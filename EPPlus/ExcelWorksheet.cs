@@ -2860,69 +2860,6 @@ namespace OfficeOpenXml
                     SaveXml(stream);
         }
 
-        
-
-        ///// <summary>
-        ///// Saves the worksheet to the package.
-        ///// </summary>
-        //internal void Save()  // Worksheet Save
-        //{
-        //    DeletePrinterSettings();
-
-        //    if (_worksheetXml != null)
-        //    {
-                
-        //        // save the header & footer (if defined)
-        //        if (_headerFooter != null)
-        //            HeaderFooter.Save();
-
-        //        var d = Dimension;
-        //        if (d == null)
-        //        {
-        //            this.DeleteAllNode("d:dimension/@ref");
-        //        }
-        //        else
-        //        {
-        //            this.SetXmlNodeString("d:dimension/@ref", d.Address);
-        //        }
-                
-
-        //        if (_drawings != null && _drawings.Count == 0)
-        //        {
-        //            //Remove node if no drawings exists.
-        //            DeleteNode("d:drawing");
-        //        }
-
-        //        SaveComments();
-        //        HeaderFooter.SaveHeaderFooterImages();
-        //        SaveTables();
-        //        SavePivotTables();
-        //        SaveXml();
-        //    }
-            
-        //    if (Drawings.UriDrawing!=null)
-        //    {
-        //        if (Drawings.Count == 0)
-        //        {                    
-        //            Part.DeleteRelationship(Drawings._drawingRelation.Id);
-        //            _package.Package.DeletePart(Drawings.UriDrawing);                    
-        //        }
-        //        else
-        //        {
-        //            Packaging.ZipPackagePart partPack = Drawings.Part;
-        //            Drawings.DrawingXml.Save(partPack.GetStream(FileMode.Create, FileAccess.Write));
-        //            foreach (ExcelDrawing d in Drawings)
-        //            {
-        //                if (d is ExcelChart)
-        //                {
-        //                    ExcelChart c = (ExcelChart)d;
-        //                    c.ChartXml.Save(c.Part.GetStream(FileMode.Create, FileAccess.Write));
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
         /// <summary>
         /// Delete the printersettings relationship and part.
         /// </summary>
@@ -3153,96 +3090,100 @@ namespace OfficeOpenXml
             _styles.SetValue(row, col, value);
             if(!_values.Exists(row,col)) _values.SetValue(row, col, null);
         }
-        
-        private void SavePivotTables()
-        {
-            foreach (var pt in PivotTables)
+
+      private void SavePivotTables()
+      {
+         foreach (var pt in PivotTables)
+         {
+            if (pt.DataFields.Count > 1)
             {
-                if (pt.DataFields.Count > 1)
-                {
-                    XmlElement parentNode;
-                    if(pt.DataOnRows==true)
-                    {
-                        parentNode =  pt.PivotTableXml.SelectSingleNode("//d:rowFields", pt.NameSpaceManager) as XmlElement;
-                        if (parentNode == null)
-                        {
-                            pt.CreateNode("d:rowFields");
-                            parentNode = pt.PivotTableXml.SelectSingleNode("//d:rowFields", pt.NameSpaceManager) as XmlElement;
-                        }
-                    }
-                    else
-                    {
-                        parentNode =  pt.PivotTableXml.SelectSingleNode("//d:colFields", pt.NameSpaceManager) as XmlElement;
-                        if (parentNode == null)
-                        {
-                            pt.CreateNode("d:colFields");
-                            parentNode = pt.PivotTableXml.SelectSingleNode("//d:colFields", pt.NameSpaceManager) as XmlElement;
-                        }
-                    }
+               XmlElement parentNode;
+               if (pt.DataOnRows == true)
+               {
+                  parentNode = pt.PivotTableXml.SelectSingleNode("//d:rowFields", pt.NameSpaceManager) as XmlElement;
+                  if (parentNode == null)
+                  {
+                     pt.CreateNode("d:rowFields");
+                     parentNode = pt.PivotTableXml.SelectSingleNode("//d:rowFields", pt.NameSpaceManager) as XmlElement;
+                  }
+               }
+               else
+               {
+                  parentNode = pt.PivotTableXml.SelectSingleNode("//d:colFields", pt.NameSpaceManager) as XmlElement;
+                  if (parentNode == null)
+                  {
+                     pt.CreateNode("d:colFields");
+                     parentNode = pt.PivotTableXml.SelectSingleNode("//d:colFields", pt.NameSpaceManager) as XmlElement;
+                  }
+               }
 
-                    if (parentNode.SelectSingleNode("d:field[@ x= \"-2\"]", pt.NameSpaceManager) == null)
-                    {
-                        XmlElement fieldNode = pt.PivotTableXml.CreateElement("field", ExcelPackage.schemaMain);
-                        fieldNode.SetAttribute("x", "-2");
-                        parentNode.AppendChild(fieldNode);
-                    }
-                }
-                var ws = Workbook.Worksheets[pt.CacheDefinition.SourceRange.WorkSheet];
-                var t = ws.Tables.GetFromRange(pt.CacheDefinition.SourceRange);
-                var fields =
-                    pt.CacheDefinition.CacheDefinitionXml.SelectNodes(
-                        "d:pivotCacheDefinition/d:cacheFields/d:cacheField", NameSpaceManager);
-                int ix = 0;
-                if (fields != null)
-                {
-                    var flds = new HashSet<string>();
-                    foreach (XmlElement node in fields)
-                    {
-                        if (ix >= pt.CacheDefinition.SourceRange.Columns) break;
-                        var fldName = node.GetAttribute("name");                        //Fixes issue 15295 dup name error
-                        if (string.IsNullOrEmpty(fldName))
-                        {
-                            fldName = (t == null
-                                ? pt.CacheDefinition.SourceRange.Offset(0, ix++, 1, 1).Value.ToString()
-                                : t.Columns[ix++].Name);
-                        }
-                        if (flds.Contains(fldName))
-                        {                            
-                            fldName = GetNewName(flds, fldName);
-                        }
-                        flds.Add(fldName);
-                        node.SetAttribute("name", fldName);
-                    }
-                    foreach (var df in pt.DataFields)
-                    {
-                        if (string.IsNullOrEmpty(df.Name))
-                        {
-                            string name;
-                            if (df.Function == DataFieldFunctions.None)
-                            {
-                                name = df.Field.Name; //Name must be set or Excel will crash on rename.                                
-                            }
-                            else
-                            {
-                                name = df.Function.ToString() + " of " + df.Field.Name; //Name must be set or Excel will crash on rename.
-                            }
-                            //Make sure name is unique
-                            var newName = name;
-                            var i = 2;
-                            while (pt.DataFields.ExistsDfName(newName, df))
-                            {
-                                newName = name + (i++).ToString(CultureInfo.InvariantCulture);
-                            }
-                            df.Name = newName;
-                        }
-                    }
-                }
-                pt.PivotTableXml.Save(pt.Part.GetStream(FileMode.Create));
-                pt.CacheDefinition.CacheDefinitionXml.Save(pt.CacheDefinition.Part.GetStream(FileMode.Create));
+               if (parentNode.SelectSingleNode("d:field[@ x= \"-2\"]", pt.NameSpaceManager) == null)
+               {
+                  XmlElement fieldNode = pt.PivotTableXml.CreateElement("field", ExcelPackage.schemaMain);
+                  fieldNode.SetAttribute("x", "-2");
+                  parentNode.AppendChild(fieldNode);
+               }
             }
-        }
 
-        private string GetNewName(HashSet<string> flds, string fldName)
+            if (pt.CacheDefinition.CacheSource == eSourceType.Worksheet)
+            {
+               var ws = Workbook.Worksheets[pt.CacheDefinition.SourceRange.WorkSheet];
+               var t = ws.Tables.GetFromRange(pt.CacheDefinition.SourceRange);
+               var fields =
+                 pt.CacheDefinition.CacheDefinitionXml.SelectNodes(
+                   "d:pivotCacheDefinition/d:cacheFields/d:cacheField", NameSpaceManager);
+               int ix = 0;
+               if (fields != null)
+               {
+                  var flds = new HashSet<string>();
+                  foreach (XmlElement node in fields)
+                  {
+                     if (ix >= pt.CacheDefinition.SourceRange.Columns) break;
+                     var fldName = node.GetAttribute("name");                        //Fixes issue 15295 dup name error
+                     if (string.IsNullOrEmpty(fldName))
+                     {
+                        fldName = (t == null
+                          ? pt.CacheDefinition.SourceRange.Offset(0, ix++, 1, 1).Value.ToString()
+                          : t.Columns[ix++].Name);
+                     }
+                     if (flds.Contains(fldName))
+                     {
+                        fldName = GetNewName(flds, fldName);
+                     }
+                     flds.Add(fldName);
+                     node.SetAttribute("name", fldName);
+                  }
+                  foreach (var df in pt.DataFields)
+                  {
+                     if (string.IsNullOrEmpty(df.Name))
+                     {
+                        string name;
+                        if (df.Function == DataFieldFunctions.None)
+                        {
+                           name = df.Field.Name; //Name must be set or Excel will crash on rename.                                
+                        }
+                        else
+                        {
+                           name = df.Function.ToString() + " of " + df.Field.Name; //Name must be set or Excel will crash on rename.
+                        }
+                        //Make sure name is unique
+                        var newName = name;
+                        var i = 2;
+                        while (pt.DataFields.ExistsDfName(newName, df))
+                        {
+                           newName = name + (i++).ToString(CultureInfo.InvariantCulture);
+                        }
+                        df.Name = newName;
+                     }
+                  }
+               }
+            }
+            pt.PivotTableXml.Save(pt.Part.GetStream(FileMode.Create));
+            pt.CacheDefinition.CacheDefinitionXml.Save(pt.CacheDefinition.Part.GetStream(FileMode.Create));
+         }
+      }
+
+      private string GetNewName(HashSet<string> flds, string fldName)
         {
             int ix = 2;
             while (flds.Contains(fldName + ix.ToString(CultureInfo.InvariantCulture)))
