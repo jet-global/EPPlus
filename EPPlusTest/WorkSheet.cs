@@ -905,6 +905,52 @@ namespace EPPlusTest
             Assert.AreEqual("PivotStyleMedium9", ws.PivotTables["PivotTable"].StyleName);
         }
 
+      [TestMethod]
+      public void AddRowsAndColumnsUpdatesPivotTable()
+      {
+         FileInfo file = new FileInfo(Path.GetTempFileName());
+         if (file.Exists)
+         {
+            file.Delete();
+         }
+         try
+         {
+            using (_pck = new ExcelPackage())
+            {
+               var ws = _pck.Workbook.Worksheets.Add("PivotTableSheet");
+               ws.Cells["A1"].LoadFromArrays(new object[][] { new[] { "A", "B", "C", "D" } });
+               ws.Cells["A2"].LoadFromArrays(new object[][]
+               {
+                new object [] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
+                new object [] { 9, 8, 7 ,6, 5, 4, 3, 2, 1, 0 },
+                new object [] { 1, 1, 2, 3, 5, 8, 13, 21, 34, 55}
+               });
+               var table = ws.Tables.Add(ws.Cells["A1:D4"], "PivotData");
+               var pt = ws.PivotTables.Add(ws.Cells["J10"], ws.Cells["A1:D4"], "PivotTable");
+               Assert.AreEqual("PivotStyleMedium9", ws.PivotTables["PivotTable"].StyleName);
+               Assert.AreEqual(10, pt.Address.Start.Row);
+               Assert.AreEqual(10, pt.Address.Start.Column);
+               ws.InsertRow(9, 10);
+               Assert.AreEqual(20, pt.Address.Start.Row);
+               ws.InsertColumn(9, 10);
+               Assert.AreEqual(20, pt.Address.Start.Column);
+               _pck.SaveAs(file);
+            }
+            using (_pck = new ExcelPackage(file))
+            {
+               var pivotTable = _pck.Workbook.Worksheets["PivotTableSheet"].PivotTables.First();
+               Assert.AreEqual(20, pivotTable.Address.Start.Row);
+               Assert.AreEqual(20, pivotTable.Address.Start.Column);
+            }
+         }
+         finally
+         {
+            if (file.Exists)
+            {
+               file.Delete();
+            }
+         }
+      }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
