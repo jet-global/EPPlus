@@ -1840,7 +1840,11 @@ namespace OfficeOpenXml
                 {
                     tbl.Address = tbl.Address.AddRow(rowFrom, rows);
                 }
-            }
+                foreach (var pivotTable in PivotTables)
+                {
+                   pivotTable.Address = pivotTable.Address.AddRow(rowFrom, rows);
+                }
+         }
         }
         /// <summary>
         /// Inserts a new column into the spreadsheet.  Existing columns below the position are 
@@ -1953,7 +1957,6 @@ namespace OfficeOpenXml
                     }                    
                 }
 
-
                 //Copy style from another column?
                 if (copyStylesFromColumn > 0)
                 {
@@ -1999,6 +2002,10 @@ namespace OfficeOpenXml
                     }
 
                     tbl.Address=tbl.Address.AddColumn(columnFrom, columns);
+                }
+                foreach (var pivotTable in PivotTables)
+                {
+                   pivotTable.Address = pivotTable.Address.AddColumn(columnFrom, columns);
                 }
             }
         }
@@ -3095,6 +3102,7 @@ namespace OfficeOpenXml
       {
          foreach (var pt in PivotTables)
          {
+            pt.SetXmlNodeString("d:location/@ref", pt.Address.FirstAddress);
             if (pt.DataFields.Count > 1)
             {
                XmlElement parentNode;
