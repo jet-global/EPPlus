@@ -12,6 +12,7 @@ using OfficeOpenXml.Style;
 using System.Data;
 using OfficeOpenXml.Table.PivotTable;
 using System.Reflection;
+using OfficeOpenXml.Table;
 
 namespace EPPlusTest
 {
@@ -934,6 +935,21 @@ namespace EPPlusTest
         {
             var ws = _pck.Workbook.Worksheets.Add("Table");
             var tbl = ws.Tables.Add(ws.Cells["A1"], "_TestTable");
+        }
+
+        [TestMethod]
+        public void TableTotalsRowFunctionEscapesSpecialCharactersInColumnName()
+        {
+            using (var p = new ExcelPackage())
+            {
+                var ws = p.Workbook.Worksheets.Add("TotalsFormulaTest");
+                ws.Cells["B1"].Value = "Column1";
+                ws.Cells["C1"].Value = "[#'Column'2]";
+                var tbl = ws.Tables.Add(ws.Cells["B1:C2"], "TestTable");
+                tbl.ShowTotal = true;
+                tbl.Columns[1].TotalsRowFunction = RowFunctions.Sum;
+                Assert.AreEqual("SUBTOTAL(109,TestTable['['#''Column''2']])", ws.Cells["C3"].Formula);
+            }
         }
 
         //[Ignore]
@@ -2328,6 +2344,72 @@ namespace EPPlusTest
             ws2.Cells[1, 2].AddComment("Testing", "test1");
             pck.Save();
         }
-        #endregion
-        }
+
+		[TestMethod]
+		public void CommentShiftsWithRowInserts()
+		{
+			InitBase();
+			var pck = new ExcelPackage();
+			var ws1 = pck.Workbook.Worksheets.Add("Comment1");
+			ws1.Cells[3, 3].AddComment("Testing comment 1", "test1");
+			ws1.Cells[4, 3].AddComment("Testing comment 2", "test2");
+			var fileInfo = new FileInfo(_worksheetPath + "comment.xlsx");
+			pck.SaveAs(fileInfo);
+			pck = new ExcelPackage(new FileInfo(_worksheetPath + "comment.xlsx"));
+			ws1 = pck.Workbook.Worksheets[1];
+			// Ensure the comments were saved in the correct location.
+			Assert.AreEqual("Testing comment 1", ws1.Cells[3, 3].Comment.Text);
+			Assert.AreEqual("test1", ws1.Cells[3, 3].Comment.Author);
+			Assert.AreEqual("Testing comment 2", ws1.Cells[4, 3].Comment.Text);
+			Assert.AreEqual("test2", ws1.Cells[4, 3].Comment.Author);
+			// Ensure they get shifted.
+			ws1.InsertRow(4, 4);
+			Assert.AreEqual("Testing comment 1", ws1.Cells[3, 3].Comment.Text);
+			Assert.AreEqual("test1", ws1.Cells[3, 3].Comment.Author);
+			Assert.AreEqual("Testing comment 2", ws1.Cells[8, 3].Comment.Text);
+			Assert.AreEqual("test2", ws1.Cells[8, 3].Comment.Author);
+			pck.Save();
+			pck = new ExcelPackage(new FileInfo(_worksheetPath + "comment.xlsx"));
+			ws1 = pck.Workbook.Worksheets[1];
+			// Ensure the shifted index is preserved.
+			Assert.AreEqual("Testing comment 1", ws1.Cells[3, 3].Comment.Text);
+			Assert.AreEqual("test1", ws1.Cells[3, 3].Comment.Author);
+			Assert.AreEqual("Testing comment 2", ws1.Cells[8, 3].Comment.Text);
+			Assert.AreEqual("test2", ws1.Cells[8, 3].Comment.Author);
+		}
+
+		[TestMethod]
+		public void CommentShiftsWithColumnInserts()
+		{
+			InitBase();
+			var pck = new ExcelPackage();
+			var ws1 = pck.Workbook.Worksheets.Add("Comment1");
+			ws1.Cells[3, 3].AddComment("Testing comment 1", "test1");
+			ws1.Cells[3, 4].AddComment("Testing comment 2", "test2");
+			var fileInfo = new FileInfo(_worksheetPath + "comment.xlsx");
+			pck.SaveAs(fileInfo);
+			pck = new ExcelPackage(new FileInfo(_worksheetPath + "comment.xlsx"));
+			ws1 = pck.Workbook.Worksheets[1];
+			// Ensure the comments were saved in the correct location.
+			Assert.AreEqual("Testing comment 1", ws1.Cells[3, 3].Comment.Text);
+			Assert.AreEqual("test1", ws1.Cells[3, 3].Comment.Author);
+			Assert.AreEqual("Testing comment 2", ws1.Cells[3, 4].Comment.Text);
+			Assert.AreEqual("test2", ws1.Cells[3, 4].Comment.Author);
+			// Ensure they get shifted.
+			ws1.InsertColumn(4, 4);
+			Assert.AreEqual("Testing comment 1", ws1.Cells[3, 3].Comment.Text);
+			Assert.AreEqual("test1", ws1.Cells[3, 3].Comment.Author);
+			Assert.AreEqual("Testing comment 2", ws1.Cells[3, 8].Comment.Text);
+			Assert.AreEqual("test2", ws1.Cells[3, 8].Comment.Author);
+			pck.Save();
+			pck = new ExcelPackage(new FileInfo(_worksheetPath + "comment.xlsx"));
+			ws1 = pck.Workbook.Worksheets[1];
+			// Ensure the shifted index is preserved.
+			Assert.AreEqual("Testing comment 1", ws1.Cells[3, 3].Comment.Text);
+			Assert.AreEqual("test1", ws1.Cells[3, 3].Comment.Author);
+			Assert.AreEqual("Testing comment 2", ws1.Cells[3, 8].Comment.Text);
+			Assert.AreEqual("test2", ws1.Cells[3, 8].Comment.Author);
+		}
+		#endregion
+	}
     }
