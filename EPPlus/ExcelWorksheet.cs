@@ -31,40 +31,35 @@
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  *******************************************************************************/
 using System;
-using System.Xml;
 using System.Collections.Generic;
-using System.IO;
-using System.Configuration;
-using OfficeOpenXml.Drawing;
-using System.Diagnostics;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
-using OfficeOpenXml.Style;
-using System.Globalization;
-using System.Text;
-using System.Security;
-using OfficeOpenXml.Drawing.Chart;
-using OfficeOpenXml.Style.XmlAccess;
-using System.Text.RegularExpressions;
-using OfficeOpenXml.Drawing.Vml;
-using OfficeOpenXml.Table;
-using OfficeOpenXml.DataValidation;
-using OfficeOpenXml.Table.PivotTable;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Security;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
 using OfficeOpenXml.ConditionalFormatting;
-using OfficeOpenXml.Utils;
-using Ionic.Zip;
+using OfficeOpenXml.DataValidation;
+using OfficeOpenXml.Drawing;
+using OfficeOpenXml.Drawing.Chart;
+using OfficeOpenXml.Drawing.Vml;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
-using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.Packaging.Ionic.Zip;
+using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Table;
+using OfficeOpenXml.Table.PivotTable;
+using OfficeOpenXml.Utils;
+
 using System.Linq;
 
 namespace OfficeOpenXml
 {
-    /// <summary>
-    /// Worksheet hidden enumeration
-    /// </summary>
-    public enum eWorkSheetHidden
+  /// <summary>
+  /// Worksheet hidden enumeration
+  /// </summary>
+  public enum eWorkSheetHidden
     {
         /// <summary>
         /// The worksheet is visible
@@ -1851,6 +1846,7 @@ namespace OfficeOpenXml
                 _commentsStore.Insert(rowFrom, 0, rows, 0);
                 _hyperLinks.Insert(rowFrom, 0, rows, 0);
                 _flags.Insert(rowFrom, 0, rows, 0);
+                Comments.Insert(rowFrom, 0, rows, 0);
 
                 foreach (var f in _sharedFormulas.Values)
                 {
@@ -1942,6 +1938,7 @@ namespace OfficeOpenXml
                 _commentsStore.Insert(0, columnFrom, 0, columns);
                 _hyperLinks.Insert(0, columnFrom, 0, columns);
                 _flags.Insert(0, columnFrom, 0, columns);
+                Comments.Insert(0, columnFrom, 0, columns);
 
                 foreach (var f in _sharedFormulas.Values)
                 {
@@ -3219,10 +3216,10 @@ namespace OfficeOpenXml
                     case RowFunctions.Average:
                         SetFormula(tbl.Address._toRow, colNum, GetTotalFunction(col, "101"));
                         break;
-                    case RowFunctions.Count:
+                    case RowFunctions.CountNums:
                         SetFormula(tbl.Address._toRow, colNum, GetTotalFunction(col, "102"));
                         break;
-                    case RowFunctions.CountNums:
+                    case RowFunctions.Count:
                         SetFormula(tbl.Address._toRow, colNum, GetTotalFunction(col, "103"));
                         break;
                     case RowFunctions.Max:
@@ -3360,10 +3357,12 @@ namespace OfficeOpenXml
             return fldName + ix.ToString(CultureInfo.InvariantCulture);
         }
 
-        private static string GetTotalFunction(ExcelTableColumn col,string FunctionNum)
+        private static string GetTotalFunction(ExcelTableColumn col, string FunctionNum)
         {
-            return string.Format("SUBTOTAL({0},{1}[{2}])", FunctionNum, col._tbl.Name, col.Name);
+            string escapedColumn = Regex.Replace(col.Name, @"[\[\]#']", new MatchEvaluator(m => "'" + m.Value));
+            return string.Format("SUBTOTAL({0},{1}[{2}])", FunctionNum, col._tbl.Name, escapedColumn);
         }
+
         private void SaveXml(Stream stream)
         {
             //Create the nodes if they do not exist.
@@ -3653,6 +3652,16 @@ namespace OfficeOpenXml
                         }
                         else if(v != null)
                         {
+                            // Fix for issue 15460
+                            var enumerableResult = v as System.Collections.IEnumerable;
+                            if (enumerableResult != null && !(v is string))
+                            {
+                              var enumerator = enumerableResult.GetEnumerator();
+                              if (enumerator.MoveNext() && enumerator.Current != null)
+                                v = enumerator.Current;
+                              else
+                                v = string.Empty;
+                            }
                             if ((v.GetType().IsPrimitive || v is double || v is decimal || v is DateTime || v is TimeSpan))
                             {
                                 //string sv = GetValueForXml(v);
@@ -3661,15 +3670,16 @@ namespace OfficeOpenXml
                             }
                             else
                             {
+                                var vString = Convert.ToString(v);
                                 int ix;
-                                if (!ss.ContainsKey(v.ToString()))
+                                if (!ss.ContainsKey(vString))
                                 {
                                     ix = ss.Count;
-                                    ss.Add(v.ToString(), new ExcelWorkbook.SharedStringItem() { isRichText = _flags.GetFlagValue(cse.Row,cse.Column,CellFlags.RichText), pos = ix });
+                                    ss.Add(vString, new ExcelWorkbook.SharedStringItem() { isRichText = _flags.GetFlagValue(cse.Row,cse.Column,CellFlags.RichText), pos = ix });
                                 }
                                 else
                                 {
-                                    ix = ss[v.ToString()].pos;
+                                    ix = ss[vString].pos;
                                 }
                                 cache.AppendFormat("<c r=\"{0}\" s=\"{1}\" t=\"s\">", cse.CellAddress, styleID < 0 ? 0 : styleID);
                                 cache.AppendFormat("<v>{0}</v></c>", ix);
