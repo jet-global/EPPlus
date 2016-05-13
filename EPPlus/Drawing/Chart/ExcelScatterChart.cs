@@ -106,7 +106,8 @@ namespace OfficeOpenXml.Drawing.Chart
         {
             get
             {
-                return GetScatterEnum(_chartXmlHelper.GetXmlNodeString(_scatterTypePath));
+                var result = GetScatterEnum(_chartXmlHelper?.GetXmlNodeString(_scatterTypePath));
+                return result == 0 ? result : eScatterStyle.LineMarker;
             }
             internal set
             {
@@ -133,6 +134,9 @@ namespace OfficeOpenXml.Drawing.Chart
         {
             if (name == "scatterChart")
             {
+                if (Series == null || Series.Count == 0)
+                    // Return a generic scatter type so series can be parsed correctly.
+                    return eChartType.XYScatter;
                 if (ScatterStyle==eScatterStyle.LineMarker)
                 {
                     if (((ExcelScatterChartSerie)Series[0]).Marker == eMarkerStyle.None)

@@ -396,9 +396,12 @@ namespace OfficeOpenXml.Drawing.Chart
            Part = part;
            ChartXml = chartXml;
            _chartNode = chartNode;
-           InitChartLoad(drawings, chartNode);
-           ChartType = GetChartType(chartNode.LocalName);
-       }
+            // Get preliminary chart type so that chart series can be initialized correctly.
+            ChartType = GetChartType(chartNode.LocalName);
+            InitChartLoad(drawings, chartNode);
+            // Set precise chart type based on observed chart series.
+            ChartType = GetChartType(chartNode.LocalName);
+        }
        internal ExcelChart(ExcelChart topChart, XmlNode chartNode) :
            base(topChart._drawings, topChart.TopNode, "xdr:graphicFrame/xdr:nvGraphicFramePr/xdr:cNvPr/@name")
        {
