@@ -958,5 +958,21 @@ namespace EPPlusTest
                 Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].XSeries);
             }
         }
+
+        [TestMethod]
+        public void ReadExcelBubbleChart()
+        {
+            var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\BubbleFromExcel.xlsx"));
+            Assert.IsTrue(file.Exists);
+            using (var package = new ExcelPackage(file))
+            {
+                var sheet = package.Workbook.Worksheets[1];
+                var drawing = sheet.Drawings[0] as ExcelBubbleChart;
+                Assert.IsNotNull(drawing);
+                Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[0].Series);
+                Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].XSeries);
+                Assert.AreEqual("Sheet1!$D$20:$D$42", ((ExcelBubbleChartSerie)drawing.Series[0]).BubbleSize);
+            }
+        }
     }
 }
