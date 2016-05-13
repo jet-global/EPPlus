@@ -292,6 +292,28 @@ namespace OfficeOpenXml
                         pageSetup.Attributes.Remove(attr);
                     }
                 }
+
+                // Update chart series that reference the same sheet as the chart.
+                foreach (ExcelChart chart in added.Drawings.Where(drawing => drawing is ExcelChart))
+                {
+                    if (chart != null)
+                    {
+                        foreach (ExcelChartSerie serie in chart.Series)
+                        {
+                            string workbook, worksheet, address;
+                            ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
+                            if (worksheet == Copy.Name)
+                            {
+                                serie.Series = ExcelRange.GetFullAddress(added.Name, address);
+                            }
+                            ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+                            if (worksheet == Copy.Name)
+                            {
+                                serie.XSeries = ExcelRange.GetFullAddress(added.Name, address);
+                            }
+                        }
+                    }
+                }
                 return added;
             }
         }
