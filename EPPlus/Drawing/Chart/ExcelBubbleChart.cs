@@ -82,7 +82,7 @@ namespace OfficeOpenXml.Drawing.Chart
         {
             get
             {
-                return _chartXmlHelper.GetXmlNodeBool(BUBBLE3D_PATH);
+                return _chartXmlHelper?.GetXmlNodeBool(BUBBLE3D_PATH) ?? false;
             }
             set
             {
