@@ -40,6 +40,7 @@ using System.Diagnostics;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using OfficeOpenXml.Style;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Security;
 using OfficeOpenXml.Drawing.Chart;
@@ -525,6 +526,26 @@ namespace OfficeOpenXml
                         if (string.IsNullOrEmpty(n.NameFormula) && n.NameValue == null)
                         {
                             n.ChangeWorksheet(_name, value);
+                        }
+                    }
+                }
+                foreach (ExcelChart chart in ws.Drawings.Where(drawing => drawing is ExcelChart))
+                {
+                    if (chart != null)
+                    {
+                        foreach (ExcelChartSerie serie in chart.Series)
+                        {
+                            string workbook, worksheet, address;
+                            ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
+                            if (worksheet == this._name)
+                            {
+                                serie.Series = ExcelRange.GetFullAddress(value, address);
+                            }
+                            ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+                            if (worksheet == this._name)
+                            {
+                                serie.XSeries = ExcelRange.GetFullAddress(value, address);
+                            }
                         }
                     }
                 }
@@ -1805,7 +1826,7 @@ namespace OfficeOpenXml
             View.ActiveCell = ExcelCellBase.GetAddress(Address.Start.Row, Address.Start.Column);
         }
 
-		#region InsertRow
+        #region InsertRow
         /// <summary>
         /// Inserts a new row into the spreadsheet.  Existing rows below the position are 
         /// shifted down.  All formula are updated to take account of the new row.
@@ -1823,10 +1844,10 @@ namespace OfficeOpenXml
         /// <param name="rowFrom">The position of the new row</param>
         /// <param name="rows">Number of rows to insert.</param>
         /// <param name="copyStylesFromRow">Copy Styles from this row. Applied to all inserted rows</param>
-		public void  InsertRow(int rowFrom, int rows, int copyStylesFromRow)
-		{
+		public void InsertRow(int rowFrom, int rows, int copyStylesFromRow)
+        {
             CheckSheetType();
-                var d = Dimension;
+            var d = Dimension;
 
             if (rowFrom < 1)
             {
@@ -1878,7 +1899,7 @@ namespace OfficeOpenXml
                 if (copyStylesFromRow > 0)
                 {
                     var cseS = new CellsStoreEnumerator<ExcelCoreValue>(_values, copyStylesFromRow, 0, copyStylesFromRow, ExcelPackage.MaxColumns); //Fixes issue 15068 , 15090
-                    while(cseS.Next())
+                    while (cseS.Next())
                     {
                         if (cseS.Value._styleId == 0) continue;
                         for (var r = 0; r < rows; r++)
@@ -1891,6 +1912,31 @@ namespace OfficeOpenXml
                 {
                     tbl.Address = tbl.Address.AddRow(rowFrom, rows);
                 }
+
+                foreach (var sheet in this.Workbook.Worksheets)
+                    foreach (ExcelChart chart in sheet.Drawings.Where(drawing => drawing is ExcelChart))
+                    {
+                        if (chart != null)
+                        {
+                            foreach (ExcelChartSerie serie in chart.Series)
+                            {
+                                string workbook, worksheet, address;
+                                ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
+                                if (worksheet == this.Name)
+                                {
+                                    string newSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, 0, rowFrom, 0);
+                                    serie.Series = ExcelRange.GetFullAddress(worksheet, newSeries);
+                                }
+                                ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+                                if (worksheet == this.Name)
+                                {
+                                    string newXSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, 0, rowFrom, 0);
+                                    serie.XSeries = ExcelRange.GetFullAddress(worksheet, newXSeries);
+                                }
+                            }
+                        }
+                    }
+
             }
         }
         /// <summary>
@@ -2051,7 +2097,33 @@ namespace OfficeOpenXml
                         InsertTableColumns(columnFrom, columns, tbl);
                     }
 
-                    tbl.Address=tbl.Address.AddColumn(columnFrom, columns);
+                    tbl.Address = tbl.Address.AddColumn(columnFrom, columns);
+                }
+                foreach (var sheet in this.Workbook.Worksheets)
+                {
+                    foreach (ExcelChart chart in sheet.Drawings.Where(drawing => drawing is ExcelChart))
+                    {
+                        if (chart != null)
+                        {
+                            foreach (ExcelChartSerie serie in chart.Series)
+                            {
+                                string workbook, worksheet, address;
+                                ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
+                                if (worksheet == this.Name)
+                                {
+                                    string newSeries = ExcelRangeBase.UpdateFormulaReferences(address, 0, columns, 0, columnFrom);
+                                    serie.Series = ExcelRange.GetFullAddress(worksheet, newSeries);
+                                }
+                                ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+                                if (worksheet == this.Name)
+                                {
+                                    string newXSeries = ExcelRangeBase.UpdateFormulaReferences(address, 0, columns, 0, columnFrom);
+                                    serie.XSeries = ExcelRange.GetFullAddress(worksheet, newXSeries);
+                                }
+                            }
+                        }
+                    }
+
                 }
             }
         }

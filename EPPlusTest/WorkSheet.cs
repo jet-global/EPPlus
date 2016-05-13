@@ -1858,7 +1858,7 @@ namespace EPPlusTest
 
             ws.BackgroundImage.Image = Properties.Resources.Test1;
             ws = _pck.Workbook.Worksheets.Add("backimg2");
-            ws.BackgroundImage.SetFromFile(new FileInfo(Path.Combine(_clipartPath,"Vector Drawing.wmf")));
+            ws.BackgroundImage.SetFromFile(new FileInfo(Path.Combine(_clipartPath, "Vector Drawing.wmf")));
         }
         //[Ignore]
         [TestMethod]
@@ -2308,5 +2308,218 @@ namespace EPPlusTest
             pck.Save();
         }
         #endregion
+
+        #region InsertRows Tests
+        [TestMethod]
+        public void InsertRowsUpdatesScatterChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+                worksheet.InsertRow(3, 3);
+                Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+            }
         }
+
+        [TestMethod]
+        public void InsertRowsUpdatesPieChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Pie) as ExcelPieChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+                worksheet.InsertRow(3, 5);
+                Assert.AreEqual("'Sheet1'!$B$2:$B$8", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$C$2:$C$8", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void InsertRowsUpdatesBarChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+                worksheet.InsertRow(3, 5);
+                Assert.AreEqual("'Sheet1'!$B$2:$B$8", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$C$2:$C$8", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void InsertRowsUpdatesBubbleChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                worksheet.Cells[2, 4].Value = 1;
+                worksheet.Cells[3, 4].Value = 2;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "$D$2:$D$3");
+                worksheet.InsertRow(3, 3);
+                Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+                Assert.AreEqual("'Sheet1'!$D$2:$D$6", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+            }
+        }
+        #endregion
+
+        #region InsertColumns Tests
+        [TestMethod]
+        public void InsertColumnsUpdatesScatterChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[2, 3].Value = "Trucks";
+                worksheet.Cells[3, 2].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+                chart.Series.AddSeries("$B$3:$C$3", "$B$2:$C$2", "");
+                worksheet.InsertColumn(3, 3);
+                Assert.AreEqual("'Sheet1'!$B$2:$F$2", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$B$3:$F$3", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void InsertColumnsUpdatesBarChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[2, 3].Value = "Trucks";
+                worksheet.Cells[3, 2].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+                chart.Series.AddSeries("$B$3:$C$3", "$B$2:$C$2", "");
+                worksheet.InsertColumn(3, 5);
+                Assert.AreEqual("'Sheet1'!$B$2:$H$2", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$B$3:$H$3", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void InsertColumnsUpdatesPieChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[2, 3].Value = "Trucks";
+                worksheet.Cells[3, 2].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Pie) as ExcelPieChart;
+                chart.Series.AddSeries("$B$3:$C$3", "$B$2:$C$2", "");
+                worksheet.InsertColumn(3, 3);
+                Assert.AreEqual("'Sheet1'!$B$2:$F$2", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$B$3:$F$3", chart.Series[0].Series);
+            }
+        }
+        
+        [TestMethod]
+        public void InsertColumnsUpdatesBubbleChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[2, 3].Value = "Trucks";
+                worksheet.Cells[3, 2].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                worksheet.Cells[4, 2].Value = 1;
+                worksheet.Cells[4, 3].Value = 2;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+                chart.Series.AddSeries("$B$3:$C$3", "$B$2:$C$2", "$B$4:$C$4");
+                worksheet.InsertColumn(3, 3);
+                Assert.AreEqual("'Sheet1'!$B$2:$F$2", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$B$3:$F$3", chart.Series[0].Series);
+                Assert.AreEqual("'Sheet1'!$B$4:$F$4", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+            }
+        }
+        #endregion
+
+        #region RenameWorksheet Tests
+        [TestMethod]
+        public void RenameWorksheetUpdatesScatterChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+                worksheet.Name = "A new name";
+                Assert.AreEqual("'A new name'!$B$2:$B$3", chart.Series[0].XSeries);
+                Assert.AreEqual("'A new name'!$C$2:$C$3", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void RenameWorksheetUpdatesBarChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+                worksheet.Name = "A new name";
+                Assert.AreEqual("'A new name'!$B$2:$B$3", chart.Series[0].XSeries);
+                Assert.AreEqual("'A new name'!$C$2:$C$3", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void RenameWorksheetUpdatesBubbleChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                worksheet.Cells[2, 4].Value = 1;
+                worksheet.Cells[3, 4].Value = 2;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "$D$2:$D$3");
+                worksheet.Name = "A new name";
+                Assert.AreEqual("'A new name'!$B$2:$B$3", chart.Series[0].XSeries);
+                Assert.AreEqual("'A new name'!$C$2:$C$3", chart.Series[0].Series);
+                Assert.AreEqual("'A new name'!$D$2:$D$3", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+            }
+        }
+        #endregion 
     }
+}
