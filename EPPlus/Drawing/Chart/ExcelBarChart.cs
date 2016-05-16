@@ -208,7 +208,7 @@ namespace OfficeOpenXml.Drawing.Chart
         {
             get
             {
-                return GetShapeEnum(_chartXmlHelper.GetXmlNodeString(_shapePath));
+                return GetShapeEnum(_chartXmlHelper?.GetXmlNodeString(_shapePath));
             }
             internal set
             {
