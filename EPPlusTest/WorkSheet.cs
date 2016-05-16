@@ -2404,9 +2404,57 @@ namespace EPPlusTest
                 Assert.AreEqual("'Sheet1'!$D$20:$D$62", drawing.PlotArea.ChartTypes[2].Series[0].Series);
             }
         }
+
+        [TestMethod]
+        public void InsertRowsUpdatesExcel2016ChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+                // Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+                var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
+                var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
+                var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
+
+                worksheet1.InsertRow(10, 10);
+                string workbook, worksheet, address;
+                ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:Z36", address);
+                ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:Z36", address);
+                address = null;
+                ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:Z26", address);
+            }
+        }
         #endregion
 
         #region InsertColumns Tests
+        [TestMethod]
+        public void InsertColumnsUpdatesExcel2016ChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+                // Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+                var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
+                var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
+                var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
+
+                string workbook, worksheet, address;
+                worksheet2.InsertColumn(10, 10);
+                ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:Z26", address);
+                ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:AJ26", address);
+                address = null;
+                ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:AJ26", address);
+            }
+        }
+
         [TestMethod]
         public void InsertColumnsUpdatesScatterChartSeries()
         {
@@ -2538,6 +2586,30 @@ namespace EPPlusTest
                 Assert.AreEqual("'A new name'!$B$2:$B$3", chart.Series[0].XSeries);
                 Assert.AreEqual("'A new name'!$C$2:$C$3", chart.Series[0].Series);
                 Assert.AreEqual("'A new name'!$D$2:$D$3", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+            }
+        }
+
+        [TestMethod]
+        public void RenameWorksheetUpdatesExcel2016ChartSeriesAndOtherNamedRanges()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+                // Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+                var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
+                var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet1!A1:Z26"));
+                var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
+
+                string workbook, worksheet, address;
+                worksheet1.Name = "Work Sheet One";
+                ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("Work Sheet One", worksheet);
+                ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("Work Sheet One", worksheet);
+                address = null;
+                ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("Sheet2", worksheet);
             }
         }
         #endregion 
