@@ -529,22 +529,37 @@ namespace OfficeOpenXml
                         }
                     }
                 }
-                foreach (ExcelChart chart in ws.Drawings.Where(drawing => drawing is ExcelChart))
+                HashSet<ExcelChart> charts = new HashSet<ExcelChart>();
+                foreach (ExcelChart chartBase in ws.Drawings.Where(drawing => drawing is ExcelChart))
                 {
-                    if (chart != null)
+
+                    foreach (var chart in chartBase.PlotArea.ChartTypes)
                     {
-                        foreach (ExcelChartSerie serie in chart.Series)
+                        bool isUnique = charts.Add(chart);
+                        if (isUnique)
                         {
-                            string workbook, worksheet, address;
-                            ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
-                            if (worksheet == this._name)
+                            foreach (ExcelChartSerie serie in chart.Series)
                             {
-                                serie.Series = ExcelRange.GetFullAddress(value, address);
-                            }
-                            ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
-                            if (worksheet == this._name)
-                            {
-                                serie.XSeries = ExcelRange.GetFullAddress(value, address);
+                                string workbook, worksheet, address;
+                                ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
+                                if (worksheet == this._name)
+                                {
+                                    serie.Series = ExcelRangeBase.GetFullAddress(value, address);
+                                }
+                                ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+                                if (worksheet == this._name)
+                                {
+                                    serie.XSeries = ExcelRangeBase.GetFullAddress(value, address);
+                                }
+                                var bubbleSerie = serie as ExcelBubbleChartSerie;
+                                if (bubbleSerie != null)
+                                {
+                                    ExcelRange.SplitAddress(bubbleSerie.BubbleSize, out workbook, out worksheet, out address);
+                                    if (worksheet == this._name)
+                                    {
+                                        bubbleSerie.BubbleSize = ExcelRangeBase.GetFullAddress(value, address);
+                                    }
+                                }
                             }
                         }
                     }
@@ -1912,31 +1927,7 @@ namespace OfficeOpenXml
                 {
                     tbl.Address = tbl.Address.AddRow(rowFrom, rows);
                 }
-
-                foreach (var sheet in this.Workbook.Worksheets)
-                    foreach (ExcelChart chart in sheet.Drawings.Where(drawing => drawing is ExcelChart))
-                    {
-                        if (chart != null)
-                        {
-                            foreach (ExcelChartSerie serie in chart.Series)
-                            {
-                                string workbook, worksheet, address;
-                                ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
-                                if (worksheet == this.Name)
-                                {
-                                    string newSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, 0, rowFrom, 0);
-                                    serie.Series = ExcelRange.GetFullAddress(worksheet, newSeries);
-                                }
-                                ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
-                                if (worksheet == this.Name)
-                                {
-                                    string newXSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, 0, rowFrom, 0);
-                                    serie.XSeries = ExcelRange.GetFullAddress(worksheet, newXSeries);
-                                }
-                            }
-                        }
-                    }
-
+                this.UpdateCharts(rows, 0, rowFrom, 0);
             }
         }
         /// <summary>
@@ -2099,34 +2090,64 @@ namespace OfficeOpenXml
 
                     tbl.Address = tbl.Address.AddColumn(columnFrom, columns);
                 }
-                foreach (var sheet in this.Workbook.Worksheets)
+                this.UpdateCharts(0, columns, 0, columnFrom);
+            }
+        }
+
+        private void UpdateCharts(int rows, int columns, int rowFrom, int colFrom)
+        {
+            HashSet<ExcelChart> uniqueChartTypes = new HashSet<ExcelChart>();
+            foreach (var sheet in this.Workbook.Worksheets)
+            {
+                foreach (ExcelChart chartBase in sheet.Drawings.Where(drawing => drawing is ExcelChart))
                 {
-                    foreach (ExcelChart chart in sheet.Drawings.Where(drawing => drawing is ExcelChart))
+                    bool isUnique = false;
+                    // The chart Plot Area contains one copy of a chart for each series in that chart. 
+                    // A chart Plot Area can also have multiple distinct charts (such as when a bar chart and a line chart are plotted in the same area).
+                    // This captures the behavior of a "Combo Chart".
+                    foreach (var chart in chartBase.PlotArea.ChartTypes)
                     {
-                        if (chart != null)
+                        isUnique = uniqueChartTypes.Add(chart);
+                        if (isUnique)
                         {
                             foreach (ExcelChartSerie serie in chart.Series)
                             {
                                 string workbook, worksheet, address;
-                                ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
-                                if (worksheet == this.Name)
+                                if (serie.Series != null && string.Empty != serie.Series)
                                 {
-                                    string newSeries = ExcelRangeBase.UpdateFormulaReferences(address, 0, columns, 0, columnFrom);
-                                    serie.Series = ExcelRange.GetFullAddress(worksheet, newSeries);
+                                    ExcelRangeBase.SplitAddress(serie.Series, out workbook, out worksheet, out address);
+                                    if (worksheet == this.Name)
+                                    {
+                                        string newSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom);
+                                        serie.Series = ExcelRangeBase.GetFullAddress(worksheet, newSeries);
+                                    }
                                 }
-                                ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
-                                if (worksheet == this.Name)
+                                if (serie.XSeries != null && string.Empty != serie.XSeries)
                                 {
-                                    string newXSeries = ExcelRangeBase.UpdateFormulaReferences(address, 0, columns, 0, columnFrom);
-                                    serie.XSeries = ExcelRange.GetFullAddress(worksheet, newXSeries);
+                                    ExcelRangeBase.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+                                    if (worksheet == this.Name)
+                                    {
+                                        string newXSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom);
+                                        serie.XSeries = ExcelRangeBase.GetFullAddress(worksheet, newXSeries);
+                                    }
+                                }
+                                var bubbleSerie = serie as ExcelBubbleChartSerie;
+                                if (bubbleSerie != null && bubbleSerie.BubbleSize != null && bubbleSerie.BubbleSize != string.Empty)
+                                {
+                                    ExcelRangeBase.SplitAddress(bubbleSerie.BubbleSize, out workbook, out worksheet, out address);
+                                    if (worksheet == this.Name)
+                                    {
+                                        string newBubbleSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom);
+                                        bubbleSerie.BubbleSize = ExcelRangeBase.GetFullAddress(worksheet, newBubbleSeries);
+                                    }
                                 }
                             }
                         }
                     }
-
                 }
             }
         }
+
         private static void InsertTableColumns(int columnFrom, int columns, ExcelTable tbl)
         {
             var node = tbl.Columns[0].TopNode.ParentNode;

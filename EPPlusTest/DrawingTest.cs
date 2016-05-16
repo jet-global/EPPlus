@@ -974,5 +974,21 @@ namespace EPPlusTest
                 Assert.AreEqual("Sheet1!$D$20:$D$42", ((ExcelBubbleChartSerie)drawing.Series[0]).BubbleSize);
             }
         }
+
+        [TestMethod]
+        public void ReadExcelComboChart()
+        {
+            var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\ComboFromExcel.xlsx"));
+            Assert.IsTrue(file.Exists);
+            using (var package = new ExcelPackage(file))
+            {
+                var sheet = package.Workbook.Worksheets[1];
+                var drawing = sheet.Drawings[0] as ExcelChart;
+                Assert.IsNotNull(drawing);
+                Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[1].Series);
+                Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].Series);
+                Assert.AreEqual("Sheet1!$D$20:$D$42", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+            }
+        }
     }
 }
