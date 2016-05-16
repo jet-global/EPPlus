@@ -355,7 +355,10 @@ namespace OfficeOpenXml
             {
                 adr += string.Format("'{0}'!", _ws);
             }
-            adr += GetAddress(_fromRow, _fromCol, _toRow, _toCol);
+            if (IsName)
+              adr += GetAddress(_fromRow, _fromCol, _toRow, _toCol);
+            else
+              adr += GetAddress(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
             return adr;
         }
 
@@ -1029,18 +1032,25 @@ namespace OfficeOpenXml
             return true;
         }
 
+        private static readonly HashSet<char> FormulaCharacters = new HashSet<char>(new char[] { '(', ')', '+', '-', '*', '/', '=', '^', '&', '%', '\"' });
         private static bool IsFormula(string address)
         {
             var isText = false;
             for (int i = 0; i < address.Length; i++)
             {
-                if (address[i] == '\'')
+                var addressChar = address[i];
+                if (addressChar == '\'')
                 {
                     isText = !isText;
                 }
                 else
                 {
-                    if (isText==false  && address.Substring(i, 1).IndexOfAny(new char[] { '(', ')', '+', '-', '*', '/', '=', '^', '&', '%', '\"' }) > -1)
+                    // Table references use [ ] around column names and since table column names can also contain unescaped formula characters,
+                    // we need to check that this is not a table column reference in order to avoid false positives.  Since function names and
+                    // formulas cannot contain [ ], we should be safe doing this check.
+                    if (addressChar == '[' || addressChar == ']')
+                        return false;
+                    if (isText == false && FormulaCharacters.Contains(addressChar))
                     {
                         return true;
                     }
