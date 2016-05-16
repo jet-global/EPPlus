@@ -346,12 +346,12 @@ namespace OfficeOpenXml
         private string GetAddress()
         {
             var adr = "";
-            if (string.IsNullOrEmpty(_wb))
+            if (!string.IsNullOrEmpty(_wb))
             {
                 adr = "[" + _wb + "]";
             }
 
-            if (string.IsNullOrEmpty(_ws))
+            if (!string.IsNullOrEmpty(_ws))
             {
                 adr += string.Format("'{0}'!", _ws);
             }
