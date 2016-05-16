@@ -976,6 +976,74 @@ namespace EPPlusTest
         }
 
         [TestMethod]
+        public void ReadExcel3DBubbleChart()
+        {
+            var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\3DBubbleFromExcel.xlsx"));
+            Assert.IsTrue(file.Exists);
+            using (var package = new ExcelPackage(file))
+            {
+                var sheet = package.Workbook.Worksheets[1];
+                var drawing = sheet.Drawings[0] as ExcelBubbleChart;
+                Assert.IsNotNull(drawing);
+                Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[0].Series);
+                Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].XSeries);
+                Assert.AreEqual("Sheet1!$D$20:$D$42", ((ExcelBubbleChartSerie)drawing.Series[0]).BubbleSize);
+            }
+        }
+
+        [TestMethod]
+        public void ReadExcelBarChart()
+        {
+            var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\BarFromExcel.xlsx"));
+            Assert.IsTrue(file.Exists);
+            using (var package = new ExcelPackage(file))
+            {
+                var sheet = package.Workbook.Worksheets[1];
+                var drawing = sheet.Drawings[0] as ExcelBarChart;
+                Assert.IsNotNull(drawing);
+                Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].Series);
+                Assert.AreEqual(string.Empty, drawing.Series[0].XSeries);
+                Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[1].Series);
+                Assert.AreEqual(string.Empty, drawing.Series[1].XSeries);
+                Assert.AreEqual("Sheet1!$D$20:$D$42", drawing.Series[2].Series);
+                Assert.AreEqual(string.Empty, drawing.Series[2].XSeries);
+            }
+        }
+
+        [TestMethod]
+        public void ReadExcelBoxAndWhiskerChart()
+        {
+            var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\BoxAndWhiskerFromExcel.xlsx"));
+            Assert.IsTrue(file.Exists);
+            using (var package = new ExcelPackage(file))
+            {
+                Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names[0].Address);
+                Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names[1].Address);
+                Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names[2].Address);
+            }
+        }
+
+        [TestMethod]
+        public void ReadExcelColumnChart()
+        {
+            var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\ColumnFromExcel.xlsx"));
+            Assert.IsTrue(file.Exists);
+            using (var package = new ExcelPackage(file))
+            {
+                var sheet = package.Workbook.Worksheets[1];
+                var drawing = sheet.Drawings[0] as ExcelBarChart;
+                Assert.AreEqual(eChartType.ColumnStacked, drawing.ChartType);
+                Assert.IsNotNull(drawing);
+                Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].Series);
+                Assert.AreEqual(string.Empty, drawing.Series[0].XSeries);
+                Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[1].Series);
+                Assert.AreEqual(string.Empty, drawing.Series[1].XSeries);
+                Assert.AreEqual("Sheet1!$D$20:$D$42", drawing.Series[2].Series);
+                Assert.AreEqual(string.Empty, drawing.Series[2].XSeries);
+            }
+        }
+
+        [TestMethod]
         public void ReadExcelComboChart()
         {
             var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\ComboFromExcel.xlsx"));
@@ -988,6 +1056,40 @@ namespace EPPlusTest
                 Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[1].Series);
                 Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].Series);
                 Assert.AreEqual("Sheet1!$D$20:$D$42", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void ReadExcelHistogramChart()
+        {
+            var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\HistogramFromExcel.xlsx"));
+            Assert.IsTrue(file.Exists);
+            using (var package = new ExcelPackage(file))
+            {
+                // Excel 2016 Chart Series are stored in named ranges.
+                Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names[0].Address);
+                Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names[1].Address);
+                Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names[2].Address);
+            }
+        }
+
+        [TestMethod]
+        public void ReadExcelPieChart()
+        {
+            var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\PieFromExcel.xlsx"));
+            Assert.IsTrue(file.Exists);
+            using (var package = new ExcelPackage(file))
+            {
+                var sheet = package.Workbook.Worksheets[1];
+                var drawing = sheet.Drawings[0] as ExcelPieChart;
+                Assert.AreEqual(eChartType.Pie3D, drawing.ChartType);
+                Assert.IsNotNull(drawing);
+                Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].Series);
+                Assert.AreEqual(string.Empty, drawing.Series[0].XSeries);
+                Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[1].Series);
+                Assert.AreEqual(string.Empty, drawing.Series[1].XSeries);
+                Assert.AreEqual("Sheet1!$D$20:$D$42", drawing.Series[2].Series);
+                Assert.AreEqual(string.Empty, drawing.Series[2].XSeries);
             }
         }
     }

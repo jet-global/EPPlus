@@ -91,7 +91,7 @@ namespace OfficeOpenXml.Drawing.Chart
             }
             else if (name == "pie3DChart")
             {
-                if (Series.Count > 0 && ((ExcelPieChartSerie)Series[0]).Explosion > 0)
+                if (Series != null && Series.Count > 0 && ((ExcelPieChartSerie)Series[0]).Explosion > 0)
                 {
                     return eChartType.PieExploded3D;
                 }
