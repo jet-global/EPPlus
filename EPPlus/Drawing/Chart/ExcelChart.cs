@@ -1607,7 +1607,7 @@ namespace OfficeOpenXml.Drawing.Chart
         {
             get
             {
-                return GetGroupingEnum(_chartXmlHelper.GetXmlNodeString(_groupingPath));
+                return GetGroupingEnum(_chartXmlHelper?.GetXmlNodeString(_groupingPath));
             }
             internal set
             {
