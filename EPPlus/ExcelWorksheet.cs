@@ -1928,6 +1928,7 @@ namespace OfficeOpenXml
                     tbl.Address = tbl.Address.AddRow(rowFrom, rows);
                 }
                 this.UpdateCharts(rows, 0, rowFrom, 0);
+                this.UpdateNamedRanges(rows, 0, rowFrom, 0);
             }
         }
         /// <summary>
@@ -2091,12 +2092,14 @@ namespace OfficeOpenXml
                     tbl.Address = tbl.Address.AddColumn(columnFrom, columns);
                 }
                 this.UpdateCharts(0, columns, 0, columnFrom);
+                this.UpdateNamedRanges(0, columns, 0, columnFrom);
             }
         }
 
         private void UpdateCharts(int rows, int columns, int rowFrom, int colFrom)
         {
             HashSet<ExcelChart> uniqueChartTypes = new HashSet<ExcelChart>();
+            string workbook, worksheet, address;
             foreach (var sheet in this.Workbook.Worksheets)
             {
                 foreach (ExcelChart chartBase in sheet.Drawings.Where(drawing => drawing is ExcelChart))
@@ -2112,7 +2115,6 @@ namespace OfficeOpenXml
                         {
                             foreach (ExcelChartSerie serie in chart.Series)
                             {
-                                string workbook, worksheet, address;
                                 if (serie.Series != null && string.Empty != serie.Series)
                                 {
                                     ExcelRangeBase.SplitAddress(serie.Series, out workbook, out worksheet, out address);
@@ -2143,6 +2145,23 @@ namespace OfficeOpenXml
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        private void UpdateNamedRanges(int rows, int columns, int rowFrom, int colFrom)
+        {
+            string workbook, worksheet, address;
+            foreach (ExcelNamedRange range in this.Workbook.Names)
+            {
+                if (string.Empty != range.Address)
+                {
+                    ExcelRangeBase.SplitAddress(range.Address, out workbook, out worksheet, out address);
+                    if (worksheet == this.Name)
+                    {
+                        string newAddress = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom);
+                        range.Address = ExcelRangeBase.GetFullAddress(worksheet, newAddress);
                     }
                 }
             }
