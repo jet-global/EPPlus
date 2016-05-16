@@ -106,8 +106,7 @@ namespace OfficeOpenXml.Drawing.Chart
         {
             get
             {
-                var result = GetScatterEnum(_chartXmlHelper?.GetXmlNodeString(_scatterTypePath));
-                return result == 0 ? result : eScatterStyle.LineMarker;
+                return GetScatterEnum(_chartXmlHelper?.GetXmlNodeString(_scatterTypePath));
             }
             internal set
             {
