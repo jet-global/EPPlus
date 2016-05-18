@@ -292,6 +292,28 @@ namespace OfficeOpenXml
                         pageSetup.Attributes.Remove(attr);
                     }
                 }
+
+                // Update chart series that reference the same sheet as the chart.
+                foreach (ExcelChart chart in added.Drawings.Where(drawing => drawing is ExcelChart))
+                {
+                    if (chart != null)
+                    {
+                        foreach (ExcelChartSerie serie in chart.Series)
+                        {
+                            string workbook, worksheet, address;
+                            ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
+                            if (worksheet == Copy.Name)
+                            {
+                                serie.Series = ExcelRange.GetFullAddress(added.Name, address);
+                            }
+                            ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+                            if (worksheet == Copy.Name)
+                            {
+                                serie.XSeries = ExcelRange.GetFullAddress(added.Name, address);
+                            }
+                        }
+                    }
+                }
                 return added;
             }
         }
@@ -512,7 +534,7 @@ namespace OfficeOpenXml
             //Shared Formulas
             foreach (int key in Copy._sharedFormulas.Keys)
             {
-                added._sharedFormulas.Add(key, Copy._sharedFormulas[key]);
+                added._sharedFormulas.Add(key, Copy._sharedFormulas[key].Clone());
             }
             
             Dictionary<int, int> styleCashe = new Dictionary<int, int>();
@@ -820,6 +842,10 @@ namespace OfficeOpenXml
             if (Name.Trim() == "")
             {
                 throw new ArgumentException("The worksheet can not have an empty name");
+            }
+            if (Name.StartsWith("'") || Name.EndsWith("'"))
+            {
+              throw new ArgumentException("The worksheet name can not start or end with an apostrophe.");
             }
             if (Name.Length > 31) Name = Name.Substring(0, 31);   //A sheet can have max 31 char's            
             return Name;
