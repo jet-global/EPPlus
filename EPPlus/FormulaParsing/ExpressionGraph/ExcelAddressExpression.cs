@@ -97,15 +97,14 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             var c = this._parsingContext.Scopes.Current;
             var result = _excelDataProvider.GetRange(c.Address.Worksheet, c.Address.FromRow, c.Address.FromCol, ExpressionString);
             if (result == null)
+            {
                 return CompileResult.Empty;
+            }          
             if (this.ResolveAsRange || result.Address.Rows > 1 || result.Address.Columns > 1)
             {
                 return new CompileResult(result, DataType.Enumerable);
             }
-            else
-            {
-                return CompileSingleCell(result);
-            }
+            return CompileSingleCell(result);
         }
 
         private CompileResult CompileSingleCell(ExcelDataProvider.IRangeInfo result)
