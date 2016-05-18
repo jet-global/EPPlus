@@ -208,6 +208,7 @@
     <Compile Include="Utils\GuardingTests.cs" />
     <Compile Include="Utils\SqRefUtilityTests.cs" />
     <Compile Include="VBA.cs" />
+    <Compile Include="WorkbookTests.cs" />
     <Compile Include="WorkSheet.cs" />
     <Compile Include="WorksheetsTests.cs" />
   </ItemGroup>
