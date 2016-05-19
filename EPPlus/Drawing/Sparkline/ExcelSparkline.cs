@@ -49,6 +49,7 @@ namespace OfficeOpenXml.Drawing.Sparkline
         #region XmlHelper Overrides
         public ExcelSparkline(XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
         {
+            // Parse the formula and HostCell values.
         }
 
         public ExcelSparkline(XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)

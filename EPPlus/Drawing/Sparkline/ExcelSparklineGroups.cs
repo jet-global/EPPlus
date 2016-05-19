@@ -41,13 +41,16 @@ namespace OfficeOpenXml.Drawing.Sparkline
     /// </summary>
     public class ExcelSparklineGroups : XmlHelper
     {
-        
-        public List<ExcelSparklineGroup> SparklineGroups { get; private set; }
+
+        public List<ExcelSparklineGroup> SparklineGroups { get; } = new List<ExcelSparklineGroup>();
 
         #region XmlHelper Overrides
         public ExcelSparklineGroups(XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
         {
-
+            foreach(var groupNode in topNode.ChildNodes)
+            {
+                SparklineGroups.Add(new ExcelSparklineGroup(nameSpaceManager, (XmlNode) groupNode));
+            }
         }
 
         public ExcelSparklineGroups(XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
