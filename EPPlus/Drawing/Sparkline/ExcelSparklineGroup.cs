@@ -28,11 +28,9 @@
  * ******************************************************************************
  * emdelaney		        Sparklines                                2016-05-20
  *******************************************************************************/
-using System;
+using OfficeOpenXml.ConditionalFormatting;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace OfficeOpenXml.Drawing.Sparkline
@@ -58,28 +56,82 @@ namespace OfficeOpenXml.Drawing.Sparkline
 
         #region Attributes
         public double? ManualMax { get; set; }
-        public double? ManuaMin { get; set; }
-        public double? LineWeight { get; set; } = 0.75;
+        public double? ManualMin { get; set; }
+        public double? LineWeight { get; set; } // defaults to 0.75, may not be necessary
         public SparklineType? Type { get; set; } = SparklineType.Line;
-        public bool? DateAxis { get; set; } = false;
+        public bool DateAxis { get; set; }
         public DispBlanksAs? DisplayEmptyCellsAs { get; set; } = DispBlanksAs.Zero;
-        public bool? Markers { get; set; } = false;
-        public bool? High { get; set; } = false;
-        public bool? Low { get; set; } = false;
-        public bool? First { get; set; } = false;
-        public bool? Last { get; set; } = false;
-        public bool? Negative { get; set; } = false;
-        public bool? DisplayXAxis { get; set; } = false;
-        public bool? DisplayYAxis { get; set; } = false;
-        public SparklineAxisMinMax? MinAxisType { get; set; } = SparklineAxisMinMax.Individual;
-        public SparklineAxisMinMax? MaxAxisType { get; set; } = SparklineAxisMinMax.Individual;
-        public bool? RightToLeft { get; set; } = false;
+        public bool Markers { get; set; }
+        public bool High { get; set; }
+        public bool Low { get; set; }
+        public bool First { get; set; }
+        public bool Last { get; set; }
+        public bool Negative { get; set; }
+        public bool DisplayXAxis { get; set; }
+        public bool DisplayYAxis { get; set; }
+        public bool DisplayHidden { get; set; }
+        public SparklineAxisMinMax MinAxisType { get; set; } = SparklineAxisMinMax.Individual;
+        public SparklineAxisMinMax MaxAxisType { get; set; } = SparklineAxisMinMax.Individual;
+        public bool RightToLeft { get; set; }
 
         #endregion
         #endregion
         #region XmlHelper Overrides
         public ExcelSparklineGroup(XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
         {
+            // Parse the interesting nodes.
+            var node = TopNode.SelectSingleNode("x14:colorSeries", nameSpaceManager);
+            if(node != null)
+                this.ColorSeries = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+            node = TopNode.SelectSingleNode("x14:colorNegative", nameSpaceManager);
+            if (node != null)
+                this.ColorNegative = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+            node = TopNode.SelectSingleNode("x14:colorAxis", nameSpaceManager);
+            if (node != null)
+                this.ColorAxis = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+            node = TopNode.SelectSingleNode("x14:colorMarkers", nameSpaceManager);
+            if (node != null)
+                this.ColorMarkers = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+            node = TopNode.SelectSingleNode("x14:colorFirst", nameSpaceManager);
+            if (node != null)
+                this.ColorFirst = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+            node = TopNode.SelectSingleNode("x14:colorLast", nameSpaceManager);
+            if (node != null)
+                this.ColorLast = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+            node = TopNode.SelectSingleNode("x14:colorHigh", nameSpaceManager);
+            if (node != null)
+                this.ColorHigh = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+            node = TopNode.SelectSingleNode("x14:colorLow", nameSpaceManager);
+            if (node != null)
+                this.ColorLow = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+            // Parse the attributes.
+            var attribute = topNode.Attributes["type"];
+            if (attribute != null)
+                this.Type = ParseSparklineType(attribute.InnerText);
+            attribute = TopNode.Attributes["displayEmptyCellsAs"];
+            if (attribute != null)
+                this.DisplayEmptyCellsAs = ParseDisplayEmptyCellsAs(attribute.InnerText);
+            this.Negative = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "negative");
+            this.ManualMin = GetAttributeDouble(topNode, "manualMin");
+            this.ManualMax = GetAttributeDouble(topNode, "manualMax");
+            this.LineWeight = GetAttributeDouble(topNode, "lineWeight");
+            this.DateAxis = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "dateAxis"); // DateAxis
+            this.Markers = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "markers");
+            this.High = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "high");
+            this.Low = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "low");
+            this.First = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "first");
+            this.Last = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "last");
+            this.DisplayXAxis = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "displayXAxis");
+            this.DisplayYAxis = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "displayYAxis");
+            this.DisplayHidden = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "displayHidden");
+            attribute = topNode.Attributes["minAxisType"];
+            if (attribute != null)
+                this.MinAxisType = ParseSparklineAxisMinMax(attribute.InnerText);
+            attribute = topNode.Attributes["maxAxisType"];
+            if (attribute != null)
+                this.MaxAxisType = ParseSparklineAxisMinMax(attribute.InnerText);
+            this.RightToLeft = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "rightToLeft");
+            // Parse the actual sparklines.
 
         }
 
@@ -88,5 +140,47 @@ namespace OfficeOpenXml.Drawing.Sparkline
 
         }
         #endregion
+        /// <summary>
+        /// Variation of <see cref="ExcelConditionalFormattingHelper.GetAttributeDouble(XmlNode, string)"/> that 
+        /// returns null if the value cannot be found instead of double.NaN.
+        /// </summary>
+        /// <param name="topNode"></param>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
+        private static double? GetAttributeDouble(XmlNode topNode, string attribute)
+        {
+            var result = ExcelConditionalFormattingHelper.GetAttributeDouble(topNode, attribute);
+            if (double.IsNaN(result))
+                return null;
+            else
+                return result;
+        }
+        private static DispBlanksAs ParseDisplayEmptyCellsAs(string type)
+        {
+            if (type.Equals("gap"))
+                return DispBlanksAs.Gap;
+            if (type.Equals("span"))
+                return DispBlanksAs.Span;
+            else
+                return DispBlanksAs.Zero;
+        }
+        private static SparklineAxisMinMax ParseSparklineAxisMinMax(string type)
+        {
+            if (type.Equals("custom"))
+                return SparklineAxisMinMax.Custom;
+            if (type.Equals("group"))
+                return SparklineAxisMinMax.Group;
+            else
+                return SparklineAxisMinMax.Individual;
+        }
+        private static SparklineType ParseSparklineType(string type)
+        {
+            if (type.Equals("stacked"))
+                return SparklineType.Stacked;
+            else if (type.Equals("column"))
+                return SparklineType.Column;
+            else
+                return SparklineType.Line;
+        }
     }
 }
