@@ -34,11 +34,7 @@ using System;
 using System.Xml;
 using System.Collections.Generic;
 using System.IO;
-using System.Configuration;
 using OfficeOpenXml.Drawing;
-using System.Diagnostics;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
-using OfficeOpenXml.Style;
 using System.Globalization;
 using System.Text;
 using System.Security;
@@ -53,10 +49,10 @@ using System.ComponentModel;
 using System.Drawing;
 using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.Utils;
-using Ionic.Zip;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
-using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.Packaging.Ionic.Zip;
+using OfficeOpenXml.Drawing.Sparkline;
+
 namespace OfficeOpenXml
 {
     /// <summary>
@@ -542,6 +538,32 @@ namespace OfficeOpenXml
                 return _names;
             }
         }
+
+        private ExcelSparklineGroups _sparklineGroups;
+        public ExcelSparklineGroups SparklineGroups
+        {
+            get
+            {
+                CheckSheetType();
+                if (_sparklineGroups == null)
+                {
+                    // TODO: Fix this so these namespace additions aren't required.
+                    if(!NameSpaceManager.HasNamespace("x14"))
+                        NameSpaceManager.AddNamespace("x14", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
+                    if(!NameSpaceManager.HasNamespace("xm"))
+                        NameSpaceManager.AddNamespace("xm", "http://schemas.microsoft.com/office/excel/2006/main");
+
+                    var sparklineGroupsNode = TopNode.SelectSingleNode("d:extLst/d:ext/x14:sparklineGroups", NameSpaceManager);
+                    if (sparklineGroupsNode != null)
+                        _sparklineGroups = new ExcelSparklineGroups(this, NameSpaceManager, sparklineGroupsNode);
+                    else
+                        _sparklineGroups = new ExcelSparklineGroups(this, NameSpaceManager);
+                }
+
+                return _sparklineGroups;
+            }
+        }
+
 		/// <summary>
 		/// Indicates if the worksheet is hidden in the workbook
 		/// </summary>
@@ -2846,39 +2868,40 @@ namespace OfficeOpenXml
 		#region Worksheet Save
         internal void Save()
         {
-                DeletePrinterSettings();
+            DeletePrinterSettings();
 
-                if (_worksheetXml != null)
+            if (_worksheetXml != null)
+            {
+
+                if (!(this is ExcelChartsheet))
                 {
+                    // save the header & footer (if defined)
+                    if (_headerFooter != null)
+                        HeaderFooter.Save();
 
-                    if (!(this is ExcelChartsheet))
+                    var d = Dimension;
+                    if (d == null)
                     {
-                        // save the header & footer (if defined)
-                        if (_headerFooter != null)
-                            HeaderFooter.Save();
-
-                        var d = Dimension;
-                        if (d == null)
-                        {
-                            this.DeleteAllNode("d:dimension/@ref");
-                        }
-                        else
-                        {
-                            this.SetXmlNodeString("d:dimension/@ref", d.Address);
-                        }
-
-
-                        if (Drawings.Count == 0)
-                        {
-                            //Remove node if no drawings exists.
-                            DeleteNode("d:drawing");
-                        }
-
-                        SaveComments();
-                        HeaderFooter.SaveHeaderFooterImages();
-                        SaveTables();
-                        SavePivotTables();
+                        this.DeleteAllNode("d:dimension/@ref");
                     }
+                    else
+                    {
+                        this.SetXmlNodeString("d:dimension/@ref", d.Address);
+                    }
+
+
+                    if (Drawings.Count == 0)
+                    {
+                        //Remove node if no drawings exists.
+                        DeleteNode("d:drawing");
+                    }
+
+                    SaveComments();
+                    HeaderFooter.SaveHeaderFooterImages();
+                    SaveTables();
+                    SavePivotTables();
+                    this.SparklineGroups.Save();
+                }
                 }
 
                 if (Drawings.UriDrawing!=null)

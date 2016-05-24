@@ -41,15 +41,18 @@ namespace OfficeOpenXml.Drawing.Sparkline
         /// <summary>
         ///  Optional, "F" argument.
         /// </summary>
-        public ExcelRange Formula { get; set; }
+        public ExcelAddress Formula { get; set; }
         /// <summary>
         /// Required, "SqRef" argument.
         /// </summary>
-        public ExcelRange HostCell { get; set; }
+        public ExcelAddress HostCell { get; set; }
         #region XmlHelper Overrides
         public ExcelSparkline(XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
         {
-            // Parse the formula and HostCell values.
+            var formulaNode = topNode.SelectSingleNode("xm:f", nameSpaceManager);
+            var hostNode = topNode.SelectSingleNode("xm:sqref", nameSpaceManager);
+            Formula = new ExcelAddress(formulaNode.InnerText);
+            HostCell = new ExcelAddress(hostNode.InnerText);
         }
 
         public ExcelSparkline(XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)

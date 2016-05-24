@@ -41,21 +41,36 @@ namespace OfficeOpenXml.Drawing.Sparkline
     /// </summary>
     public class ExcelSparklineGroups : XmlHelper
     {
+        private ExcelWorksheet Worksheet;
 
         public List<ExcelSparklineGroup> SparklineGroups { get; } = new List<ExcelSparklineGroup>();
 
-        #region XmlHelper Overrides
-        public ExcelSparklineGroups(XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
+        public void Save()
         {
+            if (this.TopNode == null)
+            {
+                throw new NotImplementedException("Saving sparklines from scratch is currently not supported.");
+            }
+            else
+            {
+                foreach (var group in this.SparklineGroups)
+                    group.Save();
+            }
+        }
+
+        #region XmlHelper Overrides
+        public ExcelSparklineGroups(ExcelWorksheet worksheet, XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
+        {
+            this.Worksheet = worksheet;
             foreach(var groupNode in topNode.ChildNodes)
             {
                 SparklineGroups.Add(new ExcelSparklineGroup(nameSpaceManager, (XmlNode) groupNode));
             }
         }
 
-        public ExcelSparklineGroups(XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
+        public ExcelSparklineGroups(ExcelWorksheet worksheet, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
         {
-
+            this.Worksheet = worksheet;
         }
         #endregion
     }
