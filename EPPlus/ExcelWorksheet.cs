@@ -1909,6 +1909,7 @@ namespace OfficeOpenXml
                         }
                     }
                 }
+                this.UpdateSparkLineReferences(rows, rowFrom, 0, 0);
                 foreach (var tbl in Tables)
                 {
                     tbl.Address = tbl.Address.AddRow(rowFrom, rows);
@@ -2065,6 +2066,7 @@ namespace OfficeOpenXml
                         }                        
                     }                    
                 }
+                this.UpdateSparkLineReferences(0, 0, columns, columnFrom);
                 //Adjust tables
                 foreach (var tbl in Tables)
                 {
@@ -3317,6 +3319,20 @@ namespace OfficeOpenXml
                 }
                 pt.PivotTableXml.Save(pt.Part.GetStream(FileMode.Create));
                 pt.CacheDefinition.CacheDefinitionXml.Save(pt.CacheDefinition.Part.GetStream(FileMode.Create));
+            }
+        }
+
+        private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)
+        {
+            string workbook, worksheet, address;
+            foreach (var group in this.SparklineGroups.SparklineGroups)
+            {
+                foreach (var sparkline in group.Sparklines)
+                {
+                    ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+                    sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(worksheet, ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom));
+                    sparkline.HostCell.Address = ExcelRangeBase.UpdateFormulaReferences(sparkline.HostCell.Address, rows, columns, rowFrom, columnFrom);
+                }
             }
         }
 
