@@ -76,6 +76,7 @@ namespace EPPlusTest
                 sheet.InsertColumn(5, 3);
                 copied.InsertRow(2, 4);
                 copied.InsertColumn(5, 4);
+                copied.Name = "Alejandro";
                 Assert.AreEqual("'Sheet1'!D9:I9", group1.Sparklines[0].Formula.Address);
                 Assert.AreEqual("'Sheet1'!D12:I12", group1.Sparklines[1].Formula.Address);
                 Assert.AreEqual("'Sheet1'!D10:I10", group2.Sparklines[0].Formula.Address);
@@ -87,11 +88,10 @@ namespace EPPlusTest
                 var copiedGroup1 = copied.SparklineGroups.SparklineGroups[0];
                 var copiedGroup2 = copied.SparklineGroups.SparklineGroups[1];
                 var copiedGroup3 = copied.SparklineGroups.SparklineGroups[2];
-                Assert.AreEqual("'Copied'!D10:J10", copiedGroup1.Sparklines[0].Formula.Address);
-                Assert.AreEqual("'Copied'!D13:J13", copiedGroup1.Sparklines[1].Formula.Address);
-
-                Assert.AreEqual("'Copied'!D11:J11", copiedGroup2.Sparklines[0].Formula.Address);
-                Assert.AreEqual("'Copied'!D12:J12", copiedGroup3.Sparklines[0].Formula.Address);
+                Assert.AreEqual("'Alejandro'!D10:J10", copiedGroup1.Sparklines[0].Formula.Address);
+                Assert.AreEqual("'Alejandro'!D13:J13", copiedGroup1.Sparklines[1].Formula.Address);
+                Assert.AreEqual("'Alejandro'!D11:J11", copiedGroup2.Sparklines[0].Formula.Address);
+                Assert.AreEqual("'Alejandro'!D12:J12", copiedGroup3.Sparklines[0].Formula.Address);
                 Assert.AreEqual("K10", copiedGroup1.Sparklines[0].HostCell.Address);
                 Assert.AreEqual("K13", copiedGroup1.Sparklines[1].HostCell.Address);
                 Assert.AreEqual("K11", copiedGroup2.Sparklines[0].HostCell.Address);
