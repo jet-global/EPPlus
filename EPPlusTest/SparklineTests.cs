@@ -100,6 +100,45 @@ namespace EPPlusTest
         }
 
         [TestMethod]
+        public void CopyCellsAddsNewSparklines()
+        {
+            string workbooksDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\workbooks");
+            using (var package = new ExcelPackage(new FileInfo(workbooksDir + @"\Sparkline Demos.xlsx")))
+            {
+                var sheet = package.Workbook.Worksheets.First();
+                var sparklineGroups = sheet.SparklineGroups;
+                var group1 = sparklineGroups.SparklineGroups[0];
+                Assert.IsNotNull(sparklineGroups);
+                Assert.IsNotNull(sparklineGroups.SparklineGroups);
+                Assert.AreEqual(3, sparklineGroups.SparklineGroups.Count);
+                var group2 = sparklineGroups.SparklineGroups[1];
+                var group3 = sparklineGroups.SparklineGroups[2];
+                Assert.AreEqual(1, group1.Sparklines.Count);
+                Assert.AreEqual(Color.FromArgb(unchecked((int)0xFF376092)), group1.ColorSeries);
+                Assert.AreEqual(Color.FromArgb(unchecked((int)0xFF376092)), group2.ColorSeries);
+                Assert.AreEqual(Color.FromArgb(unchecked((int)0xFF323232)), group3.ColorSeries);
+                Assert.AreEqual(SparklineType.Column, group1.Type);
+                Assert.AreEqual(SparklineType.Line, group2.Type);
+                Assert.AreEqual(SparklineType.Stacked, group3.Type);
+                Assert.AreEqual("Sheet1!D6:F6", group1.Sparklines[0].Formula.Address);
+                Assert.AreEqual("Sheet1!D7:F7", group2.Sparklines[0].Formula.Address);
+                Assert.AreEqual("Sheet1!D8:F8", group3.Sparklines[0].Formula.Address);
+                Assert.AreEqual("G6", group1.Sparklines[0].HostCell.Address);
+                Assert.AreEqual("G7", group2.Sparklines[0].HostCell.Address);
+                Assert.AreEqual("G8", group3.Sparklines[0].HostCell.Address);
+
+                sheet.Cells["6:6"].Copy(sheet.Cells["9:9"]);
+                Assert.AreEqual(2, group1.Sparklines.Count);
+                var newLine = group1.Sparklines[1];
+                Assert.AreEqual("'Sheet1'!D9:F9", newLine.Formula.Address);
+                Assert.AreEqual("G9", newLine.HostCell.Address);
+
+                Assert.AreEqual("Sheet1!D6:F6", group1.Sparklines[0].Formula.Address);
+                Assert.AreEqual("G6", group1.Sparklines[0].HostCell.Address);
+            }
+        }
+
+        [TestMethod]
         public void UpdateSparklinesAndSaveWorkbook()
         {
             var newFile = new FileInfo(Path.GetTempFileName());
