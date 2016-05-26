@@ -826,5 +826,21 @@ namespace OfficeOpenXml
             var stream = new MemoryStream(encoding.GetBytes(xml));
             LoadXmlSafe(xmlDoc, stream);
         }
-	}
+        /// <summary>
+        /// Sets an attribute on an existing node.
+        /// </summary>
+        /// <param name="topNode">The node where the attribute should be set.</param>
+        /// <param name="attribute">The string name of the attribute to be set.</param>
+        /// <param name="value">The new attribute value.</param>
+        internal static void SetAttribute(XmlNode topNode, string attribute, string value)
+        {
+            var node = topNode.Attributes[attribute];
+            if (node == null)
+            {
+                node = topNode.OwnerDocument.CreateAttribute(attribute);
+                topNode.Attributes.Append(node);
+            }
+            node.Value = value;
+        }
+    }
 }

@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -52,6 +53,7 @@ using OfficeOpenXml.Style.XmlAccess;
 using OfficeOpenXml.Table;
 using OfficeOpenXml.Table.PivotTable;
 using OfficeOpenXml.Utils;
+using OfficeOpenXml.Drawing.Sparkline;
 
 namespace OfficeOpenXml
 {
@@ -586,6 +588,32 @@ namespace OfficeOpenXml
                 return _names;
             }
         }
+
+        private ExcelSparklineGroups _sparklineGroups;
+        public ExcelSparklineGroups SparklineGroups
+        {
+            get
+            {
+                CheckSheetType();
+                if (_sparklineGroups == null)
+                {
+                    // TODO: Fix this so these namespace additions aren't required.
+                    if(!NameSpaceManager.HasNamespace("x14"))
+                        NameSpaceManager.AddNamespace("x14", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
+                    if(!NameSpaceManager.HasNamespace("xm"))
+                        NameSpaceManager.AddNamespace("xm", "http://schemas.microsoft.com/office/excel/2006/main");
+
+                    var sparklineGroupsNode = TopNode.SelectSingleNode("d:extLst/d:ext/x14:sparklineGroups", NameSpaceManager);
+                    if (sparklineGroupsNode != null)
+                        _sparklineGroups = new ExcelSparklineGroups(this, NameSpaceManager, sparklineGroupsNode);
+                    else
+                        _sparklineGroups = new ExcelSparklineGroups(this, NameSpaceManager);
+                }
+
+                return _sparklineGroups;
+            }
+        }
+
 		/// <summary>
 		/// Indicates if the worksheet is hidden in the workbook
 		/// </summary>
@@ -1931,6 +1959,7 @@ namespace OfficeOpenXml
                         }
                     }
                 }
+                this.UpdateSparkLineReferences(rows, rowFrom, 0, 0);
                 foreach (var tbl in Tables)
                 {
                     tbl.Address = tbl.Address.AddRow(rowFrom, rows);
@@ -2096,6 +2125,7 @@ namespace OfficeOpenXml
                         }                        
                     }                    
                 }
+                this.UpdateSparkLineReferences(0, 0, columns, columnFrom);
                 //Adjust tables
                 foreach (var tbl in Tables)
                 {
@@ -3013,39 +3043,40 @@ namespace OfficeOpenXml
         #region Worksheet Save
         internal void Save()
         {
-                DeletePrinterSettings();
+            DeletePrinterSettings();
 
-                if (_worksheetXml != null)
+            if (_worksheetXml != null)
+            {
+
+                if (!(this is ExcelChartsheet))
                 {
+                    // save the header & footer (if defined)
+                    if (_headerFooter != null)
+                        HeaderFooter.Save();
 
-                    if (!(this is ExcelChartsheet))
+                    var d = Dimension;
+                    if (d == null)
                     {
-                        // save the header & footer (if defined)
-                        if (_headerFooter != null)
-                            HeaderFooter.Save();
-
-                        var d = Dimension;
-                        if (d == null)
-                        {
-                            this.DeleteAllNode("d:dimension/@ref");
-                        }
-                        else
-                        {
-                            this.SetXmlNodeString("d:dimension/@ref", d.Address);
-                        }
-
-
-                        if (Drawings.Count == 0)
-                        {
-                            //Remove node if no drawings exists.
-                            DeleteNode("d:drawing");
-                        }
-
-                        SaveComments();
-                        HeaderFooter.SaveHeaderFooterImages();
-                        SaveTables();
-                        SavePivotTables();
+                        this.DeleteAllNode("d:dimension/@ref");
                     }
+                    else
+                    {
+                        this.SetXmlNodeString("d:dimension/@ref", d.Address);
+                    }
+
+
+                    if (Drawings.Count == 0)
+                    {
+                        //Remove node if no drawings exists.
+                        DeleteNode("d:drawing");
+                    }
+
+                    SaveComments();
+                    HeaderFooter.SaveHeaderFooterImages();
+                    SaveTables();
+                    SavePivotTables();
+                    this.SparklineGroups.Save();
+                }
                 }
 
                 if (Drawings.UriDrawing!=null)
@@ -4325,7 +4356,25 @@ namespace OfficeOpenXml
                 return _package.Workbook;
             }
         }
-		#endregion
+        #endregion
+
+        private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)
+        {
+            string workbook, worksheet, address;
+            foreach (var group in this.SparklineGroups.SparklineGroups)
+            {
+                foreach (var sparkline in group.Sparklines)
+                {
+                    ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+                    address = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
+                    if (string.IsNullOrEmpty(worksheet))
+                        sparkline.Formula.Address = address;
+                    else
+                        sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(worksheet, address);
+                    sparkline.HostCell.Address = ExcelRangeBase.UpdateFormulaReferences(sparkline.HostCell.Address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
+                }
+            }
+        }
         #endregion  // END Worksheet Private Methods
 
         /// <summary>
