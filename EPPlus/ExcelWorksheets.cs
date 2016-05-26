@@ -46,6 +46,8 @@ using OfficeOpenXml.Drawing.Vml;
 using OfficeOpenXml.Packaging.Ionic.Zlib;
 using OfficeOpenXml.Utils;
 using OfficeOpenXml.VBA;
+using OfficeOpenXml.Drawing.Sparkline;
+
 namespace OfficeOpenXml
 {
 	/// <summary>
@@ -264,6 +266,12 @@ namespace OfficeOpenXml
                 {
                     CopySheetNames(Copy, added);
                 }
+                if (Copy.SparklineGroups.SparklineGroups.Count > 0)
+                {
+                    CopySparklines(Copy, added);
+                }
+
+
 
                 //Copy all cells
                 CloneCells(Copy, added);
@@ -326,6 +334,22 @@ namespace OfficeOpenXml
         public ExcelChartsheet AddChart(string Name, eChartType chartType)
         {
             return (ExcelChartsheet)AddSheet(Name, true, chartType);
+        }
+        private void CopySparklines(ExcelWorksheet Copy, ExcelWorksheet added)
+        {
+            for(int i = 0; i < Copy.SparklineGroups.SparklineGroups.Count; i++)
+            {
+                var group = added.SparklineGroups.SparklineGroups[i];
+                group.Worksheet = added;
+                group.Sparklines.Clear();
+                foreach(var originalSparkline in Copy.SparklineGroups.SparklineGroups[i].Sparklines)
+                {
+                    var sparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(originalSparkline.Formula.Address) };
+                    sparkline.SetHostCell(new ExcelAddress(originalSparkline.HostCell.Address));
+                    sparkline.Formula.ChangeWorksheet(Copy.Name, added.Name);
+                    group.Sparklines.Add(sparkline);
+                }
+            }
         }
         private void CopySheetNames(ExcelWorksheet Copy, ExcelWorksheet added)
         {
