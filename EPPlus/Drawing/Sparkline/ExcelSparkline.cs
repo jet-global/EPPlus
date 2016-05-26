@@ -45,20 +45,35 @@ namespace OfficeOpenXml.Drawing.Sparkline
         /// <summary>
         /// Required, "SqRef" argument.
         /// </summary>
-        public ExcelAddress HostCell { get; set; }
+        public ExcelAddress HostCell { get; private set; }
+
+        /// <summary>
+        /// The ExcelSparklineGroup this Sparkline belongs to.
+        /// </summary>
+        public ExcelSparklineGroup Group { get; private set; }
+
+
         #region XmlHelper Overrides
-        public ExcelSparkline(XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
+        public ExcelSparkline(ExcelSparklineGroup group, XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
         {
+            this.Group = group;
             var formulaNode = topNode.SelectSingleNode("xm:f", nameSpaceManager);
             var hostNode = topNode.SelectSingleNode("xm:sqref", nameSpaceManager);
             Formula = new ExcelAddress(formulaNode.InnerText);
-            HostCell = new ExcelAddress(hostNode.InnerText);
+            HostCell = group.Worksheet.Cells[hostNode.InnerText];
+            group.Worksheet.Cells[HostCell.Address].Sparklines.Add(this);
         }
 
-        public ExcelSparkline(XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
+        public ExcelSparkline(ExcelSparklineGroup group, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
         {
-
+            this.Group = group;
         }
         #endregion
+
+        public void SetHostCell(ExcelAddress host)
+        {
+            this.HostCell = Group.Worksheet.Cells[host.Address];
+            Group.Worksheet.Cells[HostCell.Address].Sparklines.Add(this);
+        }
     }
 }
