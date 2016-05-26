@@ -36,6 +36,9 @@ using System;
 
 namespace OfficeOpenXml.Drawing.Sparkline
 {
+    /// <summary>
+    /// Represents the CT_SparklineGroup type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx
+    /// </summary>
     public class ExcelSparklineGroup : XmlHelper
     {
         #region Properties
