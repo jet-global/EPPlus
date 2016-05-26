@@ -36,6 +36,9 @@ using System;
 
 namespace OfficeOpenXml.Drawing.Sparkline
 {
+    /// <summary>
+    /// Represents the CT_SparklineGroup type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx
+    /// </summary>
     public class ExcelSparklineGroup : XmlHelper
     {
         #region Properties
@@ -170,7 +173,7 @@ namespace OfficeOpenXml.Drawing.Sparkline
             else
                 this.ClearAttribute(this.TopNode, "type");
             if (this.DateAxis)
-                ExcelSparklineGroup.SetAttribute(this.TopNode, "dateAxis", this.DateAxis.ToString());
+                ExcelSparklineGroup.SetAttribute(this.TopNode, "dateAxis", "1");
             else
                 this.ClearAttribute(this.TopNode, "dateAxis");
             if (this.DisplayEmptyCellsAs != null && this.DisplayEmptyCellsAs != DispBlanksAs.Zero)
@@ -178,35 +181,35 @@ namespace OfficeOpenXml.Drawing.Sparkline
             else
                 this.ClearAttribute(this.TopNode, "displayEmptyCellsAs");
             if (this.Markers)
-                ExcelSparklineGroup.SetAttribute(this.TopNode, "markers", this.Markers.ToString());
+                ExcelSparklineGroup.SetAttribute(this.TopNode, "markers", "1");
             else
                 this.ClearAttribute(this.TopNode, "markers");
             if (this.High)
-                ExcelSparklineGroup.SetAttribute(this.TopNode, "high", this.High.ToString());
+                ExcelSparklineGroup.SetAttribute(this.TopNode, "high", "1");
             else
                 this.ClearAttribute(this.TopNode, "high");
             if (this.Low)
-                ExcelSparklineGroup.SetAttribute(this.TopNode, "low", this.Low.ToString());
+                ExcelSparklineGroup.SetAttribute(this.TopNode, "low", "1");
             else
                 this.ClearAttribute(this.TopNode, "low");
             if (this.First)
-                ExcelSparklineGroup.SetAttribute(this.TopNode, "first", this.First.ToString());
+                ExcelSparklineGroup.SetAttribute(this.TopNode, "first", "1");
             else
                 this.ClearAttribute(this.TopNode, "first");
             if (this.Last)
-                ExcelSparklineGroup.SetAttribute(this.TopNode, "last", this.Last.ToString());
+                ExcelSparklineGroup.SetAttribute(this.TopNode, "last", "1");
             else
                 this.ClearAttribute(this.TopNode, "last");
             if (this.Negative)
-                ExcelSparklineGroup.SetAttribute(this.TopNode, "negative", this.Negative.ToString());
+                ExcelSparklineGroup.SetAttribute(this.TopNode, "negative", "1");
             else
                 this.ClearAttribute(this.TopNode, "negative");
             if (this.DisplayXAxis)
-                ExcelSparklineGroup.SetAttribute(this.TopNode, "displayXAxis", this.DisplayXAxis.ToString());
+                ExcelSparklineGroup.SetAttribute(this.TopNode, "displayXAxis", "1");
             else
                 this.ClearAttribute(this.TopNode, "displayXAxis");
             if (this.DisplayHidden)
-                ExcelSparklineGroup.SetAttribute(this.TopNode, "displayHidden", this.DisplayHidden.ToString());
+                ExcelSparklineGroup.SetAttribute(this.TopNode, "displayHidden", "1");
             else
                 this.ClearAttribute(this.TopNode, "displayHidden");
             if (this.MinAxisType != SparklineAxisMinMax.Individual)
@@ -218,7 +221,7 @@ namespace OfficeOpenXml.Drawing.Sparkline
             else
                 this.ClearAttribute(this.TopNode, "maxAxisType");
             if (this.RightToLeft)
-                ExcelSparklineGroup.SetAttribute(this.TopNode, "rightToLeft", this.RightToLeft.ToString());
+                ExcelSparklineGroup.SetAttribute(this.TopNode, "rightToLeft", "1");
             else
                 this.ClearAttribute(this.TopNode, "rightToLeft");
         }
