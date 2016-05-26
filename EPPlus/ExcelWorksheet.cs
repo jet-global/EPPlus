@@ -3322,20 +3322,6 @@ namespace OfficeOpenXml
             }
         }
 
-        private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)
-        {
-            string workbook, worksheet, address;
-            foreach (var group in this.SparklineGroups.SparklineGroups)
-            {
-                foreach (var sparkline in group.Sparklines)
-                {
-                    ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
-                    sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(worksheet, ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom));
-                    sparkline.HostCell.Address = ExcelRangeBase.UpdateFormulaReferences(sparkline.HostCell.Address, rows, columns, rowFrom, columnFrom);
-                }
-            }
-        }
-
         private string GetNewName(HashSet<string> flds, string fldName)
         {
             int ix = 2;
@@ -4184,7 +4170,25 @@ namespace OfficeOpenXml
                 return _package.Workbook;
             }
         }
-		#endregion
+        #endregion
+
+        private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)
+        {
+            string workbook, worksheet, address;
+            foreach (var group in this.SparklineGroups.SparklineGroups)
+            {
+                foreach (var sparkline in group.Sparklines)
+                {
+                    ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+                    address = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom);
+                    if (string.IsNullOrEmpty(worksheet))
+                        sparkline.Formula.Address = address;
+                    else
+                        sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(worksheet, address);
+                    sparkline.HostCell.Address = ExcelRangeBase.UpdateFormulaReferences(sparkline.HostCell.Address, rows, columns, rowFrom, columnFrom);
+                }
+            }
+        }
         #endregion  // END Worksheet Private Methods
 
         /// <summary>

@@ -30,8 +30,6 @@
  *******************************************************************************/
  using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace OfficeOpenXml.Drawing.Sparkline
@@ -41,15 +39,22 @@ namespace OfficeOpenXml.Drawing.Sparkline
     /// </summary>
     public class ExcelSparklineGroups : XmlHelper
     {
+        #region Properties
         private ExcelWorksheet Worksheet;
 
         public List<ExcelSparklineGroup> SparklineGroups { get; } = new List<ExcelSparklineGroup>();
+        #endregion
 
+        #region Public Methods
         public void Save()
         {
-            if (this.TopNode == null)
+            if (this.SparklineGroups.Count == 0 || this.SparklineGroups[0].Sparklines.Count == 0)
             {
-                throw new NotImplementedException("Saving sparklines from scratch is currently not supported.");
+                return;
+            }
+            else if (this.TopNode == null)
+            {
+                throw new NotImplementedException("Saving new SparkineGroups is currently not supported.");
             }
             else
             {
@@ -57,6 +62,7 @@ namespace OfficeOpenXml.Drawing.Sparkline
                     group.Save();
             }
         }
+        #endregion
 
         #region XmlHelper Overrides
         public ExcelSparklineGroups(ExcelWorksheet worksheet, XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
@@ -64,7 +70,7 @@ namespace OfficeOpenXml.Drawing.Sparkline
             this.Worksheet = worksheet;
             foreach(var groupNode in topNode.ChildNodes)
             {
-                SparklineGroups.Add(new ExcelSparklineGroup(nameSpaceManager, (XmlNode) groupNode));
+                SparklineGroups.Add(new ExcelSparklineGroup(worksheet, nameSpaceManager, (XmlNode) groupNode));
             }
         }
 
