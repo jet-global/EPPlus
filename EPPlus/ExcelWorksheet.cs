@@ -526,6 +526,7 @@ namespace OfficeOpenXml
                     n.ChangeWorksheet(_name, value);
                 }
             }
+            this.ChangeSparklineSheetNames(value);
             foreach (var ws in Workbook.Worksheets)
             {
                 if (!(ws is ExcelChartsheet))
@@ -4374,6 +4375,23 @@ namespace OfficeOpenXml
                     sparkline.HostCell.Address = ExcelRangeBase.UpdateFormulaReferences(sparkline.HostCell.Address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
                 }
             }
+        }
+
+        private void ChangeSparklineSheetNames(string newName)
+        {
+            string workbook, worksheet, address;
+            foreach (var group in this.SparklineGroups.SparklineGroups)
+            {
+                foreach (var sparkline in group.Sparklines)
+                {
+                    ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+                    if (string.IsNullOrEmpty(worksheet))
+                        return;
+                    else
+                        sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(newName, address);
+                }
+            }
+
         }
         #endregion  // END Worksheet Private Methods
 

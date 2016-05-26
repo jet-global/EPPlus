@@ -41,12 +41,12 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
+using OfficeOpenXml.Drawing.Sparkline;
 using OfficeOpenXml.Style.XmlAccess;
 using OfficeOpenXml.Drawing.Vml;
 using OfficeOpenXml.Packaging.Ionic.Zlib;
 using OfficeOpenXml.Utils;
 using OfficeOpenXml.VBA;
-using OfficeOpenXml.Drawing.Sparkline;
 
 namespace OfficeOpenXml
 {
