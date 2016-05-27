@@ -90,7 +90,6 @@ namespace OfficeOpenXml.Drawing.Sparkline
         /// </summary>
         public void Save()
         {
-            // TODO: Remove attributes if they don't exist on the model?
             this.SaveAttributes();
             this.SaveColors();
             this.SaveSparklines();
