@@ -2333,7 +2333,6 @@ namespace OfficeOpenXml
             ExcelStyles sourceStyles = _worksheet.Workbook.Styles,
                         styles = Destination._worksheet.Workbook.Styles;
             Dictionary<int, int> styleCashe = new Dictionary<int, int>();
-
             //Clear all existing cells; 
             int toRow = _toRow - _fromRow + 1,
                 toCol = _toCol - _fromCol + 1;
@@ -2533,6 +2532,28 @@ namespace OfficeOpenXml
                 {
                     Destination._worksheet.MergedCells.Add(m, true);
                 }
+            }
+            int rowOffset = Destination._fromRow;
+            string workbook, worksheet, address;
+            List<ExcelSparkline> newSparklines = new List<ExcelSparkline>();
+            foreach (var group in this.Worksheet.SparklineGroups.SparklineGroups)
+            {
+                newSparklines.Clear();
+                foreach (var sparkline in group.Sparklines)
+                {
+                    if(sparkline.HostCell.Collide(this) != eAddressCollition.No)
+                    {
+                        ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+                        var newFormula = UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+                        if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
+                            newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
+                        var newHostCell = UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+                        var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula) };
+                        newSparkline.SetHostCell(new ExcelAddress(newHostCell));
+                        newSparklines.Add(newSparkline);
+                    }
+                }
+                group.Sparklines.AddRange(newSparklines);
             }
         }
 

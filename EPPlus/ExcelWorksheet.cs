@@ -4388,7 +4388,10 @@ namespace OfficeOpenXml
                     if (string.IsNullOrEmpty(worksheet))
                         return;
                     else
-                        sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(newName, address);
+                    {
+                        sparkline.Formula.SetAddress(ExcelRangeBase.GetFullAddress(newName, address));
+                    }
+                    sparkline.HostCell._ws = newName;
                 }
             }
 
