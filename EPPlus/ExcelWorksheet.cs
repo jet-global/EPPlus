@@ -598,10 +598,10 @@ namespace OfficeOpenXml
                 CheckSheetType();
                 if (_sparklineGroups == null)
                 {
-                    // TODO: Fix this so these namespace additions aren't required.
-                    if(!NameSpaceManager.HasNamespace("x14"))
+                    // Add required namespaces for Sparkline support.
+                    if (!NameSpaceManager.HasNamespace("x14"))
                         NameSpaceManager.AddNamespace("x14", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
-                    if(!NameSpaceManager.HasNamespace("xm"))
+                    if (!NameSpaceManager.HasNamespace("xm"))
                         NameSpaceManager.AddNamespace("xm", "http://schemas.microsoft.com/office/excel/2006/main");
 
                     var sparklineGroupsNode = TopNode.SelectSingleNode("d:extLst/d:ext/x14:sparklineGroups", NameSpaceManager);
