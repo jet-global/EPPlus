@@ -4203,6 +4203,7 @@ namespace OfficeOpenXml
                         return;
                     else
                         sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(newName, address);
+                    sparkline.HostCell._ws = newName;
                 }
             }
 
