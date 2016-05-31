@@ -30,28 +30,28 @@
  * Jan Källman          Total rewrite               2010-03-01
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  *******************************************************************************/
-using System;
-using System.Xml;
-using System.Collections.Generic;
-using System.IO;
-using OfficeOpenXml.Drawing;
-using System.Globalization;
-using System.Text;
-using System.Security;
-using OfficeOpenXml.Drawing.Chart;
-using OfficeOpenXml.Style.XmlAccess;
-using System.Text.RegularExpressions;
-using OfficeOpenXml.Drawing.Vml;
-using OfficeOpenXml.Table;
-using OfficeOpenXml.DataValidation;
-using OfficeOpenXml.Table.PivotTable;
-using System.ComponentModel;
-using System.Drawing;
 using OfficeOpenXml.ConditionalFormatting;
-using OfficeOpenXml.Utils;
+using OfficeOpenXml.DataValidation;
+using OfficeOpenXml.Drawing;
+using OfficeOpenXml.Drawing.Chart;
+using OfficeOpenXml.Drawing.Sparkline;
+using OfficeOpenXml.Drawing.Vml;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OfficeOpenXml.Packaging.Ionic.Zip;
-using OfficeOpenXml.Drawing.Sparkline;
+using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Table;
+using OfficeOpenXml.Table.PivotTable;
+using OfficeOpenXml.Utils;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Security;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace OfficeOpenXml
 {
@@ -541,6 +541,9 @@ namespace OfficeOpenXml
         }
 
         private ExcelSparklineGroups _sparklineGroups;
+        /// <summary>
+        /// Gets the <see cref="ExcelSparklineGroups"/> that exist on the worksheet.
+        /// </summary>
         public ExcelSparklineGroups SparklineGroups
         {
             get

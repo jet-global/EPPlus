@@ -41,6 +41,42 @@ namespace EPPlusTest
         }
 
         [TestMethod]
+        public void ReadThemedSparklinesFromWorkbook()
+        {
+            var newFile = new FileInfo(Path.GetTempFileName());
+            if (newFile.Exists)
+                newFile.Delete();
+            string workbooksDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\workbooks");
+            using (var package = new ExcelPackage(new FileInfo(workbooksDir + @"\ThemedSparkline.xlsx")))
+            {
+                var sparklineGroups = package.Workbook.Worksheets.First().SparklineGroups;
+                Assert.IsNotNull(sparklineGroups);
+                Assert.IsNotNull(sparklineGroups.SparklineGroups);
+                Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+                var group1 = sparklineGroups.SparklineGroups[0];
+                Assert.AreEqual(Color.Empty, group1.ColorSeries);
+                var colorSeriesNode = group1.TopNode.SelectSingleNode("x14:colorSeries", group1.NameSpaceManager);
+                Assert.IsNotNull(colorSeriesNode);
+                Assert.AreEqual("3", colorSeriesNode.Attributes["theme"].InnerText);
+                Assert.AreEqual(SparklineType.Column, group1.Type);
+                package.SaveAs(newFile);
+            }
+            using (var package = new ExcelPackage(newFile))
+            {
+                var sparklineGroups = package.Workbook.Worksheets.First().SparklineGroups;
+                Assert.IsNotNull(sparklineGroups);
+                Assert.IsNotNull(sparklineGroups.SparklineGroups);
+                Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+                var group1 = sparklineGroups.SparklineGroups[0];
+                Assert.AreEqual(Color.Empty, group1.ColorSeries);
+                var colorSeriesNode = group1.TopNode.SelectSingleNode("x14:colorSeries", group1.NameSpaceManager);
+                Assert.IsNotNull(colorSeriesNode);
+                Assert.AreEqual("3", colorSeriesNode.Attributes["theme"].InnerText);
+                Assert.AreEqual(SparklineType.Column, group1.Type);
+            }
+        }
+
+        [TestMethod]
         public void InsertCellsUpdatesSparklineRanges()
         {
             string workbooksDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\workbooks");
@@ -49,8 +85,7 @@ namespace EPPlusTest
                 var sheet = package.Workbook.Worksheets.First();
                 var sparklineGroups = sheet.SparklineGroups;
                 var group1 = sparklineGroups.SparklineGroups[0];
-                var newLine = new ExcelSparkline(group1, group1.NameSpaceManager) { Formula = new ExcelAddress("Sheet1!D9:F9") };
-                newLine.SetHostCell(new ExcelAddress("G9"));
+                var newLine = new ExcelSparkline(group1, group1.NameSpaceManager) { Formula = new ExcelAddress("Sheet1!D9:F9"), HostCell = new ExcelAddress("G9") };
                 group1.Sparklines.Add(newLine);
 
                 var copied = package.Workbook.Worksheets.Add("Copied", sheet);
@@ -166,8 +201,7 @@ namespace EPPlusTest
                 Assert.AreEqual("G6", group1.Sparklines[0].HostCell.Address);
                 Assert.AreEqual("G7", group2.Sparklines[0].HostCell.Address);
                 Assert.AreEqual("G8", group3.Sparklines[0].HostCell.Address);
-                var sparkline = new ExcelSparkline(group1, group1.NameSpaceManager) { Formula = new ExcelAddress("A1:B2") };
-                sparkline.SetHostCell(new ExcelAddress("G9"));
+                var sparkline = new ExcelSparkline(group1, group1.NameSpaceManager) { Formula = new ExcelAddress("A1:B2"), HostCell = new ExcelAddress("G9") };
                 group1.Sparklines.Add(sparkline);
                 group1.Type = SparklineType.Stacked;
                 package.SaveAs(newFile);
@@ -207,7 +241,7 @@ namespace EPPlusTest
         }
 
         // Saving sparklines from scratch is currently not supported.
-        [ExpectedException(typeof(InvalidOperationException))]
+        [ExpectedException(typeof(NotImplementedException))]
         [TestMethod]
         public void SaveSparklines()
         {
@@ -218,8 +252,7 @@ namespace EPPlusTest
             {
                 var sheet = package.Workbook.Worksheets.Add("Sheet1");
                 var group = new ExcelSparklineGroup(sheet, sheet.NameSpaceManager);
-                var sparkline = new ExcelSparkline(group, sheet.NameSpaceManager) { Formula = new ExcelAddress("G1:G20") };
-                sparkline.SetHostCell(new ExcelAddress("B2"));
+                var sparkline = new ExcelSparkline(group, sheet.NameSpaceManager) { Formula = new ExcelAddress("G1:G20"), HostCell = new ExcelAddress("B2") };
                 group.Sparklines.Add(sparkline);
                 sheet.SparklineGroups.SparklineGroups.Add(group);
 
@@ -263,8 +296,7 @@ namespace EPPlusTest
                 Assert.AreEqual("G7", group2.Sparklines[0].HostCell.Address);
                 Assert.AreEqual("G8", group3.Sparklines[0].HostCell.Address);
                 Assert.AreEqual(DispBlanksAs.Gap, group1.DisplayEmptyCellsAs);
-                var sparkline = new ExcelSparkline(group1, group1.NameSpaceManager) { Formula = new ExcelAddress("A1:B2") };
-                sparkline.SetHostCell(new ExcelAddress("G9"));
+                var sparkline = new ExcelSparkline(group1, group1.NameSpaceManager) { Formula = new ExcelAddress("A1:B2"), HostCell = new ExcelAddress("G9") };
                 group1.Sparklines.Add(sparkline);
                 group1.Type = SparklineType.Stacked;
                 group1.ManualMax = 1000.23;
@@ -345,14 +377,14 @@ namespace EPPlusTest
                     group1.MinAxisType = SparklineAxisMinMax.Individual;
                     group1.MaxAxisType = SparklineAxisMinMax.Individual;
                     group1.RightToLeft = false;
-                    group1.ColorSeries = Color.Empty;
-                    group1.ColorNegative = Color.Empty;
-                    group1.ColorAxis = Color.Empty;
-                    group1.ColorMarkers = Color.Empty;
-                    group1.ColorFirst = Color.Empty;
-                    group1.ColorLast = Color.Empty;
-                    group1.ColorHigh = Color.Empty;
-                    group1.ColorLow = Color.Empty;
+                    group1.ColorSeries = Color.FromArgb(unchecked((int)0xFFFFFFFF));
+                    group1.ColorNegative = Color.FromArgb(unchecked((int)0xFFFFFFFF));
+                    group1.ColorAxis = Color.FromArgb(unchecked((int)0xFFFFFFFF));
+                    group1.ColorMarkers = Color.FromArgb(unchecked((int)0xFFFFFFFF));
+                    group1.ColorFirst = Color.FromArgb(unchecked((int)0xFFFFFFFF));
+                    group1.ColorLast = Color.FromArgb(unchecked((int)0xFFFFFFFF));
+                    group1.ColorHigh = Color.FromArgb(unchecked((int)0xFFFFFFFF));
+                    group1.ColorLow = Color.FromArgb(unchecked((int)0xFFFFFFFF));
                     this.ValidateGroup(sheet2.SparklineGroups.SparklineGroups.First());
 
                     package.Save();
@@ -379,14 +411,15 @@ namespace EPPlusTest
                     Assert.AreEqual(SparklineAxisMinMax.Individual, group1.MinAxisType);
                     Assert.AreEqual(SparklineAxisMinMax.Individual, group1.MaxAxisType);
                     Assert.IsFalse(group1.RightToLeft);
-                    Assert.IsTrue(group1.ColorSeries.IsEmpty);
-                    Assert.IsTrue(group1.ColorNegative.IsEmpty);
-                    Assert.IsTrue(group1.ColorAxis.IsEmpty);
-                    Assert.IsTrue(group1.ColorMarkers.IsEmpty);
-                    Assert.IsTrue(group1.ColorFirst.IsEmpty);
-                    Assert.IsTrue(group1.ColorLast.IsEmpty);
-                    Assert.IsTrue(group1.ColorHigh.IsEmpty);
-                    Assert.IsTrue(group1.ColorLow.IsEmpty);
+                    var expectedColor = Color.FromArgb(unchecked((int)0xFFFFFFFF));
+                    Assert.AreEqual(expectedColor, group1.ColorSeries);
+                    Assert.AreEqual(expectedColor, group1.ColorNegative);
+                    Assert.AreEqual(expectedColor, group1.ColorAxis);
+                    Assert.AreEqual(expectedColor, group1.ColorMarkers);
+                    Assert.AreEqual(expectedColor, group1.ColorFirst);
+                    Assert.AreEqual(expectedColor, group1.ColorLast);
+                    Assert.AreEqual(expectedColor, group1.ColorHigh);
+                    Assert.AreEqual(expectedColor, group1.ColorLow);
                     var copied = package.Workbook.Worksheets["Copied"];
                     this.ValidateGroup(copied.SparklineGroups.SparklineGroups.First());
                     copied.InsertRow(2, 2);
