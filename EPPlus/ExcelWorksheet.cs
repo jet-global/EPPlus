@@ -30,22 +30,11 @@
  * Jan Källman          Total rewrite               2010-03-01
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Configuration;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
 using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.DataValidation;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
+using OfficeOpenXml.Drawing.Sparkline;
 using OfficeOpenXml.Drawing.Vml;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OfficeOpenXml.Packaging.Ionic.Zip;
@@ -53,14 +42,24 @@ using OfficeOpenXml.Style.XmlAccess;
 using OfficeOpenXml.Table;
 using OfficeOpenXml.Table.PivotTable;
 using OfficeOpenXml.Utils;
-using OfficeOpenXml.Drawing.Sparkline;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Security;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace OfficeOpenXml
 {
-  /// <summary>
-  /// Worksheet hidden enumeration
-  /// </summary>
-  public enum eWorkSheetHidden
+    /// <summary>
+    /// Worksheet hidden enumeration
+    /// </summary>
+    public enum eWorkSheetHidden
     {
         /// <summary>
         /// The worksheet is visible
@@ -591,6 +590,9 @@ namespace OfficeOpenXml
         }
 
         private ExcelSparklineGroups _sparklineGroups;
+        /// <summary>
+        /// Gets the <see cref="ExcelSparklineGroups"/> that exist on the worksheet.
+        /// </summary>
         public ExcelSparklineGroups SparklineGroups
         {
             get

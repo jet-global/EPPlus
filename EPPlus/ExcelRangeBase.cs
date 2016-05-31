@@ -30,40 +30,34 @@
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  * Eyal Seagull		    Conditional Formatting      2012-04-03
  *******************************************************************************/
+using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.DataValidation;
+using OfficeOpenXml.Drawing.Sparkline;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using OfficeOpenXml.Style;
+using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Table;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
 using System.Data;
-using System.Threading;
-using OfficeOpenXml.FormulaParsing;
-using OfficeOpenXml.Style;
-using System.Xml;
 using System.Drawing;
 using System.Globalization;
-using System.Collections;
-using OfficeOpenXml.Table;
-using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
-using OfficeOpenXml.DataValidation;
-using OfficeOpenXml.DataValidation.Contracts;
 using System.Reflection;
-using OfficeOpenXml.Style.XmlAccess;
-using System.Security;
-using OfficeOpenXml.ConditionalFormatting;
-using OfficeOpenXml.ConditionalFormatting.Contracts;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
-using wm = System.Windows.Media;
-using w = System.Windows;
-using OfficeOpenXml.Drawing.Sparkline;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Xml;
 
 namespace OfficeOpenXml
-{	
+{
     /// <summary>
-	/// A range of cells 
-	/// </summary>
-	public class ExcelRangeBase : ExcelAddress, IExcelCell, IDisposable, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
+    /// A range of cells 
+    /// </summary>
+    public class ExcelRangeBase : ExcelAddress, IExcelCell, IDisposable, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
 	{
 		/// <summary>
 		/// Reference to the worksheet
@@ -2548,8 +2542,7 @@ namespace OfficeOpenXml
                         if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
                             newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
                         var newHostCell = UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-                        var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula) };
-                        newSparkline.SetHostCell(new ExcelAddress(newHostCell));
+                        var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };
                         newSparklines.Add(newSparkline);
                     }
                 }
