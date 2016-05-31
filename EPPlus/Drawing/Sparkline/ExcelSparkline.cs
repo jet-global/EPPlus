@@ -4,7 +4,7 @@
  * EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
  * See http://www.codeplex.com/EPPlus for details.
  *
- * Copyright (C) 2011  Jan Källman
+ * ExcelSparkline.cs Copyright (C) 2016 Matt Delaney.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,12 +26,10 @@
  * 
  * Author					Change						                Date
  * ******************************************************************************
- * emdelaney		        Sparklines                                2016-05-20
+ * Matt Delaney		        Sparklines                                2016-05-20
  *******************************************************************************/
- using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+using System;
 using System.Xml;
 
 namespace OfficeOpenXml.Drawing.Sparkline
@@ -41,24 +39,36 @@ namespace OfficeOpenXml.Drawing.Sparkline
     /// </summary> 
     public class ExcelSparkline : XmlHelper
     {
+        #region Properties
         /// <summary>
-        ///  Optional, "F" argument.
+        ///  Optional, gets or sets a value that corresponds to the XSD Schema's "F" argument.
         /// </summary>
         public ExcelAddress Formula { get; set; }
-        /// <summary>
-        /// Required, "SqRef" argument.
-        /// </summary>
-        public ExcelAddress HostCell { get; private set; }
 
         /// <summary>
-        /// The ExcelSparklineGroup this Sparkline belongs to.
+        /// Required, gets or sets a value that corresponds to the XSD Schema's "SqRef" argument.
+        /// </summary>
+        public ExcelAddress HostCell { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="ExcelSparklineGroup"/> this <see cref="ExcelSparkline"/> belongs to.
         /// </summary>
         public ExcelSparklineGroup Group { get; private set; }
-
+        #endregion
 
         #region XmlHelper Overrides
+        /// <summary>
+        /// Create a new <see cref="ExcelSparkline"/> from an existing XML Node.
+        /// </summary>
+        /// <param name="group">The <see cref="ExcelSparklineGroup"/> this line will belong to.</param>
+        /// <param name="nameSpaceManager">The Namespace Manager for the object.</param>
+        /// <param name="topNode">The x14:Sparkline node containing information about the sparkline.</param>
         public ExcelSparkline(ExcelSparklineGroup group, XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
         {
+            if (group == null)
+                throw new ArgumentNullException(nameof(group));
+            if (topNode == null)
+                throw new ArgumentNullException(nameof(topNode));
             this.Group = group;
             var formulaNode = topNode.SelectSingleNode("xm:f", nameSpaceManager);
             var hostNode = topNode.SelectSingleNode("xm:sqref", nameSpaceManager);
@@ -67,16 +77,17 @@ namespace OfficeOpenXml.Drawing.Sparkline
             group.Worksheet.Cells[HostCell.Address].Sparklines.Add(this);
         }
 
+        /// <summary>
+        /// Create a new <see cref="ExcelSparkline"/> from scratch (Without using an existing XML Node).
+        /// </summary>
+        /// <param name="group">The <see cref="ExcelSparklineGroup"/> that this line will belong to.</param>
+        /// <param name="nameSpaceManager">The namespace manager for the object.</param>
         public ExcelSparkline(ExcelSparklineGroup group, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
         {
+            if (group == null)
+                throw new ArgumentNullException(nameof(group));
             this.Group = group;
         }
         #endregion
-
-        public void SetHostCell(ExcelAddress host)
-        {
-            this.HostCell = Group.Worksheet.Cells[host.Address];
-            Group.Worksheet.Cells[HostCell.Address].Sparklines.Add(this);
-        }
     }
 }

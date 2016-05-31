@@ -4,7 +4,7 @@
  * EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
  * See http://www.codeplex.com/EPPlus for details.
  *
- * Copyright (C) 2011  Jan Källman
+ * ExcelSparklineGroups.cs Copyright (C) 2016 Matt Delaney.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,9 +26,10 @@
  * 
  * Author					Change						                Date
  * ******************************************************************************
- * emdelaney		        Sparklines                                2016-05-20
+ * Matt Delaney		        Sparklines                                2016-05-20
  *******************************************************************************/
- using System;
+
+using System;
 using System.Collections.Generic;
 using System.Xml;
 
@@ -42,10 +43,16 @@ namespace OfficeOpenXml.Drawing.Sparkline
         #region Properties
         private ExcelWorksheet Worksheet;
 
+        /// <summary>
+        /// Gets the <see cref="ExcelSparklineGroup"/>s that exist in this <see cref="ExcelSparklineGroups"/> node.
+        /// </summary>
         public List<ExcelSparklineGroup> SparklineGroups { get; } = new List<ExcelSparklineGroup>();
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Save Sparkline Groups to an existing TopNode.
+        /// </summary>
         public void Save()
         {
             if (this.SparklineGroups.Count == 0 || this.SparklineGroups[0].Sparklines.Count == 0)
@@ -59,12 +66,20 @@ namespace OfficeOpenXml.Drawing.Sparkline
             else
             {
                 foreach (var group in this.SparklineGroups)
+                {
                     group.Save();
+                }
             }
         }
         #endregion
 
         #region XmlHelper Overrides
+        /// <summary>
+        /// Creates a new <see cref="ExcelSparklineGroups"/> based on the specified <see cref="XmlNode"/>.
+        /// </summary>
+        /// <param name="worksheet">The <see cref="ExcelWorksheet"/> the <see cref="ExcelSparklineGroups"/> node is defined on.</param>
+        /// <param name="nameSpaceManager">The namespace manager for the object.</param>
+        /// <param name="topNode">the x14:sparklineGroups node that defines the <see cref="ExcelSparklineGroups"/>.</param>
         public ExcelSparklineGroups(ExcelWorksheet worksheet, XmlNamespaceManager nameSpaceManager, XmlNode topNode): base(nameSpaceManager, topNode)
         {
             this.Worksheet = worksheet;
@@ -74,6 +89,11 @@ namespace OfficeOpenXml.Drawing.Sparkline
             }
         }
 
+        /// <summary>
+        /// Create a new <see cref="ExcelSparklineGroups"/>.
+        /// </summary>
+        /// <param name="worksheet">The worksheet the sparkline groups exist on.</param>
+        /// <param name="nameSpaceManager">The namespace manager for the object.</param>
         public ExcelSparklineGroups(ExcelWorksheet worksheet, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
         {
             this.Worksheet = worksheet;
