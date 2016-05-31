@@ -2474,9 +2474,6 @@ namespace OfficeOpenXml
                     }
                 }
             }
-
-            Destination._worksheet.MergedCells.Clear(new ExcelAddressBase(Destination._fromRow, Destination._fromCol, Destination._fromRow+toRow-1, Destination._fromCol+toCol-1));
-
             Destination._worksheet._values.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
             Destination._worksheet._formulas.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
             //Destination._worksheet._styles.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
