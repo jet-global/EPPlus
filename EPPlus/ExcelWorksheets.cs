@@ -344,8 +344,7 @@ namespace OfficeOpenXml
                 group.Sparklines.Clear();
                 foreach(var originalSparkline in Copy.SparklineGroups.SparklineGroups[i].Sparklines)
                 {
-                    var sparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(originalSparkline.Formula.Address) };
-                    sparkline.SetHostCell(new ExcelAddress(originalSparkline.HostCell.Address));
+                    var sparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(originalSparkline.Formula.Address), HostCell = new ExcelAddress(originalSparkline.HostCell.Address) };
                     sparkline.Formula.ChangeWorksheet(Copy.Name, added.Name);
                     group.Sparklines.Add(sparkline);
                 }

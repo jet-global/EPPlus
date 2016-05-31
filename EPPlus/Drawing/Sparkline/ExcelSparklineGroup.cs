@@ -4,7 +4,7 @@
  * EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
  * See http://www.codeplex.com/EPPlus for details.
  *
- * Copyright (C) 2011  Jan Källman
+ * ExcelSparklineGroup.cs Copyright (C) 2016 Matt Delaney.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,13 +26,14 @@
  * 
  * Author					Change						                Date
  * ******************************************************************************
- * emdelaney		        Sparklines                                2016-05-20
+ * Matt Delaney		        Sparklines                                2016-05-20
  *******************************************************************************/
+
 using OfficeOpenXml.ConditionalFormatting;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Xml;
-using System;
 
 namespace OfficeOpenXml.Drawing.Sparkline
 {
@@ -43,45 +44,145 @@ namespace OfficeOpenXml.Drawing.Sparkline
     {
         #region Properties
         #region Subnodes
+        /// <summary>
+        /// Gets or sets the series color of the sparkline.
+        /// </summary>
         public Color ColorSeries { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color of negative values in this group's sparklines.
+        /// </summary>
         public Color ColorNegative { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color of the axes in sparklines that belong to this group.
+        /// </summary>
         public Color ColorAxis { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color of the markers for sparklines in this group.
+        /// </summary>
         public Color ColorMarkers { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color of the first value in each sparkline in this group.
+        /// </summary>
         public Color ColorFirst { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color of the last value in each sparkline in this group.
+        /// </summary>
         public Color ColorLast { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color of the highest value in each sparkline in this group.
+        /// </summary>
         public Color ColorHigh { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color of the lowest value in each sparkline in this group.
+        /// </summary>
         public Color ColorLow { get; set; }
 
         /// <summary>
         /// This collection must exist and must have at least one sparkline.
         /// </summary>
         public List<ExcelSparkline> Sparklines { get; private set; } = new List<ExcelSparkline>();
-
-
         #endregion
 
         #region Attributes
+        /// <summary>
+        /// Gets or sets the maximum axis value. Optional.
+        /// </summary>
         public double? ManualMax { get; set; }
-        public double? ManualMin { get; set; }
-        public double? LineWeight { get; set; } // defaults to 0.75, may not be necessary
-        public SparklineType? Type { get; set; } = SparklineType.Line;
-        public bool DateAxis { get; set; }
-        public DispBlanksAs? DisplayEmptyCellsAs { get; set; } = DispBlanksAs.Zero;
-        public bool Markers { get; set; }
-        public bool High { get; set; }
-        public bool Low { get; set; }
-        public bool First { get; set; }
-        public bool Last { get; set; }
-        public bool Negative { get; set; }
-        public bool DisplayXAxis { get; set; }
-        //public bool DisplayYAxis { get; set; }
-        public bool DisplayHidden { get; set; }
-        public SparklineAxisMinMax MinAxisType { get; set; } = SparklineAxisMinMax.Individual;
-        public SparklineAxisMinMax MaxAxisType { get; set; } = SparklineAxisMinMax.Individual;
-        public bool RightToLeft { get; set; }
 
-        public ExcelWorksheet Worksheet { get; internal set; }
+        /// <summary>
+        /// Gets or sets the minimum axis value. Optional.
+        /// </summary>
+        public double? ManualMin { get; set; }
+
+        /// <summary>
+        /// Gets or sets the line weight of the sparklines. Defaults to 0.75. Optional.
+        /// </summary>
+        public double? LineWeight { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="SparklineType"/> of the sparklines in the group. 
+        /// Defaults to <see cref="SparklineType.Line"/>.
+        /// </summary>
+        public SparklineType? Type { get; set; } = SparklineType.Line;
+
+        /// <summary>
+        /// Gets or sets a value indicating if the axis represents a date.
+        /// </summary>
+        public bool DateAxis { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating how blank cells should be displayed.
+        /// Defaults to <see cref="DispBlanksAs.Zero"/>.
+        /// </summary>
+        public DispBlanksAs? DisplayEmptyCellsAs { get; set; } = DispBlanksAs.Zero;
+
+        /// <summary>
+        /// Gets or sets a value indicating if value markers should be displayed.
+        /// </summary>
+        public bool Markers { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that represents if the highest value in a sparkline should be indicated.
+        /// </summary>
+        public bool High { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that represents if the lowest value in a sparkline should be indicated.
+        /// </summary>
+        public bool Low { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that represents if the first value in a sparkline should be highlighted.
+        /// </summary>
+        public bool First { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that represents if the last value in a sparkline should be highlighted.
+        /// </summary>
+        public bool Last { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that indicates if negative values should be recolored.
+        /// </summary>
+        public bool Negative { get; set; }
+
+        /// <summary>
+        ///  Gets or sets a value that indicates if the X Axis should be displayed.
+        /// </summary>
+        public bool DisplayXAxis { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating if hidden cells in the range should be included in the sparkline.
+        /// </summary>
+        public bool DisplayHidden { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value specifying the minimum axis grouping type <see cref="SparklineAxisMinMax"/>.
+        /// </summary>
+        public SparklineAxisMinMax MinAxisType { get; set; } = SparklineAxisMinMax.Individual;
+
+        /// <summary>
+        /// Gets or sets a value specifying the maximum axis grouping type <see cref="SparklineAxisMinMax"/>.
+        /// </summary>
+        public SparklineAxisMinMax MaxAxisType { get; set; } = SparklineAxisMinMax.Individual;
+
+        /// <summary>
+        /// Gets or sets if the values should be graphed right-to-left.
+        /// </summary>
+        public bool RightToLeft { get; set; }
         #endregion
+
+        /// <summary>
+        /// Gets or sets the <see cref="ExcelWorksheet"/> that this group of sparklines lives on.
+        /// </summary>
+        public ExcelWorksheet Worksheet { get; internal set; }
         #endregion
 
         #region Public Methods
@@ -142,10 +243,11 @@ namespace OfficeOpenXml.Drawing.Sparkline
             {
                 ExcelSparklineGroup.SetAttribute(node, "rgb", ExcelSparklineGroup.XmlColor(color));
             }
-            else
+            else if (node.Attributes.Count == 0)
             {
                 this.TopNode.RemoveChild(node);
             }
+            // Else: the node has an unsupported color definition (such as a theme) and should be left alone.
         }
 
         private static string XmlColor(Color color)
@@ -302,37 +404,64 @@ namespace OfficeOpenXml.Drawing.Sparkline
             else
                 return "line";
         }
+
+        private Color GetColorFromColorNode(XmlNode node)
+        {
+            // At the moment, only RGB color codes are supported. 
+            // However, other color definition types are possible, such as themes as outlined in the 
+            // ExcelDxfColor class.
+            if (node == null)
+                return Color.Empty;
+            var attribute = node.Attributes.GetNamedItem("rgb");
+            if (attribute == null)
+                return Color.Empty;
+            var parsed = ExcelConditionalFormattingHelper.ConvertFromColorCode(attribute.InnerText);
+            if (Color.White.Equals(parsed))
+                return Color.Empty;
+            else
+                return parsed;
+        }
         #endregion
 
         #region XmlHelper Overrides
+        /// <summary>
+        /// Creates a new <see cref="ExcelSparklineGroup"/> based on the specified <see cref="XmlNode"/>.
+        /// </summary>
+        /// <param name="worksheet">The <see cref="ExcelWorksheet"/> the <see cref="ExcelSparklineGroup"/> is defined on.</param>
+        /// <param name="nameSpaceManager">The namespace manager for the object.</param>
+        /// <param name="topNode">the x14:sparklineGroup node that defines the <see cref="ExcelSparklineGroup"/>.</param>
         public ExcelSparklineGroup(ExcelWorksheet worksheet, XmlNamespaceManager nameSpaceManager, XmlNode topNode) : base(nameSpaceManager, topNode)
         {
+            if (worksheet == null)
+                throw new ArgumentNullException(nameof(worksheet));
+            if (topNode == null)
+                throw new ArgumentNullException(nameof(topNode));
             this.Worksheet = worksheet;
-            // Parse the interesting nodes.
+            // Parse the color nodes.
             var node = TopNode.SelectSingleNode("x14:colorSeries", nameSpaceManager);
             if (node != null)
-                this.ColorSeries = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+                this.ColorSeries = this.GetColorFromColorNode(node);
             node = TopNode.SelectSingleNode("x14:colorNegative", nameSpaceManager);
             if (node != null)
-                this.ColorNegative = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+                this.ColorNegative = this.GetColorFromColorNode(node);
             node = TopNode.SelectSingleNode("x14:colorAxis", nameSpaceManager);
             if (node != null)
-                this.ColorAxis = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+                this.ColorAxis = this.GetColorFromColorNode(node);
             node = TopNode.SelectSingleNode("x14:colorMarkers", nameSpaceManager);
             if (node != null)
-                this.ColorMarkers = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+                this.ColorMarkers = this.GetColorFromColorNode(node);
             node = TopNode.SelectSingleNode("x14:colorFirst", nameSpaceManager);
             if (node != null)
-                this.ColorFirst = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+                this.ColorFirst = this.GetColorFromColorNode(node);
             node = TopNode.SelectSingleNode("x14:colorLast", nameSpaceManager);
             if (node != null)
-                this.ColorLast = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+                this.ColorLast = this.GetColorFromColorNode(node);
             node = TopNode.SelectSingleNode("x14:colorHigh", nameSpaceManager);
             if (node != null)
-                this.ColorHigh = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+                this.ColorHigh = this.GetColorFromColorNode(node);
             node = TopNode.SelectSingleNode("x14:colorLow", nameSpaceManager);
             if (node != null)
-                this.ColorLow = ExcelConditionalFormattingHelper.ConvertFromColorCode(node.Attributes["rgb"].InnerText);
+                this.ColorLow = this.GetColorFromColorNode(node);
             // Parse the attributes.
             var attribute = topNode.Attributes["type"];
             if (attribute != null)
@@ -344,14 +473,13 @@ namespace OfficeOpenXml.Drawing.Sparkline
             this.ManualMin = GetAttributeDouble(topNode, "manualMin");
             this.ManualMax = GetAttributeDouble(topNode, "manualMax");
             this.LineWeight = GetAttributeDouble(topNode, "lineWeight");
-            this.DateAxis = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "dateAxis"); // DateAxis
+            this.DateAxis = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "dateAxis");
             this.Markers = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "markers");
             this.High = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "high");
             this.Low = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "low");
             this.First = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "first");
             this.Last = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "last");
             this.DisplayXAxis = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "displayXAxis");
-            //this.DisplayYAxis = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "displayYAxis");
             this.DisplayHidden = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "displayHidden");
             attribute = topNode.Attributes["minAxisType"];
             if (attribute != null)
@@ -366,9 +494,14 @@ namespace OfficeOpenXml.Drawing.Sparkline
                 this.Sparklines.Add(new ExcelSparkline(this, nameSpaceManager, (XmlNode)sparklineNode));
         }
 
+        /// <summary>
+        /// Creating new <see cref="ExcelSparklineGroup"/>s from scratch is not implemented.
+        /// </summary>
+        /// <param name="worksheet">The worksheet to add the <see cref="ExcelSparklineGroup"/> to.</param>
+        /// <param name="nameSpaceManager">The namespace manager for the <see cref="ExcelSparklineGroup"/>.</param>
         public ExcelSparklineGroup(ExcelWorksheet worksheet, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
         {
-            this.Worksheet = worksheet;
+            throw new NotImplementedException();
         }
         #endregion
     }
