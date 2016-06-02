@@ -891,7 +891,8 @@ namespace OfficeOpenXml
                     fontCache.Add(fntID, f);
 				}
                 var ind = styles.CellXfs[cell.StyleID].Indent;
-                var t = cell.TextForWidth + (ind > 0 ? new string('_',ind*2) : "");
+                var textForWidth = cell.TextForWidth;
+                var t = textForWidth + (ind > 0 && !string.IsNullOrEmpty(textForWidth) ? new string('_',ind*2) : "");
                 var size = g.MeasureString(t, f, 10000, StringFormat.GenericDefault);
 
                 //var ft = new wm.FormattedText(t, CultureInfo.CurrentCulture, w.FlowDirection.LeftToRight,
@@ -2548,12 +2549,29 @@ namespace OfficeOpenXml
                 }
                 group.Sparklines.AddRange(newSparklines);
             }
+            if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns)
+            {
+                for (int r = 0; r < this.Rows; r++)
+                {
+                    var destinationRow = Destination.Worksheet.Row(Destination.Start.Row + r);
+                    destinationRow.OutlineLevel = this.Worksheet.Row(_fromRow + r).OutlineLevel;
+                }
+            }
+            if (_fromRow == 1 && _toRow == ExcelPackage.MaxRows)
+            {
+                for (int c = 0; c < this.Columns; c++)
+                {
+                    var destinationCol = Destination.Worksheet.Column(Destination.Start.Column + c);
+                    destinationCol.OutlineLevel = this.Worksheet.Column(_fromCol + c).OutlineLevel;
+                }
+            }
+
         }
 
-		/// <summary>
-		/// Clear all cells
-		/// </summary>
-		public void Clear()
+        /// <summary>
+        /// Clear all cells
+        /// </summary>
+        public void Clear()
 		{
 			Delete(this, false);
 		}
