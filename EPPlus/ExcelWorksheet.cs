@@ -1961,6 +1961,11 @@ namespace OfficeOpenXml
                             SetStyleInner(rowFrom + r, cseS.Column, cseS.Value._styleId);
                         }
                     }
+                    var newOutlineLevel = this.Row(copyStylesFromRow + rows).OutlineLevel;
+                    for (var r = 0; r < rows; r++)
+                    {
+                        this.Row(rowFrom + r).OutlineLevel = newOutlineLevel;
+                    }
                 }
                 this.UpdateSparkLineReferences(rows, rowFrom, 0, 0);
                 foreach (var tbl in Tables)
@@ -2126,7 +2131,12 @@ namespace OfficeOpenXml
                                 SetStyleInner(sc[0], columnFrom + c, sc[1]);
                             }
                         }                        
-                    }                    
+                    }
+                    var newOutlineLevel = this.Column(copyStylesFromColumn).OutlineLevel;
+                    for (var c = 0; c < columns; c++)
+                    {
+                        this.Column(columnFrom + c).OutlineLevel = newOutlineLevel;
+                    }
                 }
                 this.UpdateSparkLineReferences(0, 0, columns, columnFrom);
                 //Adjust tables
@@ -3297,15 +3307,15 @@ namespace OfficeOpenXml
                             throw(new InvalidDataException(string.Format("Table {0} Column {1} does not have a unique name.", tbl.Name, col.Name)));
                         }                        
                         colVal.Add(n);
-                        col.Name = ConvertUtil.ExcelEncodeString(col.Name);
-                        if (tbl.ShowHeader)
-                        {
-                            SetValueInner(tbl.Address._fromRow, colNum, col.Name);
-                        }
-                        if (tbl.ShowTotal)
-                        {
-                            SetTableTotalFunction(tbl, col, colNum);
-                        }
+                        //col.Name = ConvertUtil.ExcelEncodeString(col.Name);
+                        //if (tbl.ShowHeader)
+                        //{
+                        //    SetValueInner(tbl.Address._fromRow, colNum, col.Name);
+                        //}
+                        //if (tbl.ShowTotal)
+                        //{
+                        //    SetTableTotalFunction(tbl, col, colNum);
+                        //}
                         if (!string.IsNullOrEmpty(col.CalculatedColumnFormula))
                         {
                             int fromRow = tbl.ShowHeader ? tbl.Address._fromRow + 1 : tbl.Address._fromRow;
@@ -3321,7 +3331,9 @@ namespace OfficeOpenXml
                 }                
                 if (tbl.Part == null)
                 {
-                    tbl.TableUri = GetNewUri(_package.Package, @"/xl/tables/table{0}.xml", tbl.Id);
+                    var id = tbl.Id;
+                    tbl.TableUri = GetNewUri(_package.Package, @"/xl/tables/table{0}.xml", ref id);
+                    tbl.Id = id;
                     tbl.Part = _package.Package.CreatePart(tbl.TableUri, "application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml", Workbook._package.Compression);
                     var stream = tbl.Part.GetStream(FileMode.Create);
                     tbl.TableXml.Save(stream);
