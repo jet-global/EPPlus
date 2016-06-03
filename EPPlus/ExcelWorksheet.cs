@@ -2209,7 +2209,9 @@ namespace OfficeOpenXml
             string workbook, worksheet, address;
             foreach (ExcelNamedRange range in this.Workbook.Names)
             {
-                if (string.Empty != range.Address)
+                // Named ranges that have an address defined by its name as opposed to a cell reference
+                // should not be updated (e.g. a named range created by a slicer).
+                if (range.Address != string.Empty && range.Address != range.Name)
                 {
                     ExcelRangeBase.SplitAddress(range.Address, out workbook, out worksheet, out address);
                     string newAddress = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
