@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.FormulaParsing;
 using Rhino.Mocks;
 
@@ -29,6 +25,21 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
         public void IIfShouldReturnCorrectResultWhenInnerFunctionExists()
         {
             var result = _parser.Parse("If(NOT(Or(true, FALSE)), 1, 2)");
+            Assert.AreEqual(2d, result);
+        }
+
+        [TestMethod]
+        public void IIfShouldReturnCorrectResultWhenTrueConditionIsCoercedFromAString()
+        {
+            var result = _parser.Parse(@"If(""true"", 1, 2)");
+            Assert.AreEqual(1d, result);
+        }
+
+        [TestMethod]
+
+        public void IIfShouldReturnCorrectResultWhenFalseConditionIsCoercedFromAString()
+        {
+            var result = _parser.Parse(@"If(""false"", 1, 2)");
             Assert.AreEqual(2d, result);
         }
 
