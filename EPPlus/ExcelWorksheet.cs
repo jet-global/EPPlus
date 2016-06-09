@@ -3244,15 +3244,15 @@ namespace OfficeOpenXml
                         parentNode.AppendChild(fieldNode);
                     }
                 }
-                var ws = Workbook.Worksheets[pt.CacheDefinition.SourceRange.WorkSheet];
-                var t = ws.Tables.GetFromRange(pt.CacheDefinition.SourceRange);
                 var fields =
                     pt.CacheDefinition.CacheDefinitionXml.SelectNodes(
                         "d:pivotCacheDefinition/d:cacheFields/d:cacheField", NameSpaceManager);
                 int ix = 0;
-                if (fields != null)
+                if (fields != null && pt.CacheDefinition.SourceRange != null)
                 {
                     var flds = new HashSet<string>();
+                    var ws = Workbook.Worksheets[pt.CacheDefinition.SourceRange.WorkSheet];
+                    var t = ws.Tables.GetFromRange(pt.CacheDefinition.SourceRange);
                     foreach (XmlElement node in fields)
                     {
                         if (ix >= pt.CacheDefinition.SourceRange.Columns) break;
