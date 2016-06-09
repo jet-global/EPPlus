@@ -30,39 +30,34 @@
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  * Eyal Seagull		    Conditional Formatting      2012-04-03
  *******************************************************************************/
+using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.DataValidation;
+using OfficeOpenXml.Drawing.Sparkline;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using OfficeOpenXml.Style;
+using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Table;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
 using System.Data;
-using System.Threading;
-using OfficeOpenXml.FormulaParsing;
-using OfficeOpenXml.Style;
-using System.Xml;
 using System.Drawing;
 using System.Globalization;
-using System.Collections;
-using OfficeOpenXml.Table;
-using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
-using OfficeOpenXml.DataValidation;
-using OfficeOpenXml.DataValidation.Contracts;
 using System.Reflection;
-using OfficeOpenXml.Style.XmlAccess;
-using System.Security;
-using OfficeOpenXml.ConditionalFormatting;
-using OfficeOpenXml.ConditionalFormatting.Contracts;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
-using wm=System.Windows.Media;
-using w=System.Windows;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Xml;
 
 namespace OfficeOpenXml
-{	
+{
     /// <summary>
-	/// A range of cells 
-	/// </summary>
-	public class ExcelRangeBase : ExcelAddress, IExcelCell, IDisposable, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
+    /// A range of cells 
+    /// </summary>
+    public class ExcelRangeBase : ExcelAddress, IExcelCell, IDisposable, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
 	{
 		/// <summary>
 		/// Reference to the worksheet
@@ -1434,6 +1429,8 @@ namespace OfficeOpenXml
                 return fullAddress;
             }
         }
+
+        internal List<ExcelSparkline> Sparklines { get; } = new List<ExcelSparkline>();
 		#endregion
 		#region Private Methods
 		/// <summary>
@@ -2331,7 +2328,6 @@ namespace OfficeOpenXml
             ExcelStyles sourceStyles = _worksheet.Workbook.Styles,
                         styles = Destination._worksheet.Workbook.Styles;
             Dictionary<int, int> styleCashe = new Dictionary<int, int>();
-
             //Clear all existing cells; 
             int toRow = _toRow - _fromRow + 1,
                 toCol = _toCol - _fromCol + 1;
@@ -2407,11 +2403,9 @@ namespace OfficeOpenXml
                     //Destination._worksheet._hyperLinks.SetValue(row, col, hl);
                     cell.HyperLink=hl;
                 }
-
-                if(_worksheet._commentsStore.Exists(row, col, ref comment))
-                {
-                    cell.Comment=comment;
-                }
+                
+                // Will just be null if no comment exists.
+                cell.Comment = _worksheet.Cells[cse.Row, cse.Column].Comment;
 
                 if (_worksheet._flags.Exists(row, col, ref flag))
                 {
@@ -2481,9 +2475,6 @@ namespace OfficeOpenXml
                     }
                 }
             }
-
-            Destination._worksheet.MergedCells.Clear(new ExcelAddressBase(Destination._fromRow, Destination._fromCol, Destination._fromRow+toRow-1, Destination._fromCol+toCol-1));
-
             Destination._worksheet._values.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
             Destination._worksheet._formulas.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
             //Destination._worksheet._styles.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
@@ -2508,7 +2499,7 @@ namespace OfficeOpenXml
 
                 if(cell.Formula!=null)
                 {
-                    cell.Formula = UpdateFormulaReferences(cell.Formula.ToString(), Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, true);
+                    cell.Formula = UpdateFormulaReferences(cell.Formula.ToString(), Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, Destination.WorkSheet, Destination.WorkSheet, true);
                     Destination._worksheet._formulas.SetValue(cell.Row, cell.Column, cell.Formula);
                 }
                 if(cell.HyperLink!=null)
@@ -2518,7 +2509,7 @@ namespace OfficeOpenXml
 
                 if (cell.Comment != null)
                 {
-                    //Destination._worksheet._commentsStore.SetValue(cell.Row, cell.Column, cell.Comment);
+                    Destination.Worksheet.Cells[cell.Row, cell.Column].AddComment(cell.Comment.Text, cell.Comment.Author);
                 }
                 if (cell.Flag != 0)
                 {
@@ -2534,12 +2525,50 @@ namespace OfficeOpenXml
                     Destination._worksheet.MergedCells.Add(m, true);
                 }
             }
+            int rowOffset = Destination._fromRow;
+            string workbook, worksheet, address;
+            List<ExcelSparkline> newSparklines = new List<ExcelSparkline>();
+            foreach (var group in this.Worksheet.SparklineGroups.SparklineGroups)
+            {
+                newSparklines.Clear();
+                foreach (var sparkline in group.Sparklines)
+                {
+                    if(sparkline.HostCell.Collide(this) != eAddressCollition.No)
+                    {
+                        ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+                        var newFormula = UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+                        if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
+                            newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
+                        var newHostCell = UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+                        var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };
+                        newSparklines.Add(newSparkline);
+                    }
+                }
+                group.Sparklines.AddRange(newSparklines);
+            }
+            if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns)
+            {
+                for (int r = 0; r < this.Rows; r++)
+                {
+                    var destinationRow = Destination.Worksheet.Row(Destination.Start.Row + r);
+                    destinationRow.OutlineLevel = this.Worksheet.Row(_fromRow + r).OutlineLevel;
+                }
+            }
+            if (_fromRow == 1 && _toRow == ExcelPackage.MaxRows)
+            {
+                for (int c = 0; c < this.Columns; c++)
+                {
+                    var destinationCol = Destination.Worksheet.Column(Destination.Start.Column + c);
+                    destinationCol.OutlineLevel = this.Worksheet.Column(_fromCol + c).OutlineLevel;
+                }
+            }
+
         }
 
-		/// <summary>
-		/// Clear all cells
-		/// </summary>
-		public void Clear()
+        /// <summary>
+        /// Clear all cells
+        /// </summary>
+        public void Clear()
 		{
 			Delete(this, false);
 		}
