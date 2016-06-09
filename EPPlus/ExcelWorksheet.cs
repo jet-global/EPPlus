@@ -1972,10 +1972,13 @@ namespace OfficeOpenXml
                 {
                     tbl.Address = tbl.Address.AddRow(rowFrom, rows);
                 }
+                foreach (var pivotTable in PivotTables)
+                {
+                    pivotTable.Address = pivotTable.Address.AddRow(rowFrom, rows);
+                }
                 this.UpdateCharts(rows, 0, rowFrom, 0);
                 this.UpdateNamedRanges(rows, 0, rowFrom, 0);
             }
-
             // Update cross-sheet references.
             foreach(var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
             {
@@ -2095,7 +2098,6 @@ namespace OfficeOpenXml
                     }                    
                 }
 
-
                 //Copy style from another column?
                 if (copyStylesFromColumn > 0)
                 {
@@ -2148,6 +2150,10 @@ namespace OfficeOpenXml
                     }
 
                     tbl.Address = tbl.Address.AddColumn(columnFrom, columns);
+                }
+                foreach (var pivotTable in PivotTables)
+                {
+                    pivotTable.Address = pivotTable.Address.AddColumn(columnFrom, columns);
                 }
                 this.UpdateCharts(0, columns, 0, columnFrom);
                 this.UpdateNamedRanges(0, columns, 0, columnFrom);
@@ -3128,69 +3134,6 @@ namespace OfficeOpenXml
                     SaveXml(stream);
         }
 
-        
-
-        ///// <summary>
-        ///// Saves the worksheet to the package.
-        ///// </summary>
-        //internal void Save()  // Worksheet Save
-        //{
-        //    DeletePrinterSettings();
-
-        //    if (_worksheetXml != null)
-        //    {
-                
-        //        // save the header & footer (if defined)
-        //        if (_headerFooter != null)
-        //            HeaderFooter.Save();
-
-        //        var d = Dimension;
-        //        if (d == null)
-        //        {
-        //            this.DeleteAllNode("d:dimension/@ref");
-        //        }
-        //        else
-        //        {
-        //            this.SetXmlNodeString("d:dimension/@ref", d.Address);
-        //        }
-                
-
-        //        if (_drawings != null && _drawings.Count == 0)
-        //        {
-        //            //Remove node if no drawings exists.
-        //            DeleteNode("d:drawing");
-        //        }
-
-        //        SaveComments();
-        //        HeaderFooter.SaveHeaderFooterImages();
-        //        SaveTables();
-        //        SavePivotTables();
-        //        SaveXml();
-        //    }
-            
-        //    if (Drawings.UriDrawing!=null)
-        //    {
-        //        if (Drawings.Count == 0)
-        //        {                    
-        //            Part.DeleteRelationship(Drawings._drawingRelation.Id);
-        //            _package.Package.DeletePart(Drawings.UriDrawing);                    
-        //        }
-        //        else
-        //        {
-        //            Packaging.ZipPackagePart partPack = Drawings.Part;
-        //            Drawings.DrawingXml.Save(partPack.GetStream(FileMode.Create, FileAccess.Write));
-        //            foreach (ExcelDrawing d in Drawings)
-        //            {
-        //                if (d is ExcelChart)
-        //                {
-        //                    ExcelChart c = (ExcelChart)d;
-        //                    c.ChartXml.Save(c.Part.GetStream(FileMode.Create, FileAccess.Write));
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
         /// <summary>
         /// Delete the printersettings relationship and part.
         /// </summary>
@@ -3423,17 +3366,18 @@ namespace OfficeOpenXml
         //    SetStyleInner(row, col, value);
         //    if(!_values.Exists(row,col)) SetValueInner(row, col, null);
         //}
-        
+
         private void SavePivotTables()
         {
             foreach (var pt in PivotTables)
             {
+                pt.SetXmlNodeString("d:location/@ref", pt.Address.FirstAddress);
                 if (pt.DataFields.Count > 1)
                 {
                     XmlElement parentNode;
-                    if(pt.DataOnRows==true)
+                    if (pt.DataOnRows == true)
                     {
-                        parentNode =  pt.PivotTableXml.SelectSingleNode("//d:rowFields", pt.NameSpaceManager) as XmlElement;
+                        parentNode = pt.PivotTableXml.SelectSingleNode("//d:rowFields", pt.NameSpaceManager) as XmlElement;
                         if (parentNode == null)
                         {
                             pt.CreateNode("d:rowFields");
@@ -3442,7 +3386,7 @@ namespace OfficeOpenXml
                     }
                     else
                     {
-                        parentNode =  pt.PivotTableXml.SelectSingleNode("//d:colFields", pt.NameSpaceManager) as XmlElement;
+                        parentNode = pt.PivotTableXml.SelectSingleNode("//d:colFields", pt.NameSpaceManager) as XmlElement;
                         if (parentNode == null)
                         {
                             pt.CreateNode("d:colFields");
@@ -3457,15 +3401,15 @@ namespace OfficeOpenXml
                         parentNode.AppendChild(fieldNode);
                     }
                 }
-                var ws = Workbook.Worksheets[pt.CacheDefinition.SourceRange.WorkSheet];
-                var t = ws.Tables.GetFromRange(pt.CacheDefinition.SourceRange);
                 var fields =
-                    pt.CacheDefinition.CacheDefinitionXml.SelectNodes(
-                        "d:pivotCacheDefinition/d:cacheFields/d:cacheField", NameSpaceManager);
+                  pt.CacheDefinition.CacheDefinitionXml.SelectNodes(
+                    "d:pivotCacheDefinition/d:cacheFields/d:cacheField", NameSpaceManager);
                 int ix = 0;
-                if (fields != null)
+                if (fields != null && pt.CacheDefinition.SourceRange != null)
                 {
                     var flds = new HashSet<string>();
+                    var ws = Workbook.Worksheets[pt.CacheDefinition.SourceRange.WorkSheet];
+                    var t = ws.Tables.GetFromRange(pt.CacheDefinition.SourceRange);
                     foreach (XmlElement node in fields)
                     {
                         if (ix >= pt.CacheDefinition.SourceRange.Columns) break;
@@ -3473,11 +3417,11 @@ namespace OfficeOpenXml
                         if (string.IsNullOrEmpty(fldName))
                         {
                             fldName = (t == null
-                                ? pt.CacheDefinition.SourceRange.Offset(0, ix++, 1, 1).Value.ToString()
-                                : t.Columns[ix++].Name);
+                              ? pt.CacheDefinition.SourceRange.Offset(0, ix++, 1, 1).Value.ToString()
+                              : t.Columns[ix++].Name);
                         }
                         if (flds.Contains(fldName))
-                        {                            
+                        {
                             fldName = GetNewName(flds, fldName);
                         }
                         flds.Add(fldName);
