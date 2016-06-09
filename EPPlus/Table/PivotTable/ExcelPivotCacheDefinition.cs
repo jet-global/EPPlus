@@ -221,7 +221,7 @@ namespace OfficeOpenXml.Table.PivotTable
                     }
                     else
                     {
-                        throw (new ArgumentException("The cachesource is not a worksheet"));
+                        return null;
                     }
                 }
                 return _sourceRange;
