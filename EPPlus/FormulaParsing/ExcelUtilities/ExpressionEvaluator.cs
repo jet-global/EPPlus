@@ -38,8 +38,8 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 {
     public class ExpressionEvaluator
     {
-        private WildCardValueMatcher _wildCardValueMatcher;
-        private CompileResultFactory _compileResultFactory;
+        private readonly WildCardValueMatcher _wildCardValueMatcher;
+        private readonly CompileResultFactory _compileResultFactory;
 
         public ExpressionEvaluator()
             : this(new WildCardValueMatcher(), new CompileResultFactory())
@@ -100,7 +100,7 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
                 return left == null;
             }
             var operatorCandidate = GetNonAlphanumericStartChars(expression);
-            if (!string.IsNullOrEmpty(operatorCandidate))
+            if (!string.IsNullOrEmpty(operatorCandidate) && operatorCandidate != "-")
             {
                 IOperator op;
                 if (OperatorsDict.Instance.TryGetValue(operatorCandidate, out op))

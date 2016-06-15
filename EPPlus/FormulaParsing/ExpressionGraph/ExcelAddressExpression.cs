@@ -99,7 +99,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             if (result == null)
             {
                 return CompileResult.Empty;
-            }          
+            }
             if (this.ResolveAsRange || result.Address.Rows > 1 || result.Address.Columns > 1)
             {
                 return new CompileResult(result, DataType.Enumerable);
