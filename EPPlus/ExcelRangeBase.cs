@@ -2336,7 +2336,6 @@ namespace OfficeOpenXml
             object o = null;
             byte flag=0;
             Uri hl = null;
-            ExcelComment comment=null;
 
             var excludeFormulas = excelRangeCopyOptionFlags.HasValue && (excelRangeCopyOptionFlags.Value & ExcelRangeCopyOptionFlags.ExcludeFormulas) == ExcelRangeCopyOptionFlags.ExcludeFormulas;
             var cse = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
