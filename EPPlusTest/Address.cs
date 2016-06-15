@@ -134,5 +134,32 @@ namespace EPPlusTest
           Assert.IsFalse(ExcelCellBase.IsValidCellAddress("Table1!XFD1:XFD1048576"));
         }
 
+
+        [TestMethod]
+        public void GetWorksheetPart()
+        {
+            string address = "Sheet1!A1";
+            Assert.AreEqual("Sheet1", ExcelAddressBase.GetWorksheetPart(address, "failure"));
+        }
+        [TestMethod]
+        public void GetWorksheetPartFromDefault()
+        {
+            string address = "A1";
+            Assert.AreEqual("Default", ExcelAddressBase.GetWorksheetPart(address, "Default"));
+        }
+
+        [TestMethod]
+        public void SplitAddressCorrectlySplitsWorksheetName()
+        {
+            string worksheetAddress = "'Sheet One'!$B$2:$B$3";
+            string worksheetAddress2 = "Sheet1!$B$2:$B$3";
+            string workbook, worksheet, address;
+            ExcelAddressBase.SplitAddress(worksheetAddress, out workbook, out worksheet, out address);
+            Assert.AreEqual("Sheet One", worksheet);
+            Assert.AreEqual("$B$2:$B$3", address);
+            ExcelAddressBase.SplitAddress(worksheetAddress2, out workbook, out worksheet, out address);
+            Assert.AreEqual("Sheet1", worksheet);
+            Assert.AreEqual("$B$2:$B$3", address);
+        }
     }
 }
