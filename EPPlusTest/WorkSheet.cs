@@ -3106,6 +3106,39 @@ namespace EPPlusTest
         #endregion 
 
         [TestMethod]
+        public void SaveWorksheetDoesNotSetHiddenRowHeightToZero()
+        {
+            var file = new FileInfo(Path.GetTempFileName());
+            if (file.Exists)
+                file.Delete();
+            try {
+                using (var p = new ExcelPackage())
+                {
+                    var sheet = p.Workbook.Worksheets.Add("sheet");
+                    var row = sheet.Row(2);
+                    row.Hidden = true;
+                    Assert.AreNotEqual(0, row.Height);
+                    Assert.AreNotEqual(0, row.CustomHeight);
+                    p.SaveAs(file);
+                }
+                using (var p = new ExcelPackage(file))
+                {
+                    var sheet = p.Workbook.Worksheets["sheet"];
+                    var row = sheet.Row(2);
+                    Assert.IsTrue(row.Hidden);
+                    Assert.AreNotEqual(0, row.Height);
+                    Assert.AreNotEqual(0, row.CustomHeight);
+                }
+            }
+            finally
+            {
+                if (file.Exists)
+                    file.Delete();
+            }
+        }
+
+        
+        [TestMethod]
         public void DateFunctionsWorkWithDifferentCultureDateFormats()
         {
             var currentCulture = CultureInfo.CurrentCulture;

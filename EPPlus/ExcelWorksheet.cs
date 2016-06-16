@@ -3958,7 +3958,7 @@ namespace OfficeOpenXml
 
                 if (currRow.Hidden == true)
                 {
-                    cache.Append(" ht=\"0\" hidden=\"1\"");
+                    cache.Append(" hidden=\"1\"");
                 }
                 else if (currRow.Height != DefaultRowHeight && currRow.Height>=0)
                 {
@@ -4007,7 +4007,7 @@ namespace OfficeOpenXml
                 
                 if (currRow.Hidden == true)
                 {
-                    sw.Write(" ht=\"0\" hidden=\"1\"");
+                    sw.Write(" hidden=\"1\"");
                 }
                 else if (currRow.Height != DefaultRowHeight)
                 {
