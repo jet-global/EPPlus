@@ -792,6 +792,15 @@ namespace OfficeOpenXml.Style.XmlAccess
                 case eStyleProperty.Color:
                     fnt.Color.Rgb=value.ToString();
                     break;
+                case eStyleProperty.Tint:
+                    fnt.Color.Tint = (decimal)value;
+                    break;
+                case eStyleProperty.IndexedColor:
+                    fnt.Color.Indexed = (int)value;
+                    break;
+                case eStyleProperty.AutoColor:
+                    fnt.Color.Auto = (bool)value;
+                    break;
                 case eStyleProperty.VerticalAlign:
                     fnt.VerticalAlign = ((ExcelVerticalAlignmentFont)value) == ExcelVerticalAlignmentFont.None ? "" : value.ToString().ToLower(CultureInfo.InvariantCulture);
                     break;
@@ -818,7 +827,6 @@ namespace OfficeOpenXml.Style.XmlAccess
             if (_numFmtId >= 0)
             {
                 SetXmlNodeString("@numFmtId", _numFmtId.ToString());
-                if(doSetXfId) SetXmlNodeString("@applyNumberFormat", "1");
             }
             if (_fontId >= 0)
             {
