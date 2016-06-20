@@ -225,16 +225,18 @@ namespace OfficeOpenXml
 						}
 						else
 						{
-                            //if (addressType == ExcelAddressBase.AddressType.ExternalAddress || addressType == ExcelAddressBase.AddressType.ExternalName)
-                            //{
-                            //    var r = new ExcelAddress(fullAddress);
-                            //    namedRange.NameFormula = '\'[' + r._wb
-                            //}
-                            //else
-                            //{
+                            if (addressType == ExcelAddressBase.AddressType.ExternalAddress || addressType == ExcelAddressBase.AddressType.ExternalName)
+                            {
+                                var r = new ExcelAddress(fullAddress);
+                                string workbook = r._wb.StartsWith("file:///", StringComparison.InvariantCultureIgnoreCase) ? r._wb.Substring(8) : r._wb;
+                                // External workbook addresses are always fully qualified with a workbook, worksheet, and address.
+                                namedRange.NameFormula = "'[" + workbook + "]" + r.WorkSheet + "'" + r.Address.Substring(r.Address.LastIndexOf('!'));
+                            }
+                            else
+                            {
                                 namedRange.NameFormula = fullAddress;
-                            //}
-						}
+                            }
+                        }
 					}
 					else
 					{
