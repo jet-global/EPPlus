@@ -1011,6 +1011,21 @@ namespace EPPlusTest
         }
 
         [TestMethod]
+        public void ReadExcelLineChart()
+        {
+            var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\LineChartFromExcel.xlsx"));
+            Assert.IsTrue(file.Exists);
+            using (var package = new ExcelPackage(file))
+            {
+                var sheet = package.Workbook.Worksheets[1];
+                var drawing = sheet.Drawings[0] as ExcelLineChart;
+                Assert.IsNotNull(drawing);
+                Assert.AreEqual("Sheet1!$B$3:$B$20", drawing.Series[0].Series);
+                Assert.AreEqual(string.Empty, drawing.Series[0].XSeries);
+            }
+        }
+
+        [TestMethod]
         public void ReadExcelBoxAndWhiskerChart()
         {
             var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\BoxAndWhiskerFromExcel.xlsx"));

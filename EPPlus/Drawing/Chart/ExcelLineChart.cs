@@ -109,6 +109,8 @@ namespace OfficeOpenXml.Drawing.Chart
         {
                if(name=="lineChart")
                {
+                   if (this._chartXmlHelper == null)
+                       return eChartType.Line;
                    if(Marker)
                    {
                        if(Grouping==eGrouping.Stacked)
