@@ -53,6 +53,7 @@ using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Linq;
 
 namespace OfficeOpenXml
 {
@@ -2210,7 +2211,7 @@ namespace OfficeOpenXml
             }
         }
 
-        private void UpdateNamedRanges(int rows, int columns, int rowFrom, int colFrom)
+        private void UpdateNamedRanges(int rows, int columns, int rowFrom, int columnFrom)
         {
             string workbook, worksheet, address;
             foreach (ExcelNamedRange range in this.Workbook.Names)
@@ -2220,7 +2221,7 @@ namespace OfficeOpenXml
                 if (range.Address != string.Empty && range.Address != range.Name)
                 {
                     ExcelRangeBase.SplitAddress(range.Address, out workbook, out worksheet, out address);
-                    string newAddress = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
+                    string newAddress = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, worksheet, this.Name);
                     if (string.IsNullOrEmpty(worksheet))
                     {
                         range.Address = newAddress;
@@ -2229,6 +2230,11 @@ namespace OfficeOpenXml
                     {
                         range.Address = ExcelRangeBase.GetFullAddress(worksheet, newAddress);
                     }
+                }
+                // Update cross-sheet references.
+                foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+                {
+                    sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
                 }
             }
         }

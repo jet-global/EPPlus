@@ -875,6 +875,10 @@ namespace OfficeOpenXml
             {
               throw new ArgumentException("The worksheet name can not start or end with an apostrophe.");
             }
+            if (Name.StartsWith("'") || Name.EndsWith("'"))
+            {
+              throw new ArgumentException("The worksheet name can not start or end with an apostrophe.");
+            }
             if (Name.Length > 31) Name = Name.Substring(0, 31);   //A sheet can have max 31 char's            
             return Name;
         }
