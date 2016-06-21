@@ -82,6 +82,11 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
                 d = Convert.ToDouble(op);
                 return true;
             }
+            else if (op is DateTime)
+            {
+                d = ((DateTime)op).ToOADate();
+                return true;
+            }
             else if (op != null)
             {
                 if (double.TryParse(op.ToString(), out d))
@@ -117,6 +122,12 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
                     double leftNum, rightNum;
                     bool leftIsNumeric = TryConvertToDouble(left, out leftNum);
                     bool rightIsNumeric = double.TryParse(right, out rightNum);
+                    DateTime rightDate;
+                    if (!rightIsNumeric && DateTime.TryParse(right, out rightDate))
+                    {
+                        rightNum = rightDate.ToOADate();
+                        rightIsNumeric = true;
+                    }
                     if (leftIsNumeric && rightIsNumeric)
                     {
                          return EvaluateOperator(leftNum, rightNum, op);
