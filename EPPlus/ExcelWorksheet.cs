@@ -32,9 +32,16 @@
  *******************************************************************************/
 using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.DataValidation;
+using System.ComponentModel;
+using System.Drawing;
+using System.IO;
+using System.Text;
+using OfficeOpenXml.Drawing.Sparkline;
+using System.Xml;
+using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.DataValidation;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
-using OfficeOpenXml.Drawing.Sparkline;
 using OfficeOpenXml.Drawing.Vml;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OfficeOpenXml.Packaging.Ionic.Zip;
@@ -44,8 +51,6 @@ using OfficeOpenXml.Table.PivotTable;
 using OfficeOpenXml.Utils;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -57,10 +62,10 @@ using System.Linq;
 
 namespace OfficeOpenXml
 {
-    /// <summary>
-    /// Worksheet hidden enumeration
-    /// </summary>
-    public enum eWorkSheetHidden
+  /// <summary>
+  /// Worksheet hidden enumeration
+  /// </summary>
+  public enum eWorkSheetHidden
     {
         /// <summary>
         /// The worksheet is visible
@@ -332,7 +337,7 @@ namespace OfficeOpenXml
                         var adr=new ExcelAddressBase(_list[v]);
                         if (!(Destination.Collide(adr) == ExcelAddressBase.eAddressCollition.Inside || Destination.Collide(adr)==ExcelAddressBase.eAddressCollition.Equal))
                         {
-                            throw(new InvalidOperationException(string.Format("Can't delete merged cells. A range is partly merged with the deleted range. {0}", adr._address)));
+                            throw(new InvalidOperationException(string.Format("Can't delete/overwrite merged cells. A range is partly merged with the another merged range. {0}", adr._address)));
                         }
                         used.Add(v);
                     }
@@ -1925,6 +1930,8 @@ namespace OfficeOpenXml
                 _hyperLinks.Insert(rowFrom, 0, rows, 0);
                 _flags.Insert(rowFrom, 0, rows, 0);
                 Comments.Insert(rowFrom, 0, rows, 0);
+                _names.Insert(rowFrom, 0, rows, 0);
+                Workbook.Names.Insert(rowFrom, 0, rows, 0, n => n.Worksheet == this);
 
                 foreach (var f in _sharedFormulas.Values)
                 {
@@ -1985,6 +1992,12 @@ namespace OfficeOpenXml
             {
                 sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
             }
+
+            // Update cross-sheet references.
+            foreach(var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+            {
+                sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
+            }
         }
         /// <summary>
         /// Inserts a new column into the spreadsheet.  Existing columns below the position are 
@@ -2027,7 +2040,9 @@ namespace OfficeOpenXml
                 _commentsStore.Insert(0, columnFrom, 0, columns);
                 _hyperLinks.Insert(0, columnFrom, 0, columns);
                 _flags.Insert(0, columnFrom, 0, columns);
+                _names.Insert(0, columnFrom, 0, columns);
                 Comments.Insert(0, columnFrom, 0, columns);
+                Workbook.Names.Insert(0, columnFrom, 0, columns, n=>n.Worksheet == this);
 
                 foreach (var f in _sharedFormulas.Values)
                 {
@@ -2163,6 +2178,11 @@ namespace OfficeOpenXml
                 {
                     sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
                 }
+            }
+            // Update cross-sheet references.
+            foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+            {
+                sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
             }
         }
 
