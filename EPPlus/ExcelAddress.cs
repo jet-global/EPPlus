@@ -1131,7 +1131,21 @@ namespace OfficeOpenXml
             var ix = 0;
             if (address[0] == '[')
             {
-                ix = address.IndexOf(']')+1;
+                ix = address.IndexOf(']') + 1;
+            }
+            else if (address[0] == '\'')
+            {
+                var escapedAddress = GetString(address, 0, out endIx);
+                if (string.Empty == escapedAddress)
+                {
+                    endIx = address.IndexOf('\'', 1) + 1;
+                    return address.Substring(1, endIx - 2);
+                }
+            }
+            else if (address.IndexOf('!') > 0)
+            {
+                endIx = address.IndexOf('!');
+                return address.Substring(0, endIx);
             }
             if (ix > 0 && ix < address.Length)
             {
