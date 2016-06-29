@@ -311,16 +311,5 @@ namespace EPPlusTest
                 Assert.AreEqual("B2:C3", namedRange.Address);
             }
         }
-        
-
-        [TestMethod]
-        public void ShouldHandleWorksheetSpec()
-        {
-            var address = "Sheet1!A1:Sheet1!A2";
-            var excelAddress = new ExcelAddress(address);
-            Assert.AreEqual("Sheet1", excelAddress.WorkSheet);
-            Assert.AreEqual(1, excelAddress._fromRow);
-            Assert.AreEqual(2, excelAddress._toRow);
-        }
     }
 }
