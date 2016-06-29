@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.FormulaParsing;
@@ -25,6 +22,7 @@ namespace EPPlusTest.Excel.Functions
             Assert.AreEqual("A", result.Result);
         }
 
+        [Ignore]
         [TestMethod]
         public void IfShouldIgnoreCase()
         {
