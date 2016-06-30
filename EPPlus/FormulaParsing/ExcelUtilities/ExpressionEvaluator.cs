@@ -120,17 +120,17 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
                         return op.Operator == Operators.NotEqualTo;
                     }
                     double leftNum, rightNum;
+                    DateTime date;
                     bool leftIsNumeric = TryConvertToDouble(left, out leftNum);
                     bool rightIsNumeric = double.TryParse(right, out rightNum);
-                    DateTime rightDate;
-                    if (!rightIsNumeric && DateTime.TryParse(right, out rightDate))
-                    {
-                        rightNum = rightDate.ToOADate();
-                        rightIsNumeric = true;
-                    }
+                    bool rightIsDate = DateTime.TryParse(right, out date);
                     if (leftIsNumeric && rightIsNumeric)
                     {
                          return EvaluateOperator(leftNum, rightNum, op);
+                    }
+                    if (leftIsNumeric && rightIsDate)
+                    {
+                        return EvaluateOperator(leftNum, date.ToOADate(), op);
                     }
                     if (leftIsNumeric != rightIsNumeric)
                     {
