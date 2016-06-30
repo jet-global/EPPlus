@@ -1986,17 +1986,11 @@ namespace OfficeOpenXml
                 }
                 this.UpdateCharts(rows, 0, rowFrom, 0);
                 this.UpdateNamedRanges(rows, 0, rowFrom, 0);
-            }
-            // Update cross-sheet references.
-            foreach(var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
-            {
-                sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
-            }
-
-            // Update cross-sheet references.
-            foreach(var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
-            {
-                sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
+                // Update cross-sheet references.
+                foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+                {
+                    sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
+                }
             }
         }
         /// <summary>
@@ -2178,11 +2172,6 @@ namespace OfficeOpenXml
                 {
                     sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
                 }
-            }
-            // Update cross-sheet references.
-            foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
-            {
-                sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
             }
         }
 
