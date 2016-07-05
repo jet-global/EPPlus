@@ -359,7 +359,7 @@ namespace OfficeOpenXml
         internal CellStore<List<Token>> _formulaTokens;
 
         internal CellStore<Uri> _hyperLinks;
-        internal CellStore<ExcelComment> _commentsStore;
+        internal CellStore<int> _commentsStore;
 
         internal Dictionary<int, Formulas> _sharedFormulas = new Dictionary<int, Formulas>();
         internal int _minCol = ExcelPackage.MaxColumns;
@@ -407,7 +407,7 @@ namespace OfficeOpenXml
             //_styles = new CellStore<int>();
             _formulas = new CellStore<object>();
             _flags = new FlagCellStore();
-            _commentsStore = new CellStore<ExcelComment>();
+            _commentsStore = new CellStore<int>();
             _hyperLinks = new CellStore<Uri>();
             
             _names = new ExcelNamedRangeCollection(Workbook,this);
@@ -1924,8 +1924,6 @@ namespace OfficeOpenXml
             {
                 _values.Insert(rowFrom, 0, rows, 0);
                 _formulas.Insert(rowFrom, 0, rows, 0);
-                //_styles.Insert(rowFrom, 0, rows, 0);
-                //_types.Insert(rowFrom, 0, rows, 0);
                 _commentsStore.Insert(rowFrom, 0, rows, 0);
                 _hyperLinks.Insert(rowFrom, 0, rows, 0);
                 _flags.Insert(rowFrom, 0, rows, 0);
@@ -2609,12 +2607,14 @@ namespace OfficeOpenXml
             lock (this)
             {
                 _values.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
-                //_types.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
                 _formulas.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
-                //_styles.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
                 _flags.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
                 _commentsStore.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
                 _hyperLinks.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
+                _names.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
+
+                Comments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
+                Workbook.Names.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns, n => n.Worksheet == this);
 
                 AdjustFormulasRow(rowFrom, rows);
                 FixMergedCellsRow(rowFrom, rows, true);
@@ -2668,6 +2668,10 @@ namespace OfficeOpenXml
                 _flags.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
                 _commentsStore.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
                 _hyperLinks.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
+                _names.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
+
+                Comments.Delete(0, columnFrom, 0, columns);
+                Workbook.Names.Delete(0, columnFrom, ExcelPackage.MaxRows, columns, n => n.Worksheet == this);
 
                 AdjustFormulasColumn(columnFrom, columns);
                 FixMergedCellsColumn(columnFrom, columns, true);
@@ -3226,7 +3230,7 @@ namespace OfficeOpenXml
                         SetXmlNodeString("d:legacyDrawing/@r:id", rel.Id);
                         _vmlDrawings.RelId = rel.Id;
                     }
-                    _vmlDrawings.VmlDrawingXml.Save(_vmlDrawings.Part.GetStream());
+                    _vmlDrawings.VmlDrawingXml.Save(_vmlDrawings.Part.GetStream(FileMode.Create));
                 }
             }
         }
@@ -3251,6 +3255,7 @@ namespace OfficeOpenXml
                             if (string.IsNullOrEmpty(n))
                             {
                                 n = col.Name.ToLower(CultureInfo.InvariantCulture);
+                                SetValueInner(tbl.Address._fromRow, colNum, ConvertUtil.ExcelDecodeString(col.Name));
                             }
                             else
                             {
@@ -3267,22 +3272,12 @@ namespace OfficeOpenXml
                             throw(new InvalidDataException(string.Format("Table {0} Column {1} does not have a unique name.", tbl.Name, col.Name)));
                         }                        
                         colVal.Add(n);
-                        //col.Name = ConvertUtil.ExcelEncodeString(col.Name);
-                        //if (tbl.ShowHeader)
-                        //{
-                        //    SetValueInner(tbl.Address._fromRow, colNum, col.Name);
-                        //}
-                        //if (tbl.ShowTotal)
-                        //{
-                        //    SetTableTotalFunction(tbl, col, colNum);
-                        //}
                         if (!string.IsNullOrEmpty(col.CalculatedColumnFormula))
                         {
                             int fromRow = tbl.ShowHeader ? tbl.Address._fromRow + 1 : tbl.Address._fromRow;
                             int toRow = tbl.ShowTotal ? tbl.Address._toRow - 1 : tbl.Address._toRow;
                             for (int row = fromRow; row <= toRow; row++)
                             {
-                                //Cell(row, colNum).Formula = col.CalculatedColumnFormula;
                                 SetFormula(row, colNum, col.CalculatedColumnFormula);
                             }                            
                         }

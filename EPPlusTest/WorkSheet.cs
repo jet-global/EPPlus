@@ -521,6 +521,10 @@ namespace EPPlusTest
             r4.Italic = true;
             r4.UnderLine = true;
 
+            var rIns = rs.Insert(2, " inserted");
+            rIns.Bold = true;
+            rIns.Color = Color.Green;
+
             rs = ws.Cells["A3:A4"].RichText;
 
             var r5 = rs.Add("Double");
@@ -550,7 +554,7 @@ namespace EPPlusTest
             r1 = ws.Cells["G3"].RichText.Add("Test");
             r1.Bold = true;
             ws.Cells["G3"].RichText.Add(" a new t");
-            ws.Cells["G3"].RichText[1].Bold = false; ;
+            ws.Cells["G3"].RichText[1].Bold = false;
         }
         //[Ignore]
         //[TestMethod]
