@@ -57,6 +57,15 @@ namespace EPPlusTest
             Assert.IsTrue(result);
         }
 
+        [TestMethod]
+        public void EvaluateShouldHandleDateArg()
+        {
+            var result = _evaluator.Evaluate(new DateTime(2016, 1, 1), ">" + new DateTime(2015, 6, 6).ToOADate());
+            Assert.IsTrue(result);
+            result = _evaluator.Evaluate(new DateTime(2016, 1, 1), ">6/6/2015");
+            Assert.IsTrue(result);
+        }
+
         [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void EvaluateShouldThrowIfOperatorIsNotBoolean()
         {

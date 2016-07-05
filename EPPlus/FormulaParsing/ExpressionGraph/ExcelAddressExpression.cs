@@ -104,10 +104,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             {
                 return new CompileResult(result, DataType.Enumerable);
             }
-            else
-            {
-                return CompileSingleCell(result);
-            }
+            return CompileSingleCell(result);
         }
 
         private CompileResult CompileSingleCell(ExcelDataProvider.IRangeInfo result)

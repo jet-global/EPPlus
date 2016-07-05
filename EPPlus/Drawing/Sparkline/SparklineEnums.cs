@@ -4,7 +4,7 @@
  * EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
  * See http://www.codeplex.com/EPPlus for details.
  *
- * Copyright (C) 2011  Jan Källman
+ * SparklineEnums.cs Copyright (C) 2016 Matt Delaney.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,30 +24,34 @@
  *
  * Code change notes:
  * 
- * Author							Change						Date
+ * Author					Change						                Date
  * ******************************************************************************
- * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
+ * Matt Delaney		        Sparklines                                2016-05-20
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
 
-namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
+namespace OfficeOpenXml.Drawing.Sparkline
 {
-    public class DateExpression : AtomicExpression
+    /// <summary>
+    /// Represents the values of the ST_SparklineType type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx.
+    /// </summary>
+    public enum SparklineType
     {
-        public DateExpression(string expression)
-            : base(expression)
-        {
+        Line, Column, Stacked
+    }
 
-        }
+    /// <summary>
+    /// Represents the values of the ST_SparklineAxisMinMax type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx
+    /// </summary>
+    public enum SparklineAxisMinMax
+    {
+        Individual, Group, Custom
+    }
 
-        public override CompileResult Compile()
-        {
-            var date = double.Parse(ExpressionString);
-            return new CompileResult(DateTime.FromOADate(date), DataType.Date);
-        }
+    /// <summary>
+    /// Represents the values of the ST_DispBlanksAs type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx.
+    /// </summary>
+    public enum DispBlanksAs
+    {
+        Span, Gap, Zero
     }
 }

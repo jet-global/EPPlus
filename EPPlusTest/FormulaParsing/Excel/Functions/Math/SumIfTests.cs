@@ -4,6 +4,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
+using System;
 using static OfficeOpenXml.FormulaParsing.ExcelDataProvider;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
@@ -314,6 +315,29 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
                 sheet.Calculate();
                 Assert.AreEqual(1d, sheet.Cells["C1"].Value);
             }
+        }
+
+        [TestMethod]
+        public void SumIfDateComparison()
+        {
+            _worksheet.Cells[2, 3].Value = new DateTime(2012, 1, 1);
+            _worksheet.Cells[3, 3].Value = new DateTime(2012, 6, 1);
+            _worksheet.Cells[4, 3].Value = new DateTime(2012, 12, 1);
+            _worksheet.Cells[5, 3].Value = new DateTime(2014, 1, 1);
+            _worksheet.Cells[6, 3].Value = new DateTime(2014, 6, 1);
+            _worksheet.Cells[2, 4].Value = 1.0;
+            _worksheet.Cells[3, 4].Value = 1.0;
+            _worksheet.Cells[4, 4].Value = 1.0;
+            _worksheet.Cells[5, 4].Value = 1.0;
+            _worksheet.Cells[6, 4].Value = 1.0;
+            _worksheet.Cells[8, 2].Value = new DateTime(2013, 1, 1);
+            _worksheet.Cells[8, 3].Formula = "SUMIF(C2:C6,\"<\"&B8,D2:D6)";
+            _worksheet.Calculate();
+            Assert.AreEqual(3.0, _worksheet.Cells[8, 3].Value);
+            var shortDatePattern = System.Globalization.DateTimeFormatInfo.CurrentInfo.ShortDatePattern;
+            _worksheet.Cells[8, 3].Formula = string.Format("SUMIF(C2:C6,\"<{0}\",D2:D6)", new DateTime(2013, 1, 1).ToString(shortDatePattern));
+            _worksheet.Calculate();
+            Assert.AreEqual(3.0, _worksheet.Cells[8, 3].Value);
         }
     }
 }

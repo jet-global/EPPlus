@@ -97,6 +97,7 @@
     <Compile Include="Calculation.cs" />
     <Compile Include="ConditionalFormatting\ConditionalFormatting.cs" />
     <Compile Include="ExcelCellBaseTest.cs" />
+    <Compile Include="ExcelStyleTest.cs" />
     <Compile Include="FormulaParsing\ExcelUtilities\ExpressionEvaluatorTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\FunctionRepositoryTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\CountIfsTests.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SumIfsTests.cs" />
+    <Compile Include="FormulaParsing\ExpressionGraph\CompileResultFactoryTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\FunctionCompilerFactoryTests.cs" />
     <Compile Include="FormulaParsing\FormulaParserManagerTests.cs" />
@@ -219,6 +221,7 @@
     <Compile Include="Utils\GuardingTests.cs" />
     <Compile Include="Utils\SqRefUtilityTests.cs" />
     <Compile Include="VBA.cs" />
+    <Compile Include="WorkbookTests.cs" />
     <Compile Include="WorkSheet.cs" />
     <Compile Include="WorksheetsTests.cs" />
   </ItemGroup>
