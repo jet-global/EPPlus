@@ -1498,7 +1498,8 @@ namespace OfficeOpenXml
 			{
 				for (int row = _fromRow; row <= _toRow; row++)
 				{
-                    _worksheet._formulas.SetValue(row, col, id);
+                    if (_worksheet._formulas.GetValue(row, col) is int)
+                        _worksheet._formulas.SetValue(row, col, id);
 				}
 			}
 		}

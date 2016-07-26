@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 
 namespace EPPlusTest
@@ -87,6 +89,26 @@ namespace EPPlusTest
                 Assert.IsNotNull(name.Addresses);
                 name.Address = "Sheet1!C3";
                 Assert.IsNull(name.Addresses);
+            }
+        }
+
+        [TestMethod]
+        public void OverwrittenSharedFormulasAreRespected()
+        {
+            // In Excel, a cell in a shared formula range can have its formula replaced by something
+            // that is not the shared formula. EP Plus overwrites this formula when splitting shared
+            // formulas.
+            var dir = AppDomain.CurrentDomain.BaseDirectory;
+            using (var pck = new ExcelPackage(new FileInfo(Path.Combine(dir, "Workbooks", "SharedFormulas.xlsx"))))
+            {
+                var sheet = pck.Workbook.Worksheets["Sheet1"];
+                // This formula is in the shared formula range, but was explicitly overwritten in Excel.
+                var nonSharedFormulaOriginal = sheet.Cells["C5"].Formula;
+                // Set some other cell's formula in the shared formula range to trigger a split.
+                sheet.Cells["C4"].Formula = "SUM(1,2)";
+                // Verify that the explicit formula in the shared formula range was NOT overwritten.
+                var nonSharedFormulaUpdated = sheet.Cells["C5"].Formula;
+                Assert.AreEqual(nonSharedFormulaOriginal, nonSharedFormulaUpdated);
             }
         }
     }
