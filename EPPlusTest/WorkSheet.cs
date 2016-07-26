@@ -8,12 +8,13 @@ using OfficeOpenXml.Drawing;
 using System.Drawing;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Drawing.Vml;
-using OfficeOpenXml.Style;
 using System.Data;
-using OfficeOpenXml.Table.PivotTable;
+using System.Globalization;
 using System.Reflection;
-using OfficeOpenXml.Table;
 using System.Threading;
+using OfficeOpenXml.Style;
+using OfficeOpenXml.Table;
+using OfficeOpenXml.Table.PivotTable;
 using System.Globalization;
 
 namespace EPPlusTest
@@ -1055,6 +1056,52 @@ namespace EPPlusTest
             Assert.AreEqual("PivotStyleMedium9", ws.PivotTables["PivotTable"].StyleName);
         }
 
+        [TestMethod]
+        public void AddRowsAndColumnsUpdatesPivotTable()
+        {
+            FileInfo file = new FileInfo(Path.GetTempFileName());
+            if (file.Exists)
+            {
+                file.Delete();
+            }
+            try
+            {
+                using (_pck = new ExcelPackage())
+                {
+                    var ws = _pck.Workbook.Worksheets.Add("PivotTableSheet");
+                    ws.Cells["A1"].LoadFromArrays(new object[][] { new[] { "A", "B", "C", "D" } });
+                    ws.Cells["A2"].LoadFromArrays(new object[][]
+                    {
+                new object [] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
+                new object [] { 9, 8, 7 ,6, 5, 4, 3, 2, 1, 0 },
+                new object [] { 1, 1, 2, 3, 5, 8, 13, 21, 34, 55}
+                    });
+                    var table = ws.Tables.Add(ws.Cells["A1:D4"], "PivotData");
+                    var pt = ws.PivotTables.Add(ws.Cells["J10"], ws.Cells["A1:D4"], "PivotTable");
+                    Assert.AreEqual("PivotStyleMedium9", ws.PivotTables["PivotTable"].StyleName);
+                    Assert.AreEqual(10, pt.Address.Start.Row);
+                    Assert.AreEqual(10, pt.Address.Start.Column);
+                    ws.InsertRow(9, 10);
+                    Assert.AreEqual(20, pt.Address.Start.Row);
+                    ws.InsertColumn(9, 10);
+                    Assert.AreEqual(20, pt.Address.Start.Column);
+                    _pck.SaveAs(file);
+                }
+                using (_pck = new ExcelPackage(file))
+                {
+                    var pivotTable = _pck.Workbook.Worksheets["PivotTableSheet"].PivotTables.First();
+                    Assert.AreEqual(20, pivotTable.Address.Start.Row);
+                    Assert.AreEqual(20, pivotTable.Address.Start.Column);
+                }
+            }
+            finally
+            {
+                if (file.Exists)
+                {
+                    file.Delete();
+                }
+            }
+        }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
@@ -1100,6 +1147,117 @@ namespace EPPlusTest
                 Assert.AreEqual("SUBTOTAL(109,TestTable['['#''Column''2']])", ws.Cells["C3"].Formula);
             }
         }
+        [TestMethod]
+        public void InsertRowsSetsOutlineLevel()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                sheet1.Row(15).OutlineLevel = 1;
+                sheet1.InsertRow(2, 10, 15);
+                for (int i = 2; i < 12; i++)
+                {
+                    Assert.AreEqual(1, sheet1.Row(i).OutlineLevel, $"The outline level of row {i} is not set.");
+                }
+                Assert.AreEqual(1, sheet1.Row(25).OutlineLevel);
+            }
+        }
+
+        [TestMethod]
+        public void InsertColumnsSetsOutlineLevel()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                sheet1.Column(15).OutlineLevel = 1;
+                sheet1.InsertColumn(2, 10, 15);
+                for (int i = 2; i < 12; i++)
+                {
+                    Assert.AreEqual(1, sheet1.Column(i).OutlineLevel, $"The outline level of column {i} is not set.");
+                }
+                Assert.AreEqual(1, sheet1.Column(25).OutlineLevel);
+            }
+        }
+
+        [TestMethod]
+        public void CopyRowSetsOutlineLevelsCorrectly()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                sheet1.Row(2).OutlineLevel = 1;
+                sheet1.Row(3).OutlineLevel = 1;
+                sheet1.Row(4).OutlineLevel = 0;
+
+                // Set outline levels on rows to be copied over.
+                sheet1.Row(6).OutlineLevel = 17;
+                sheet1.Row(7).OutlineLevel = 25;
+                sheet1.Row(8).OutlineLevel = 29;
+
+                sheet1.Cells["2:4"].Copy(sheet1.Cells["A6"]);
+                Assert.AreEqual(1, sheet1.Row(2).OutlineLevel);
+                Assert.AreEqual(1, sheet1.Row(3).OutlineLevel);
+                Assert.AreEqual(0, sheet1.Row(4).OutlineLevel);
+
+                Assert.AreEqual(1, sheet1.Row(6).OutlineLevel);
+                Assert.AreEqual(1, sheet1.Row(7).OutlineLevel);
+                Assert.AreEqual(0, sheet1.Row(8).OutlineLevel);
+            }
+        }
+
+        [TestMethod]
+        public void CopyRowCrossSheetSetsOutlineLevelsCorrectly()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                sheet1.Row(2).OutlineLevel = 1;
+                sheet1.Row(3).OutlineLevel = 1;
+                sheet1.Row(4).OutlineLevel = 0;
+
+                var sheet2 = package.Workbook.Worksheets.Add("Sheet2");
+                // Set outline levels on rows to be copied over.
+                sheet2.Row(6).OutlineLevel = 17;
+                sheet2.Row(7).OutlineLevel = 25;
+                sheet2.Row(8).OutlineLevel = 29;
+
+                sheet1.Cells["2:4"].Copy(sheet2.Cells["A6"]);
+                Assert.AreEqual(1, sheet1.Row(2).OutlineLevel);
+                Assert.AreEqual(1, sheet1.Row(3).OutlineLevel);
+                Assert.AreEqual(0, sheet1.Row(4).OutlineLevel);
+
+                Assert.AreEqual(1, sheet2.Row(6).OutlineLevel);
+                Assert.AreEqual(1, sheet2.Row(7).OutlineLevel);
+                Assert.AreEqual(0, sheet2.Row(8).OutlineLevel);
+            }
+        }
+
+        [TestMethod]
+        public void CopyColumnSetsOutlineLevelsCorrectly()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                sheet1.Column(2).OutlineLevel = 1;
+                sheet1.Column(3).OutlineLevel = 1;
+                sheet1.Column(4).OutlineLevel = 0;
+
+                // Set outline levels on rows to be copied over.
+                sheet1.Column(6).OutlineLevel = 17;
+                sheet1.Column(7).OutlineLevel = 25;
+                sheet1.Column(8).OutlineLevel = 29;
+
+                sheet1.Cells["B:D"].Copy(sheet1.Cells["F1"]);
+                Assert.AreEqual(1, sheet1.Column(2).OutlineLevel);
+                Assert.AreEqual(1, sheet1.Column(3).OutlineLevel);
+                Assert.AreEqual(0, sheet1.Column(4).OutlineLevel);
+
+                Assert.AreEqual(1, sheet1.Column(6).OutlineLevel);
+                Assert.AreEqual(1, sheet1.Column(7).OutlineLevel);
+                Assert.AreEqual(0, sheet1.Column(8).OutlineLevel);
+            }
+        }
+
         [TestMethod]
         public void InsertRowsSetsOutlineLevel()
         {
@@ -2154,7 +2312,7 @@ namespace EPPlusTest
 
             ws.BackgroundImage.Image = Properties.Resources.Test1;
             ws = _pck.Workbook.Worksheets.Add("backimg2");
-            ws.BackgroundImage.SetFromFile(new FileInfo(Path.Combine(_clipartPath,"Vector Drawing.wmf")));
+            ws.BackgroundImage.SetFromFile(new FileInfo(Path.Combine(_clipartPath, "Vector Drawing.wmf")));
         }
         //[Ignore]
         [TestMethod]
@@ -2884,6 +3042,361 @@ namespace EPPlusTest
 		#endregion
 
         [TestMethod]
+        public void CopySheetWithSharedFormula()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var workbook = package.Workbook;
+                var sheet1 = workbook.Worksheets.Add("Sheet1");
+                sheet1.Cells[2, 2, 5, 2].Value = new object[,] { { 1 }, { 2 }, { 3 }, { 4 } };
+                // Creates a shared formula.
+                sheet1.Cells["D2:D5"].Formula = "SUM(B2:C2)";
+                var sheet2 = workbook.Worksheets.Copy(sheet1.Name, "Sheet2");
+                sheet1.InsertColumn(3, 1);
+                // Inserting a column on sheet1 should modify the shared formula on sheet1, but not sheet2.
+                Assert.AreEqual("SUM(B2:D2)", sheet1.Cells["E2"].Formula);
+                Assert.AreEqual("SUM(B2:C2)", sheet2.Cells["D2"].Formula);
+            }
+        }
+        #region InsertRows Tests
+        [TestMethod]
+        public void InsertRowsUpdatesScatterChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+                worksheet.InsertRow(3, 3);
+                Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void InsertRowsUpdatesPieChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Pie) as ExcelPieChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+                worksheet.InsertRow(3, 5);
+                Assert.AreEqual("'Sheet1'!$B$2:$B$8", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$C$2:$C$8", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void InsertRowsUpdatesBarChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+                worksheet.InsertRow(3, 5);
+                Assert.AreEqual("'Sheet1'!$B$2:$B$8", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$C$2:$C$8", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void InsertRowsUpdatesBubbleChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                worksheet.Cells[2, 4].Value = 1;
+                worksheet.Cells[3, 4].Value = 2;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "$D$2:$D$3");
+                worksheet.InsertRow(3, 3);
+                Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+                Assert.AreEqual("'Sheet1'!$D$2:$D$6", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+            }
+        }
+
+        [TestMethod]
+        public void InsertRowsUpdatesComboChart()
+        {
+            var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\ComboFromExcel.xlsx"));
+            Assert.IsTrue(file.Exists);
+            using (var package = new ExcelPackage(file))
+            {
+                var sheet = package.Workbook.Worksheets[1];
+                var drawing = sheet.Drawings[0] as ExcelChart;
+                Assert.IsNotNull(drawing);
+                Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[1].Series);
+                Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].Series);
+                Assert.AreEqual("Sheet1!$D$20:$D$42", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+                sheet.InsertRow(22, 20);
+                Assert.AreEqual("'Sheet1'!$C$20:$C$62", drawing.Series[1].Series);
+                Assert.AreEqual("'Sheet1'!$B$20:$B$62", drawing.Series[0].Series);
+                Assert.AreEqual("'Sheet1'!$D$20:$D$62", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void InsertRowsUpdatesExcel2016ChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+                // Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+                var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
+                var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
+                var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
+
+                worksheet1.InsertRow(10, 10);
+                string workbook, worksheet, address;
+                ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:Z36", address);
+                ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:Z36", address);
+                address = null;
+                ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:Z26", address);
+            }
+        }
+        #endregion
+
+        #region InsertColumns Tests
+        [TestMethod]
+        public void InsertColumnsUpdatesExcel2016ChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+                // Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+                var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
+                var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
+                var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
+
+                string workbook, worksheet, address;
+                worksheet2.InsertColumn(10, 10);
+                ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:Z26", address);
+                ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:AJ26", address);
+                address = null;
+                ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("A1:AJ26", address);
+            }
+        }
+
+        [TestMethod]
+        public void InsertColumnsUpdatesScatterChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[2, 3].Value = "Trucks";
+                worksheet.Cells[3, 2].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+                chart.Series.AddSeries("$B$3:$C$3", "$B$2:$C$2", "");
+                worksheet.InsertColumn(3, 3);
+                Assert.AreEqual("'Sheet1'!$B$2:$F$2", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$B$3:$F$3", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void InsertColumnsUpdatesBarChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[2, 3].Value = "Trucks";
+                worksheet.Cells[3, 2].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+                chart.Series.AddSeries("$B$3:$C$3", "$B$2:$C$2", "");
+                worksheet.InsertColumn(3, 5);
+                Assert.AreEqual("'Sheet1'!$B$2:$H$2", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$B$3:$H$3", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void InsertColumnsUpdatesPieChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[2, 3].Value = "Trucks";
+                worksheet.Cells[3, 2].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Pie) as ExcelPieChart;
+                chart.Series.AddSeries("$B$3:$C$3", "$B$2:$C$2", "");
+                worksheet.InsertColumn(3, 3);
+                Assert.AreEqual("'Sheet1'!$B$2:$F$2", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$B$3:$F$3", chart.Series[0].Series);
+            }
+        }
+        
+        [TestMethod]
+        public void InsertColumnsUpdatesBubbleChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[2, 3].Value = "Trucks";
+                worksheet.Cells[3, 2].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                worksheet.Cells[4, 2].Value = 1;
+                worksheet.Cells[4, 3].Value = 2;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+                chart.Series.AddSeries("$B$3:$C$3", "$B$2:$C$2", "$B$4:$C$4");
+                worksheet.InsertColumn(3, 3);
+                Assert.AreEqual("'Sheet1'!$B$2:$F$2", chart.Series[0].XSeries);
+                Assert.AreEqual("'Sheet1'!$B$3:$F$3", chart.Series[0].Series);
+                Assert.AreEqual("'Sheet1'!$B$4:$F$4", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+            }
+        }
+        #endregion
+
+        #region RenameWorksheet Tests
+        [TestMethod]
+        public void RenameWorksheetUpdatesScatterChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+                worksheet.Name = "A new name";
+                Assert.AreEqual("'A new name'!$B$2:$B$3", chart.Series[0].XSeries);
+                Assert.AreEqual("'A new name'!$C$2:$C$3", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void RenameWorksheetUpdatesBarChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+                worksheet.Name = "A new name";
+                Assert.AreEqual("'A new name'!$B$2:$B$3", chart.Series[0].XSeries);
+                Assert.AreEqual("'A new name'!$C$2:$C$3", chart.Series[0].Series);
+            }
+        }
+
+        [TestMethod]
+        public void RenameWorksheetUpdatesBubbleChartSeries()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[2, 2].Value = "Cars";
+                worksheet.Cells[3, 2].Value = "Trucks";
+                worksheet.Cells[2, 3].Value = 10;
+                worksheet.Cells[3, 3].Value = 4;
+                worksheet.Cells[2, 4].Value = 1;
+                worksheet.Cells[3, 4].Value = 2;
+                var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+                chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "$D$2:$D$3");
+                worksheet.Name = "A new name";
+                Assert.AreEqual("'A new name'!$B$2:$B$3", chart.Series[0].XSeries);
+                Assert.AreEqual("'A new name'!$C$2:$C$3", chart.Series[0].Series);
+                Assert.AreEqual("'A new name'!$D$2:$D$3", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+            }
+        }
+
+        [TestMethod]
+        public void RenameWorksheetUpdatesExcel2016ChartSeriesAndOtherNamedRanges()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+                // Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+                var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
+                var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet1!A1:Z26"));
+                var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
+
+                string workbook, worksheet, address;
+                worksheet1.Name = "Work Sheet One";
+                ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("Work Sheet One", worksheet);
+                ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("Work Sheet One", worksheet);
+                address = null;
+                ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+                Assert.AreEqual("Sheet2", worksheet);
+            }
+        }
+        #endregion 
+
+        [TestMethod]
+        public void SaveWorksheetDoesNotSetHiddenRowHeightToZero()
+        {
+            var file = new FileInfo(Path.GetTempFileName());
+            if (file.Exists)
+                file.Delete();
+            try {
+                using (var p = new ExcelPackage())
+                {
+                    var sheet = p.Workbook.Worksheets.Add("sheet");
+                    var row = sheet.Row(2);
+                    row.Hidden = true;
+                    Assert.AreNotEqual(0, row.Height);
+                    Assert.AreNotEqual(0, row.CustomHeight);
+                    p.SaveAs(file);
+                }
+                using (var p = new ExcelPackage(file))
+                {
+                    var sheet = p.Workbook.Worksheets["sheet"];
+                    var row = sheet.Row(2);
+                    Assert.IsTrue(row.Hidden);
+                    Assert.AreNotEqual(0, row.Height);
+                    Assert.AreNotEqual(0, row.CustomHeight);
+                }
+            }
+            finally
+            {
+                if (file.Exists)
+                    file.Delete();
+            }
+        }
+
+        
+        [TestMethod]
         public void DateFunctionsWorkWithDifferentCultureDateFormats()
         {
             var currentCulture = CultureInfo.CurrentCulture;
@@ -2912,23 +3425,6 @@ namespace EPPlusTest
                 Assert.AreEqual(41670.0, ws.Cells[3, 3].Value);
             }
             Thread.CurrentThread.CurrentCulture = currentCulture;
-        }
-        [TestMethod]
-        public void CopySheetWithSharedFormula()
-        {
-            using (ExcelPackage package = new ExcelPackage())
-            {
-                var workbook = package.Workbook;
-                var sheet1 = workbook.Worksheets.Add("Sheet1");
-                sheet1.Cells[2, 2, 5, 2].Value = new object[,] { { 1 }, { 2 }, { 3 }, { 4 } };
-                // Creates a shared formula.
-                sheet1.Cells["D2:D5"].Formula = "SUM(B2:C2)";
-                var sheet2 = workbook.Worksheets.Copy(sheet1.Name, "Sheet2");
-                sheet1.InsertColumn(3, 1);
-                // Inserting a column on sheet1 should modify the shared formula on sheet1, but not sheet2.
-                Assert.AreEqual("SUM(B2:D2)", sheet1.Cells["E2"].Formula);
-                Assert.AreEqual("SUM(B2:C2)", sheet2.Cells["D2"].Formula);
-            }
         }
     }
 }

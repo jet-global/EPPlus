@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using System.Reflection;
+using OfficeOpenXml.Drawing.Chart;
 
 namespace EPPlusTest
 {
@@ -99,7 +100,44 @@ namespace EPPlusTest
 			workbook.Worksheets.MoveAfter(4, 2);
 
 			CompareOrderOfWorksheetsAfterSaving(package);
-		}
+        }
+
+        #region Add Tests
+        [TestMethod]
+        public void AddWorksheetUpdatesChartSeriesReferences()
+        {
+            var package = new ExcelPackage();
+            var myWorkbook = package.Workbook;
+            var firstSheet = myWorkbook.Worksheets.Add("Sheet1");
+            var chart1 = firstSheet.Drawings.AddChart("Chart1", eChartType.BarClustered);
+            chart1.Series.Add("Sheet1!$B$1:$B$16", "Sheet1!$A$1:$A$16");
+
+            var secondSheet = myWorkbook.Worksheets.Add("Sheet2", firstSheet);
+
+            Assert.AreEqual(1, firstSheet.Drawings.Count);
+            chart1 = firstSheet.Drawings[0] as ExcelBarChart;
+            string workbook, worksheet, range;
+            var serie1 = chart1.Series[0];
+            ExcelAddressBase.SplitAddress(serie1.Series, out workbook, out worksheet, out range);
+            Assert.AreEqual("Sheet1", worksheet);
+            Assert.AreEqual("$B$1:$B$16", range);
+            ExcelAddressBase.SplitAddress(serie1.XSeries, out workbook, out worksheet, out range);
+            Assert.AreEqual("Sheet1", worksheet);
+            Assert.AreEqual("$A$1:$A$16", range);
+
+            Assert.AreEqual(1, secondSheet.Drawings.Count);
+            var chart2 = secondSheet.Drawings[0] as ExcelBarChart;
+            var serie2 = chart2.Series[0];
+            ExcelAddressBase.SplitAddress(serie2.Series, out workbook, out worksheet, out range);
+            Assert.AreEqual("Sheet2", worksheet);
+            Assert.AreEqual("$B$1:$B$16", range);
+            ExcelAddressBase.SplitAddress(serie2.XSeries, out workbook, out worksheet, out range);
+            Assert.AreEqual("Sheet2", worksheet);
+            Assert.AreEqual("$A$1:$A$16", range);
+        }
+        #endregion
+
+
         #region Delete Column with Save Tests
 
         private const string OutputDirectory = @"d:\temp\";

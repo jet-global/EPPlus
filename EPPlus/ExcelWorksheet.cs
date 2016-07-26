@@ -30,15 +30,13 @@
  * Jan Källman          Total rewrite               2010-03-01
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
+using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.DataValidation;
 using System.ComponentModel;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
-using System.Security;
 using System.Text;
-using System.Text.RegularExpressions;
+using OfficeOpenXml.Drawing.Sparkline;
 using System.Xml;
 using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.DataValidation;
@@ -51,9 +49,16 @@ using OfficeOpenXml.Style.XmlAccess;
 using OfficeOpenXml.Table;
 using OfficeOpenXml.Table.PivotTable;
 using OfficeOpenXml.Utils;
-
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
-
+using System.Security;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
+using System.Linq;
 
 namespace OfficeOpenXml
 {
@@ -533,6 +538,7 @@ namespace OfficeOpenXml
                     n.ChangeWorksheet(_name, value);
                 }
             }
+            this.ChangeSparklineSheetNames(value);
             foreach (var ws in Workbook.Worksheets)
             {
                 if (!(ws is ExcelChartsheet))
@@ -545,6 +551,41 @@ namespace OfficeOpenXml
                         }
                     }
                     ws.UpdateCrossSheetReferenceNames(_name, value);
+                }
+                HashSet<ExcelChart> charts = new HashSet<ExcelChart>();
+                foreach (ExcelChart chartBase in ws.Drawings.Where(drawing => drawing is ExcelChart))
+                {
+
+                    foreach (var chart in chartBase.PlotArea.ChartTypes)
+                    {
+                        bool isUnique = charts.Add(chart);
+                        if (isUnique)
+                        {
+                            foreach (ExcelChartSerie serie in chart.Series)
+                            {
+                                string workbook, worksheet, address;
+                                ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
+                                if (worksheet == this._name)
+                                {
+                                    serie.Series = ExcelRangeBase.GetFullAddress(value, address);
+                                }
+                                ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+                                if (worksheet == this._name)
+                                {
+                                    serie.XSeries = ExcelRangeBase.GetFullAddress(value, address);
+                                }
+                                var bubbleSerie = serie as ExcelBubbleChartSerie;
+                                if (bubbleSerie != null)
+                                {
+                                    ExcelRange.SplitAddress(bubbleSerie.BubbleSize, out workbook, out worksheet, out address);
+                                    if (worksheet == this._name)
+                                    {
+                                        bubbleSerie.BubbleSize = ExcelRangeBase.GetFullAddress(value, address);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -560,6 +601,35 @@ namespace OfficeOpenXml
                 return _names;
             }
         }
+
+        private ExcelSparklineGroups _sparklineGroups;
+        /// <summary>
+        /// Gets the <see cref="ExcelSparklineGroups"/> that exist on the worksheet.
+        /// </summary>
+        public ExcelSparklineGroups SparklineGroups
+        {
+            get
+            {
+                CheckSheetType();
+                if (_sparklineGroups == null)
+                {
+                    // Add required namespaces for Sparkline support.
+                    if (!NameSpaceManager.HasNamespace("x14"))
+                        NameSpaceManager.AddNamespace("x14", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
+                    if (!NameSpaceManager.HasNamespace("xm"))
+                        NameSpaceManager.AddNamespace("xm", "http://schemas.microsoft.com/office/excel/2006/main");
+
+                    var sparklineGroupsNode = TopNode.SelectSingleNode("d:extLst/d:ext/x14:sparklineGroups", NameSpaceManager);
+                    if (sparklineGroupsNode != null)
+                        _sparklineGroups = new ExcelSparklineGroups(this, NameSpaceManager, sparklineGroupsNode);
+                    else
+                        _sparklineGroups = new ExcelSparklineGroups(this, NameSpaceManager);
+                }
+
+                return _sparklineGroups;
+            }
+        }
+
         /// <summary>
         /// Indicates if the worksheet is hidden in the workbook
         /// </summary>
@@ -1915,6 +1985,7 @@ namespace OfficeOpenXml
                         this.Row(rowFrom + r).OutlineLevel = newOutlineLevel;
                     }
                 }
+                this.UpdateSparkLineReferences(rows, rowFrom, 0, 0);
                 foreach (var tbl in Tables)
                 {
                     tbl.Address = tbl.Address.AddRow(rowFrom, rows);
@@ -1924,12 +1995,14 @@ namespace OfficeOpenXml
                     ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
                     ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
                 }
-            }
-
-            // Update cross-sheet references.
-            foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
-            {
-                sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
+                }
+                this.UpdateCharts(rows, 0, rowFrom, 0);
+                this.UpdateNamedRanges(rows, 0, rowFrom, 0);
+                // Update cross-sheet references.
+                foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+                {
+                    sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
+                }
             }
         }
         /// <summary>
@@ -2047,7 +2120,6 @@ namespace OfficeOpenXml
                     }
                 }
 
-
                 //Copy style from another column?
                 if (copyStylesFromColumn > 0)
                 {
@@ -2089,7 +2161,9 @@ namespace OfficeOpenXml
                     {
                         this.Column(columnFrom + c).OutlineLevel = newOutlineLevel;
                     }
+                    }
                 }
+                this.UpdateSparkLineReferences(0, 0, columns, columnFrom);
                 //Adjust tables
                 foreach (var tbl in Tables)
                 {
@@ -2113,6 +2187,82 @@ namespace OfficeOpenXml
                             ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
                         }
                     }
+
+                }
+                this.UpdateCharts(0, columns, 0, columnFrom);
+                this.UpdateNamedRanges(0, columns, 0, columnFrom);
+                // Update cross-sheet references.
+                foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+                {
+                    sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
+                }
+            }
+        }
+
+        private void UpdateCharts(int rows, int columns, int rowFrom, int colFrom)
+        {
+            HashSet<ExcelChart> uniqueChartTypes = new HashSet<ExcelChart>();
+            string workbook, worksheet, address;
+            foreach (var sheet in this.Workbook.Worksheets)
+            {
+                foreach (ExcelChart chartBase in sheet.Drawings.Where(drawing => drawing is ExcelChart))
+                {
+                    bool isUnique = false;
+                    // The chart Plot Area contains one copy of a chart for each series in that chart. 
+                    // A chart Plot Area can also have multiple distinct charts (such as when a bar chart and a line chart are plotted in the same area).
+                    // This captures the behavior of a "Combo Chart".
+                    foreach (var chart in chartBase.PlotArea.ChartTypes)
+                    {
+                        isUnique = uniqueChartTypes.Add(chart);
+                        if (isUnique)
+                        {
+                            foreach (ExcelChartSerie serie in chart.Series)
+                            {
+                                if (serie.Series != null && string.Empty != serie.Series)
+                                {
+                                    ExcelRangeBase.SplitAddress(serie.Series, out workbook, out worksheet, out address);
+                                    string newSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
+                                    serie.Series = ExcelRangeBase.GetFullAddress(worksheet, newSeries);
+                                }
+                                if (serie.XSeries != null && string.Empty != serie.XSeries)
+                                {
+                                    ExcelRangeBase.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+                                    string newXSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
+                                    serie.XSeries = ExcelRangeBase.GetFullAddress(worksheet, newXSeries);
+                                }
+                                var bubbleSerie = serie as ExcelBubbleChartSerie;
+                                if (bubbleSerie != null && bubbleSerie.BubbleSize != null && bubbleSerie.BubbleSize != string.Empty)
+                                {
+                                    ExcelRangeBase.SplitAddress(bubbleSerie.BubbleSize, out workbook, out worksheet, out address);
+                                    string newBubbleSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
+                                    bubbleSerie.BubbleSize = ExcelRangeBase.GetFullAddress(worksheet, newBubbleSeries);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void UpdateNamedRanges(int rows, int columns, int rowFrom, int columnFrom)
+        {
+            string workbook, worksheet, address;
+            foreach (ExcelNamedRange range in this.Workbook.Names)
+            {
+                // Named ranges that have an address defined by its name as opposed to a cell reference
+                // should not be updated (e.g. a named range created by a slicer).
+                if (range.Address != string.Empty && range.Address != range.Name)
+                {
+                    ExcelRangeBase.SplitAddress(range.Address, out workbook, out worksheet, out address);
+                    string newAddress = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, worksheet, this.Name);
+                    if (string.IsNullOrEmpty(worksheet))
+                    {
+                        range.Address = newAddress;
+                    }
+                    else
+                    {
+                        range.Address = ExcelRangeBase.GetFullAddress(worksheet, newAddress);
+                    }
                 }
                 // Update cross-sheet references.
                 foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
@@ -2120,7 +2270,8 @@ namespace OfficeOpenXml
                     sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
                 }
             }
-        } 
+        }
+
         private static void InsertTableColumns(int columnFrom, int columns, ExcelTable tbl)
         {
             var node = tbl.Columns[0].TopNode.ParentNode;
@@ -2981,39 +3132,40 @@ namespace OfficeOpenXml
         #region Worksheet Save
         internal void Save()
         {
-                DeletePrinterSettings();
+            DeletePrinterSettings();
 
-                if (_worksheetXml != null)
+            if (_worksheetXml != null)
+            {
+
+                if (!(this is ExcelChartsheet))
                 {
+                    // save the header & footer (if defined)
+                    if (_headerFooter != null)
+                        HeaderFooter.Save();
 
-                    if (!(this is ExcelChartsheet))
+                    var d = Dimension;
+                    if (d == null)
                     {
-                        // save the header & footer (if defined)
-                        if (_headerFooter != null)
-                            HeaderFooter.Save();
-
-                        var d = Dimension;
-                        if (d == null)
-                        {
-                            this.DeleteAllNode("d:dimension/@ref");
-                        }
-                        else
-                        {
-                            this.SetXmlNodeString("d:dimension/@ref", d.Address);
-                        }
-
-
-                        if (Drawings.Count == 0)
-                        {
-                            //Remove node if no drawings exists.
-                            DeleteNode("d:drawing");
-                        }
-
-                        SaveComments();
-                        HeaderFooter.SaveHeaderFooterImages();
-                        SaveTables();
-                        SavePivotTables();
+                        this.DeleteAllNode("d:dimension/@ref");
                     }
+                    else
+                    {
+                        this.SetXmlNodeString("d:dimension/@ref", d.Address);
+                    }
+
+
+                    if (Drawings.Count == 0)
+                    {
+                        //Remove node if no drawings exists.
+                        DeleteNode("d:drawing");
+                    }
+
+                    SaveComments();
+                    HeaderFooter.SaveHeaderFooterImages();
+                    SaveTables();
+                    SavePivotTables();
+                    this.SparklineGroups.Save();
+                }
                 }
 
                 if (Drawings.UriDrawing!=null)
@@ -3049,69 +3201,6 @@ namespace OfficeOpenXml
                     
                     SaveXml(stream);
         }
-
-        
-
-        ///// <summary>
-        ///// Saves the worksheet to the package.
-        ///// </summary>
-        //internal void Save()  // Worksheet Save
-        //{
-        //    DeletePrinterSettings();
-
-        //    if (_worksheetXml != null)
-        //    {
-                
-        //        // save the header & footer (if defined)
-        //        if (_headerFooter != null)
-        //            HeaderFooter.Save();
-
-        //        var d = Dimension;
-        //        if (d == null)
-        //        {
-        //            this.DeleteAllNode("d:dimension/@ref");
-        //        }
-        //        else
-        //        {
-        //            this.SetXmlNodeString("d:dimension/@ref", d.Address);
-        //        }
-                
-
-        //        if (_drawings != null && _drawings.Count == 0)
-        //        {
-        //            //Remove node if no drawings exists.
-        //            DeleteNode("d:drawing");
-        //        }
-
-        //        SaveComments();
-        //        HeaderFooter.SaveHeaderFooterImages();
-        //        SaveTables();
-        //        SavePivotTables();
-        //        SaveXml();
-        //    }
-            
-        //    if (Drawings.UriDrawing!=null)
-        //    {
-        //        if (Drawings.Count == 0)
-        //        {                    
-        //            Part.DeleteRelationship(Drawings._drawingRelation.Id);
-        //            _package.Package.DeletePart(Drawings.UriDrawing);                    
-        //        }
-        //        else
-        //        {
-        //            Packaging.ZipPackagePart partPack = Drawings.Part;
-        //            Drawings.DrawingXml.Save(partPack.GetStream(FileMode.Create, FileAccess.Write));
-        //            foreach (ExcelDrawing d in Drawings)
-        //            {
-        //                if (d is ExcelChart)
-        //                {
-        //                    ExcelChart c = (ExcelChart)d;
-        //                    c.ChartXml.Save(c.Part.GetStream(FileMode.Create, FileAccess.Write));
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
 
         /// <summary>
         /// Delete the printersettings relationship and part.
@@ -3336,17 +3425,18 @@ namespace OfficeOpenXml
         //    SetStyleInner(row, col, value);
         //    if(!_values.Exists(row,col)) SetValueInner(row, col, null);
         //}
-        
+
         private void SavePivotTables()
         {
             foreach (var pt in PivotTables)
             {
+                pt.SetXmlNodeString("d:location/@ref", pt.Address.FirstAddress);
                 if (pt.DataFields.Count > 1)
                 {
                     XmlElement parentNode;
-                    if(pt.DataOnRows==true)
+                    if (pt.DataOnRows == true)
                     {
-                        parentNode =  pt.PivotTableXml.SelectSingleNode("//d:rowFields", pt.NameSpaceManager) as XmlElement;
+                        parentNode = pt.PivotTableXml.SelectSingleNode("//d:rowFields", pt.NameSpaceManager) as XmlElement;
                         if (parentNode == null)
                         {
                             pt.CreateNode("d:rowFields");
@@ -3355,7 +3445,7 @@ namespace OfficeOpenXml
                     }
                     else
                     {
-                        parentNode =  pt.PivotTableXml.SelectSingleNode("//d:colFields", pt.NameSpaceManager) as XmlElement;
+                        parentNode = pt.PivotTableXml.SelectSingleNode("//d:colFields", pt.NameSpaceManager) as XmlElement;
                         if (parentNode == null)
                         {
                             pt.CreateNode("d:colFields");
@@ -3378,15 +3468,15 @@ namespace OfficeOpenXml
                     pt.CacheDefinition.SetXmlNodeString(ExcelPivotCacheDefinition._sourceAddressPath, pt.CacheDefinition.SourceRange.Address);
                 }
 
-                var ws = Workbook.Worksheets[pt.CacheDefinition.SourceRange.WorkSheet];
-                var t = ws.Tables.GetFromRange(pt.CacheDefinition.SourceRange);
                 var fields =
-                    pt.CacheDefinition.CacheDefinitionXml.SelectNodes(
-                        "d:pivotCacheDefinition/d:cacheFields/d:cacheField", NameSpaceManager);
+                  pt.CacheDefinition.CacheDefinitionXml.SelectNodes(
+                    "d:pivotCacheDefinition/d:cacheFields/d:cacheField", NameSpaceManager);
                 int ix = 0;
-                if (fields != null)
+                if (fields != null && pt.CacheDefinition.SourceRange != null)
                 {
                     var flds = new HashSet<string>();
+                    var ws = Workbook.Worksheets[pt.CacheDefinition.SourceRange.WorkSheet];
+                    var t = ws.Tables.GetFromRange(pt.CacheDefinition.SourceRange);
                     foreach (XmlElement node in fields)
                     {
                         if (ix >= pt.CacheDefinition.SourceRange.Columns) break;
@@ -3394,11 +3484,11 @@ namespace OfficeOpenXml
                         if (string.IsNullOrEmpty(fldName))
                         {
                             fldName = (t == null
-                                ? pt.CacheDefinition.SourceRange.Offset(0, ix++, 1, 1).Value.ToString()
-                                : t.Columns[ix++].Name);
+                              ? pt.CacheDefinition.SourceRange.Offset(0, ix++, 1, 1).Value.ToString()
+                              : t.Columns[ix++].Name);
                         }
                         if (flds.Contains(fldName))
-                        {                            
+                        {
                             fldName = GetNewName(flds, fldName);
                         }
                         flds.Add(fldName);
@@ -4296,7 +4386,45 @@ namespace OfficeOpenXml
                 return _package.Workbook;
             }
         }
-		#endregion
+        #endregion
+
+        private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)
+        {
+            string workbook, worksheet, address;
+            foreach (var group in this.SparklineGroups.SparklineGroups)
+            {
+                foreach (var sparkline in group.Sparklines)
+                {
+                    ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+                    address = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
+                    if (string.IsNullOrEmpty(worksheet))
+                        sparkline.Formula.Address = address;
+                    else
+                        sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(worksheet, address);
+                    sparkline.HostCell.Address = ExcelRangeBase.UpdateFormulaReferences(sparkline.HostCell.Address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
+                }
+            }
+        }
+
+        private void ChangeSparklineSheetNames(string newName)
+        {
+            string workbook, worksheet, address;
+            foreach (var group in this.SparklineGroups.SparklineGroups)
+            {
+                foreach (var sparkline in group.Sparklines)
+                {
+                    ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+                    if (string.IsNullOrEmpty(worksheet))
+                        return;
+                    else
+                    {
+                        sparkline.Formula.SetAddress(ExcelRangeBase.GetFullAddress(newName, address));
+                    }
+                    sparkline.HostCell._ws = newName;
+                }
+            }
+
+        }
         #endregion  // END Worksheet Private Methods
 
         /// <summary>
