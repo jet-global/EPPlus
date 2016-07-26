@@ -25,7 +25,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -47,11 +47,11 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\Debug4\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\EPPlus.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug4\EPPlus.XML</DocumentationFile>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <NoWarn>15191, CS1591</NoWarn>
@@ -60,11 +60,11 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\Release4\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\EPPlus.XML</DocumentationFile>
+    <DocumentationFile>bin\Release4\EPPlus.XML</DocumentationFile>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
@@ -362,8 +362,6 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Eomonth.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Hour.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\IsoWeekNum.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTime\Networkdays.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTime\NetworkdaysIntl.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\TimeValue.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Weeknum.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Minute.cs" />
@@ -376,12 +374,6 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Today.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Weekday.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workday.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workdays\AdditionalHolidayDays.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workdays\HolidayWeekdays.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workdays\HolidayWeekdaysFactory.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workdays\WorkdayCalculationDirection.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workdays\WorkdayCalculator.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workdays\WorkdayCalculatorResult.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Year.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Yearfrac.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DecimalCompileResultValidator.cs" />

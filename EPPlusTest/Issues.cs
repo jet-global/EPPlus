@@ -1196,6 +1196,17 @@ namespace EPPlusTest
                 }
             }
         }
+        [TestMethod, Ignore]
+        public void Issue15485()
+        {
+            using (var pkg = new ExcelPackage(new FileInfo(@"c:\temp\bug\PivotChartSeriesIssue.xlsx")))
+            {
+                var ws = pkg.Workbook.Worksheets[1];
+                ws.InsertRow(1, 1);
+                ws.InsertColumn(1, 1);
+                pkg.Save();
+            }
+        }
         public static byte[] ReadTemplateFile(string templateName)
         {
             byte[] templateFIle;
@@ -1318,5 +1329,29 @@ namespace EPPlusTest
           file.Delete();
       }
     }
+            }
+        }
+
+        [TestMethod]
+        public void PreserveNamesAddressesWhenInsertingRows()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+                var sheet2 = package.Workbook.Worksheets.Add("Sheet2");
+
+                package.Workbook.Names.Add("myName1", new ExcelRange(sheet2, "A1"));
+                package.Workbook.Names.Add("myName2", new ExcelRange(sheet2, "A2"));
+                package.Workbook.Names.Add("myName3", new ExcelRange(sheet2, "A3"));
+                sheet2.Cells["A1"].Value = 1;
+                sheet2.Cells["A2"].Value = 2;
+                sheet2.Cells["A3"].Value = 3;
+                sheet1.Cells["A1"].Formula = "myName1";
+                sheet1.Cells["A2"].Formula = "myName2";
+                sheet1.Cells["A3"].Formula = "myName3";
+
+                sheet2.InsertRow(2, 2);
+                Assert.AreEqual("'Sheet2'!A5", package.Workbook.Names.Last().Address);
+            
   }
 }
