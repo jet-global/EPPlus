@@ -1995,16 +1995,15 @@ namespace OfficeOpenXml
                     ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
                     ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
                 }
-                }
-                this.UpdateCharts(rows, 0, rowFrom, 0);
-                this.UpdateNamedRanges(rows, 0, rowFrom, 0);
-                // Update cross-sheet references.
-                foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
-                {
-                    sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
-                }
+            }
+            this.UpdateCharts(rows, 0, rowFrom, 0);
+            // Update cross-sheet references.
+            foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+            {
+                sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
             }
         }
+
         /// <summary>
         /// Inserts a new column into the spreadsheet.  Existing columns below the position are 
         /// shifted down.  All formula are updated to take account of the new column.
@@ -2190,14 +2189,12 @@ namespace OfficeOpenXml
 
                 }
                 this.UpdateCharts(0, columns, 0, columnFrom);
-                this.UpdateNamedRanges(0, columns, 0, columnFrom);
                 // Update cross-sheet references.
                 foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
                 {
                     sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
                 }
             }
-        }
 
         private void UpdateCharts(int rows, int columns, int rowFrom, int colFrom)
         {
@@ -2240,34 +2237,6 @@ namespace OfficeOpenXml
                             }
                         }
                     }
-                }
-            }
-        }
-
-        private void UpdateNamedRanges(int rows, int columns, int rowFrom, int columnFrom)
-        {
-            string workbook, worksheet, address;
-            foreach (ExcelNamedRange range in this.Workbook.Names)
-            {
-                // Named ranges that have an address defined by its name as opposed to a cell reference
-                // should not be updated (e.g. a named range created by a slicer).
-                if (range.Address != string.Empty && range.Address != range.Name)
-                {
-                    ExcelRangeBase.SplitAddress(range.Address, out workbook, out worksheet, out address);
-                    string newAddress = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, worksheet, this.Name);
-                    if (string.IsNullOrEmpty(worksheet))
-                    {
-                        range.Address = newAddress;
-                    }
-                    else
-                    {
-                        range.Address = ExcelRangeBase.GetFullAddress(worksheet, newAddress);
-                    }
-                }
-                // Update cross-sheet references.
-                foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
-                {
-                    sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
                 }
             }
         }

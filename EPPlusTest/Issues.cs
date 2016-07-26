@@ -1228,39 +1228,39 @@ namespace EPPlusTest
 
         }
 
-		[TestMethod]
-		public void Issue15460WithString()
-		{
-			FileInfo file = new FileInfo("report.xlsx");
-			try
-			{
-				if (file.Exists)
-					file.Delete();
-				using (ExcelPackage package = new ExcelPackage(file))
-				{
-					var sheet = package.Workbook.Worksheets.Add("New Sheet");
-					sheet.Cells[3, 3].Value = new[] { "value1", "value2", "value3" };
-					package.Save();
-				}
-				using (ExcelPackage package = new ExcelPackage(file))
-				{
-					var sheet = package.Workbook.Worksheets["New Sheet"];
-					Assert.AreEqual("value1", sheet.Cells[3, 3].Value);
-				}
-			}
-			finally
-			{
-				if (file.Exists)
-					file.Delete();
-			}
-    }
-    
-    [TestMethod]
+        [TestMethod]
+        public void Issue15460WithString()
+        {
+            FileInfo file = new FileInfo("report.xlsx");
+            try
+            {
+                if (file.Exists)
+                    file.Delete();
+                using (ExcelPackage package = new ExcelPackage(file))
+                {
+                    var sheet = package.Workbook.Worksheets.Add("New Sheet");
+                    sheet.Cells[3, 3].Value = new[] { "value1", "value2", "value3" };
+                    package.Save();
+                }
+                using (ExcelPackage package = new ExcelPackage(file))
+                {
+                    var sheet = package.Workbook.Worksheets["New Sheet"];
+                    Assert.AreEqual("value1", sheet.Cells[3, 3].Value);
+                }
+            }
+            finally
+            {
+                if (file.Exists)
+                    file.Delete();
+            }
+        }
+
+        [TestMethod]
         public void Issue15455()
         {
             using (var pck = new ExcelPackage())
             {
-                    
+
                 var sheet1 = pck.Workbook.Worksheets.Add("sheet1");
                 var sheet2 = pck.Workbook.Worksheets.Add("Sheet2");
                 sheet1.Cells["C2"].Value = 3;
@@ -1276,59 +1276,57 @@ namespace EPPlusTest
         }
 
 
-    [TestMethod]
-    public void Issue15460WithNull()
-    {
-      FileInfo file = new FileInfo("report.xlsx");
-      try
-      {
-        if (file.Exists)
-          file.Delete();
-        using (ExcelPackage package = new ExcelPackage(file))
+        [TestMethod]
+        public void Issue15460WithNull()
         {
-          var sheet = package.Workbook.Worksheets.Add("New Sheet");
-          sheet.Cells[3, 3].Value = new[] { null, "value2", "value3" };
-          package.Save();
+            FileInfo file = new FileInfo("report.xlsx");
+            try
+            {
+                if (file.Exists)
+                    file.Delete();
+                using (ExcelPackage package = new ExcelPackage(file))
+                {
+                    var sheet = package.Workbook.Worksheets.Add("New Sheet");
+                    sheet.Cells[3, 3].Value = new[] { null, "value2", "value3" };
+                    package.Save();
+                }
+                using (ExcelPackage package = new ExcelPackage(file))
+                {
+                    var sheet = package.Workbook.Worksheets["New Sheet"];
+                    Assert.AreEqual(string.Empty, sheet.Cells[3, 3].Value);
+                }
+            }
+            finally
+            {
+                if (file.Exists)
+                    file.Delete();
+            }
         }
-        using (ExcelPackage package = new ExcelPackage(file))
-        {
-          var sheet = package.Workbook.Worksheets["New Sheet"];
-          Assert.AreEqual(string.Empty, sheet.Cells[3, 3].Value);
-        }
-      }
-      finally
-      {
-        if (file.Exists)
-          file.Delete();
-      }
-    }
 
-    [TestMethod]
-    public void Issue15460WithNonStringPrimitive()
-    {
-      FileInfo file = new FileInfo("report.xlsx");
-      try
-      {
-        if (file.Exists)
-          file.Delete();
-        using (ExcelPackage package = new ExcelPackage(file))
+        [TestMethod]
+        public void Issue15460WithNonStringPrimitive()
         {
-          var sheet = package.Workbook.Worksheets.Add("New Sheet");
-          sheet.Cells[3, 3].Value = new[] { 5, 6, 7 };
-          package.Save();
-        }
-        using (ExcelPackage package = new ExcelPackage(file))
-        {
-          var sheet = package.Workbook.Worksheets["New Sheet"];
-          Assert.AreEqual((double)5, sheet.Cells[3, 3].Value);
-        }
-      }
-      finally
-      {
-        if (file.Exists)
-          file.Delete();
-      }
-    }
+            FileInfo file = new FileInfo("report.xlsx");
+            try
+            {
+                if (file.Exists)
+                    file.Delete();
+                using (ExcelPackage package = new ExcelPackage(file))
+                {
+                    var sheet = package.Workbook.Worksheets.Add("New Sheet");
+                    sheet.Cells[3, 3].Value = new[] { 5, 6, 7 };
+                    package.Save();
+                }
+                using (ExcelPackage package = new ExcelPackage(file))
+                {
+                    var sheet = package.Workbook.Worksheets["New Sheet"];
+                    Assert.AreEqual((double)5, sheet.Cells[3, 3].Value);
+                }
+            }
+            finally
+            {
+                if (file.Exists)
+                    file.Delete();
             }
         }
 
@@ -1352,6 +1350,8 @@ namespace EPPlusTest
 
                 sheet2.InsertRow(2, 2);
                 Assert.AreEqual("'Sheet2'!A5", package.Workbook.Names.Last().Address);
-            
-  }
+
+            }
+        }
+    }
 }

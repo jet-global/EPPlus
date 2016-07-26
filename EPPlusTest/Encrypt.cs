@@ -95,7 +95,7 @@ namespace EPPlusTest
             p.SaveAs(new FileInfo(@"c:\temp\encrNew.xlsx"));
         
         }
-        [TestMethod, Ignore]
+        [TestMethod]
         [Ignore]
         public void DecrypTestBug()
         {
