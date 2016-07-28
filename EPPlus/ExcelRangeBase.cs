@@ -271,7 +271,6 @@ namespace OfficeOpenXml
 			}
 			else
 			{
-				if (formula[0] == '=') value = formula.Substring(1, formula.Length - 1); // remove any starting equalsign.
 				range._worksheet._formulas.SetValue(row, col, formula);
 				range._worksheet.SetValueInner(row, col, null);
 			}
@@ -1118,6 +1117,8 @@ namespace OfficeOpenXml
 			}
 			set
 			{
+                if (!string.IsNullOrEmpty(value) && value[0] == '=')
+                    value = value.Substring(1);
 				if (IsName)
 				{
 					if (_worksheet == null)
@@ -1625,13 +1626,13 @@ namespace OfficeOpenXml
                     {
                         fIsSet = true;
                     }
-                    f.StartCol = address._toCol + 1;
                     if (address._fromRow < fRange._fromRow)
                         f.StartRow = fRange._fromRow;
                     else
                     {
                         f.StartRow = address._fromRow;
                     }
+                    f.StartCol = this.FindNextColumn(f.StartRow, address._toCol + 1, fRange._toCol);
 
                     if (fRange._toRow < address._toRow)
                     {
@@ -1658,7 +1659,7 @@ namespace OfficeOpenXml
                     }
 
                     f.StartCol = fRange._fromCol;
-                    f.StartRow = _toRow + 1;
+                    f.StartRow = this.FindNextRow(fRange._toRow, f.StartCol);
 
                     f.Formula = TranslateFromR1C1(formulaR1C1, f.StartRow, f.StartCol);
 
@@ -1669,6 +1670,30 @@ namespace OfficeOpenXml
                 }
             }
 		}
+
+        private int FindNextRow(int maxRow, int col)
+        {
+            for (int i = 1; i + _toRow <= maxRow; i++)
+            {
+                int row = _toRow + i;
+                var f = _worksheet._formulas.GetValue(row, col);
+                if (f is int)
+                    return row;
+            }
+            return -1;
+        }
+
+        private int FindNextColumn(int row, int initialCol, int maxCol)
+        {
+            for (int col = initialCol; col <= maxCol; col++)
+            {
+                var f = _worksheet._formulas.GetValue(row, col);
+                if (f is int)
+                    return col;
+            }
+            return -1;
+        }
+
 		private object ConvertData(ExcelTextFormat Format, string v, int col, bool isText)
 		{
 			if (isText && (Format.DataTypes == null || Format.DataTypes.Length < col)) return string.IsNullOrEmpty(v) ? null : v;
