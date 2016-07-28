@@ -93,22 +93,112 @@ namespace EPPlusTest
         }
 
         [TestMethod]
-        public void OverwrittenSharedFormulasAreRespected()
+        public void OverwrittenSharedFormulaRowsAreRespected()
         {
             // In Excel, a cell in a shared formula range can have its formula replaced by something
             // that is not the shared formula. EP Plus overwrites this formula when splitting shared
             // formulas.
-            var dir = AppDomain.CurrentDomain.BaseDirectory;
-            using (var pck = new ExcelPackage(new FileInfo(Path.Combine(dir, "Workbooks", "SharedFormulas.xlsx"))))
+            FileInfo newFile = new FileInfo(Path.GetTempFileName());
+            if (newFile.Exists)
+                newFile.Delete();
+            try
             {
-                var sheet = pck.Workbook.Worksheets["Sheet1"];
-                // This formula is in the shared formula range, but was explicitly overwritten in Excel.
-                var nonSharedFormulaOriginal = sheet.Cells["C5"].Formula;
-                // Set some other cell's formula in the shared formula range to trigger a split.
-                sheet.Cells["C4"].Formula = "SUM(1,2)";
-                // Verify that the explicit formula in the shared formula range was NOT overwritten.
-                var nonSharedFormulaUpdated = sheet.Cells["C5"].Formula;
-                Assert.AreEqual(nonSharedFormulaOriginal, nonSharedFormulaUpdated);
+                var dir = AppDomain.CurrentDomain.BaseDirectory;
+                using (var pck = new ExcelPackage(new FileInfo(Path.Combine(dir, "Workbooks", "SharedFormulasRows.xlsx"))))
+                {
+                    var sheet = pck.Workbook.Worksheets["Sheet1"];
+                    // This formula is in the shared formula range, but was explicitly overwritten in Excel.
+                    var nonSharedFormulaOriginal = sheet.Cells["C5"].Formula;
+                    // Set some other cell's formula in the shared formula range to trigger a split.
+                    sheet.Cells["C4"].Formula = "SUM(1,2)";
+                    // Verify that the explicit formula in the shared formula range was NOT overwritten.
+                    var nonSharedFormulaUpdated = sheet.Cells["C5"].Formula;
+                    Assert.AreEqual(nonSharedFormulaOriginal, nonSharedFormulaUpdated);
+                    // Ensure that the shared formula was propagated to the region.
+                    var sharedFormulaUpdated = sheet.Cells["C6"].Formula;
+                    Assert.AreEqual("B6+D6", sharedFormulaUpdated);
+                    pck.SaveAs(newFile);
+                }
+                // Ensure the integrity of the package is maintained.
+                using (var pck = new ExcelPackage(newFile))
+                {
+                    var sheet = pck.Workbook.Worksheets["Sheet1"];
+                    Assert.AreEqual("B3+D3", sheet.Cells["C3"].Formula);
+                    Assert.AreEqual("SUM(1,2)", sheet.Cells["C4"].Formula);
+                    Assert.AreEqual("B5*D5", sheet.Cells["C5"].Formula);
+                    Assert.AreEqual("B6+D6", sheet.Cells["C6"].Formula);
+                }
+            }
+            finally
+            {
+                if (newFile.Exists)
+                    newFile.Delete();
+            }
+        }
+
+        [TestMethod]
+        public void OverwrittenSharedFormulaColumnsAreRespected()
+        {
+            // In Excel, a cell in a shared formula range can have its formula replaced by something
+            // that is not the shared formula. EP Plus overwrites this formula when splitting shared
+            // formulas.
+            FileInfo newFile = new FileInfo(Path.GetTempFileName());
+            if (newFile.Exists)
+                newFile.Delete();
+            try
+            {
+                var dir = AppDomain.CurrentDomain.BaseDirectory;
+                using (var pck = new ExcelPackage(new FileInfo(Path.Combine(dir, "Workbooks", "SharedFormulasColumns.xlsx"))))
+                {
+                    var sheet = pck.Workbook.Worksheets["Sheet1"];
+                    // This formula is in the shared formula range, but was explicitly overwritten in Excel.
+                    var nonSharedFormulaOriginal = sheet.Cells["E3"].Formula;
+                    // Set some other cell's formula in the shared formula range to trigger a split.
+                    sheet.Cells["D3"].Formula = "SUM(1,2)";
+                    // Verify that the explicit formula in the shared formula range was NOT overwritten.
+                    var nonSharedFormulaUpdated = sheet.Cells["E3"].Formula;
+                    Assert.AreEqual(nonSharedFormulaOriginal, nonSharedFormulaUpdated);
+                    // Ensure that the shared formula was propagated to the region.
+                    var sharedFormulaUpdated = sheet.Cells["F3"].Formula;
+                    Assert.AreEqual("F2+F4", sharedFormulaUpdated);
+                    pck.SaveAs(newFile);
+                }
+                // Ensure the integrity of the package is maintained.
+                using (var pck = new ExcelPackage(newFile))
+                {
+                    var sheet = pck.Workbook.Worksheets["Sheet1"];
+                    Assert.AreEqual("C2+C4", sheet.Cells["C3"].Formula);
+                    Assert.AreEqual("SUM(1,2)", sheet.Cells["D3"].Formula);
+                    Assert.AreEqual("E2*E4", sheet.Cells["E3"].Formula);
+                    Assert.AreEqual("F2+F4", sheet.Cells["F3"].Formula);
+                }
+            }
+            finally
+            {
+                if (newFile.Exists)
+                    newFile.Delete();
+            }
+        }
+
+        [TestMethod]
+        public void SetFormulaRemovesLeadingEquals()
+        {
+            using (var pkg = new ExcelPackage())
+            {
+                var sheet = pkg.Workbook.Worksheets.Add("Sheet");
+                sheet.Cells[3, 3].Formula = "=SUM(1,2)";
+                Assert.AreEqual("SUM(1,2)", sheet.Cells[3, 3].Formula);
+            }
+        }
+
+        [TestMethod]
+        public void SetSharedFormulaRemovesLeadingEquals()
+        {
+            using (var pkg = new ExcelPackage())
+            {
+                var sheet = pkg.Workbook.Worksheets.Add("Sheet");
+                sheet.Cells[3, 3, 5, 5].Formula = "=SUM(1,2)";
+                Assert.AreEqual("SUM(1,2)", sheet.Cells[3, 3].Formula);
             }
         }
     }
