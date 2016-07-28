@@ -74,6 +74,11 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             return this;
         }
 
+        public virtual Expression GetComparableExpression()
+        {
+            return this;
+        }
+
         public virtual Expression AddChild(Expression child)
         {
             if (_children.Any())
