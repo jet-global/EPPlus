@@ -92,18 +92,6 @@ namespace EPPlusTest
         }
 
         [TestMethod]
-        public void IfWithArray()
-        {
-            using (ExcelPackage package = new ExcelPackage())
-            {
-                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-                worksheet.Cells[3, 3].Formula = "IF(FALSE,\"true\",{\"false\"})";
-                worksheet.Cells[3, 3].Calculate();
-                CollectionAssert.AreEqual(new List<object> { "false" }, (List<object>)worksheet.Cells[3, 3].Value);
-            }
-        }
-
-        [TestMethod]
         public void ArrayEquality()
         {
             using (ExcelPackage package = new ExcelPackage())
@@ -142,5 +130,16 @@ namespace EPPlusTest
             }
         }
 
+        [TestMethod]
+        public void IfWithArray()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[3, 3].Formula = "IF(FALSE,\"true\",{\"false\"})";
+                worksheet.Cells[3, 3].Calculate();
+                CollectionAssert.AreEqual(new List<object> { "false" }, (List<object>)worksheet.Cells[3, 3].Value);
+            }
+        }
     }
 }

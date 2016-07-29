@@ -96,7 +96,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             var expression = this;
             if (Next != null && Operator != null)
             {
-                var result = Operator.Apply(Compile(), Next.Compile());
+                var result = Operator.Apply(GetComparableExpression().Compile(), Next.GetComparableExpression().Compile());
                 expression = ExpressionConverter.Instance.FromCompileResult(result);
                 if (expression is ExcelErrorExpression)
                 {

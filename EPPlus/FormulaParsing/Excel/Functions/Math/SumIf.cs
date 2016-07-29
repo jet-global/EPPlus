@@ -53,17 +53,30 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
         {
             ValidateArguments(arguments, 2);
             var args = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
-            var criteria = arguments.ElementAt(1).ValueFirst != null ? ArgToString(arguments, 1) : null;
+            var criteria = GetArgumentValue(arguments.ElementAt(1)).ValueFirst != null ? GetArgumentValue(arguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
             var retVal = 0d;
             if (args == null)
             {
-                var val = arguments.ElementAt(0).Value;
+                var val = GetArgumentValue(arguments.ElementAt(0)).Value;
                 if (criteria != null && _evaluator.Evaluate(val, criteria))
                 {
-                    var sumRange = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
-                    retVal = arguments.Count() > 2
-                        ? sumRange.First().ValueDouble
-                        : ConvertUtil.GetValueDouble(val, true);
+                    if (arguments.Count() > 2)
+                    {
+                        var sumVal = arguments.ElementAt(2).Value;
+                        var sumRange = sumVal as ExcelDataProvider.IRangeInfo;
+                        if (sumRange != null)
+                        {
+                            retVal = sumRange.First().ValueDouble;
+                        }
+                        else
+                        {
+                            retVal = ConvertUtil.GetValueDouble(sumVal, true);
+                        }
+                    }
+                    else
+                    {
+                        retVal = ConvertUtil.GetValueDouble(val, true);
+                    }
                 }
             }
             else if (arguments.Count() > 2)
@@ -83,7 +96,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
             var retVal = 0d;
             foreach (var cell in range)
             {
-                if (criteria != null && _evaluator.Evaluate(cell.Value, criteria))
+                if (criteria != null && _evaluator.Evaluate(GetArgumentValue(cell.Value), criteria))
                 {
                     var or = cell.Row - range.Address._fromRow;
                     var oc = cell.Column - range.Address._fromCol;
@@ -91,10 +104,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
                        sumRange.Address._fromCol + oc <= sumRange.Address._toCol)
                     {
                         var v = sumRange.GetOffset(or, oc);
-                        if (v is ExcelErrorValue)
-                        {
-                            throw (new ExcelErrorValueException((ExcelErrorValue)v));
-                        }
                         retVal += ConvertUtil.GetValueDouble(v, true);
                     }
                 }
@@ -105,18 +114,34 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
         private double CalculateSingleRange(ExcelDataProvider.IRangeInfo range, string expression, ParsingContext context)
         {
             var retVal = 0d;
-            foreach (var candidate in range)
+            foreach (var cell in range)
             {
-                if (expression != null && IsNumeric(candidate.Value) && _evaluator.Evaluate(candidate.Value, expression) && IsNumeric(candidate.Value))
+                if (expression != null && IsNumeric(GetArgumentValue(cell.Value)) && _evaluator.Evaluate(GetArgumentValue(cell.Value), expression))
                 {
-                    if (candidate.IsExcelError)
-                    {
-                        throw (new ExcelErrorValueException((ExcelErrorValue)candidate.Value));
-                    }
-                    retVal += candidate.ValueDouble;
+                    retVal += cell.ValueDouble;
                 }
             }
             return retVal;
+        }
+
+        private FunctionArgument GetArgumentValue(FunctionArgument arg)
+        {
+            var list = arg.Value as List<FunctionArgument>;
+            if (list != null)
+            {
+                return list.First();
+            }
+            return arg;
+        }
+
+        private object GetArgumentValue(object arg)
+        {
+            var list = arg as List<object>;
+            if (list != null)
+            {
+                return list.First();
+            }
+            return arg;
         }
     }
 }

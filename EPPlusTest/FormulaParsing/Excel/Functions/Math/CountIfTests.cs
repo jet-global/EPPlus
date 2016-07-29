@@ -85,7 +85,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
             Assert.AreEqual(1d, result.Result);
         }
 
-[TestMethod]
+        [TestMethod]
         public void CountIfEqualToEmptyString()
         {
             _worksheet.Cells["A1"].Value = null;
@@ -239,6 +239,26 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
             var args = FunctionsHelper.CreateArgs(range, ">=a");
             var result = func.Execute(args, _parsingContext);
             Assert.AreEqual(1d, result.Result);
+        }
+
+        [TestMethod]
+        public void CountIfWithArraySingleCell()
+        {
+            _worksheet.Cells[2, 3].Formula = "{1,2,3}";
+            _worksheet.Cells[3, 3].Formula = "COUNTIF(C2,{1,2,3})";
+            _worksheet.Cells[3, 3].Calculate();
+            Assert.AreEqual(1d, _worksheet.Cells[3, 3].Value);
+        }
+
+        [TestMethod]
+        public void CountIfWithArrayMultiCell()
+        {
+            _worksheet.Cells[2, 3].Formula = "{1,2,3}";
+            _worksheet.Cells[2, 4].Formula = "{1,2,3}";
+            _worksheet.Cells[2, 5].Formula = "{1,2,3}";
+            _worksheet.Cells[3, 3].Formula = "COUNTIF(C2:E2,{1,2,3})";
+            _worksheet.Cells[3, 3].Calculate();
+            Assert.AreEqual(3d, _worksheet.Cells[3, 3].Value);
         }
     }
 }
