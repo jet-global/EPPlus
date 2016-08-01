@@ -339,5 +339,92 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
             _worksheet.Calculate();
             Assert.AreEqual(3.0, _worksheet.Cells[8, 3].Value);
         }
+
+        [TestMethod]
+        public void SumIfSingleCellWithNoSumRange()
+        {
+            _worksheet.Cells[2, 2].Value = 1;
+            _worksheet.Cells[3, 3].Formula = "SUMIF(B2,1)";
+            _worksheet.Cells[3, 3].Calculate();
+            Assert.AreEqual(1d, _worksheet.Cells[3, 3].Value);
+        }
+
+        [TestMethod]
+        public void SumIfSingleCellWithSumRange()
+        {
+            _worksheet.Cells[2, 2].Value = "Value";
+            _worksheet.Cells[2, 3].Value = 1;
+            _worksheet.Cells[3, 3].Formula = "SUMIF(B2,\"Value\",C2)";
+            _worksheet.Cells[3, 3].Calculate();
+            Assert.AreEqual(1d, _worksheet.Cells[3, 3].Value);
+        }
+
+        [TestMethod]
+        public void SumIfArrayComparisons()
+        {
+            _worksheet.Cells[2, 2].Value = 1;
+            _worksheet.Cells[2, 3].Formula = "{1,2,3;4,5,6}";
+            _worksheet.Cells[3, 3].Formula = "SUMIF(C2,{1},B2)";
+            _worksheet.Cells[2, 4].Formula = "{1}";
+            _worksheet.Cells[3, 4].Formula = "SUMIF(D2,{1,2,3},B2)";
+            _worksheet.Cells[2, 5].Formula = "{1,2,3}";
+            _worksheet.Cells[3, 5].Formula = "SUMIF(E2,\"{1,2,3}\",B2)";
+            _worksheet.Calculate();
+            Assert.AreEqual(1d, _worksheet.Cells[3, 3].Value);
+            Assert.AreEqual(1d, _worksheet.Cells[3, 4].Value);
+            Assert.AreEqual(0d, _worksheet.Cells[3, 5].Value);
+        }
+
+        [TestMethod]
+        public void SumIfWithArraySingleCell()
+        {
+            _worksheet.Cells[2, 2].Value = 1;
+            _worksheet.Cells[2, 3].Formula = "{1,2,3}";
+            _worksheet.Cells[3, 3].Formula = "SUMIF(C2,{1,2,3},B2)";
+            _worksheet.Cells[3, 3].Calculate();
+            Assert.AreEqual(1d, _worksheet.Cells[3, 3].Value);
+        }
+
+        [TestMethod]
+        public void SumIfWithArrayMultiCell()
+        {
+            _worksheet.Cells[2, 2].Value = 1;
+            _worksheet.Cells[2, 3].Value = 1;
+            _worksheet.Cells[2, 4].Value = 1;
+            _worksheet.Cells[3, 2].Formula = "{1,2,3}";
+            _worksheet.Cells[3, 3].Formula = "{1,2,3}";
+            _worksheet.Cells[3, 4].Formula = "{1,2,3}";
+            _worksheet.Cells[4, 4].Formula = "SUMIF(B3:D3,{1,2,3},B2:D2)";
+            _worksheet.Cells[4, 4].Calculate();
+            Assert.AreEqual(3d, _worksheet.Cells[4, 4].Value);
+        }
+
+        [TestMethod]
+        public void SumIfWithErrorSingleCell()
+        {
+            _worksheet.Cells[2, 2].Value = "Value";
+            _worksheet.Cells[3, 2].Value = ExcelErrorValue.Create(eErrorType.Value);
+            _worksheet.Cells[4, 4].Formula = "SUMIF(B3,\"Value\")";
+            _worksheet.Cells[5, 4].Formula = "SUMIF(B2,\"Value\",B3)";
+            _worksheet.Calculate();
+            Assert.AreEqual(0d, _worksheet.Cells[4, 4].Value);
+            Assert.AreEqual(0d, _worksheet.Cells[5, 4].Value);
+        }
+
+        [TestMethod]
+        public void SumIfWithErrorMultiCell()
+        {
+            _worksheet.Cells[2, 2].Value = "Value";
+            _worksheet.Cells[2, 3].Value = "Value";
+            _worksheet.Cells[2, 4].Value = "Value";
+            _worksheet.Cells[3, 2].Value = ExcelErrorValue.Create(eErrorType.Value);
+            _worksheet.Cells[3, 3].Value = ExcelErrorValue.Create(eErrorType.Value);
+            _worksheet.Cells[3, 4].Value = ExcelErrorValue.Create(eErrorType.Value);
+            _worksheet.Cells[4, 4].Formula = "SUMIF(B3:D3,\"Value\")";
+            _worksheet.Cells[5, 4].Formula = "SUMIF(B2:D2,\"Value\",B3:D3)";
+            _worksheet.Calculate();
+            Assert.AreEqual(0d, _worksheet.Cells[4, 4].Value);
+            Assert.AreEqual(0d, _worksheet.Cells[5, 4].Value);
+        }
     }
 }
