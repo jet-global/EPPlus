@@ -255,6 +255,38 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
         }
 
         /// <summary>
+        /// If the argument is a collection, its first value will be returned.
+        /// If the argument is not a collection, the argument will be returned.
+        /// </summary>
+        /// <param name="argument"></param>
+        /// <returns></returns>
+        protected FunctionArgument GetFirstArgument(FunctionArgument argument)
+        {
+            var list = argument.Value as List<FunctionArgument>;
+            if (list != null)
+            {
+                return list.First();
+            }
+            return argument;
+        }
+
+        /// <summary>
+        /// If the argument is a collection, its first value will be returned.
+        /// If the argument is not a collection, the argument will be returned.
+        /// </summary>
+        /// <param name="argument"></param>
+        /// <returns></returns>
+        protected object GetFirstArgument(object argument)
+        {
+            var list = argument as List<object>;
+            if (list != null)
+            {
+                return list.First();
+            }
+            return argument;
+        }
+
+        /// <summary>
         /// Throws an <see cref="ArgumentException"/> if <paramref name="condition"/> evaluates to true.
         /// </summary>
         /// <param name="condition"></param>

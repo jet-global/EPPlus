@@ -56,12 +56,6 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis.TokenSeparatorHandlers
 
             if (tokenSeparator.TokenType == TokenType.String)
             {
-                if (context.LastToken != null && context.LastToken.TokenType == TokenType.OpeningEnumerable)
-                {
-                    context.AppendToCurrentToken(c);
-                    context.ToggleIsInString();
-                    return true;
-                }
                 if (context.LastToken != null && context.LastToken.TokenType == TokenType.String)
                 {
                     context.AddToken(!context.CurrentTokenHasValue

@@ -60,6 +60,13 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             return this;
         }
 
+        public override Expression GetComparableExpression()
+        {
+            if (HasChildren)
+                return Children.First();
+            return this;
+        }
+
         public override CompileResult Compile()
         {
             var result = new List<object>();
