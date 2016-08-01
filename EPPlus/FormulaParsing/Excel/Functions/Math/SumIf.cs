@@ -53,11 +53,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
         {
             ValidateArguments(arguments, 2);
             var args = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
-            var criteria = GetArgumentValue(arguments.ElementAt(1)).ValueFirst != null ? GetArgumentValue(arguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
+            var criteria = GetFirstArgument(arguments.ElementAt(1)).ValueFirst != null ? GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
             var retVal = 0d;
             if (args == null)
             {
-                var val = GetArgumentValue(arguments.ElementAt(0)).Value;
+                var val = GetFirstArgument(arguments.ElementAt(0)).Value;
                 if (criteria != null && _evaluator.Evaluate(val, criteria))
                 {
                     if (arguments.Count() > 2)
@@ -96,7 +96,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
             var retVal = 0d;
             foreach (var cell in range)
             {
-                if (criteria != null && _evaluator.Evaluate(GetArgumentValue(cell.Value), criteria))
+                if (criteria != null && _evaluator.Evaluate(GetFirstArgument(cell.Value), criteria))
                 {
                     var or = cell.Row - range.Address._fromRow;
                     var oc = cell.Column - range.Address._fromCol;
@@ -116,32 +116,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
             var retVal = 0d;
             foreach (var cell in range)
             {
-                if (expression != null && IsNumeric(GetArgumentValue(cell.Value)) && _evaluator.Evaluate(GetArgumentValue(cell.Value), expression))
+                if (expression != null && IsNumeric(GetFirstArgument(cell.Value)) && _evaluator.Evaluate(GetFirstArgument(cell.Value), expression))
                 {
                     retVal += cell.ValueDouble;
                 }
             }
             return retVal;
-        }
-
-        private FunctionArgument GetArgumentValue(FunctionArgument arg)
-        {
-            var list = arg.Value as List<FunctionArgument>;
-            if (list != null)
-            {
-                return list.First();
-            }
-            return arg;
-        }
-
-        private object GetArgumentValue(object arg)
-        {
-            var list = arg as List<object>;
-            if (list != null)
-            {
-                return list.First();
-            }
-            return arg;
         }
     }
 }

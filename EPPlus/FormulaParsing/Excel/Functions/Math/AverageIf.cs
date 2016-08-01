@@ -67,11 +67,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
         {
             ValidateArguments(arguments, 2);
             var args = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
-            var criteria = GetArgumentValue(arguments.ElementAt(1)).ValueFirst != null ? GetArgumentValue(arguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
+            var criteria = GetFirstArgument(arguments.ElementAt(1)).ValueFirst != null ? GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
             var retVal = 0d;
             if (args == null)
             {
-                var val = GetArgumentValue(arguments.ElementAt(0)).Value;
+                var val = GetFirstArgument(arguments.ElementAt(0)).Value;
                 if (criteria != null && Evaluate(val, criteria))
                 {
                     if (arguments.Count() > 2)
@@ -115,7 +115,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
             var nMatches = 0;
             foreach (var cell in range)
             {
-                if (criteria != null && Evaluate(GetArgumentValue(cell.Value), criteria))
+                if (criteria != null && Evaluate(GetFirstArgument(cell.Value), criteria))
                 {
                     var or = cell.Row - range.Address._fromRow;
                     var oc = cell.Column - range.Address._fromCol;
@@ -137,33 +137,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
             var nMatches = 0;
             foreach (var candidate in range)
             {
-                if (expression != null && IsNumeric(GetArgumentValue(candidate.Value)) && Evaluate(GetArgumentValue(candidate.Value), expression))
+                if (expression != null && IsNumeric(GetFirstArgument(candidate.Value)) && Evaluate(GetFirstArgument(candidate.Value), expression))
                 {
                     retVal += candidate.ValueDouble;
                     nMatches++;
                 }
             }
             return Divide(retVal, nMatches);
-        }
-
-        private FunctionArgument GetArgumentValue(FunctionArgument arg)
-        {
-            var list = arg.Value as List<FunctionArgument>;
-            if (list != null)
-            {
-                return list.First();
-            }
-            return arg;
-        }
-
-        private object GetArgumentValue(object arg)
-        {
-            var list = arg as List<object>;
-            if (list != null)
-            {
-                return list.First();
-            }
-            return arg;
         }
     }
 }
