@@ -84,7 +84,7 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
             }
             else if (op is DateTime)
             {
-                d = ((DateTime) op).ToOADate();
+                d = ((DateTime)op).ToOADate();
                 return true;
             }
             else if (op != null)

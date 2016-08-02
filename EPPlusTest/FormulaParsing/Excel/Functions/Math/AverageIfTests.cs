@@ -282,5 +282,29 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
             var result = func.Execute(args, _parsingContext);
             Assert.AreEqual(5d, result.Result);
         }
+
+        [TestMethod]
+        public void AverageIfWithArraySingleCell()
+        {
+            _worksheet.Cells[2, 2].Value = 1;
+            _worksheet.Cells[2, 3].Formula = "{1,2,3}";
+            _worksheet.Cells[3, 3].Formula = "AVERAGEIF(C2,{1,2,3},B2)";
+            _worksheet.Cells[3, 3].Calculate();
+            Assert.AreEqual(1d, _worksheet.Cells[3, 3].Value);
+        }
+
+        [TestMethod]
+        public void AverageIfWithArrayMultiCell()
+        {
+            _worksheet.Cells[2, 2].Value = 1;
+            _worksheet.Cells[2, 3].Value = 1;
+            _worksheet.Cells[2, 4].Value = 1;
+            _worksheet.Cells[3, 2].Formula = "{1,2,3}";
+            _worksheet.Cells[3, 3].Formula = "{1,2,3}";
+            _worksheet.Cells[3, 4].Formula = "{1,2,3}";
+            _worksheet.Cells[4, 4].Formula = "AVERAGEIF(B3:D3,{1,2,3},B2:D2)";
+            _worksheet.Cells[4, 4].Calculate();
+            Assert.AreEqual(1d, _worksheet.Cells[4, 4].Value);
+        }
     }
 }
