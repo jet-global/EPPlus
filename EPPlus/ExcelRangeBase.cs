@@ -30,39 +30,37 @@
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  * Eyal Seagull		    Conditional Formatting      2012-04-03
  *******************************************************************************/
+using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.DataValidation;
+using OfficeOpenXml.Drawing.Sparkline;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using OfficeOpenXml.Style;
+using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Table;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
 using System.Data;
-using System.Threading;
-using OfficeOpenXml.FormulaParsing;
-using OfficeOpenXml.Style;
-using System.Xml;
 using System.Drawing;
 using System.Globalization;
-using System.Collections;
-using OfficeOpenXml.Table;
-using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
-using OfficeOpenXml.DataValidation;
-using OfficeOpenXml.DataValidation.Contracts;
 using System.Reflection;
-using OfficeOpenXml.Style.XmlAccess;
-using System.Security;
-using OfficeOpenXml.ConditionalFormatting;
-using OfficeOpenXml.ConditionalFormatting.Contracts;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Xml;
+
 using wm=System.Windows.Media;
 using w=System.Windows;
 
 namespace OfficeOpenXml
-{	
+{
     /// <summary>
-	/// A range of cells 
-	/// </summary>
-	public class ExcelRangeBase : ExcelAddress, IExcelCell, IDisposable, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
+    /// A range of cells 
+    /// </summary>
+    public class ExcelRangeBase : ExcelAddress, IExcelCell, IDisposable, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
 	{
 		/// <summary>
 		/// Reference to the worksheet
@@ -271,7 +269,6 @@ namespace OfficeOpenXml
 			}
 			else
 			{
-				if (formula[0] == '=') value = formula.Substring(1, formula.Length - 1); // remove any starting equalsign.
 				range._worksheet._formulas.SetValue(row, col, formula);
 				range._worksheet.SetValueInner(row, col, null);
 			}
@@ -1118,6 +1115,8 @@ namespace OfficeOpenXml
 			}
 			set
 			{
+                if (!string.IsNullOrEmpty(value) && value[0] == '=')
+                    value = value.Substring(1);
 				if (IsName)
 				{
 					if (_worksheet == null)
@@ -1460,6 +1459,8 @@ namespace OfficeOpenXml
                 return fullAddress;
             }
         }
+
+        internal List<ExcelSparkline> Sparklines { get; } = new List<ExcelSparkline>();
 		#endregion
 		#region Private Methods
 		/// <summary>
@@ -1498,7 +1499,8 @@ namespace OfficeOpenXml
 			{
 				for (int row = _fromRow; row <= _toRow; row++)
 				{
-                    _worksheet._formulas.SetValue(row, col, id);
+                    if (_worksheet._formulas.GetValue(row, col) is int)
+                        _worksheet._formulas.SetValue(row, col, id);
 				}
 			}
 		}
@@ -1624,13 +1626,13 @@ namespace OfficeOpenXml
                     {
                         fIsSet = true;
                     }
-                    f.StartCol = address._toCol + 1;
                     if (address._fromRow < fRange._fromRow)
                         f.StartRow = fRange._fromRow;
                     else
                     {
                         f.StartRow = address._fromRow;
                     }
+                    f.StartCol = this.FindNextColumn(f.StartRow, address._toCol + 1, fRange._toCol);
 
                     if (fRange._toRow < address._toRow)
                     {
@@ -1657,7 +1659,7 @@ namespace OfficeOpenXml
                     }
 
                     f.StartCol = fRange._fromCol;
-                    f.StartRow = _toRow + 1;
+                    f.StartRow = this.FindNextRow(fRange._toRow, f.StartCol);
 
                     f.Formula = TranslateFromR1C1(formulaR1C1, f.StartRow, f.StartCol);
 
@@ -1668,6 +1670,30 @@ namespace OfficeOpenXml
                 }
             }
 		}
+
+        private int FindNextRow(int maxRow, int col)
+        {
+            for (int i = 1; i + _toRow <= maxRow; i++)
+            {
+                int row = _toRow + i;
+                var f = _worksheet._formulas.GetValue(row, col);
+                if (f is int)
+                    return row;
+            }
+            return -1;
+        }
+
+        private int FindNextColumn(int row, int initialCol, int maxCol)
+        {
+            for (int col = initialCol; col <= maxCol; col++)
+            {
+                var f = _worksheet._formulas.GetValue(row, col);
+                if (f is int)
+                    return col;
+            }
+            return -1;
+        }
+
 		private object ConvertData(ExcelTextFormat Format, string v, int col, bool isText)
 		{
 			if (isText && (Format.DataTypes == null || Format.DataTypes.Length < col)) return string.IsNullOrEmpty(v) ? null : v;
@@ -2357,7 +2383,6 @@ namespace OfficeOpenXml
             ExcelStyles sourceStyles = _worksheet.Workbook.Styles,
                         styles = Destination._worksheet.Workbook.Styles;
             Dictionary<int, int> styleCashe = new Dictionary<int, int>();
-
             //Clear all existing cells; 
             int toRow = _toRow - _fromRow + 1,
                 toCol = _toCol - _fromCol + 1;
@@ -2366,7 +2391,6 @@ namespace OfficeOpenXml
             object o = null;
             byte flag=0;
             Uri hl = null;
-            ExcelComment comment=null;
 
             var excludeFormulas = excelRangeCopyOptionFlags.HasValue && (excelRangeCopyOptionFlags.Value & ExcelRangeCopyOptionFlags.ExcludeFormulas) == ExcelRangeCopyOptionFlags.ExcludeFormulas;
             var cse = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
@@ -2505,9 +2529,6 @@ namespace OfficeOpenXml
                     }
                 }
             }
-
-            Destination._worksheet.MergedCells.Clear(new ExcelAddressBase(Destination._fromRow, Destination._fromCol, Destination._fromRow+toRow-1, Destination._fromCol+toCol-1));
-
             Destination._worksheet._values.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
             Destination._worksheet._formulas.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
             //Destination._worksheet._styles.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
@@ -2557,6 +2578,27 @@ namespace OfficeOpenXml
                 {
                     Destination._worksheet.MergedCells.Add(m, true);
                 }
+            }
+            int rowOffset = Destination._fromRow;
+            string workbook, worksheet, address;
+            List<ExcelSparkline> newSparklines = new List<ExcelSparkline>();
+            foreach (var group in this.Worksheet.SparklineGroups.SparklineGroups)
+            {
+                newSparklines.Clear();
+                foreach (var sparkline in group.Sparklines)
+                {
+                    if(sparkline.HostCell.Collide(this) != eAddressCollition.No)
+                    {
+                        ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+                        var newFormula = UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+                        if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
+                            newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
+                        var newHostCell = UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+                        var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };
+                        newSparklines.Add(newSparkline);
+                    }
+                }
+                group.Sparklines.AddRange(newSparklines);
             }
             if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns)
             {

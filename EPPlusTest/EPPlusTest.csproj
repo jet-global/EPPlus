@@ -221,6 +221,7 @@
     <Compile Include="Utils\GuardingTests.cs" />
     <Compile Include="Utils\SqRefUtilityTests.cs" />
     <Compile Include="VBA.cs" />
+    <Compile Include="WorkbookTests.cs" />
     <Compile Include="WorkSheet.cs" />
     <Compile Include="WorksheetsTests.cs" />
   </ItemGroup>
@@ -230,6 +231,12 @@
     <EmbeddedResource Include="Resources\Vector Drawing.wmf" />
     <EmbeddedResource Include="Resources\Vector Drawing2.wmf" />
     <None Include="Workbooks\FormulaTest.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Workbooks\SharedFormulasColumns.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Workbooks\SharedFormulasRows.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
