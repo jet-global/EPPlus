@@ -181,6 +181,86 @@ namespace EPPlusTest
         }
 
         [TestMethod]
+        public void FullyOverwrittenSharedRowFormulaIsRemovedCorrectly()
+        {
+            // There is a bug where Shared Formulas that are overwritten from the bottom up cause
+            // an exception on the final cell in the Shared Formula range.
+            FileInfo newFile = new FileInfo(Path.GetTempFileName());
+            if (newFile.Exists)
+                newFile.Delete();
+            try
+            {
+                var dir = AppDomain.CurrentDomain.BaseDirectory;
+                using (var pck = new ExcelPackage())
+                {
+                    var sheet = pck.Workbook.Worksheets.Add("Sheet1");
+                    sheet.Cells["C3:C4"].Formula = "B3+B3";
+                    Assert.AreEqual("B3+B3", sheet.Cells[3, 3].Formula);
+                    Assert.AreEqual("B4+B4", sheet.Cells[4, 3].Formula);
+                    sheet.Cells[4, 3].Formula = "B4-B4";
+                    Assert.AreEqual("B3+B3", sheet.Cells[3, 3].Formula);
+                    Assert.AreEqual("B4-B4", sheet.Cells[4, 3].Formula);
+                    sheet.Cells[3, 3].Formula = "B3-B3";
+                    Assert.AreEqual("B3-B3", sheet.Cells[3, 3].Formula);
+                    Assert.AreEqual("B4-B4", sheet.Cells[4, 3].Formula);
+                    pck.SaveAs(newFile);
+                }
+                // Ensure the integrity of the package is maintained.
+                using (var pck = new ExcelPackage(newFile))
+                {
+                    var sheet = pck.Workbook.Worksheets["Sheet1"];
+                    Assert.AreEqual("B3-B3", sheet.Cells[3, 3].Formula);
+                    Assert.AreEqual("B4-B4", sheet.Cells[4, 3].Formula);
+                }
+            }
+            finally
+            {
+                if (newFile.Exists)
+                    newFile.Delete();
+            }
+        }
+
+        [TestMethod]
+        public void FullyOverwrittenSharedColumnFormulaIsRemovedCorrectly()
+        {
+            // There is a bug where Shared Formulas that are overwritten from the bottom up cause
+            // an exception on the final cell in the Shared Formula range.
+            FileInfo newFile = new FileInfo(Path.GetTempFileName());
+            if (newFile.Exists)
+                newFile.Delete();
+            try
+            {
+                var dir = AppDomain.CurrentDomain.BaseDirectory;
+                using (var pck = new ExcelPackage())
+                {
+                    var sheet = pck.Workbook.Worksheets.Add("Sheet1");
+                    sheet.Cells["C3:D3"].Formula = "C4+C4";
+                    Assert.AreEqual("C4+C4", sheet.Cells[3, 3].Formula);
+                    Assert.AreEqual("D4+D4", sheet.Cells[3, 4].Formula);
+                    sheet.Cells[3, 4].Formula = "D4-D4";
+                    Assert.AreEqual("C4+C4", sheet.Cells[3, 3].Formula);
+                    Assert.AreEqual("D4-D4", sheet.Cells[3, 4].Formula);
+                    sheet.Cells[3, 3].Formula = "C4-C4";
+                    Assert.AreEqual("C4-C4", sheet.Cells[3, 3].Formula);
+                    Assert.AreEqual("D4-D4", sheet.Cells[3, 4].Formula);
+                    pck.SaveAs(newFile);
+                }
+                // Ensure the integrity of the package is maintained.
+                using (var pck = new ExcelPackage(newFile))
+                {
+                    var sheet = pck.Workbook.Worksheets["Sheet1"];
+                    Assert.AreEqual("C4-C4", sheet.Cells[3, 3].Formula);
+                    Assert.AreEqual("D4-D4", sheet.Cells[3, 4].Formula);
+                }
+            }
+            finally
+            {
+                if (newFile.Exists)
+                    newFile.Delete();
+            }
+        }
+
+        [TestMethod]
         public void SetFormulaRemovesLeadingEquals()
         {
             using (var pkg = new ExcelPackage())

@@ -1633,19 +1633,23 @@ namespace OfficeOpenXml
                         f.StartRow = address._fromRow;
                     }
                     f.StartCol = this.FindNextColumn(f.StartRow, address._toCol + 1, fRange._toCol);
-
-                    if (fRange._toRow < address._toRow)
-                    {
-                        f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
-                                fRange._toRow, fRange._toCol);
-                    }
+                    if (f.StartCol == -1)
+                        _worksheet._sharedFormulas.Remove(f.Index);
                     else
                     {
-                        f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
-                                address._toRow, fRange._toCol);
+                        if (fRange._toRow < address._toRow)
+                        {
+                            f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
+                                    fRange._toRow, fRange._toCol);
+                        }
+                        else
+                        {
+                            f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
+                                    address._toRow, fRange._toCol);
+                        }
+                        f.Formula = TranslateFromR1C1(formulaR1C1, f.StartRow, f.StartCol);
+                        _worksheet.Cells[f.Address].SetSharedFormulaID(f.Index);
                     }
-                    f.Formula = TranslateFromR1C1(formulaR1C1, f.StartRow, f.StartCol);
-                    _worksheet.Cells[f.Address].SetSharedFormulaID(f.Index);
                 }
                 //Bottom Range
                 if (fRange._toRow > address._toRow)
@@ -1660,13 +1664,16 @@ namespace OfficeOpenXml
 
                     f.StartCol = fRange._fromCol;
                     f.StartRow = this.FindNextRow(fRange._toRow, f.StartCol);
+                    if (f.StartRow == -1)
+				        _worksheet._sharedFormulas.Remove(f.Index);
+                    else
+                    {
+                        f.Formula = TranslateFromR1C1(formulaR1C1, f.StartRow, f.StartCol);
 
-                    f.Formula = TranslateFromR1C1(formulaR1C1, f.StartRow, f.StartCol);
-
-                    f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
-                            fRange._toRow, fRange._toCol);
-                    _worksheet.Cells[f.Address].SetSharedFormulaID(f.Index);
-
+                        f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
+                                fRange._toRow, fRange._toCol);
+                        _worksheet.Cells[f.Address].SetSharedFormulaID(f.Index);
+                    }
                 }
             }
 		}
