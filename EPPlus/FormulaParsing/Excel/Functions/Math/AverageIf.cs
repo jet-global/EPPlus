@@ -67,17 +67,30 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
         {
             ValidateArguments(arguments, 2);
             var args = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
-            var criteria = arguments.ElementAt(1).ValueFirst != null ? ArgToString(arguments, 1) : null;
+            var criteria = GetFirstArgument(arguments.ElementAt(1)).ValueFirst != null ? GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
             var retVal = 0d;
             if (args == null)
             {
-                var val = arguments.ElementAt(0).Value;
+                var val = GetFirstArgument(arguments.ElementAt(0)).Value;
                 if (criteria != null && Evaluate(val, criteria))
                 {
-                    var lookupRange = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
-                    retVal = arguments.Count() > 2
-                        ? lookupRange.First().ValueDouble
-                        : ConvertUtil.GetValueDouble(val, true);
+                    if (arguments.Count() > 2)
+                    {
+                        var averageVal = arguments.ElementAt(2).Value;
+                        var averageRange = averageVal as ExcelDataProvider.IRangeInfo;
+                        if (averageRange != null)
+                        {
+                            retVal = averageRange.First().ValueDouble;
+                        }
+                        else
+                        {
+                            retVal = ConvertUtil.GetValueDouble(averageVal, true);
+                        }
+                    }
+                    else
+                    {
+                        retVal = ConvertUtil.GetValueDouble(val, true);
+                    }
                 }
                 else
                 {
@@ -87,7 +100,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
             else if (arguments.Count() > 2)
             {
                 var lookupRange = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
-                retVal = CalculateWithLookupRange(args, criteria, lookupRange, context);
+                retVal = CalculateWithAverageRange(args, criteria, lookupRange, context);
             }
             else
             {
@@ -96,13 +109,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
             return CreateResult(retVal, DataType.Decimal);
         }
 
-        private double CalculateWithLookupRange(ExcelDataProvider.IRangeInfo range, string criteria, ExcelDataProvider.IRangeInfo sumRange, ParsingContext context)
+        private double CalculateWithAverageRange(ExcelDataProvider.IRangeInfo range, string criteria, ExcelDataProvider.IRangeInfo sumRange, ParsingContext context)
         {
             var retVal = 0d;
             var nMatches = 0;
             foreach (var cell in range)
             {
-                if (criteria != null && Evaluate(cell.Value, criteria))
+                if (criteria != null && Evaluate(GetFirstArgument(cell.Value), criteria))
                 {
                     var or = cell.Row - range.Address._fromRow;
                     var oc = cell.Column - range.Address._fromCol;
@@ -110,10 +123,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
                        sumRange.Address._fromCol + oc <= sumRange.Address._toCol)
                     {
                         var v = sumRange.GetOffset(or, oc);
-                        if (v is ExcelErrorValue)
-                        {
-                            throw (new ExcelErrorValueException((ExcelErrorValue)v));
-                        }
                         nMatches++;
                         retVal += ConvertUtil.GetValueDouble(v, true);
                     }
@@ -128,12 +137,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
             var nMatches = 0;
             foreach (var candidate in range)
             {
-                if (expression != null && IsNumeric(candidate.Value) && Evaluate(candidate.Value, expression))
+                if (expression != null && IsNumeric(GetFirstArgument(candidate.Value)) && Evaluate(GetFirstArgument(candidate.Value), expression))
                 {
-                    if (candidate.IsExcelError)
-                    {
-                        throw (new ExcelErrorValueException((ExcelErrorValue)candidate.Value));
-                    }
                     retVal += candidate.ValueDouble;
                     nMatches++;
                 }

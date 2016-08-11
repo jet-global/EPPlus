@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
@@ -279,6 +280,57 @@ namespace EPPlusTest
                 var sheet = pkg.Workbook.Worksheets.Add("Sheet");
                 sheet.Cells[3, 3, 5, 5].Formula = "=SUM(1,2)";
                 Assert.AreEqual("SUM(1,2)", sheet.Cells[3, 3].Formula);
+            }
+        }
+        
+        [TestMethod]
+        public void ArrayEquality()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[3, 3].Formula = "{\"test\"}=\"test\"";
+                worksheet.Cells[3, 4].Formula = "{\"test\"}=\"\"\"test\"\"\"";
+                worksheet.Cells[3, 5].Formula = "{\"test1\",\"test2\"}=\"test1\"";
+                worksheet.Cells[3, 6].Formula = "{\"test1\",\"test2\"}={\"test1\"}";
+                worksheet.Cells[3, 7].Formula = "{\"test1\",\"test2\"}={\"test1\",\"testB\"}";
+                worksheet.Cells[3, 8].Formula = "{1,2,3}={1,2,3}";
+                worksheet.Cells[3, 9].Formula = "{1,2,3}={1}";
+                worksheet.Cells[3, 10].Formula = "{1,2,3}+4";
+                worksheet.Calculate();
+                Assert.IsTrue((bool)worksheet.Cells[3, 3].Value);
+                Assert.IsFalse((bool)worksheet.Cells[3, 4].Value);
+                Assert.IsTrue((bool)worksheet.Cells[3, 5].Value);
+                Assert.IsTrue((bool)worksheet.Cells[3, 6].Value);
+                Assert.IsTrue((bool)worksheet.Cells[3, 7].Value);
+                Assert.IsTrue((bool)worksheet.Cells[3, 7].Value);
+                Assert.IsTrue((bool)worksheet.Cells[3, 8].Value);
+                Assert.IsTrue((bool)worksheet.Cells[3, 9].Value);
+                Assert.AreEqual(5d, worksheet.Cells[3, 10].Value);
+            }
+        }
+
+        [TestMethod]
+        public void ArrayCell()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[3, 3].Formula = "{\"test1\",\"test2\"}";
+                worksheet.Calculate();
+                CollectionAssert.AreEqual(new List<object> { "test1", "test2" }, (List<object>)worksheet.Cells[3, 3].Value);
+            }
+        }
+
+        [TestMethod]
+        public void IfWithArray()
+        {
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                worksheet.Cells[3, 3].Formula = "IF(FALSE,\"true\",{\"false\"})";
+                worksheet.Cells[3, 3].Calculate();
+                CollectionAssert.AreEqual(new List<object> { "false" }, (List<object>)worksheet.Cells[3, 3].Value);
             }
         }
     }

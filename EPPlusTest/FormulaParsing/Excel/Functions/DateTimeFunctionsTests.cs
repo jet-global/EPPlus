@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Text;
-using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using OfficeOpenXml.FormulaParsing;
@@ -139,7 +137,7 @@ namespace EPPlusTest.Excel.Functions
             var expectedResult = GetTime(10, 11, 12);
             var func = new Time();
             var result = func.Execute(FunctionsHelper.CreateArgs(10, 11, 12), _parsingContext);
-            Assert.AreEqual(expectedResult, result.Result);  
+            Assert.AreEqual(expectedResult, result.Result);
         }
 
         [TestMethod]
@@ -280,7 +278,7 @@ namespace EPPlusTest.Excel.Functions
             var r2 = func.Execute(FunctionsHelper.CreateArgs(dt2arg, -1), _parsingContext);
             var r3 = func.Execute(FunctionsHelper.CreateArgs(dt3arg, 2), _parsingContext);
 
-            var dt1 = DateTime.FromOADate((double) r1.Result);
+            var dt1 = DateTime.FromOADate((double)r1.Result);
             var dt2 = DateTime.FromOADate((double)r2.Result);
             var dt3 = DateTime.FromOADate((double)r3.Result);
 
@@ -367,7 +365,7 @@ namespace EPPlusTest.Excel.Functions
 
             var result = func.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg), _parsingContext);
 
-            var roundedResult = Math.Round((double) result.Result, 4);
+            var roundedResult = Math.Round((double)result.Result, 4);
 
             Assert.IsTrue(Math.Abs(0.0861 - roundedResult) < double.Epsilon);
         }
@@ -498,7 +496,7 @@ namespace EPPlusTest.Excel.Functions
                 var expectedDate = new DateTime(2016, 6, 13).ToOADate();
                 var actualDate = ws.Cells["B3"].Value;
                 Assert.AreEqual(expectedDate, actualDate);
-            } 
+            }
         }
 
         [TestMethod]
@@ -579,6 +577,48 @@ namespace EPPlusTest.Excel.Functions
                 ws.Cells["A1"].Formula = "NETWORKDAYS.INTL(DATE(2016,1,1), DATE(2016,1,20), \"0000011\", DATE(2016,1,4))";
                 ws.Calculate();
                 Assert.AreEqual(13, ws.Cells["A1"].Value);
+            }
+        }
+
+        [TestMethod]
+        public void DateFunctionsWorkInDifferentCultureDateFormats()
+        {
+            var currentCulture = CultureInfo.CurrentCulture;
+            try
+            {
+                var us = CultureInfo.CreateSpecificCulture("en-US");
+                Thread.CurrentThread.CurrentCulture = us;
+                using (var package = new ExcelPackage())
+                {
+                    var ws = package.Workbook.Worksheets.Add("Sheet1");
+                    ws.Cells[2, 2].Value = "1/15/2014";
+                    ws.Cells[4, 3].Formula = "MONTH(B2)";
+                    ws.Cells[5, 3].Formula = "DAY(B2)";
+                    ws.Cells[6, 3].Formula = "YEAR(B2)";
+                    ws.Calculate();
+                    Assert.AreEqual(1, ws.Cells[4, 3].Value);
+                    Assert.AreEqual(15, ws.Cells[5, 3].Value);
+                    Assert.AreEqual(2014, ws.Cells[6, 3].Value);
+                }
+
+                var gb = CultureInfo.CreateSpecificCulture("en-GB");
+                Thread.CurrentThread.CurrentCulture = gb;
+                using (var package = new ExcelPackage())
+                {
+                    var ws = package.Workbook.Worksheets.Add("Sheet1");
+                    ws.Cells[2, 2].Value = "15/1/2014";
+                    ws.Cells[4, 3].Formula = "MONTH(B2)";
+                    ws.Cells[5, 3].Formula = "DAY(B2)";
+                    ws.Cells[6, 3].Formula = "YEAR(B2)";
+                    ws.Calculate();
+                    Assert.AreEqual(1, ws.Cells[4, 3].Value);
+                    Assert.AreEqual(15, ws.Cells[5, 3].Value);
+                    Assert.AreEqual(2014, ws.Cells[6, 3].Value);
+                }
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = currentCulture;
             }
         }
     }

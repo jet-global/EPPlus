@@ -13,7 +13,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
             System.DateTime date = System.DateTime.MinValue;
             if (dateObj is string)
             {
-                date = System.DateTime.Parse(dateObj.ToString(), CultureInfo.InvariantCulture);
+                date = System.DateTime.Parse(dateObj.ToString());
             }
             else
             {

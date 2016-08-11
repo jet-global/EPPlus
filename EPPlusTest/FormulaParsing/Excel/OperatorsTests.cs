@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Excel.Operators;
-using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace EPPlusTest.Excel
@@ -94,6 +92,22 @@ namespace EPPlusTest.Excel
         {
             var result = Operator.Concat.Apply(new CompileResult(12, DataType.Integer), new CompileResult("b", DataType.String));
             Assert.AreEqual("12b", result.Result);
+        }
+
+        [TestMethod]
+        public void OperatorConcatShouldConcatAnEmptyRange()
+        {
+            var file = new FileInfo("filename.xlsx");
+            using (var package = new ExcelPackage(file))
+            using (var sheet = package.Workbook.Worksheets.Add("NewSheet"))
+            using (var excelDataProvider = new EpplusExcelDataProvider(package))
+            {
+                var emptyRange = excelDataProvider.GetRange("NewSheet", 2, 2, "B2");
+                var result = Operator.Concat.Apply(new CompileResult(emptyRange, DataType.ExcelAddress), new CompileResult("b", DataType.String));
+                Assert.AreEqual("b", result.Result);
+                result = Operator.Concat.Apply(new CompileResult("b", DataType.String), new CompileResult(emptyRange, DataType.ExcelAddress));
+                Assert.AreEqual("b", result.Result);
+            }
         }
 
         [TestMethod]

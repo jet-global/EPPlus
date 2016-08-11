@@ -72,6 +72,10 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             {
                 return new CompileResult(((System.DateTime)obj).ToOADate(), DataType.Date);
             }
+            if (obj.GetType().Equals(typeof(List<object>)))
+            {
+                return new CompileResult(obj, DataType.Enumerable);
+            }
             throw new ArgumentException("Non supported type " + obj.GetType().FullName);
         }
     }
