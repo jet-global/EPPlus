@@ -194,7 +194,7 @@ namespace OfficeOpenXml.Drawing.Chart
         {
             get
             {
-                return GetDirectionEnum(_chartXmlHelper.GetXmlNodeString(_directionPath));
+                return GetDirectionEnum(_chartXmlHelper?.GetXmlNodeString(_directionPath));
             }
             internal set
             {
@@ -209,7 +209,7 @@ namespace OfficeOpenXml.Drawing.Chart
         {
             get
             {
-                return GetShapeEnum(_chartXmlHelper.GetXmlNodeString(_shapePath));
+                return GetShapeEnum(_chartXmlHelper?.GetXmlNodeString(_shapePath));
             }
             internal set
             {

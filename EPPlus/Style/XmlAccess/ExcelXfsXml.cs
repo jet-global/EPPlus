@@ -848,7 +848,6 @@ namespace OfficeOpenXml.Style.XmlAccess
             if (_numFmtId >= 0)
             {
                 SetXmlNodeString("@numFmtId", _numFmtId.ToString());
-                if(doSetXfId) SetXmlNodeString("@applyNumberFormat", "1");
             }
             if (_fontId >= 0)
             {

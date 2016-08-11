@@ -74,6 +74,11 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             return this;
         }
 
+        public virtual Expression GetComparableExpression()
+        {
+            return this;
+        }
+
         public virtual Expression AddChild(Expression child)
         {
             if (_children.Any())
@@ -91,7 +96,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
             var expression = this;
             if (Next != null && Operator != null)
             {
-                var result = Operator.Apply(Compile(), Next.Compile());
+                var result = Operator.Apply(GetComparableExpression().Compile(), Next.GetComparableExpression().Compile());
                 expression = ExpressionConverter.Instance.FromCompileResult(result);
                 if (expression is ExcelErrorExpression)
                 {

@@ -95,7 +95,8 @@ namespace EPPlusTest
             p.SaveAs(new FileInfo(@"c:\temp\encrNew.xlsx"));
         
         }
-        [TestMethod, Ignore]
+        [TestMethod]
+        [Ignore]
         public void DecrypTestBug()
         {
             var p = new ExcelPackage(new FileInfo(@"c:\temp\bug\TestExcel_2040.xlsx"), "");
