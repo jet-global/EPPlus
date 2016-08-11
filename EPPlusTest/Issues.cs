@@ -1067,6 +1067,21 @@ namespace EPPlusTest
                 p.SaveAs(new FileInfo(@"c:\temp\rtpreserve.xlsx"));
             }
         }
+
+        [TestMethod]
+        public void MergeIssue()
+        {
+            var worksheetPath = Path.Combine(Path.GetTempPath(), @"EPPlus worksheets");
+            FileInfo fi = new FileInfo(Path.Combine(worksheetPath, "Example.xlsx"));
+            fi.Delete();
+            using (ExcelPackage pckg = new ExcelPackage(fi))
+            {
+                var ws = pckg.Workbook.Worksheets.Add("Example");
+                ws.Cells[1, 1, 1, 3].Merge = true;
+                ws.Cells[1, 1, 1, 3].Merge = true;
+                pckg.Save();
+            }
+        }
         [TestMethod]
         public void Issuer15445()
         {
@@ -1214,26 +1229,6 @@ namespace EPPlusTest
         }
 
         [TestMethod]
-        public void Issue15455()
-        {
-            using (var pck = new ExcelPackage())
-            {
-
-                var sheet1 = pck.Workbook.Worksheets.Add("sheet1");
-                var sheet2 = pck.Workbook.Worksheets.Add("Sheet2");
-                sheet1.Cells["C2"].Value = 3;
-                sheet1.Cells["C3"].Formula = "VLOOKUP(E1, Sheet2!A1:D6, C2, 0)";
-                sheet1.Cells["E1"].Value = "d";
-
-                sheet2.Cells["A1"].Value = "d";
-                sheet2.Cells["C1"].Value = "dg";
-                pck.Workbook.Calculate();
-                var c3 = sheet1.Cells["C3"].Value;
-                Assert.AreEqual("dg", c3);
-            }
-        }
-
-        [TestMethod]
         public void Issue15460WithString()
         {
             FileInfo file = new FileInfo("report.xlsx");
@@ -1259,6 +1254,27 @@ namespace EPPlusTest
                     file.Delete();
             }
         }
+
+        [TestMethod]
+        public void Issue15455()
+        {
+            using (var pck = new ExcelPackage())
+            {
+
+                var sheet1 = pck.Workbook.Worksheets.Add("sheet1");
+                var sheet2 = pck.Workbook.Worksheets.Add("Sheet2");
+                sheet1.Cells["C2"].Value = 3;
+                sheet1.Cells["C3"].Formula = "VLOOKUP(E1, Sheet2!A1:D6, C2, 0)";
+                sheet1.Cells["E1"].Value = "d";
+
+                sheet2.Cells["A1"].Value = "d";
+                sheet2.Cells["C1"].Value = "dg";
+                pck.Workbook.Calculate();
+                var c3 = sheet1.Cells["C3"].Value;
+                Assert.AreEqual("dg", c3);
+            }
+        }
+
 
         [TestMethod]
         public void Issue15460WithNull()
@@ -1313,20 +1329,6 @@ namespace EPPlusTest
                     file.Delete();
             }
         }
-        [TestMethod]
-        public void MergeIssue()
-        {
-            var worksheetPath = Path.Combine(Path.GetTempPath(), @"EPPlus worksheets");
-            FileInfo fi = new FileInfo(Path.Combine(worksheetPath, "Example.xlsx"));
-            fi.Delete();
-            using (ExcelPackage pckg = new ExcelPackage(fi))
-            {
-                var ws = pckg.Workbook.Worksheets.Add("Example");
-                ws.Cells[1, 1, 1, 3].Merge = true;
-                ws.Cells[1, 1, 1, 3].Merge = true;
-                pckg.Save();
-            }
-        }
 
         [TestMethod]
         public void PreserveNamesAddressesWhenInsertingRows()
@@ -1348,7 +1350,7 @@ namespace EPPlusTest
 
                 sheet2.InsertRow(2, 2);
                 Assert.AreEqual("'Sheet2'!A5", package.Workbook.Names.Last().Address);
-            
+
             }
         }
     }

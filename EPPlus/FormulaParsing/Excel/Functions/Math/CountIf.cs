@@ -45,7 +45,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
             var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
             ValidateArguments(functionArguments, 2);
             var range = functionArguments.ElementAt(0);
-            var criteria = functionArguments.ElementAt(1).ValueFirst != null ? ArgToString(functionArguments, 1) : null;
+            var criteria = GetFirstArgument(functionArguments.ElementAt(1)).ValueFirst != null ? GetFirstArgument(functionArguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
             double result = 0d;
             if (range.IsExcelRange)
             {
@@ -54,7 +54,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
                 {
                     for (int col = rangeInfo.Address.Start.Column; col < rangeInfo.Address.End.Column + 1; col++)
                     {
-                        if (criteria != null && Evaluate(rangeInfo.Worksheet.GetValue(row, col), criteria))
+                        if (criteria != null && Evaluate(GetFirstArgument(rangeInfo.Worksheet.GetValue(row, col)), criteria))
                         {
                             result++;
                         }

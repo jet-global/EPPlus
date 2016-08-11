@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.FormulaParsing;
 using Rhino.Mocks;
 
@@ -40,6 +36,7 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
         }
 
         [TestMethod]
+
         public void IIfShouldReturnCorrectResultWhenFalseConditionIsCoercedFromAString()
         {
             var result = _parser.Parse(@"If(""false"", 1, 2)");
