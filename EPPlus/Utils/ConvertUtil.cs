@@ -16,23 +16,36 @@ namespace OfficeOpenXml.Utils
             if (candidate == null) return false;
             return (candidate.GetType().IsPrimitive || candidate is double || candidate is decimal || candidate is DateTime || candidate is TimeSpan || candidate is long);
         }
+        /// <summary>
+        /// Tries to parse a double from the specified <paramref name="candidate"/> which is expected to be a string value.
+        /// </summary>
+        /// <param name="candidate">The string value.</param>
+        /// <param name="result">The double value parsed from the specified <paramref name="candidate"/>.</param>
+        /// <returns>True if <paramref name="candidate"/> could be parsed to a double; otherwise, false.</returns>
+        internal static bool TryParseNumericString(object candidate, out double result)
+        {
+            if (candidate != null)
+            {
+                // If a number is stored in a string, Excel will not convert it to the invariant format, so assume that it is in the current culture's number format.
+                // This may not always be true, but it is a better assumption than assuming it is always in the invariant culture, which will probably never be true
+                // for locales outside the United States.
+                var style = NumberStyles.Float | NumberStyles.AllowThousands;
+                return double.TryParse(candidate.ToString(), style, CultureInfo.CurrentCulture, out result);
+            }
+            result = 0;
+            return false;
+        }
 		/// <summary>
-		/// Tries to parse a double from the specified <paramref name="candidate"/> which is expected to be a string value.
+		/// Tries to parse a boolean value from the specificed <paramref name="candidate"/>.
 		/// </summary>
-		/// <param name="candidate">The string value.</param>
-		/// <param name="result">The double value parsed from the specified <paramref name="candidate"/>.</param>
-		/// <returns>True if <paramref name="candidate"/> could be parsed to a double; otherwise, false.</returns>
-		internal static bool TryParseNumericString(object candidate, out double result)
+		/// <param name="candidate">The value to check for boolean-ness.</param>
+		/// <param name="result">The boolean value parsed from the specified <paramref name="candidate"/>.</param>
+		/// <returns>True if <paramref name="candidate"/> could be parsed </returns>
+		internal static bool TryParseBooleanString(object candidate, out bool result)
 		{
 			if (candidate != null)
-			{
-				// If a number is stored in a string, Excel will not convert it to the invariant format, so assume that it is in the current culture's number format.
-				// This may not always be true, but it is a better assumption than assuming it is always in the invariant culture, which will probably never be true
-				// for locales outside the United States.
-				var style = NumberStyles.Float | NumberStyles.AllowThousands;
-				return double.TryParse(candidate.ToString(), style, CultureInfo.CurrentCulture, out result);
-			}
-			result = 0;
+				return bool.TryParse(candidate.ToString(), out result);
+			result = false;
 			return false;
 		}
 		/// <summary>
@@ -59,8 +72,9 @@ namespace OfficeOpenXml.Utils
 		/// </summary>
 		/// <param name="v"></param>
 		/// <param name="ignoreBool"></param>
+        /// <param name="retNaN">Return NaN if invalid double otherwise 0</param>
 		/// <returns></returns>
-		internal static double GetValueDouble(object v, bool ignoreBool = false)
+		internal static double GetValueDouble(object v, bool ignoreBool = false, bool retNaN=false)
         {
             double d;
             try
@@ -86,13 +100,13 @@ namespace OfficeOpenXml.Utils
                 }
                 else
                 {
-                    d = 0;
+                    d = retNaN ? double.NaN : 0;
                 }
             }
 
             catch
             {
-                d = 0;
+                d = retNaN ? double.NaN : 0;
             }
             return d;
         }

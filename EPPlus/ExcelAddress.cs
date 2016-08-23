@@ -355,12 +355,14 @@ namespace OfficeOpenXml
             {
                 adr += string.Format("'{0}'!", _ws);
             }
-            adr += GetAddress(_fromRow, _fromCol, _toRow, _toCol);
+            if (IsName)
+              adr += GetAddress(_fromRow, _fromCol, _toRow, _toCol);
+            else
+              adr += GetAddress(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
             return adr;
         }
-
-        ExcelCellAddress _start = null;
         #endregion
+        protected ExcelCellAddress _start = null;
         /// <summary>
         /// Gets the row and column of the top left cell.
         /// </summary>
@@ -376,7 +378,7 @@ namespace OfficeOpenXml
                 return _start;
             }
         }
-        ExcelCellAddress _end = null;
+        protected ExcelCellAddress _end = null;
         /// <summary>
         /// Gets the row and column of the bottom right cell.
         /// </summary>
@@ -392,7 +394,7 @@ namespace OfficeOpenXml
                 return _end;
             }
         }
-        ExcelTableAddress _table=null;
+        protected ExcelTableAddress _table = null;
         public ExcelTableAddress Table
         {
             get
@@ -411,6 +413,13 @@ namespace OfficeOpenXml
                 return _address;
             }
         }        
+        internal string FullAddress
+        {
+            get
+            {
+                return string.IsNullOrEmpty(_ws) ? _ws : "[" + _ws + "]!" + Address;
+            }
+        }
         /// <summary>
         /// If the address is a defined name
         /// </summary>
@@ -491,7 +500,7 @@ namespace OfficeOpenXml
             {
                 if (fullAddress == "#REF!")
                 {
-                    SetAddress(ref fullAddress, ref second, ref hasSheet);
+                    SetAddress(ref fullAddress, ref second, ref hasSheet, false);
                     return true;
                 }
                 else if (Utils.ConvertUtil._invariantCompareInfo.IsPrefix(fullAddress, "!"))
@@ -499,6 +508,7 @@ namespace OfficeOpenXml
                     // invalid address!
                     return false;
                 }
+                bool isMulti = false;
                 for (int i = 0; i < fullAddress.Length; i++)
                 {
                     var c = fullAddress[i];
@@ -550,11 +560,19 @@ namespace OfficeOpenXml
                         }
                         else if (c == '!' && !isText && !first.EndsWith("#REF") && !second.EndsWith("#REF"))
                         {
+                            // the following is to handle addresses that specifies the
+                            // same worksheet twice: Sheet1!A1:Sheet1:A3
+                            // They will be converted to: Sheet1!A1:A3
+                            if (hasSheet && second != null && second.ToLower().EndsWith(first.ToLower()))
+                            {
+                                second = Regex.Replace(second, $"{first}$", string.Empty);
+                            }
                             hasSheet = true;
                         }
                         else if (c == ',' && !isText)
                         {
-                            SetAddress(ref first, ref second, ref hasSheet);
+                            isMulti = true;
+                            SetAddress(ref first, ref second, ref hasSheet, isMulti);
                         }
                         else
                         {
@@ -571,7 +589,7 @@ namespace OfficeOpenXml
                 }
                 if (Table == null)
                 {
-                    SetAddress(ref first, ref second, ref hasSheet);
+                    SetAddress(ref first, ref second, ref hasSheet, isMulti);
                 }
                 return true;
             }
@@ -624,9 +642,9 @@ namespace OfficeOpenXml
             }
         }
         #region Address manipulation methods
-        internal eAddressCollition Collide(ExcelAddressBase address)
+        internal eAddressCollition Collide(ExcelAddressBase address, bool ignoreWs=false)
         {
-            if (address.WorkSheet != WorkSheet && address.WorkSheet!=null)
+            if (ignoreWs==false && address.WorkSheet != WorkSheet && address.WorkSheet!=null)
             {
                 return eAddressCollition.No;
             }
@@ -773,7 +791,7 @@ namespace OfficeOpenXml
             return null;
         }
         #endregion
-        private void SetAddress(ref string first, ref string second, ref bool hasSheet)
+        private void SetAddress(ref string first, ref string second, ref bool hasSheet, bool isMulti)
         {
             string ws, address;
             if (hasSheet)
@@ -796,10 +814,14 @@ namespace OfficeOpenXml
                 _firstAddress = address;
                 GetRowColFromAddress(address, out _fromRow, out _fromCol, out _toRow, out  _toCol, out _fromRowFixed, out _fromColFixed, out _toRowFixed, out _toColFixed);
             }
-            else
+            if (isMulti)
             {
                 if (_addresses == null) _addresses = new List<ExcelAddress>();
                 _addresses.Add(new ExcelAddress(_ws, address));
+            }
+            else
+            {
+                _addresses = null;
             }
         }
         internal enum AddressType
@@ -1029,18 +1051,25 @@ namespace OfficeOpenXml
             return true;
         }
 
+        private static readonly HashSet<char> FormulaCharacters = new HashSet<char>(new char[] { '(', ')', '+', '-', '*', '/', '=', '^', '&', '%', '\"' });
         private static bool IsFormula(string address)
         {
             var isText = false;
             for (int i = 0; i < address.Length; i++)
             {
-                if (address[i] == '\'')
+                var addressChar = address[i];
+                if (addressChar == '\'')
                 {
                     isText = !isText;
                 }
                 else
                 {
-                    if (isText==false  && address.Substring(i, 1).IndexOfAny(new char[] { '(', ')', '+', '-', '*', '/', '=', '^', '&', '%', '\"' }) > -1)
+                    // Table references use [ ] around column names and since table column names can also contain unescaped formula characters,
+                    // we need to check that this is not a table column reference in order to avoid false positives.  Since function names and
+                    // formulas cannot contain [ ], we should be safe doing this check.
+                    if (addressChar == '[' || addressChar == ']')
+                        return false;
+                    if (isText == false && FormulaCharacters.Contains(addressChar))
                     {
                         return true;
                     }

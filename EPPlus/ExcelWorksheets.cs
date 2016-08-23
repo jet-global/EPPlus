@@ -41,11 +41,13 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
+using OfficeOpenXml.Drawing.Sparkline;
 using OfficeOpenXml.Style.XmlAccess;
 using OfficeOpenXml.Drawing.Vml;
 using OfficeOpenXml.Packaging.Ionic.Zlib;
 using OfficeOpenXml.Utils;
 using OfficeOpenXml.VBA;
+
 namespace OfficeOpenXml
 {
 	/// <summary>
@@ -264,6 +266,12 @@ namespace OfficeOpenXml
                 {
                     CopySheetNames(Copy, added);
                 }
+                if (Copy.SparklineGroups.SparklineGroups.Count > 0)
+                {
+                    CopySparklines(Copy, added);
+                }
+
+
 
                 //Copy all cells
                 CloneCells(Copy, added);
@@ -327,6 +335,21 @@ namespace OfficeOpenXml
         {
             return (ExcelChartsheet)AddSheet(Name, true, chartType);
         }
+        private void CopySparklines(ExcelWorksheet Copy, ExcelWorksheet added)
+        {
+            for(int i = 0; i < Copy.SparklineGroups.SparklineGroups.Count; i++)
+            {
+                var group = added.SparklineGroups.SparklineGroups[i];
+                group.Worksheet = added;
+                group.Sparklines.Clear();
+                foreach(var originalSparkline in Copy.SparklineGroups.SparklineGroups[i].Sparklines)
+                {
+                    var sparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(originalSparkline.Formula.Address), HostCell = new ExcelAddress(originalSparkline.HostCell.Address) };
+                    sparkline.Formula.ChangeWorksheet(Copy.Name, added.Name);
+                    group.Sparklines.Add(sparkline);
+                }
+            }
+        }
         private void CopySheetNames(ExcelWorksheet Copy, ExcelWorksheet added)
         {
             foreach (var name in Copy.Names)
@@ -362,7 +385,6 @@ namespace OfficeOpenXml
             foreach (var tbl in Copy.Tables)
             {
                 string xml=tbl.TableXml.OuterXml;
-                int Id = _pck.Workbook._nextTableID++;
                 string name;
                 if (prevName == "")
                 {
@@ -377,6 +399,7 @@ namespace OfficeOpenXml
                         name = string.Format("Table{0}", ++ix);
                     }
                 }
+                int Id = _pck.Workbook._nextTableID++;
                 prevName = name;
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(xml);
@@ -385,7 +408,10 @@ namespace OfficeOpenXml
                 xmlDoc.SelectSingleNode("//d:table/@displayName", tbl.NameSpaceManager).Value = name;
                 xml = xmlDoc.OuterXml;
 
-                var uriTbl = new Uri(string.Format("/xl/tables/table{0}.xml", Id), UriKind.Relative);
+                //var uriTbl = new Uri(string.Format("/xl/tables/table{0}.xml", Id), UriKind.Relative);
+                var uriTbl = GetNewUri(_pck.Package, "/xl/tables/table{0}.xml", ref Id);
+                if (_pck.Workbook._nextTableID < Id) _pck.Workbook._nextTableID = Id;
+
                 var part = _pck.Package.CreatePart(uriTbl, "application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml", _pck.Compression);
                 StreamWriter streamTbl = new StreamWriter(part.GetStream(FileMode.Create, FileAccess.Write));
                 streamTbl.Write(xml);
@@ -421,7 +447,6 @@ namespace OfficeOpenXml
             foreach (var tbl in Copy.PivotTables)
             {
                 string xml = tbl.PivotTableXml.OuterXml;
-                int Id = _pck.Workbook._nextPivotTableID++;
 
                 string name;
                 if (prevName == "")
@@ -446,20 +471,23 @@ namespace OfficeOpenXml
                 xmlDoc.SelectSingleNode("//d:pivotTableDefinition/@name", tbl.NameSpaceManager).Value = name;
                 xml = xmlDoc.OuterXml;
 
-                var uriTbl = new Uri(string.Format("/xl/pivotTables/pivotTable{0}.xml", Id), UriKind.Relative);
+                int Id = _pck.Workbook._nextPivotTableID++;
+                //var uriTbl = new Uri(string.Format("/xl/pivotTables/pivotTable{0}.xml", Id), UriKind.Relative);
+                var uriTbl = GetNewUri(_pck.Package, "/xl/pivotTables/pivotTable{0}.xml", ref Id);
+                if (_pck.Workbook._nextPivotTableID < Id) _pck.Workbook._nextPivotTableID = Id;
                 var partTbl = _pck.Package.CreatePart(uriTbl, ExcelPackage.schemaPivotTable , _pck.Compression);
                 StreamWriter streamTbl = new StreamWriter(partTbl.GetStream(FileMode.Create, FileAccess.Write));
                 streamTbl.Write(xml);
                 //streamTbl.Close();
                 streamTbl.Flush();
 
-                xml = tbl.CacheDefinition.CacheDefinitionXml.OuterXml;                
-                var uriCd = new Uri(string.Format("/xl/pivotCache/pivotcachedefinition{0}.xml", Id), UriKind.Relative);
-                while (_pck.Package.PartExists(uriCd))
-                {
-                    uriCd = new Uri(string.Format("/xl/pivotCache/pivotcachedefinition{0}.xml", ++Id), UriKind.Relative);
-                }
-
+                xml = tbl.CacheDefinition.CacheDefinitionXml.OuterXml;
+                //var uriCd = new Uri(string.Format("/xl/pivotCache/pivotcachedefinition{0}.xml", Id), UriKind.Relative);
+                //while (_pck.Package.PartExists(uriCd))
+                //{
+                //    uriCd = new Uri(string.Format("/xl/pivotCache/pivotcachedefinition{0}.xml", ++Id), UriKind.Relative);
+                //}
+                var uriCd = GetNewUri(_pck.Package, "/xl/pivotCache/pivotcachedefinition{0}.xml", ref Id);
                 var partCd = _pck.Package.CreatePart(uriCd, ExcelPackage.schemaPivotCacheDefinition, _pck.Compression);
                 StreamWriter streamCd = new StreamWriter(partCd.GetStream(FileMode.Create, FileAccess.Write));
                 streamCd.Write(xml);
@@ -534,7 +562,7 @@ namespace OfficeOpenXml
             //Shared Formulas
             foreach (int key in Copy._sharedFormulas.Keys)
             {
-                added._sharedFormulas.Add(key, Copy._sharedFormulas[key]);
+                added._sharedFormulas.Add(key, Copy._sharedFormulas[key].Clone());
             }
             
             Dictionary<int, int> styleCashe = new Dictionary<int, int>();
@@ -842,6 +870,14 @@ namespace OfficeOpenXml
             if (Name.Trim() == "")
             {
                 throw new ArgumentException("The worksheet can not have an empty name");
+            }
+            if (Name.StartsWith("'") || Name.EndsWith("'"))
+            {
+              throw new ArgumentException("The worksheet name can not start or end with an apostrophe.");
+            }
+            if (Name.StartsWith("'") || Name.EndsWith("'"))
+            {
+              throw new ArgumentException("The worksheet name can not start or end with an apostrophe.");
             }
             if (Name.Length > 31) Name = Name.Substring(0, 31);   //A sheet can have max 31 char's            
             return Name;

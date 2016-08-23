@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using EPPlusTest.FormulaParsing.TestHelpers;
+using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 
@@ -137,7 +137,7 @@ namespace EPPlusTest.Excel.Functions
             var expectedResult = GetTime(10, 11, 12);
             var func = new Time();
             var result = func.Execute(FunctionsHelper.CreateArgs(10, 11, 12), _parsingContext);
-            Assert.AreEqual(expectedResult, result.Result);  
+            Assert.AreEqual(expectedResult, result.Result);
         }
 
         [TestMethod]
@@ -278,7 +278,7 @@ namespace EPPlusTest.Excel.Functions
             var r2 = func.Execute(FunctionsHelper.CreateArgs(dt2arg, -1), _parsingContext);
             var r3 = func.Execute(FunctionsHelper.CreateArgs(dt3arg, 2), _parsingContext);
 
-            var dt1 = DateTime.FromOADate((double) r1.Result);
+            var dt1 = DateTime.FromOADate((double)r1.Result);
             var dt2 = DateTime.FromOADate((double)r2.Result);
             var dt3 = DateTime.FromOADate((double)r3.Result);
 
@@ -365,7 +365,7 @@ namespace EPPlusTest.Excel.Functions
 
             var result = func.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg), _parsingContext);
 
-            var roundedResult = Math.Round((double) result.Result, 4);
+            var roundedResult = Math.Round((double)result.Result, 4);
 
             Assert.IsTrue(Math.Abs(0.0861 - roundedResult) < double.Epsilon);
         }
@@ -443,14 +443,14 @@ namespace EPPlusTest.Excel.Functions
             Assert.AreEqual(expectedDate, result.Result);
         }
 
-        [TestMethod, Ignore]
+        [TestMethod]
         public void WorkdayShouldReturnCorrectResultWithNegativeArg()
         {
-            var inputDate = new DateTime(2014, 8, 27).ToOADate();
-            var expectedDate = new DateTime(2014, 8, 25).ToOADate();
+            var inputDate = new DateTime(2016, 6, 15).ToOADate();
+            var expectedDate = new DateTime(2016, 5, 4).ToOADate();
 
             var func = new Workday();
-            var args = FunctionsHelper.CreateArgs(inputDate, -2);
+            var args = FunctionsHelper.CreateArgs(inputDate, -30);
             var result = func.Execute(args, _parsingContext);
             Assert.AreEqual(DateTime.FromOADate(expectedDate), DateTime.FromOADate((double)result.Result));
         }
@@ -468,17 +468,158 @@ namespace EPPlusTest.Excel.Functions
         }
 
         [TestMethod]
-        public void WorkdayShouldReturnCorrectWhenArrayOfHolidayDatesIsSupplied()
+        public void WorkdayWithNegativeArgShouldReturnCorrectWhenArrayOfHolidayDatesIsSupplied()
         {
-            var inputDate = new DateTime(2014, 1, 1).ToOADate();
-            var holidayDate1 = new DateTime(2014, 1, 2).ToOADate();
-            var holidayDate2 = new DateTime(2014, 1, 3).ToOADate();
-            var expectedDate = new DateTime(2014, 1, 9).ToOADate();
+            var inputDate = new DateTime(2016, 7, 27).ToOADate();
+            var holidayDate1 = new DateTime(2016, 7, 11).ToOADate();
+            var holidayDate2 = new DateTime(2016, 7, 8).ToOADate();
+            var expectedDate = new DateTime(2016, 6, 13).ToOADate();
 
             var func = new Workday();
-            var args = FunctionsHelper.CreateArgs(inputDate, 4, FunctionsHelper.CreateArgs(holidayDate1, holidayDate2));
+            var args = FunctionsHelper.CreateArgs(inputDate, -30, FunctionsHelper.CreateArgs(holidayDate1, holidayDate2));
             var result = func.Execute(args, _parsingContext);
             Assert.AreEqual(expectedDate, result.Result);
+        }
+
+        [TestMethod]
+        public void WorkdayWithNegativeArgShouldReturnCorrectWhenRangeWithHolidayDatesIsSupplied()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("test");
+                ws.Cells["A1"].Value = new DateTime(2016, 7, 27).ToOADate();
+                ws.Cells["B1"].Value = new DateTime(2016, 7, 11).ToOADate();
+                ws.Cells["B2"].Value = new DateTime(2016, 7, 8).ToOADate();
+                ws.Cells["B3"].Formula = "WORKDAY(A1,-30, B1:B2)";
+                ws.Calculate();
+
+                var expectedDate = new DateTime(2016, 6, 13).ToOADate();
+                var actualDate = ws.Cells["B3"].Value;
+                Assert.AreEqual(expectedDate, actualDate);
+            }
+        }
+
+        [TestMethod]
+        public void NetworkdaysShouldReturnNumberOfDays()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("test");
+                ws.Cells["A1"].Formula = "NETWORKDAYS(DATE(2016,1,1), DATE(2016,1,20))";
+                ws.Calculate();
+                Assert.AreEqual(14, ws.Cells["A1"].Value);
+            }
+        }
+
+        [TestMethod]
+        public void NetworkdaysShouldReturnNumberOfDaysWithHolidayRange()
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                // do something...
+                using (var package = new ExcelPackage())
+                {
+                    package.Load(ms);
+                }
+            }
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("test");
+                ws.Cells["A1"].Formula = "NETWORKDAYS(DATE(2016,1,1), DATE(2016,1,20),B1)";
+                ws.Cells["B1"].Formula = "DATE(2016,1,15)";
+                ws.Calculate();
+                Assert.AreEqual(13, ws.Cells["A1"].Value);
+            }
+        }
+
+        [TestMethod]
+        public void NetworkdaysNegativeShouldReturnNumberOfDays()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("test");
+                ws.Cells["A1"].Formula = "NETWORKDAYS(DATE(2016,1,1), DATE(2015,12,20))";
+                ws.Calculate();
+                Assert.AreEqual(10, ws.Cells["A1"].Value);
+            }
+        }
+
+        [TestMethod]
+        public void NetworkdayIntlShouldUseWeekendArg()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("test");
+                ws.Cells["A1"].Formula = "NETWORKDAYS.INTL(DATE(2016,1,1), DATE(2016,1,20), 11)";
+                ws.Calculate();
+                Assert.AreEqual(17, ws.Cells["A1"].Value);
+            }
+        }
+
+        [TestMethod]
+        public void NetworkdayIntlShouldUseWeekendStringArg()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("test");
+                ws.Cells["A1"].Formula = "NETWORKDAYS.INTL(DATE(2016,1,1), DATE(2016,1,20), \"0000011\")";
+                ws.Calculate();
+                Assert.AreEqual(14, ws.Cells["A1"].Value);
+            }
+        }
+
+        [TestMethod]
+        public void NetworkdayIntlShouldReduceHoliday()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("test");
+                ws.Cells["A1"].Formula = "NETWORKDAYS.INTL(DATE(2016,1,1), DATE(2016,1,20), \"0000011\", DATE(2016,1,4))";
+                ws.Calculate();
+                Assert.AreEqual(13, ws.Cells["A1"].Value);
+            }
+        }
+
+        [TestMethod]
+        public void DateFunctionsWorkInDifferentCultureDateFormats()
+        {
+            var currentCulture = CultureInfo.CurrentCulture;
+            try
+            {
+                var us = CultureInfo.CreateSpecificCulture("en-US");
+                Thread.CurrentThread.CurrentCulture = us;
+                using (var package = new ExcelPackage())
+                {
+                    var ws = package.Workbook.Worksheets.Add("Sheet1");
+                    ws.Cells[2, 2].Value = "1/15/2014";
+                    ws.Cells[4, 3].Formula = "MONTH(B2)";
+                    ws.Cells[5, 3].Formula = "DAY(B2)";
+                    ws.Cells[6, 3].Formula = "YEAR(B2)";
+                    ws.Calculate();
+                    Assert.AreEqual(1, ws.Cells[4, 3].Value);
+                    Assert.AreEqual(15, ws.Cells[5, 3].Value);
+                    Assert.AreEqual(2014, ws.Cells[6, 3].Value);
+                }
+
+                var gb = CultureInfo.CreateSpecificCulture("en-GB");
+                Thread.CurrentThread.CurrentCulture = gb;
+                using (var package = new ExcelPackage())
+                {
+                    var ws = package.Workbook.Worksheets.Add("Sheet1");
+                    ws.Cells[2, 2].Value = "15/1/2014";
+                    ws.Cells[4, 3].Formula = "MONTH(B2)";
+                    ws.Cells[5, 3].Formula = "DAY(B2)";
+                    ws.Cells[6, 3].Formula = "YEAR(B2)";
+                    ws.Calculate();
+                    Assert.AreEqual(1, ws.Cells[4, 3].Value);
+                    Assert.AreEqual(15, ws.Cells[5, 3].Value);
+                    Assert.AreEqual(2014, ws.Cells[6, 3].Value);
+                }
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = currentCulture;
+            }
         }
     }
 }

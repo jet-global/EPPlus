@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace EPPlusTest
 {
@@ -95,6 +96,7 @@ namespace EPPlusTest
         
         }
         [TestMethod]
+        [Ignore]
         public void DecrypTestBug()
         {
             var p = new ExcelPackage(new FileInfo(@"c:\temp\bug\TestExcel_2040.xlsx"), "");
