@@ -2105,6 +2105,15 @@ namespace OfficeOpenXml
                 foreach (ExcelChart chartBase in sheet.Drawings.Where(drawing => drawing is ExcelChart))
                 {
                     bool isUnique = false;
+                    if (sheet == this)
+                    {
+                        chartBase.AdjustPositionAndSize();
+                        int newFromRow = chartBase.From.Row > rowFrom ? chartBase.From.Row + rows : chartBase.From.Row;
+                        int newFromColumn = chartBase.From.Column > colFrom ? chartBase.From.Column + columns : chartBase.From.Column;
+                        int newToRow = chartBase.To.Row > rowFrom ? chartBase.To.Row + rows : chartBase.To.Row;
+                        int newToColumn = chartBase.To.Column > colFrom ? chartBase.To.Column + columns : chartBase.To.Column;
+                        chartBase.SetPosition(newFromRow, chartBase.From.RowOff, newFromColumn, chartBase.From.ColumnOff, newToRow, chartBase.To.RowOff, newToColumn, chartBase.To.ColumnOff);
+                    }
                     // The chart Plot Area contains one copy of a chart for each series in that chart. 
                     // A chart Plot Area can also have multiple distinct charts (such as when a bar chart and a line chart are plotted in the same area).
                     // This captures the behavior of a "Combo Chart".

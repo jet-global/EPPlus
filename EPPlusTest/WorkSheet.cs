@@ -2428,6 +2428,67 @@ namespace EPPlusTest
                 Assert.AreEqual("A1:Z26", address);
             }
         }
+
+        [TestMethod]
+        public void InsertRowCrossSheetDoesNotChangeChartPosition()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+                var otherSheet = package.Workbook.Worksheets.Add("Unrelated Sheet");
+                var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+                chart.From.Column = 4;
+                chart.From.Row = 2;
+                chart.To.Column = 10;
+                chart.To.Row = 12;
+                otherSheet.InsertRow(1, 10);
+                otherSheet.InsertColumn(1, 10);
+                Assert.AreEqual(4, chart.From.Column);
+                Assert.AreEqual(2, chart.From.Row);
+                Assert.AreEqual(10, chart.To.Column);
+                Assert.AreEqual(12, chart.To.Row);
+            }
+        }
+
+        [TestMethod]
+        public void InsertRowAndColumnsAboveChartUpdatesChartPosition()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+                var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+                chart.From.Column = 4;
+                chart.From.Row = 2;
+                chart.To.Column = 10;
+                chart.To.Row = 12;
+                sheet.InsertRow(1, 10);
+                sheet.InsertColumn(1, 6);
+                Assert.AreEqual(10, chart.From.Column);
+                Assert.AreEqual(12, chart.From.Row);
+                Assert.AreEqual(16, chart.To.Column);
+                Assert.AreEqual(22, chart.To.Row);
+            }
+        }
+
+        [TestMethod]
+        public void InsertRowAndColumnsInsideChartUpdatesChartTo()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+                var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+                chart.From.Column = 4;
+                chart.From.Row = 4;
+                chart.To.Column = 10;
+                chart.To.Row = 10;
+                sheet.InsertRow(6, 10);
+                sheet.InsertColumn(6, 6);
+                Assert.AreEqual(4, chart.From.Column);
+                Assert.AreEqual(4, chart.From.Row);
+                Assert.AreEqual(16, chart.To.Column);
+                Assert.AreEqual(20, chart.To.Row);
+            }
+        }
         #endregion
 
         #region InsertColumns Tests

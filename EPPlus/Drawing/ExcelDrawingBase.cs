@@ -30,13 +30,9 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Xml;
 using OfficeOpenXml.Drawing.Chart;
-using System.Drawing;
 using OfficeOpenXml.Style.XmlAccess;
 
 namespace OfficeOpenXml.Drawing
@@ -719,6 +715,51 @@ namespace OfficeOpenXml.Drawing
             SetPixelHeight(_height);
             _doNotAdjust = false;
         }
+
+        /// <summary>
+        /// Set the top left and bottom right corners of a drawing. 
+        /// </summary>
+        /// <param name="fromRow">Start row - 0-based index.</param>
+        /// <param name="fromRowOffsetEmu">Offset in English Metric Units (EMUs).</param>
+        /// <param name="fromColumn">Start Column - 0-based index.</param>
+        /// <param name="fromColumnOffsetEmu">Offset in English Metric Units (EMUs).</param>
+        /// <param name="toRow">End row - 0-based index.</param>
+        /// <param name="toRowOffsetEmu">Offset in English Metric Units (EMUs).</param>
+        /// <param name="toColumn">End Column - 0-based index.</param>
+        /// <param name="toColumnOffsetPixels">Offset in English Metric Units (EMUs).</param>
+        public void SetPosition(int fromRow, int fromRowOffsetEmu, int fromColumn, int fromColumnOffsetEmu, int toRow, int toRowOffsetEmu, int toColumn, int toColumnOffsetPixels)
+        {
+            if (fromRowOffsetEmu < -60 * EMU_PER_PIXEL)
+            {
+                throw new ArgumentException("Minimum negative offset is -60 pixels.", nameof(fromRowOffsetEmu));
+            }
+            if (fromColumnOffsetEmu < -60 * EMU_PER_PIXEL)
+            {
+                throw new ArgumentException("Minimum negative offset is -60 pixels.", nameof(fromColumnOffsetEmu));
+            }
+            if (toRowOffsetEmu < -60 * EMU_PER_PIXEL)
+            {
+                throw new ArgumentException("Minimum negative offset is -60 pixels.", nameof(toRowOffsetEmu));
+            }
+            if (toColumnOffsetPixels < -60 * EMU_PER_PIXEL)
+            {
+                throw new ArgumentException("Minimum negative offset is -60 pixels.", nameof(toColumnOffsetPixels));
+            }
+            _doNotAdjust = true;
+
+            From.Row = fromRow;
+            From.RowOff = fromRowOffsetEmu;
+            From.Column = fromColumn;
+            From.ColumnOff = fromColumnOffsetEmu;
+
+            To.Row = toRow;
+            To.RowOff = toRowOffsetEmu;
+            To.Column = toColumn;
+            To.ColumnOff = toColumnOffsetPixels;
+
+            _doNotAdjust = false;
+        }
+
         /// <summary>
         /// Set size in Percent
         /// Note that resizing columns / rows after using this function will effect the size of the drawing
