@@ -225,8 +225,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
                     {
                         l = l ?? new CompileResult(string.Empty, DataType.String);
                         r = r ?? new CompileResult(string.Empty, DataType.String);
-                        var lStr = l.Result != null ? l.ResultValue.ToString() : string.Empty;
-                        var rStr = r.Result != null ? r.ResultValue.ToString() : string.Empty;
+                        var lStr = Convert.ToString(l.ResultValue);
+                        var rStr = Convert.ToString(r.ResultValue);
                         return new CompileResult(string.Concat(lStr, rStr), DataType.String);
                     });
             }
@@ -370,7 +370,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
         {
             var sl = (l ?? "").ToString();
             var sr = (r ?? "").ToString();
-            return System.String.Compare(sl, sr, System.StringComparison.Ordinal);
+            return System.String.Compare(sl, sr, System.StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool  EitherIsError(CompileResult l, CompileResult r, out ExcelErrorValue errorVal)

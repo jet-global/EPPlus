@@ -33,6 +33,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
+using System.Linq;
 
 namespace OfficeOpenXml
 {
@@ -125,6 +126,95 @@ namespace OfficeOpenXml
             AddName(Name, item);
             return item;
         }
+
+        internal void Insert(int rowFrom, int colFrom, int rows, int cols)
+        {
+            Insert(rowFrom, colFrom, rows, cols, n => true);
+        }
+
+        internal void Insert(int rowFrom, int colFrom, int rows, int cols, Func<ExcelNamedRange, bool> filter)
+        {
+            var namedRanges = this._list.Where(filter);
+            foreach(var namedRange in namedRanges)
+            {
+                InsertRows(rowFrom, rows, namedRange);
+                InsertColumns(colFrom, cols, namedRange);
+            }
+        }
+        internal void Delete(int rowFrom, int colFrom, int rows, int cols)
+        {
+            Delete(rowFrom, colFrom, rows, cols, n => true);
+        }
+        internal void Delete(int rowFrom, int colFrom, int rows, int cols, Func<ExcelNamedRange, bool> filter)
+        {
+            var namedRanges = this._list.Where(filter);
+            foreach (var namedRange in namedRanges)
+            {
+                ExcelAddressBase adr;
+                if (rows==0)
+                {
+                    adr = namedRange.DeleteColumn(colFrom, cols);
+                }
+                else
+                {
+                    adr = namedRange.DeleteRow(rowFrom, rows);
+                }
+                if (adr == null)
+                {
+                    namedRange.Address = "#REF!";
+                }
+                else
+                {
+                    namedRange.Address = adr.Address;
+                }
+            }
+        }
+
+        private void InsertColumns(int colFrom, int cols, ExcelNamedRange namedRange)
+        {
+            if (colFrom > 0)
+            {
+                if (colFrom <= namedRange.Start.Column)
+                {
+                    var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column +cols, namedRange.End.Row, namedRange.End.Column + cols);
+                    namedRange.Address = BuildNewAddress(namedRange, newAddress);
+                }
+                else if (colFrom <= namedRange.End.Column)
+                {
+                    var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row, namedRange.End.Column + cols);
+                    namedRange.Address = BuildNewAddress(namedRange, newAddress);
+                }
+            }
+        }
+
+        private static string BuildNewAddress(ExcelNamedRange namedRange, string newAddress)
+        {
+            if (namedRange.FullAddress.Contains("!"))
+            {
+                var worksheet = namedRange.FullAddress.Split('!')[0];
+                worksheet = worksheet.Trim('\'');
+                newAddress = ExcelCellBase.GetFullAddress(worksheet, newAddress);
+            }
+            return newAddress;
+        }
+
+        private void InsertRows(int rowFrom, int rows, ExcelNamedRange namedRange)
+        {
+            if (rows > 0)
+            {
+                if (rowFrom <= namedRange.Start.Row)
+                {
+                    var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row + rows, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column);
+                    namedRange.Address = BuildNewAddress(namedRange, newAddress); 
+                }
+                else if (rowFrom <= namedRange.End.Row)
+                {
+                    var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column);
+                    namedRange.Address = BuildNewAddress(namedRange, newAddress); ;
+                }
+            }
+        }
+
         /// <summary>
         /// Remove a defined name from the collection
         /// </summary>
@@ -218,5 +308,6 @@ namespace OfficeOpenXml
                 Remove(_list[0].Name);
             }
         }
+
     }
 }

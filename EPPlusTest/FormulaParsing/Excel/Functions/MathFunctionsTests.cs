@@ -159,35 +159,6 @@ namespace EPPlusTest.Excel.Functions
         }
 
         [TestMethod]
-        public void SumIfShouldCalculateMatchingValuesOnly()
-        {
-            var func = new SumIf();
-            var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(3, 4, 5), "4");
-            var result = func.Execute(args, _parsingContext);
-            Assert.AreEqual(4d, result.Result);
-        }
-
-        [TestMethod]
-        public void SumIfShouldCalculateWithExpression()
-        {
-            var func = new SumIf();
-            var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(3, 4, 5), ">3");
-            var result = func.Execute(args, _parsingContext);
-            Assert.AreEqual(9d, result.Result);
-        }
-
-
-        [TestMethod, ExpectedException(typeof(ExcelErrorValueException))]
-        public void SumIfShouldThrowIfCriteriaIsLargerThan255Chars()
-        {
-            var longString = "a";
-            for (var x = 0; x < 256; x++) { longString = string.Concat(longString, "a"); }
-            var func = new SumIf();
-            var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(3, 4, 5), longString, (FunctionsHelper.CreateArgs(3, 2, 1)));
-            var result = func.Execute(args, _parsingContext);
-        }
-
-        [TestMethod]
         public void SumSqShouldCalculateArray()
         {
             var func = new Sumsq();
@@ -565,24 +536,6 @@ namespace EPPlusTest.Excel.Functions
             func.IgnoreHiddenValues = true;
             var args = FunctionsHelper.CreateArgs(1d, FunctionsHelper.CreateArgs(12, 13));
             args.ElementAt(0).SetExcelStateFlag(ExcelCellState.HiddenCell);
-            var result = func.Execute(args, _parsingContext);
-            Assert.AreEqual(2d, result.Result);
-        }
-
-        [TestMethod]
-        public void CountIfShouldReturnNbrOfNumericItemsThatMatch()
-        {
-            var func = new CountIf();
-            var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(1d, 2d, 3d), ">1");
-            var result = func.Execute(args, _parsingContext);
-            Assert.AreEqual(2d, result.Result);
-        }
-
-        [TestMethod]
-        public void CountIfShouldReturnNbrOfAlphaNumItemsThatMatch()
-        {
-            var func = new CountIf();
-            var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs("Monday", "Tuesday", "Thursday"), "T*day");
             var result = func.Execute(args, _parsingContext);
             Assert.AreEqual(2d, result.Result);
         }
@@ -1052,5 +1005,82 @@ namespace EPPlusTest.Excel.Functions
             var result = func.Execute(args, _parsingContext);
             Assert.AreEqual(2.5d, result.Result);
         }
+
+        [TestMethod]
+        public void CountIfShouldHandleNegativeCriteria()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet1 = package.Workbook.Worksheets.Add("test");
+                sheet1.Cells["A1"].Value = -1;
+                sheet1.Cells["A2"].Value = -2;
+                sheet1.Cells["A3"].Formula = "CountIf(A1:A2,\"-1\")";
+                sheet1.Calculate();
+                Assert.AreEqual(1d, sheet1.Cells["A3"].Value);
+            }
+        }
+        [TestMethod]
+        public void Rank()
+        {
+            using (var p = new ExcelPackage())
+            {
+                var w = p.Workbook.Worksheets.Add("testsheet");
+                w.SetValue(1, 1, 1);
+                w.SetValue(2, 1, 1);
+                w.SetValue(3, 1, 2);
+                w.SetValue(4, 1, 2);
+                w.SetValue(5, 1, 4);
+                w.SetValue(6, 1, 4);
+
+                w.SetFormula(1, 2, "RANK(1,A1:A5)");
+                w.SetFormula(1, 3, "RANK(1,A1:A5,1)");
+                w.SetFormula(1, 4, "RANK.AVG(1,A1:A5)");
+                w.SetFormula(1, 5, "RANK.AVG(1,A1:A5,1)");
+
+                w.SetFormula(2, 2, "RANK.EQ(2,A1:A5)");
+                w.SetFormula(2, 3, "RANK.EQ(2,A1:A5,1)");
+                w.SetFormula(2, 4, "RANK.AVG(2,A1:A5,1)");
+                w.SetFormula(2, 5, "RANK.AVG(2,A1:A5,0)");
+
+                w.SetFormula(3, 2, "RANK(3,A1:A5)");
+                w.SetFormula(3, 3, "RANK(3,A1:A5,1)");
+                w.SetFormula(3, 4, "RANK.AVG(3,A1:A5,1)");
+                w.SetFormula(3, 5, "RANK.AVG(3,A1:A5,0)");
+
+                w.SetFormula(4, 2, "RANK.EQ(4,A1:A5)");
+                w.SetFormula(4, 3, "RANK.EQ(4,A1:A5,1)");
+                w.SetFormula(4, 4, "RANK.AVG(4,A1:A5,1)");
+                w.SetFormula(4, 5, "RANK.AVG(4,A1:A5)");
+
+
+                w.SetFormula(5, 4, "RANK.AVG(4,A1:A6,1)");
+                w.SetFormula(5, 5, "RANK.AVG(4,A1:A6)");
+
+                w.Calculate();
+
+                Assert.AreEqual(w.GetValue(1, 2), 4D);
+                Assert.AreEqual(w.GetValue(1, 3), 1D);
+                Assert.AreEqual(w.GetValue(1, 4), 4.5D);
+                Assert.AreEqual(w.GetValue(1, 5), 1.5D);
+
+                Assert.AreEqual(w.GetValue(2, 2), 2D);
+                Assert.AreEqual(w.GetValue(2, 3), 3D);
+                Assert.AreEqual(w.GetValue(2, 4), 3.5D);
+                Assert.AreEqual(w.GetValue(2, 5), 2.5D);
+
+                Assert.IsInstanceOfType(w.GetValue(3, 2), typeof(ExcelErrorValue));
+                Assert.IsInstanceOfType(w.GetValue(3, 3), typeof(ExcelErrorValue));
+                Assert.IsInstanceOfType(w.GetValue(3, 4), typeof(ExcelErrorValue));
+                Assert.IsInstanceOfType(w.GetValue(3, 5), typeof(ExcelErrorValue));
+
+                Assert.AreEqual(w.GetValue(4, 2), 1D);
+                Assert.AreEqual(w.GetValue(4, 3), 5D);
+                Assert.AreEqual(w.GetValue(4, 4), 5D);
+                Assert.AreEqual(w.GetValue(4, 5), 1D);
+
+                Assert.AreEqual(w.GetValue(5, 4), 5.5D);
+                Assert.AreEqual(w.GetValue(5, 5), 1.5D);
+            }
+        }
     }
-}
+    }
