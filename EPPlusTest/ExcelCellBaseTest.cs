@@ -49,6 +49,14 @@ namespace EPPlusTest
             var result = ExcelCellBase.UpdateFormulaReferences("'boring sheet'!C3", 3, 3, 2, 2, "boring sheet", "updated sheet");
             Assert.AreEqual("'boring sheet'!C3", result);
         }
+
+        [TestMethod]
+        public void UpdateFormulaReferencesPreservesEscapedQuotes()
+        {
+            Assert.AreEqual("\"Hello,\"\" World\"&\"!\"", ExcelCellBase.UpdateFormulaReferences("\"Hello,\"\" World\"&\"!\"", 1, 1, 8, 2, "Sheet", "Sheet"));
+            Assert.AreEqual("FUNCTION(1,\"Hello World\",\"My name is \"\"Bob\"\"\",16)", ExcelCellBase.UpdateFormulaReferences("FUNCTION(1, \"Hello World\", \"My name is \"\"Bob\"\"\", 16)", 1, 1, 8, 2, "Sheet", "Sheet"));
+            Assert.AreEqual("FUNCTION(\"This is an example of \"\" Nested \"\"\"\" Quotes \"\".\")", ExcelCellBase.UpdateFormulaReferences("FUNCTION(\"This is an example of \"\" Nested \"\"\"\" Quotes \"\".\")", 1, 1, 8, 2, "Sheet", "Sheet"));
+        }
         #endregion
 
         #region UpdateCrossSheetReferenceNames Tests

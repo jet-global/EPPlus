@@ -899,12 +899,13 @@ namespace OfficeOpenXml
                           else
                             f += a.Address;
                         }
-
-
                     }
                     else
                     {
-                        f += t.Value;
+                        if (t.TokenType == TokenType.StringContent)
+                            f += t.Value.Replace("\"", "\"\"");
+                        else
+                            f += t.Value;
                     }
                 }
                 return f;
