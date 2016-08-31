@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
@@ -233,5 +235,54 @@ namespace EPPlusTest.Excel
 			operatorResult = Operator.LessThanOrEqual.Apply(result1, result2);
 			Assert.IsFalse((bool)operatorResult.Result);
 		}
+
+        [TestMethod]
+        public void OperatorsActingOnGermanDateStrings()
+        {
+            var currentCulture = CultureInfo.CurrentCulture;
+            var culture = new CultureInfo("de-DE");
+            Thread.CurrentThread.CurrentCulture = culture;
+            try
+            {
+                string dateFormat = culture.DateTimeFormat.ShortDatePattern;
+                DateTime date1 = new DateTime(2015, 2, 20);
+                DateTime date2 = new DateTime(2015, 12, 1);
+                var numericDate1 = date1.ToOADate();
+                var numericDate2 = date2.ToOADate();
+                CompileResult result1 = new CompileResult(date1.ToString(dateFormat), DataType.String); // 20.02.2015
+                CompileResult result2 = new CompileResult(date2.ToString(dateFormat), DataType.String); // 01.12.2015
+                var operatorResult = Operator.Concat.Apply(result1, result2);
+                Assert.AreEqual($"{date1.ToString(dateFormat)}{date2.ToString(dateFormat)}", operatorResult.Result);
+                operatorResult = Operator.Divide.Apply(result1, result2);
+                Assert.AreEqual(numericDate1 / numericDate2, operatorResult.Result);
+                operatorResult = Operator.Exp.Apply(result1, result2);
+                Assert.AreEqual(Math.Pow(numericDate1, numericDate2), operatorResult.Result);
+                operatorResult = Operator.Minus.Apply(result1, result2);
+                Assert.AreEqual(numericDate1 - numericDate2, operatorResult.Result);
+                operatorResult = Operator.Multiply.Apply(result1, result2);
+                Assert.AreEqual(numericDate1 * numericDate2, operatorResult.Result);
+                operatorResult = Operator.Percent.Apply(result1, result2);
+                Assert.AreEqual(numericDate1 * numericDate2, operatorResult.Result);
+                operatorResult = Operator.Plus.Apply(result1, result2);
+                Assert.AreEqual(numericDate1 + numericDate2, operatorResult.Result);
+                // Comparison operators always compare string-wise and don't parse out the actual numbers.
+                operatorResult = Operator.Eq.Apply(result1, new CompileResult(date1.ToString("f"), DataType.String));
+                Assert.IsFalse((bool)operatorResult.Result);
+                operatorResult = Operator.NotEqualsTo.Apply(result1, new CompileResult(date1.ToString("f"), DataType.String));
+                Assert.IsTrue((bool)operatorResult.Result);
+                operatorResult = Operator.GreaterThan.Apply(result1, result2);
+                Assert.IsTrue((bool)operatorResult.Result);
+                operatorResult = Operator.GreaterThanOrEqual.Apply(result1, result2);
+                Assert.IsTrue((bool)operatorResult.Result);
+                operatorResult = Operator.LessThan.Apply(result1, result2);
+                Assert.IsFalse((bool)operatorResult.Result);
+                operatorResult = Operator.LessThanOrEqual.Apply(result1, result2);
+                Assert.IsFalse((bool)operatorResult.Result);
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = currentCulture;
+            }
+        }
 	}
 }

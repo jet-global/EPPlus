@@ -15,7 +15,6 @@ using System.Threading;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
 using OfficeOpenXml.Table.PivotTable;
-using System.Globalization;
 
 namespace EPPlusTest
 {
@@ -3358,9 +3357,13 @@ namespace EPPlusTest
                 ws.Cells[2, 2].Value = "1/15/2014";
                 ws.Cells[3, 3].Formula = "EOMONTH(C2, 0)";
                 ws.Cells[2, 3].Formula = "EDATE(B2, 0)";
+                ws.Cells[4, 3].Formula = "B2 + 15";
+                ws.Cells[5, 3].Formula = "B2 - 14";
                 ws.Calculate();
                 Assert.AreEqual(41654.0, ws.Cells[2, 3].Value);
                 Assert.AreEqual(41670.0, ws.Cells[3, 3].Value);
+                Assert.AreEqual(41669.0, ws.Cells[4, 3].Value);
+                Assert.AreEqual(41640.0, ws.Cells[5, 3].Value);
             }
             var gb = CultureInfo.CreateSpecificCulture("en-GB");
             Thread.CurrentThread.CurrentCulture = gb;
@@ -3370,9 +3373,29 @@ namespace EPPlusTest
                 ws.Cells[2, 2].Value = "15/1/2014";
                 ws.Cells[3, 3].Formula = "EOMONTH(C2, 0)";
                 ws.Cells[2, 3].Formula = "EDATE(B2, 0)";
+                ws.Cells[4, 3].Formula = "B2 + 15";
+                ws.Cells[5, 3].Formula = "B2 - 14";
                 ws.Calculate();
                 Assert.AreEqual(41654.0, ws.Cells[2, 3].Value);
                 Assert.AreEqual(41670.0, ws.Cells[3, 3].Value);
+                Assert.AreEqual(41669.0, ws.Cells[4, 3].Value);
+                Assert.AreEqual(41640.0, ws.Cells[5, 3].Value);
+            }
+            var de = CultureInfo.CreateSpecificCulture("de-DE");
+            Thread.CurrentThread.CurrentCulture = de;
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("Sheet1");
+                ws.Cells[2, 2].Value = "15.1.2014";
+                ws.Cells[3, 3].Formula = "EOMONTH(C2, 0)";
+                ws.Cells[2, 3].Formula = "EDATE(B2, 0)";
+                ws.Cells[4, 3].Formula = "B2 + 15";
+                ws.Cells[5, 3].Formula = "B2 - 14";
+                ws.Calculate();
+                Assert.AreEqual(41654.0, ws.Cells[2, 3].Value);
+                Assert.AreEqual(41670.0, ws.Cells[3, 3].Value);
+                Assert.AreEqual(41669.0, ws.Cells[4, 3].Value);
+                Assert.AreEqual(41640.0, ws.Cells[5, 3].Value);
             }
             Thread.CurrentThread.CurrentCulture = currentCulture;
         }
