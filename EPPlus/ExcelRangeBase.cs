@@ -1399,7 +1399,7 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Address including sheetname
 		/// </summary>
-		public string FullAddress
+		public new string FullAddress
 		{
 			get
 			{
@@ -2560,7 +2560,7 @@ namespace OfficeOpenXml
 
                 if(cell.Formula!=null)
                 {
-                    cell.Formula = UpdateFormulaReferences(cell.Formula.ToString(), Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, Destination.WorkSheet, Destination.WorkSheet, true);
+                    cell.Formula = _workbook._package.FormulaManager.UpdateFormulaReferences(cell.Formula.ToString(), Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, Destination.WorkSheet, Destination.WorkSheet, true);
                     Destination._worksheet._formulas.SetValue(cell.Row, cell.Column, cell.Formula);
                 }
                 if(cell.HyperLink!=null)
@@ -2597,10 +2597,10 @@ namespace OfficeOpenXml
                     if(sparkline.HostCell.Collide(this) != eAddressCollition.No)
                     {
                         ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
-                        var newFormula = UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+                        var newFormula = _workbook._package.FormulaManager.UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
                         if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
                             newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
-                        var newHostCell = UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+                        var newHostCell = _workbook._package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
                         var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };
                         newSparklines.Add(newSparkline);
                     }

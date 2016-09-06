@@ -235,9 +235,28 @@ namespace OfficeOpenXml
         /// Maximum number of rows in a worksheet (1048576). 
         /// </summary>
         public const int MaxRows = 1048576;
-		#endregion
 
-		#region ExcelPackage Constructors
+        private IFormulaManager _FormulaManager;
+        /// <summary>
+        /// Gets the <see cref="IFormulaManager"/> for this <see cref="ExcelPackage"/> that
+        /// can be used to update formulas in cells and charts.
+        /// </summary>
+        public IFormulaManager FormulaManager
+        {
+            get
+            {
+                if (_FormulaManager == null)
+                    _FormulaManager = new FormulaManager();
+                return _FormulaManager;
+            }
+            private set
+            {
+                _FormulaManager = value;
+            }
+        }
+        #endregion
+
+        #region ExcelPackage Constructors
         /// <summary>
         /// Create a new instance of the ExcelPackage. Output is accessed through the Stream property.
         /// </summary>
@@ -246,6 +265,7 @@ namespace OfficeOpenXml
             Init();
             ConstructNewFile(null);
         }
+
         /// <summary>
 		/// Create a new instance of the ExcelPackage class based on a existing file or creates a new file. 
 		/// </summary>
@@ -1218,5 +1238,16 @@ namespace OfficeOpenXml
                     outputStream.Flush();
             }
         }
+
+        #region Configuration Methods
+        /// <summary>
+        /// Configures this <see cref="ExcelPackage"/> instance with the given <paramref name="formulaManager"/>.
+        /// </summary>
+        /// <param name="formulaManager">The <see cref="IFormulaManager"/> to use when updating formulas.</param>
+        public void Configure(IFormulaManager formulaManager)
+        {
+            this._FormulaManager = formulaManager;
+        }
+        #endregion
     }
 }

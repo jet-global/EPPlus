@@ -938,7 +938,7 @@ namespace OfficeOpenXml
             Stream stream = packPart.GetStream();
 
             XmlTextReader xr = new XmlTextReader(stream);
-            xr.ProhibitDtd = true;
+            xr.DtdProcessing = DtdProcessing.Prohibit;
             xr.WhitespaceHandling = WhitespaceHandling.None;
             LoadColumns(xr);    //columnXml
             long start = stream.Position;
@@ -1951,14 +1951,14 @@ namespace OfficeOpenXml
                         a._toRow += rows;
                     }
                     f.Address = ExcelAddressBase.GetAddress(a._fromRow, a._fromCol, a._toRow, a._toCol);
-                    f.Formula = ExcelCellBase.UpdateFormulaReferences(f.Formula, rows, 0, rowFrom, 0, this.Name, this.Name);
+                    f.Formula = _package.FormulaManager.UpdateFormulaReferences(f.Formula, rows, 0, rowFrom, 0, this.Name, this.Name);
                 }
                 var cse = new CellsStoreEnumerator<object>(_formulas);
                 while (cse.Next())
                 {
                     if (cse.Value is string)
                     {
-                        cse.Value = ExcelCellBase.UpdateFormulaReferences(cse.Value.ToString(), rows, 0, rowFrom, 0, this.Name, this.Name);
+                        cse.Value = _package.FormulaManager.UpdateFormulaReferences(cse.Value.ToString(), rows, 0, rowFrom, 0, this.Name, this.Name);
                     }
                 }
                 FixMergedCellsRow(rowFrom, rows, false);
@@ -2057,7 +2057,7 @@ namespace OfficeOpenXml
                         a._toCol += columns;
                     }
                     f.Address = ExcelAddressBase.GetAddress(a._fromRow, a._fromCol, a._toRow, a._toCol);
-                    f.Formula = ExcelCellBase.UpdateFormulaReferences(f.Formula, 0, columns, 0, columnFrom, this.Name, this.Name);
+                    f.Formula = _package.FormulaManager.UpdateFormulaReferences(f.Formula, 0, columns, 0, columnFrom, this.Name, this.Name);
                 }
 
                 var cse = new CellsStoreEnumerator<object>(_formulas);
@@ -2065,7 +2065,7 @@ namespace OfficeOpenXml
                 {
                     if (cse.Value is string)
                     {
-                        cse.Value = ExcelCellBase.UpdateFormulaReferences(cse.Value.ToString(), 0, columns, 0, columnFrom, this.Name, this.Name);
+                        cse.Value = _package.FormulaManager.UpdateFormulaReferences(cse.Value.ToString(), 0, columns, 0, columnFrom, this.Name, this.Name);
                     }
                 }
 
@@ -2221,20 +2221,20 @@ namespace OfficeOpenXml
                                 if (serie.Series != null && string.Empty != serie.Series)
                                 {
                                     ExcelRangeBase.SplitAddress(serie.Series, out workbook, out worksheet, out address);
-                                    string newSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
+                                    string newSeries = _package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
                                     serie.Series = ExcelRangeBase.GetFullAddress(worksheet, newSeries);
                                 }
                                 if (serie.XSeries != null && string.Empty != serie.XSeries)
                                 {
                                     ExcelRangeBase.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
-                                    string newXSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
+                                    string newXSeries = _package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
                                     serie.XSeries = ExcelRangeBase.GetFullAddress(worksheet, newXSeries);
                                 }
                                 var bubbleSerie = serie as ExcelBubbleChartSerie;
                                 if (bubbleSerie != null && bubbleSerie.BubbleSize != null && bubbleSerie.BubbleSize != string.Empty)
                                 {
                                     ExcelRangeBase.SplitAddress(bubbleSerie.BubbleSize, out workbook, out worksheet, out address);
-                                    string newBubbleSeries = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
+                                    string newBubbleSeries = _package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
                                     bubbleSerie.BubbleSize = ExcelRangeBase.GetFullAddress(worksheet, newBubbleSeries);
                                 }
                             }
@@ -2497,12 +2497,12 @@ namespace OfficeOpenXml
                     string currentFormulaR1C1;
                     if (rows > 0 || row < startRow)
                     {
-                        newFormula = ExcelCellBase.UpdateFormulaReferences(ExcelCellBase.TranslateFromR1C1(formualR1C1, row, col), rows, 0, startRow, 0, this.Name, this.Name);
+                        newFormula = _package.FormulaManager.UpdateFormulaReferences(ExcelCellBase.TranslateFromR1C1(formualR1C1, row, col), rows, 0, startRow, 0, this.Name, this.Name);
                         currentFormulaR1C1 = ExcelRangeBase.TranslateToR1C1(newFormula, row, col);
                     }
                     else
                     {
-                        newFormula = ExcelCellBase.UpdateFormulaReferences(ExcelCellBase.TranslateFromR1C1(formualR1C1, row-rows, col), rows, 0, startRow, 0, this.Name, this.Name);
+                        newFormula = _package.FormulaManager.UpdateFormulaReferences(ExcelCellBase.TranslateFromR1C1(formualR1C1, row-rows, col), rows, 0, startRow, 0, this.Name, this.Name);
                         currentFormulaR1C1 = ExcelRangeBase.TranslateToR1C1(newFormula, row, col);
                     }
                     if (currentFormulaR1C1 != prevFormualR1C1) //newFormula.Contains("#REF!"))
@@ -2745,7 +2745,7 @@ namespace OfficeOpenXml
                     if (sf.StartRow > rowFrom)
                     {
                         var r = Math.Min(sf.StartRow - rowFrom, rows);
-                        sf.Formula = ExcelCellBase.UpdateFormulaReferences(sf.Formula, -r, 0, rowFrom, 0, this.Name, this.Name);
+                        sf.Formula = _package.FormulaManager.UpdateFormulaReferences(sf.Formula, -r, 0, rowFrom, 0, this.Name, this.Name);
                         sf.StartRow -= r;
                     }
                 }
@@ -2760,7 +2760,7 @@ namespace OfficeOpenXml
             {
                 if (cse.Value is string)
                 {
-                    cse.Value = ExcelCellBase.UpdateFormulaReferences(cse.Value.ToString(), -rows, 0, rowFrom, 0, this.Name, this.Name);
+                    cse.Value = _package.FormulaManager.UpdateFormulaReferences(cse.Value.ToString(), -rows, 0, rowFrom, 0, this.Name, this.Name);
                 }
             }
         }
@@ -2781,7 +2781,7 @@ namespace OfficeOpenXml
                     if (sf.StartCol > columnFrom)
                     {
                         var c = Math.Min(sf.StartCol - columnFrom, columns);
-                        sf.Formula = ExcelCellBase.UpdateFormulaReferences(sf.Formula, 0, -c, 0, 1, this.Name, this.Name);
+                        sf.Formula = _package.FormulaManager.UpdateFormulaReferences(sf.Formula, 0, -c, 0, 1, this.Name, this.Name);
                         sf.StartCol-= c;
                     }
 
@@ -2803,7 +2803,7 @@ namespace OfficeOpenXml
             {
                 if (cse.Value is string)
                 {
-                    cse.Value = ExcelCellBase.UpdateFormulaReferences(cse.Value.ToString(), 0, -columns, 0, columnFrom, this.Name, this.Name);
+                    cse.Value = _package.FormulaManager.UpdateFormulaReferences(cse.Value.ToString(), 0, -columns, 0, columnFrom, this.Name, this.Name);
                 }
             }
         }
@@ -3066,14 +3066,14 @@ namespace OfficeOpenXml
           {
             foreach (var f in _sharedFormulas.Values)
             {
-              f.Formula = ExcelCellBase.UpdateFormulaReferences(f.Formula, rows, columns, rowFrom, columnFrom, this.Name, sheetWhoseReferencesShouldBeUpdated);
+              f.Formula = _package.FormulaManager.UpdateFormulaReferences(f.Formula, rows, columns, rowFrom, columnFrom, this.Name, sheetWhoseReferencesShouldBeUpdated);
             }
             var cse = new CellsStoreEnumerator<object>(_formulas);
             while (cse.Next())
             {
               if (cse.Value is string)
               {
-                cse.Value = ExcelCellBase.UpdateFormulaReferences(cse.Value.ToString(), rows, columns, rowFrom, columnFrom, this.Name, sheetWhoseReferencesShouldBeUpdated);
+                cse.Value = _package.FormulaManager.UpdateFormulaReferences(cse.Value.ToString(), rows, columns, rowFrom, columnFrom, this.Name, sheetWhoseReferencesShouldBeUpdated);
               }
             }
           }
@@ -3089,14 +3089,14 @@ namespace OfficeOpenXml
           {
             foreach (var f in _sharedFormulas.Values)
             {
-              f.Formula = ExcelCellBase.UpdateFormulaSheetReferences(f.Formula, oldName, newName);
+              f.Formula = _package.FormulaManager.UpdateFormulaSheetReferences(f.Formula, oldName, newName);
             }
             var cse = new CellsStoreEnumerator<object>(_formulas);
             while (cse.Next())
             {
               if (cse.Value is string)
               {
-                cse.Value = ExcelCellBase.UpdateFormulaSheetReferences(cse.Value.ToString(), oldName, newName);
+                cse.Value = _package.FormulaManager.UpdateFormulaSheetReferences(cse.Value.ToString(), oldName, newName);
               }
             }
           }
@@ -4368,12 +4368,12 @@ namespace OfficeOpenXml
                 foreach (var sparkline in group.Sparklines)
                 {
                     ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
-                    address = ExcelRangeBase.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
+                    address = _package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
                     if (string.IsNullOrEmpty(worksheet))
                         sparkline.Formula.Address = address;
                     else
                         sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(worksheet, address);
-                    sparkline.HostCell.Address = ExcelRangeBase.UpdateFormulaReferences(sparkline.HostCell.Address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
+                    sparkline.HostCell.Address = _package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
                 }
             }
         }
