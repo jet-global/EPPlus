@@ -186,7 +186,7 @@ namespace OfficeOpenXml.Table.PivotTable
                     if (CacheSource == eSourceType.Worksheet)
                     {
                         var ws = PivotTable.WorkSheet.Workbook.Worksheets[GetXmlNodeString(_sourceWorksheetPath)];
-                        if (ws == null) //Not worksheet, check name or table name
+                        if (ws == null)
                         {
                             var name = GetXmlNodeString(_sourceNamePath);
                             foreach (var n in PivotTable.WorkSheet.Workbook.Names)
@@ -201,7 +201,7 @@ namespace OfficeOpenXml.Table.PivotTable
                             {
                                 if (w.Tables._tableNames.ContainsKey(name))
                                 {
-                                    _sourceRange = w.Cells[w.Tables[name].Address.Address];
+									_sourceRange = new ExcelRangeBase(w.Workbook, w, name, true);
                                     break;
                                 }
                                 foreach (var n in w.Names)
