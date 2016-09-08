@@ -96,7 +96,7 @@ namespace OfficeOpenXml
         /// </summary>
         protected internal override void ChangeAddress()
         {
-            if (Table != null)
+            if (this.IsTableAddress)
             {
                 SetRCFromTable(_workbook._package, null);
             }
@@ -834,7 +834,7 @@ namespace OfficeOpenXml
 													_worksheet.AutoFilterAddress._fromCol,
 													_worksheet.AutoFilterAddress._fromRow,
 													_worksheet.AutoFilterAddress._toCol));
-				afAddr[afAddr.Count - 1]._ws = WorkSheet;
+				afAddr[afAddr.Count - 1]._ws = base.WorkSheet;
 			}
 			foreach (var tbl in _worksheet.Tables)
 			{
@@ -844,7 +844,7 @@ namespace OfficeOpenXml
 																			tbl.AutoFilterAddress._fromCol,
 																			tbl.AutoFilterAddress._fromRow,
 																			tbl.AutoFilterAddress._toCol));
-					afAddr[afAddr.Count - 1]._ws = WorkSheet;
+					afAddr[afAddr.Count - 1]._ws = base.WorkSheet;
 				}
 			}
 
@@ -1179,7 +1179,7 @@ namespace OfficeOpenXml
 				}
 				else
 				{
-					Set_SharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, _fromRow, _fromCol), new ExcelAddress(WorkSheet, FirstAddress), false);
+                    Set_SharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, _fromRow, _fromCol), new ExcelAddress(base.WorkSheet, FirstAddress), false);
 					foreach (var address in Addresses)
 					{
 						Set_SharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, address.Start.Row, address.Start.Column), address, false);
@@ -2598,7 +2598,7 @@ namespace OfficeOpenXml
                     {
                         ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
                         var newFormula = _workbook._package.FormulaManager.UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-                        if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
+                        if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.Worksheet))
                             newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
                         var newHostCell = _workbook._package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
                         var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };

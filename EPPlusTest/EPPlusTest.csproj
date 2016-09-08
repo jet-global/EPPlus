@@ -96,6 +96,7 @@
     <Compile Include="Address.cs" />
     <Compile Include="Calculation.cs" />
     <Compile Include="ConditionalFormatting\ConditionalFormatting.cs" />
+    <Compile Include="ExcelAddressTest.cs" />
     <Compile Include="ExcelPackageTest.cs" />
     <Compile Include="FormulaManagerTest.cs" />
     <Compile Include="ExcelStyleTest.cs" />
