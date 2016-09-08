@@ -6,6 +6,37 @@ using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 
 namespace OfficeOpenXml
 {
+    /// <summary>
+    /// Contains logic for parsing and updating references in formula strings.
+    /// </summary>
+    public interface IFormulaManager
+    {
+        /// <summary>
+        /// Updates the Excel formula so that all the cellAddresses are incremented by the row and column increments
+        /// if they fall after the afterRow and afterColumn.
+        /// Supports inserting rows and columns into existing templates.
+        /// </summary>
+        /// <param name="formula">The Excel formula</param>
+        /// <param name="rowIncrement">The amount to increment the cell reference by</param>
+        /// <param name="colIncrement">The amount to increment the cell reference by</param>
+        /// <param name="afterRow">Only change rows after this row</param>
+        /// <param name="afterColumn">Only change columns after this column</param>
+        /// <param name="currentSheet">The sheet that contains the formula currently being processed.</param>
+        /// <param name="modifiedSheet">The sheet where cells are being inserted or deleted.</param>
+        /// <param name="setFixed">Fixed address</param>
+        /// <returns>The updated version of the <paramref name="formula"/>.</returns>
+        string UpdateFormulaReferences(string formula, int rowIncrement, int colIncrement, int afterRow, int afterColumn, string currentSheet, string modifiedSheet, bool setFixed = false);
+
+        /// <summary>
+        /// Updates all the references to a renamed sheet in a formula.
+        /// </summary>
+        /// <param name="formula">The formula to updated.</param>
+        /// <param name="oldSheetName">The old sheet name.</param>
+        /// <param name="newSheetName">The new sheet name.</param>
+        /// <returns>The formula with all cross-sheet references updated.</returns>
+        string UpdateFormulaSheetReferences(string formula, string oldSheetName, string newSheetName);
+    }
+
     internal class FormulaManager : IFormulaManager
     {
         /// <summary>
@@ -140,12 +171,5 @@ namespace OfficeOpenXml
                 return formula;
             }
         }
-    }
-    
-    public interface IFormulaManager
-    {
-        string UpdateFormulaReferences(string formula, int rowIncrement, int colIncrement, int afterRow, int afterColumn, string currentSheet, string modifiedSheet, bool setFixed = false);
-
-        string UpdateFormulaSheetReferences(string formula, string oldSheetName, string newSheetName);
     }
 }

@@ -184,7 +184,7 @@ namespace OfficeOpenXml.FormulaParsing
                 if (t.TokenType == TokenType.ExcelAddress)
                 {
                     var adr = new ExcelFormulaAddress(t.Value);
-                    if (adr.Table != null)
+                    if (adr.IsTableAddress)
                     {
                         adr.SetRCFromTable(ws._package, new ExcelAddressBase(f.Row, f.Column, f.Row, f.Column));
                     }
