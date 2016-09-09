@@ -2598,7 +2598,7 @@ namespace OfficeOpenXml
                     {
                         ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
                         var newFormula = _workbook._package.FormulaManager.UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-                        if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.Worksheet))
+                        if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
                             newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
                         var newHostCell = _workbook._package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
                         var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };
