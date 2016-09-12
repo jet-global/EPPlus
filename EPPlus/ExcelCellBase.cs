@@ -632,12 +632,12 @@ namespace OfficeOpenXml
             }
             else
             {
-                if (FromRow == 1 && ToRow == ExcelPackage.MaxRows)
+                if (FromRow == 1 && ToRow >= ExcelPackage.MaxRows)
                 {
                     var absChar = Absolute ? "$" : "";
                     return absChar + GetColumnLetter(FromColumn) + ":" + absChar + GetColumnLetter(ToColumn);
                 }
-                else if(FromColumn==1 && ToColumn==ExcelPackage.MaxColumns)
+                else if(FromColumn==1 && ToColumn >= ExcelPackage.MaxColumns)
                 {
                     var absChar = Absolute ? "$" : "";
                     return absChar + FromRow.ToString() + ":" + absChar + ToRow.ToString();
@@ -692,40 +692,42 @@ namespace OfficeOpenXml
         {
             return GetFullAddress(worksheetName, address, true);
         }
-        internal static string GetFullAddress(string worksheetName, string address, bool fullRowCol)
-        {
-               if (address.IndexOf("!") == -1 || address=="#REF!")
-               {
-                   if (fullRowCol)
-                   {
-                       string[] cells = address.Split(':');
-                       if (cells.Length > 0)
-                       {
-                           address = string.Format("'{0}'!{1}", worksheetName, cells[0]);
-                           if (cells.Length > 1)
-                           {
-                               address += string.Format(":{0}", cells[1]);
-                           }
-                       }
-                   }
-                   else
-                   {
-                       var a = new ExcelAddressBase(address);
-                       if ((a._fromRow == 1 && a._toRow == ExcelPackage.MaxRows) || (a._fromCol == 1 && a._toCol == ExcelPackage.MaxColumns))
-                       {
-                           address = string.Format("'{0}'!{1}{2}:{3}{4}", worksheetName, ExcelAddress.GetColumnLetter(a._fromCol), a._fromRow, ExcelAddress.GetColumnLetter(a._toCol), a._toRow);
-                       }
-                       else
-                       {
-                           address=GetFullAddress(worksheetName, address, true);
-                       }
-                   }
-               }
-               return address;
-        }
-        #endregion
-        #region IsValidCellAddress
-        public static bool IsValidAddress(string address)
+		internal static string GetFullAddress(string worksheetName, string address, bool fullRowCol)
+		{
+			if (address.IndexOf("!") == -1 || address == "#REF!")
+			{
+				if (fullRowCol)
+				{
+					string[] cells = address.Split(':');
+					if (cells.Length > 0)
+					{
+						var addressFormat = string.IsNullOrEmpty(worksheetName) ? "{1}" : "'{0}'!{1}";
+						address = string.Format(addressFormat, worksheetName, cells[0]);
+						if (cells.Length > 1)
+						{
+							address += string.Format(":{0}", cells[1]);
+						}
+					}
+				}
+				else
+				{
+					var a = new ExcelAddressBase(address);
+					if ((a._fromRow == 1 && a._toRow == ExcelPackage.MaxRows) || (a._fromCol == 1 && a._toCol == ExcelPackage.MaxColumns))
+					{
+						var addressFormat = string.IsNullOrEmpty(worksheetName) ? "{1}{2}:{3}{4}" : "'{0}'!{1}{2}:{3}{4}";
+						address = string.Format("'{0}'!{1}{2}:{3}{4}", worksheetName, ExcelAddress.GetColumnLetter(a._fromCol), a._fromRow, ExcelAddress.GetColumnLetter(a._toCol), a._toRow);
+					}
+					else
+					{
+						address = GetFullAddress(worksheetName, address, true);
+					}
+				}
+			}
+			return address;
+		}
+		#endregion
+		#region IsValidCellAddress
+		public static bool IsValidAddress(string address)
         {
             address = Utils.ConvertUtil._invariantTextInfo.ToUpper(address);
             string r1 = "", c1 = "", r2 = "", c2 = "";
