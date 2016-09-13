@@ -174,15 +174,40 @@ namespace OfficeOpenXml
         {
             if (colFrom > 0)
             {
-                if (colFrom <= namedRange.Start.Column)
+                if (namedRange.Addresses?.Any() == true)
                 {
-                    var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column +cols, namedRange.End.Row, namedRange.End.Column + cols);
-                    namedRange.Address = BuildNewAddress(namedRange, newAddress);
+                    string worksheetPrefix = string.Empty;
+                    if (namedRange.FullAddress.Contains("!"))
+                    {
+                        var worksheetPart = namedRange.FullAddress.Split('!')[0];
+                        worksheetPart = worksheetPart.Trim('\'');
+                        worksheetPrefix = $"'{worksheetPart}'!";
+                    }
+                    var addressBuilder = new StringBuilder();
+                    foreach (var address in namedRange.Addresses)
+                    {
+                        if (colFrom <= address.Start.Column)
+                            addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column + cols, address.End.Row, address.End.Column + cols)},");
+                        else if (colFrom <= address.End.Column)
+                            addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column, address.End.Row, address.End.Column + cols)},");
+                        else
+                            addressBuilder.Append($"{worksheetPrefix}{address.Address},");
+                    }
+                    addressBuilder.Length--;
+                    namedRange.Address = addressBuilder.ToString();
                 }
-                else if (colFrom <= namedRange.End.Column)
+                else
                 {
-                    var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row, namedRange.End.Column + cols);
-                    namedRange.Address = BuildNewAddress(namedRange, newAddress);
+                    if (colFrom <= namedRange.Start.Column)
+                    {
+                        var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column + cols, namedRange.End.Row, namedRange.End.Column + cols);
+                        namedRange.Address = BuildNewAddress(namedRange, newAddress);
+                    }
+                    else if (colFrom <= namedRange.End.Column)
+                    {
+                        var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row, namedRange.End.Column + cols);
+                        namedRange.Address = BuildNewAddress(namedRange, newAddress);
+                    }
                 }
             }
         }
@@ -202,15 +227,40 @@ namespace OfficeOpenXml
         {
             if (rows > 0)
             {
-                if (rowFrom <= namedRange.Start.Row)
+                if (namedRange.Addresses?.Any() == true)
                 {
-                    var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row + rows, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column);
-                    namedRange.Address = BuildNewAddress(namedRange, newAddress); 
+                    string worksheetPrefix = string.Empty;
+                    if (namedRange.FullAddress.Contains("!"))
+                    {
+                        var worksheetPart = namedRange.FullAddress.Split('!')[0];
+                        worksheetPart = worksheetPart.Trim('\'');
+                        worksheetPrefix = $"'{worksheetPart}'!";
+                    }
+                    var addressBuilder = new StringBuilder();
+                    foreach (var address in namedRange.Addresses)
+                    {
+                        if (rowFrom <= address.Start.Row)
+                            addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row + rows, address.Start.Column, address.End.Row + rows, address.End.Column)},");
+                        else if (rowFrom <= address.End.Row)
+                            addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column, address.End.Row + rows, address.End.Column)},");
+                        else
+                            addressBuilder.Append($"{worksheetPrefix}{address.Address},");
+                    }
+                    addressBuilder.Length--;
+                    namedRange.Address = addressBuilder.ToString();
                 }
-                else if (rowFrom <= namedRange.End.Row)
+                else
                 {
-                    var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column);
-                    namedRange.Address = BuildNewAddress(namedRange, newAddress); ;
+                    if (rowFrom <= namedRange.Start.Row)
+                    {
+                        var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row + rows, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column);
+                        namedRange.Address = BuildNewAddress(namedRange, newAddress);
+                    }
+                    else if (rowFrom <= namedRange.End.Row)
+                    {
+                        var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column);
+                        namedRange.Address = BuildNewAddress(namedRange, newAddress);
+                    }
                 }
             }
         }

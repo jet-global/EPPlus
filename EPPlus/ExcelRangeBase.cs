@@ -1396,24 +1396,7 @@ namespace OfficeOpenXml
 				return _worksheet;
 			}
 		}
-		/// <summary>
-		/// Address including sheetname
-		/// </summary>
-		public new string FullAddress
-		{
-			get
-			{
-				string fullAddress = GetFullAddress(_worksheet.Name, _address);
-				if (Addresses != null)
-				{
-					foreach (var a in Addresses)
-					{
-						fullAddress += "," + GetFullAddress(_worksheet.Name, a.Address); ;
-					}
-				}
-				return fullAddress;
-			}
-		}
+		
 		/// <summary>
 		/// Address including sheetname
 		/// </summary>
@@ -1422,45 +1405,21 @@ namespace OfficeOpenXml
 			get
 			{
 				string wbwsRef = string.IsNullOrEmpty(base._wb) ? base._ws : "[" + base._wb.Replace("'", "''") + "]" + _ws;
-				string fullAddress = GetFullAddress(wbwsRef, GetAddress(_fromRow, _fromCol, _toRow, _toCol, true));
-				if (Addresses != null)
+				if (Addresses == null)
+					return ExcelCellBase.GetFullAddress(wbwsRef, GetAddress(_fromRow, _fromCol, _toRow, _toCol, true));
+				string fullAddress = string.Empty;
+				foreach (var a in Addresses)
 				{
-					foreach (var a in Addresses)
-					{
-                        if (a.Address == "#REF!")
-                        {
-                            fullAddress += "," + GetFullAddress(wbwsRef, "#REF!");
-                        }
-                        else
-                        {
-                            fullAddress += "," + GetFullAddress(wbwsRef, GetAddress(a.Start.Row, a.Start.Column, a.End.Row, a.End.Column, true)); 
-                        }
-					}
+					if (a.Address == "#REF!")
+						fullAddress += ExcelCellBase.GetFullAddress(wbwsRef, "#REF!") + ',';
+					else
+						fullAddress += ExcelCellBase.GetFullAddress(wbwsRef, GetAddress(a.Start.Row, a.Start.Column, a.End.Row, a.End.Column, true)) + ','; 
 				}
-				return fullAddress;
+				return fullAddress.TrimEnd(',');
 			}
 		}
-        /// <summary>
-        /// Address including sheetname
-        /// </summary>
-        internal string FullAddressAbsoluteNoFullRowCol
-        {
-            get
-            {
-                string wbwsRef = string.IsNullOrEmpty(base._wb) ? base._ws : "[" + base._wb.Replace("'", "''") + "]" + _ws;
-                string fullAddress = GetFullAddress(wbwsRef, GetAddress(_fromRow, _fromCol, _toRow, _toCol, true), false);
-                if (Addresses != null)
-                {
-                    foreach (var a in Addresses)
-                    {
-                        fullAddress += "," + GetFullAddress(wbwsRef, GetAddress(a.Start.Row, a.Start.Column, a.End.Row, a.End.Column, true),false); ;
-                    }
-                }
-                return fullAddress;
-            }
-        }
 
-        internal List<ExcelSparkline> Sparklines { get; } = new List<ExcelSparkline>();
+		internal List<ExcelSparkline> Sparklines { get; } = new List<ExcelSparkline>();
 		#endregion
 		#region Private Methods
 		/// <summary>
