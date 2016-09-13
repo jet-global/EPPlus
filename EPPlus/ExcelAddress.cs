@@ -32,6 +32,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace OfficeOpenXml
@@ -169,7 +170,17 @@ namespace OfficeOpenXml
 
         internal string FullAddress
         {
-            get { return this.GetAddress(); }
+            get
+            {
+                if (Addresses == null)
+                    return GetFullAddress(_ws, _address);
+                string fullAddress = string.Empty;
+                foreach (var a in Addresses)
+                {
+                    fullAddress += GetFullAddress(_ws, a.Address) + ",";
+                }
+                return fullAddress.TrimEnd(',');
+            }
         }
         
         /// <summary>
@@ -1269,6 +1280,7 @@ namespace OfficeOpenXml
             }
             set
             {
+                this.Addresses?.Clear();
                 SetAddress(value);
                 ChangeAddress();
             }
@@ -1342,10 +1354,6 @@ namespace OfficeOpenXml
     /// </summary>
     public class ExcelFormulaAddress : ExcelAddressBase
     {
-        #region Class Variables
-        internal new List<ExcelFormulaAddress> _addresses;
-        #endregion
-
         #region Properties
         /// <summary>
         /// The address for the range
@@ -1363,24 +1371,10 @@ namespace OfficeOpenXml
             }
             set
             {
+                base.Addresses?.Clear();
                 SetAddress(value);
                 ChangeAddress();
                 SetFixed();
-            }
-        }
-
-        /// <summary>
-        /// Gets the addresses in this <see cref="ExcelFormulaAddress"/>.
-        /// </summary>
-        public new List<ExcelFormulaAddress> Addresses
-        {
-            get
-            {
-                if (_addresses == null)
-                {
-                    _addresses = new List<ExcelFormulaAddress>();
-                }
-                return _addresses;
             }
         }
         #endregion
@@ -1429,7 +1423,7 @@ namespace OfficeOpenXml
             string a = GetAddress(fromRow, fromCol, toRow, tocol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
             if (Addresses != null)
             {
-                foreach (var sa in Addresses)
+                foreach (var sa in Addresses.Cast<ExcelFormulaAddress>())
                 {
                     a += "," + sa.GetOffset(row, column);
                 }
