@@ -637,7 +637,7 @@ namespace OfficeOpenXml
                     var absChar = Absolute ? "$" : "";
                     return absChar + GetColumnLetter(FromColumn) + ":" + absChar + GetColumnLetter(ToColumn);
                 }
-                else if(FromColumn==1 && ToColumn >= ExcelPackage.MaxColumns)
+                else if(FromColumn == 1 && ToColumn >= ExcelPackage.MaxColumns)
                 {
                     var absChar = Absolute ? "$" : "";
                     return absChar + FromRow.ToString() + ":" + absChar + ToRow.ToString();
