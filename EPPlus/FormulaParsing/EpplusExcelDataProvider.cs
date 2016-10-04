@@ -299,7 +299,7 @@ namespace OfficeOpenXml.FormulaParsing
         public override IRangeInfo GetRange(string worksheet, int row, int column, string address)
         {
             var addr = new ExcelAddress(worksheet, address);
-            if (addr.Table != null)
+            if (addr.IsTableAddress)
             {
                 addr.SetRCFromTable(_package, new ExcelAddressBase(row, column, row, column));
             }

@@ -106,7 +106,7 @@ namespace OfficeOpenXml.Packaging
                 }
                 catch
                 {
-                    //The URI is not a valid URI. Encode it to make i valid.
+                    //The URI is not a valid URI. Encode it to make it valid.
                     rel.TargetUri = new Uri(Uri.EscapeUriString("Invalid:URI "+c.GetAttribute("Target")), UriKind.RelativeOrAbsolute);
                 }
                 if (!string.IsNullOrEmpty(source))

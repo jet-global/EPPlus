@@ -122,6 +122,7 @@ namespace OfficeOpenXml
         internal FormulaParser _formulaParser = null;
 	    internal FormulaParserManager _parserManager;
         internal CellStore<List<Token>> _formulaTokens;
+		internal Dictionary<string, int> SlicerAppendNumbers { get; } = new Dictionary<string, int>();
 		/// <summary>
 		/// Read shared strings to list
 		/// </summary>

@@ -743,7 +743,27 @@ namespace OfficeOpenXml
                         XmlAttribute relAtt = drawXml.SelectSingleNode(string.Format("//c:chart/@r:id[.='{0}']", prevRelID), Copy.Drawings.NameSpaceManager) as XmlAttribute;
                         relAtt.Value=rel.Id;
                     }
-                    else if (draw is ExcelPicture)
+					// TODO: Add support for "Slicer" here.
+					else if (draw is ExcelSlicerDrawing)
+				{
+					ExcelSlicerDrawing slicer = draw as ExcelSlicerDrawing;
+					var uriSlicer = XmlHelper.GetNewUri(_pck.Package, "/xl/slicers/slicer{0}.xml");
+					var slicerPart = _pck.Package.CreatePart(uriSlicer, "application/???", _pck.Compression);
+					var uriSlicerCache = XmlHelper.GetNewUri(_pck.Package, "/xl/slicerCaches/slicerCache{0}.xml");
+					var slicerCachePart = _pck.Package.CreatePart(uriSlicerCache, "application/???", _pck.Compression);
+					StreamWriter streamSlicer = new StreamWriter(slicerPart.GetStream(FileMode.Create, FileAccess.Write));
+					var originalSlicerXml = slicer.SlicerDocument.InnerXml;
+					slicer.Name = $"{slicer.Name} {workSheet.Workbook.SlicerAppendNumbers[slicer.Name]++}";
+                    var slicerXml = ;
+					streamSlicer.Write(xml);
+					// Make a new slicer by copying the original slicer's xml. Update the new slicers's Name and Cache fields.
+					// (Slicer_Name<digit>, as in Slicer_Description1 for a copy of a slicer named "Description").
+					// Make a new Slicer Cache by copying the original slicer cache.
+					// Update the new slicer cache's TabId, PivotCacheId, PivotTable fields.
+					// Add a workbook-level relationship to the new SlicerCache.
+					// Add a worksheet-level relationship to the new Slicer.
+				}
+				else if (draw is ExcelPicture)
                     {
                         ExcelPicture pic = draw as ExcelPicture;
                         var uri = pic.UriPic;

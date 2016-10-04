@@ -185,6 +185,7 @@ namespace OfficeOpenXml
 		/// Main Xml schema name
 		/// </summary>
 		internal const string schemaMain = @"http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+		internal const string schemaMain2009 = @"http://schemas.microsoft.com/office/spreadsheetml/2009/9/main";
 		/// <summary>
 		/// Relationship schema name
 		/// </summary>
@@ -202,8 +203,12 @@ namespace OfficeOpenXml
         internal const string schemaHyperlink = @"http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink";
         internal const string schemaComment = @"http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments";
         internal const string schemaImage = @"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
-        //Office properties
-        internal const string schemaCore = @"http://schemas.openxmlformats.org/package/2006/metadata/core-properties";
+		internal const string schemaSlicerDrawing = @"http://schemas.microsoft.com/office/drawing/2010/slicer";
+		internal const string schemaSlicerRelationship = @"http://schemas.microsoft.com/office/2007/relationships/slicer";
+		internal const string schemaSlicerCache = @"http://schemas.microsoft.com/office/2007/relationships/slicerCache";
+
+		//Office properties
+		internal const string schemaCore = @"http://schemas.openxmlformats.org/package/2006/metadata/core-properties";
         internal const string schemaExtended = @"http://schemas.openxmlformats.org/officeDocument/2006/extended-properties";
         internal const string schemaCustom = @"http://schemas.openxmlformats.org/officeDocument/2006/custom-properties";
         internal const string schemaDc = @"http://purl.org/dc/elements/1.1/";
@@ -235,9 +240,28 @@ namespace OfficeOpenXml
         /// Maximum number of rows in a worksheet (1048576). 
         /// </summary>
         public const int MaxRows = 1048576;
-		#endregion
 
-		#region ExcelPackage Constructors
+        private IFormulaManager _FormulaManager;
+        /// <summary>
+        /// Gets the <see cref="IFormulaManager"/> for this <see cref="ExcelPackage"/> that
+        /// can be used to update formulas in cells and charts.
+        /// </summary>
+        public IFormulaManager FormulaManager
+        {
+            get
+            {
+                if (_FormulaManager == null)
+                    _FormulaManager = new FormulaManager();
+                return _FormulaManager;
+            }
+            private set
+            {
+                _FormulaManager = value;
+            }
+        }
+        #endregion
+
+        #region ExcelPackage Constructors
         /// <summary>
         /// Create a new instance of the ExcelPackage. Output is accessed through the Stream property.
         /// </summary>
@@ -246,6 +270,7 @@ namespace OfficeOpenXml
             Init();
             ConstructNewFile(null);
         }
+
         /// <summary>
 		/// Create a new instance of the ExcelPackage class based on a existing file or creates a new file. 
 		/// </summary>
@@ -1218,5 +1243,16 @@ namespace OfficeOpenXml
                     outputStream.Flush();
             }
         }
+
+        #region Configuration Methods
+        /// <summary>
+        /// Configures this <see cref="ExcelPackage"/> instance with the given <paramref name="formulaManager"/>.
+        /// </summary>
+        /// <param name="formulaManager">The <see cref="IFormulaManager"/> to use when updating formulas.</param>
+        public void Configure(IFormulaManager formulaManager)
+        {
+            this._FormulaManager = formulaManager;
+        }
+        #endregion
     }
 }

@@ -1126,5 +1126,21 @@ namespace EPPlusTest
                 Assert.AreEqual(string.Empty, drawing.Series[2].XSeries);
             }
         }
-    }
+
+		[TestMethod]
+		public void ReadExcelSlicer()
+		{
+			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\SlicerFromExcel.xlsx"));
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets["PivotTable"];
+				var drawing = sheet.Drawings[0] as ExcelSlicerDrawing;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Description", drawing.Name);
+				Assert.IsNotNull(drawing.SlicerCache);
+
+			}
+		}
+	}
 }
