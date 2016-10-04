@@ -74,19 +74,7 @@ namespace EPPlusTest
             Assert.AreEqual(addr.DeleteRow(1, 3), null);
             Assert.AreEqual(addr.DeleteColumn(1, 2), null);
         }
-        [TestMethod]
-        public void SplitAddress()
-        {
-            var addr = new ExcelAddressBase("C3:F8");
 
-            addr.Insert(new ExcelAddressBase("G9"), ExcelAddressBase.eShiftType.Right);
-            addr.Insert(new ExcelAddressBase("G3"), ExcelAddressBase.eShiftType.Right);
-            addr.Insert(new ExcelAddressBase("C9"), ExcelAddressBase.eShiftType.Right);
-            addr.Insert(new ExcelAddressBase("B2"), ExcelAddressBase.eShiftType.Right);
-            addr.Insert(new ExcelAddressBase("B3"), ExcelAddressBase.eShiftType.Right);
-            addr.Insert(new ExcelAddressBase("D:D"), ExcelAddressBase.eShiftType.Right);
-            addr.Insert(new ExcelAddressBase("5:5"), ExcelAddressBase.eShiftType.Down);
-        }
         [TestMethod]
         public void Addresses()
         {
@@ -133,20 +121,6 @@ namespace EPPlusTest
           Assert.IsFalse(ExcelCellBase.IsValidCellAddress("Table1!A1:XFD1"));
           Assert.IsFalse(ExcelCellBase.IsValidCellAddress("Table1!A1048576:XFD1048576"));
           Assert.IsFalse(ExcelCellBase.IsValidCellAddress("Table1!XFD1:XFD1048576"));
-        }
-
-
-        [TestMethod]
-        public void GetWorksheetPart()
-        {
-            string address = "Sheet1!A1";
-            Assert.AreEqual("Sheet1", ExcelAddressBase.GetWorksheetPart(address, "failure"));
-        }
-        [TestMethod]
-        public void GetWorksheetPartFromDefault()
-        {
-            string address = "A1";
-            Assert.AreEqual("Default", ExcelAddressBase.GetWorksheetPart(address, "Default"));
         }
 
         [TestMethod]

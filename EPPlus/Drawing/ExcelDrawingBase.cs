@@ -211,7 +211,7 @@ namespace OfficeOpenXml.Drawing
         /// <summary>
         /// The name of the drawing object
         /// </summary>
-        public string Name 
+        public virtual string Name 
         {
             get
             {
@@ -350,10 +350,14 @@ namespace OfficeOpenXml.Drawing
             {
                 return ExcelChart.GetChart(drawings, node);
             }
-            else
+            else if(node.SelectSingleNode("mc:AlternateContent/mc:Choice/xdr:graphicFrame/a:graphic/a:graphicData/sle:slicer", drawings.NameSpaceManager) != null)
             {
-                return new ExcelDrawing(drawings, node, "");
+				return new ExcelSlicerDrawing(drawings, node);
             }
+			else
+			{
+				return new ExcelDrawing(drawings, node, "");
+			}
         }
         internal string Id
         {

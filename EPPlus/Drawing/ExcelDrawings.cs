@@ -142,6 +142,7 @@ namespace OfficeOpenXml.Drawing
                     {
                         _drawingNames.Add(dr.Name, _drawings.Count - 1);
                     }
+					this.Worksheet.Workbook.SlicerAppendNumbers[dr.Name] = 1;
                 }
             }
         }
@@ -159,6 +160,8 @@ namespace OfficeOpenXml.Drawing
             _nsManager.AddNamespace("xdr", ExcelPackage.schemaSheetDrawings);
             _nsManager.AddNamespace("c", ExcelPackage.schemaChart);
             _nsManager.AddNamespace("r", ExcelPackage.schemaRelationships);
+			_nsManager.AddNamespace("mc", ExcelPackage.schemaMarkupCompatibility);
+			_nsManager.AddNamespace("sle", ExcelPackage.schemaSlicerDrawing);
         }
         /// <summary>
         /// Provides access to a namespace manager instance to allow XPath searching
