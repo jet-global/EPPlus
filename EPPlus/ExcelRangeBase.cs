@@ -786,7 +786,7 @@ namespace OfficeOpenXml
 	    /// <summary>
 	    /// Set the column width from the content of the range.
         /// Note: Cells containing formulas are ignored if no calculation is made.
-        ///       Wrapped and merged cells are also ignored.
+        ///      Merged cells are also ignored.
         ///      Hidden columns are left hidden.
 	    /// </summary>
 	    /// <param name="MinimumWidth">Minimum column width</param>
@@ -802,8 +802,7 @@ namespace OfficeOpenXml
 				SetToSelectedRange();
 			}
             var fontCache = new Dictionary<int, Font>();
-
-	        bool doAdjust = _worksheet._package.DoAdjustDrawings;
+            bool doAdjust = _worksheet._package.DoAdjustDrawings;
 			_worksheet._package.DoAdjustDrawings = false;
 			var drawWidths = _worksheet.Drawings.GetDrawingWidths();
 
@@ -878,7 +877,7 @@ namespace OfficeOpenXml
                 if (_worksheet.Column(cell.Start.Column).Hidden)    //Issue 15338
                     continue;
 
-                if (cell.Merge == true || cell.Style.WrapText) continue;
+                if (cell.Merge == true) continue;
 				var fntID = styles.CellXfs[cell.StyleID].FontId;
 				Font f;
 				if (fontCache.ContainsKey(fntID))
@@ -899,7 +898,7 @@ namespace OfficeOpenXml
                     fontCache.Add(fntID, f);
 				}
                 var ind = styles.CellXfs[cell.StyleID].Indent;
-                var textForWidth = cell.TextForWidth;
+                var textForWidth = cell.GetTextForWidth(f);
                 var t = textForWidth + (ind > 0 && !string.IsNullOrEmpty(textForWidth) ? new string('_',ind) : "");
                 var size = g.MeasureString(t, f, 10000, StringFormat.GenericDefault);
 
@@ -970,14 +969,47 @@ namespace OfficeOpenXml
             }
         }
 
-        internal string TextForWidth
+        private string GetTextForWidth(Font font)
 		{
-			get
-			{
-				return GetFormattedText(true);
-			}
+            if (this.Style.WrapText)
+                return GetLongestStringFromWrappedText(font);
+            return GetFormattedText(true);
 		}
-		private string GetFormattedText(bool forWidthCalc)
+
+        private string GetLongestStringFromWrappedText(Font font)
+        {
+            var rowHeight = _worksheet.Row(this._fromRow).Height;
+            var formattedText = this.GetFormattedText(true);
+            var textHeight = ExcelFontXml.GetFontHeight(font.Name, font.Size) * 0.75;
+            var leftoverRowHeight = rowHeight % textHeight;
+            int textLines = (int)Math.Round((rowHeight - leftoverRowHeight) / textHeight);
+            if (textLines <= 1)
+                return formattedText;
+            string longestString = string.Empty;
+            bool endOfText = false;
+            var splitIndex = (int)Math.Round((double)(formattedText.Length / textLines));
+            string textToSplit = formattedText;
+            while (!endOfText)
+            {
+                if (textToSplit.Length > splitIndex)
+                {
+                    var nextSpaceOrHyphenIndex = textToSplit.IndexOf(' ', splitIndex);
+                    if (nextSpaceOrHyphenIndex <= 0)
+                        return textToSplit;
+                    string lineOfText = textToSplit.Substring(0, nextSpaceOrHyphenIndex);
+                    if (lineOfText.Length > longestString.Length)
+                        longestString = lineOfText;
+                    textToSplit = textToSplit.Substring(nextSpaceOrHyphenIndex + 1);
+                }
+                else
+                {
+                    endOfText = true;
+                }
+            }
+            return longestString;
+        }
+
+        private string GetFormattedText(bool forWidthCalc)
 		{
 			object v = Value;
 			if (v == null) return "";
