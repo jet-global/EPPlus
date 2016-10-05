@@ -333,5 +333,92 @@ namespace EPPlusTest
                 CollectionAssert.AreEqual(new List<object> { "false" }, (List<object>)worksheet.Cells[3, 3].Value);
             }
         }
+
+
+        [TestMethod]
+        public void EPPlusRegressionColumnAutoFitResizesColumnToFitContentsWithDefaultRowHeight()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Sheet");
+                sheet.Cells[1, 2].Value = "Header to set width";
+                sheet.Cells[1, 2].Style.WrapText = true;
+                var contents = "=0";
+                sheet.Cells[2, 2].Formula = contents;
+                sheet.Cells[2, 2].Style.Numberformat.Format = "_(* #,##0_);_(* (#,##0);_(* \" - \"??_);_(@_)";
+                sheet.Column(2).Width = 2;
+                Assert.AreEqual(2, sheet.Column(2).Width);
+                sheet.Cells[2, 3].Formula = "=\"Next cell contents.\"";
+                sheet.Cells[2, 2].Calculate();
+                sheet.Column(2).AutoFit();
+                var actualWidth = sheet.Column(2).Width;
+                Assert.AreEqual(19, Math.Round(sheet.Column(2).Width));
+            }
+        }
+
+        [TestMethod]
+        public void EPPlusRegressionColumnAutoFitResizesColumnToFitContentsWithNoSpacesRegardlessOfRowHeight()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Sheet");
+                sheet.Row(1).Height = 33; // Just a bit taller than two lines of text.
+                sheet.Cells[1, 2].Value = "HeaderWithNoSpacesShouldNotBreak";
+                sheet.Cells[1, 2].Style.WrapText = true;
+                var contents = "=0";
+                sheet.Cells[2, 2].Formula = contents;
+                sheet.Cells[2, 2].Style.Numberformat.Format = "_(* #,##0_);_(* (#,##0);_(* \" - \"??_);_(@_)";
+                sheet.Column(2).Width = 2;
+                Assert.AreEqual(2, sheet.Column(2).Width);
+                sheet.Cells[2, 3].Formula = "=\"Next cell contents.\"";
+                sheet.Cells[2, 2].Calculate();
+                sheet.Column(2).AutoFit();
+                Assert.AreEqual(35, Math.Round(sheet.Column(2).Width));
+            }
+        }
+
+        [TestMethod]
+        public void EPPlusRegressionColumnAutoFitResizesColumnToFitContentsWithSpecifiedRowHeight()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Sheet");
+                sheet.Row(1).Height = 33; // Just a bit taller than two lines of text.
+                sheet.Cells[1, 2].Value = "Header to set width";
+                sheet.Cells[1, 2].Style.WrapText = true;
+                var contents = "=0";
+                sheet.Cells[2, 2].Formula = contents;
+                sheet.Cells[2, 2].Style.Numberformat.Format = "_(* #,##0_);_(* (#,##0);_(* \" - \"??_);_(@_)";
+                sheet.Column(2).Width = 2;
+                Assert.AreEqual(2, sheet.Column(2).Width);
+                sheet.Cells[2, 3].Formula = "=\"Next cell contents.\"";
+                sheet.Cells[2, 2].Calculate();
+                sheet.Column(2).AutoFit();
+                Assert.AreEqual(10, Math.Round(sheet.Column(2).Width));
+
+            }
+        }
+
+        [TestMethod]
+        public void EPPlusRegressionColumnAutoFitResizesColumnToFitContentsWithSpecifiedRowHeightForFiveLines()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Sheet");
+                sheet.Row(1).Height = 76; // Just a bit taller than five lines of text.
+                sheet.Cells[1, 2].Value = "Set width to five lines";
+                sheet.Cells[1, 2].Style.WrapText = true;
+                var contents = "=0";
+                sheet.Cells[2, 2].Formula = contents;
+                sheet.Cells[2, 2].Style.Numberformat.Format = "_(* #,##0_);_(* (#,##0);_(* \" - \"??_);_(@_)";
+                sheet.Column(2).Width = 2;
+                Assert.AreEqual(2, sheet.Column(2).Width);
+                sheet.Cells[2, 3].Formula = "=\"Next cell contents.\"";
+                sheet.Cells[2, 2].Calculate();
+                sheet.Column(2).AutoFit();
+                Assert.AreEqual(9, Math.Round(sheet.Column(2).Width));
+
+            }
+        }
     }
 }
