@@ -43,6 +43,8 @@ using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OfficeOpenXml.Packaging.Ionic.Zip;
 using System.Drawing;
 using OfficeOpenXml.Style;
+using OfficeOpenXml.Drawing;
+using OfficeOpenXml.Drawing.Slicers;
 
 namespace OfficeOpenXml
 {
@@ -122,7 +124,30 @@ namespace OfficeOpenXml
         internal FormulaParser _formulaParser = null;
 	    internal FormulaParserManager _parserManager;
         internal CellStore<List<Token>> _formulaTokens;
-		internal Dictionary<string, int> SlicerAppendNumbers { get; } = new Dictionary<string, int>();
+		internal Dictionary<string, int> NextSlicerIdNumber { get; } = new Dictionary<string, int>();
+		private List<ExcelSlicerCache> _slicerCaches;
+		public List<ExcelSlicerCache> SlicerCaches
+		{
+			get
+			{
+				if(this._slicerCaches == null)
+				{
+					var slicerCacheNamespaceManager = ExcelSlicer.SlicerDocumentNamespaceManager;
+					this._slicerCaches = new List<ExcelSlicerCache>();
+					var slicerCaches = this.Part.GetRelationshipsByType(ExcelPackage.schemaSlicerCache);
+					foreach (var cache in slicerCaches)
+					{
+						var cacheTargetUri = cache.TargetUri.ToString();
+						var uri = new Uri($"/xl/{cacheTargetUri}", UriKind.Relative);
+						var possiblePart = this._package.GetXmlFromUri(uri);
+						var slicerCacheNode = possiblePart.SelectSingleNode("default:slicerCacheDefinition", slicerCacheNamespaceManager);
+						this._slicerCaches.Add(new ExcelSlicerCache(slicerCacheNode, slicerCacheNamespaceManager, cache.TargetUri, possiblePart));
+					}
+				}
+				return this._slicerCaches;
+			}
+		}
+
 		/// <summary>
 		/// Read shared strings to list
 		/// </summary>
@@ -787,6 +812,12 @@ namespace OfficeOpenXml
 			if (_workbookXml != null)
 			{
 				_package.SavePart(WorkbookUri, _workbookXml);
+			}
+
+			// Save any slicer caches
+			foreach(var slicerCache in this.SlicerCaches)
+			{
+				slicerCache.Save(this._package);
 			}
 
 			// save the properties of the workbook

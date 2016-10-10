@@ -9,6 +9,7 @@ using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Style;
 using System.Diagnostics;
+using OfficeOpenXml.Drawing.Slicers;
 
 namespace EPPlusTest
 {
@@ -1138,8 +1139,71 @@ namespace EPPlusTest
 				var drawing = sheet.Drawings[0] as ExcelSlicerDrawing;
 				Assert.IsNotNull(drawing);
 				Assert.AreEqual("Description", drawing.Name);
-				Assert.IsNotNull(drawing.SlicerCache);
+				Assert.IsNotNull(drawing.Slicer);
+				Assert.AreEqual("Description", drawing.Slicer.Name);
+				Assert.IsNotNull(drawing.Slicer.SlicerCache);
+				Assert.AreEqual(new Uri("slicerCaches/slicerCache1.xml", UriKind.Relative), drawing.Slicer.SlicerCache.SlicerCacheUri);
+				Assert.AreEqual("Slicer_Description", drawing.Slicer.SlicerCache.Name);
+			}
+		}
 
+		[TestMethod]
+		public void CopyWorksheetCopiesExcelSlicer()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\SlicerFromExcel.xlsx"));
+				Assert.IsTrue(file.Exists);
+				using (var package = new ExcelPackage(file))
+				{
+					var oldSheet = package.Workbook.Worksheets["PivotTable"];
+					var newSheet = package.Workbook.Worksheets.Add("New Sheet", oldSheet);
+					var oldDrawing = oldSheet.Drawings[0] as ExcelSlicerDrawing;
+					var newDrawing = newSheet.Drawings[0] as ExcelSlicerDrawing;
+					Assert.IsNotNull(newDrawing);
+					Assert.AreNotSame(oldDrawing, newDrawing);
+					Assert.AreEqual("Description", oldDrawing.Name);
+					Assert.AreEqual("Description 1", newDrawing.Name);
+					Assert.IsNotNull(newDrawing.Slicer);
+					Assert.AreEqual("Description", oldDrawing.Slicer.Name);
+					Assert.AreEqual("Description 1", newDrawing.Slicer.Name);
+					Assert.IsNotNull(newDrawing.Slicer.SlicerCache);
+					Assert.AreEqual(new Uri("slicerCaches/slicerCache1.xml", UriKind.Relative), oldDrawing.Slicer.SlicerCache.SlicerCacheUri);
+					Assert.AreEqual(new Uri("slicerCaches/slicerCache2.xml", UriKind.Relative), newDrawing.Slicer.SlicerCache.SlicerCacheUri);
+					Assert.AreEqual("Slicer_Description", oldDrawing.Slicer.SlicerCache.Name);
+					Assert.AreEqual("Slicer_Description1", newDrawing.Slicer.SlicerCache.Name);
+					package.SaveAs(tempFile);
+				}
+				using (var package = new ExcelPackage(tempFile))
+				{
+					Assert.AreEqual(2, package.Workbook.SlicerCaches.Count);
+					var oldSheet = package.Workbook.Worksheets["PivotTable"];
+					var newSheet = package.Workbook.Worksheets["New Sheet"];
+					Assert.AreEqual(1, oldSheet.Slicers.Slicers.Count);
+					Assert.AreEqual(1, newSheet.Slicers.Slicers.Count);
+					var oldDrawing = oldSheet.Drawings[0] as ExcelSlicerDrawing;
+					var newDrawing = newSheet.Drawings[0] as ExcelSlicerDrawing;
+					Assert.IsNotNull(oldDrawing);
+					Assert.IsNotNull(newDrawing);
+					Assert.AreNotSame(oldDrawing, newDrawing);
+					Assert.AreEqual("Description", oldDrawing.Name);
+					Assert.AreEqual("Description 1", newDrawing.Name);
+					Assert.IsNotNull(oldDrawing.Slicer);
+					Assert.IsNotNull(newDrawing.Slicer);
+					Assert.AreEqual("Description", oldDrawing.Slicer.Name);
+					Assert.AreEqual("Description 1", newDrawing.Slicer.Name);
+					Assert.IsNotNull(oldDrawing.Slicer.SlicerCache);
+					Assert.IsNotNull(newDrawing.Slicer.SlicerCache);
+					Assert.AreEqual(new Uri("slicerCaches/slicerCache1.xml", UriKind.Relative), oldDrawing.Slicer.SlicerCache.SlicerCacheUri);
+					Assert.AreEqual(new Uri("slicerCaches/slicerCache2.xml", UriKind.Relative), newDrawing.Slicer.SlicerCache.SlicerCacheUri);
+					Assert.AreEqual("Slicer_Description", oldDrawing.Slicer.SlicerCache.Name);
+					Assert.AreEqual("Slicer_Description1", newDrawing.Slicer.SlicerCache.Name);
+				}
+			}
+			finally
+			{
+				tempFile.Delete();
 			}
 		}
 	}

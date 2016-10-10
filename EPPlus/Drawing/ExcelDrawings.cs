@@ -142,7 +142,7 @@ namespace OfficeOpenXml.Drawing
                     {
                         _drawingNames.Add(dr.Name, _drawings.Count - 1);
                     }
-					this.Worksheet.Workbook.SlicerAppendNumbers[dr.Name] = 1;
+					this.Worksheet.Workbook.NextSlicerIdNumber[dr.Name] = 1;
                 }
             }
         }

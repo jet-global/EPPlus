@@ -715,6 +715,7 @@ namespace OfficeOpenXml
             ns.AddNamespace("dcterms", schemaDcTerms);
             ns.AddNamespace("dcmitype", schemaDcmiType);
             ns.AddNamespace("xsi", schemaXsi);
+			ns.AddNamespace("x14", schemaMain2009);
             return ns;
         }
 		
