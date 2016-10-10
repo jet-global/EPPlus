@@ -53,6 +53,7 @@ using System.Globalization;
 using System.Linq;
 using System.Security;
 using System.Text.RegularExpressions;
+using OfficeOpenXml.Drawing.Slicers;
 
 namespace OfficeOpenXml
 {
@@ -355,7 +356,20 @@ namespace OfficeOpenXml
         internal CellStore<Uri> _hyperLinks;
         internal CellStore<int> _commentsStore;
 
-        internal Dictionary<int, Formulas> _sharedFormulas = new Dictionary<int, Formulas>();
+		private ExcelSlicers _slicers;
+		public ExcelSlicers Slicers
+		{
+			get
+			{
+				if (this._slicers == null)
+				{
+					this._slicers = new ExcelSlicers(this);
+				}
+				return this._slicers;
+			}
+		}
+
+		internal Dictionary<int, Formulas> _sharedFormulas = new Dictionary<int, Formulas>();
         internal int _minCol = ExcelPackage.MaxColumns;
         internal int _maxCol = 0;
         #region Worksheet Private Properties
@@ -3139,6 +3153,8 @@ namespace OfficeOpenXml
                     this.SparklineGroups.Save();
                 }
                 }
+			if(this.Slicers.Slicers.Count > 0)
+				this.Slicers.Save();
 
                 if (Drawings.UriDrawing!=null)
                 {

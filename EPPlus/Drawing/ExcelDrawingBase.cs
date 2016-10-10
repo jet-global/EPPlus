@@ -34,6 +34,7 @@ using System.Globalization;
 using System.Xml;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Drawing.Slicers;
 
 namespace OfficeOpenXml.Drawing
 {

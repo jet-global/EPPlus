@@ -213,8 +213,10 @@
     </Compile>
     <Compile Include="ConditionalFormatting\Rules\ExcelConditionalFormattingUniqueValues.cs" />
     <Compile Include="ConditionalFormatting\Rules\ExcelConditionalFormattingYesterday.cs" />
-    <Compile Include="Drawing\ExcelSlicerDrawing.cs" />
-    <Compile Include="Drawing\ExcelSlicerCache.cs" />
+    <Compile Include="Drawing\Slicers\ExcelSlicer.cs" />
+    <Compile Include="Drawing\Slicers\ExcelSlicerDrawing.cs" />
+    <Compile Include="Drawing\Slicers\ExcelSlicerCache.cs" />
+    <Compile Include="Drawing\Slicers\ExcelSlicers.cs" />
     <Compile Include="Drawing\Sparkline\ExcelSparkline.cs" />
     <Compile Include="Drawing\Sparkline\ExcelSparklineGroup.cs" />
     <Compile Include="Drawing\Sparkline\ExcelSparklineGroups.cs" />
