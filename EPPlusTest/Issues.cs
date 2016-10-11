@@ -19,34 +19,6 @@ namespace EPPlusTest
     [TestClass]
     public class Issues
     {
-		[TestMethod]
-		public void CopySlicerCorruptsWorkbook()
-		{
-			var path = @"C:\users\gpl\Desktop\BasicPivotTable.xlsx";
-			var file = new FileInfo(path);
-			var newFile = new FileInfo(@"C:\users\gpl\Desktop\BasicPivotTableSAVED.xlsx");
-			using (var package = new ExcelPackage(file))
-			{
-				var sheet = package.Workbook.Worksheets["PivotTable"];
-				package.Workbook.Worksheets.Copy(sheet.Name, "Copied Sheet");
-				package.SaveAs(newFile);
-			}
-		}
-
-		[TestMethod]
-		public void CopyTwoImagesResultsInAWorkbookThatIsMissingAnImage()
-		{
-			var path = @"C:\users\gpl\Desktop\Two Cats.xlsx";
-			var file = new FileInfo(path);
-			var newFile = new FileInfo(@"C:\users\gpl\Desktop\Two Cats SAVED.xlsx");
-			using (var package = new ExcelPackage(file))
-			{
-				var sheet = package.Workbook.Worksheets["Sheet1"];
-				package.Workbook.Worksheets.Copy(sheet.Name, "Copied Sheet");
-				package.SaveAs(newFile);
-			}
-		}
-
 		[TestInitialize]
         public void Initialize()
         {
