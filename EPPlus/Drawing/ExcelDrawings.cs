@@ -139,10 +139,9 @@ namespace OfficeOpenXml.Drawing
                 {
                     _drawings.Add(dr);
                     if (!_drawingNames.ContainsKey(dr.Name))
-                    {
                         _drawingNames.Add(dr.Name, _drawings.Count - 1);
-                    }
-					this.Worksheet.Workbook.NextSlicerIdNumber[dr.Name] = 1;
+					if(!this.Worksheet.Workbook.NextSlicerIdNumber.ContainsKey(dr.Name))
+						this.Worksheet.Workbook.NextSlicerIdNumber[dr.Name] = 1;
                 }
             }
         }
