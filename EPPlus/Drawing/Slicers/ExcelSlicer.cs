@@ -3,6 +3,9 @@ using System.Xml;
 
 namespace OfficeOpenXml.Drawing.Slicers
 {
+	/// <summary>
+	/// Represents a single Excel Slicer in an <see cref="ExcelSlicers"/> file.
+	/// </summary>
 	public class ExcelSlicer: XmlHelper
 	{
 		#region Class Variables
