@@ -1206,5 +1206,79 @@ namespace EPPlusTest
 				tempFile.Delete();
 			}
 		}
+
+		[TestMethod]
+		public void CopyWorksheetTwiceCopiesExcelSlicer()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\SlicerFromExcel.xlsx"));
+				Assert.IsTrue(file.Exists);
+				using (var package = new ExcelPackage(file))
+				{
+					var oldSheet = package.Workbook.Worksheets["PivotTable"];
+					var newSheet = package.Workbook.Worksheets.Add("New Sheet", oldSheet);
+					var newSheet2 = package.Workbook.Worksheets.Add("New Sheet 2", oldSheet);
+					var oldDrawing = oldSheet.Drawings[0] as ExcelSlicerDrawing;
+					var newDrawing = newSheet.Drawings[0] as ExcelSlicerDrawing;
+					var newDrawing2 = newSheet2.Drawings[0] as ExcelSlicerDrawing;
+					Assert.IsNotNull(newDrawing);
+					Assert.IsNotNull(newDrawing2);
+					Assert.AreEqual("Description", oldDrawing.Name);
+					Assert.AreEqual("Description 1", newDrawing.Name);
+					Assert.AreEqual("Description 2", newDrawing2.Name);
+					Assert.IsNotNull(newDrawing.Slicer);
+					Assert.IsNotNull(newDrawing2.Slicer);
+					Assert.AreEqual("Description", oldDrawing.Slicer.Name);
+					Assert.AreEqual("Description 1", newDrawing.Slicer.Name);
+					Assert.AreEqual("Description 2", newDrawing2.Slicer.Name);
+					Assert.IsNotNull(newDrawing.Slicer.SlicerCache);
+					Assert.IsNotNull(newDrawing2.Slicer.SlicerCache);
+					Assert.AreEqual(new Uri("slicerCaches/slicerCache1.xml", UriKind.Relative), oldDrawing.Slicer.SlicerCache.SlicerCacheUri);
+					Assert.AreEqual(new Uri("slicerCaches/slicerCache2.xml", UriKind.Relative), newDrawing.Slicer.SlicerCache.SlicerCacheUri);
+					Assert.AreEqual(new Uri("slicerCaches/slicerCache3.xml", UriKind.Relative), newDrawing2.Slicer.SlicerCache.SlicerCacheUri);
+					Assert.AreEqual("Slicer_Description", oldDrawing.Slicer.SlicerCache.Name);
+					Assert.AreEqual("Slicer_Description1", newDrawing.Slicer.SlicerCache.Name);
+					Assert.AreEqual("Slicer_Description2", newDrawing2.Slicer.SlicerCache.Name);
+					package.SaveAs(tempFile);
+				}
+				using (var package = new ExcelPackage(tempFile))
+				{
+					Assert.AreEqual(3, package.Workbook.SlicerCaches.Count);
+					var oldSheet = package.Workbook.Worksheets["PivotTable"];
+					var newSheet = package.Workbook.Worksheets["New Sheet"];
+					var newSheet2 = package.Workbook.Worksheets["New Sheet 2"];
+					Assert.AreEqual(1, oldSheet.Slicers.Slicers.Count);
+					Assert.AreEqual(1, newSheet.Slicers.Slicers.Count);
+					Assert.AreEqual(1, newSheet2.Slicers.Slicers.Count);
+					var oldDrawing = oldSheet.Drawings[0] as ExcelSlicerDrawing;
+					var newDrawing = newSheet.Drawings[0] as ExcelSlicerDrawing;
+					var newDrawing2 = newSheet2.Drawings[0] as ExcelSlicerDrawing;
+					Assert.IsNotNull(newDrawing);
+					Assert.IsNotNull(newDrawing2);
+					Assert.AreEqual("Description", oldDrawing.Name);
+					Assert.AreEqual("Description 1", newDrawing.Name);
+					Assert.AreEqual("Description 2", newDrawing2.Name);
+					Assert.IsNotNull(newDrawing.Slicer);
+					Assert.IsNotNull(newDrawing2.Slicer);
+					Assert.AreEqual("Description", oldDrawing.Slicer.Name);
+					Assert.AreEqual("Description 1", newDrawing.Slicer.Name);
+					Assert.AreEqual("Description 2", newDrawing2.Slicer.Name);
+					Assert.IsNotNull(newDrawing.Slicer.SlicerCache);
+					Assert.IsNotNull(newDrawing2.Slicer.SlicerCache);
+					Assert.AreEqual(new Uri("slicerCaches/slicerCache1.xml", UriKind.Relative), oldDrawing.Slicer.SlicerCache.SlicerCacheUri);
+					Assert.AreEqual(new Uri("slicerCaches/slicerCache2.xml", UriKind.Relative), newDrawing.Slicer.SlicerCache.SlicerCacheUri);
+					Assert.AreEqual(new Uri("slicerCaches/slicerCache3.xml", UriKind.Relative), newDrawing2.Slicer.SlicerCache.SlicerCacheUri);
+					Assert.AreEqual("Slicer_Description", oldDrawing.Slicer.SlicerCache.Name);
+					Assert.AreEqual("Slicer_Description1", newDrawing.Slicer.SlicerCache.Name);
+					Assert.AreEqual("Slicer_Description2", newDrawing2.Slicer.SlicerCache.Name);
+				}
+			}
+			finally
+			{
+				tempFile.Delete();
+			}
+		}
 	}
 }
