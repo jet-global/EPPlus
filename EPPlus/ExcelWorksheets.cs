@@ -473,40 +473,30 @@ namespace OfficeOpenXml
                 }
                 prevName=name;
                 XmlDocument xmlDoc = new XmlDocument();
-                //TODO: Fix save pivottable here
-                //Copy.Save();    //Save the worksheet first
                 xmlDoc.LoadXml(xml);
-                //xmlDoc.SelectSingleNode("//d:table/@id", tbl.NameSpaceManager).Value = Id.ToString();
                 xmlDoc.SelectSingleNode("//d:pivotTableDefinition/@name", tbl.NameSpaceManager).Value = name;
                 xml = xmlDoc.OuterXml;
 
                 int Id = _pck.Workbook._nextPivotTableID++;
-                //var uriTbl = new Uri(string.Format("/xl/pivotTables/pivotTable{0}.xml", Id), UriKind.Relative);
                 var uriTbl = GetNewUri(_pck.Package, "/xl/pivotTables/pivotTable{0}.xml", ref Id);
                 if (_pck.Workbook._nextPivotTableID < Id) _pck.Workbook._nextPivotTableID = Id;
                 var partTbl = _pck.Package.CreatePart(uriTbl, ExcelPackage.schemaPivotTable , _pck.Compression);
                 StreamWriter streamTbl = new StreamWriter(partTbl.GetStream(FileMode.Create, FileAccess.Write));
                 streamTbl.Write(xml);
-                //streamTbl.Close();
                 streamTbl.Flush();
 
                 xml = tbl.CacheDefinition.CacheDefinitionXml.OuterXml;
-                //var uriCd = new Uri(string.Format("/xl/pivotCache/pivotcachedefinition{0}.xml", Id), UriKind.Relative);
-                //while (_pck.Package.PartExists(uriCd))
-                //{
-                //    uriCd = new Uri(string.Format("/xl/pivotCache/pivotcachedefinition{0}.xml", ++Id), UriKind.Relative);
-                //}
-                var uriCd = GetNewUri(_pck.Package, "/xl/pivotCache/pivotcachedefinition{0}.xml", ref Id);
+                var uriCd = GetNewUri(_pck.Package, "/xl/pivotCache/pivotCacheDefinition{0}.xml", ref Id);
                 var partCd = _pck.Package.CreatePart(uriCd, ExcelPackage.schemaPivotCacheDefinition, _pck.Compression);
                 StreamWriter streamCd = new StreamWriter(partCd.GetStream(FileMode.Create, FileAccess.Write));
                 streamCd.Write(xml);
                 streamCd.Flush();
 
                 xml = "<pivotCacheRecords xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" count=\"0\" />";
-                var uriRec = new Uri(string.Format("/xl/pivotCache/pivotrecords{0}.xml", Id), UriKind.Relative);
+                var uriRec = new Uri(string.Format("/xl/pivotCache/pivotCacheRecords{0}.xml", Id), UriKind.Relative);
                 while (_pck.Package.PartExists(uriRec))
                 {
-                    uriRec = new Uri(string.Format("/xl/pivotCache/pivotrecords{0}.xml", ++Id), UriKind.Relative);
+                    uriRec = new Uri(string.Format("/xl/pivotCache/pivotCacheRecords{0}.xml", ++Id), UriKind.Relative);
                 }
                 var partRec = _pck.Package.CreatePart(uriRec, ExcelPackage.schemaPivotCacheRecords, _pck.Compression);
                 StreamWriter streamRec = new StreamWriter(partRec.GetStream(FileMode.Create, FileAccess.Write));
@@ -514,7 +504,6 @@ namespace OfficeOpenXml
                 streamRec.Flush();
 
                 //create the relationship and add the ID to the worksheet xml.
-				// TODO: Fix this too?
                 added.Part.CreateRelationship(UriHelper.ResolvePartUri(added.WorksheetUri, uriTbl), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
                 partTbl.CreateRelationship(UriHelper.ResolvePartUri(tbl.Relationship.SourceUri, uriCd), tbl.CacheDefinition.Relationship.TargetMode, tbl.CacheDefinition.Relationship.RelationshipType);
                 partCd.CreateRelationship(UriHelper.ResolvePartUri(uriCd, uriRec), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheRecords");
@@ -826,7 +815,7 @@ namespace OfficeOpenXml
 			ExcelSlicerDrawing slicer = draw as ExcelSlicerDrawing;
 			var uriSlicerCacheFull = XmlHelper.GetNewUri(_pck.Package, "/xl/slicerCaches/slicerCache{0}.xml");
 			var uriSlicerCache = new Uri(uriSlicerCacheFull.ToString().Substring(4), UriKind.Relative);
-			var slicerCachePart = _pck.Package.CreatePart(uriSlicerCacheFull, "application /vnd.ms-excel.slicerCache+xml", _pck.Compression);
+			var slicerCachePart = _pck.Package.CreatePart(uriSlicerCacheFull, "application/vnd.ms-excel.slicerCache+xml", _pck.Compression);
 			var slicerCacheRelationship = newWorksheet.Workbook.Part.CreateRelationship(uriSlicerCache, Packaging.TargetMode.Internal, ExcelPackage.schemaSlicerCache);
 			StreamWriter streamSlicerCache = new StreamWriter(slicerCachePart.GetStream(FileMode.Create, FileAccess.Write));
 			streamSlicerCache.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
