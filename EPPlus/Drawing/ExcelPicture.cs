@@ -63,7 +63,7 @@ namespace OfficeOpenXml.Drawing
                 _image = Image.FromStream(Part.GetStream());
                 ImageConverter ic=new ImageConverter();
                 var iby=(byte[])ic.ConvertTo(_image, typeof(byte[]));
-                var ii = _drawings._package.LoadImage(iby, UriPic, Part);
+                var ii = _drawings.Package.LoadImage(iby, UriPic, Part);
                 ImageHash = ii.Hash;
 
                 //_height = _image.Height;
@@ -94,7 +94,7 @@ namespace OfficeOpenXml.Drawing
 
             node.InsertAfter(node.OwnerDocument.CreateElement("xdr", "clientData", ExcelPackage.schemaSheetDrawings), picNode);
 
-            var package = drawings.Worksheet._package.Package;
+            var package = drawings.Worksheet.Package.Package;
             //Get the picture if it exists or save it if not.
             _image = image;
             string relID = SavePicture(image);
@@ -117,7 +117,7 @@ namespace OfficeOpenXml.Drawing
             node.InsertAfter(node.OwnerDocument.CreateElement("xdr", "clientData", ExcelPackage.schemaSheetDrawings), picNode);
 
             //Changed to stream 2/4-13 (issue 14834). Thnx SClause
-            var package = drawings.Worksheet._package.Package;
+            var package = drawings.Worksheet.Package.Package;
             ContentType = GetContentType(imageFile.Extension);
             var imagestream = new FileStream(imageFile.FullName, FileMode.Open, FileAccess.Read);
             _image = Image.FromStream(imagestream);
@@ -126,19 +126,19 @@ namespace OfficeOpenXml.Drawing
             imagestream.Close();
 
             UriPic = GetNewUri(package, "/xl/media/{0}" + imageFile.Name);
-            var ii = _drawings._package.AddImage(img, UriPic, ContentType);
+            var ii = _drawings.Package.AddImage(img, UriPic, ContentType);
             string relID;
-            if(!drawings._hashes.ContainsKey(ii.Hash))
+            if(!drawings.Hashes.ContainsKey(ii.Hash))
             {
                 Part = ii.Part;
                 RelPic = drawings.Part.CreateRelationship(UriHelper.GetRelativeUri(drawings.UriDrawing, ii.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/image");
                 relID = RelPic.Id;
-                _drawings._hashes.Add(ii.Hash, relID);
+                _drawings.Hashes.Add(ii.Hash, relID);
                 AddNewPicture(img, relID);
             }
             else
             {
-                relID = drawings._hashes[ii.Hash];
+                relID = drawings.Hashes[ii.Hash];
                 var rel = _drawings.Part.GetRelationship(relID);
                 UriPic = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
             }
@@ -219,12 +219,12 @@ namespace OfficeOpenXml.Drawing
         {
             ImageConverter ic = new ImageConverter();
             byte[] img = (byte[])ic.ConvertTo(image, typeof(byte[]));
-            var ii = _drawings._package.AddImage(img);
+            var ii = _drawings.Package.AddImage(img);
 
             ImageHash = ii.Hash;
-            if (_drawings._hashes.ContainsKey(ii.Hash))
+            if (_drawings.Hashes.ContainsKey(ii.Hash))
             {
-                var relID = _drawings._hashes[ii.Hash];
+                var relID = _drawings.Hashes[ii.Hash];
                 var rel = _drawings.Part.GetRelationship(relID);
                 UriPic = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
                 return relID;
@@ -239,7 +239,7 @@ namespace OfficeOpenXml.Drawing
             RelPic = _drawings.Part.CreateRelationship(UriHelper.GetRelativeUri(_drawings.UriDrawing, UriPic), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/image");
             
             //AddNewPicture(img, picRelation.Id);
-            _drawings._hashes.Add(ii.Hash, RelPic.Id);
+            _drawings.Hashes.Add(ii.Hash, RelPic.Id);
 
             return RelPic.Id;
         }
@@ -413,7 +413,7 @@ namespace OfficeOpenXml.Drawing
         }
         internal override void DeleteMe()
         {
-            _drawings._package.RemoveImage(ImageHash);
+            _drawings.Package.RemoveImage(ImageHash);
             base.DeleteMe();
         }
         public override void Dispose()

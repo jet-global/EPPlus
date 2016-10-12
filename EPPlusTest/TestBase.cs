@@ -17,7 +17,6 @@ namespace EPPlusTest
         [TestInitialize]
         public void InitBase()
         {
-
             _clipartPath = Path.Combine(Path.GetTempPath(), @"EPPlus clipart");
             if (!Directory.Exists(_clipartPath))
             {

@@ -116,7 +116,7 @@ namespace OfficeOpenXml
 			}
 			set
 			{
-                if (_worksheet._package.DoAdjustDrawings)
+                if (_worksheet.Package.DoAdjustDrawings)
                 {
                     var pos = _worksheet.Drawings.GetDrawingWidths();
                     _hidden = value;
@@ -157,7 +157,7 @@ namespace OfficeOpenXml
 			}
 			set	
             {
-                if (_worksheet._package.DoAdjustDrawings)
+                if (_worksheet.Package.DoAdjustDrawings)
                 {
                     var pos = _worksheet.Drawings.GetDrawingWidths();
                     _width = value;

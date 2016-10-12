@@ -283,7 +283,7 @@ namespace OfficeOpenXml
                 if (value)
                 {
                     //    // ensure no other worksheet has its tabSelected attribute set to 1
-                    foreach (ExcelWorksheet sheet in _worksheet._package.Workbook.Worksheets)
+                    foreach (ExcelWorksheet sheet in _worksheet.Package.Workbook.Worksheets)
                         sheet.View.TabSelected = false;
 
                     SheetViewElement.SetAttribute("tabSelected", "1");

@@ -483,7 +483,7 @@ namespace OfficeOpenXml.Drawing.Chart
                graphFrame.InnerXml = string.Format("<xdr:nvGraphicFramePr><xdr:cNvPr id=\"{0}\" name=\"Chart 1\" /><xdr:cNvGraphicFramePr /></xdr:nvGraphicFramePr><xdr:xfrm><a:off x=\"0\" y=\"0\" /> <a:ext cx=\"0\" cy=\"0\" /></xdr:xfrm><a:graphic><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/chart\"><c:chart xmlns:c=\"http://schemas.openxmlformats.org/drawingml/2006/chart\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" r:id=\"rId1\" />   </a:graphicData>  </a:graphic>",_id);
                TopNode.AppendChild(TopNode.OwnerDocument.CreateElement("clientData", ExcelPackage.schemaSheetDrawings));
 
-               var package = drawings.Worksheet._package.Package;
+               var package = drawings.Worksheet.Package.Package;
                UriChart = GetNewUri(package, "/xl/charts/chart{0}.xml");
 
                ChartXml = new XmlDocument();
@@ -491,7 +491,7 @@ namespace OfficeOpenXml.Drawing.Chart
                LoadXmlSafe(ChartXml, ChartStartXml(type), Encoding.UTF8);
 
                // save it to the package
-               Part = package.CreatePart(UriChart, "application/vnd.openxmlformats-officedocument.drawingml.chart+xml", _drawings._package.Compression);
+               Part = package.CreatePart(UriChart, "application/vnd.openxmlformats-officedocument.drawingml.chart+xml", _drawings.Package.Compression);
 
                StreamWriter streamChart = new StreamWriter(Part.GetStream(FileMode.Create, FileAccess.Write));
                ChartXml.Save(streamChart);

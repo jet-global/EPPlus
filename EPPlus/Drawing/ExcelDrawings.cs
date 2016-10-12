@@ -30,592 +30,635 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
 using System.Collections;
-using System.IO;
+using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
+using System.IO;
+using System.Xml;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Table.PivotTable;
 using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.Drawing
 {
-    /// <summary>
-    /// Collection for Drawing objects.
-    /// </summary>
-    public class ExcelDrawings : IEnumerable<ExcelDrawing>, IDisposable
-    {
-        private XmlDocument _drawingsXml=new XmlDocument();
-        private Dictionary<string, int> _drawingNames;
-        private List<ExcelDrawing> _drawings;
-        internal class ImageCompare
-        {
-            internal byte[] image { get; set; }
-            internal string relID { get; set; }
+	/// <summary>
+	/// Collection for Drawing objects.
+	/// </summary>
+	public class ExcelDrawings : IEnumerable<ExcelDrawing>, IDisposable
+	{
 
-            internal bool Comparer(byte[] compareImg)
-            {
-                if (compareImg.Length != image.Length)
-                {
-                    return false;
-                }
+		#region Class Variables
+		private XmlDocument _drawingsXml = new XmlDocument();
+		private Dictionary<string, int> _drawingNames;
+		private List<ExcelDrawing> _drawings;
+		private XmlNamespaceManager _nsManager = null;
+		private Packaging.ZipPackagePart _part = null;
+		private Uri _uriDrawing = null;
+		#endregion
 
-                for (int i = 0; i < image.Length; i++)
-                {
-                    if (image[i] != compareImg[i])
-                    {
-                        return false;
-                    }
-                }
-                return true; //Equal
-            }
-        }
-        //internal List<ImageCompare> _pics = new List<ImageCompare>();
-        internal Dictionary<string, string> _hashes = new Dictionary<string, string>();
-        internal ExcelPackage _package;
-        internal Packaging.ZipPackageRelationship _drawingRelation = null;
-        internal ExcelDrawings(ExcelPackage xlPackage, ExcelWorksheet sheet)
-        {
-                _drawingsXml = new XmlDocument();                
-                _drawingsXml.PreserveWhitespace = false;
-                _drawings = new List<ExcelDrawing>();
-                _drawingNames = new Dictionary<string,int>(StringComparer.InvariantCultureIgnoreCase);
-                _package = xlPackage;
-                Worksheet = sheet;
-                XmlNode node = sheet.WorksheetXml.SelectSingleNode("//d:drawing", sheet.NameSpaceManager);
-                CreateNSM();
-                if (node != null)
-                {
-                    _drawingRelation = sheet.Part.GetRelationship(node.Attributes["r:id"].Value);
-                    _uriDrawing = UriHelper.ResolvePartUri(sheet.WorksheetUri, _drawingRelation.TargetUri);
+		#region Properties
+		/// <summary>
+		/// Gets or sets the collection of drawing hash codes.
+		/// </summary>
+		internal Dictionary<string, string> Hashes { get; set; } = new Dictionary<string, string>();
 
-                    _part = xlPackage.Package.GetPart(_uriDrawing);
-                    XmlHelper.LoadXmlSafe(_drawingsXml, _part.GetStream()); 
+		/// <summary>
+		/// Gets or sets the <see cref="ExcelPackage"/> that these drawings exist within.
+		/// </summary>
+		internal ExcelPackage Package { get; set; }
 
-                    AddDrawings();
-                }
-         }
-        internal ExcelWorksheet Worksheet { get; set; }
-        /// <summary>
-        /// A reference to the drawing xml document
-        /// </summary>
-        public XmlDocument DrawingXml
-        {
-            get
-            {
-                return _drawingsXml;
-            }
-        }
-        private void AddDrawings()
-        {
-            // Look inside all children for the drawings because they could be inside
-            // Markup Compatibility AlternativeContent/Choice or AlternativeContent/Fallback nodes.
-            // The code below currently pretends that loading all Choice alternative drawings doesn't cause a problem
-            // elsewhere. This seems to be ok for the time being as encountered drawing files so far only seem to have
-            // one Choice node (and no Fallback) underneath the AlternativeContent node. (Excel 2013 that is.)
-            // This change prevents CodePlex issue #15028 from occurring. 
-            // (the drawing xml part (that ONLY contained AlternativeContent nodes) was incorrectly being garbage collected when the package was saved)
-            XmlNodeList list = _drawingsXml.SelectNodes("//*[self::xdr:twoCellAnchor or self::xdr:oneCellAnchor or self::xdr:absoluteAnchor]", NameSpaceManager);
+		/// <summary>
+		/// Gets or sets the relationship between this drawings object and the worksheet.
+		/// </summary>
+		internal Packaging.ZipPackageRelationship DrawingRelationship { get; set; } = null;
 
-            foreach (XmlNode node in list)
-            {
-                
-                ExcelDrawing dr;
-                switch(node.LocalName)
-                {
-                    case "oneCellAnchor":
-                        //dr = new ExcelDrawing(this, node, "xdr:sp/xdr:nvSpPr/xdr:cNvPr/@name");                        
-                    case "twoCellAnchor":
-                    case "absoluteAnchor":
-                        dr = ExcelDrawing.GetDrawing(this, node);
-                        break;
-                    default: //"absoluteCellAnchor":
-                        dr = null;
-                        break;
-                }
-                if (dr != null)
-                {
-                    _drawings.Add(dr);
-                    if (!_drawingNames.ContainsKey(dr.Name))
-                        _drawingNames.Add(dr.Name, _drawings.Count - 1);
-					if(!this.Worksheet.Workbook.NextSlicerIdNumber.ContainsKey(dr.Name))
+		/// <summary>
+		/// Gets or sets the worksheet that these drawings are drawn on.
+		/// </summary>
+		internal ExcelWorksheet Worksheet { get; set; }
+
+		/// <summary>
+		/// Provides access to a namespace manager instance to allow XPath searching
+		/// </summary>
+		public XmlNamespaceManager NameSpaceManager
+		{
+			get
+			{
+				return this._nsManager;
+			}
+		}
+
+		/// <summary>
+		/// A reference to the drawing xml document
+		/// </summary>
+		public XmlDocument DrawingXml
+		{
+			get
+			{
+				return this._drawingsXml;
+			}
+		}
+
+		public int Count
+		{
+			get
+			{
+				if (this._drawings == null)
+				{
+					return 0;
+				}
+				else
+				{
+					return this._drawings.Count;
+				}
+			}
+		}
+
+		internal Packaging.ZipPackagePart Part
+		{
+			get
+			{
+				return this._part;
+			}
+		}
+
+		public Uri UriDrawing
+		{
+			get
+			{
+				return this._uriDrawing;
+			}
+		}
+		#endregion
+
+		#region Nested Classes
+		internal class ImageCompare
+		{
+			internal byte[] image { get; set; }
+			internal string relID { get; set; }
+
+			internal bool Comparer(byte[] compareImg)
+			{
+				if (compareImg.Length != image.Length)
+				{
+					return false;
+				}
+
+				for (int i = 0; i < image.Length; i++)
+				{
+					if (image[i] != compareImg[i])
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		#endregion
+
+		#region Constructors
+		internal ExcelDrawings(ExcelPackage xlPackage, ExcelWorksheet sheet)
+		{
+			this._drawingsXml = new XmlDocument();
+			this._drawingsXml.PreserveWhitespace = false;
+			this._drawings = new List<ExcelDrawing>();
+			this._drawingNames = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
+			this.Package = xlPackage;
+			this.Worksheet = sheet;
+			XmlNode node = sheet.WorksheetXml.SelectSingleNode("//d:drawing", sheet.NameSpaceManager);
+			this.CreateNSM();
+			if (node != null)
+			{
+				this.DrawingRelationship = sheet.Part.GetRelationship(node.Attributes["r:id"].Value);
+				this._uriDrawing = UriHelper.ResolvePartUri(sheet.WorksheetUri, this.DrawingRelationship.TargetUri);
+
+				this._part = xlPackage.Package.GetPart(this._uriDrawing);
+				XmlHelper.LoadXmlSafe(this._drawingsXml, this._part.GetStream());
+
+				this.AddDrawings();
+			}
+		}
+		#endregion
+
+		#region Private Methods
+		private XmlElement CreateDrawingXml()
+		{
+			if (this.DrawingXml.OuterXml == "")
+			{
+				this.DrawingXml.LoadXml(string.Format("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><xdr:wsDr xmlns:xdr=\"{0}\" xmlns:a=\"{1}\" />", ExcelPackage.schemaSheetDrawings, ExcelPackage.schemaDrawings));
+				this._uriDrawing = new Uri(string.Format("/xl/drawings/drawing{0}.xml", Worksheet.SheetID), UriKind.Relative);
+
+				Packaging.ZipPackage package = Worksheet.Package.Package;
+				this._part = package.CreatePart(_uriDrawing, "application/vnd.openxmlformats-officedocument.drawing+xml", Package.Compression);
+
+				StreamWriter streamChart = new StreamWriter(this._part.GetStream(FileMode.Create, FileAccess.Write));
+				this.DrawingXml.Save(streamChart);
+				streamChart.Close();
+				package.Flush();
+
+				this.DrawingRelationship = this.Worksheet.Part.CreateRelationship(UriHelper.GetRelativeUri(Worksheet.WorksheetUri, _uriDrawing), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/drawing");
+				XmlElement e = Worksheet.WorksheetXml.CreateElement("drawing", ExcelPackage.schemaMain);
+				e.SetAttribute("id", ExcelPackage.schemaRelationships, DrawingRelationship.Id);
+
+				this.Worksheet.WorksheetXml.DocumentElement.AppendChild(e);
+				package.Flush();
+			}
+			XmlNode colNode = this._drawingsXml.SelectSingleNode("//xdr:wsDr", NameSpaceManager);
+			XmlElement drawNode;
+			if (this.Worksheet is ExcelChartsheet)
+			{
+				drawNode = this._drawingsXml.CreateElement("xdr", "absoluteAnchor", ExcelPackage.schemaSheetDrawings);
+				XmlElement posNode = this._drawingsXml.CreateElement("xdr", "pos", ExcelPackage.schemaSheetDrawings);
+				posNode.SetAttribute("y", "0");
+				posNode.SetAttribute("x", "0");
+				drawNode.AppendChild(posNode);
+				XmlElement extNode = this._drawingsXml.CreateElement("xdr", "ext", ExcelPackage.schemaSheetDrawings);
+				extNode.SetAttribute("cy", "6072876");
+				extNode.SetAttribute("cx", "9299263");
+				drawNode.AppendChild(extNode);
+				colNode.AppendChild(drawNode);
+			}
+			else
+			{
+				drawNode = this._drawingsXml.CreateElement("xdr", "twoCellAnchor", ExcelPackage.schemaSheetDrawings);
+				colNode.AppendChild(drawNode);
+				//Add from position Element;
+				XmlElement fromNode = this._drawingsXml.CreateElement("xdr", "from", ExcelPackage.schemaSheetDrawings);
+				drawNode.AppendChild(fromNode);
+				fromNode.InnerXml = "<xdr:col>0</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>0</xdr:rowOff>";
+
+				//Add to position Element;
+				XmlElement toNode = this._drawingsXml.CreateElement("xdr", "to", ExcelPackage.schemaSheetDrawings);
+				drawNode.AppendChild(toNode);
+				toNode.InnerXml = "<xdr:col>10</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>10</xdr:row><xdr:rowOff>0</xdr:rowOff>";
+			}
+
+			return drawNode;
+		}
+
+		private void AddDrawings()
+		{
+			// Look inside all children for the drawings because they could be inside
+			// Markup Compatibility AlternativeContent/Choice or AlternativeContent/Fallback nodes.
+			// The code below currently pretends that loading all Choice alternative drawings doesn't cause a problem
+			// elsewhere. This seems to be ok for the time being as encountered drawing files so far only seem to have
+			// one Choice node (and no Fallback) underneath the AlternativeContent node. (Excel 2013 that is.)
+			// This change prevents CodePlex issue #15028 from occurring. 
+			// (the drawing xml part (that ONLY contained AlternativeContent nodes) was incorrectly being garbage collected when the package was saved)
+			XmlNodeList list = this.DrawingXml.SelectNodes("//*[self::xdr:twoCellAnchor or self::xdr:oneCellAnchor or self::xdr:absoluteAnchor]", NameSpaceManager);
+
+			foreach (XmlNode node in list)
+			{
+
+				ExcelDrawing dr;
+				switch (node.LocalName)
+				{
+					case "oneCellAnchor":
+					//dr = new ExcelDrawing(this, node, "xdr:sp/xdr:nvSpPr/xdr:cNvPr/@name");                        
+					case "twoCellAnchor":
+					case "absoluteAnchor":
+						dr = ExcelDrawing.GetDrawing(this, node);
+						break;
+					default: //"absoluteCellAnchor":
+						dr = null;
+						break;
+				}
+				if (dr != null)
+				{
+					this._drawings.Add(dr);
+					if (!this._drawingNames.ContainsKey(dr.Name))
+						this._drawingNames.Add(dr.Name, _drawings.Count - 1);
+					if (!this.Worksheet.Workbook.NextSlicerIdNumber.ContainsKey(dr.Name))
 						this.Worksheet.Workbook.NextSlicerIdNumber[dr.Name] = 1;
-                }
-            }
-        }
+				}
+			}
+		}
 
+		/// <summary>
+		/// Creates the NamespaceManager. 
+		/// </summary>
+		private void CreateNSM()
+		{
+			NameTable nt = new NameTable();
+			this._nsManager = new XmlNamespaceManager(nt);
+			this._nsManager.AddNamespace("a", ExcelPackage.schemaDrawings);
+			this._nsManager.AddNamespace("xdr", ExcelPackage.schemaSheetDrawings);
+			this._nsManager.AddNamespace("c", ExcelPackage.schemaChart);
+			this._nsManager.AddNamespace("r", ExcelPackage.schemaRelationships);
+			this._nsManager.AddNamespace("mc", ExcelPackage.schemaMarkupCompatibility);
+			this._nsManager.AddNamespace("sle", ExcelPackage.schemaSlicerDrawing);
+		}
 
-        #region NamespaceManager
-        /// <summary>
-        /// Creates the NamespaceManager. 
-        /// </summary>
-        private void CreateNSM()
-        {
-            NameTable nt = new NameTable();
-            _nsManager = new XmlNamespaceManager(nt);
-            _nsManager.AddNamespace("a", ExcelPackage.schemaDrawings);
-            _nsManager.AddNamespace("xdr", ExcelPackage.schemaSheetDrawings);
-            _nsManager.AddNamespace("c", ExcelPackage.schemaChart);
-            _nsManager.AddNamespace("r", ExcelPackage.schemaRelationships);
-			_nsManager.AddNamespace("mc", ExcelPackage.schemaMarkupCompatibility);
-			_nsManager.AddNamespace("sle", ExcelPackage.schemaSlicerDrawing);
-        }
-        /// <summary>
-        /// Provides access to a namespace manager instance to allow XPath searching
-        /// </summary>
-        XmlNamespaceManager _nsManager=null;
-        public XmlNamespaceManager NameSpaceManager
-        {
-            get
-            {
-                return _nsManager;
-            }
-        }
-        #endregion
-        #region IEnumerable Members
+		#endregion
 
-        public IEnumerator GetEnumerator()
-        {
-            return (_drawings.GetEnumerator());
-        }
-        #region IEnumerable<ExcelDrawing> Members
+		#region Public Methods
+		public IEnumerator GetEnumerator()
+		{
+			return (this._drawings.GetEnumerator());
+		}
 
-        IEnumerator<ExcelDrawing> IEnumerable<ExcelDrawing>.GetEnumerator()
-        {
-            return (_drawings.GetEnumerator());
-        }
+		IEnumerator<ExcelDrawing> IEnumerable<ExcelDrawing>.GetEnumerator()
+		{
+			return (this._drawings.GetEnumerator());
+		}
 
-        #endregion
+		/// <summary>
+		/// Add a new chart to the worksheet.
+		/// Do not support Bubble-, Radar-, Stock- or Surface charts. 
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="chartType">Type of chart</param>
+		/// <param name="pivotTableSource">The pivottable source for a pivotchart</param>    
+		/// <returns>The chart</returns>
+		public ExcelChart AddChart(string name, eChartType chartType, ExcelPivotTable pivotTableSource)
+		{
+			if (this._drawingNames.ContainsKey(name))
+			{
+				throw new Exception("Name already exists in the drawings collection");
+			}
 
-        /// <summary>
-        /// Returns the drawing at the specified position.  
-        /// </summary>
-        /// <param name="PositionID">The position of the drawing. 0-base</param>
-        /// <returns></returns>
-        public ExcelDrawing this[int PositionID]
-        {
-            get
-            {
-                return (_drawings[PositionID]);
-            }
-        }
+			if (chartType == eChartType.StockHLC ||
+				chartType == eChartType.StockOHLC ||
+				chartType == eChartType.StockVOHLC)
+			{
+				throw (new NotImplementedException("Chart type is not supported in the current version"));
+			}
+			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
+			{
+				throw new InvalidOperationException("Chart Worksheets can't have more than one chart");
+			}
+			XmlElement drawNode = this.CreateDrawingXml();
 
-        /// <summary>
-        /// Returns the drawing matching the specified name
-        /// </summary>
-        /// <param name="Name">The name of the worksheet</param>
-        /// <returns></returns>
-        public ExcelDrawing this[string Name]
-        {
-            get
-            {
-                if (_drawingNames.ContainsKey(Name))
-                {
-                    return _drawings[_drawingNames[Name]];
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-        public int Count
-        {
-            get
-            {
-                if (_drawings == null)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return _drawings.Count;
-                }
-            }
-        }
-        Packaging.ZipPackagePart _part=null;
-        internal Packaging.ZipPackagePart Part
-        {
-            get
-            {
-                return _part;
-            }        
-        }
-        Uri _uriDrawing=null;
-        public Uri UriDrawing
-        {
-            get
-            {
-                return _uriDrawing;
-            }
-        }
-        #endregion
-        #region Add functions
-            /// <summary>
-            /// Add a new chart to the worksheet.
-            /// Do not support Bubble-, Radar-, Stock- or Surface charts. 
-            /// </summary>
-            /// <param name="Name"></param>
-            /// <param name="ChartType">Type of chart</param>
-            /// <param name="PivotTableSource">The pivottable source for a pivotchart</param>    
-            /// <returns>The chart</returns>
-            public ExcelChart AddChart(string Name, eChartType ChartType, ExcelPivotTable PivotTableSource)
-            {
-                if(_drawingNames.ContainsKey(Name))
-                {
-                    throw new Exception("Name already exists in the drawings collection");
-                }
+			ExcelChart chart = ExcelChart.GetNewChart(this, drawNode, chartType, null, pivotTableSource);
+			chart.Name = name;
+			this._drawings.Add(chart);
+			this._drawingNames.Add(name, this._drawings.Count - 1);
+			return chart;
+		}
 
-                if (ChartType == eChartType.StockHLC ||
-                    ChartType == eChartType.StockOHLC ||
-                    ChartType == eChartType.StockVOHLC)
-                {
-                    throw(new NotImplementedException("Chart type is not supported in the current version"));
-                }
-                if (Worksheet is ExcelChartsheet && _drawings.Count > 0)
-                {
-                    throw new InvalidOperationException("Chart Worksheets can't have more than one chart");                
-                }
-                XmlElement drawNode = CreateDrawingXml();
+		/// <summary>
+		/// Add a new chart to the worksheet.
+		/// Do not support Bubble-, Radar-, Stock- or Surface charts. 
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="chartType">Type of chart</param>
+		/// <returns>The chart</returns>
+		public ExcelChart AddChart(string name, eChartType chartType)
+		{
+			return this.AddChart(name, chartType, null);
+		}
 
-                ExcelChart chart = ExcelChart.GetNewChart(this, drawNode, ChartType, null, PivotTableSource);
-                chart.Name = Name;
-                _drawings.Add(chart);
-                _drawingNames.Add(Name, _drawings.Count - 1);
-                return chart;
-            }
-            /// <summary>
-            /// Add a new chart to the worksheet.
-            /// Do not support Bubble-, Radar-, Stock- or Surface charts. 
-            /// </summary>
-            /// <param name="Name"></param>
-            /// <param name="ChartType">Type of chart</param>
-            /// <returns>The chart</returns>
-            public ExcelChart AddChart(string Name, eChartType ChartType)
-            {
-                return AddChart(Name, ChartType, null);
-            }
-            /// <summary>
-            /// Add a picure to the worksheet
-            /// </summary>
-            /// <param name="Name"></param>
-            /// <param name="image">An image. Allways saved in then JPeg format</param>
-            /// <returns></returns>
-            public ExcelPicture AddPicture(string Name, Image image)
-            {
-               return AddPicture(Name, image, null);
-            }
-            /// <summary>
-            /// Add a picure to the worksheet
-            /// </summary>
-            /// <param name="Name"></param>
-            /// <param name="image">An image. Allways saved in then JPeg format</param>
-            /// <param name="Hyperlink">Picture Hyperlink</param>
-            /// <returns></returns>
-            public ExcelPicture AddPicture(string Name, Image image, Uri Hyperlink)
-            {
-                if (image != null)
-                {
-                    if (_drawingNames.ContainsKey(Name))
-                    {
-                        throw new Exception("Name already exists in the drawings collection");
-                    }
-                    XmlElement drawNode = CreateDrawingXml();
-                    drawNode.SetAttribute("editAs", "oneCell");
-                    ExcelPicture pic = new ExcelPicture(this, drawNode, image, Hyperlink);
-                    pic.Name = Name;
-                    _drawings.Add(pic);
-                    _drawingNames.Add(Name, _drawings.Count - 1);
-                    return pic;
-                }
-                throw (new Exception("AddPicture: Image can't be null"));
-            }
-            /// <summary>
-            /// Add a picure to the worksheet
-            /// </summary>
-            /// <param name="Name"></param>
-            /// <param name="ImageFile">The image file</param>
-            /// <returns></returns>
-            public ExcelPicture AddPicture(string Name, FileInfo ImageFile)
-            {
-               return AddPicture(Name, ImageFile, null);
-            }
-            /// <summary>
-            /// Add a picure to the worksheet
-            /// </summary>
-            /// <param name="Name"></param>
-            /// <param name="ImageFile">The image file</param>
-            /// <param name="Hyperlink">Picture Hyperlink</param>
-            /// <returns></returns>
-            public ExcelPicture AddPicture(string Name, FileInfo ImageFile, Uri Hyperlink)
-            {
-                if (Worksheet is ExcelChartsheet && _drawings.Count > 0)
-                {
-                    throw new InvalidOperationException("Chart worksheets can't have more than one drawing");
-                }
-                if (ImageFile != null)
-               {
-                  if (_drawingNames.ContainsKey(Name))
-                  {
-                     throw new Exception("Name already exists in the drawings collection");
-                  }
-                  XmlElement drawNode = CreateDrawingXml();
-                  drawNode.SetAttribute("editAs", "oneCell");
-                  ExcelPicture pic = new ExcelPicture(this, drawNode, ImageFile, Hyperlink);
-                  pic.Name = Name;
-                  _drawings.Add(pic);
-                  _drawingNames.Add(Name, _drawings.Count - 1);
-                  return pic;
-               }
-               throw (new Exception("AddPicture: ImageFile can't be null"));
-            }
+		/// <summary>
+		/// Add a picure to the worksheet
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="image">An image. Allways saved in then JPeg format</param>
+		/// <returns></returns>
+		public ExcelPicture AddPicture(string name, Image image)
+		{
+			return this.AddPicture(name, image, null);
+		}
 
-        /// <summary>
-        /// Add a new shape to the worksheet
-        /// </summary>
-        /// <param name="Name">Name</param>
-        /// <param name="Style">Shape style</param>
-        /// <returns>The shape object</returns>
-    
-        public ExcelShape AddShape(string Name, eShapeStyle Style)
-            {
-                if (Worksheet is ExcelChartsheet && _drawings.Count > 0)
-                {
-                    throw new InvalidOperationException("Chart worksheets can't have more than one drawing");
-                }
-                if (_drawingNames.ContainsKey(Name))
-                {
-                    throw new Exception("Name already exists in the drawings collection");
-                }
-                XmlElement drawNode = CreateDrawingXml();
+		/// <summary>
+		/// Add a picure to the worksheet
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="image">An image. Allways saved in then JPeg format</param>
+		/// <param name="hyperlink">Picture Hyperlink</param>
+		/// <returns></returns>
+		public ExcelPicture AddPicture(string name, Image image, Uri hyperlink)
+		{
+			if (image != null)
+			{
+				if (this._drawingNames.ContainsKey(name))
+				{
+					throw new Exception("Name already exists in the drawings collection");
+				}
+				XmlElement drawNode = CreateDrawingXml();
+				drawNode.SetAttribute("editAs", "oneCell");
+				ExcelPicture pic = new ExcelPicture(this, drawNode, image, hyperlink);
+				pic.Name = name;
+				this._drawings.Add(pic);
+				this._drawingNames.Add(name, _drawings.Count - 1);
+				return pic;
+			}
+			throw (new Exception("AddPicture: Image can't be null"));
+		}
 
-                ExcelShape shape = new ExcelShape(this, drawNode, Style);
-                shape.Name = Name;
-                shape.Style = Style;
-                _drawings.Add(shape);
-                _drawingNames.Add(Name, _drawings.Count - 1);
-                return shape;
-            }
-        /// <summary>
-        /// Add a new shape to the worksheet
-        /// </summary>
-        /// <param name="Name">Name</param>
-        /// <param name="Source">Source shape</param>
-        /// <returns>The shape object</returns>
-        public ExcelShape AddShape(string Name, ExcelShape Source)
-        {
-            if (Worksheet is ExcelChartsheet && _drawings.Count > 0)
-            {
-                throw new InvalidOperationException("Chart worksheets can't have more than one drawing");
-            }
-            if (_drawingNames.ContainsKey(Name))
-            {
-                throw new Exception("Name already exists in the drawings collection");
-            }
-            XmlElement drawNode = CreateDrawingXml();
-            drawNode.InnerXml = Source.TopNode.InnerXml;
+		/// <summary>
+		/// Add a picure to the worksheet
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="imageFile">The image file</param>
+		/// <returns></returns>
+		public ExcelPicture AddPicture(string name, FileInfo imageFile)
+		{
+			return this.AddPicture(name, imageFile, null);
+		}
 
-            ExcelShape shape = new ExcelShape(this, drawNode);
-            shape.Name = Name;
-            shape.Style = Source.Style;
-            _drawings.Add(shape);
-            _drawingNames.Add(Name, _drawings.Count - 1);
-            return shape;
-        }
-            private XmlElement CreateDrawingXml()
-            {
-                if (DrawingXml.OuterXml == "")
-                {
-                    DrawingXml.LoadXml(string.Format("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><xdr:wsDr xmlns:xdr=\"{0}\" xmlns:a=\"{1}\" />", ExcelPackage.schemaSheetDrawings, ExcelPackage.schemaDrawings));
-                    _uriDrawing = new Uri(string.Format("/xl/drawings/drawing{0}.xml", Worksheet.SheetID),UriKind.Relative);
+		/// <summary>
+		/// Add a picure to the worksheet
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="imageFile">The image file</param>
+		/// <param name="hyperlink">Picture Hyperlink</param>
+		/// <returns></returns>
+		public ExcelPicture AddPicture(string name, FileInfo imageFile, Uri hyperlink)
+		{
+			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
+			{
+				throw new InvalidOperationException("Chart worksheets can't have more than one drawing");
+			}
+			if (imageFile != null)
+			{
+				if (this._drawingNames.ContainsKey(name))
+				{
+					throw new Exception("Name already exists in the drawings collection");
+				}
+				XmlElement drawNode = this.CreateDrawingXml();
+				drawNode.SetAttribute("editAs", "oneCell");
+				ExcelPicture pic = new ExcelPicture(this, drawNode, imageFile, hyperlink);
+				pic.Name = name;
+				this._drawings.Add(pic);
+				this._drawingNames.Add(name, _drawings.Count - 1);
+				return pic;
+			}
+			throw (new Exception("AddPicture: ImageFile can't be null"));
+		}
 
-                    Packaging.ZipPackage package = Worksheet._package.Package;
-                    _part = package.CreatePart(_uriDrawing, "application/vnd.openxmlformats-officedocument.drawing+xml", _package.Compression);
+		/// <summary>
+		/// Add a new shape to the worksheet
+		/// </summary>
+		/// <param name="name">Name</param>
+		/// <param name="style">Shape style</param>
+		/// <returns>The shape object</returns>
 
-                    StreamWriter streamChart = new StreamWriter(_part.GetStream(FileMode.Create, FileAccess.Write));
-                    DrawingXml.Save(streamChart);
-                    streamChart.Close();
-                    package.Flush();
+		public ExcelShape AddShape(string name, eShapeStyle style)
+		{
+			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
+			{
+				throw new InvalidOperationException("Chart worksheets can't have more than one drawing");
+			}
+			if (this._drawingNames.ContainsKey(name))
+			{
+				throw new Exception("Name already exists in the drawings collection");
+			}
+			XmlElement drawNode = this.CreateDrawingXml();
 
-                    _drawingRelation = Worksheet.Part.CreateRelationship(UriHelper.GetRelativeUri(Worksheet.WorksheetUri, _uriDrawing), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/drawing");
-                    XmlElement e = Worksheet.WorksheetXml.CreateElement("drawing", ExcelPackage.schemaMain);
-                    e.SetAttribute("id",ExcelPackage.schemaRelationships, _drawingRelation.Id);
+			ExcelShape shape = new ExcelShape(this, drawNode, style);
+			shape.Name = name;
+			shape.Style = style;
+			this._drawings.Add(shape);
+			this._drawingNames.Add(name, _drawings.Count - 1);
+			return shape;
+		}
 
-                    Worksheet.WorksheetXml.DocumentElement.AppendChild(e);
-                    package.Flush();                    
-                }
-                XmlNode colNode = _drawingsXml.SelectSingleNode("//xdr:wsDr", NameSpaceManager);
-                XmlElement drawNode;
-                if (this.Worksheet is ExcelChartsheet)
-                {
-                    drawNode = _drawingsXml.CreateElement("xdr", "absoluteAnchor", ExcelPackage.schemaSheetDrawings);
-                    XmlElement posNode = _drawingsXml.CreateElement("xdr", "pos", ExcelPackage.schemaSheetDrawings);
-                    posNode.SetAttribute("y", "0");
-                    posNode.SetAttribute("x", "0");
-                    drawNode.AppendChild(posNode);
-                    XmlElement extNode = _drawingsXml.CreateElement("xdr", "ext", ExcelPackage.schemaSheetDrawings);
-                    extNode.SetAttribute("cy", "6072876");
-                    extNode.SetAttribute("cx", "9299263");
-                    drawNode.AppendChild(extNode);
-                    colNode.AppendChild(drawNode);
-                }
-                else
-                {
-                    drawNode = _drawingsXml.CreateElement("xdr", "twoCellAnchor", ExcelPackage.schemaSheetDrawings);
-                    colNode.AppendChild(drawNode);
-                    //Add from position Element;
-                    XmlElement fromNode = _drawingsXml.CreateElement("xdr", "from", ExcelPackage.schemaSheetDrawings);
-                    drawNode.AppendChild(fromNode);
-                    fromNode.InnerXml = "<xdr:col>0</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>0</xdr:rowOff>";
+		/// <summary>
+		/// Add a new shape to the worksheet
+		/// </summary>
+		/// <param name="name">Name</param>
+		/// <param name="source">Source shape</param>
+		/// <returns>The shape object</returns>
+		public ExcelShape AddShape(string name, ExcelShape source)
+		{
+			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
+			{
+				throw new InvalidOperationException("Chart worksheets can't have more than one drawing");
+			}
+			if (this._drawingNames.ContainsKey(name))
+			{
+				throw new Exception("Name already exists in the drawings collection");
+			}
+			XmlElement drawNode = this.CreateDrawingXml();
+			drawNode.InnerXml = source.TopNode.InnerXml;
 
-                    //Add to position Element;
-                    XmlElement toNode = _drawingsXml.CreateElement("xdr", "to", ExcelPackage.schemaSheetDrawings);
-                    drawNode.AppendChild(toNode);
-                    toNode.InnerXml = "<xdr:col>10</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>10</xdr:row><xdr:rowOff>0</xdr:rowOff>";
-                }
+			ExcelShape shape = new ExcelShape(this, drawNode);
+			shape.Name = name;
+			shape.Style = source.Style;
+			this._drawings.Add(shape);
+			this._drawingNames.Add(name, _drawings.Count - 1);
+			return shape;
+		}
 
-                return drawNode;
-            }
-        #endregion
-        #region Remove methods
-            /// <summary>
-            /// Removes a drawing.
-            /// </summary>
-            /// <param name="Index">The index of the drawing</param>
-        public void Remove(int Index)
-        {
-            if (Worksheet is ExcelChartsheet && _drawings.Count > 0)
-            {
-                throw new InvalidOperationException("Can' remove charts from chart worksheets");
-            }
-            RemoveDrawing(Index);
-        }
+		/// <summary>
+		/// Removes a drawing.
+		/// </summary>
+		/// <param name="index">The index of the drawing</param>
+		public void Remove(int index)
+		{
+			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
+			{
+				throw new InvalidOperationException("Can' remove charts from chart worksheets");
+			}
+			this.RemoveDrawing(index);
+		}
 
-        internal void RemoveDrawing(int Index)
-        {
-            var draw = _drawings[Index];
-            draw.DeleteMe();
-            for (int i = Index + 1; i < _drawings.Count; i++)
-            {
-                _drawingNames[_drawings[i].Name]--;
-            }
-            _drawingNames.Remove(draw.Name);
-            _drawings.Remove(draw);
-        }
-        /// <summary>
-        /// Removes a drawing.
-        /// </summary>
-        /// <param name="Drawing">The drawing</param>
-        public void Remove(ExcelDrawing Drawing)
-        {
-            Remove(_drawingNames[Drawing.Name]);
-        }
-        /// <summary>
-        /// Removes a drawing.
-        /// </summary>
-        /// <param name="Name">The name of the drawing</param>
-        public void Remove(string Name)
-        {
-            Remove(_drawingNames[Name]);
-        }
-        /// <summary>
-        /// Removes all drawings from the collection
-        /// </summary>
-        public void Clear()
-        {
-            if (Worksheet is ExcelChartsheet && _drawings.Count > 0)
-            {
-                throw new InvalidOperationException("Can' remove charts from chart worksheets");
-            }
-            ClearDrawings();
-        }
+		/// <summary>
+		/// Removes a drawing.
+		/// </summary>
+		/// <param name="drawing">The drawing</param>
+		public void Remove(ExcelDrawing drawing)
+		{
+			this.Remove(this._drawingNames[drawing.Name]);
+		}
 
-        internal void ClearDrawings()
-        {
-            while (Count > 0)
-            {
-                RemoveDrawing(0);
-            }
-        }
-        #endregion
-            internal void AdjustWidth(int[,] pos)
-            {
-                var ix = 0;
-                //Now set the size for all drawings depending on the editAs property.
-                foreach (OfficeOpenXml.Drawing.ExcelDrawing d in this)
-                {
-                    if (d.EditAs != Drawing.eEditAs.TwoCell)
-                    {
-                        if (d.EditAs == Drawing.eEditAs.Absolute)
-                        {
-                            d.SetPixelLeft(pos[ix, 0]);
-                        }
-                        d.SetPixelWidth(pos[ix, 1]);
-                        
-                    }
-                    ix++;
-                }
-            }
-            internal void AdjustHeight(int[,] pos)
-            {
-                var ix = 0;
-                //Now set the size for all drawings depending on the editAs property.
-                foreach (OfficeOpenXml.Drawing.ExcelDrawing d in this)
-                {
-                    if (d.EditAs != Drawing.eEditAs.TwoCell)
-                    {
-                        if (d.EditAs == Drawing.eEditAs.Absolute)
-                        {
-                            d.SetPixelTop(pos[ix, 0]);
-                        }
-                        d.SetPixelHeight(pos[ix, 1]);
+		/// <summary>
+		/// Removes a drawing.
+		/// </summary>
+		/// <param name="name">The name of the drawing</param>
+		public void Remove(string name)
+		{
+			this.Remove(this._drawingNames[name]);
+		}
 
-                    }
-                    ix++;
-                }
-            }
-            internal int[,] GetDrawingWidths()
-            {
-                int[,] pos = new int[Count, 2];
-                int ix = 0;
-                //Save the size for all drawings
-                foreach (ExcelDrawing d in this)
-                {
-                    pos[ix, 0] = d.GetPixelLeft();
-                    pos[ix++, 1] = d.GetPixelWidth();
-                }
-                return pos;
-            }
-            internal int[,] GetDrawingHeight()
-            {
-                int[,] pos = new int[Count, 2];
-                int ix = 0;
-                //Save the size for all drawings
-                foreach (ExcelDrawing d in this)
-                {
-                    pos[ix, 0] = d.GetPixelTop();
-                    pos[ix++, 1] = d.GetPixelHeight();
-                }
-                return pos;
-            }
+		/// <summary>
+		/// Removes all drawings from the collection
+		/// </summary>
+		public void Clear()
+		{
+			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
+			{
+				throw new InvalidOperationException("Can' remove charts from chart worksheets");
+			}
+			this.ClearDrawings();
+		}
 
-            public void Dispose()
-            {
-                _drawingsXml = null;
-                _hashes.Clear();
-                _hashes = null;
-                _part = null;
-                _drawingNames.Clear();
-                _drawingNames = null;
-                _drawingRelation = null;
-                foreach (var d in _drawings)
-                {
-                    d.Dispose();
-                }
-                _drawings.Clear();
-                _drawings = null;
-            }
-    }
+		public void Dispose()
+		{
+			this._drawingsXml = null;
+			this.Hashes.Clear();
+			this.Hashes = null;
+			this._part = null;
+			this._drawingNames.Clear();
+			this._drawingNames = null;
+			this.DrawingRelationship = null;
+			foreach (var d in _drawings)
+			{
+				d.Dispose();
+			}
+			this._drawings.Clear();
+			this._drawings = null;
+		}
+		#endregion
+
+		#region Internal Methods
+		internal void RemoveDrawing(int index)
+		{
+			var draw = this._drawings[index];
+			draw.DeleteMe();
+			for (int i = index + 1; i < this._drawings.Count; i++)
+			{
+				this._drawingNames[this._drawings[i].Name]--;
+			}
+			this._drawingNames.Remove(draw.Name);
+			this._drawings.Remove(draw);
+		}
+
+		internal void ClearDrawings()
+		{
+			while (Count > 0)
+			{
+				this.RemoveDrawing(0);
+			}
+		}
+
+		internal void AdjustWidth(int[,] pos)
+		{
+			var ix = 0;
+			//Now set the size for all drawings depending on the editAs property.
+			foreach (OfficeOpenXml.Drawing.ExcelDrawing d in this)
+			{
+				if (d.EditAs != Drawing.eEditAs.TwoCell)
+				{
+					if (d.EditAs == Drawing.eEditAs.Absolute)
+					{
+						d.SetPixelLeft(pos[ix, 0]);
+					}
+					d.SetPixelWidth(pos[ix, 1]);
+
+				}
+				ix++;
+			}
+		}
+
+		internal void AdjustHeight(int[,] pos)
+		{
+			var ix = 0;
+			//Now set the size for all drawings depending on the editAs property.
+			foreach (OfficeOpenXml.Drawing.ExcelDrawing d in this)
+			{
+				if (d.EditAs != Drawing.eEditAs.TwoCell)
+				{
+					if (d.EditAs == Drawing.eEditAs.Absolute)
+					{
+						d.SetPixelTop(pos[ix, 0]);
+					}
+					d.SetPixelHeight(pos[ix, 1]);
+
+				}
+				ix++;
+			}
+		}
+
+		internal int[,] GetDrawingWidths()
+		{
+			int[,] pos = new int[Count, 2];
+			int ix = 0;
+			//Save the size for all drawings
+			foreach (ExcelDrawing d in this)
+			{
+				pos[ix, 0] = d.GetPixelLeft();
+				pos[ix++, 1] = d.GetPixelWidth();
+			}
+			return pos;
+		}
+
+		internal int[,] GetDrawingHeight()
+		{
+			int[,] pos = new int[Count, 2];
+			int ix = 0;
+			//Save the size for all drawings
+			foreach (ExcelDrawing d in this)
+			{
+				pos[ix, 0] = d.GetPixelTop();
+				pos[ix++, 1] = d.GetPixelHeight();
+			}
+			return pos;
+		}
+		#endregion
+
+		#region Public Operators
+		/// <summary>
+		/// Returns the drawing at the specified position.  
+		/// </summary>
+		/// <param name="PositionID">The position of the drawing. 0-base</param>
+		/// <returns></returns>
+		public ExcelDrawing this[int PositionID]
+		{
+			get
+			{
+				return (this._drawings[PositionID]);
+			}
+		}
+
+		/// <summary>
+		/// Returns the drawing matching the specified name
+		/// </summary>
+		/// <param name="Name">The name of the worksheet</param>
+		/// <returns></returns>
+		public ExcelDrawing this[string Name]
+		{
+			get
+			{
+				if (this._drawingNames.ContainsKey(Name))
+				{
+					return this._drawings[this._drawingNames[Name]];
+				}
+				else
+				{
+					return null;
+				}
+			}
+		}
+		#endregion
+	}
 }

@@ -1349,7 +1349,7 @@ namespace EPPlusTest
                     sheets[1].Tables.Add(sheets[1].Cells["F3:K10"], "Tableb"),
                     sheets[0].Tables.Add(sheets[0].Cells["F3:K10"], "Table3"),
                 };
-                Assert.AreEqual(5, wb._nextTableID);
+                Assert.AreEqual(5, wb.NextTableID);
                 Assert.AreEqual(1, tables[0].Id);
                 Assert.AreEqual(2, tables[1].Id);
                 try

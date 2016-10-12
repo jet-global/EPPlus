@@ -58,9 +58,9 @@ namespace OfficeOpenXml
                 textElem = commentTopNode.OwnerDocument.CreateElement("text", ExcelPackage.schemaMain);
                 commentTopNode.AppendChild(textElem);
             }
-            if (!cell.Worksheet._vmlDrawings.ContainsKey(ExcelAddress.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)))
+            if (!cell.Worksheet.VmlDrawingsComments.ContainsKey(ExcelAddress.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)))
             {
-                cell.Worksheet._vmlDrawings.Add(cell);
+                cell.Worksheet.VmlDrawingsComments.Add(cell);
             }
 
             TopNode = cell.Worksheet.VmlDrawingsComments[ExcelCellBase.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)].TopNode;

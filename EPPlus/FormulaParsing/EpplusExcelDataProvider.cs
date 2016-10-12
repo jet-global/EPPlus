@@ -316,9 +316,9 @@ namespace OfficeOpenXml.FormulaParsing
             ExcelWorksheet ws;
             if (string.IsNullOrEmpty(worksheet))
             {
-                if(_package._workbook.Names.ContainsKey(name))
+                if(_package.Workbook.Names.ContainsKey(name))
                 {
-                    nameItem = _package._workbook.Names[name];
+                    nameItem = _package.Workbook.Names[name];
                 }
                 else
                 {
@@ -328,14 +328,14 @@ namespace OfficeOpenXml.FormulaParsing
             }
             else
             {
-                ws = _package._workbook.Worksheets[worksheet];
+                ws = _package.Workbook.Worksheets[worksheet];
                 if (ws !=null && ws.Names.ContainsKey(name))
                 {
                     nameItem = ws.Names[name];
                 }
-                else if (_package._workbook.Names.ContainsKey(name))
+                else if (_package.Workbook.Names.ContainsKey(name))
                 {
-                    nameItem = _package._workbook.Names[name];
+                    nameItem = _package.Workbook.Names[name];
                 }
                 else
                 {

@@ -166,7 +166,7 @@ namespace OfficeOpenXml
         }
         private static void Init(ExcelWorkbook workbook)
         {
-            workbook._formulaTokens = new CellStore<List<Token>>();;
+            workbook.FormulaTokens = new CellStore<List<Token>>();;
             foreach (var ws in workbook.Worksheets)
             {
                 if (!(ws is ExcelChartsheet))

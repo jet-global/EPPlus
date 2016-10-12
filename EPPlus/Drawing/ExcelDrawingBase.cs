@@ -190,7 +190,7 @@ namespace OfficeOpenXml.Drawing
         {
             _drawings = drawings;
             _topNode = node;
-            _id = drawings.Worksheet.Workbook._nextDrawingID++;
+            _id = drawings.Worksheet.Workbook.NextDrawingID++;
             XmlNode posNode = node.SelectSingleNode("xdr:from", drawings.NameSpaceManager);
             if (node != null)
             {
@@ -324,7 +324,7 @@ namespace OfficeOpenXml.Drawing
         }
         internal void ReSetWidthHeight()
         {
-            if (!_drawings.Worksheet.Workbook._package.DoAdjustDrawings &&
+            if (!_drawings.Worksheet.Workbook.Package.DoAdjustDrawings &&
                 EditAs==eEditAs.Absolute)
             {
                 SetPixelWidth(_width);
@@ -824,7 +824,7 @@ namespace OfficeOpenXml.Drawing
         /// </summary>
         public void AdjustPositionAndSize()
         {
-            if (_drawings.Worksheet.Workbook._package.DoAdjustDrawings == false) return;
+            if (_drawings.Worksheet.Workbook.Package.DoAdjustDrawings == false) return;
             if (EditAs==eEditAs.Absolute)
             {
                 SetPixelLeft(_left);

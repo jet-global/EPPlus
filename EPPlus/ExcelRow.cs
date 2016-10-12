@@ -144,7 +144,7 @@ namespace OfficeOpenXml
             set
             {
                 var r = GetRowInternal();
-                if (_worksheet._package.DoAdjustDrawings)
+                if (_worksheet.Package.DoAdjustDrawings)
                 {
                     var pos = _worksheet.Drawings.GetDrawingHeight();   //Fixes issue 14846
                     r.Height = value;

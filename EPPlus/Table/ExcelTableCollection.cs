@@ -47,7 +47,7 @@ namespace OfficeOpenXml.Table
         ExcelWorksheet _ws;        
         internal ExcelTableCollection(ExcelWorksheet ws)
         {
-            var pck = ws._package.Package;
+            var pck = ws.Package.Package;
             _ws = ws;
             foreach(XmlElement node in ws.WorksheetXml.SelectNodes("//d:tableParts/d:tablePart", ws.NameSpaceManager))
             {
@@ -61,9 +61,9 @@ namespace OfficeOpenXml.Table
         {
             _tables.Add(tbl);
             _tableNames.Add(tbl.Name, _tables.Count - 1);
-            if (tbl.Id >= _ws.Workbook._nextTableID)
+            if (tbl.Id >= _ws.Workbook.NextTableID)
             {
-                _ws.Workbook._nextTableID = tbl.Id + 1;
+                _ws.Workbook.NextTableID = tbl.Id + 1;
             }
             return tbl;
         }
@@ -99,7 +99,7 @@ namespace OfficeOpenXml.Table
                     throw (new ArgumentException(string.Format("Table range collides with table {0}", t.Name)));
                 }
             }
-            return Add(new ExcelTable(_ws, Range, Name, _ws.Workbook._nextTableID));
+            return Add(new ExcelTable(_ws, Range, Name, _ws.Workbook.NextTableID));
         }
 
         private void ValidateTableName(string Name)
@@ -154,7 +154,7 @@ namespace OfficeOpenXml.Table
                     {
                         if (table.Id > Table.Id) table.Id--;
                     }
-                    Table.WorkSheet.Workbook._nextTableID--;
+                    Table.WorkSheet.Workbook.NextTableID--;
                 }
                 if (ClearRange)
                 {
