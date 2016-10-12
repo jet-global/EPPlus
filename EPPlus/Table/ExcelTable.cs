@@ -118,7 +118,7 @@ namespace OfficeOpenXml.Table
             WorkSheet = sheet;
             TableUri = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
             RelationshipID = rel.Id;
-            var pck = sheet._package.Package;
+            var pck = sheet.Package.Package;
             Part=pck.GetPart(TableUri);
 
             TableXml = new XmlDocument();

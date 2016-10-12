@@ -127,7 +127,7 @@ namespace OfficeOpenXml
             //Add the image
             ImageConverter ic = new ImageConverter();
             byte[] img = (byte[])ic.ConvertTo(Picture, typeof(byte[]));
-            var ii = _ws.Workbook._package.AddImage(img);
+            var ii = _ws.Workbook.Package.AddImage(img);
 
             return AddImage(Picture, id, ii);
         }
@@ -156,9 +156,9 @@ namespace OfficeOpenXml
 
             ImageConverter ic = new ImageConverter();
             string contentType = ExcelPicture.GetContentType(PictureFile.Extension);
-            var uriPic = XmlHelper.GetNewUri(_ws._package.Package, "/xl/media/" + PictureFile.Name.Substring(0, PictureFile.Name.Length-PictureFile.Extension.Length) + "{0}" + PictureFile.Extension);
+            var uriPic = XmlHelper.GetNewUri(_ws.Package.Package, "/xl/media/" + PictureFile.Name.Substring(0, PictureFile.Name.Length-PictureFile.Extension.Length) + "{0}" + PictureFile.Extension);
             byte[] imgBytes = (byte[])ic.ConvertTo(Picture, typeof(byte[]));
-            var ii = _ws.Workbook._package.AddImage(imgBytes, uriPic, contentType);
+            var ii = _ws.Workbook.Package.AddImage(imgBytes, uriPic, contentType);
 
             return AddImage(Picture, id, ii);
         }
@@ -437,7 +437,7 @@ namespace OfficeOpenXml
                     var vmlNode = _ws.WorksheetXml.SelectSingleNode("d:worksheet/d:legacyDrawingHF/@r:id", NameSpaceManager);
                     if (vmlNode == null)
                     {
-                        _vmlDrawingsHF = new ExcelVmlDrawingPictureCollection(_ws._package, _ws, null);
+                        _vmlDrawingsHF = new ExcelVmlDrawingPictureCollection(_ws.Package, _ws, null);
                     }
                     else
                     {
@@ -446,7 +446,7 @@ namespace OfficeOpenXml
                             var rel = _ws.Part.GetRelationship(vmlNode.Value);
                             var vmlUri = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
 
-                            _vmlDrawingsHF = new ExcelVmlDrawingPictureCollection(_ws._package, _ws, vmlUri);
+                            _vmlDrawingsHF = new ExcelVmlDrawingPictureCollection(_ws.Package, _ws, vmlUri);
                             _vmlDrawingsHF.RelId = rel.Id;
                         }
                     }
@@ -505,18 +505,18 @@ namespace OfficeOpenXml
                     if (_vmlDrawingsHF.Uri != null)
                     {
                         _ws.Part.DeleteRelationship(_vmlDrawingsHF.RelId);
-                        _ws._package.Package.DeletePart(_vmlDrawingsHF.Uri);
+                        _ws.Package.Package.DeletePart(_vmlDrawingsHF.Uri);
                     }
                 }
                 else
                 {
                     if (_vmlDrawingsHF.Uri == null)
                     {
-                        _vmlDrawingsHF.Uri = XmlHelper.GetNewUri(_ws._package.Package, @"/xl/drawings/vmlDrawing{0}.vml");
+                        _vmlDrawingsHF.Uri = XmlHelper.GetNewUri(_ws.Package.Package, @"/xl/drawings/vmlDrawing{0}.vml");
                     }
                     if (_vmlDrawingsHF.Part == null)
                     {
-                        _vmlDrawingsHF.Part = _ws._package.Package.CreatePart(_vmlDrawingsHF.Uri, "application/vnd.openxmlformats-officedocument.vmlDrawing", _ws._package.Compression);
+                        _vmlDrawingsHF.Part = _ws.Package.Package.CreatePart(_vmlDrawingsHF.Uri, "application/vnd.openxmlformats-officedocument.vmlDrawing", _ws.Package.Compression);
                         var rel = _ws.Part.CreateRelationship(UriHelper.GetRelativeUri(_ws.WorksheetUri, _vmlDrawingsHF.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/vmlDrawing");
                         _ws.SetHFLegacyDrawingRel(rel.Id);
                         _vmlDrawingsHF.RelId = rel.Id;

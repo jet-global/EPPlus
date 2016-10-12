@@ -46,7 +46,7 @@ namespace OfficeOpenXml.Table.PivotTable
         ExcelWorksheet _ws;        
         internal ExcelPivotTableCollection(ExcelWorksheet ws)
         {
-            var pck = ws._package.Package;
+            var pck = ws.Package.Package;
             _ws = ws;            
             foreach(var rel in ws.Part.GetRelationships())
             {
@@ -62,9 +62,9 @@ namespace OfficeOpenXml.Table.PivotTable
         {
             _pivotTables.Add(tbl);
             _pivotTableNames.Add(tbl.Name, _pivotTables.Count - 1);
-            if (tbl.CacheID >= _ws.Workbook._nextPivotTableID)
+            if (tbl.CacheID >= _ws.Workbook.NextPivotTableID)
             {
-                _ws.Workbook._nextPivotTableID = tbl.CacheID + 1;
+                _ws.Workbook.NextPivotTableID = tbl.CacheID + 1;
             }
             return tbl;
         }
@@ -97,7 +97,7 @@ namespace OfficeOpenXml.Table.PivotTable
                     throw (new ArgumentException(string.Format("Table range collides with table {0}", t.Name)));
                 }
             }
-            return Add(new ExcelPivotTable(_ws, Range, Source, Name, _ws.Workbook._nextPivotTableID++));
+            return Add(new ExcelPivotTable(_ws, Range, Source, Name, _ws.Workbook.NextPivotTableID++));
         }
 
         internal string GetNewTableName()

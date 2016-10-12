@@ -50,7 +50,7 @@ namespace OfficeOpenXml.Table.PivotTable
             WorkSheet = sheet;
             PivotTableUri = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
             Relationship = rel;
-            var pck = sheet._package.Package;
+            var pck = sheet.Package.Package;
             Part=pck.GetPart(PivotTableUri);
 
             PivotTableXml = new XmlDocument();
@@ -129,7 +129,7 @@ namespace OfficeOpenXml.Table.PivotTable
 	    {
             WorkSheet = sheet;
             Address = address;
-            var pck = sheet._package.Package;
+            var pck = sheet.Package.Package;
 
             PivotTableXml = new XmlDocument();
             LoadXmlSafe(PivotTableXml, GetStartXml(name, tblId, address, sourceAddress), Encoding.UTF8);

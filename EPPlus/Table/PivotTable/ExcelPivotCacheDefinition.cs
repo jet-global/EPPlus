@@ -71,7 +71,7 @@ namespace OfficeOpenXml.Table.PivotTable
             }
             CacheDefinitionUri = UriHelper.ResolvePartUri(Relationship.SourceUri, Relationship.TargetUri);
 
-            var pck = pivotTable.WorkSheet._package.Package;
+            var pck = pivotTable.WorkSheet.Package.Package;
             Part = pck.GetPart(CacheDefinitionUri);
             CacheDefinitionXml = new XmlDocument();
             LoadXmlSafe(CacheDefinitionXml, Part.GetStream());
@@ -92,7 +92,7 @@ namespace OfficeOpenXml.Table.PivotTable
         {
             PivotTable = pivotTable;
 
-            var pck = pivotTable.WorkSheet._package.Package;
+            var pck = pivotTable.WorkSheet.Package.Package;
             
             //CacheDefinition
             CacheDefinitionXml = new XmlDocument();

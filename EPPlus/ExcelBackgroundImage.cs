@@ -88,7 +88,7 @@ namespace OfficeOpenXml
                 {
                     ImageConverter ic = new ImageConverter();
                     byte[] img = (byte[])ic.ConvertTo(value, typeof(byte[]));
-                    var ii = _workSheet.Workbook._package.AddImage(img);
+                    var ii = _workSheet.Workbook.Package.AddImage(img);
                     var rel = _workSheet.Part.CreateRelationship(ii.Uri, Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/image");
                     SetXmlNodeString(BACKGROUNDPIC_PATH, rel.Id);
                 }
@@ -115,10 +115,10 @@ namespace OfficeOpenXml
 
             ImageConverter ic = new ImageConverter();
             string contentType = ExcelPicture.GetContentType(PictureFile.Extension);
-            var imageURI = XmlHelper.GetNewUri(_workSheet._package.Package, "/xl/media/" + PictureFile.Name.Substring(0, PictureFile.Name.Length - PictureFile.Extension.Length) + "{0}" + PictureFile.Extension);
+            var imageURI = XmlHelper.GetNewUri(_workSheet.Package.Package, "/xl/media/" + PictureFile.Name.Substring(0, PictureFile.Name.Length - PictureFile.Extension.Length) + "{0}" + PictureFile.Extension);
 
             byte[] fileBytes = (byte[])ic.ConvertTo(img, typeof(byte[]));
-            var ii = _workSheet.Workbook._package.AddImage(fileBytes, imageURI, contentType);
+            var ii = _workSheet.Workbook.Package.AddImage(fileBytes, imageURI, contentType);
 
 
             if (_workSheet.Part.Package.PartExists(imageURI) && ii.RefCount==1) //The file exists with another content, overwrite it.
@@ -143,7 +143,7 @@ namespace OfficeOpenXml
             {
                 var ic = new ImageConverter();
                 byte[] img = (byte[])ic.ConvertTo(Image, typeof(byte[]));
-                var ii = _workSheet.Workbook._package.GetImageInfo(img);
+                var ii = _workSheet.Workbook.Package.GetImageInfo(img);
 
                 //Delete the relation
                 _workSheet.Part.DeleteRelationship(relID);

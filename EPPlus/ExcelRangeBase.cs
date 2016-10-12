@@ -98,7 +98,7 @@ namespace OfficeOpenXml
 		{
 			if (this.IsTableAddress)
 			{
-				SetRCFromTable(_workbook._package, null);
+				SetRCFromTable(_workbook.Package, null);
 			}
 			SetDelegate();
 		}
@@ -107,14 +107,14 @@ namespace OfficeOpenXml
 		{
 			_worksheet = xlWorksheet;
 			_workbook = _worksheet.Workbook;
-			base.SetRCFromTable(_worksheet._package, null);
+			base.SetRCFromTable(_worksheet.Package, null);
 			if (string.IsNullOrEmpty(_ws)) _ws = _worksheet == null ? "" : _worksheet.Name;
 			SetDelegate();
 		}
 		internal ExcelRangeBase(ExcelWorkbook wb, ExcelWorksheet xlWorksheet, string address, bool isName) :
 			base(xlWorksheet == null ? "" : xlWorksheet.Name, address, isName)
 		{
-			SetRCFromTable(wb._package, null);
+			SetRCFromTable(wb.Package, null);
 			_worksheet = xlWorksheet;
 			_workbook = wb;
 			if (string.IsNullOrEmpty(_ws)) _ws = (xlWorksheet == null ? null : xlWorksheet.Name);
@@ -627,7 +627,7 @@ namespace OfficeOpenXml
 				{
 					if (_worksheet == null)
 					{
-						return _workbook._names[_address].NameValue;
+						return _workbook.Names[_address].NameValue;
 					}
 					else
 					{
@@ -652,7 +652,7 @@ namespace OfficeOpenXml
 				{
 					if (_worksheet == null)
 					{
-						_workbook._names[_address].NameValue = value;
+						_workbook.Names[_address].NameValue = value;
 					}
 					else
 					{
@@ -802,8 +802,8 @@ namespace OfficeOpenXml
 				SetToSelectedRange();
 			}
 			var fontCache = new Dictionary<int, Font>();
-			bool doAdjust = _worksheet._package.DoAdjustDrawings;
-			_worksheet._package.DoAdjustDrawings = false;
+			bool doAdjust = _worksheet.Package.DoAdjustDrawings;
+			_worksheet.Package.DoAdjustDrawings = false;
 			var drawWidths = _worksheet.Drawings.GetDrawingWidths();
 
 			var fromCol = _fromCol > _worksheet.Dimension._fromCol ? _fromCol : _worksheet.Dimension._fromCol;
@@ -942,7 +942,7 @@ namespace OfficeOpenXml
 				}
 			}
 			_worksheet.Drawings.AdjustWidth(drawWidths);
-			_worksheet._package.DoAdjustDrawings = doAdjust;
+			_worksheet.Package.DoAdjustDrawings = doAdjust;
 		}
 
 		private void SetMinWidth(double minimumWidth, int fromCol, int toCol)
@@ -1133,7 +1133,7 @@ namespace OfficeOpenXml
 				{
 					if (_worksheet == null)
 					{
-						return _workbook._names[_address].NameFormula;
+						return _workbook.Names[_address].NameFormula;
 					}
 					else
 					{
@@ -1153,7 +1153,7 @@ namespace OfficeOpenXml
 				{
 					if (_worksheet == null)
 					{
-						_workbook._names[_address].NameFormula = value;
+						_workbook.Names[_address].NameFormula = value;
 					}
 					else
 					{
@@ -1412,7 +1412,7 @@ namespace OfficeOpenXml
 				{
 					if (_worksheet._commentsStore.Exists(_fromRow, _fromCol, ref i))
 					{
-						return _worksheet._comments[i] as ExcelComment;
+						return _worksheet.Comments[i] as ExcelComment;
 					}
 				}
 				return null;
@@ -2506,7 +2506,7 @@ namespace OfficeOpenXml
 			}
 			var copiedMergedCells = new Dictionary<int, ExcelAddress>();
 			//Merged cells
-			var csem = new CellsStoreEnumerator<int>(_worksheet.MergedCells._cells, _fromRow, _fromCol, _toRow, _toCol);
+			var csem = new CellsStoreEnumerator<int>(_worksheet.MergedCells.Cells, _fromRow, _fromCol, _toRow, _toCol);
 			while (csem.Next())
 			{
 				if (!copiedMergedCells.ContainsKey(csem.Value))
@@ -2551,7 +2551,7 @@ namespace OfficeOpenXml
 
 				if (cell.Formula != null)
 				{
-					cell.Formula = _workbook._package.FormulaManager.UpdateFormulaReferences(cell.Formula.ToString(), Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, Destination.WorkSheet, Destination.WorkSheet, true);
+					cell.Formula = _workbook.Package.FormulaManager.UpdateFormulaReferences(cell.Formula.ToString(), Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, Destination.WorkSheet, Destination.WorkSheet, true);
 					Destination._worksheet._formulas.SetValue(cell.Row, cell.Column, cell.Formula);
 				}
 				if (cell.HyperLink != null)
@@ -2588,10 +2588,10 @@ namespace OfficeOpenXml
 					if (sparkline.HostCell.Collide(this) != eAddressCollition.No)
 					{
 						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
-						var newFormula = _workbook._package.FormulaManager.UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+						var newFormula = _workbook.Package.FormulaManager.UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
 						if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
 							newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
-						var newHostCell = _workbook._package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+						var newHostCell = _workbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
 						var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };
 						newSparklines.Add(newSparkline);
 					}

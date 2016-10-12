@@ -112,7 +112,7 @@ namespace OfficeOpenXml.FormulaParsing
                     f.Tokens = lexer.Tokenize(f.Formula, (ws==null ? null : ws.Name)).ToList();
                     if (ws == null)
                     {
-                        name._workbook._formulaTokens.SetValue(name.Index, 0, f.Tokens);
+                        name._workbook.FormulaTokens.SetValue(name.Index, 0, f.Tokens);
                     }
                     else
                     {
@@ -186,7 +186,7 @@ namespace OfficeOpenXml.FormulaParsing
                     var adr = new ExcelFormulaAddress(t.Value);
                     if (adr.IsTableAddress)
                     {
-                        adr.SetRCFromTable(ws._package, new ExcelAddressBase(f.Row, f.Column, f.Row, f.Column));
+                        adr.SetRCFromTable(ws.Package, new ExcelAddressBase(f.Row, f.Column, f.Row, f.Column));
                     }
 
                     if (adr.WorkSheet == null && adr.Collide(new ExcelAddressBase(f.Row, f.Column, f.Row, f.Column))!=ExcelAddressBase.eAddressCollition.No && !options.AllowCirculareReferences)
