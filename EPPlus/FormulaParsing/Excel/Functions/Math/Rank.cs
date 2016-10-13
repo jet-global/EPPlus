@@ -15,8 +15,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
         }
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2);
-            var number = ArgToDecimal(arguments, 0);
+			if(ValidateArguments(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
+			var number = ArgToDecimal(arguments, 0);
             var refer = arguments.ElementAt(1);
             bool asc = false;
             if (arguments.Count() > 2)

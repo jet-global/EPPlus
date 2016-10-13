@@ -29,8 +29,22 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
         {
             _package.Dispose();
         }
-        
-        [TestMethod]
+
+		[TestMethod]
+		public void IndexReturnsPoundValueWhenTooFewArgumentsAreSupplied()
+		{
+			_worksheet.Cells["A1"].Value = 1d;
+			_worksheet.Cells["A2"].Value = 3d;
+			_worksheet.Cells["A3"].Value = 5d;
+
+			_worksheet.Cells["A4"].Formula = "INDEX(A1:A3,213)";
+
+			_worksheet.Calculate();
+
+			Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), _worksheet.Cells["A4"].Value);
+		}
+
+		[TestMethod]
         public void Index_Should_Return_Value_By_Index()
         {
             var func = new Index();
@@ -55,5 +69,5 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 
             Assert.AreEqual(5d, _worksheet.Cells["A4"].Value);
         }
-    }
+	}
 }

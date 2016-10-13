@@ -10,8 +10,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1);
-            var dateInt = ArgToInt(arguments, 0);
+			if(ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			var dateInt = ArgToInt(arguments, 0);
             var date = System.DateTime.FromOADate(dateInt);
             return CreateResult(WeekNumber(date), DataType.Integer);
         }

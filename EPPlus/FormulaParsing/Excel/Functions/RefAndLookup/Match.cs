@@ -48,7 +48,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2);
+            if(ValidateArguments(arguments, 2) == false)
+            	return new CompileResult(eErrorType.Value);
 
             var searchedValue = arguments.ElementAt(0).Value;
             var address =  arguments.ElementAt(1).IsExcelRange ? arguments.ElementAt(1).ValueAsRangeInfo.Address.FullAddress : ArgToString(arguments, 1);

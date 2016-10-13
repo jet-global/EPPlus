@@ -10,9 +10,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1);
+            if(ValidateArguments(arguments, 1) == false)
+            	return new CompileResult(eErrorType.Value);
             var number = ArgToInt(arguments, 0);
-            ThrowExcelErrorValueExceptionIf(() => number < 1 || number > 255, eErrorType.Value);
+            if(number < 1 || number > 255)
+				return new CompileResult(eErrorType.Value);
             return CreateResult(((char) number).ToString(), DataType.String);
         }
     }

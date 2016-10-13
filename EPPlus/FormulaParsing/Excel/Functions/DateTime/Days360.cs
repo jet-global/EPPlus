@@ -16,8 +16,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
         }
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2);
-            var numDate1 = ArgToDecimal(arguments, 0);
+			if(ValidateArguments(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
+			var numDate1 = ArgToDecimal(arguments, 0);
             var numDate2 = ArgToDecimal(arguments, 1);
             var dt1 = System.DateTime.FromOADate(numDate1);
             var dt2 = System.DateTime.FromOADate(numDate2);

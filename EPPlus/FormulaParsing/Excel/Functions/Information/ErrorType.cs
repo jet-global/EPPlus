@@ -34,8 +34,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Information
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1);
-            var error = arguments.ElementAt(0);
+			if(ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			var error = arguments.ElementAt(0);
             var isErrorFunc = context.Configuration.FunctionRepository.GetFunction("iserror");
             var isErrorResult = isErrorFunc.Execute(arguments, context);
             if (!(bool) isErrorResult.Result)

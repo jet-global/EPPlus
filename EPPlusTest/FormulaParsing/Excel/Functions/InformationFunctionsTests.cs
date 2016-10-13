@@ -121,7 +121,17 @@ namespace EPPlusTest.Excel.Functions
             Assert.IsTrue((bool)result.Result);
         }
 
-        [TestMethod]
+
+		[TestMethod]
+		public void IsOddShouldPoundValueOnNonNumericInput()
+		{
+			var args = FunctionsHelper.CreateArgs("Not odd");
+			var func = new IsOdd();
+			var result = func.Execute(args, _context);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
         public void IsEvenShouldReturnCorrectResult()
         {
             var args = FunctionsHelper.CreateArgs(4.123);
@@ -130,7 +140,16 @@ namespace EPPlusTest.Excel.Functions
             Assert.IsTrue((bool)result.Result);
         }
 
-        [TestMethod]
+		[TestMethod]
+		public void IsEvenShouldPoundValueOnNonNumericInput()
+		{
+			var args = FunctionsHelper.CreateArgs("Not odd");
+			var func = new IsEven();
+			var result = func.Execute(args, _context);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
         public void IsLogicalShouldReturnCorrectResult()
         {
             var func = new IsLogical();
@@ -170,5 +189,86 @@ namespace EPPlusTest.Excel.Functions
             result = func.Execute(args, _context);
             Assert.AreEqual(errorCode, result.Result);
         }
+
+		[TestMethod]
+		public void ErrorTypeWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new ErrorType();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IsEvenWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new IsEven();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IsLogicalWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new IsLogical();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IsNonTextWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new IsNonText();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IsNumberWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new IsNumber();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IsOddWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new IsOdd();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IsTextWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new IsText();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void NWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new N();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
     }
 }

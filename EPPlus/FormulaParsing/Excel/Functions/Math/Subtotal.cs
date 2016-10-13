@@ -80,7 +80,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2);
+            if(ValidateArguments(arguments, 2) == false)
+            	return new CompileResult(eErrorType.Value);
             var funcNum = ArgToInt(arguments, 0);
             if (context.Scopes.Current.Parent != null && context.Scopes.Current.Parent.IsSubtotal)
             {
@@ -88,20 +89,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
             }
             var actualArgs = arguments.Skip(1);
             ExcelFunction function = null;
-            function = GetFunctionByCalcType(funcNum);
-            var compileResult = function.Execute(actualArgs, context);
+			if (!_functions.ContainsKey(funcNum))
+				return new CompileResult(eErrorType.Value);
+			else
+				function = _functions[funcNum];
+			var compileResult = function.Execute(actualArgs, context);
             compileResult.IsResultOfSubtotal = true;
             return compileResult;
-        }
-
-        private ExcelFunction GetFunctionByCalcType(int funcNum)
-        {
-            if (!_functions.ContainsKey(funcNum))
-            {
-                ThrowExcelErrorValueException(eErrorType.Value);
-                //throw new ArgumentException("Invalid funcNum " + funcNum + ", valid ranges are 1-11 and 101-111");
-            }
-            return _functions[funcNum];
         }
     }
 }

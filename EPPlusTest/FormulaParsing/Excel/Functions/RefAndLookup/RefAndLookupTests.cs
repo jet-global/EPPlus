@@ -20,6 +20,16 @@ namespace EPPlusTest.Excel.Functions
     public class RefAndLookupTests
     {
         const string WorksheetName = null;
+
+		[TestMethod]
+		public void AddressWithTooFewArgumentsReturnsPoundValue()
+		{
+			var function = new OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup.Address();
+			var args = FunctionsHelper.CreateArgs("One Arg Only");
+			var result = function.Execute(args, null);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
         [TestMethod]
         public void LookupArgumentsShouldSetSearchedValue()
         {
@@ -495,5 +505,95 @@ namespace EPPlusTest.Excel.Functions
             parsingContext.ExcelDataProvider.Stub(x => x.ExcelMaxRows).Return(10);
             var result = func.Execute(FunctionsHelper.CreateArgs(1, 2, (int)ExcelReferenceType.RelativeRowAndColumn, false), parsingContext);
         }
-    }
+
+		[TestMethod]
+		public void OffsetReturnsPoundValueIfTooFewArgumentsAreSupplied()
+		{
+			var func = new Offset();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs("B2", 2);
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void OffsetReturnsPoundRefIfInvalidArgumentsAreSupplied()
+		{
+			var func = new Offset();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs("B2", 0, 0, 0, 0);
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void ColumnsWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Columns();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void HLookupWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new HLookup();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LookupWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Lookup();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MatchWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Match();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+ 
+		[TestMethod]
+		public void OffsetWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Offset();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void RowsWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Rows();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void VLookupWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new VLookup();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+	}
 }

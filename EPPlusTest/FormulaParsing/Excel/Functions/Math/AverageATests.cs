@@ -115,7 +115,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ExcelErrorValueException))]
 		public void AverageAUnparsableLiteral()
 		{
 			// In the case of literals, any unparsable string literal results in a #VALUE.
@@ -125,6 +124,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				new FunctionArgument(1000),
 				new FunctionArgument("Test")
 			}, ParsingContext.Create());
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)(result.Result)).Type);
 		}
 	}
 }

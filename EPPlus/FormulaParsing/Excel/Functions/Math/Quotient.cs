@@ -10,10 +10,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2);
-            var num = ArgToDecimal(arguments, 0);
+			if(ValidateArguments(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
+			var num = ArgToDecimal(arguments, 0);
             var denom = ArgToDecimal(arguments, 1);
-            ThrowExcelErrorValueExceptionIf(() => (int)denom == 0, eErrorType.Div0);
+            if((int)denom == 0)
+				return new CompileResult(eErrorType.Div0);
             var result = (int)(num/denom);
             return CreateResult(result, DataType.Integer);
         }

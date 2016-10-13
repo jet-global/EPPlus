@@ -35,7 +35,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1);
+            if(ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
             var serialNumber = ArgToDecimal(arguments, 0);
             var returnType = arguments.Count() > 1 ? ArgToInt(arguments, 1) : 1;
             return CreateResult(CalculateDayOfWeek(System.DateTime.FromOADate(serialNumber), returnType), DataType.Integer);

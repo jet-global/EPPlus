@@ -35,7 +35,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1);
+            if(ValidateArguments(arguments, 1) == false)
+            	return new CompileResult(eErrorType.Value);
             double result = 0d;
             List<List<double>> results = new List<List<double>>();
             foreach (var arg in arguments)

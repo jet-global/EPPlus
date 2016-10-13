@@ -10,8 +10,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2, eErrorType.Value);
-            var dateSerial = ArgToDecimal(arguments, 0);
+            if(!this.ValidateArguments(arguments, 2))
+				return new CompileResult(eErrorType.Value);
+			var dateSerial = ArgToDecimal(arguments, 0);
             var date = System.DateTime.FromOADate(dateSerial);
             var nMonthsToAdd = ArgToInt(arguments, 1);
             var resultDate = date.AddMonths(nMonthsToAdd);

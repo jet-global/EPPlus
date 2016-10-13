@@ -34,8 +34,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Information
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1);
-            var arg = GetFirstValue(arguments);
+			if(ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			var arg = GetFirstValue(arguments);
             return CreateResult(IsNumeric(arg), DataType.Boolean);
         }
     }

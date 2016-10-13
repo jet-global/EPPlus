@@ -34,7 +34,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2);
+            if(ValidateArguments(arguments, 2) == false)
+            	return new CompileResult(eErrorType.Value);
             var number = ArgToDecimal(arguments, 0);
             var nDigits = ArgToInt(arguments, 1);
             double result = (number >= 0) 

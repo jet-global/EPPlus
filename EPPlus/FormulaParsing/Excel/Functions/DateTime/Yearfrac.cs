@@ -13,7 +13,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
             var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-            ValidateArguments(functionArguments, 2);
+			if(ValidateArguments(functionArguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
             var date1Num = ArgToDecimal(functionArguments, 0);
             var date2Num = ArgToDecimal(functionArguments, 1);
             if (date1Num > date2Num) //Switch to make date1 the lowest date
@@ -32,7 +33,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
             if (functionArguments.Count() > 2)
             {
                 basis = ArgToInt(functionArguments, 2);
-                ThrowExcelErrorValueExceptionIf(() => basis < 0 || basis > 4, eErrorType.Num);
+				if(basis < 0 || basis > 4)
+					return new CompileResult(eErrorType.Num);
             }
             var func = context.Configuration.FunctionRepository.GetFunction("days360");
             var calendar = new GregorianCalendar();

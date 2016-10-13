@@ -10,8 +10,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
     public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
     {
-        ValidateArguments(arguments, 1);
-        var arg = ArgToDecimal(arguments, 0);
+			if(ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			var arg = ArgToDecimal(arguments, 0);
         return CreateResult(System.Math.Log(arg, System.Math.E), DataType.Decimal);
     }
 }
