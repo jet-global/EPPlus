@@ -34,38 +34,46 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1);
+			if(ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
             var result = 0d;
             var index = 0;
-            while (AreEqual(result, 0d) && index < arguments.Count())
-            {
-                result = CalculateFirstItem(arguments, index++, context);
-            }
-            result = CalculateCollection(arguments.Skip(index), result, (arg, current) =>
-            {
-                if (ShouldIgnore(arg)) return current;
-                if (arg.ValueIsExcelError)
-                {
-                    ThrowExcelErrorValueException(arg.ValueAsExcelErrorValue.Type);
-                }
-                if (arg.IsExcelRange)
-                {
-                    foreach (var cell in arg.ValueAsRangeInfo)
-                    {
-                        if(ShouldIgnore(cell, context)) return current;
-                        current *= cell.ValueDouble;
-                    }
-                    return current;
-                }
-                var obj = arg.Value;
-                if (obj != null && IsNumeric(obj))
-                {
-                    var val = Convert.ToDouble(obj);
-                    current *= val;
-                }
-                return current;
-            });
-            return CreateResult(result, DataType.Decimal);
+			try
+			{
+				while (AreEqual(result, 0d) && index < arguments.Count())
+				{
+					result = CalculateFirstItem(arguments, index++, context);
+				}
+				result = CalculateCollection(arguments.Skip(index), result, (arg, current) =>
+				{
+					if (ShouldIgnore(arg)) return current;
+					if (arg.ValueIsExcelError)
+					{
+						throw new Exception(arg.ValueAsExcelErrorValue.ToString());
+					}
+					if (arg.IsExcelRange)
+					{
+						foreach (var cell in arg.ValueAsRangeInfo)
+						{
+							if (ShouldIgnore(cell, context)) return current;
+							current *= cell.ValueDouble;
+						}
+						return current;
+					}
+					var obj = arg.Value;
+					if (obj != null && IsNumeric(obj))
+					{
+						var val = Convert.ToDouble(obj);
+						current *= val;
+					}
+					return current;
+				});
+				return CreateResult(result, DataType.Decimal);
+			}
+			catch
+			{
+				return new CompileResult(eErrorType.Value);
+			}
         }
 
         private double CalculateFirstItem(IEnumerable<FunctionArgument> arguments, int index, ParsingContext context)

@@ -25,10 +25,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
-using OfficeOpenXml.FormulaParsing.Exceptions;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
@@ -36,16 +34,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2);
+			if(ValidateArguments(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
             var row = ArgToInt(arguments, 0);
             var col = ArgToInt(arguments, 1);
-            ThrowExcelErrorValueExceptionIf(() => row < 0 && col < 0, eErrorType.Value);
+            if(row < 0 && col < 0)
+				return new CompileResult(eErrorType.Value);
             var referenceType = ExcelReferenceType.AbsoluteRowAndColumn;
             var worksheetSpec = string.Empty;
             if (arguments.Count() > 2)
             {
                 var arg3 = ArgToInt(arguments, 2);
-                ThrowExcelErrorValueExceptionIf(() => arg3 < 1 || arg3 > 4, eErrorType.Value);
+                if(arg3 < 1 || arg3 > 4)
+					return new CompileResult(eErrorType.Value);
                 referenceType = (ExcelReferenceType)ArgToInt(arguments, 2);
             }
             if (arguments.Count() > 3)

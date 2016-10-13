@@ -25,13 +25,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using System.Globalization;
 using OfficeOpenXml.FormulaParsing.Utilities;
 using OfficeOpenXml.FormulaParsing.Exceptions;
-using System.Collections;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
@@ -117,62 +114,32 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
         /// </summary>
         /// <param name="arguments"></param>
         /// <param name="minLength"></param>
-        /// <param name="errorTypeToThrow">The <see cref="eErrorType"/> of the <see cref="ExcelErrorValueException"/> that will be thrown if <paramref name="minLength"/> is not met.</param>
-        protected void ValidateArguments(IEnumerable<FunctionArgument> arguments, int minLength,
-                                         eErrorType errorTypeToThrow)
+        protected bool ValidateArguments(IEnumerable<FunctionArgument> arguments, int minLength)
         {
             Require.That(arguments).Named("arguments").IsNotNull();
-            ThrowExcelErrorValueExceptionIf(() =>
-                {
-                    var nArgs = 0;
-                    if (arguments.Any())
-                    {
-                        foreach (var arg in arguments)
-                        {
-                            nArgs++;
-                            if (nArgs >= minLength) return false;
-                            if (arg.IsExcelRange)
-                            {
-                                nArgs += arg.ValueAsRangeInfo.GetNCells();
-                                if (nArgs >= minLength) return false;
-                            }
-                        }
-                    }
-                    return true;
-                }, errorTypeToThrow);
+			return !this.TooFewArgs(arguments, minLength);
         }
 
-        /// <summary>
-        /// This functions validates that the supplied <paramref name="arguments"/> contains at least
-        /// (the value of) <paramref name="minLength"/> elements. If one of the arguments is an
-        /// <see cref="ExcelDataProvider.IRangeInfo">Excel range</see> the number of cells in
-        /// that range will be counted as well.
-        /// </summary>
-        /// <param name="arguments"></param>
-        /// <param name="minLength"></param>
-        /// <exception cref="ArgumentException"></exception>
-        protected void ValidateArguments(IEnumerable<FunctionArgument> arguments, int minLength)
-        {
-            Require.That(arguments).Named("arguments").IsNotNull();
-            ThrowArgumentExceptionIf(() =>
-                {
-                    var nArgs = 0;
-                    if (arguments.Any())
-                    {
-                        foreach (var arg in arguments)
-                        {
-                            nArgs++;
-                            if (nArgs >= minLength) return false;
-                            if (arg.IsExcelRange)
-                            {
-                                nArgs += arg.ValueAsRangeInfo.GetNCells();
-                                if (nArgs >= minLength) return false;
-                            }
-                        }
-                    }
-                    return true;
-                }, "Expecting at least {0} arguments", minLength.ToString());
-        }
+		private bool TooFewArgs(IEnumerable<FunctionArgument> arguments, int minLength)
+		{
+			{
+				var nArgs = 0;
+				if (arguments.Any())
+				{
+					foreach (var arg in arguments)
+					{
+						nArgs++;
+						if (nArgs >= minLength) return false;
+						if (arg.IsExcelRange)
+						{
+							nArgs += arg.ValueAsRangeInfo.GetNCells();
+							if (nArgs >= minLength) return false;
+						}
+					}
+				}
+				return true;
+			}
+		}
 
         /// <summary>
         /// Returns the value of the argument att the position of the 0-based
@@ -286,66 +253,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
             return argument;
         }
 
-        /// <summary>
-        /// Throws an <see cref="ArgumentException"/> if <paramref name="condition"/> evaluates to true.
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="message"></param>
-        /// <exception cref="ArgumentException"></exception>
-        protected void ThrowArgumentExceptionIf(Func<bool> condition, string message)
-        {
-            if (condition())
-            {
-                throw new ArgumentException(message);
-            }
-        }
-
-        /// <summary>
-        /// Throws an <see cref="ArgumentException"/> if <paramref name="condition"/> evaluates to true.
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="message"></param>
-        /// <param name="formats">Formats to the message string.</param>
-        protected void ThrowArgumentExceptionIf(Func<bool> condition, string message, params object[] formats)
-        {
-            message = string.Format(message, formats);
-            ThrowArgumentExceptionIf(condition, message);
-        }
-
-        /// <summary>
-        /// Throws an <see cref="ExcelErrorValueException"/> with the given <paramref name="errorType"/> set.
-        /// </summary>
-        /// <param name="errorType"></param>
-        protected void ThrowExcelErrorValueException(eErrorType errorType)
-        {
-            throw new ExcelErrorValueException("An excel function error occurred", ExcelErrorValue.Create(errorType));
-        }
-
-        /// <summary>
-        /// Throws an <see cref="ArgumentException"/> if <paramref name="condition"/> evaluates to true.
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="errorType"></param>
-        /// <exception cref="ExcelErrorValueException"></exception>
-        protected void ThrowExcelErrorValueExceptionIf(Func<bool> condition, eErrorType errorType)
-        {
-            if (condition())
-            {
-                throw new ExcelErrorValueException("An excel function error occurred", ExcelErrorValue.Create(errorType));
-            }
-        }
-
         protected bool IsNumeric(object val)
         {
             if (val == null) return false;
             return (val.GetType().IsPrimitive || val is double || val is decimal  || val is System.DateTime || val is TimeSpan);
         }
-
-        //protected virtual bool IsNumber(object obj)
-        //{
-        //    if (obj == null) return false;
-        //    return (obj is int || obj is double || obj is short || obj is decimal || obj is long);
-        //}
 
         /// <summary>
         /// Helper method for comparison of two doubles.

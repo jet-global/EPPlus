@@ -13,8 +13,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
             var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-            ValidateArguments(functionArguments, 2);
-            var startDate = System.DateTime.FromOADate(ArgToInt(functionArguments, 0));
+			if(ValidateArguments(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
+			var startDate = System.DateTime.FromOADate(ArgToInt(functionArguments, 0));
             var endDate = System.DateTime.FromOADate(ArgToInt(functionArguments, 1));
             WorkdayCalculator calculator = new WorkdayCalculator();
             var weekdayFactory = new HolidayWeekdaysFactory();

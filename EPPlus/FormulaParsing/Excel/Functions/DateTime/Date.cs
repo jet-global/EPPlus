@@ -34,8 +34,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 3);
-            var year = ArgToInt(arguments, 0);
+			if(ValidateArguments(arguments, 3) == false)
+				return new CompileResult(eErrorType.Value);
+			var year = ArgToInt(arguments, 0);
             var month = ArgToInt(arguments, 1);
             var day = ArgToInt(arguments, 2);
             var date = new System.DateTime(year, 1, 1);

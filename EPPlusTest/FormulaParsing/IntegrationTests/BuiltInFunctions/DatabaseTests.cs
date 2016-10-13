@@ -202,11 +202,12 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 
                 // function
                 sheet.Cells["F1"].Formula = "DAVERAGE(A1:B3,\"Crit2\",D1:E2)";
-
-                sheet.Workbook.Calculate();
+				sheet.Cells["F2"].Formula = "DAVERAGE(\"Too few arguments\")";
+				sheet.Workbook.Calculate();
 
                 Assert.AreEqual(1.5d, sheet.Cells["F1"].Value);
-            }
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells["F2"].Value);
+			}
         }
 
         [TestMethod]

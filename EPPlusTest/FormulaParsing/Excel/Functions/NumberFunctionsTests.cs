@@ -1,15 +1,12 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+﻿using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Numeric;
-using EPPlusTest.FormulaParsing.TestHelpers;
 
 namespace EPPlusTest.Excel.Functions
 {
-    [TestClass]
+	[TestClass]
     public class NumberFunctionsTests
     {
         private ParsingContext _parsingContext = ParsingContext.Create();
@@ -23,7 +20,17 @@ namespace EPPlusTest.Excel.Functions
             Assert.AreEqual(2, result.Result);
         }
 
-        [TestMethod]
+		[TestMethod]
+		public void CIntithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new CInt();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
         public void IntShouldConvertDecimalToInteger()
         {
             var func = new CInt();
@@ -49,5 +56,7 @@ namespace EPPlusTest.Excel.Functions
             var result = func.Execute(args, _parsingContext);
             Assert.AreEqual(-3, result.Result);
         }
+
+
     }
 }

@@ -56,8 +56,9 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 
         public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
         {
-            // 2 is allowed, Excel returns FALSE if false is the outcome of the expression
-            if(children.Count() < 2) throw new ExcelErrorValueException(eErrorType.Value);
+			// 2 is allowed, Excel returns FALSE if false is the outcome of the expression
+			if (children.Count() < 2)
+				return new CompileResult(eErrorType.Value);
             var args = new List<FunctionArgument>();
             Function.BeforeInvoke(context);
             var firstChild = children.ElementAt(0);
@@ -74,8 +75,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
                 var r=((ExcelDataProvider.IRangeInfo)v);
                 if(r.GetNCells()>1)
                 {
-                    throw(new ArgumentException("Logical can't be more than one cell"));
-                }
+					return new CompileResult(eErrorType.Value);
+				}
                 v = r.GetOffset(0, 0);
             }
             bool boolVal;
@@ -91,7 +92,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
                 }
                 else
                 {
-                    throw (new ArgumentException("Invalid logical test"));
+					return new CompileResult(eErrorType.Value);
                 }
             }
             /****  End Handle names and ranges ****/

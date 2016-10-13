@@ -45,8 +45,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Database
         }
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 3);
-            var values = GetMatchingValues(arguments, context);
+			if(ValidateArguments(arguments, 3) == false)
+				return new CompileResult(eErrorType.Value);
+			var values = GetMatchingValues(arguments, context);
             if (!values.Any()) return CreateResult(0d, DataType.Integer);
             return CreateResult(values.Min(), DataType.Integer);
         }

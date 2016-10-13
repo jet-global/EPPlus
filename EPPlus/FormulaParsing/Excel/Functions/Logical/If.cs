@@ -34,8 +34,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Logical
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 3);
-            var condition = ArgToBool(arguments, 0);
+			if(ValidateArguments(arguments, 3) == false)
+				return new CompileResult(eErrorType.Value);
+			var condition = ArgToBool(arguments, 0);
             var firstStatement = arguments.ElementAt(1).Value;
             var secondStatement = arguments.ElementAt(2).Value;
             var factory = new CompileResultFactory();

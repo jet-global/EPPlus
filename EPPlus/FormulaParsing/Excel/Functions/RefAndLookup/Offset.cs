@@ -35,7 +35,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
             var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-            ValidateArguments(functionArguments, 3);
+			if(ValidateArguments(functionArguments, 3) == false)
+				return new CompileResult(eErrorType.Value);
             var startRange = ArgToString(functionArguments, 0);
             var rowOffset = ArgToInt(functionArguments, 1);
             var colOffset = ArgToInt(functionArguments, 2);
@@ -43,12 +44,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
             if (functionArguments.Length > 3)
             {
                 height = ArgToInt(functionArguments, 3);
-                ThrowExcelErrorValueExceptionIf(() => height == 0, eErrorType.Ref);
+                if(height == 0)
+					return new CompileResult(eErrorType.Ref);
             }
             if (functionArguments.Length > 4)
             {
                 width = ArgToInt(functionArguments, 4);
-                ThrowExcelErrorValueExceptionIf(() => width == 0, eErrorType.Ref);
+                if(width == 0)
+					return new CompileResult(eErrorType.Ref);
             }
 
             var adr = new ExcelAddress(startRange);

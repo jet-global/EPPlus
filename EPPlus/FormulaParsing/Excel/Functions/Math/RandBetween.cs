@@ -34,8 +34,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2);
-            var low = ArgToDecimal(arguments, 0);
+			if(ValidateArguments(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
+			var low = ArgToDecimal(arguments, 0);
             var high = ArgToDecimal(arguments, 1);
             var rand = new Rand().Execute(new FunctionArgument[0], context).Result;
             var randPart = (CalulateDiff(high, low) * (double)rand) + 1;

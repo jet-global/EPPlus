@@ -34,7 +34,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2);
+            if(ValidateArguments(arguments, 2) == false)
+            	return new CompileResult(eErrorType.Value);
             var str = ArgToString(arguments, 0);
             var n = ArgToInt(arguments, 1);
             var sb = new StringBuilder();

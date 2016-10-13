@@ -36,26 +36,31 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1, eErrorType.Div0);
+            if(ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Div0);
             double nValues = 0d, result = 0d;
             foreach (var arg in arguments)
             {
-                Calculate(arg, context, ref result, ref nValues);
+                var error = Calculate(arg, context, ref result, ref nValues);
+				if (error != null)
+					return new CompileResult(error.Value);
             }
             return CreateResult(Divide(result, nValues), DataType.Decimal);
         }
 
-        private void Calculate(FunctionArgument arg, ParsingContext context, ref double retVal, ref double nValues, bool isInArray = false)
+        private eErrorType? Calculate(FunctionArgument arg, ParsingContext context, ref double retVal, ref double nValues, bool isInArray = false)
         {
             if (ShouldIgnore(arg))
             {
-                return;
+                return null;
             }
             if (arg.Value is IEnumerable<FunctionArgument>)
             {
                 foreach (var item in (IEnumerable<FunctionArgument>)arg.Value)
                 {
-                    Calculate(item, context, ref retVal, ref nValues, true);
+                    var error = Calculate(item, context, ref retVal, ref nValues, true);
+					if (error != null)
+						return error;
                 }
             }
             else if (arg.IsExcelRange)
@@ -79,10 +84,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 				else if (arg.Value is string && !isInArray)
 				{
-					ThrowExcelErrorValueException(eErrorType.Value);
+					return eErrorType.Value;
 				}
             }
             CheckForAndHandleExcelError(arg);
+			return null;
         }
 
         private double? GetNumericValue(object obj, bool isInArray)

@@ -73,8 +73,9 @@ namespace EPPlusSamples
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            // Sanity check, will set excel VALUE error if min length is not met
-            ValidateArguments(arguments, 1);
+			// Sanity check, will set excel VALUE error if min length is not met
+			if (ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
             
             // Helper method that converts function arguments to an enumerable of doubles
             var numbers = ArgsToDoubleEnumerable(arguments, context);
@@ -94,11 +95,12 @@ namespace EPPlusSamples
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            // Sanity check, will set excel VALUE error if min length is not met
-            ValidateArguments(arguments, 2);
+			// Sanity check, will set excel VALUE error if min length is not met
+			if (ValidateArguments(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
 
-            //Replace swedish year format with invariant for parameter 2.
-            var format = arguments.ElementAt(1).Value.ToString().Replace("åååå", "yyyy");   
+			//Replace swedish year format with invariant for parameter 2.
+			var format = arguments.ElementAt(1).Value.ToString().Replace("åååå", "yyyy");   
             var newArgs = new List<FunctionArgument> { arguments.ElementAt(0) };
             newArgs.Add(new FunctionArgument(format));
 
@@ -115,10 +117,11 @@ namespace EPPlusSamples
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            // Sanity check, will set excel VALUE error if min length is not met
-            ValidateArguments(arguments, 1);
-            // Get the first arg
-            var input = ArgToString(arguments, 0);
+			// Sanity check, will set excel VALUE error if min length is not met
+			if (ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			// Get the first arg
+			var input = ArgToString(arguments, 0);
 
             // return the result
             return CreateResult(input + "sh", DataType.String);

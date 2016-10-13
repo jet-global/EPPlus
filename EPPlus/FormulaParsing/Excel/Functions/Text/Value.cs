@@ -20,7 +20,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1);
+            if(ValidateArguments(arguments, 1) == false)
+            	return new CompileResult(eErrorType.Value);
             var val = ArgToString(arguments, 0).TrimEnd(' ');
             double result = 0d;
             if (Regex.IsMatch(val, $"^[\\d]*({Regex.Escape(_groupSeparator)}?[\\d]*)?({Regex.Escape(_decimalSeparator)}[\\d]*)?[ ?% ?]?$"))

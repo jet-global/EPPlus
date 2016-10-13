@@ -390,8 +390,6 @@ namespace OfficeOpenXml
 		internal CellStore<Uri> _hyperLinks;
 		internal CellStore<int> _commentsStore;
 		internal Dictionary<int, Formulas> _sharedFormulas = new Dictionary<int, Formulas>();
-		private int _minCol = ExcelPackage.MaxColumns;
-		private int _maxCol = 0;
 		private ExcelSlicers _slicers;
 		private Uri _worksheetUri;
 		private string _name;

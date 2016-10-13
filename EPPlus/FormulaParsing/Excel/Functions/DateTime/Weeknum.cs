@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
     public class Weeknum : ExcelFunction
     {
-        public override ExpressionGraph.CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1, eErrorType.Value);
-            var dateSerial = ArgToDecimal(arguments, 0);
+            if (ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			var dateSerial = ArgToDecimal(arguments, 0);
             var date = System.DateTime.FromOADate(dateSerial);
             var startDay = DayOfWeek.Sunday;
             if (arguments.Count() > 1)
@@ -44,8 +44,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
                         break;
                     default:
                         // Not supported 
-                        ThrowExcelErrorValueException(eErrorType.Num);
-                        break;
+                        return new CompileResult(eErrorType.Num);
                 }
             }
             if (DateTimeFormatInfo.CurrentInfo == null)

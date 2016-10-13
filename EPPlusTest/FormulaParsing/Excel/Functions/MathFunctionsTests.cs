@@ -336,19 +336,10 @@ namespace EPPlusTest.Excel.Functions
         [TestMethod]
         public void AverageShouldThrowDivByZeroExcelErrorValueIfEmptyArgs()
         {
-            eErrorType errorType = eErrorType.Value;
-
             var func = new Average();
             var args = new FunctionArgument[0];
-            try
-            {
-                func.Execute(args, _parsingContext);
-            }
-            catch (ExcelErrorValueException e)
-            {
-                errorType = e.ErrorValue.Type;
-            }
-            Assert.AreEqual(eErrorType.Div0, errorType);
+            var result = func.Execute(args, _parsingContext);
+            Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)result.Result).Type);
         }
 
         [TestMethod]
@@ -371,13 +362,15 @@ namespace EPPlusTest.Excel.Functions
             Assert.AreEqual(expectedResult, result.Result);
         }
 
-        [TestMethod, ExpectedException(typeof(ExcelErrorValueException))]
+        [TestMethod]
         public void AverageAShouldThrowValueExceptionIfNonNumericTextIsSupplied()
         {
             var func = new AverageA();
             var args = FunctionsHelper.CreateArgs(4d, 2d, 5d, 2d, "ABC");
             var result = func.Execute(args, _parsingContext);
-        }
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)(result.Result)).Type);
+		}
 
         [TestMethod]
         public void AverageAShouldCountValueAs0IfNonNumericTextIsSuppliedInArray()
@@ -540,7 +533,16 @@ namespace EPPlusTest.Excel.Functions
             Assert.AreEqual(2d, result.Result);
         }
 
-        [TestMethod]
+		[TestMethod]
+		public void ProductShouldPoundValueWhenThereAreTooFewArguments()
+		{
+			var func = new Product();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
         public void ProductShouldMultiplyArguments()
         {
             var func = new Product();
@@ -894,13 +896,15 @@ namespace EPPlusTest.Excel.Functions
             Assert.AreEqual(120d, result.Result);
         }
 
-        [TestMethod, ExpectedException(typeof (ExcelErrorValueException))]
-        public void FactShouldThrowWhenNegativeNumber()
+        [TestMethod]
+        public void FactShouldReturnPoundNaWhenNegativeNumber()
         {
             var func = new Fact();
             var args = FunctionsHelper.CreateArgs(-1);
-            func.Execute(args, _parsingContext);
-        }
+            var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)(result.Result)).Type);
+		}
 
         [TestMethod]
         public void QuotientShouldReturnCorrectResult()
@@ -911,13 +915,15 @@ namespace EPPlusTest.Excel.Functions
             Assert.AreEqual(2, result.Result);
         }
 
-        [TestMethod, ExpectedException(typeof(ExcelErrorValueException))]
-        public void QuotientShouldThrowWhenDenomIs0()
+        [TestMethod]
+        public void QuotientShouldPoundDivZeroWhenDenomIs0()
         {
             var func = new Quotient();
             var args = FunctionsHelper.CreateArgs(1, 0);
-            func.Execute(args, _parsingContext);
-        }
+            var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)(result.Result)).Type);
+		}
 
         [TestMethod]
         public void LargeShouldReturnTheLargestNumberIf1()
@@ -937,13 +943,15 @@ namespace EPPlusTest.Excel.Functions
             Assert.AreEqual(3d, result.Result);
         }
 
-        [TestMethod, ExpectedException(typeof(ExcelErrorValueException))]
-        public void LargeShouldThrowIfIndexOutOfBounds()
+        [TestMethod]
+        public void LargeShouldPoundNumIfIndexOutOfBounds()
         {
             var func = new Large();
             var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 6);
             var result = func.Execute(args, _parsingContext);
-        }
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
+		}
 
         [TestMethod]
         public void SmallShouldReturnTheSmallestNumberIf1()
@@ -963,21 +971,25 @@ namespace EPPlusTest.Excel.Functions
             Assert.AreEqual(2d, result.Result);
         }
 
-        [TestMethod, ExpectedException(typeof(ExcelErrorValueException))]
-        public void SmallShouldThrowIfIndexOutOfBounds()
+        [TestMethod]
+        public void SmallShouldPoundNumIfIndexOutOfBounds()
         {
             var func = new Small();
             var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 6);
             var result = func.Execute(args, _parsingContext);
-        }
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
+		}
 
-        [TestMethod, ExpectedException(typeof(ExcelErrorValueException))]
-        public void MedianShouldThrowIfNoArgs()
+        [TestMethod]
+        public void MedianShouldPoundNumIfNoArgs()
         {
             var func = new Median();
             var args = FunctionsHelper.Empty();
-            func.Execute(args, _parsingContext);
-        }
+            var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
+		}
 
         [TestMethod]
         public void MedianShouldCalculateCorrectlyWithOneMember()
@@ -1082,5 +1094,546 @@ namespace EPPlusTest.Excel.Functions
                 Assert.AreEqual(w.GetValue(5, 5), 1.5D);
             }
         }
+
+		[TestMethod]
+		public void AbsWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Abs();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void AcosWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Acos();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void AcoshWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Acosh();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void AsinWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Asin();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void AsinhWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Asinh();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void AtanWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Atan();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void Atan2WithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Atan2();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void AtanhWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Atanh();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void AverageIfWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new AverageIf();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void AverageIfsWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new AverageIfs();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void CeilingWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Ceiling();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void CosWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Cos();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void CoshWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Cosh();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void CountWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Count();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void CountAWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new CountA();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void CountBlankWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new CountBlank();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void CountIfWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new CountIf();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void CountIfsWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new CountIfs();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void DegreesWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Degrees();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void ExpWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Exp();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void FactWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Fact();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void FloorWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Floor();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LargeWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Large();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LnWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Ln();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LogWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Log();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void Log10WithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Log10();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MaxWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Max();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MaxaWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Maxa();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MinWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Min();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MinaWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Mina();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void ModWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Mod();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void PowerWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Power();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void QuotientWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Quotient();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void RandBetweenWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new RandBetween();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void RankWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Rank();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void RoundWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Round();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void RounddownWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Rounddown();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void RoundupWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Roundup();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SignWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Sign();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SinWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Sin();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SinhWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Sinh();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SmallWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Small();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SqrtWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Sqrt();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SqrtPiWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new SqrtPi();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void StdevWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Stdev();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SubtotalWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Subtotal();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SumIfWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new SumIf();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SumIfsWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new SumIfs();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SumProductWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new SumProduct();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void TanWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Tan();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void TanhWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Tanh();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void TruncWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Trunc();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void VarWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Var();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void VarPWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new VarP();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
     }
-    }
+}

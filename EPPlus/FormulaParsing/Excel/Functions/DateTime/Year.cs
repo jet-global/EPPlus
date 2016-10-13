@@ -35,8 +35,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 1);
-            var dateObj = arguments.ElementAt(0).Value;
+			if(ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			var dateObj = arguments.ElementAt(0).Value;
             System.DateTime date = System.DateTime.MinValue;
             if (dateObj is string)
             {

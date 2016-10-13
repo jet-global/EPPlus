@@ -34,7 +34,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            ValidateArguments(arguments, 2);
+            if(ValidateArguments(arguments, 2) == false)
+            	return new CompileResult(eErrorType.Value);
             var value = arguments.First().ValueFirst;
             var format = ArgToString(arguments, 1);
             format = format.Replace(System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator, ".");

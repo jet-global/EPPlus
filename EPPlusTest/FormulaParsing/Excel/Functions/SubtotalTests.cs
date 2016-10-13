@@ -25,13 +25,15 @@ namespace EPPlusTest.Excel.Functions
             _context.Scopes.NewScope(RangeAddress.Empty);
         }
 
-        [TestMethod, ExpectedException(typeof(ExcelErrorValueException))]
-        public void ShouldThrowIfInvalidFuncNumber()
+        [TestMethod]
+        public void ShouldPoundValueIfInvalidFuncNumber()
         {
             var func = new Subtotal();
             var args = FunctionsHelper.CreateArgs(139, 1);
-            func.Execute(args, _context);
-        }
+            var result = func.Execute(args, _context);
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)(result.Result)).Type);
+		}
 
         [TestMethod]
         public void ShouldCalculateAverageWhenCalcTypeIs1()
