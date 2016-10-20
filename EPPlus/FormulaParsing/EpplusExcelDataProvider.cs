@@ -61,7 +61,7 @@ namespace OfficeOpenXml.FormulaParsing
                     {
                         return false;
                     }
-                    else if (_values.Next())
+                    else if (_values.MoveNext())
                     {
                         _values.Reset();
                         return false;
@@ -78,7 +78,7 @@ namespace OfficeOpenXml.FormulaParsing
                 {
                     if (_cellCount == 0)
                     {
-                        if (_values.Next() && _values.Next())
+                        if (_values.MoveNext() && _values.MoveNext())
                         {
                             _values.Reset();
                             return true;
@@ -130,7 +130,7 @@ namespace OfficeOpenXml.FormulaParsing
 
             public void Reset()
             {
-                _values.Init();
+                _values.Reset();
             }
 
 

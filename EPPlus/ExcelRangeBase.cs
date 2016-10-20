@@ -492,7 +492,7 @@ namespace OfficeOpenXml
 					column.StyleID = _styleID;
 
 					var cols = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, 0, _fromCol + 1, 0, _toCol);
-					if (cols.Next())
+					if (cols.MoveNext())
 					{
 						col = _fromCol;
 						while (column.ColumnMin <= _toCol)
@@ -518,7 +518,7 @@ namespace OfficeOpenXml
 									column.ColumnMax = nextCol.ColumnMax - 1;
 								}
 								column = nextCol;
-								cols.Next();
+								cols.MoveNext();
 							}
 						}
 					}
@@ -530,11 +530,11 @@ namespace OfficeOpenXml
 					if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns) //FullRow
 					{
 						var rows = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, 1, 0, ExcelPackage.MaxRows, 0);
-						rows.Next();
+						rows.MoveNext();
 						while (rows.Value._value != null)
 						{
 							_worksheet.SetStyleInner(rows.Row, 0, _styleID);
-							if (!rows.Next())
+							if (!rows.MoveNext())
 							{
 								break;
 							}
@@ -563,7 +563,7 @@ namespace OfficeOpenXml
 				else //Only set name on created cells. (uncreated cells is set on full row or full column).
 				{
 					var cells = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
-					while (cells.Next())
+					while (cells.MoveNext())
 					{
 						_worksheet.SetStyleInner(cells.Row, cells.Column, _styleID);
 					}
@@ -1410,7 +1410,7 @@ namespace OfficeOpenXml
 				var i = -1;
 				if (_worksheet.Comments.Count > 0)
 				{
-					if (_worksheet._commentsStore.Exists(_fromRow, _fromCol, ref i))
+					if (_worksheet._commentsStore.Exists(_fromRow, _fromCol, out i))
 					{
 						return _worksheet.Comments[i] as ExcelComment;
 					}
@@ -2394,7 +2394,7 @@ namespace OfficeOpenXml
 			var cse = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
 
 			var copiedValue = new List<CopiedCell>();
-			while (cse.Next())
+			while (cse.MoveNext())
 			{
 				var row = cse.Row;
 				var col = cse.Column;       //Issue 15070
@@ -2413,7 +2413,7 @@ namespace OfficeOpenXml
 				//    cell.Type=s;
 				//}
 
-				if (!excludeFormulas && _worksheet._formulas.Exists(row, col, ref o))
+				if (!excludeFormulas && _worksheet._formulas.Exists(row, col, out o))
 				{
 					if (o is int)
 					{
@@ -2450,7 +2450,7 @@ namespace OfficeOpenXml
 					}
 				}
 
-				if (_worksheet._hyperLinks.Exists(row, col, ref hl))
+				if (_worksheet._hyperLinks.Exists(row, col, out hl))
 				{
 					//Destination._worksheet._hyperLinks.SetValue(row, col, hl);
 					cell.HyperLink = hl;
@@ -2459,7 +2459,7 @@ namespace OfficeOpenXml
 				// Will just be null if no comment exists.
 				cell.Comment = _worksheet.Cells[cse.Row, cse.Column].Comment;
 
-				if (_worksheet._flags.Exists(row, col, ref flag))
+				if (_worksheet._flags.Exists(row, col, out flag))
 				{
 					cell.Flag = flag;
 				}
@@ -2468,7 +2468,7 @@ namespace OfficeOpenXml
 
 			//Copy styles with no cell value
 			var cses = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
-			while (cses.Next())
+			while (cses.MoveNext())
 			{
 				if (!_worksheet.ExistsValueInner(cses.Row, cses.Column))
 				{
@@ -2507,7 +2507,7 @@ namespace OfficeOpenXml
 			var copiedMergedCells = new Dictionary<int, ExcelAddress>();
 			//Merged cells
 			var csem = new CellsStoreEnumerator<int>(_worksheet.MergedCells.Cells, _fromRow, _fromCol, _toRow, _toCol);
-			while (csem.Next())
+			while (csem.MoveNext())
 			{
 				if (!copiedMergedCells.ContainsKey(csem.Value))
 				{
@@ -2758,7 +2758,7 @@ namespace OfficeOpenXml
 		int _enumAddressIx = -1;
 		public bool MoveNext()
 		{
-			if (cellEnum.Next())
+			if (cellEnum.MoveNext())
 			{
 				return true;
 			}

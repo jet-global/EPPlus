@@ -82,7 +82,7 @@ namespace OfficeOpenXml
                 }
 
                 var cse = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, 0, 0, 0, ExcelPackage.MaxColumns);
-                while(cse.Next())
+                while(cse.MoveNext())
                 {
                     var c = cse.Value._value as ExcelColumn;
                     if (cse.Column > _columnMin && c.ColumnMax <= value && cse.Column!=_columnMin)

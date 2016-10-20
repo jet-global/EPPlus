@@ -139,7 +139,7 @@ namespace OfficeOpenXml.FormulaParsing
         {
             var ws = Range.Worksheet;
             var fs = new CellsStoreEnumerator<object>(ws._formulas, Range.Start.Row, Range.Start.Column, Range.End.Row, Range.End.Column);
-            while (fs.Next())
+            while (fs.MoveNext())
             {
                 if (fs.Value == null || fs.Value.ToString().Trim() == "") continue;
                 var id = ExcelCellBase.GetCellID(ws.SheetID, fs.Row, fs.Column);
@@ -312,7 +312,7 @@ namespace OfficeOpenXml.FormulaParsing
             return;
         iterateCells:
 
-            while (f.iterator != null && f.iterator.Next())
+            while (f.iterator != null && f.iterator.MoveNext())
             {
                 var v = f.iterator.Value;
                 if (v == null || v.ToString().Trim() == "") continue;
