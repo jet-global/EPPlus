@@ -898,7 +898,7 @@ namespace OfficeOpenXml
 			Dictionary<int, int> styleCashe = new Dictionary<int, int>();
 			int row, col;
 			var val = new CellsStoreEnumerator<ExcelCoreValue>(originalWorksheet._values);
-			while (val.Next())
+			while (val.MoveNext())
 			{
 				row = val.Row;
 				col = val.Column;
@@ -948,7 +948,7 @@ namespace OfficeOpenXml
 		{
 			addedWorksheet.SetValueInner(row, col, originalWorksheet.GetValueInner(row, col));
 			byte fl = 0;
-			if (originalWorksheet._flags.Exists(row, col, ref fl))
+			if (originalWorksheet._flags.Exists(row, col, out fl))
 			{
 				addedWorksheet._flags.SetValue(row, col, fl);
 			}

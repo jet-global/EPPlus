@@ -149,7 +149,7 @@ namespace OfficeOpenXml
                 //    return null;
                 //}
                 int i=-1;
-                if (Worksheet._commentsStore.Exists(cell.Row, cell.Column, ref i))
+                if (Worksheet._commentsStore.Exists(cell.Row, cell.Column, out i))
                 {
                     return _list[i];
                 }
@@ -212,7 +212,7 @@ namespace OfficeOpenXml
             //int ix=_comments.IndexOf(id);
             int i = -1;
             ExcelComment c=null;
-            if (Worksheet._commentsStore.Exists(comment.Range._fromRow, comment.Range._fromCol, ref i))
+            if (Worksheet._commentsStore.Exists(comment.Range._fromRow, comment.Range._fromCol, out i))
             {
                 c = _list[i];
             }
@@ -225,7 +225,7 @@ namespace OfficeOpenXml
                 _list.RemoveAt(i);                
                 Worksheet._commentsStore.Delete(comment.Range._fromRow, comment.Range._fromCol, 1, 1);
                 var ci = new CellsStoreEnumerator<int>(Worksheet._commentsStore);
-                while(ci.Next())
+                while(ci.MoveNext())
                 {
                     if(ci.Value>i)
                     {
