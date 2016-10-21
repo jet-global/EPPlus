@@ -491,7 +491,7 @@ namespace OfficeOpenXml
 					column.StyleName = value;
 					column.StyleID = _styleID;
 
-					var cols = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, 0, _fromCol + 1, 0, _toCol);
+					var cols = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, 0, _fromCol + 1, 0, _toCol);
 					if (cols.MoveNext())
 					{
 						col = _fromCol;
@@ -529,7 +529,7 @@ namespace OfficeOpenXml
 
 					if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns) //FullRow
 					{
-						var rows = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, 1, 0, ExcelPackage.MaxRows, 0);
+						var rows =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, 1, 0, ExcelPackage.MaxRows, 0);
 						rows.MoveNext();
 						while (rows.Value._value != null)
 						{
@@ -562,7 +562,7 @@ namespace OfficeOpenXml
 				}
 				else //Only set name on created cells. (uncreated cells is set on full row or full column).
 				{
-					var cells = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
+					var cells =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
 					while (cells.MoveNext())
 					{
 						_worksheet.SetStyleInner(cells.Row, cells.Column, _styleID);
@@ -947,7 +947,7 @@ namespace OfficeOpenXml
 
 		private void SetMinWidth(double minimumWidth, int fromCol, int toCol)
 		{
-			var iterator = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, 0, fromCol, 0, toCol);
+			var iterator = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, 0, fromCol, 0, toCol);
 			var prevCol = fromCol;
 			foreach (ExcelCoreValue val in iterator)
 			{
@@ -2391,7 +2391,7 @@ namespace OfficeOpenXml
 			Uri hl = null;
 
 			var excludeFormulas = excelRangeCopyOptionFlags.HasValue && (excelRangeCopyOptionFlags.Value & ExcelRangeCopyOptionFlags.ExcludeFormulas) == ExcelRangeCopyOptionFlags.ExcludeFormulas;
-			var cse = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
+			var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
 
 			var copiedValue = new List<CopiedCell>();
 			while (cse.MoveNext())
@@ -2405,24 +2405,14 @@ namespace OfficeOpenXml
 					Value = cse.Value._value
 				};
 
-				//Destination._worksheet.SetValueInner(row, col, cse.Value);
-
-				//if (_worksheet._types.Exists(row, col, ref s))
-				//{
-				//    //Destination._worksheet._types.SetValue(row, col,s);
-				//    cell.Type=s;
-				//}
-
 				if (!excludeFormulas && _worksheet._formulas.Exists(row, col, out o))
 				{
 					if (o is int)
 					{
-						// Destination._worksheet._formulas.SetValue(row, col, _worksheet.GetFormula(cse.Row, cse.Column));    //Shared formulas, set the formula per cell to simplify
 						cell.Formula = _worksheet.GetFormula(cse.Row, cse.Column);
 					}
 					else
 					{
-						//Destination._worksheet._formulas.SetValue(row, col, o);
 						cell.Formula = o;
 					}
 				}
@@ -2430,7 +2420,6 @@ namespace OfficeOpenXml
 				{
 					if (sameWorkbook)
 					{
-						//Destination._worksheet.SetStyleInner(row, col, i);
 						cell.StyleID = i;
 					}
 					else
@@ -2467,7 +2456,7 @@ namespace OfficeOpenXml
 			}
 
 			//Copy styles with no cell value
-			var cses = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
+			var cses =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
 			while (cses.MoveNext())
 			{
 				if (!_worksheet.ExistsValueInner(cses.Row, cses.Column))
@@ -2506,7 +2495,7 @@ namespace OfficeOpenXml
 			}
 			var copiedMergedCells = new Dictionary<int, ExcelAddress>();
 			//Merged cells
-			var csem = new CellsStoreEnumerator<int>(_worksheet.MergedCells.Cells, _fromRow, _fromCol, _toRow, _toCol);
+			var csem = CellStoreEnumeratorFactory<int>.GetNewEnumerator(_worksheet.MergedCells.Cells, _fromRow, _fromCol, _toRow, _toCol);
 			while (csem.MoveNext())
 			{
 				if (!copiedMergedCells.ContainsKey(csem.Value))
@@ -2529,8 +2518,6 @@ namespace OfficeOpenXml
 			}
 			Destination._worksheet._values.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
 			Destination._worksheet._formulas.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
-			//Destination._worksheet._styles.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
-			//Destination._worksheet._types.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
 			Destination._worksheet._hyperLinks.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
 			Destination._worksheet._flags.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
 			Destination._worksheet._commentsStore.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
@@ -2538,11 +2525,6 @@ namespace OfficeOpenXml
 			foreach (var cell in copiedValue)
 			{
 				Destination._worksheet.SetValueInner(cell.Row, cell.Column, cell.Value);
-
-				//if(cell.Type!=null)
-				//{
-				//    Destination._worksheet._types.SetValue(cell.Row, cell.Column, cell.Type);
-				//}
 
 				if (cell.StyleID != null)
 				{
@@ -2718,7 +2700,7 @@ namespace OfficeOpenXml
 
 		#endregion
 		#region "Enumerator"
-		CellsStoreEnumerator<ExcelCoreValue> cellEnum;
+		ICellStoreEnumerator<ExcelCoreValue> cellEnum;
 		public IEnumerator<ExcelRangeBase> GetEnumerator()
 		{
 			Reset();
@@ -2767,7 +2749,7 @@ namespace OfficeOpenXml
 				_enumAddressIx++;
 				if (_enumAddressIx < _addresses.Count)
 				{
-					cellEnum = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values,
+					cellEnum =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values,
 						_addresses[_enumAddressIx]._fromRow,
 						_addresses[_enumAddressIx]._fromCol,
 						_addresses[_enumAddressIx]._toRow,
@@ -2785,7 +2767,7 @@ namespace OfficeOpenXml
 		public void Reset()
 		{
 			_enumAddressIx = -1;
-			cellEnum = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
+			cellEnum =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
 		}
 		#endregion
 	}
