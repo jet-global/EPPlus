@@ -897,7 +897,7 @@ namespace OfficeOpenXml
 
 			Dictionary<int, int> styleCashe = new Dictionary<int, int>();
 			int row, col;
-			var val = new CellsStoreEnumerator<ExcelCoreValue>(originalWorksheet._values);
+			var val =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(originalWorksheet._values);
 			while (val.MoveNext())
 			{
 				row = val.Row;

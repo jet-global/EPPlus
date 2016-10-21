@@ -224,7 +224,7 @@ namespace OfficeOpenXml
                 Worksheet.VmlDrawingsComments._drawings.Delete(id);
                 _list.RemoveAt(i);                
                 Worksheet._commentsStore.Delete(comment.Range._fromRow, comment.Range._fromCol, 1, 1);
-                var ci = new CellsStoreEnumerator<int>(Worksheet._commentsStore);
+                var ci = CellStoreEnumeratorFactory<int>.GetNewEnumerator(Worksheet._commentsStore);
                 while(ci.MoveNext())
                 {
                     if(ci.Value>i)

@@ -335,6 +335,194 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 			Rows = null;
 		}
 	}
+
+	/// <summary>
+	/// This enumerator allows for partial enumeration of an <see cref="ICellStore{T}"/>.
+	/// </summary>
+	/// <typeparam name="S">The type of the <see cref="ICellStore{T}"/> being enumerated.</typeparam>
+	public class CellsStoreEnumerator<S> : ICellStoreEnumerator<S>
+	{
+		#region Class Variables
+		private CellStore<S> _cellStore;
+		private int row, colPos;
+		private int[] pagePos, cellPos;
+		private int _startRow, _startCol, _endRow, _endCol;
+		private int minRow, minColPos, maxRow, maxColPos;
+		#endregion
+
+		#region Properties
+		/// <summary>
+		/// Gets the current cell address as a string.
+		/// </summary>
+		public string CellAddress
+		{
+			get
+			{
+				return ExcelAddressBase.GetAddress(this.Row, this.Column);
+			}
+		}
+
+		/// <summary>
+		///  Gets the current value.
+		/// </summary>
+		public S Current
+		{
+			get
+			{
+				return this.Value;
+			}
+		}
+
+		/// <summary>
+		/// Get the current Enumerator objct.
+		/// </summary>
+		object IEnumerator.Current
+		{
+			get
+			{
+				this.Reset();
+				return this;
+			}
+		}
+
+		/// <summary>
+		/// Get the current row.
+		/// </summary>
+		public int Row
+		{
+			get
+			{
+				return this.row;
+			}
+		}
+
+		/// <summary>
+		/// Get the current column.
+		/// </summary>
+		public int Column
+		{
+			get
+			{
+				if (this.colPos == -1)
+					this.MoveNext();
+				if (this.colPos == -1)
+					return 0;
+				return this._cellStore.GetColumnPosIndex(this.colPos);
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the current value.
+		/// </summary>
+		public S Value
+		{
+			get
+			{
+				lock (this._cellStore)
+				{
+					return this._cellStore.GetValue(this.row, this.Column);
+				}
+			}
+			set
+			{
+				lock (_cellStore)
+				{
+					this._cellStore.SetValue(this.row, this.Column, value);
+				}
+			}
+		}
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Initialize a new <see cref="CellsStoreEnumerator{T}"/> for all the cells in the <see cref="ICellStore{T}"/>.
+		/// </summary>
+		/// <param name="cellStore">The <see cref="ICellStore{T}"/> to fully enumerate.</param>
+		public CellsStoreEnumerator(CellStore<S> cellStore) :
+			this(cellStore, 0, 0, ExcelPackage.MaxRows, ExcelPackage.MaxColumns)
+		{
+		}
+
+		/// <summary>
+		/// Initialize a new <see cref="CellsStoreEnumerator{T}"/> for the specified subset of cells in the <see cref="ICellStore{T}"/>.
+		/// </summary>
+		/// <param name="cellStore">The CellStore to partially enumerate.</param>
+		/// <param name="StartRow">The first row to include cells from.</param>
+		/// <param name="StartCol">The first column to include cells from.</param>
+		/// <param name="EndRow">The last row to include cells from.</param>
+		/// <param name="EndCol">The last column to include cells from.</param>
+		public CellsStoreEnumerator(CellStore<S> cellStore, int StartRow, int StartCol, int EndRow, int EndCol)
+		{
+			var specificCellStore = cellStore as CellStore<S>;
+			if (specificCellStore == null)
+				throw new ArgumentException("Unexpected Cell Store Type for the CellsStoreEnumerator.");
+			this._cellStore = specificCellStore;
+
+			this._startRow = StartRow;
+			this._startCol = StartCol;
+			this._endRow = EndRow;
+			this._endCol = EndCol;
+
+			this.Init();
+
+		}
+		#endregion
+
+		#region Public Methods
+		public IEnumerator<S> GetEnumerator()
+		{
+			this.Reset();
+			return this;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			this.Reset();
+			return this;
+		}
+
+		public void Dispose()
+		{
+			//_cellStore=null;
+		}
+
+		public bool MoveNext()
+		{
+			return this._cellStore.GetNextCell(ref row, ref colPos, minColPos, maxRow, maxColPos);
+		}
+
+		public void Reset()
+		{
+			this.Init();
+		}
+		#endregion
+
+		#region Private Methods
+		private void Init()
+		{
+			this.minRow = this._startRow;
+			this.maxRow = this._endRow;
+
+			this.minColPos = this._cellStore.GetPosition(this._startCol);
+			if (minColPos < 0)
+				this.minColPos = ~this.minColPos;
+			this.maxColPos = this._cellStore.GetPosition(this._endCol);
+			if (this.maxColPos < 0)
+				this.maxColPos = ~this.maxColPos - 1;
+			this.row = this.minRow;
+			this.colPos = this.minColPos - 1;
+
+			var cols = this.maxColPos - this.minColPos + 1;
+			this.pagePos = new int[cols];
+			this.cellPos = new int[cols];
+			for (int i = 0; i < cols; i++)
+			{
+				this.pagePos[i] = -1;
+				this.cellPos[i] = -1;
+			}
+		}
+		#endregion
+	}
 	#endregion
 
 	#region Constants
@@ -353,7 +541,6 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 	private IndexBase _searchIx = new IndexBase();
 	private IndexItem _searchItem = new IndexItem();
 	private int ColumnCount;
-	private int _colPos = -1, _row;
 	#endregion
 
 	#region Constructors
@@ -395,127 +582,6 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 		}
 		this._values = null;
 		this._columnIndex = null;
-	}
-
-	/// <summary>
-	/// Get the index into the columns array that corresponds to the specified <paramref name="column"/>.
-	/// </summary>
-	/// <param name="column">The column to find the location of.</param>
-	/// <returns></returns>
-	public int GetPosition(int column)
-	{
-		this._searchIx.Index = (short)column;
-		return Array.BinarySearch(this._columnIndex, 0, this.ColumnCount, this._searchIx);
-	}
-
-	/// <summary>
-	/// Get the next cell after the current position.
-	/// </summary>
-	/// <param name="row">The row to start searching in.</param>
-	/// <param name="colPos">The resulting column position.</param>
-	/// <param name="startColPos">The column position to start searching in.</param>
-	/// <param name="endRow">The last row to search.</param>
-	/// <param name="endColPos">The last column index to search.</param>
-	/// <returns>True if the cell could be found; false otherwise.</returns>
-	public bool GetNextCell(ref int row, ref int colPos, int startColPos, int endRow, int endColPos)
-	{
-		if (this.ColumnCount == 0)
-		{
-			return false;
-		}
-		else
-		{
-			if (++colPos < this.ColumnCount && colPos <= endColPos)
-			{
-				var r = this._columnIndex[colPos].GetNextRow(row);
-				if (r == row) //Exists next Row
-				{
-					return true;
-				}
-				else
-				{
-					int minRow, minCol;
-					if (r > row)
-					{
-						minRow = r;
-						minCol = colPos;
-					}
-					else
-					{
-						minRow = int.MaxValue;
-						minCol = 0;
-					}
-
-					var c = colPos + 1;
-					while (c < this.ColumnCount && c <= endColPos)
-					{
-						r = this._columnIndex[c].GetNextRow(row);
-						if (r == row) //Exists next Row
-						{
-							colPos = c;
-							return true;
-						}
-						if (r > row && r < minRow)
-						{
-							minRow = r;
-							minCol = c;
-						}
-						c++;
-					}
-					c = startColPos;
-					if (row < endRow)
-					{
-						row++;
-						while (c < colPos)
-						{
-							r = this._columnIndex[c].GetNextRow(row);
-							if (r == row) //Exists next Row
-							{
-								colPos = c;
-								return true;
-							}
-							if (r > row && (r < minRow || (r == minRow && c < minCol)) && r <= endRow)
-							{
-								minRow = r;
-								minCol = c;
-							}
-							c++;
-						}
-					}
-
-					if (minRow == int.MaxValue || minRow > endRow)
-					{
-						return false;
-					}
-					else
-					{
-						row = minRow;
-						colPos = minCol;
-						return true;
-					}
-				}
-			}
-			else
-			{
-				if (colPos <= startColPos || row >= endRow)
-				{
-					return false;
-				}
-				colPos = startColPos - 1;
-				row++;
-				return this.GetNextCell(ref row, ref colPos, startColPos, endRow, endColPos);
-			}
-		}
-	}
-
-	/// <summary>
-	/// Gets the index into the cell array that corresponds to the particular column position.
-	/// </summary>
-	/// <param name="colPos">The column position whose index should be returned.</param>
-	/// <returns>The index into the data array that corresponds to the given column position.</returns>
-	public int GetColumnPosIndex(int colPos)
-	{
-		return this._columnIndex[colPos].Index;
 	}
 
 	/// <summary>
@@ -617,113 +683,6 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 	}
 
 	/// <summary>
-	/// Update the row and column position to reflect the first cell before the current position.
-	/// </summary>
-	/// <param name="row">The current row / the resulting row.</param>
-	/// <param name="colPos">The current column index / the resulting column index.</param>
-	/// <param name="startRow">The row to start looking in.</param>
-	/// <param name="startColPos">The column index to start looking in.</param>
-	/// <param name="endColPos">The last column index to look in.</param>
-	/// <returns>True if a previous value was found; false otherwise.</returns>
-	public bool GetPrevCell(ref int row, ref int colPos, int startRow, int startColPos, int endColPos)
-	{
-		if (this.ColumnCount == 0)
-		{
-			return false;
-		}
-		else
-		{
-			if (--colPos >= startColPos)
-			{
-				var r = _columnIndex[colPos].GetNextRow(row);
-				if (r == row) //Exists next Row
-				{
-					return true;
-				}
-				else
-				{
-					int minRow, minCol;
-					if (r > row && r >= startRow)
-					{
-						minRow = r;
-						minCol = colPos;
-					}
-					else
-					{
-						minRow = int.MaxValue;
-						minCol = 0;
-					}
-
-					var c = colPos - 1;
-					if (c >= startColPos)
-					{
-						while (c >= startColPos)
-						{
-							r = this._columnIndex[c].GetNextRow(row);
-							if (r == row) //Exists next Row
-							{
-								colPos = c;
-								return true;
-							}
-							if (r > row && r < minRow && r >= startRow)
-							{
-								minRow = r;
-								minCol = c;
-							}
-							c--;
-						}
-					}
-					if (row > startRow)
-					{
-						c = endColPos;
-						row--;
-						while (c > colPos)
-						{
-							r = this._columnIndex[c].GetNextRow(row);
-							if (r == row) //Exists next Row
-							{
-								colPos = c;
-								return true;
-							}
-							if (r > row && r < minRow && r >= startRow)
-							{
-								minRow = r;
-								minCol = c;
-							}
-							c--;
-						}
-					}
-					if (minRow == int.MaxValue || startRow < minRow)
-					{
-						return false;
-					}
-					else
-					{
-						row = minRow;
-						colPos = minCol;
-						return true;
-					}
-				}
-			}
-			else
-			{
-				colPos = this.ColumnCount;
-				row--;
-				if (row < startRow)
-				{
-					_colPos = -1;
-					_row = 0;
-					return false;
-				}
-				else
-				{
-					return this.GetPrevCell(ref colPos, ref row, startRow, startColPos, endColPos);
-				}
-			}
-		}
-	}
-
-	/// <summary>
 	/// Determine if a value exists at the specified <paramref name="row"/> and <paramref name="column"/>.
 	/// </summary>
 	/// <param name="row">The row to check for a value.</param>
@@ -733,7 +692,6 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 	{
 		return this.GetPointer(row, column) >= 0;
 	}
-
 
 	/// <summary>
 	/// Determine if a value exists at the specified <paramref name="row"/> and <paramref name="column"/>, and return it if available.
@@ -1778,9 +1736,10 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 			if (pageItem.RowCount == CellStore<T>.PageSizeMax) //Max size-->Split
 			{
 				pagePos = this.SplitPage(columnIndex, pagePos);
+				// Should the new value be stored on the previous page?
 				if (columnIndex._pages[pagePos - 1].RowCount > pos)
 				{
-					pagePos--;
+						pagePos--;
 				}
 				else
 				{
@@ -1797,7 +1756,14 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 		}
 		if (pos < pageItem.RowCount)
 		{
-			Array.Copy(pageItem.Rows, pos, pageItem.Rows, pos + 1, pageItem.RowCount - pos);
+			try {
+				Array.Copy(pageItem.Rows, pos, pageItem.Rows, pos + 1, pageItem.RowCount - pos);
+			}
+			catch(Exception ex)
+			{
+
+				throw;
+			}
 		}
 		pageItem.Rows[pos] = new IndexItem() { Index = ix, IndexPointer = _values.Count };
 		this._values.Add(value);
@@ -1915,6 +1881,232 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 		column.PageCount++;
 	}
 
+	/// <summary>
+	/// Get the index into the columns array that corresponds to the specified <paramref name="column"/>.
+	/// </summary>
+	/// <param name="column">The column to find the location of.</param>
+	/// <returns></returns>
+	private int GetPosition(int column)
+	{
+		this._searchIx.Index = (short)column;
+		return Array.BinarySearch(this._columnIndex, 0, this.ColumnCount, this._searchIx);
+	}
+
+	/// <summary>
+	/// Update the row and column position to reflect the first cell before the current position.
+	/// </summary>
+	/// <param name="row">The current row / the resulting row.</param>
+	/// <param name="colPos">The current column index / the resulting column index.</param>
+	/// <param name="startRow">The row to start looking in.</param>
+	/// <param name="startColPos">The column index to start looking in.</param>
+	/// <param name="endColPos">The last column index to look in.</param>
+	/// <returns>True if a previous value was found; false otherwise.</returns>
+	private bool GetPrevCell(ref int row, ref int colPos, int startRow, int startColPos, int endColPos)
+	{
+		if (this.ColumnCount == 0)
+		{
+			return false;
+		}
+		else
+		{
+			if (--colPos >= startColPos)
+			{
+				var r = _columnIndex[colPos].GetNextRow(row);
+				if (r == row) //Exists next Row
+				{
+					return true;
+				}
+				else
+				{
+					int minRow, minCol;
+					if (r > row && r >= startRow)
+					{
+						minRow = r;
+						minCol = colPos;
+					}
+					else
+					{
+						minRow = int.MaxValue;
+						minCol = 0;
+					}
+
+					var c = colPos - 1;
+					if (c >= startColPos)
+					{
+						while (c >= startColPos)
+						{
+							r = this._columnIndex[c].GetNextRow(row);
+							if (r == row) //Exists next Row
+							{
+								colPos = c;
+								return true;
+							}
+							if (r > row && r < minRow && r >= startRow)
+							{
+								minRow = r;
+								minCol = c;
+							}
+							c--;
+						}
+					}
+					if (row > startRow)
+					{
+						c = endColPos;
+						row--;
+						while (c > colPos)
+						{
+							r = this._columnIndex[c].GetNextRow(row);
+							if (r == row) //Exists next Row
+							{
+								colPos = c;
+								return true;
+							}
+							if (r > row && r < minRow && r >= startRow)
+							{
+								minRow = r;
+								minCol = c;
+							}
+							c--;
+						}
+					}
+					if (minRow == int.MaxValue || startRow < minRow)
+					{
+						return false;
+					}
+					else
+					{
+						row = minRow;
+						colPos = minCol;
+						return true;
+					}
+				}
+			}
+			else
+			{
+				colPos = this.ColumnCount;
+				row--;
+				if (row < startRow)
+				{
+					return false;
+				}
+				else
+				{
+					return this.GetPrevCell(ref colPos, ref row, startRow, startColPos, endColPos);
+				}
+			}
+		}
+	}
+
+	/// <summary>
+	/// Get the next cell after the current position.
+	/// </summary>
+	/// <param name="row">The row to start searching in.</param>
+	/// <param name="colPos">The resulting column position.</param>
+	/// <param name="startColPos">The column position to start searching in.</param>
+	/// <param name="endRow">The last row to search.</param>
+	/// <param name="endColPos">The last column index to search.</param>
+	/// <returns>True if the cell could be found; false otherwise.</returns>
+	private bool GetNextCell(ref int row, ref int colPos, int startColPos, int endRow, int endColPos)
+	{
+		if (this.ColumnCount == 0)
+		{
+			return false;
+		}
+		else
+		{
+			if (++colPos < this.ColumnCount && colPos <= endColPos)
+			{
+				var r = this._columnIndex[colPos].GetNextRow(row);
+				if (r == row) //Exists next Row
+				{
+					return true;
+				}
+				else
+				{
+					int minRow, minCol;
+					if (r > row)
+					{
+						minRow = r;
+						minCol = colPos;
+					}
+					else
+					{
+						minRow = int.MaxValue;
+						minCol = 0;
+					}
+
+					var c = colPos + 1;
+					while (c < this.ColumnCount && c <= endColPos)
+					{
+						r = this._columnIndex[c].GetNextRow(row);
+						if (r == row) //Exists next Row
+						{
+							colPos = c;
+							return true;
+						}
+						if (r > row && r < minRow)
+						{
+							minRow = r;
+							minCol = c;
+						}
+						c++;
+					}
+					c = startColPos;
+					if (row < endRow)
+					{
+						row++;
+						while (c < colPos)
+						{
+							r = this._columnIndex[c].GetNextRow(row);
+							if (r == row) //Exists next Row
+							{
+								colPos = c;
+								return true;
+							}
+							if (r > row && (r < minRow || (r == minRow && c < minCol)) && r <= endRow)
+							{
+								minRow = r;
+								minCol = c;
+							}
+							c++;
+						}
+					}
+
+					if (minRow == int.MaxValue || minRow > endRow)
+					{
+						return false;
+					}
+					else
+					{
+						row = minRow;
+						colPos = minCol;
+						return true;
+					}
+				}
+			}
+			else
+			{
+				if (colPos <= startColPos || row >= endRow)
+				{
+					return false;
+				}
+				colPos = startColPos - 1;
+				row++;
+				return this.GetNextCell(ref row, ref colPos, startColPos, endRow, endColPos);
+			}
+		}
+	}
+
+	/// <summary>
+	/// Gets the index into the cell array that corresponds to the particular column position.
+	/// </summary>
+	/// <param name="colPos">The column position whose index should be returned.</param>
+	/// <returns>The index into the data array that corresponds to the given column position.</returns>
+	private int GetColumnPosIndex(int colPos)
+	{
+		return this._columnIndex[colPos].Index;
+	}
+
 	private void AddColumn(int pos, int Column)
 	{
 		if (this.ColumnCount == this._columnIndex.Length)
@@ -1932,191 +2124,6 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 	}
 	#endregion
 
-}
-
-/// <summary>
-/// This enumerator allows for partial enumeration of an <see cref="ICellStore{T}"/>.
-/// </summary>
-/// <typeparam name="T">The type of the <see cref="ICellStore{T}"/> being enumerated.</typeparam>
-internal class CellsStoreEnumerator<T> : IEnumerable<T>, IEnumerator<T>
-{
-	#region Class Variables
-	ICellStore<T> _cellStore;
-	int row, colPos;
-	int[] pagePos, cellPos;
-	int _startRow, _startCol, _endRow, _endCol;
-	int minRow, minColPos, maxRow, maxColPos;
-	#endregion
-
-	#region Properties
-	/// <summary>
-	/// Gets the current cell address as a string.
-	/// </summary>
-	public string CellAddress
-	{
-		get
-		{
-			return ExcelAddressBase.GetAddress(this.Row, this.Column);
-		}
-	}
-
-	/// <summary>
-	///  Gets the current value.
-	/// </summary>
-	public T Current
-	{
-		get
-		{
-			return this.Value;
-		}
-	}
-
-	/// <summary>
-	/// Get the current Enumerator objct.
-	/// </summary>
-	object IEnumerator.Current
-	{
-		get
-		{
-			this.Reset();
-			return this;
-		}
-	}
-
-	/// <summary>
-	/// Get the current row.
-	/// </summary>
-	internal int Row
-	{
-		get
-		{
-			return this.row;
-		}
-	}
-
-	/// <summary>
-	/// Get the current column.
-	/// </summary>
-	internal int Column
-	{
-		get
-		{
-			if (this.colPos == -1)
-				this.MoveNext();
-			if (this.colPos == -1)
-				return 0;
-			return this._cellStore.GetColumnPosIndex(this.colPos);
-		}
-	}
-
-	/// <summary>
-	/// Gets or sets the current value.
-	/// </summary>
-	internal T Value
-	{
-		get
-		{
-			lock (this._cellStore)
-			{
-				return this._cellStore.GetValue(this.row, this.Column);
-			}
-		}
-		set
-		{
-			lock (_cellStore)
-			{
-				this._cellStore.SetValue(this.row, this.Column, value);
-			}
-		}
-	}
-	#endregion
-
-	#region Constructors
-	/// <summary>
-	/// Initialize a new <see cref="CellsStoreEnumerator{T}"/> for all the cells in the <see cref="ICellStore{T}"/>.
-	/// </summary>
-	/// <param name="cellStore">The <see cref="ICellStore{T}"/> to fully enumerate.</param>
-	public CellsStoreEnumerator(ICellStore<T> cellStore) :
-		this(cellStore, 0, 0, ExcelPackage.MaxRows, ExcelPackage.MaxColumns)
-	{
-	}
-
-	/// <summary>
-	/// Initialize a new <see cref="CellsStoreEnumerator{T}"/> for the specified subset of cells in the <see cref="ICellStore{T}"/>.
-	/// </summary>
-	/// <param name="cellStore">The CellStore to partially enumerate.</param>
-	/// <param name="StartRow">The first row to include cells from.</param>
-	/// <param name="StartCol">The first column to include cells from.</param>
-	/// <param name="EndRow">The last row to include cells from.</param>
-	/// <param name="EndCol">The last column to include cells from.</param>
-	public CellsStoreEnumerator(ICellStore<T> cellStore, int StartRow, int StartCol, int EndRow, int EndCol)
-	{
-		this._cellStore = cellStore;
-
-		this._startRow = StartRow;
-		this._startCol = StartCol;
-		this._endRow = EndRow;
-		this._endCol = EndCol;
-
-		this.Init();
-
-	}
-	#endregion
-
-	#region Public Methods
-	public IEnumerator<T> GetEnumerator()
-	{
-		this.Reset();
-		return this;
-	}
-
-	IEnumerator IEnumerable.GetEnumerator()
-	{
-		this.Reset();
-		return this;
-	}
-
-	public void Dispose()
-	{
-		//_cellStore=null;
-	}
-
-	public bool MoveNext()
-	{
-		return this._cellStore.GetNextCell(ref row, ref colPos, minColPos, maxRow, maxColPos);
-	}
-
-	public void Reset()
-	{
-		this.Init();
-	}
-	#endregion
-
-	#region Private Methods
-	private void Init()
-	{
-		this.minRow = this._startRow;
-		this.maxRow = this._endRow;
-
-		this.minColPos = this._cellStore.GetPosition(this._startCol);
-		if (minColPos < 0)
-			this.minColPos = ~this.minColPos;
-		this.maxColPos = this._cellStore.GetPosition(this._endCol);
-		if (this.maxColPos < 0)
-			this.maxColPos = ~this.maxColPos - 1;
-		this.row = this.minRow;
-		this.colPos = this.minColPos - 1;
-
-		var cols = this.maxColPos - this.minColPos + 1;
-		this.pagePos = new int[cols];
-		this.cellPos = new int[cols];
-		for (int i = 0; i < cols; i++)
-		{
-			this.pagePos[i] = -1;
-			this.cellPos[i] = -1;
-		}
-	}
-	#endregion
 }
 
 internal class FlagCellStore : CellStore<byte>

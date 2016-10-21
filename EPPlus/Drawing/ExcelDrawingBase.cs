@@ -532,7 +532,7 @@ namespace OfficeOpenXml.Drawing
             {
                 var height = dh;
 
-                var cse = new CellsStoreEnumerator<ExcelCoreValue>(_drawings.Worksheet._values, row, 0, row, ExcelPackage.MaxColumns);
+                var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_drawings.Worksheet._values, row, 0, row, ExcelPackage.MaxColumns);
                 var styles = _drawings.Worksheet.Workbook.Styles;
                 while (cse.MoveNext())
                 {

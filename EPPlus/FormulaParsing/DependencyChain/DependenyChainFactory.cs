@@ -138,7 +138,7 @@ namespace OfficeOpenXml.FormulaParsing
         private static void GetChain(DependencyChain depChain, ILexer lexer, ExcelRangeBase Range, ExcelCalculationOption options)
         {
             var ws = Range.Worksheet;
-            var fs = new CellsStoreEnumerator<object>(ws._formulas, Range.Start.Row, Range.Start.Column, Range.End.Row, Range.End.Column);
+            var fs =CellStoreEnumeratorFactory<object>.GetNewEnumerator(ws._formulas, Range.Start.Row, Range.Start.Column, Range.End.Row, Range.End.Column);
             while (fs.MoveNext())
             {
                 if (fs.Value == null || fs.Value.ToString().Trim() == "") continue;
@@ -214,7 +214,7 @@ namespace OfficeOpenXml.FormulaParsing
 
                         if (f.ws != null)
                         {
-                            f.iterator = new CellsStoreEnumerator<object>(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
+                            f.iterator =CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
                             goto iterateCells;
                         }
                     }
@@ -264,7 +264,7 @@ namespace OfficeOpenXml.FormulaParsing
                         {
                             if (name.NameValue == null)
                             {
-                                f.iterator = new CellsStoreEnumerator<object>(f.ws._formulas, name.Start.Row,
+                                f.iterator =CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, name.Start.Row,
                                     name.Start.Column, name.End.Row, name.End.Column);
                                 goto iterateCells;
                             }

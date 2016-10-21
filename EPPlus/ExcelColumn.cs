@@ -81,7 +81,7 @@ namespace OfficeOpenXml
                     throw new Exception("ColumnMax out of range");
                 }
 
-                var cse = new CellsStoreEnumerator<ExcelCoreValue>(_worksheet._values, 0, 0, 0, ExcelPackage.MaxColumns);
+                var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, 0, 0, 0, ExcelPackage.MaxColumns);
                 while(cse.MoveNext())
                 {
                     var c = cse.Value._value as ExcelColumn;
