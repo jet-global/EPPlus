@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 
@@ -7,8 +8,62 @@ namespace EPPlusTest
     [TestClass]
     public class CellStoreTest : TestBase
     {
-        
-        [TestMethod]
+		[TestMethod]
+		public void CellStorePagingBreaksOnceAFullyFormedPageNeedsToBeSplit()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells["A1"].Value = "Has some text in A1";
+				sheet.Cells["A2"].Value = "Has some text in A2";
+				sheet.Cells["B1"].Value = "Has some text in B1";
+				sheet.Cells["B2"].Value = "Has some text in B2";
+				sheet.Cells["C1"].Value = "Has some text in C1";
+				sheet.Cells["C2"].Value = "Has some text in C2";
+				sheet.Cells["D1"].Value = "Has some text in D1";
+				sheet.Cells["D2"].Value = "Has some text in D2";
+
+				sheet.Cells["E22"].Value = "Has some text to be copied.";
+				sheet.Cells["F22"].Value = "Has some other text to be copied.";
+
+				sheet.Cells["H23"].Value = "Has even more text to be copied.";
+				sheet.Cells["I23"].Value = "Has even more distinct text to be copied.";
+
+				sheet.Cells["K24"].Value = "Has even more text that could be copied if necessary.";
+				sheet.Cells["L24"].Value = "Has even more distinct text that could be copied.";
+
+				sheet.Cells["N25"].Value = "Has even more text that could be copied if necessary.";
+				sheet.Cells["O25"].Value = "Has even more distinct text that could be copied.";
+
+				int row = 22;
+				this.InsertTheRightAmountOfSpace(sheet, row, 5);
+				row += 67;
+				for (int i = row; i > row - 67; i--)
+				{
+					this.InsertTheRightAmountOfSpace(sheet, i, 6);
+				}
+
+				row = 4646;
+				this.InsertTheRightAmountOfSpace(sheet, row, 8);
+				row += 67;
+				for (int i = row; i > row - 67; i--)
+				{
+					this.InsertTheRightAmountOfSpace(sheet, i, 9);
+				}
+			}
+		}
+
+		private void InsertTheRightAmountOfSpace(ExcelWorksheet sheet, int row, int column)
+		{
+			sheet.InsertRow(row + 1, 67);
+			for (int i = 1; i < 68; i++)
+			{
+				sheet.Cells[$"{row}:{row}"].Copy(sheet.Cells[$"{row + i}:{row + i}"]);
+				sheet.Cells[row + i, column].Formula = $"\"Updated Unique Value {Guid.NewGuid().ToString()}\"";
+			}
+		}
+
+		[TestMethod]
         public void Insert1()
         {
             var ws=_pck.Workbook.Worksheets.Add("Insert1");
@@ -32,8 +87,8 @@ namespace EPPlusTest
             ws.InsertRow(1, 15);
             Assert.AreEqual(ws.GetValue(4020, 1), "3,0");
             Assert.AreEqual(ws.GetValue(5016, 1), "499,0");
-   
         }
+
         [TestMethod]
         public void Insert2()
         {
@@ -56,6 +111,7 @@ namespace EPPlusTest
             Assert.AreEqual(ws.GetValue(1, 1), "0,0");
             Assert.AreEqual(ws.GetValue(47, 1), "14,0");
         }
+
         [TestMethod]
         public void Insert3()
         {
@@ -80,6 +136,7 @@ namespace EPPlusTest
                 ws.InsertRow(i, 1);
             }
         }
+
         [TestMethod]
         public void EnumCellstore()
         {
@@ -93,6 +150,7 @@ namespace EPPlusTest
                 Console.WriteLine(i);
             }
         }
+
         [TestMethod]
         public void DeleteCells()
         {
@@ -110,6 +168,7 @@ namespace EPPlusTest
             ws.DeleteRow(1, 31);
             Assert.AreEqual("43,0", ws.GetValue(1, 1));
         }
+
         [TestMethod]
         public void DeleteCellsFirst()
         {
@@ -122,6 +181,7 @@ namespace EPPlusTest
                 ws.DeleteRow(1,1);
             }
         }
+
         [TestMethod]
         public void DeleteInsert()
         {
@@ -136,10 +196,12 @@ namespace EPPlusTest
                 ws.SetValue(i + 2,1, i + 2);
             }
         }
+
         private void LoadData(ExcelWorksheet ws)
         {
             LoadData(ws, 1000);
         }
+
         private void LoadData(ExcelWorksheet ws, int rows, int cols=1, bool isNumeric = false)
         {
             for (int r = 0; r < rows; r++)
@@ -153,6 +215,7 @@ namespace EPPlusTest
                 }
             }
         }
+
         [TestMethod]
         public void FillInsertTest()
         {
@@ -168,6 +231,7 @@ namespace EPPlusTest
                 r+=i+1;
             }
         }
+
         [TestMethod]
         public void CopyCellsTest()
         {
