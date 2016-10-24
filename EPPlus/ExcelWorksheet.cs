@@ -2353,7 +2353,7 @@ namespace OfficeOpenXml
 		/// <param name="value">value</param>
 		internal void SetValueInner(int row, int col, object value)
 		{
-			this._values.SetValueSpecial(row, col, ExcelWorksheet._setValueInnerUpdateDelegate, value);
+			this._values.SetValue(row, col, new ExcelCoreValue() { _value = value, _styleId = this._values.GetValue(row, col)._styleId });
 		}
 
 		/// <summary>
@@ -2364,7 +2364,7 @@ namespace OfficeOpenXml
 		/// <param name="styleId">styleId</param>
 		internal void SetStyleInner(int row, int col, int styleId)
 		{
-			this._values.SetValueSpecial(row, col, this.SetStyleInnerUpdate, styleId);
+			this._values.SetValue(row, col, new ExcelCoreValue() { _value = this._values.GetValue(row, col)._value, _styleId = styleId });
 		}
 
 		/// <summary>
