@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 
@@ -50,6 +49,18 @@ namespace EPPlusTest
 				{
 					this.InsertTheRightAmountOfSpace(sheet, i, 9);
 				}
+
+				Assert.IsNotNull(sheet.Cells[4645, 5].Formula);
+				Assert.IsNotNull(sheet.Cells[4645, 6].Formula);
+
+
+				Assert.IsNotNull(sheet.Cells[4646, 8].Formula);
+				Assert.IsNotNull(sheet.Cells[4646, 9].Formula);
+				Assert.IsNotNull(sheet.Cells[9269, 8].Formula);
+				Assert.IsNotNull(sheet.Cells[9269, 9].Formula);
+
+				Assert.AreEqual("Has even more text that could be copied if necessary.", sheet.Cells[9270, 11].Value);
+				Assert.AreEqual("Has even more distinct text that could be copied.", sheet.Cells[9270, 12].Value);
 			}
 		}
 
