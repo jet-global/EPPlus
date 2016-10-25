@@ -419,59 +419,60 @@ namespace OfficeOpenXml
             }
             else             //Cellrange
             {
-                var tmpCache = styleCashe;
-                var rowCache = new Dictionary<int, int>(address.End.Row - address.Start.Row + 1);
-                var colCache = new Dictionary<int, ExcelCoreValue>(address.End.Column - address.Start.Column + 1);
-                ws._values.SetRangeValueSpecial(address.Start.Row, address.Start.Column, address.End.Row, address.End.Column,
-                    (List<ExcelCoreValue> list, int index, int row, int column, object args) =>
-                    {
-                        // Optimized GetStyleID
-                        var s = list[index]._styleId;
-                        if (s == 0 && !ws.ExistsStyleInner(row, 0, ref s))
-                        {
-                            // get row styleId with cache
-                            if (!rowCache.ContainsKey(row)) rowCache.Add(row, ws._values.GetValue(row, 0)._styleId);
-                            s = rowCache[row];
-                            if (s == 0)
-                            {
-                                // get column styleId with cache
-                                if (!colCache.ContainsKey(column)) colCache.Add(column, ws._values.GetValue(0, column));
-                                s = colCache[column]._styleId;
-                                if (s == 0)
-                                {
-                                    int r = 0, c = column;
-                                    if (ws._values.PrevCell(ref r, ref c))
-                                    {
-                                        //var val = ws._values.GetValue(0, c);
-                                        if (!colCache.ContainsKey(c)) colCache.Add(c, ws._values.GetValue(0, c));
-                                        var val = colCache[c];
-                                        var colObj = (ExcelColumn)(val._value);
-                                        if (colObj != null && colObj.ColumnMax >= column) //Fixes issue 15174
-                                        {
-                                            s = val._styleId;
-                                        }
-                                    }
-                                }
-                            }
-                        }
+				var tmpCache = styleCashe;
+				int rowCount = address.End.Row - address.Start.Row + 1;
+				var rowCache = new Dictionary<int, int>(rowCount);
+				int columnCount = address.End.Column - address.Start.Column + 1;
+				var colCache = new Dictionary<int, ExcelCoreValue>(columnCount);
 
-                        if (tmpCache.ContainsKey(s))
-                        {
-                            //ws.SetStyleInner(row, column, tmpCache[s]);
-                            list[index] = new ExcelCoreValue { _value = list[index]._value, _styleId = tmpCache[s] };
-                        }
-                        else
-                        {
-                            ExcelXfs st = CellXfs[s];
-                            int newId = st.GetNewID(CellXfs, sender, e.StyleClass, e.StyleProperty, e.Value);
-                            tmpCache.Add(s, newId);
-                            //ws.SetStyleInner(row, column, newId);
-                            list[index] = new ExcelCoreValue { _value = list[index]._value, _styleId = newId };
-                        }
-                    },
-                    e);
+				for (int row = address.Start.Row; row < rowCount + address.Start.Row; row++)
+				{
+					for (int column = address.Start.Column; column < columnCount + address.Start.Column; column++)
+					{
+						// Optimized GetStyleID
+						var s = ws.GetStyleInner(row, column);
+						if (s == 0 && !ws.ExistsStyleInner(row, 0, ref s))
+						{
+							// get row styleId with cache
+							if (!rowCache.ContainsKey(row)) rowCache.Add(row, ws._values.GetValue(row, 0)._styleId);
+							s = rowCache[row];
+							if (s == 0)
+							{
+								// get column styleId with cache
+								if (!colCache.ContainsKey(column)) colCache.Add(column, ws._values.GetValue(0, column));
+								s = colCache[column]._styleId;
+								if (s == 0)
+								{
+									int r = 0, c = column;
+									if (ws._values.PrevCell(ref r, ref c))
+									{
+										//var val = ws._values.GetValue(0, c);
+										if (!colCache.ContainsKey(c)) colCache.Add(c, ws._values.GetValue(0, c));
+										var val = colCache[c];
+										var colObj = (ExcelColumn)(val._value);
+										if (colObj != null && colObj.ColumnMax >= column) //Fixes issue 15174
+										{
+											s = val._styleId;
+										}
+									}
+								}
+							}
+						}
 
-            }
+						if (tmpCache.ContainsKey(s))
+						{
+							ws.SetStyleInner(row, column, tmpCache[s]);
+						}
+						else
+						{
+							ExcelXfs st = CellXfs[s];
+							int newId = st.GetNewID(CellXfs, sender, e.StyleClass, e.StyleProperty, e.Value);
+							tmpCache.Add(s, newId);
+							ws.SetStyleInner(row, column, newId);
+						}
+					}
+				}
+			}
         }
 
         private void AddNewStyleColumn(StyleBase sender, StyleChangeEventArgs e, ExcelWorksheet ws, Dictionary<int, int> styleCashe, ExcelColumn column, int s)
