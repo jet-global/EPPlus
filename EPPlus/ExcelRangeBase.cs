@@ -1894,18 +1894,16 @@ namespace OfficeOpenXml
 			{
 				rowArray.Add(dr.ItemArray);
 			}
-			_worksheet._values.SetRangeValueSpecial(_fromRow, _fromCol, _fromRow + rowArray.Count - 1, _fromCol + Table.Columns.Count - 1,
-				(List<ExcelCoreValue> list, int index, int rowIx, int columnIx, object value) =>
-				{
-					rowIx -= _fromRow;
-					columnIx -= _fromCol;
 
-					var val = ((List<object[]>)value)[rowIx][columnIx];
+			for(int column = 0; column < Table.Columns.Count; column++)
+				for(int row = 0; row < rowArray.Count; row++)
+				{
+					var val = rowArray[row][column];
 					if (val != null && val != DBNull.Value && !string.IsNullOrEmpty(val.ToString()))
 					{
-						list[index] = new ExcelCoreValue { _value = val, _styleId = list[index]._styleId };
+						this.Worksheet.SetValue(row + _fromRow, column + _fromCol, val);
 					}
-				}, rowArray);
+				}
 
 			return _worksheet.Cells[_fromRow, _fromCol, _fromRow + rowArray.Count - 1, _fromCol + Table.Columns.Count - 1];
 		}
@@ -1928,24 +1926,18 @@ namespace OfficeOpenXml
 				rowArray.Add(item);
 				if (maxColumn < item.Length) maxColumn = item.Length;
 			}
-			_worksheet._values.SetRangeValueSpecial(_fromRow, _fromCol, _fromRow + rowArray.Count - 1, _fromCol + maxColumn - 1,
-				(List<ExcelCoreValue> list, int index, int rowIx, int columnIx, object value) =>
+			for (int row = 0; row < rowArray.Count; row++)
+			{
+				var currentRow = rowArray[row];
+				for (int column = 0; column < currentRow.Length; column++)
 				{
-					rowIx -= _fromRow;
-					columnIx -= _fromCol;
-
-					var values = ((List<object[]>)value);
-					if (values.Count <= rowIx) return;
-					var item = values[rowIx];
-					if (item.Length <= columnIx) return;
-
-					var val = item[columnIx];
+					var val = currentRow[column];
 					if (val != null && val != DBNull.Value && !string.IsNullOrEmpty(val.ToString()))
 					{
-						list[index] = new ExcelCoreValue { _value = val, _styleId = list[index]._styleId };
+						this.Worksheet.SetValue(row + _fromRow, column + _fromCol, val);
 					}
-				}, rowArray);
-
+				}
+			}
 			return _worksheet.Cells[_fromRow, _fromCol, _fromRow + rowArray.Count - 1, _fromCol + maxColumn - 1];
 		}
 		#endregion
@@ -2225,17 +2217,20 @@ namespace OfficeOpenXml
 				}
 				lineNo++;
 			}
-			// flush
-			_worksheet._values.SetRangeValueSpecial(_fromRow, _fromCol, _fromRow + values.Length - 1, _fromCol + maxCol,
-				(List<ExcelCoreValue> list, int index, int rowIx, int columnIx, object value) =>
-				{
-					rowIx -= _fromRow;
-					columnIx -= _fromCol;
-					var item = values[rowIx];
-					if (item == null || item.Count <= columnIx) return;
 
-					list[index] = new ExcelCoreValue { _value = item[columnIx], _styleId = list[index]._styleId };
-				}, values);
+			//flush
+			for (int myRowIndex = 0; row < values.Length; row++)
+			{
+				var element = values[myRowIndex];
+				for (int column = 0; column < element.Count; column++)
+				{
+					var val = element[column];
+					if (val != null)
+					{
+						this.Worksheet.SetValue(myRowIndex + _fromRow, column + _fromCol, val);
+					}
+				}
+			}
 
 			return _worksheet.Cells[_fromRow, _fromCol, _fromRow + row, _fromCol + maxCol];
 		}

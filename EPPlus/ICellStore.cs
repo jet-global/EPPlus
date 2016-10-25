@@ -88,9 +88,6 @@ namespace OfficeOpenXml
 		/// <returns>True if a value was found at the location; false otherwise.</returns>
 		bool Exists(int row, int column);
 
-		//[Obsolete("This method relies on knowing how the CellStore works under the hood and will be removed in a future update. Use SetValue instead.")]
-		void SetRangeValueSpecial(int _fromRow, int _fromCol, int v1, int v2, CellStoreDelegates<T>.SetRangeValueDelegate setValueDelegate, object values);
-
 		/// <summary>
 		/// Removes the values in the specified range without updating cells below or to the right of the specified range.
 		/// </summary>
