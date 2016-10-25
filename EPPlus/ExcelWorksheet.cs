@@ -2379,17 +2379,18 @@ namespace OfficeOpenXml
 		{
 			var rowBound = values.GetUpperBound(0);
 			var colBound = values.GetUpperBound(1);
-			_values.SetRangeValueSpecial(fromRow, fromColumn, toRow, toColumn,
-				(List<ExcelCoreValue> list, int index, int row, int column, object value) =>
+			for (int row = fromRow; row <= toRow; row++)
+			{
+				for (int column = fromColumn; column <= toColumn; column++)
 				{
 					object val = null;
 					if (rowBound >= row - fromRow && colBound >= column - fromColumn)
 					{
 						val = ((object[,])values)[row - fromRow, column - fromColumn];
 					}
-					list[index] = new ExcelCoreValue { _value = val, _styleId = list[index]._styleId };
-				},
-				values);
+					this.SetValueInner(row, column, val);
+				}
+			}
 		}
 
 		/// <summary>
