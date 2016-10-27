@@ -518,7 +518,8 @@ namespace OfficeOpenXml
 									column.ColumnMax = nextCol.ColumnMax - 1;
 								}
 								column = nextCol;
-								cols.MoveNext();
+								if (!cols.MoveNext())
+									break;
 							}
 						}
 					}

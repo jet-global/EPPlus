@@ -157,9 +157,12 @@ namespace OfficeOpenXml
 		/// <returns>An <see cref="ICellStoreEnumerator{T}"/> that enumerates the entire <paramref name="cellStore"/>.</returns>
 		public static ICellStoreEnumerator<T> GetNewEnumerator(ICellStore<T> cellStore)
 		{
-			var specificCellStore = cellStore as CellStore<T>;
-			if(specificCellStore != null)
-				return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore);
+			//var specificCellStore = cellStore as CellStore<T>;
+			//if(specificCellStore != null)
+			//	return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore);
+			var newCellStore = cellStore as BalancedCellStore<T>;
+			if (newCellStore != null)
+				return new BalancedStoreEnumerator<T>(newCellStore);
 			throw new NotImplementedException($"No CellStoreEnumerator accepts the type {cellStore.GetType()}.");
 		}
 
@@ -174,9 +177,12 @@ namespace OfficeOpenXml
 		/// <returns>An enumerator that only returns values within the given range.</returns>
 		public static ICellStoreEnumerator<T> GetNewEnumerator(ICellStore<T> cellStore, int startRow, int startColumn, int endRow, int endColumn)
 		{
-			var specificCellStore = cellStore as CellStore<T>;
-			if (specificCellStore != null)
-				return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore, startRow, startColumn, endRow, endColumn);
+			//var specificCellStore = cellStore as CellStore<T>;
+			//if (specificCellStore != null)
+			//	return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore, startRow, startColumn, endRow, endColumn);
+			var newCellStore = cellStore as BalancedCellStore<T>;
+			if (newCellStore != null)
+				return new BalancedStoreEnumerator<T>(newCellStore, startRow, startColumn, endRow, endColumn);
 			throw new NotImplementedException($"No CellStoreEnumerator accepts the type {cellStore.GetType()}.");
 		}
 	}

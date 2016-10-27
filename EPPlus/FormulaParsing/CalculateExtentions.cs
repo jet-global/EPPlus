@@ -166,7 +166,7 @@ namespace OfficeOpenXml
         }
         private static void Init(ExcelWorkbook workbook)
         {
-            workbook.FormulaTokens = new CellStore<List<Token>>();;
+            workbook.FormulaTokens = new BalancedCellStore<List<Token>>();;
             foreach (var ws in workbook.Worksheets)
             {
                 if (!(ws is ExcelChartsheet))
@@ -175,7 +175,7 @@ namespace OfficeOpenXml
                     {
                         ws._formulaTokens.Dispose();
                     }
-                    ws._formulaTokens = new CellStore<List<Token>>();
+                    ws._formulaTokens = new BalancedCellStore<List<Token>>();
                 }
             }
         }

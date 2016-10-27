@@ -8,6 +8,22 @@ namespace EPPlusTest
     public class CellStoreTest : TestBase
     {
 		[TestMethod]
+		public void BasicInsertTest()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				for (int row = 1; row < 10; row++)
+				{
+					sheet.Cells[row, row].Value = row;
+				}
+				sheet.InsertRow(4, 10);
+				sheet.InsertRow(1, 10);
+				sheet.InsertRow(10, 50);
+			}
+		}
+
+		[TestMethod]
 		public void CellStorePagingBreaksOnceAFullyFormedPageNeedsToBeSplit()
 		{
 			using (var package = new ExcelPackage())
@@ -35,19 +51,19 @@ namespace EPPlusTest
 				sheet.Cells["O25"].Value = "Has even more distinct text that could be copied.";
 
 				int row = 22;
-				this.InsertTheRightAmountOfSpace(sheet, row, 5);
+				this.InsertTheRightAmountOfRows(sheet, row, 5);
 				row += 67;
-				for (int i = row; i > row - 67; i--)
+				for (int i = row; i > row - 68; i--)
 				{
-					this.InsertTheRightAmountOfSpace(sheet, i, 6);
+					this.InsertTheRightAmountOfRows(sheet, i, 6);
 				}
 
 				row = 4646;
-				this.InsertTheRightAmountOfSpace(sheet, row, 8);
+				this.InsertTheRightAmountOfRows(sheet, row, 8);
 				row += 67;
-				for (int i = row; i > row - 67; i--)
+				for (int i = row; i > row - 68; i--)
 				{
-					this.InsertTheRightAmountOfSpace(sheet, i, 9);
+					this.InsertTheRightAmountOfRows(sheet, i, 9);
 				}
 
 				Assert.IsNotNull(sheet.Cells[4645, 5].Formula);
@@ -64,13 +80,82 @@ namespace EPPlusTest
 			}
 		}
 
-		private void InsertTheRightAmountOfSpace(ExcelWorksheet sheet, int row, int column)
+		private void InsertTheRightAmountOfRows(ExcelWorksheet sheet, int row, int column)
 		{
 			sheet.InsertRow(row + 1, 67);
 			for (int i = 1; i < 68; i++)
 			{
 				sheet.Cells[$"{row}:{row}"].Copy(sheet.Cells[$"{row + i}:{row + i}"]);
 				sheet.Cells[row + i, column].Formula = $"\"Updated Unique Value {Guid.NewGuid().ToString()}\"";
+			}
+		}
+
+		[TestMethod]
+		public void CellStorePagingBreaksOnceAFullyFormedPageNeedsToBeSplitColumns()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells["A1"].Value = "Has some text in A1";
+				sheet.Cells["A2"].Value = "Has some text in A2";
+				sheet.Cells["B1"].Value = "Has some text in B1";
+				sheet.Cells["B2"].Value = "Has some text in B2";
+				sheet.Cells["C1"].Value = "Has some text in C1";
+				sheet.Cells["C2"].Value = "Has some text in C2";
+				sheet.Cells["D1"].Value = "Has some text in D1";
+				sheet.Cells["D2"].Value = "Has some text in D2";
+
+				sheet.Cells[5, 22].Value = "Has some text to be copied.";
+				sheet.Cells[6, 22].Value = "Has some other text to be copied.";
+
+				sheet.Cells[8, 23].Value = "Has even more text to be copied.";
+				sheet.Cells[9, 23].Value = "Has even more distinct text to be copied.";
+
+				sheet.Cells[11, 24].Value = "Has even more text that could be copied if necessary.";
+				sheet.Cells[12, 24].Value = "Has even more distinct text that could be copied.";
+
+				sheet.Cells[14, 25].Value = "Has even more text that could be copied if necessary.";
+				sheet.Cells[15, 25].Value = "Has even more distinct text that could be copied.";
+
+				int column = 22;
+				this.InsertTheRightAmountOfColumns(sheet, 5, column);
+				column += 67;
+				for (int i = column; i > column - 68; i--)
+				{
+					this.InsertTheRightAmountOfColumns(sheet, 6, i);
+				}
+
+				column = 4646;
+				this.InsertTheRightAmountOfColumns(sheet, 8, column);
+				column += 67;
+				for (int i = column; i > column - 68; i--)
+				{
+					this.InsertTheRightAmountOfColumns(sheet, 9, i);
+				}
+
+				Assert.IsNotNull(sheet.Cells[5, 4645].Formula);
+				Assert.IsNotNull(sheet.Cells[6, 4645].Formula);
+
+
+				Assert.IsNotNull(sheet.Cells[8, 4646].Formula);
+				Assert.IsNotNull(sheet.Cells[9, 4646].Formula);
+				Assert.IsNotNull(sheet.Cells[8, 9269].Formula);
+				Assert.IsNotNull(sheet.Cells[9, 9269].Formula);
+
+				Assert.AreEqual("Has even more text that could be copied if necessary.", sheet.Cells[11, 9270].Value);
+				Assert.AreEqual("Has even more distinct text that could be copied.", sheet.Cells[12, 9270].Value);
+			}
+		}
+
+		private void InsertTheRightAmountOfColumns(ExcelWorksheet sheet, int row, int column)
+		{
+			sheet.InsertColumn(column + 1, 67);
+			var currentColumnLetter = ExcelAddress.GetColumnLetter(column);
+			for (int i = 1; i < 68; i++)
+			{
+				var nextColumnLetter = ExcelAddress.GetColumnLetter(column + i);
+				sheet.Cells[$"{currentColumnLetter}:{currentColumnLetter}"].Copy(sheet.Cells[$"{nextColumnLetter}:{nextColumnLetter}"]);
+				sheet.Cells[row, column + i].Formula = $"\"Updated Unique Value {Guid.NewGuid().ToString()}\"";
 			}
 		}
 

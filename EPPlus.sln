@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPPlusExcelCalculationDemo"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPPlus", "EPPlus\EPPlus.csproj", "{BE4A6343-F411-44A3-8D6F-F40747ED7BA5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeftLeaningRedBlackTree", "LeftLeaningRedBlackTree\LeftLeaningRedBlackTree.csproj", "{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,18 @@ Global
 		{BE4A6343-F411-44A3-8D6F-F40747ED7BA5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BE4A6343-F411-44A3-8D6F-F40747ED7BA5}.Release|x86.ActiveCfg = Release|Any CPU
 		{BE4A6343-F411-44A3-8D6F-F40747ED7BA5}.Release|x86.Build.0 = Release|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Debug|x86.Build.0 = Debug|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Release|x86.ActiveCfg = Release|Any CPU
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

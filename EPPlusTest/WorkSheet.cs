@@ -718,19 +718,19 @@ namespace EPPlusTest
             comment = ws.Comments.Add(ws.Cells["C2"], "Jan Källman\r\nAuthor\r\n3", "JK");
             comment = ws.Comments.Add(ws.Cells["C1"], "Jan Källman\r\nAuthor\r\n5", "JK");
             comment = ws.Comments.Add(ws.Cells["B1"], "Jan Källman\r\nAuthor\r\n7", "JK");
-
             ws.Comments.Remove(ws.Cells["A2"].Comment);
-            //comment.HorizontalAlignment = eTextAlignHorizontalVml.Center;
-            //comment.Visible = true;
-            //comment.BackgroundColor = Color.Green;
-            //comment.To.Row += 4;
-            //comment.To.Column += 2;
-            //comment.LineStyle = eLineStyleVml.LongDash;
-            //comment.LineColor = Color.Red;
-            //comment.LineWidth = (Single)2.5;
-            //rt.Color = Color.Red;
+			Assert.IsNull(ws.Comments[new ExcelCellAddress("B2")]);
+			//comment.HorizontalAlignment = eTextAlignHorizontalVml.Center;
+			//comment.Visible = true;
+			//comment.BackgroundColor = Color.Green;
+			//comment.To.Row += 4;
+			//comment.To.Column += 2;
+			//comment.LineStyle = eLineStyleVml.LongDash;
+			//comment.LineColor = Color.Red;
+			//comment.LineWidth = (Single)2.5;
+			//rt.Color = Color.Red;
 
-            var rt2 = ws.Cells["B2"].AddComment("Range Added Comment test test test test test test test test test test testtesttesttesttesttesttesttesttesttesttest", "Jan Källman");
+			var rt2 = ws.Cells["B2"].AddComment("Range Added Comment test test test test test test test test test test testtesttesttesttesttesttesttesttesttesttest", "Jan Källman");
             ws.Cells["c3"].Comment.AutoFit = true;
 
         }

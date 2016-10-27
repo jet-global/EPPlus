@@ -86,6 +86,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BalancedCellStore.cs" />
     <Compile Include="CellStore.cs" />
     <Compile Include="ConditionalFormatting\Contracts\IExcelConditionalFormattingAverageGroup.cs" />
     <Compile Include="ConditionalFormatting\Contracts\IExcelConditionalFormattingBeginsWith.cs" />
@@ -863,6 +864,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConditionalFormatting\CF Implementation.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LeftLeaningRedBlackTree\LeftLeaningRedBlackTree.csproj">
+      <Project>{7d91d041-fc1a-45d1-98d2-e76a2029f5f0}</Project>
+      <Name>LeftLeaningRedBlackTree</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

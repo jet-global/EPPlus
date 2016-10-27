@@ -206,7 +206,7 @@ namespace OfficeOpenXml
 					return this.List.Count;
 				}
 			}
-			internal ICellStore<int> Cells { get; set; } = new CellStore<int>();
+			internal ICellStore<int> Cells { get; set; } = new BalancedCellStore<int>();
 			internal List<string> List { get; } = new List<string>();
 			#endregion
 
@@ -307,7 +307,7 @@ namespace OfficeOpenXml
 					}
 				}
 
-				this.Cells.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow - Destination._fromRow + 1, Destination._toCol - Destination._fromCol + 1);
+				this.Cells.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
 				foreach (var i in used)
 				{
 					this.List[i] = null;
@@ -1129,11 +1129,11 @@ namespace OfficeOpenXml
 			_positionID = positionID;
 			Hidden = hide;
 
-			_values = new CellStore<ExcelCoreValue>();
-			_formulas = new CellStore<object>();
+			_values = new BalancedCellStore<ExcelCoreValue>();
+			_formulas = new BalancedCellStore<object>();
 			_flags = new FlagCellStore();
-			_commentsStore = new CellStore<int>();
-			_hyperLinks = new CellStore<Uri>();
+			_commentsStore = new BalancedCellStore<int>();
+			_hyperLinks = new BalancedCellStore<Uri>();
 
 			_names = new ExcelNamedRangeCollection(Workbook, this);
 
