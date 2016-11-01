@@ -117,6 +117,7 @@
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\FunctionCompilerFactoryTests.cs" />
     <Compile Include="FormulaParsing\FormulaParserManagerTests.cs" />
+    <Compile Include="LeftLeaningRedBlackTreeTest.cs" />
     <Compile Include="Utils\ConvertUtilTest.cs" />
     <Compile Include="DataValidation\CustomValidationTests.cs" />
     <Compile Include="DataValidation\DataValidationTests.cs" />
@@ -284,6 +285,10 @@
     <ProjectReference Include="..\EPPlus\EPPlus.csproj">
       <Project>{be4a6343-f411-44a3-8d6f-f40747ed7ba5}</Project>
       <Name>EPPlus</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LeftLeaningRedBlackTree\LeftLeaningRedBlackTree.csproj">
+      <Project>{7d91d041-fc1a-45d1-98d2-e76a2029f5f0}</Project>
+      <Name>LeftLeaningRedBlackTree</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

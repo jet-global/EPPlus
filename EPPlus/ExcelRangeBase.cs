@@ -2512,11 +2512,11 @@ namespace OfficeOpenXml
 					}
 				}
 			}
-			Destination._worksheet._values.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
-			Destination._worksheet._formulas.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
-			Destination._worksheet._hyperLinks.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
-			Destination._worksheet._flags.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
-			Destination._worksheet._commentsStore.Clear(Destination._fromRow, Destination._fromCol, toRow, toCol);
+			Destination._worksheet._values.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
+			Destination._worksheet._formulas.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
+			Destination._worksheet._hyperLinks.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
+			Destination._worksheet._flags.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
+			Destination._worksheet._commentsStore.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
 
 			foreach (var cell in copiedValue)
 			{

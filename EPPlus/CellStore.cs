@@ -1593,12 +1593,13 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 		}
 		if (pos < pageItem.RowCount)
 		{
-			try {
+			try
+			{
 				Array.Copy(pageItem.Rows, pos, pageItem.Rows, pos + 1, pageItem.RowCount - pos);
 			}
-			catch(Exception ex)
+			catch(Exception)
 			{
-
+				// Put a breakpoint here to observe the state when an exception is thrown in this method.
 				throw;
 			}
 		}

@@ -18,6 +18,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPPlusExcelCalculationDemo", "EPPlusExcelCalculationSample\EPPlusExcelCalculationDemo.csproj", "{94CBCEFC-DDBF-4F54-8AEA-4C40BBD2881B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPPlus", "EPPlus\EPPlus.csproj", "{BE4A6343-F411-44A3-8D6F-F40747ED7BA5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7D91D041-FC1A-45D1-98D2-E76A2029F5F0} = {7D91D041-FC1A-45D1-98D2-E76A2029F5F0}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeftLeaningRedBlackTree", "LeftLeaningRedBlackTree\LeftLeaningRedBlackTree.csproj", "{7D91D041-FC1A-45D1-98D2-E76A2029F5F0}"
 EndProject

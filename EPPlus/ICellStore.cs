@@ -21,7 +21,7 @@ namespace OfficeOpenXml
 		/// </summary>
 		/// <param name="row">The row to read a value from.</param>
 		/// <param name="column">The column to read a value from.</param>
-		/// <returns></returns>
+		/// <returns>The value at the specified row and column.</returns>
 		T GetValue(int row, int column);
 
 		/// <summary>
@@ -31,6 +31,14 @@ namespace OfficeOpenXml
 		/// <param name="column">The column of the location to set a value at.</param>
 		/// <param name="value">The value to store at the location.</param>
 		void SetValue(int row, int column, T value);
+
+		/// <summary>
+		/// Determine if a value exists at the given location.
+		/// </summary>
+		/// <param name="row">The row to look for a value at.</param>
+		/// <param name="column">The column to look for a value at.</param>
+		/// <returns>True if a value was found at the location; false otherwise.</returns>
+		bool Exists(int row, int column);
 
 		/// <summary>
 		/// Determine if a value exists at the given location, and return it as an out parameter if found.
@@ -81,21 +89,13 @@ namespace OfficeOpenXml
 		void Delete(int fromRow, int fromCol, int rows, int columns, bool shift);
 
 		/// <summary>
-		/// Determine if a value exists at the given location.
-		/// </summary>
-		/// <param name="row">The row to look for a value at.</param>
-		/// <param name="column">The column to look for a value at.</param>
-		/// <returns>True if a value was found at the location; false otherwise.</returns>
-		bool Exists(int row, int column);
-
-		/// <summary>
 		/// Removes the values in the specified range without updating cells below or to the right of the specified range.
 		/// </summary>
-		/// <param name="_fromRow">The first row whose cells should be cleared.</param>
-		/// <param name="_fromCol">The first column whose cells should be cleared.</param>
+		/// <param name="fromRow">The first row whose cells should be cleared.</param>
+		/// <param name="fromCol">The first column whose cells should be cleared.</param>
 		/// <param name="toRow">The last row whose values should be cleared.</param>
-		/// <param name="toCol">The last column whose values should be cleared.</param>
-		void Clear(int _fromRow, int _fromCol, int toRow, int toCol);
+		/// <param name="toColumn">The last column whose values should be cleared.</param>
+		void Clear(int fromRow, int fromCol, int toRow, int toColumn);
 
 		/// <summary>
 		/// Get the range of cells contained in this collection.
@@ -149,7 +149,7 @@ namespace OfficeOpenXml
 	/// </summary>
 	/// <typeparam name="T">The type of the value being stored in the <see cref="ICellStore{T}"/>.</typeparam>
 	internal class CellStoreEnumeratorFactory<T>
-	{
+	{ 
 		/// <summary>
 		/// Enumerate the entire CellStore.
 		/// </summary>
@@ -157,9 +157,9 @@ namespace OfficeOpenXml
 		/// <returns>An <see cref="ICellStoreEnumerator{T}"/> that enumerates the entire <paramref name="cellStore"/>.</returns>
 		public static ICellStoreEnumerator<T> GetNewEnumerator(ICellStore<T> cellStore)
 		{
-			//var specificCellStore = cellStore as CellStore<T>;
-			//if(specificCellStore != null)
-			//	return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore);
+			var originalCellStore = cellStore as CellStore<T>;
+			if (originalCellStore != null)
+				return new CellStore<T>.CellsStoreEnumerator<T>(originalCellStore);
 			var newCellStore = cellStore as BalancedCellStore<T>;
 			if (newCellStore != null)
 				return new BalancedStoreEnumerator<T>(newCellStore);
@@ -177,9 +177,9 @@ namespace OfficeOpenXml
 		/// <returns>An enumerator that only returns values within the given range.</returns>
 		public static ICellStoreEnumerator<T> GetNewEnumerator(ICellStore<T> cellStore, int startRow, int startColumn, int endRow, int endColumn)
 		{
-			//var specificCellStore = cellStore as CellStore<T>;
-			//if (specificCellStore != null)
-			//	return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore, startRow, startColumn, endRow, endColumn);
+			var originalCellStore = cellStore as CellStore<T>;
+			if (originalCellStore != null)
+				return new CellStore<T>.CellsStoreEnumerator<T>(originalCellStore, startRow, startColumn, endRow, endColumn);
 			var newCellStore = cellStore as BalancedCellStore<T>;
 			if (newCellStore != null)
 				return new BalancedStoreEnumerator<T>(newCellStore, startRow, startColumn, endRow, endColumn);

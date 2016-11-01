@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 
@@ -20,6 +21,51 @@ namespace EPPlusTest
 				sheet.InsertRow(4, 10);
 				sheet.InsertRow(1, 10);
 				sheet.InsertRow(10, 50);
+			}
+		}
+
+		[TestMethod]
+		public void InsertingSpaceAndCopyingColumnsUpdatesFormulaReferencesCorrectly()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet 1");
+				sheet.Cells[2, 2].Formula = "B1";
+				sheet.Cells[3, 3].Formula = "C1";
+				sheet.Cells[4, 3].Formula = "C1";
+				sheet.InsertColumn(5, 9);
+				sheet.Cells["B:D"].Copy(sheet.Cells["E:G"]);
+				sheet.Cells["B:D"].Copy(sheet.Cells["H:J"]);
+				sheet.Cells["B:D"].Copy(sheet.Cells["K:M"]);
+
+				sheet.InsertColumn(13, 8);
+				sheet.Cells["K:L"].Copy(sheet.Cells["M:N"]);
+				sheet.Cells["K:L"].Copy(sheet.Cells["O:P"]);
+				sheet.Cells["K:L"].Copy(sheet.Cells["Q:R"]);
+				sheet.Cells["K:L"].Copy(sheet.Cells["S:T"]);
+
+				sheet.InsertColumn(10, 8);
+
+				sheet.Cells["H:I"].Copy(sheet.Cells["J:K"]);
+				sheet.Cells["H:I"].Copy(sheet.Cells["L:M"]);
+				sheet.Cells["H:I"].Copy(sheet.Cells["N:O"]);
+				sheet.Cells["H:I"].Copy(sheet.Cells["P:Q"]);
+
+				for (int column = 1; column < 26; column++)
+				{
+					sheet.Cells[1, column].Value = $"References Column {column}.";
+				}
+				sheet.Calculate();
+				for (int column = 1; column <= 40; column++)
+				{
+					if (!string.IsNullOrEmpty(sheet.Cells[2, column].Value as string))
+						Assert.AreEqual($"References Column {column}.", sheet.Cells[2, column].Value);
+					else if (!string.IsNullOrEmpty(sheet.Cells[3, column].Value as string))
+					{
+						Assert.AreEqual($"References Column {column}.", sheet.Cells[3, column].Value);
+						Assert.AreEqual($"References Column {column}.", sheet.Cells[4, column].Value);
+					}
+				}
 			}
 		}
 

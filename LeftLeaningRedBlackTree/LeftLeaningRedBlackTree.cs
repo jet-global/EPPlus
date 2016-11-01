@@ -76,10 +76,11 @@ namespace OfficeOpenXml
 			/// </summary>
 			public int Siblings;
 
-        /// <summary>
-        /// Gets an HTML fragment representing the node and its children.
-        /// </summary>
-        public string HtmlFragment
+#if DEBUGGING
+			/// <summary>
+			/// Gets an HTML fragment representing the node and its children.
+			/// </summary>
+			public string HtmlFragment
         {
             get
             {
@@ -95,6 +96,7 @@ namespace OfficeOpenXml
                     "</table>";
             }
         }
+#endif
 		}
 
 		/// <summary>
@@ -138,9 +140,9 @@ namespace OfficeOpenXml
 		/// </summary>
 		/// <param name="key">Key to add.</param>
 		/// <param name="value">Value to add.</param>
-		public void Add(TKey key, TValue value)
+		public void Add(TKey key, TValue value, bool rebalance = true)
 		{
-			_rootNode = Add(_rootNode, key, value);
+			_rootNode = Add(_rootNode, key, value, rebalance);
 			_rootNode.IsBlack = true;
 #if DEBUGGING
         AssertInvariants();
@@ -234,7 +236,7 @@ namespace OfficeOpenXml
 			else
 			{
 				return default(TValue);
-//				throw new KeyNotFoundException();
+				//				throw new KeyNotFoundException();
 			}
 		}
 
@@ -302,6 +304,7 @@ namespace OfficeOpenXml
 			get { return GetExtreme(_rootNode, n => n.Right, n => n.Key); }
 		}
 
+		#region Private Methods
 		/// <summary>
 		/// Returns true if the specified node is red.
 		/// </summary>
@@ -324,33 +327,35 @@ namespace OfficeOpenXml
 		/// <param name="key">Key to add.</param>
 		/// <param name="value">Value to add.</param>
 		/// <returns>New root node.</returns>
-		private Node Add(Node node, TKey key, TValue value)
+		private Node Add(Node node, TKey key, TValue value, bool rebalance = true)
 		{
 			if (null == node)
 			{
+				if (rebalance == false)
+					throw new InvalidOperationException("Cannot add new nodes with rebalancing disabled.");
 				// Insert new node
 				Count++;
 				return new Node { Key = key, Value = value };
 			}
 
-			if (IsRed(node.Left) && IsRed(node.Right))
+			if (rebalance && IsRed(node.Left) && IsRed(node.Right))
 			{
 				// Split node with two red children
 				FlipColor(node);
 			}
-
 			// Find right place for new node
 			int comparisonResult = KeyAndValueComparison(key, value, node.Key, node.Value);
 			if (comparisonResult < 0)
 			{
-				node.Left = Add(node.Left, key, value);
+				node.Left = Add(node.Left, key, value, rebalance);
 			}
 			else if (0 < comparisonResult)
 			{
-				node.Right = Add(node.Right, key, value);
+				node.Right = Add(node.Right, key, value, rebalance);
 			}
 			else
 			{
+				rebalance = false;
 				if (IsMultiDictionary)
 				{
 					// Store the presence of a "duplicate" node
@@ -363,17 +368,19 @@ namespace OfficeOpenXml
 					node.Value = value;
 				}
 			}
-
-			if (IsRed(node.Right))
+			if (rebalance == true)
 			{
-				// Rotate to prevent red node on right
-				node = RotateLeft(node);
-			}
+				if (IsRed(node.Right))
+				{
+					// Rotate to prevent red node on right
+					node = RotateLeft(node);
+				}
 
-			if (IsRed(node.Left) && IsRed(node.Left.Left))
-			{
-				// Rotate to prevent consecutive red nodes
-				node = RotateRight(node);
+				if (IsRed(node.Left) && IsRed(node.Left.Left))
+				{
+					// Rotate to prevent consecutive red nodes
+					node = RotateRight(node);
+				}
 			}
 
 			return node;
@@ -731,7 +738,7 @@ namespace OfficeOpenXml
 			return comparisonResult;
 		}
 
-
+#if DEBUGGING
 		/// <summary>
 		/// Asserts that tree invariants are not violated.
 		/// </summary>
@@ -794,10 +801,10 @@ namespace OfficeOpenXml
 			}
 		}
 
-    /// <summary>
-    /// Gets an HTML fragment representing the tree.
-    /// </summary>
-    public string HtmlDocument
+		/// <summary>
+		/// Gets an HTML fragment representing the tree.
+		/// </summary>
+		public string HtmlDocument
     {
         get
         {
@@ -809,5 +816,7 @@ namespace OfficeOpenXml
                 "</html>";
         }
     }
+#endif
+		#endregion
 	}
 }
