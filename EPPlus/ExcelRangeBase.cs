@@ -1455,6 +1455,234 @@ namespace OfficeOpenXml
 		internal List<ExcelSparkline> Sparklines { get; } = new List<ExcelSparkline>();
 		#endregion
 		#region Private Methods
+		private void CopyInternal(ExcelRangeBase Destination, ExcelRangeCopyOptionFlags? excelRangeCopyOptionFlags, bool clearDestinationBeforeCopying)
+		{
+			bool sameWorkbook = Destination._worksheet.Workbook == _worksheet.Workbook;
+			ExcelStyles sourceStyles = _worksheet.Workbook.Styles,
+						styles = Destination._worksheet.Workbook.Styles;
+			Dictionary<int, int> styleCashe = new Dictionary<int, int>();
+			//Clear all existing cells; 
+			int toRow = _toRow - _fromRow + 1,
+				toCol = _toCol - _fromCol + 1;
+
+			int i = 0;
+			object o = null;
+			byte flag = 0;
+			Uri hl = null;
+
+			var excludeFormulas = excelRangeCopyOptionFlags.HasValue && (excelRangeCopyOptionFlags.Value & ExcelRangeCopyOptionFlags.ExcludeFormulas) == ExcelRangeCopyOptionFlags.ExcludeFormulas;
+			var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
+
+			var copiedValue = new List<CopiedCell>();
+			while (cse.MoveNext())
+			{
+				var row = cse.Row;
+				var col = cse.Column;       //Issue 15070
+				var cell = new CopiedCell
+				{
+					Row = Destination._fromRow + (row - _fromRow),
+					Column = Destination._fromCol + (col - _fromCol),
+					Value = cse.Value._value
+				};
+
+				if (!excludeFormulas && _worksheet._formulas.Exists(row, col, out o))
+				{
+					if (o is int)
+					{
+						cell.Formula = _worksheet.GetFormula(cse.Row, cse.Column);
+					}
+					else
+					{
+						cell.Formula = o;
+					}
+				}
+				if (_worksheet.ExistsStyleInner(row, col, ref i))
+				{
+					if (sameWorkbook)
+					{
+						cell.StyleID = i;
+					}
+					else
+					{
+						if (styleCashe.ContainsKey(i))
+						{
+							i = styleCashe[i];
+						}
+						else
+						{
+							var oldStyleID = i;
+							i = styles.CloneStyle(sourceStyles, i);
+							styleCashe.Add(oldStyleID, i);
+						}
+						//Destination._worksheet.SetStyleInner(row, col, i);
+						cell.StyleID = i;
+					}
+				}
+
+				if (_worksheet._hyperLinks.Exists(row, col, out hl))
+				{
+					//Destination._worksheet._hyperLinks.SetValue(row, col, hl);
+					cell.HyperLink = hl;
+				}
+
+				// Will just be null if no comment exists.
+				cell.Comment = _worksheet.Cells[cse.Row, cse.Column].Comment;
+
+				if (_worksheet._flags.Exists(row, col, out flag))
+				{
+					cell.Flag = flag;
+				}
+				copiedValue.Add(cell);
+			}
+
+			//Copy styles with no cell value
+			var cses = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
+			while (cses.MoveNext())
+			{
+				if (!_worksheet.ExistsValueInner(cses.Row, cses.Column))
+				{
+					var row = Destination._fromRow + (cses.Row - _fromRow);
+					var col = Destination._fromCol + (cses.Column - _fromCol);
+					var cell = new CopiedCell
+					{
+						Row = row,
+						Column = col,
+						Value = null
+					};
+
+					i = cses.Value._styleId;
+					if (sameWorkbook)
+					{
+						cell.StyleID = i;
+					}
+					else
+					{
+						if (styleCashe.ContainsKey(i))
+						{
+							i = styleCashe[i];
+						}
+						else
+						{
+							var oldStyleID = i;
+							i = styles.CloneStyle(sourceStyles, i);
+							styleCashe.Add(oldStyleID, i);
+						}
+						//Destination._worksheet.SetStyleInner(row, col, i);
+						cell.StyleID = i;
+					}
+					copiedValue.Add(cell);
+				}
+			}
+			var copiedMergedCells = new Dictionary<int, ExcelAddress>();
+			//Merged cells
+			var csem = CellStoreEnumeratorFactory<int>.GetNewEnumerator(_worksheet.MergedCells.Cells, _fromRow, _fromCol, _toRow, _toCol);
+			while (csem.MoveNext())
+			{
+				if (!copiedMergedCells.ContainsKey(csem.Value))
+				{
+					var adr = new ExcelAddress(_worksheet.Name, _worksheet.MergedCells.List[csem.Value]);
+					if (this.Collide(adr) == eAddressCollition.Inside)
+					{
+						copiedMergedCells.Add(csem.Value, new ExcelAddress(
+							Destination._fromRow + (adr.Start.Row - _fromRow),
+							Destination._fromCol + (adr.Start.Column - _fromCol),
+							Destination._fromRow + (adr.End.Row - _fromRow),
+							Destination._fromCol + (adr.End.Column - _fromCol)));
+					}
+					else
+					{
+						//Partial merge of the address ignore.
+						copiedMergedCells.Add(csem.Value, null);
+					}
+				}
+			}
+
+			if (clearDestinationBeforeCopying)
+			{
+				Destination._worksheet._values.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
+				Destination._worksheet._formulas.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
+				Destination._worksheet._hyperLinks.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
+				Destination._worksheet._flags.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
+				Destination._worksheet._commentsStore.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
+			}
+
+			foreach (var cell in copiedValue)
+			{
+				Destination._worksheet.SetValueInner(cell.Row, cell.Column, cell.Value);
+
+				if (cell.StyleID != null)
+				{
+					Destination._worksheet.SetStyleInner(cell.Row, cell.Column, cell.StyleID.Value);
+				}
+
+				if (cell.Formula != null)
+				{
+					cell.Formula = _workbook.Package.FormulaManager.UpdateFormulaReferences(cell.Formula.ToString(), Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, Destination.WorkSheet, Destination.WorkSheet, true);
+					Destination._worksheet._formulas.SetValue(cell.Row, cell.Column, cell.Formula);
+				}
+				if (cell.HyperLink != null)
+				{
+					Destination._worksheet._hyperLinks.SetValue(cell.Row, cell.Column, cell.HyperLink);
+				}
+
+				if (cell.Comment != null)
+				{
+					Destination.Worksheet.Cells[cell.Row, cell.Column].AddComment(cell.Comment.Text, cell.Comment.Author);
+				}
+				if (cell.Flag != 0)
+				{
+					Destination._worksheet._flags.SetValue(cell.Row, cell.Column, cell.Flag);
+				}
+			}
+
+			//Add merged cells
+			foreach (var m in copiedMergedCells.Values)
+			{
+				if (m != null)
+				{
+					Destination._worksheet.MergedCells.Add(m, true);
+				}
+			}
+			int rowOffset = Destination._fromRow;
+			string workbook, worksheet, address;
+			List<ExcelSparkline> newSparklines = new List<ExcelSparkline>();
+			foreach (var group in this.Worksheet.SparklineGroups.SparklineGroups)
+			{
+				newSparklines.Clear();
+				foreach (var sparkline in group.Sparklines)
+				{
+					if (sparkline.HostCell.Collide(this) != eAddressCollition.No)
+					{
+						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+						var newFormula = _workbook.Package.FormulaManager.UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+						if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
+							newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
+						var newHostCell = _workbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+						var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };
+						newSparklines.Add(newSparkline);
+					}
+				}
+				group.Sparklines.AddRange(newSparklines);
+			}
+			if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns)
+			{
+				for (int r = 0; r < this.Rows; r++)
+				{
+					var destinationRow = Destination.Worksheet.Row(Destination.Start.Row + r);
+					destinationRow.OutlineLevel = this.Worksheet.Row(_fromRow + r).OutlineLevel;
+				}
+			}
+			if (_fromRow == 1 && _toRow == ExcelPackage.MaxRows)
+			{
+				for (int c = 0; c < this.Columns; c++)
+				{
+					var destinationCol = Destination.Worksheet.Column(Destination.Start.Column + c);
+					destinationCol.OutlineLevel = this.Worksheet.Column(_fromCol + c).OutlineLevel;
+				}
+			}
+
+		}
+
 		/// <summary>
 		/// Set the value without altering the richtext property
 		/// </summary>
@@ -2373,226 +2601,12 @@ namespace OfficeOpenXml
 		/// <param name="excelRangeCopyOptionFlags">Cell parts that will not be copied. If Formulas are specified, the formulas will NOT be copied.</param>
 		public void Copy(ExcelRangeBase Destination, ExcelRangeCopyOptionFlags? excelRangeCopyOptionFlags)
 		{
-			bool sameWorkbook = Destination._worksheet.Workbook == _worksheet.Workbook;
-			ExcelStyles sourceStyles = _worksheet.Workbook.Styles,
-						styles = Destination._worksheet.Workbook.Styles;
-			Dictionary<int, int> styleCashe = new Dictionary<int, int>();
-			//Clear all existing cells; 
-			int toRow = _toRow - _fromRow + 1,
-				toCol = _toCol - _fromCol + 1;
+			this.CopyInternal(Destination, excelRangeCopyOptionFlags, true);
+		}
 
-			int i = 0;
-			object o = null;
-			byte flag = 0;
-			Uri hl = null;
-
-			var excludeFormulas = excelRangeCopyOptionFlags.HasValue && (excelRangeCopyOptionFlags.Value & ExcelRangeCopyOptionFlags.ExcludeFormulas) == ExcelRangeCopyOptionFlags.ExcludeFormulas;
-			var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
-
-			var copiedValue = new List<CopiedCell>();
-			while (cse.MoveNext())
-			{
-				var row = cse.Row;
-				var col = cse.Column;       //Issue 15070
-				var cell = new CopiedCell
-				{
-					Row = Destination._fromRow + (row - _fromRow),
-					Column = Destination._fromCol + (col - _fromCol),
-					Value = cse.Value._value
-				};
-
-				if (!excludeFormulas && _worksheet._formulas.Exists(row, col, out o))
-				{
-					if (o is int)
-					{
-						cell.Formula = _worksheet.GetFormula(cse.Row, cse.Column);
-					}
-					else
-					{
-						cell.Formula = o;
-					}
-				}
-				if (_worksheet.ExistsStyleInner(row, col, ref i))
-				{
-					if (sameWorkbook)
-					{
-						cell.StyleID = i;
-					}
-					else
-					{
-						if (styleCashe.ContainsKey(i))
-						{
-							i = styleCashe[i];
-						}
-						else
-						{
-							var oldStyleID = i;
-							i = styles.CloneStyle(sourceStyles, i);
-							styleCashe.Add(oldStyleID, i);
-						}
-						//Destination._worksheet.SetStyleInner(row, col, i);
-						cell.StyleID = i;
-					}
-				}
-
-				if (_worksheet._hyperLinks.Exists(row, col, out hl))
-				{
-					//Destination._worksheet._hyperLinks.SetValue(row, col, hl);
-					cell.HyperLink = hl;
-				}
-
-				// Will just be null if no comment exists.
-				cell.Comment = _worksheet.Cells[cse.Row, cse.Column].Comment;
-
-				if (_worksheet._flags.Exists(row, col, out flag))
-				{
-					cell.Flag = flag;
-				}
-				copiedValue.Add(cell);
-			}
-
-			//Copy styles with no cell value
-			var cses =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
-			while (cses.MoveNext())
-			{
-				if (!_worksheet.ExistsValueInner(cses.Row, cses.Column))
-				{
-					var row = Destination._fromRow + (cses.Row - _fromRow);
-					var col = Destination._fromCol + (cses.Column - _fromCol);
-					var cell = new CopiedCell
-					{
-						Row = row,
-						Column = col,
-						Value = null
-					};
-
-					i = cses.Value._styleId;
-					if (sameWorkbook)
-					{
-						cell.StyleID = i;
-					}
-					else
-					{
-						if (styleCashe.ContainsKey(i))
-						{
-							i = styleCashe[i];
-						}
-						else
-						{
-							var oldStyleID = i;
-							i = styles.CloneStyle(sourceStyles, i);
-							styleCashe.Add(oldStyleID, i);
-						}
-						//Destination._worksheet.SetStyleInner(row, col, i);
-						cell.StyleID = i;
-					}
-					copiedValue.Add(cell);
-				}
-			}
-			var copiedMergedCells = new Dictionary<int, ExcelAddress>();
-			//Merged cells
-			var csem = CellStoreEnumeratorFactory<int>.GetNewEnumerator(_worksheet.MergedCells.Cells, _fromRow, _fromCol, _toRow, _toCol);
-			while (csem.MoveNext())
-			{
-				if (!copiedMergedCells.ContainsKey(csem.Value))
-				{
-					var adr = new ExcelAddress(_worksheet.Name, _worksheet.MergedCells.List[csem.Value]);
-					if (this.Collide(adr) == eAddressCollition.Inside)
-					{
-						copiedMergedCells.Add(csem.Value, new ExcelAddress(
-							Destination._fromRow + (adr.Start.Row - _fromRow),
-							Destination._fromCol + (adr.Start.Column - _fromCol),
-							Destination._fromRow + (adr.End.Row - _fromRow),
-							Destination._fromCol + (adr.End.Column - _fromCol)));
-					}
-					else
-					{
-						//Partial merge of the address ignore.
-						copiedMergedCells.Add(csem.Value, null);
-					}
-				}
-			}
-			Destination._worksheet._values.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
-			Destination._worksheet._formulas.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
-			Destination._worksheet._hyperLinks.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
-			Destination._worksheet._flags.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
-			Destination._worksheet._commentsStore.Clear(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
-
-			foreach (var cell in copiedValue)
-			{
-				Destination._worksheet.SetValueInner(cell.Row, cell.Column, cell.Value);
-
-				if (cell.StyleID != null)
-				{
-					Destination._worksheet.SetStyleInner(cell.Row, cell.Column, cell.StyleID.Value);
-				}
-
-				if (cell.Formula != null)
-				{
-					cell.Formula = _workbook.Package.FormulaManager.UpdateFormulaReferences(cell.Formula.ToString(), Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, Destination.WorkSheet, Destination.WorkSheet, true);
-					Destination._worksheet._formulas.SetValue(cell.Row, cell.Column, cell.Formula);
-				}
-				if (cell.HyperLink != null)
-				{
-					Destination._worksheet._hyperLinks.SetValue(cell.Row, cell.Column, cell.HyperLink);
-				}
-
-				if (cell.Comment != null)
-				{
-					Destination.Worksheet.Cells[cell.Row, cell.Column].AddComment(cell.Comment.Text, cell.Comment.Author);
-				}
-				if (cell.Flag != 0)
-				{
-					Destination._worksheet._flags.SetValue(cell.Row, cell.Column, cell.Flag);
-				}
-			}
-
-			//Add merged cells
-			foreach (var m in copiedMergedCells.Values)
-			{
-				if (m != null)
-				{
-					Destination._worksheet.MergedCells.Add(m, true);
-				}
-			}
-			int rowOffset = Destination._fromRow;
-			string workbook, worksheet, address;
-			List<ExcelSparkline> newSparklines = new List<ExcelSparkline>();
-			foreach (var group in this.Worksheet.SparklineGroups.SparklineGroups)
-			{
-				newSparklines.Clear();
-				foreach (var sparkline in group.Sparklines)
-				{
-					if (sparkline.HostCell.Collide(this) != eAddressCollition.No)
-					{
-						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
-						var newFormula = _workbook.Package.FormulaManager.UpdateFormulaReferences(address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-						if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
-							newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
-						var newHostCell = _workbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, Destination._fromRow - _fromRow, Destination._fromCol - _fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-						var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };
-						newSparklines.Add(newSparkline);
-					}
-				}
-				group.Sparklines.AddRange(newSparklines);
-			}
-			if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns)
-			{
-				for (int r = 0; r < this.Rows; r++)
-				{
-					var destinationRow = Destination.Worksheet.Row(Destination.Start.Row + r);
-					destinationRow.OutlineLevel = this.Worksheet.Row(_fromRow + r).OutlineLevel;
-				}
-			}
-			if (_fromRow == 1 && _toRow == ExcelPackage.MaxRows)
-			{
-				for (int c = 0; c < this.Columns; c++)
-				{
-					var destinationCol = Destination.Worksheet.Column(Destination.Start.Column + c);
-					destinationCol.OutlineLevel = this.Worksheet.Column(_fromCol + c).OutlineLevel;
-				}
-			}
-
+		public void CopyToEmptySpace(ExcelRangeBase destination, ExcelRangeCopyOptionFlags? excelRangeCopyOptionFlags = null)
+		{
+			this.CopyInternal(destination, excelRangeCopyOptionFlags, false);
 		}
 
 		/// <summary>
