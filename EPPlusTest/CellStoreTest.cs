@@ -31,9 +31,6 @@ namespace EPPlusTest
 				sheet.Cells["K24"].Value = "Has even more text that could be copied if necessary.";
 				sheet.Cells["L24"].Value = "Has even more distinct text that could be copied.";
 
-				sheet.Cells["N25"].Value = "Has even more text that could be copied if necessary.";
-				sheet.Cells["O25"].Value = "Has even more distinct text that could be copied.";
-
 				int row = 22;
 				this.InsertTheRightAmountOfSpace(sheet, row, 5);
 				row += 67;
@@ -42,25 +39,28 @@ namespace EPPlusTest
 					this.InsertTheRightAmountOfSpace(sheet, i, 6);
 				}
 
-				row = 4646;
+				row = 4579;
 				this.InsertTheRightAmountOfSpace(sheet, row, 8);
 				row += 67;
 				for (int i = row; i > row - 67; i--)
 				{
 					this.InsertTheRightAmountOfSpace(sheet, i, 9);
 				}
+				sheet.Calculate();
+				for (int i = 22; i < 4579; i++)
+				{
+					Assert.IsTrue(!string.IsNullOrEmpty(sheet.Cells[i, 5].Value?.ToString()), $"Cell at [{i},5] is null or empty.");
+					Assert.IsTrue(!string.IsNullOrEmpty(sheet.Cells[i, 6].Value?.ToString()), $"Cell at [{i},6] is null or empty.");
+				}
 
-				Assert.IsNotNull(sheet.Cells[4645, 5].Formula);
-				Assert.IsNotNull(sheet.Cells[4645, 6].Formula);
+				for (int i = 4579; i < 9136; i++)
+				{
+					Assert.IsTrue(!string.IsNullOrEmpty(sheet.Cells[i, 8].Value?.ToString()), $"Cell at [{i},8] is null or empty.");
+					Assert.IsTrue(!string.IsNullOrEmpty(sheet.Cells[i, 9].Value?.ToString()), $"Cell at [{i},9] is null or empty.");
+				}
 
-
-				Assert.IsNotNull(sheet.Cells[4646, 8].Formula);
-				Assert.IsNotNull(sheet.Cells[4646, 9].Formula);
-				Assert.IsNotNull(sheet.Cells[9269, 8].Formula);
-				Assert.IsNotNull(sheet.Cells[9269, 9].Formula);
-
-				Assert.AreEqual("Has even more text that could be copied if necessary.", sheet.Cells[9270, 11].Value);
-				Assert.AreEqual("Has even more distinct text that could be copied.", sheet.Cells[9270, 12].Value);
+				Assert.AreEqual("Has even more text that could be copied if necessary.", sheet.Cells[9136, 11].Value);
+				Assert.AreEqual("Has even more distinct text that could be copied.", sheet.Cells[9136, 12].Value);
 			}
 		}
 

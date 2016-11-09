@@ -28,6 +28,9 @@
  * ******************************************************************************
  * Jan Källman		    Added       		        2012-11-25
  *******************************************************************************/
+// This preprocessor constant turns on invariant validation for all modification methods on the CellStore (useful for tracking down weird CellStore bugs). 
+// #define DEBUGGING
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -148,7 +151,6 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 		}
 		internal int GetNextRow(int row)
 		{
-			//var page = (int)((ulong)row >> CellStore<int>.pageBits);
 			var p = GetPosition(row);
 			if (p < 0)
 			{
@@ -598,8 +600,8 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 			var page = (short)(row >> pageBits);
 			if (col >= 0)
 			{
-				//var pos = Array.BinarySearch(_columnIndex[col].Pages, 0, _columnIndex[col].Count, new IndexBase() { Index = page });
 				var pos = this._columnIndex[col].GetPosition(row);
+
 				if (pos < 0)
 				{
 					pos = ~pos;
@@ -617,7 +619,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 					this.AddPage(this._columnIndex[col], pos, page);
 				}
 				var pageItem = this._columnIndex[col]._pages[pos];
-				if (pageItem.IndexOffset > row)
+				if (Math.Min(pageItem.IndexOffset, pageItem.MinIndex) > row)
 				{
 					pos--;
 					page--;
@@ -629,6 +631,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 				}
 
 				short ix = (short)(row - ((pageItem.Index << CellStore<T>.pageBits) + pageItem.Offset));
+
 				this._searchItem.Index = ix;
 				var cellPos = Array.BinarySearch(pageItem.Rows, 0, pageItem.RowCount, this._searchItem);
 				if (cellPos < 0)
@@ -650,6 +653,9 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 				this.AddCell(this._columnIndex[col], 0, 0, ix, value);
 			}
 		}
+#if DEBUGGING
+		this.AssertInvariants();
+#endif
 	}
 
 	/// <summary>
@@ -828,6 +834,9 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 				}
 			}
 		}
+#if DEBUGGING
+		this.AssertInvariants();
+#endif
 	}
 
 	/// <summary>
@@ -1024,6 +1033,9 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 				}
 			}
 		}
+#if DEBUGGING
+		this.AssertInvariants();
+#endif
 	}
 	#endregion
 
@@ -1572,6 +1584,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 		{
 			if (pageItem.RowCount == CellStore<T>.PageSizeMax) //Max size-->Split
 			{
+
 				pagePos = this.SplitPage(columnIndex, pagePos);
 				// Should the new value be stored on the previous page?
 				if (columnIndex._pages[pagePos - 1].RowCount > pos)
@@ -1583,6 +1596,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 					pos -= columnIndex._pages[pagePos - 1].RowCount;
 				}
 				pageItem = columnIndex._pages[pagePos];
+				ix = (short) (ix - pageItem.IndexOffset);
 			}
 			else //Expand to double size.
 			{
@@ -1593,14 +1607,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 		}
 		if (pos < pageItem.RowCount)
 		{
-			try {
-				Array.Copy(pageItem.Rows, pos, pageItem.Rows, pos + 1, pageItem.RowCount - pos);
-			}
-			catch(Exception ex)
-			{
-
-				throw;
-			}
+			Array.Copy(pageItem.Rows, pos, pageItem.Rows, pos + 1, pageItem.RowCount - pos);
 		}
 		pageItem.Rows[pos] = new IndexItem() { Index = ix, IndexPointer = _values.Count };
 		this._values.Add(value);
@@ -1616,7 +1623,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 			page.Offset = 0;
 			for (int r = 0; r < page.RowCount; r++)
 			{
-				page.Rows[r].Index -= (short)offset;
+				page.Rows[r].Index += (short)offset;
 			}
 		}
 		//Find Split pos
@@ -1651,7 +1658,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 		return pagePos + 1;
 	}
 
-	private PageIndex AdjustIndex(ColumnIndex columnIndex, int pagePos)
+	private bool AdjustIndex(ColumnIndex columnIndex, int pagePos)
 	{
 		PageIndex page = columnIndex._pages[pagePos];
 		//First Adjust indexes
@@ -1660,16 +1667,30 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 			page.Rows[0].Index >= PageSize)
 		{
 			page.Index++;
-			page.Offset -= PageSize;
+			if (page.Offset > 0)
+				page.Offset -= PageSize;
+			else
+				for (int i = 0; i < page.RowCount; i++)
+				{
+					page.Rows[i].Index -= PageSize;
+				}
+			return true;
 		}
 		else if (page.Offset + page.Rows[0].Index <= -PageSize ||
 				 page.Offset <= -PageSize ||
 				 page.Rows[0].Index <= -PageSize)
 		{
 			page.Index--;
-			page.Offset += PageSize;
+			if (page.Offset < 1)
+				page.Offset += PageSize;
+			else
+				for (int i = 0; i < page.RowCount; i++)
+				{
+					page.Rows[i].Index += PageSize;
+				}
+			return true;
 		}
-		return page;
+		return false;
 	}
 
 	private void AddPage(ColumnIndex column, int pos, short index)
@@ -1959,6 +1980,37 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 		this._columnIndex[pos] = new ColumnIndex() { Index = (short)(Column) };
 		this.ColumnCount++;
 	}
+
+#if DEBUGGING
+	private void AssertInvariants()
+	{
+		int index = -1;
+		for (int i = 0; i < this.ColumnCount; i++)
+		{
+			var column = this._columnIndex[i];
+			if (column.Index <= index)
+				throw new InvalidOperationException($"The column {column.Index} violates the invariant that the list of columns is always sorted.");
+			index = column.Index;
+			this.AssertPageInvariants(column);
+		}
+	}
+
+	private void AssertPageInvariants(ColumnIndex column)
+	{
+		int lastIndex = -1;
+		for (int i = 0; i < column.PageCount; i++)
+		{
+			var page = column._pages[i];
+			if (Math.Abs(page.Offset) > CellStore<T>.PageSize)
+				throw new InvalidOperationException($"The offset {page.Offset} is too extreme, must be in the range (-{CellStore<T>.PageSize} to {CellStore<T>.PageSize}).");
+			if (page.RowCount != 0 && page.MaxIndex < page.MinIndex)
+				throw new InvalidOperationException($"Page {i} is not sorted: begins with {page.MinIndex} and ends with {page.MaxIndex}.");
+			else if (page.MinIndex <= lastIndex)
+				throw new InvalidOperationException($"The page {i} on column.Index {column.Index} is out of order.");
+			lastIndex = page.MinIndex;
+		}
+	}
+#endif
 	#endregion
 
 }
