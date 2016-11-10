@@ -252,7 +252,7 @@ namespace OfficeOpenXml
 			var sfi = range._worksheet._formulas.GetValue(row, col);
 			if (sfi is int)
 			{
-				range.SplitFormulas(range._worksheet.Cells[row, col]);
+				range.UpdateSharedFormulaAnchors(range._worksheet.Cells[row, col]);
 			}
 			if (sfi != null) range._worksheet._formulas.SetValue(row, col, string.Empty);
 			range._worksheet.SetValueInner(row, col, value);
@@ -260,7 +260,7 @@ namespace OfficeOpenXml
 		private static void Set_Formula(ExcelRangeBase range, object value, int row, int col)
 		{
 			var f = range._worksheet._formulas.GetValue(row, col);
-			if (f is int && (int)f >= 0) range.SplitFormulas(range._worksheet.Cells[row, col]);
+			if (f is int && (int)f >= 0) range.UpdateSharedFormulaAnchors(range._worksheet.Cells[row, col]);
 
 			string formula = (value == null ? string.Empty : value.ToString());
 			if (formula == string.Empty)
@@ -1504,14 +1504,14 @@ namespace OfficeOpenXml
 					var f = _worksheet._formulas.GetValue(row, col);
 					if (f is int && (int)f >= 0)
 					{
-						SplitFormulas(address);
+						UpdateSharedFormulaAnchors(address);
 						return;
 					}
 				}
 			}
 		}
 
-		private void SplitFormulas(ExcelAddressBase address)
+		private void UpdateSharedFormulaAnchors(ExcelAddressBase address)
 		{
 			List<int> formulas = new List<int>();
 			for (int col = address._fromCol; col <= address._toCol; col++)
@@ -1537,23 +1537,23 @@ namespace OfficeOpenXml
 
 			foreach (int ix in formulas)
 			{
-				SplitFormula(address, ix);
+				UpdateSharedFormulaAnchor(address, ix);
 			}
 
 			////Clear any formula references inside the refered range
 			//_worksheet._formulas.Clear(address._fromRow, address._toRow, address._toRow - address._fromRow + 1, address._toCol - address.column + 1);
 		}
 
-		private void SplitFormula(ExcelAddressBase address, int ix)
+		private void UpdateSharedFormulaAnchor(ExcelAddressBase address, int ix)
 		{
-			var f = _worksheet._sharedFormulas[ix];
-			var fRange = _worksheet.Cells[f.Address];
+			var f = this._worksheet._sharedFormulas[ix];
+			var fRange = this._worksheet.Cells[f.Address];
 			var collide = address.Collide(fRange);
 			switch (collide)
 			{
 				case eAddressCollition.Equal:
 				case eAddressCollition.Inside:
-					_worksheet._sharedFormulas.Remove(ix);
+					this._worksheet._sharedFormulas.Remove(ix);
 					break;
 				case eAddressCollition.Partly:
 					int row, column;
@@ -1565,7 +1565,7 @@ namespace OfficeOpenXml
 						f.Formula = ExcelCellBase.TranslateFromR1C1(r1c1, f.StartRow, f.StartCol);
 					}
 					else
-						_worksheet._sharedFormulas.Remove(ix);
+						this._worksheet._sharedFormulas.Remove(ix);
 					break;
 				default:
 				case eAddressCollition.No:
