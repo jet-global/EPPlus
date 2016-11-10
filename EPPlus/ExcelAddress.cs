@@ -443,6 +443,17 @@ namespace OfficeOpenXml
 				   _toRow > ExcelPackage.MaxRows ||
 				   _toCol > ExcelPackage.MaxColumns);
 		}
+
+		/// <summary>
+		/// Determines whether or not the given coordinates are within this <see cref="ExcelAddressBase"/>.
+		/// </summary>
+		/// <param name="row">The row to check.</param>
+		/// <param name="column">The column to check.</param>
+		/// <returns>True if the row and column do not map to a cell in this range; otherwise false.</returns>
+		public bool ContainsCoordinate(int row, int column)
+		{
+			return row >= this._fromRow && row <= this._toRow && column >= this._fromCol && column <= this._toCol;
+		}
 		#endregion
 
 		#region Internal Methods
