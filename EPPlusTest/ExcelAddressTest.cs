@@ -830,6 +830,19 @@ namespace EPPlusTest
 			Assert.IsFalse(excelAddress.IsValidRowCol());
 		}
 		#endregion
+
+		#region ContainsCoordinate Tests
+		[TestMethod]
+		public void ContainsCoordinate()
+		{
+			var excelAddressBase = new ExcelAddressBase(3, 3, 5, 5);
+			Assert.IsTrue(excelAddressBase.ContainsCoordinate(4, 4));		// Inside
+			Assert.IsFalse(excelAddressBase.ContainsCoordinate(2, 4));	// Above
+			Assert.IsFalse(excelAddressBase.ContainsCoordinate(6, 4));	// Below
+			Assert.IsFalse(excelAddressBase.ContainsCoordinate(4, 2));	// Left
+			Assert.IsFalse(excelAddressBase.ContainsCoordinate(4, 6));	// Right
+		}
+		#endregion
 		#endregion
 
 		#region ExcelAddress Tests

@@ -1549,147 +1549,52 @@ namespace OfficeOpenXml
 			var f = _worksheet._sharedFormulas[ix];
 			var fRange = _worksheet.Cells[f.Address];
 			var collide = address.Collide(fRange);
-
-			//The formula is inside the currenct range, remove it
-			if (collide == eAddressCollition.Equal || collide == eAddressCollition.Inside)
+			switch (collide)
 			{
-				_worksheet._sharedFormulas.Remove(ix);
-				return;
-				//fRange.SetSharedFormulaID(int.MinValue); 
-			}
-			var firstCellCollide = address.Collide(new ExcelAddressBase(fRange._fromRow, fRange._fromCol, fRange._fromRow, fRange._fromCol));
-			if (collide == eAddressCollition.Partly && (firstCellCollide == eAddressCollition.Inside || firstCellCollide == eAddressCollition.Equal)) //Do we need to split? Only if the functions first row is inside the new range.
-			{
-				//The formula partly collides with the current range
-				bool fIsSet = false;
-				string formulaR1C1 = fRange.FormulaR1C1;
-				//Top Range
-				if (fRange._fromRow < _fromRow)
-				{
-					f.Address = ExcelCellBase.GetAddress(fRange._fromRow, fRange._fromCol, _fromRow - 1, fRange._toCol);
-					fIsSet = true;
-				}
-				//Left Range
-				if (fRange._fromCol < address._fromCol)
-				{
-					if (fIsSet)
+				case eAddressCollition.Equal:
+				case eAddressCollition.Inside:
+					_worksheet._sharedFormulas.Remove(ix);
+					break;
+				case eAddressCollition.Partly:
+					int row, column;
+					if (this.TryFindNewAnchorCoordinates(f, address, out row, out column))
 					{
-						f = new ExcelWorksheet.Formulas(SourceCodeTokenizer.Default);
-						f.Index = _worksheet.GetMaxShareFunctionIndex(false);
-						f.StartCol = fRange._fromCol;
-						f.IsArray = false;
-						_worksheet._sharedFormulas.Add(f.Index, f);
+						var r1c1 = ExcelCellBase.TranslateToR1C1(f.Formula, f.StartRow, f.StartCol);
+						f.StartRow = row;
+						f.StartCol = column;
+						f.Formula = ExcelCellBase.TranslateFromR1C1(r1c1, f.StartRow, f.StartCol);
 					}
 					else
-					{
-						fIsSet = true;
-					}
-					if (fRange._fromRow < address._fromRow)
-						f.StartRow = address._fromRow;
-					else
-					{
-						f.StartRow = fRange._fromRow;
-					}
-					if (fRange._toRow < address._toRow)
-					{
-						f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
-								fRange._toRow, address._fromCol - 1);
-					}
-					else
-					{
-						f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
-							 address._toRow, address._fromCol - 1);
-					}
-					f.Formula = TranslateFromR1C1(formulaR1C1, f.StartRow, f.StartCol);
-					_worksheet.Cells[f.Address].SetSharedFormulaID(f.Index);
-				}
-				//Right Range
-				if (fRange._toCol > address._toCol)
-				{
-					if (fIsSet)
-					{
-						f = new ExcelWorksheet.Formulas(SourceCodeTokenizer.Default);
-						f.Index = _worksheet.GetMaxShareFunctionIndex(false);
-						f.IsArray = false;
-						_worksheet._sharedFormulas.Add(f.Index, f);
-					}
-					else
-					{
-						fIsSet = true;
-					}
-					if (address._fromRow < fRange._fromRow)
-						f.StartRow = fRange._fromRow;
-					else
-					{
-						f.StartRow = address._fromRow;
-					}
-					f.StartCol = this.FindNextColumn(f.StartRow, address._toCol + 1, fRange._toCol);
-					if (f.StartCol == -1)
-						_worksheet._sharedFormulas.Remove(f.Index);
-					else
-					{
-						if (fRange._toRow < address._toRow)
-						{
-							f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
-									fRange._toRow, fRange._toCol);
-						}
-						else
-						{
-							f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
-									address._toRow, fRange._toCol);
-						}
-						f.Formula = TranslateFromR1C1(formulaR1C1, f.StartRow, f.StartCol);
-						_worksheet.Cells[f.Address].SetSharedFormulaID(f.Index);
-					}
-				}
-				//Bottom Range
-				if (fRange._toRow > address._toRow)
-				{
-					if (fIsSet)
-					{
-						f = new ExcelWorksheet.Formulas(SourceCodeTokenizer.Default);
-						f.Index = _worksheet.GetMaxShareFunctionIndex(false);
-						f.IsArray = false;
-						_worksheet._sharedFormulas.Add(f.Index, f);
-					}
-
-					f.StartCol = fRange._fromCol;
-					f.StartRow = this.FindNextRow(fRange._toRow, f.StartCol);
-					if (f.StartRow == -1)
-						_worksheet._sharedFormulas.Remove(f.Index);
-					else
-					{
-						f.Formula = TranslateFromR1C1(formulaR1C1, f.StartRow, f.StartCol);
-
-						f.Address = ExcelCellBase.GetAddress(f.StartRow, f.StartCol,
-								fRange._toRow, fRange._toCol);
-						_worksheet.Cells[f.Address].SetSharedFormulaID(f.Index);
-					}
-				}
+						_worksheet._sharedFormulas.Remove(ix);
+					break;
+				default:
+				case eAddressCollition.No:
+					break;
 			}
 		}
 
-		private int FindNextRow(int maxRow, int col)
+		private bool TryFindNewAnchorCoordinates(ExcelWorksheet.Formulas currentFormula, ExcelAddressBase newAddress, out int row, out int column)
 		{
-			for (int i = 1; i + _toRow <= maxRow; i++)
+			row = -1;
+			column = -1;
+			var currentAddress = new ExcelAddressBase(currentFormula.Address);
+			for (int r = currentAddress._fromRow; r <= currentAddress._toRow; r++)
 			{
-				int row = _toRow + i;
-				var f = _worksheet._formulas.GetValue(row, col);
-				if (f is int)
-					return row;
+				for (int c = currentAddress._fromCol; c <= currentAddress._toCol; c++)
+				{
+					var f = _worksheet._formulas.GetValue(r, c) as int?;
+					if (f == currentFormula.Index)
+					{
+						if (!newAddress.ContainsCoordinate(r, c))
+						{
+							row = r;
+							column = c;
+							return true;
+						}
+					}
+				}
 			}
-			return -1;
-		}
-
-		private int FindNextColumn(int row, int initialCol, int maxCol)
-		{
-			for (int col = initialCol; col <= maxCol; col++)
-			{
-				var f = _worksheet._formulas.GetValue(row, col);
-				if (f is int)
-					return col;
-			}
-			return -1;
+			return false;
 		}
 
 		private object ConvertData(ExcelTextFormat Format, string v, int col, bool isText)
