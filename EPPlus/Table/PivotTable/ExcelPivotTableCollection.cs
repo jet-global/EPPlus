@@ -102,11 +102,11 @@ namespace OfficeOpenXml.Table.PivotTable
 
         internal string GetNewTableName()
         {
-            string name = "Pivottable1";
+            string name = "PivotTable1";
             int i = 2;
             while (_ws.Workbook.ExistsPivotTableName(name))
             {
-                name = string.Format("Pivottable{0}", i++);
+                name = string.Format("PivotTable{0}", i++);
             }
             return name;
         }

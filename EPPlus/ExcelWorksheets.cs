@@ -809,8 +809,10 @@ namespace OfficeOpenXml
 				XmlDocument xmlDoc = new XmlDocument();
 				xmlDoc.LoadXml(xml);
 				xmlDoc.SelectSingleNode("//d:pivotTableDefinition/@name", tbl.NameSpaceManager).Value = name;
-				xml = xmlDoc.OuterXml;
 
+				this.UpdateSlicerCachePivotTableNames(addedWorksheet.SheetID.ToString(), tbl.Name, name);
+
+				xml = xmlDoc.OuterXml;
 				int Id = this.Package.Workbook.NextPivotTableID++;
 				var uriTbl = GetNewUri(this.Package.Package, "/xl/pivotTables/pivotTable{0}.xml", ref Id);
 				if (this.Package.Workbook.NextPivotTableID < Id) this.Package.Workbook.NextPivotTableID = Id;
@@ -841,6 +843,17 @@ namespace OfficeOpenXml
 				addedWorksheet.Part.CreateRelationship(UriHelper.ResolvePartUri(addedWorksheet.WorksheetUri, uriTbl), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
 				partTbl.CreateRelationship(UriHelper.ResolvePartUri(tbl.Relationship.SourceUri, uriCd), tbl.CacheDefinition.Relationship.TargetMode, tbl.CacheDefinition.Relationship.RelationshipType);
 				partCd.CreateRelationship(UriHelper.ResolvePartUri(uriCd, uriRec), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheRecords");
+			}
+		}
+
+		private void UpdateSlicerCachePivotTableNames(string newSheetId, string oldPivotTableName, string newPivotTableName)
+		{
+			var workbook = this.Package.Workbook;
+			foreach(var slicerCache in workbook.SlicerCaches)
+			{
+				// In this context, pivot table names are case-insensitive.
+				if (newSheetId == slicerCache.TabId && oldPivotTableName.Equals(slicerCache.PivotTableName))
+					slicerCache.PivotTableName = newPivotTableName;
 			}
 		}
 
@@ -1030,7 +1043,7 @@ namespace OfficeOpenXml
 		}
 
 		private void CopyDrawing(ExcelWorksheet originalWorksheet, ExcelWorksheet newWorksheet)
-		{       
+		{
 			string xml = originalWorksheet.Drawings.DrawingXml.OuterXml;
 			var uriDraw = new Uri(string.Format("/xl/drawings/drawing{0}.xml", newWorksheet.SheetID), UriKind.Relative);
 			var part = this.Package.Package.CreatePart(uriDraw, "application/vnd.openxmlformats-officedocument.drawing+xml", this.Package.Compression);
@@ -1112,13 +1125,19 @@ namespace OfficeOpenXml
 					c._top = draw._top;
 					c._height = draw._height;
 					c._width = draw._width;
+					var newSlicerDrawing = c as ExcelSlicerDrawing;
+					if (newSlicerDrawing != null)
+					{
+						newSlicerDrawing.Slicer = newWorksheet.Slicers.Slicers.First(excelSlicer => excelSlicer.Name == draw.Name);
+						newSlicerDrawing.Slicer.IncrementNameAndCacheName();
+						newSlicerDrawing.Name = newSlicerDrawing.Slicer.Name;
+					}
 				}
 			}
 		}
 
 		private void CopySlicerDrawing(ExcelWorksheet originalWorksheet, ExcelWorksheet newWorksheet, ExcelDrawing draw)
 		{
-			ExcelSlicerDrawing slicer = draw as ExcelSlicerDrawing;
 			var uriSlicerCacheFull = XmlHelper.GetNewUri(this.Package.Package, "/xl/slicerCaches/slicerCache{0}.xml");
 			var uriSlicerCache = new Uri(uriSlicerCacheFull.ToString().Substring(4), UriKind.Relative);
 			var slicerCachePart = this.Package.Package.CreatePart(uriSlicerCacheFull, "application/vnd.ms-excel.slicerCache+xml", this.Package.Compression);
@@ -1134,10 +1153,7 @@ namespace OfficeOpenXml
 			var newWorkbookSlicerCacheNode = newWorkbookSlicerCachesNode.SelectSingleNode("x14:slicerCache", newWorksheet.Workbook.NameSpaceManager).CloneNode(false);
 			newWorkbookSlicerCachesNode.AppendChild(newWorkbookSlicerCacheNode);
 			newWorkbookSlicerCacheNode.Attributes["r:id"].Value = slicerCacheRelationship.Id;
-			var newSlicerDrawing = newWorksheet.Drawings.First(drawing => drawing.Name == draw.Name) as ExcelSlicerDrawing;
-			newSlicerDrawing.Slicer = newWorksheet.Slicers.Slicers.First(excelSlicer => excelSlicer.Name == slicer.Name);
-			newSlicerDrawing.Slicer.IncrementNameAndCacheName();
-			newSlicerDrawing.Name = newSlicerDrawing.Slicer.Name;
+			// We don't know the new PivotTableName yet, so updating that must done later, when PivotTables are copied.
 		}
 
 		private void CopyVmlDrawing(ExcelWorksheet originalSheet, ExcelWorksheet newSheet)

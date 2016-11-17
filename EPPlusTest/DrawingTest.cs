@@ -921,6 +921,8 @@ namespace EPPlusTest
 					Assert.AreEqual(new Uri("slicerCaches/slicerCache2.xml", UriKind.Relative), newDrawing.Slicer.SlicerCache.SlicerCacheUri);
 					Assert.AreEqual("Slicer_Description", oldDrawing.Slicer.SlicerCache.Name);
 					Assert.AreEqual("Slicer_Description1", newDrawing.Slicer.SlicerCache.Name);
+					Assert.AreEqual("PivotTable1", oldDrawing.Slicer.SlicerCache.PivotTableName);
+					Assert.AreEqual("PivotTable2", newDrawing.Slicer.SlicerCache.PivotTableName);
 					package.SaveAs(tempFile);
 				}
 				using (var package = new ExcelPackage(tempFile))
@@ -947,6 +949,8 @@ namespace EPPlusTest
 					Assert.AreEqual(new Uri("slicerCaches/slicerCache2.xml", UriKind.Relative), newDrawing.Slicer.SlicerCache.SlicerCacheUri);
 					Assert.AreEqual("Slicer_Description", oldDrawing.Slicer.SlicerCache.Name);
 					Assert.AreEqual("Slicer_Description1", newDrawing.Slicer.SlicerCache.Name);
+					Assert.AreEqual("PivotTable1", oldDrawing.Slicer.SlicerCache.PivotTableName);
+					Assert.AreEqual("PivotTable2", newDrawing.Slicer.SlicerCache.PivotTableName);
 				}
 			}
 			finally
@@ -989,6 +993,9 @@ namespace EPPlusTest
 					Assert.AreEqual("Slicer_Description", oldDrawing.Slicer.SlicerCache.Name);
 					Assert.AreEqual("Slicer_Description1", newDrawing.Slicer.SlicerCache.Name);
 					Assert.AreEqual("Slicer_Description2", newDrawing2.Slicer.SlicerCache.Name);
+					Assert.AreEqual("PivotTable1", oldDrawing.Slicer.SlicerCache.PivotTableName);
+					Assert.AreEqual("PivotTable2", newDrawing.Slicer.SlicerCache.PivotTableName);
+					Assert.AreEqual("PivotTable3", newDrawing2.Slicer.SlicerCache.PivotTableName);
 					package.SaveAs(tempFile);
 				}
 				using (var package = new ExcelPackage(tempFile))
@@ -1021,6 +1028,9 @@ namespace EPPlusTest
 					Assert.AreEqual("Slicer_Description", oldDrawing.Slicer.SlicerCache.Name);
 					Assert.AreEqual("Slicer_Description1", newDrawing.Slicer.SlicerCache.Name);
 					Assert.AreEqual("Slicer_Description2", newDrawing2.Slicer.SlicerCache.Name);
+					Assert.AreEqual("PivotTable1", oldDrawing.Slicer.SlicerCache.PivotTableName);
+					Assert.AreEqual("PivotTable2", newDrawing.Slicer.SlicerCache.PivotTableName);
+					Assert.AreEqual("PivotTable3", newDrawing2.Slicer.SlicerCache.PivotTableName);
 				}
 			}
 			finally

@@ -91,7 +91,9 @@ namespace EPPlusTest
         public void Calulation4()
         {
 			var dir = AppDomain.CurrentDomain.BaseDirectory;
-			var pck = new ExcelPackage(new FileInfo(Path.Combine(dir, "Workbooks", "FormulaTest.xlsx")));
+			var file = new FileInfo(Path.Combine(dir, "Workbooks", "FormulaTest.xlsx"));
+			Assert.IsTrue(file.Exists);
+			var pck = new ExcelPackage(file);
             pck.Workbook.Calculate();
             Assert.AreEqual(490D, pck.Workbook.Worksheets[1].Cells["D5"].Value);
         }
@@ -99,7 +101,10 @@ namespace EPPlusTest
         public void CalulationValidationExcel()
         {
             var dir = AppDomain.CurrentDomain.BaseDirectory;
-            var pck = new ExcelPackage(new FileInfo(Path.Combine(dir, "Workbooks", "FormulaTest.xlsx")));
+			var file = new FileInfo(Path.Combine(dir, "Workbooks", "FormulaTest.xlsx"));
+			Assert.IsTrue(file.Exists);
+
+				var pck = new ExcelPackage(file);
 
             var ws = pck.Workbook.Worksheets["ValidateFormulas"];
             var fr = new Dictionary<string, object>();

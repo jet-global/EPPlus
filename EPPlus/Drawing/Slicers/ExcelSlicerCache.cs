@@ -14,20 +14,20 @@
 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
  * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
  *
- * All code and executables are provided "as is" with no warranty either express or implied. 
+ * All code and executables are provided "as is" with no warranty either express or implied.
  * The author accepts no liability for any damage or loss of business that this product may cause.
  *
  * Code change notes:
- * 
+ *
  * Author                      Change                            Date
  * ******************************************************************************
- * Matt Delaney                Added support for slicers.        11 October 2016     
+ * Matt Delaney                Added support for slicers.        11 October 2016
  *******************************************************************************/
 using System;
 using System.Xml;
@@ -75,11 +75,28 @@ namespace OfficeOpenXml.Drawing.Slicers
 		{
 			get
 			{
-				return this.TopNode.SelectSingleNode("default:pivotTables/default:pivotTable").Attributes["tabId"].Value;
+				return this.TopNode.SelectSingleNode("default:pivotTables/default:pivotTable", this.NameSpaceManager).Attributes["tabId"].Value;
 			}
 			set
 			{
 				this.TopNode.SelectSingleNode("default:pivotTables/default:pivotTable", this.NameSpaceManager).Attributes["tabId"].Value = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the name of the PivotTable this slicer cache's slicer is affecting.
+		/// </summary>
+		public string PivotTableName
+		{
+			get
+			{
+				return this.TopNode.SelectSingleNode("default:pivotTables/default:pivotTable", this.NameSpaceManager).Attributes["name"].Value;
+
+			}
+			set
+			{
+				this.TopNode.SelectSingleNode("default:pivotTables/default:pivotTable", this.NameSpaceManager).Attributes["name"].Value = value;
+
 			}
 		}
 
@@ -88,7 +105,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 
 		#region Constructors
 		/// <summary>
-		/// Initialize a new <see cref="ExcelSlicerCache"/> object to represent the slicerCacheN.xml part. 
+		/// Initialize a new <see cref="ExcelSlicerCache"/> object to represent the slicerCacheN.xml part.
 		/// </summary>
 		/// <param name="node">The slicerCacheDefinition node to represent.</param>
 		/// <param name="namespaceManager">The namespaceManager to use when parsing nodes (This should usually be based on <see cref="ExcelSlicer.SlicerDocumentNamespaceManager"/>).</param>
@@ -104,7 +121,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 
 		#region Internal Methods
 		/// <summary>
-		/// Save this <see cref="ExcelSlicerCache"/> back into the <paramref name="package"/> at 
+		/// Save this <see cref="ExcelSlicerCache"/> back into the <paramref name="package"/> at
 		/// </summary>
 		/// <param name="package"></param>
 		internal void Save(ExcelPackage package)
