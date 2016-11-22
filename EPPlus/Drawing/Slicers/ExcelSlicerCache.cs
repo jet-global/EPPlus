@@ -30,6 +30,7 @@
  * Matt Delaney                Added support for slicers.        11 October 2016
  *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace OfficeOpenXml.Drawing.Slicers
@@ -38,18 +39,19 @@ namespace OfficeOpenXml.Drawing.Slicers
 	/// Represents an Excel Slicer Cache.
 	/// When this part exists, it can be found at /xl/slicerCaches/slicerCacheN.xml.
 	/// </summary>
-	public class ExcelSlicerCache: XmlHelper
+	public class ExcelSlicerCache : XmlHelper
 	{
+		#region Class Variables
+		private List<PivotTableNode> myPivotTables = new List<PivotTableNode>();
+		#endregion
+
 		#region Properties
 		/// <summary>
 		/// Gets or sets the name of this <see cref="ExcelSlicerCache"/>.
 		/// </summary>
 		public string Name
 		{
-			get
-			{
-				return this.TopNode.Attributes["name"].Value;
-			}
+			get { return this.TopNode.Attributes["name"].Value; }
 			set
 			{
 				this.TopNode.Attributes["name"].Value = value;
@@ -69,35 +71,11 @@ namespace OfficeOpenXml.Drawing.Slicers
 		public Uri SlicerCacheUri { get; private set; }
 
 		/// <summary>
-		/// Gets or sets the tabId, which identifies which worksheet the slicer corresponding to this slicerCache exists on.
+		/// Gets a readonly list of <see cref="PivotTableNode"/>s that wrap the <pivotTable /> element.
 		/// </summary>
-		public string TabId
+		public IReadOnlyList<PivotTableNode> PivotTables
 		{
-			get
-			{
-				return this.TopNode.SelectSingleNode("default:pivotTables/default:pivotTable", this.NameSpaceManager).Attributes["tabId"].Value;
-			}
-			set
-			{
-				this.TopNode.SelectSingleNode("default:pivotTables/default:pivotTable", this.NameSpaceManager).Attributes["tabId"].Value = value;
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the name of the PivotTable this slicer cache's slicer is affecting.
-		/// </summary>
-		public string PivotTableName
-		{
-			get
-			{
-				return this.TopNode.SelectSingleNode("default:pivotTables/default:pivotTable", this.NameSpaceManager).Attributes["name"].Value;
-
-			}
-			set
-			{
-				this.TopNode.SelectSingleNode("default:pivotTables/default:pivotTable", this.NameSpaceManager).Attributes["name"].Value = value;
-
-			}
+			get { return myPivotTables; }
 		}
 
 		private XmlDocument Part { get; set; }
@@ -111,11 +89,15 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// <param name="namespaceManager">The namespaceManager to use when parsing nodes (This should usually be based on <see cref="ExcelSlicer.SlicerDocumentNamespaceManager"/>).</param>
 		/// <param name="slicerCacheUri">The path to this Slicer Cache's part in the package.</param>
 		/// <param name="part">The <see cref="XmlDocument"/> based on the <paramref name="slicerCacheUri"/>.</param>
-		internal ExcelSlicerCache(XmlNode node, XmlNamespaceManager namespaceManager, Uri slicerCacheUri, XmlDocument part): base(namespaceManager, node)
+		internal ExcelSlicerCache(XmlNode node, XmlNamespaceManager namespaceManager, Uri slicerCacheUri, XmlDocument part) : base(namespaceManager, node)
 		{
 			this.SlicerCacheUri = slicerCacheUri;
 			this.Part = part;
 			this.Name = node.Attributes["name"].Value;
+			foreach (XmlNode pivotTableNode in this.TopNode.SelectNodes("default:pivotTables/default:pivotTable", this.NameSpaceManager))
+			{
+				myPivotTables.Add(new PivotTableNode(pivotTableNode));
+			}
 		}
 		#endregion
 
@@ -127,6 +109,50 @@ namespace OfficeOpenXml.Drawing.Slicers
 		internal void Save(ExcelPackage package)
 		{
 			package.SavePart(new Uri("/xl/" + this.SlicerCacheUri, UriKind.Relative), this.Part);
+		}
+		#endregion
+
+		#region Nested Classes
+		/// <summary>
+		/// Wraps a <pivotTable /> in <slicerCacheDefinition-pivotTables />
+		/// </summary>
+		public class PivotTableNode
+		{
+			#region Properties
+			/// <summary>
+			/// Gets or sets the tabId, which identifies which worksheet the pivot table corresponding to this slicerCache exists on.
+			/// </summary>
+			public string TabId
+			{
+				get { return this.Node.Attributes["tabId"].Value; }
+				set { this.Node.Attributes["tabId"].Value = value; }
+			}
+
+			/// <summary>
+			/// Gets or sets the name of the PivotTable this slicer cache's slicer is affecting.
+			/// </summary>
+			public string PivotTableName
+			{
+				get { return this.Node.Attributes["name"].Value; }
+				set { this.Node.Attributes["name"].Value = value; }
+			}
+
+			private XmlNode Node { get; set; }
+			#endregion
+
+			#region Constructors
+			/// <summary>
+			/// Creates an instance of a <see cref="PivotTableNode"/>.
+			/// This is a wrapper for the <pivotTable /> in <slicerCacheDefinition />
+			/// </summary>
+			/// <param name="node">The <see cref="XmlNode"/> underlying this <see cref="PivotTableNode"/>.</param>
+			public PivotTableNode(XmlNode node)
+			{
+				if (node == null)
+					throw new ArgumentNullException(nameof(node));
+				this.Node = node;
+			}
+			#endregion
 		}
 		#endregion
 	}

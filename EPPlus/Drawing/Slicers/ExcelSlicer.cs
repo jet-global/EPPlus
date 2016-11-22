@@ -48,7 +48,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// <summary>
 		/// Gets or sets the slicer cache associated with this slicer.
 		/// </summary>
-		public ExcelSlicerCache SlicerCache { get; set; }
+		public ExcelSlicerCache SlicerCache { get; private set; }
 
 		/// <summary>
 		/// Gets or sets this slicer's name attribute.
@@ -105,20 +105,6 @@ namespace OfficeOpenXml.Drawing.Slicers
 			var cacheName = node.Attributes["cache"].Value;
 			this.SlicerCache = this.Worksheet.Workbook.SlicerCaches.Last(cache => cache.Name == cacheName);
 			this.SlicerCache.Slicer = this;
-		}
-		#endregion
-
-		#region Public Methods
-		/// <summary>
-		/// Updates this slicer's name and cache name variables to be new, unique values. 
-		/// </summary>
-		internal void IncrementNameAndCacheName()
-		{
-			var newSlicerNumber = this.Worksheet.Workbook.NextSlicerIdNumber[this.Name]++;
-			this.SlicerCache.Name += newSlicerNumber.ToString();
-			this.Worksheet.Workbook.Names.AddFormula(this.SlicerCache.Name, "#N/A");
-			this.SlicerCache.TabId = this.Worksheet.SheetID.ToString();
-			this.Name += $" {newSlicerNumber}";
 		}
 		#endregion
 	}
