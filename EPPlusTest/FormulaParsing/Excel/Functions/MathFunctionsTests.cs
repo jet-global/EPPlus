@@ -409,33 +409,6 @@ namespace EPPlusTest.Excel.Functions
         }
 
         [TestMethod]
-        public void FloorShouldReturnCorrectResultWhenSignificanceIsBetween0And1()
-        {
-            var func = new Floor();
-            var args = FunctionsHelper.CreateArgs(26.75d, 0.1);
-            var result = func.Execute(args, _parsingContext);
-            Assert.AreEqual(26.7d, result.Result);
-        }
-
-        [TestMethod]
-        public void FloorShouldReturnCorrectResultWhenSignificanceIs1()
-        {
-            var func = new Floor();
-            var args = FunctionsHelper.CreateArgs(26.75d, 1);
-            var result = func.Execute(args, _parsingContext);
-            Assert.AreEqual(26d, result.Result);
-        }
-
-        [TestMethod]
-        public void FloorShouldReturnCorrectResultWhenSignificanceIsMinus1()
-        {
-            var func = new Floor();
-            var args = FunctionsHelper.CreateArgs(-26.75d, -1);
-            var result = func.Execute(args, _parsingContext);
-            Assert.AreEqual(-26d, result.Result);
-        }
-
-        [TestMethod]
         public void RandShouldReturnAValueBetween0and1()
         {
             var func = new Rand();

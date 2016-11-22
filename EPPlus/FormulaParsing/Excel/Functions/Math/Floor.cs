@@ -22,56 +22,36 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-    public class Floor : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-			if(ValidateArguments(arguments, 2) == false)
+	public class Floor : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
 			var number = ArgToDecimal(arguments, 0);
-            var significance = ArgToDecimal(arguments, 1);
-            ValidateNumberAndSign(number, significance);
-            if (significance < 1 && significance > 0)
-            {
-                var floor = System.Math.Floor(number);
-                var rest = number - floor;
-                var nSign = (int)(rest / significance);
-                return CreateResult(floor + (nSign * significance), DataType.Decimal);
-            }
-            else if (significance == 1)
-            {
-                return CreateResult(System.Math.Floor(number), DataType.Decimal);
-            }
-            else
-            {
-                double result;
-                if (number > 1)
-                {
-                    result = number - (number % significance) + significance;
-                }
-                else
-                {
-                    result = number - (number % significance);
-                }
-                return CreateResult(result, DataType.Decimal);
-            }
-        }
+			var significance = ArgToDecimal(arguments, 1);
+			if ((number > 0d && significance < 0))
+				return new CompileResult(eErrorType.Num);
+			if (significance == 0.0)
+				return new CompileResult(eErrorType.Div0);
 
-        private void ValidateNumberAndSign(double number, double sign)
-        {
-            if (number > 0d && sign < 0)
-            {
-                var values = string.Format("num: {0}, sign: {1}", number, sign);
-                throw new InvalidOperationException("Floor cannot handle a negative significance when the number is positive" + values);
-            }
-        }
-    }
+			if (number == 0.0)
+				return base.CreateResult(0.0, DataType.Decimal);
+			double divisionResult = number / significance;
+			int multiple = (int)divisionResult;
+			bool exactChange = divisionResult == multiple;
+			if (exactChange)
+				return base.CreateResult(number, DataType.Decimal);
+			else if (significance > 0 && number < 0)
+				return base.CreateResult((multiple - 1) * significance, DataType.Decimal);
+			else
+				return base.CreateResult(multiple * significance, DataType.Decimal);
+
+		}
+	}
 }
