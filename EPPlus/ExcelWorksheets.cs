@@ -810,7 +810,15 @@ namespace OfficeOpenXml
 				xmlDoc.LoadXml(xml);
 				xmlDoc.SelectSingleNode("//d:pivotTableDefinition/@name", tbl.NameSpaceManager).Value = name;
 
-				this.UpdateSlicerCachePivotTableNames(addedWorksheet.SheetID.ToString(), tbl.Name, name);
+				var newSheetId = addedWorksheet.SheetID.ToString();
+				foreach (var slicerCache in this.Package.Workbook.SlicerCaches)
+				{
+					foreach (var pivotTable in slicerCache.PivotTables)
+					{
+						if (pivotTable.TabId == newSheetId && pivotTable.PivotTableName == tbl.Name)
+							pivotTable.PivotTableName = name;
+					}
+				}
 
 				xml = xmlDoc.OuterXml;
 				int Id = this.Package.Workbook.NextPivotTableID++;
@@ -843,17 +851,6 @@ namespace OfficeOpenXml
 				addedWorksheet.Part.CreateRelationship(UriHelper.ResolvePartUri(addedWorksheet.WorksheetUri, uriTbl), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
 				partTbl.CreateRelationship(UriHelper.ResolvePartUri(tbl.Relationship.SourceUri, uriCd), tbl.CacheDefinition.Relationship.TargetMode, tbl.CacheDefinition.Relationship.RelationshipType);
 				partCd.CreateRelationship(UriHelper.ResolvePartUri(uriCd, uriRec), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheRecords");
-			}
-		}
-
-		private void UpdateSlicerCachePivotTableNames(string newSheetId, string oldPivotTableName, string newPivotTableName)
-		{
-			var workbook = this.Package.Workbook;
-			foreach(var slicerCache in workbook.SlicerCaches)
-			{
-				// In this context, pivot table names are case-insensitive.
-				if (newSheetId == slicerCache.TabId && oldPivotTableName.Equals(slicerCache.PivotTableName))
-					slicerCache.PivotTableName = newPivotTableName;
 			}
 		}
 
@@ -1128,8 +1125,13 @@ namespace OfficeOpenXml
 					var newSlicerDrawing = c as ExcelSlicerDrawing;
 					if (newSlicerDrawing != null)
 					{
-						newSlicerDrawing.Slicer = newWorksheet.Slicers.Slicers.First(excelSlicer => excelSlicer.Name == draw.Name);
-						newSlicerDrawing.Slicer.IncrementNameAndCacheName();
+						var newSlicerNumber = this.Package.Workbook.NextSlicerIdNumber[draw.Name]++;
+						var slicer = newWorksheet.Slicers.Slicers.First(excelSlicer => excelSlicer.Name == draw.Name);
+						slicer.Name += $" {newSlicerNumber}";
+						slicer.SlicerCache.Name += newSlicerNumber.ToString();
+						this.Package.Workbook.Names.AddFormula(slicer.SlicerCache.Name, "#N/A");
+
+						newSlicerDrawing.Slicer = slicer;
 						newSlicerDrawing.Name = newSlicerDrawing.Slicer.Name;
 					}
 				}
@@ -1148,7 +1150,17 @@ namespace OfficeOpenXml
 			streamSlicerCache.Flush();
 			var newCacheDocument = originalWorksheet.Workbook.Package.GetXmlFromUri(uriSlicerCacheFull);
 			var slicerCacheNode = newCacheDocument.SelectSingleNode("default:slicerCacheDefinition", ExcelSlicer.SlicerDocumentNamespaceManager);
-			originalWorksheet.Workbook.SlicerCaches.Add(new ExcelSlicerCache(slicerCacheNode, ExcelSlicer.SlicerDocumentNamespaceManager, uriSlicerCache, newCacheDocument));
+			var slicerCache = new ExcelSlicerCache(slicerCacheNode, ExcelSlicer.SlicerDocumentNamespaceManager, uriSlicerCache, newCacheDocument);
+			// We don't have the copied pivot tables yet, but we do know that any pivot tables on the old sheet will be cloned so the PivotTable assocations
+			// need to be updated in the SlicerCache.
+			var oldSheetId = originalWorksheet.SheetID.ToString();
+			var newSheetId = newWorksheet.SheetID.ToString();
+			foreach (var pivotTable in slicerCache.PivotTables)
+			{
+				if (pivotTable.TabId == oldSheetId)
+					pivotTable.TabId = newSheetId;
+			}
+			originalWorksheet.Workbook.SlicerCaches.Add(slicerCache);
 			var newWorkbookSlicerCachesNode = newWorksheet.Workbook.TopNode.SelectSingleNode("d:extLst/d:ext/x14:slicerCaches", newWorksheet.Workbook.NameSpaceManager);
 			var newWorkbookSlicerCacheNode = newWorkbookSlicerCachesNode.SelectSingleNode("x14:slicerCache", newWorksheet.Workbook.NameSpaceManager).CloneNode(false);
 			newWorkbookSlicerCachesNode.AppendChild(newWorkbookSlicerCacheNode);

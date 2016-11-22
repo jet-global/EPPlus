@@ -88,6 +88,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Security" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="WindowsBase">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -96,6 +97,7 @@
     <Compile Include="Address.cs" />
     <Compile Include="Calculation.cs" />
     <Compile Include="ConditionalFormatting\ConditionalFormatting.cs" />
+    <Compile Include="Drawing\Slicers\ExcelSlicerCacheTest.cs" />
     <Compile Include="ExcelAddressTest.cs" />
     <Compile Include="ExcelCellBaseTest.cs" />
     <Compile Include="ExcelNamedRangeCollectionTest.cs" />
