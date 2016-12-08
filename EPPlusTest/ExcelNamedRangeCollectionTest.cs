@@ -661,5 +661,174 @@ namespace EPPlusTest
 			}
 		}
 		#endregion
+
+		#region Reference Resolution Tests
+		[TestMethod]
+		public void AbsoluteNamedRangeReferenceResolvesToAbsoluteLocation()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("AbsoluteNamedRange", new ExcelRangeBase(sheet, "$C$3"));
+				sheet.Cells[3, 3].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "AbsoluteNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RelativeNamedRangeWithoutOffsetsResolvestoSameRowAsCellBeingEvaluated()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, "$C1"));
+				sheet.Cells[1, 3].Value = "Wrong";
+				sheet.Cells[4, 3].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "RelativeNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RelativeNamedRangeWithPositiveRowOffsetResolvesCorrectly()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, "$C6"));
+				sheet.Cells[1, 3].Value = "Very Wrong";
+				sheet.Cells[6, 3].Value = "Wrong";
+				sheet.Cells[9, 3].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "RelativeNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RelativeNamedRangeWithNegativeRowOffsetResolvesCorrectly()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, $"$C{ExcelPackage.MaxRows}"));
+				sheet.Cells[ExcelPackage.MaxRows, 3].Value = "Wrong";
+				sheet.Cells[1, 3].Value = "Wrong";
+				sheet.Cells[3, 3].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "RelativeNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RelativeColumnNamedRangeWithoutOffsetsResolvestoSameRowAsCellBeingEvaluated()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, "A$3"));
+				sheet.Cells[3, 1].Value = "Wrong";
+				sheet.Cells[3, 4].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "RelativeNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RelativeNamedRangeWithPositiveColumnOffsetResolvesCorrectly()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, "B$3"));
+				sheet.Cells[3, 1].Value = "Very Wrong";
+				sheet.Cells[3, 2].Value = "Wrong";
+				sheet.Cells[3, 5].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "RelativeNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RelativeNamedRangeWithNegativeColumnOffsetResolvesCorrectly()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, $"{ExcelCellAddress.GetColumnLetter(ExcelPackage.MaxColumns)}$3"));
+				sheet.Cells[3, ExcelPackage.MaxColumns].Value = "Wrong";
+				sheet.Cells[3, 3].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "RelativeNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RelativeNamedRangeWithPositiveRowAndColumnOffsetsResolvesCorrectly()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, "B2"));
+				sheet.Cells[2, 2].Value = "Wrong";
+				sheet.Cells[5, 5].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "RelativeNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RelativeNamedRangeWithNegativeRowAndColumnOffsetsResolvesCorrectly()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, $"{ExcelCellAddress.GetColumnLetter(ExcelPackage.MaxColumns)}{ExcelPackage.MaxRows}"));
+				sheet.Cells[ExcelPackage.MaxRows, ExcelPackage.MaxColumns].Value = "Wrong";
+				sheet.Cells[3, 3].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "RelativeNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RelativeNamedRangeWithPositiveRowAndNegativeColumnOffsetResolvesCorrectly()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, $"{ExcelCellAddress.GetColumnLetter(ExcelPackage.MaxColumns)}2"));
+				sheet.Cells[2, ExcelPackage.MaxColumns].Value = "Wrong";
+				sheet.Cells[5, 3].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "RelativeNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RelativeNamedRangeWithNegativeRowAndPositiveColumnOffsetResolvesCorrectly()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				sheet.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, $"B{ExcelPackage.MaxRows}"));
+				sheet.Cells[ExcelPackage.MaxRows, ExcelPackage.MaxColumns].Value = "Wrong";
+				sheet.Cells[3, 5].Value = "Correct!";
+				sheet.Cells[4, 4].Formula = "RelativeNamedRange";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
+			}
+		}
+		#endregion
 	}
 }

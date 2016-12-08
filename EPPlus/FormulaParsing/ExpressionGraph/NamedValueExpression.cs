@@ -72,8 +72,23 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
                     {
                         return null;
                     }
-                    var factory = new CompileResultFactory();
-                    return factory.Create(range.First().Value);
+					var address = range.Address;
+					var column = address.Start.Column;
+					var row = address.Start.Row;
+					if (address._fromColFixed == false)
+					{
+						column = (column - 1 + c.Address.FromCol) % ExcelPackage.MaxColumns;
+						if (column == 0)
+							column = ExcelPackage.MaxColumns;
+					}
+					if (address._fromRowFixed == false)
+					{
+						row = (row - 1 + c.Address.FromRow) % ExcelPackage.MaxRows;
+						if (row == 0)
+							row = ExcelPackage.MaxRows;
+					}
+					var factory = new CompileResultFactory();
+                    return factory.Create(range.Worksheet.Cells[row, column].Value);
                 }
             }
             else
