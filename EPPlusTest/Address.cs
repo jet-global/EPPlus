@@ -153,12 +153,11 @@ namespace EPPlusTest
             using (var package = new ExcelPackage())
             {
                 var sheet = package.Workbook.Worksheets.Add("NEW");
-                var range = sheet.Cells[2, 1, 3, 3];
-                var namedRange = sheet.Names.Add("NewNamedRange", range);
+                var namedRange = sheet.Names.Add("NewNamedRange", new ExcelRangeBase(sheet, "$A$2:$C$3"));
 
                 sheet.InsertRow(1, 1);
 
-                Assert.AreEqual("'NEW'!A3:C4", namedRange.Address);
+                Assert.AreEqual("'NEW'!$A$3:$C$4", namedRange.Address);
             }
         }
 
@@ -184,11 +183,11 @@ namespace EPPlusTest
             {
                 var sheet = package.Workbook.Worksheets.Add("NEW");
                 var range = sheet.Cells[2, 1, 3, 3];
-                var namedRange = sheet.Names.Add("NewNamedRange", range);
+                var namedRange = sheet.Names.Add("NewNamedRange", new ExcelRangeBase(sheet, "$A$2:$C$3"));
 
                 sheet.InsertRow(3, 1);
 
-                Assert.AreEqual("'NEW'!A2:C4", namedRange.Address);
+                Assert.AreEqual("'NEW'!$A$2:$C$4", namedRange.Address);
             }
         }
 
@@ -198,12 +197,11 @@ namespace EPPlusTest
             using (var package = new ExcelPackage())
             {
                 var sheet = package.Workbook.Worksheets.Add("NEW");
-                var range = sheet.Cells[2, 2, 3, 4];
-                var namedRange = sheet.Names.Add("NewNamedRange", range);
+                var namedRange = sheet.Names.Add("NewNamedRange", new ExcelRangeBase(sheet, "$B$2:$D$3"));
 
                 sheet.InsertColumn(1, 1);
-
-                Assert.AreEqual("'NEW'!C2:E3", namedRange.Address);
+				
+                Assert.AreEqual("'NEW'!$C$2:$E$3", namedRange.Address);
             }
         }
 
@@ -228,12 +226,11 @@ namespace EPPlusTest
             using (var package = new ExcelPackage())
             {
                 var sheet = package.Workbook.Worksheets.Add("NEW");
-                var range = sheet.Cells[2, 2, 3, 4];
-                var namedRange = sheet.Names.Add("NewNamedRange", range);
+                var namedRange = sheet.Names.Add("NewNamedRange", new ExcelRangeBase(sheet, "$B$2:$D$3"));
 
-                sheet.InsertColumn(5, 1);
+                sheet.InsertColumn(3, 1);
 
-                Assert.AreEqual("B2:D3", namedRange.Address);
+                Assert.AreEqual("'NEW'!$B$2:$E$3", namedRange.Address);
             }
         }
 
@@ -244,12 +241,11 @@ namespace EPPlusTest
             {
                 var workbook = package.Workbook;
                 var sheet = package.Workbook.Worksheets.Add("NEW");
-                var range = sheet.Cells[2, 1, 3, 3];
-                var namedRange = workbook.Names.Add("NewNamedRange", range);
+                var namedRange = workbook.Names.Add("NewNamedRange", new ExcelRangeBase(sheet, "$A$2:$C$3"));
 
                 sheet.InsertRow(1, 1);
 
-                Assert.AreEqual("'NEW'!A3:C4", namedRange.Address);
+                Assert.AreEqual("'NEW'!$A$3:$C$4", namedRange.Address);
             }
         }
 
@@ -260,12 +256,11 @@ namespace EPPlusTest
             {
                 var workbook = package.Workbook;
                 var sheet = package.Workbook.Worksheets.Add("NEW");
-                var range = sheet.Cells[2, 2, 3, 3];
-                var namedRange = workbook.Names.Add("NewNamedRange", range);
+                var namedRange = workbook.Names.Add("NewNamedRange", new ExcelRangeBase(sheet, "$B$2:$C$3"));
 
                 sheet.InsertColumn(1, 1);
 
-                Assert.AreEqual("'NEW'!C2:D3", namedRange.Address);
+                Assert.AreEqual("'NEW'!$C$2:$D$3", namedRange.Address);
             }
         }
 
@@ -277,12 +272,11 @@ namespace EPPlusTest
                 var workbook = package.Workbook;
                 var sheet1 = package.Workbook.Worksheets.Add("NEW");
                 var sheet2 = package.Workbook.Worksheets.Add("NEW2");
-                var range = sheet2.Cells[2, 2, 3, 3];
-                var namedRange = workbook.Names.Add("NewNamedRange", range);
+                var namedRange = workbook.Names.Add("NewNamedRange", new ExcelRangeBase(sheet2, "$B$2:$C$3"));
 
                 sheet1.InsertColumn(1, 1);
 
-                Assert.AreEqual("B2:C3", namedRange.Address);
+                Assert.AreEqual("'NEW2'!$B$2:$C$3", namedRange.FullAddress);
             }
         }
     }

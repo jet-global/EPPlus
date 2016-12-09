@@ -1285,7 +1285,7 @@ namespace OfficeOpenXml
 			{
 				if (string.IsNullOrEmpty(_address) && _fromRow > 0)
 				{
-					_address = GetAddress(_fromRow, _fromCol, _toRow, _toCol);
+					_address = GetAddress(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
 				}
 				return _address;
 			}

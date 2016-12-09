@@ -359,7 +359,7 @@ namespace OfficeOpenXml.FormulaParsing
                 };
                 if (nameItem._fromRow > 0)
                 {
-                    ni.Value = new RangeInfo(nameItem.Worksheet ?? ws, nameItem._fromRow, nameItem._fromCol, nameItem._toRow, nameItem._toCol);
+                    ni.Value = new RangeInfo(nameItem.Worksheet ?? ws, nameItem);
                 }
                 else
                 {

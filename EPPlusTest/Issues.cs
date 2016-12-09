@@ -1338,9 +1338,9 @@ namespace EPPlusTest
                 var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
                 var sheet2 = package.Workbook.Worksheets.Add("Sheet2");
 
-                package.Workbook.Names.Add("myName1", new ExcelRange(sheet2, "A1"));
-                package.Workbook.Names.Add("myName2", new ExcelRange(sheet2, "A2"));
-                package.Workbook.Names.Add("myName3", new ExcelRange(sheet2, "A3"));
+                package.Workbook.Names.Add("myName1", new ExcelRange(sheet2, "$A$1"));
+                package.Workbook.Names.Add("myName2", new ExcelRange(sheet2, "$A$2"));
+                package.Workbook.Names.Add("myName3", new ExcelRange(sheet2, "$A$3"));
                 sheet2.Cells["A1"].Value = 1;
                 sheet2.Cells["A2"].Value = 2;
                 sheet2.Cells["A3"].Value = 3;
@@ -1349,7 +1349,7 @@ namespace EPPlusTest
                 sheet1.Cells["A3"].Formula = "myName3";
 
                 sheet2.InsertRow(2, 2);
-                Assert.AreEqual("'Sheet2'!A5", package.Workbook.Names.Last().Address);
+                Assert.AreEqual("'Sheet2'!$A$5", package.Workbook.Names.Last().Address);
 
             }
         }

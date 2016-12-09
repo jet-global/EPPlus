@@ -68,7 +68,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
                 }
                 else
                 {
-                    if (range.IsEmpty)
+                    if (range.IsEmpty && range.Address._fromRowFixed == true && range.Address._fromColFixed == true)
                     {
                         return null;
                     }
