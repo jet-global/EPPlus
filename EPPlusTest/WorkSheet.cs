@@ -3050,19 +3050,19 @@ namespace EPPlusTest
                 var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
                 var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
                 // Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
-                var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
-                var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
-                var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
+                var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$1:$Z$26"));
+                var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$1:$Z$26"));
+                var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
                 worksheet1.InsertRow(10, 10);
                 string workbook, worksheet, address;
                 ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
-                Assert.AreEqual("A1:Z36", address);
+                Assert.AreEqual("$A$1:$Z$36", address);
                 ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
-                Assert.AreEqual("A1:Z36", address);
+                Assert.AreEqual("$A$1:$Z$36", address);
                 address = null;
                 ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
-                Assert.AreEqual("A1:Z26", address);
+                Assert.AreEqual("$A$1:$Z$26", address);
             }
         }
 
@@ -3137,19 +3137,19 @@ namespace EPPlusTest
                 var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
                 var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
                 // Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
-                var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!A1:Z26"));
-                var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
-                var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
+                var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$1:$Z$26"));
+                var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
+                var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
                 string workbook, worksheet, address;
                 worksheet2.InsertColumn(10, 10);
                 ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
-                Assert.AreEqual("A1:Z26", address);
+                Assert.AreEqual("$A$1:$Z$26", address);
                 ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
-                Assert.AreEqual("A1:AJ26", address);
+                Assert.AreEqual("$A$1:$AJ$26", address);
                 address = null;
                 ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
-                Assert.AreEqual("A1:AJ26", address);
+                Assert.AreEqual("$A$1:$AJ$26", address);
             }
         }
 

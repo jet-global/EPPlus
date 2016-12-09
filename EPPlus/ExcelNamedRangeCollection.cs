@@ -188,10 +188,15 @@ namespace OfficeOpenXml
 					{
 						try
 						{
-							if (colFrom <= address.Start.Column)
-								addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column + cols, address.End.Row, address.End.Column + cols)},");
-							else if (colFrom <= address.End.Column)
-								addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column, address.End.Row, address.End.Column + cols)},");
+							if (address._fromColFixed)
+							{
+								if (colFrom <= address.Start.Column)
+									addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column + cols, address.End.Row, address.End.Column + cols, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)},");
+								else if (colFrom <= address.End.Column)
+									addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column, address.End.Row, address.End.Column + cols, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)},");
+								else
+									addressBuilder.Append($"{worksheetPrefix}{address.Address},");
+							}
 							else
 								addressBuilder.Append($"{worksheetPrefix}{address.Address},");
 						}
@@ -207,15 +212,18 @@ namespace OfficeOpenXml
 				{
 					try
 					{
-						if (colFrom <= namedRange.Start.Column)
+						if (namedRange._fromColFixed)
 						{
-							var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column + cols, namedRange.End.Row, namedRange.End.Column + cols);
-							namedRange.Address = BuildNewAddress(namedRange, newAddress);
-						}
-						else if (colFrom <= namedRange.End.Column)
-						{
-							var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row, namedRange.End.Column + cols);
-							namedRange.Address = BuildNewAddress(namedRange, newAddress);
+							if (colFrom <= namedRange.Start.Column)
+							{
+								var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column + cols, namedRange.End.Row, namedRange.End.Column + cols, namedRange._fromRowFixed, namedRange._fromColFixed, namedRange._toRowFixed, namedRange._toColFixed);
+								namedRange.Address = BuildNewAddress(namedRange, newAddress);
+							}
+							else if (colFrom <= namedRange.End.Column)
+							{
+								var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row, namedRange.End.Column + cols, namedRange._fromRowFixed, namedRange._fromColFixed, namedRange._toRowFixed, namedRange._toColFixed);
+								namedRange.Address = BuildNewAddress(namedRange, newAddress);
+							}
 						}
 					}
 					catch (ArgumentOutOfRangeException) { /* This means the named range has an invalid address in it, so just ignore the problem. */ }
@@ -252,10 +260,15 @@ namespace OfficeOpenXml
 					{
 						try
 						{
-							if (rowFrom <= address.Start.Row)
-								addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row + rows, address.Start.Column, address.End.Row + rows, address.End.Column)},");
-							else if (rowFrom <= address.End.Row)
-								addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column, address.End.Row + rows, address.End.Column)},");
+							if (address._fromRowFixed)
+							{
+								if (rowFrom <= address.Start.Row)
+									addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row + rows, address.Start.Column, address.End.Row + rows, address.End.Column, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)},");
+								else if (rowFrom <= address.End.Row)
+									addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column, address.End.Row + rows, address.End.Column, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)},");
+								else
+									addressBuilder.Append($"{worksheetPrefix}{address.Address},");
+							}
 							else
 								addressBuilder.Append($"{worksheetPrefix}{address.Address},");
 						}
@@ -271,15 +284,18 @@ namespace OfficeOpenXml
 				{
 					try
 					{
-						if (rowFrom <= namedRange.Start.Row)
+						if (namedRange._fromRowFixed)
 						{
-							var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row + rows, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column);
-							namedRange.Address = BuildNewAddress(namedRange, newAddress);
-						}
-						else if (rowFrom <= namedRange.End.Row)
-						{
-							var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column);
-							namedRange.Address = BuildNewAddress(namedRange, newAddress);
+							if (rowFrom <= namedRange.Start.Row)
+							{
+								var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row + rows, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column, namedRange._fromRowFixed, namedRange._fromColFixed, namedRange._toRowFixed, namedRange._toColFixed);
+								namedRange.Address = BuildNewAddress(namedRange, newAddress);
+							}
+							else if (rowFrom <= namedRange.End.Row)
+							{
+								var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column, namedRange._fromRowFixed, namedRange._fromColFixed, namedRange._toRowFixed, namedRange._toColFixed);
+								namedRange.Address = BuildNewAddress(namedRange, newAddress);
+							}
 						}
 					}
 					catch (ArgumentOutOfRangeException) { /* This means the named range has an invalid address in it, so just ignore the problem. */ }
