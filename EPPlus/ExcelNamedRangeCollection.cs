@@ -188,7 +188,7 @@ namespace OfficeOpenXml
 					{
 						try
 						{
-							if (address._fromColFixed)
+							if (address._fromColFixed && (address.Start.Column == 1 && address.End.Column == ExcelPackage.MaxColumns) == false)
 							{
 								if (colFrom <= address.Start.Column)
 									addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column + cols, address.End.Row, address.End.Column + cols, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)},");
@@ -212,7 +212,7 @@ namespace OfficeOpenXml
 				{
 					try
 					{
-						if (namedRange._fromColFixed)
+						if (namedRange._fromColFixed && (namedRange.Start.Column ==1 && namedRange.End.Column == ExcelPackage.MaxColumns) == false)
 						{
 							if (colFrom <= namedRange.Start.Column)
 							{

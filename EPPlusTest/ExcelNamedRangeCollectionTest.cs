@@ -114,6 +114,20 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void InsertRowsInsideAbsolutesColumnNamedRange()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				var namedRangeCollection = new ExcelNamedRangeCollection(excelPackage.Workbook);
+				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "$C:$C"));
+				namedRangeCollection.Insert(1, 0, 3, 0);
+				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("$C:$C", namedRange.Address);
+			}
+		}
+
+		[TestMethod]
 		public void InsertRowsHandlesNonContiguousRelativeNamedRangeAddresses()
 		{
 			using (var excelPackage = new ExcelPackage())
@@ -278,6 +292,34 @@ namespace EPPlusTest
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
 				Assert.AreEqual("'Sheet'!$F$3", namedRange.Address);
+			}
+		}
+
+		[TestMethod]
+		public void InsertColumnsInCompleteRowAbsoluteNamedRange()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				var namedRangeCollection = new ExcelNamedRangeCollection(excelPackage.Workbook);
+				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "$3:$3"));
+				namedRangeCollection.Insert(0, 1, 0, 3);
+				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("$3:$3", namedRange.Address);
+			}
+		}
+
+		[TestMethod]
+		public void InsertColumnsInCompleteRowRelativeNamedRange()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				var namedRangeCollection = new ExcelNamedRangeCollection(excelPackage.Workbook);
+				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "3:3"));
+				namedRangeCollection.Insert(0, 1, 0, 3);
+				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("3:3", namedRange.Address);
 			}
 		}
 
