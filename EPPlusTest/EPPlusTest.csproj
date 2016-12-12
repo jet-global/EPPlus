@@ -102,6 +102,7 @@
     <Compile Include="ExcelCellBaseTest.cs" />
     <Compile Include="ExcelNamedRangeCollectionTest.cs" />
     <Compile Include="ExcelPackageTest.cs" />
+    <Compile Include="ExcelWorksheetTests.cs" />
     <Compile Include="FormulaManagerTest.cs" />
     <Compile Include="ExcelStyleTest.cs" />
     <Compile Include="FormulaParsing\ExcelUtilities\ExpressionEvaluatorTests.cs" />
@@ -230,7 +231,6 @@
     <Compile Include="Utils\SqRefUtilityTests.cs" />
     <Compile Include="VBA.cs" />
     <Compile Include="WorkbookTests.cs" />
-    <Compile Include="WorkSheet.cs" />
     <Compile Include="WorksheetsTests.cs" />
   </ItemGroup>
   <ItemGroup>

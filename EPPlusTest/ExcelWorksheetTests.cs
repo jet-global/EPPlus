@@ -3189,6 +3189,31 @@ namespace EPPlusTest
 				Assert.AreEqual(20, chart.To.Row);
 			}
 		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void InsertRowTooManyTotalRowsThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				sheet.Cells[ExcelPackage.MaxRows - 1, 1].Value = "Close to the end";
+				sheet.InsertRow(ExcelPackage.MaxRows - 2, 2);
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void InsertRowThatWouldPushFormulasOffTheSheetThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				sheet.Cells[1, 1].Value = "Not close to the end of the worksheet";
+				sheet.Cells[ExcelPackage.MaxRows, 1].Formula = "3 + 4";
+				sheet.InsertRow(2, 1);
+			}
+		}
 		#endregion
 
 		#region InsertColumns Tests
@@ -3288,6 +3313,31 @@ namespace EPPlusTest
 				Assert.AreEqual("'Sheet1'!$B$2:$F$2", chart.Series[0].XSeries);
 				Assert.AreEqual("'Sheet1'!$B$3:$F$3", chart.Series[0].Series);
 				Assert.AreEqual("'Sheet1'!$B$4:$F$4", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void InsertColumnsTooManyTotalColumnsThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				sheet.Cells[1, ExcelPackage.MaxColumns - 1].Value = "Close to the end";
+				sheet.InsertColumn(ExcelPackage.MaxColumns - 2, 2);
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void InsertColumnThatWouldPushFormulasOffTheSheetThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				sheet.Cells[1, 1].Value = "Not close to the end of the worksheet";
+				sheet.Cells[2, ExcelPackage.MaxColumns - 1].Formula = "3 + 4";
+				sheet.InsertColumn(2, 2);
 			}
 		}
 		#endregion
