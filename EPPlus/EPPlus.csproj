@@ -213,6 +213,9 @@
     </Compile>
     <Compile Include="ConditionalFormatting\Rules\ExcelConditionalFormattingUniqueValues.cs" />
     <Compile Include="ConditionalFormatting\Rules\ExcelConditionalFormattingYesterday.cs" />
+    <Compile Include="ConditionalFormatting\X14ConditionalFormattingCollection.cs" />
+    <Compile Include="ConditionalFormatting\X14ConditionalFormattingFormula.cs" />
+    <Compile Include="ConditionalFormatting\X14CondtionalFormattingRule.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicer.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerDrawing.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerCache.cs" />
