@@ -2595,46 +2595,79 @@ namespace OfficeOpenXml
 			string workbook, worksheet, address;
 			foreach (var sheet in this.Workbook.Worksheets)
 			{
-				foreach (ExcelChart chartBase in sheet.Drawings.Where(drawing => drawing is ExcelChart))
+				foreach (ExcelDrawing drawing in sheet.Drawings)
 				{
 					bool isUnique = false;
 					if (sheet == this)
 					{
-						chartBase.AdjustPositionAndSize();
-						int newFromRow = chartBase.From.Row > rowFrom ? chartBase.From.Row + rows : chartBase.From.Row;
-						int newFromColumn = chartBase.From.Column > colFrom ? chartBase.From.Column + columns : chartBase.From.Column;
-						int newToRow = chartBase.To.Row > rowFrom ? chartBase.To.Row + rows : chartBase.To.Row;
-						int newToColumn = chartBase.To.Column > colFrom ? chartBase.To.Column + columns : chartBase.To.Column;
-						chartBase.SetPosition(newFromRow, chartBase.From.RowOff, newFromColumn, chartBase.From.ColumnOff, newToRow, chartBase.To.RowOff, newToColumn, chartBase.To.ColumnOff);
+						drawing.AdjustPositionAndSize();
+						int newFromRow = drawing.From.Row;
+						int newFromColumn = drawing.From.Column;
+						int newToRow = drawing.To.Row;
+						int newToColumn = drawing.To.Column;
+						switch (drawing.EditAs)
+						{
+							case eEditAs.OneCell:
+								if (drawing.From.Row > rowFrom)
+								{
+									newFromRow += rows;
+									newToRow += rows;
+								}
+								if (drawing.From.Column > colFrom)
+								{
+									newFromColumn += columns;
+									newToColumn += columns;
+								}
+								break;
+							case eEditAs.TwoCell:
+								if (drawing.From.Row > rowFrom)
+									newFromRow += rows;
+								if (drawing.From.Column > colFrom)
+									newFromColumn += columns;
+								if (drawing.To.Row > rowFrom)
+									newToRow += rows;
+								if (drawing.To.Column > colFrom)
+									newToColumn += columns;
+								break;
+							case eEditAs.Absolute:
+							default:
+								// No position arrangement is required.
+								break;
+						}
+						drawing.SetPosition(newFromRow, drawing.From.RowOff, newFromColumn, drawing.From.ColumnOff, newToRow, drawing.To.RowOff, newToColumn, drawing.To.ColumnOff);
 					}
 					// The chart Plot Area contains one copy of a chart for each series in that chart. 
 					// A chart Plot Area can also have multiple distinct charts (such as when a bar chart and a line chart are plotted in the same area).
 					// This captures the behavior of a "Combo Chart".
-					foreach (var chart in chartBase.PlotArea.ChartTypes)
+					var chartBase = drawing as ExcelChart;
+					if (chartBase != null)
 					{
-						isUnique = uniqueChartTypes.Add(chart);
-						if (isUnique)
+						foreach (var chart in chartBase.PlotArea.ChartTypes)
 						{
-							foreach (ExcelChartSerie serie in chart.Series)
+							isUnique = uniqueChartTypes.Add(chart);
+							if (isUnique)
 							{
-								if (serie.Series != null && string.Empty != serie.Series)
+								foreach (ExcelChartSerie serie in chart.Series)
 								{
-									ExcelRangeBase.SplitAddress(serie.Series, out workbook, out worksheet, out address);
-									string newSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
-									serie.Series = ExcelRangeBase.GetFullAddress(worksheet, newSeries);
-								}
-								if (serie.XSeries != null && string.Empty != serie.XSeries)
-								{
-									ExcelRangeBase.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
-									string newXSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
-									serie.XSeries = ExcelRangeBase.GetFullAddress(worksheet, newXSeries);
-								}
-								var bubbleSerie = serie as ExcelBubbleChartSerie;
-								if (bubbleSerie != null && bubbleSerie.BubbleSize != null && bubbleSerie.BubbleSize != string.Empty)
-								{
-									ExcelRangeBase.SplitAddress(bubbleSerie.BubbleSize, out workbook, out worksheet, out address);
-									string newBubbleSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
-									bubbleSerie.BubbleSize = ExcelRangeBase.GetFullAddress(worksheet, newBubbleSeries);
+									if (serie.Series != null && string.Empty != serie.Series)
+									{
+										ExcelRangeBase.SplitAddress(serie.Series, out workbook, out worksheet, out address);
+										string newSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
+										serie.Series = ExcelRangeBase.GetFullAddress(worksheet, newSeries);
+									}
+									if (serie.XSeries != null && string.Empty != serie.XSeries)
+									{
+										ExcelRangeBase.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+										string newXSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
+										serie.XSeries = ExcelRangeBase.GetFullAddress(worksheet, newXSeries);
+									}
+									var bubbleSerie = serie as ExcelBubbleChartSerie;
+									if (bubbleSerie != null && bubbleSerie.BubbleSize != null && bubbleSerie.BubbleSize != string.Empty)
+									{
+										ExcelRangeBase.SplitAddress(bubbleSerie.BubbleSize, out workbook, out worksheet, out address);
+										string newBubbleSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
+										bubbleSerie.BubbleSize = ExcelRangeBase.GetFullAddress(worksheet, newBubbleSeries);
+									}
 								}
 							}
 						}

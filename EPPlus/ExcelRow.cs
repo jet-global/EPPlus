@@ -102,25 +102,34 @@ namespace OfficeOpenXml
 		/// Allows the row to be hidden in the worksheet
 		/// </summary>
 		public bool Hidden
-        {
-            get
-            {
-                var r=(RowInternal)_worksheet.GetValueInner(Row, 0);
-                if (r == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    return r.Hidden;
-                }
-            }
-            set
-            {
-                var r = GetRowInternal();
-                r.Hidden=value;
-            }
-        }        
+		{
+			get
+			{
+				var r = (RowInternal)_worksheet.GetValueInner(Row, 0);
+				if (r == null)
+				{
+					return false;
+				}
+				else
+				{
+					return r.Hidden;
+				}
+			}
+			set
+			{
+				var r = GetRowInternal();
+				if (_worksheet.Package.DoAdjustDrawings)
+				{
+					var pos = _worksheet.Drawings.GetDrawingHeight();
+					r.Hidden = value;
+					_worksheet.Drawings.AdjustHeight(pos);
+				}
+				else
+				{
+					r.Hidden = value;
+				}
+			}
+		}
 		#endregion
 
 		#region ExcelRow Height
