@@ -13,17 +13,17 @@
 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
  * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
  *
- * All code and executables are provided "as is" with no warranty either express or implied. 
+ * All code and executables are provided "as is" with no warranty either express or implied.
  * The author accepts no liability for any damage or loss of business that this product may cause.
  *
  * Code change notes:
- * 
+ *
  * Author							Change						Date
  * ******************************************************************************
  * Jan Källman		    Initial Release		        2011-11-02
@@ -96,7 +96,7 @@ namespace OfficeOpenXml
 		internal object _value;
 		internal int _styleId;
 	}
-	#endregion 
+	#endregion
 
 	/// <summary>
 	/// Represents an Excel worksheet and provides access to its properties and methods
@@ -413,6 +413,7 @@ namespace OfficeOpenXml
 		private ExcelTableCollection _tables = null;
 		private ExcelPivotTableCollection _pivotTables = null;
 		private ExcelConditionalFormattingCollection _conditionalFormatting = null;
+		private X14ConditionalFormattingCollection _x14ConditionalFormatting = null;
 		private ExcelDataValidationCollection _dataValidation = null;
 		private ExcelBackgroundImage _backgroundImage = null;
 		#endregion
@@ -517,7 +518,7 @@ namespace OfficeOpenXml
 
 		/// <summary>
 		/// Address for autofilter
-		/// <seealso cref="ExcelRangeBase.AutoFilter" />        
+		/// <seealso cref="ExcelRangeBase.AutoFilter" />
 		/// </summary>
 		public ExcelAddressBase AutoFilterAddress
 		{
@@ -708,7 +709,7 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Summary rows below details 
+		/// Summary rows below details
 		/// </summary>
 		public bool OutLineSummaryBelow
 		{
@@ -831,7 +832,7 @@ namespace OfficeOpenXml
 
 		/// <summary>
 		/// The XML document holding the worksheet data.
-		/// All column, row, cell, pagebreak, merged cell and hyperlink-data are loaded into memory and removed from the document when loading the document.        
+		/// All column, row, cell, pagebreak, merged cell and hyperlink-data are loaded into memory and removed from the document when loading the document.
 		/// </summary>
 		public XmlDocument WorksheetXml
 		{
@@ -859,7 +860,7 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// A reference to the header and footer class which allows you to 
+		/// A reference to the header and footer class which allows you to
 		/// set the header and footer for all odd, even and first pages of the worksheet
 		/// </summary>
 		/// <remarks>
@@ -904,7 +905,7 @@ namespace OfficeOpenXml
 
 		/// <summary>
 		/// Provides access to a range of cells
-		/// </summary>  
+		/// </summary>
 		public ExcelRange Cells
 		{
 			get
@@ -915,7 +916,7 @@ namespace OfficeOpenXml
 		}
 		/// <summary>
 		/// Provides access to the selected range of cells
-		/// </summary>  
+		/// </summary>
 		public ExcelRange SelectedRange
 		{
 			get
@@ -938,7 +939,7 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Dimension address for the worksheet. 
+		/// Dimension address for the worksheet.
 		/// Top left cell to Bottom right.
 		/// If the worksheet has no cells, null is returned
 		/// </summary>
@@ -1055,6 +1056,24 @@ namespace OfficeOpenXml
 					this._conditionalFormatting = new ExcelConditionalFormattingCollection(this);
 				}
 				return this._conditionalFormatting;
+			}
+		}
+
+		/// <summary>
+		/// Gets a collection representing extension-data (x14) conditional formatting rules defined on the worksheet.
+		/// Adding new rules is currently unsupported.
+		/// </summary>
+		/// <seealso cref="ExcelConditionalFormattingCollection"/>
+		public X14ConditionalFormattingCollection X14ConditionalFormatting
+		{
+			get
+			{
+				CheckSheetType();
+				if (this._x14ConditionalFormatting == null)
+				{
+					this._x14ConditionalFormatting = new X14ConditionalFormattingCollection(this);
+				}
+				return this._x14ConditionalFormatting;
 			}
 		}
 
@@ -1290,7 +1309,7 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Inserts a new row into the spreadsheet.  Existing rows below the position are 
+		/// Inserts a new row into the spreadsheet.  Existing rows below the position are
 		/// shifted down.  All formula are updated to take account of the new row.
 		/// </summary>
 		/// <param name="rowFrom">The position of the new row</param>
@@ -1301,7 +1320,7 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Inserts a new row into the spreadsheet.  Existing rows below the position are 
+		/// Inserts a new row into the spreadsheet.  Existing rows below the position are
 		/// shifted down.  All formula are updated to take account of the new row.
 		/// </summary>
 		/// <param name="rowFrom">The position of the new row</param>
@@ -1396,18 +1415,18 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Inserts a new column into the spreadsheet.  Existing columns below the position are 
+		/// Inserts a new column into the spreadsheet.  Existing columns below the position are
 		/// shifted down.  All formula are updated to take account of the new column.
 		/// </summary>
 		/// <param name="columnFrom">The position of the new column</param>
-		/// <param name="columns">Number of columns to insert</param>        
+		/// <param name="columns">Number of columns to insert</param>
 		public void InsertColumn(int columnFrom, int columns)
 		{
 			this.InsertColumn(columnFrom, columns, 0);
 		}
 
 		///<summary>
-		/// Inserts a new column into the spreadsheet.  Existing column to the left are 
+		/// Inserts a new column into the spreadsheet.  Existing column to the left are
 		/// shifted.  All formula are updated to take account of the new column.
 		/// </summary>
 		/// <param name="columnFrom">The position of the new column</param>
@@ -1517,7 +1536,7 @@ namespace OfficeOpenXml
 						copyStylesFromColumn += columns;
 					}
 
-					//Get styles to a cached list, 
+					//Get styles to a cached list,
 					var l = new List<int[]>();
 					var sce =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, 0, copyStylesFromColumn, ExcelPackage.MaxRows, copyStylesFromColumn);
 					lock (sce)
@@ -1874,7 +1893,7 @@ namespace OfficeOpenXml
 						try
 						{
 							// Issue 14682 -- "GetValue<decimal>() won't convert strings"
-							// As suggested, after all special cases, all .NET to do it's 
+							// As suggested, after all special cases, all .NET to do it's
 							// preferred conversion rather than simply returning the default
 							return (T)Convert.ChangeType(v, typeof(T));
 						}
@@ -2022,7 +2041,7 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
@@ -2203,7 +2222,7 @@ namespace OfficeOpenXml
 
 		/// <summary>
 		/// Get the next ID from a shared formula or an Array formula
-		/// Sharedforumlas will have an id from 0-x. Array formula ids start from 0x4000001-. 
+		/// Sharedforumlas will have an id from 0-x. Array formula ids start from 0x4000001-.
 		/// </summary>
 		/// <param name="isArray">If the formula is an array formula</param>
 		/// <returns></returns>
@@ -2491,7 +2510,7 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Returns the style ID given a style name.  
+		/// Returns the style ID given a style name.
 		/// The style ID will be created if not found, but only if the style name exists!
 		/// </summary>
 		/// <param name="StyleName"></param>
@@ -2636,7 +2655,7 @@ namespace OfficeOpenXml
 						}
 						drawing.SetPosition(newFromRow, drawing.From.RowOff, newFromColumn, drawing.From.ColumnOff, newToRow, drawing.To.RowOff, newToColumn, drawing.To.ColumnOff);
 					}
-					// The chart Plot Area contains one copy of a chart for each series in that chart. 
+					// The chart Plot Area contains one copy of a chart for each series in that chart.
 					// A chart Plot Area can also have multiple distinct charts (such as when a bar chart and a line chart are plotted in the same area).
 					// This captures the behavior of a "Combo Chart".
 					var chartBase = drawing as ExcelChart;
@@ -2700,7 +2719,7 @@ namespace OfficeOpenXml
 		/// Adds a value to the row of merged cells to fix for inserts or deletes
 		/// </summary>
 		/// <param name="row"></param>
-		/// <param name="rows"></param> 
+		/// <param name="rows"></param>
 		/// <param name="delete"></param>
 		private void FixMergedCellsRow(int row, int rows, bool delete)
 		{
@@ -2848,7 +2867,7 @@ namespace OfficeOpenXml
 					}
 					else
 					{
-						if (position <= fromRow && position + Math.Abs(rows) > toRow)  //Delete the formula 
+						if (position <= fromRow && position + Math.Abs(rows) > toRow)  //Delete the formula
 						{
 							deleted.Add(f);
 						}
@@ -3102,7 +3121,7 @@ namespace OfficeOpenXml
 			stream.Dispose();
 			packPart.Stream = new MemoryStream();
 
-			//first char is invalid sometimes?? 
+			//first char is invalid sometimes??
 			if (xml[0] != '<')
 				XmlHelper.LoadXmlSafe(_worksheetXml, xml.Substring(1, xml.Length - 1), encoding);
 			else
@@ -3196,7 +3215,7 @@ namespace OfficeOpenXml
 
 		/// <summary>
 		/// Extracts the workbook XML without the sheetData-element (containing all cell data).
-		/// Xml-Cell data can be extreemly large (GB), so we find the sheetdata element in the streem (position start) and 
+		/// Xml-Cell data can be extreemly large (GB), so we find the sheetdata element in the streem (position start) and
 		/// then tries to find the &lt;/sheetData&gt; element from the end-parameter.
 		/// This approach is to avoid out of memory exceptions reading large packages
 		/// </summary>
@@ -3221,7 +3240,7 @@ namespace OfficeOpenXml
 				sb.Append(block, 0, pos);
 				length += size;
 			}
-			while (length < start + 20 && length < end);    //the  start-pos contains the stream position of the sheetData element. Add 20 (with some safty for whitespace, streampointer diff etc, just so be sure). 
+			while (length < start + 20 && length < end);    //the  start-pos contains the stream position of the sheetData element. Add 20 (with some safty for whitespace, streampointer diff etc, just so be sure).
 			startmMatch = Regex.Match(sb.ToString(), string.Format("(<[^>]*{0}[^>]*>)", "sheetData"));
 			if (!startmMatch.Success) //Not found
 			{
@@ -3991,7 +4010,7 @@ namespace OfficeOpenXml
 							string name;
 							if (df.Function == DataFieldFunctions.None)
 							{
-								name = df.Field.Name; //Name must be set or Excel will crash on rename.                                
+								name = df.Field.Name; //Name must be set or Excel will crash on rename.
 							}
 							else
 							{
@@ -4147,7 +4166,7 @@ namespace OfficeOpenXml
 			StringBuilder breaks = new StringBuilder();
 			int count = 0;
 			var cse =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, 0, 0, ExcelPackage.MaxRows, 0);
-			//foreach(ExcelRow row in _rows)            
+			//foreach(ExcelRow row in _rows)
 			while (cse.MoveNext())
 			{
 				var row = cse.Value._value as RowInternal;
@@ -4429,7 +4448,7 @@ namespace OfficeOpenXml
 		private object GetFormulaValue(object v)
 		{
 			//if (this.Package.Workbook._isCalculated)
-			//{                    
+			//{
 			if (v != null && v.ToString() != "")
 			{
 				return "<v>" + ConvertUtil.ExcelEscapeString(GetValueForXml(v)) + "</v>"; //Fixes issue 15071
@@ -4611,7 +4630,7 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Update xml with hyperlinks 
+		/// Update xml with hyperlinks
 		/// </summary>
 		/// <param name="sw">The stream</param>
 		private void UpdateHyperLinks(StreamWriter sw)

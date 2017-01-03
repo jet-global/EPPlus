@@ -290,7 +290,7 @@
 //</x:cfRule>
 #endregion
 
-#region Examples "iconSet" Extended (not implemented yet)
+#region Examples "iconSet" Extended
 //<x:extLst>
 //  <x:ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
 //    <x14:conditionalFormattings>
