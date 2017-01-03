@@ -13,17 +13,17 @@
 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
  * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
  *
- * All code and executables are provided "as is" with no warranty either express or implied. 
+ * All code and executables are provided "as is" with no warranty either express or implied.
  * The author accepts no liability for any damage or loss of business that this product may cause.
  *
  * Code change notes:
- * 
+ *
  * Author							Change						Date
  * ******************************************************************************
  * Jan Källman		    Initial Release		       2011-01-01
@@ -52,8 +52,8 @@ namespace OfficeOpenXml
 	public enum ExcelCalcMode
 	{
 		/// <summary>
-		/// Indicates that calculations in the workbook are performed automatically when cell values change. 
-		/// The application recalculates those cells that are dependent on other cells that contain changed values. 
+		/// Indicates that calculations in the workbook are performed automatically when cell values change.
+		/// The application recalculates those cells that are dependent on other cells that contain changed values.
 		/// This mode of calculation helps to avoid unnecessary calculations.
 		/// </summary>
 		Automatic,
@@ -62,14 +62,14 @@ namespace OfficeOpenXml
 		/// </summary>
 		AutomaticNoTable,
 		/// <summary>
-		/// Indicates that calculations in the workbook be triggered manually by the user. 
+		/// Indicates that calculations in the workbook be triggered manually by the user.
 		/// </summary>
 		Manual
 	}
 	#endregion
 
 	/// <summary>
-	/// Represents the Excel workbook and provides access to all the 
+	/// Represents the Excel workbook and provides access to all the
 	/// document properties and worksheets within the workbook.
 	/// </summary>
 	public sealed class ExcelWorkbook : XmlHelper, IDisposable
@@ -336,7 +336,7 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Provides access to the XML data representing the styles in the package. 
+		/// Provides access to the XML data representing the styles in the package.
 		/// </summary>
 		public XmlDocument StylesXml
 		{
@@ -410,8 +410,8 @@ namespace OfficeOpenXml
 			{
 				if (this._properties == null)
 				{
-					//  Create a NamespaceManager to handle the default namespace, 
-					//  and create a prefix for the default namespace:                   
+					//  Create a NamespaceManager to handle the default namespace,
+					//  and create a prefix for the default namespace:
 					this._properties = new OfficeProperties(this.Package, this.NameSpaceManager);
 				}
 				return this._properties;
@@ -1187,7 +1187,7 @@ namespace OfficeOpenXml
 			}
 			else
 			{
-				elem.InnerText = name.FullAddressAbsolute;
+				elem.InnerText = name.FullAddress;
 			}
 		}
 
