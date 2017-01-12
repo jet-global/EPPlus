@@ -909,9 +909,10 @@ namespace OfficeOpenXml
 						var characterCount = textForWidth.ToCharArray().Count() + (cellIndent > 0 && !string.IsNullOrEmpty(textForWidth) ? cellIndent : 0);
 						var measurableText = new string('W', characterCount + cellPadding);
 						var textWidth = g.MeasureString(measurableText, font).Width / defaultCharacterWidth;
-						if (r != 0)
-							textWidth = textWidth; // TODO apply rotation
-						sizes.Add(textWidth);
+                        if (r == 0)
+						    sizes.Add(textWidth);
+                        else
+                            sizes.Add(Convert.ToSingle(Math.Cos(Math.PI * (r <= 90 ? r : r - 90) / 180.0) * textWidth));
 					}
 					var width = sizes.Max();
 
