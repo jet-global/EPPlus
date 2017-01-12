@@ -27,8 +27,8 @@ namespace OfficeOpenXml.Style.Dxf
                     NumberFormat.Format = ExcelNumberFormat.GetFromBuildInFromID(NumberFormat.NumFmtID);
                 }
 
-                Font.Bold = _helper.GetXmlNodeBoolNullable("d:font/d:b/@val");
-                Font.Italic = _helper.GetXmlNodeBoolNullable("d:font/d:i/@val");
+                Font.Bold = _helper.GetXmlNodeBool("d:font/d:b/@val", true);
+                Font.Italic = _helper.GetXmlNodeBool("d:font/d:i/@val", true);
                 Font.Strike = _helper.GetXmlNodeBoolNullable("d:font/d:strike");
                 Font.Underline = GetUnderLineEnum(_helper.GetXmlNodeString("d:font/d:u/@val"));
                 Font.Color = GetColor(_helper, "d:font/d:color");
