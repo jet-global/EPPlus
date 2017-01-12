@@ -438,6 +438,22 @@ namespace EPPlusTest
                 Assert.IsTrue(boldWidth > normalWidth);
             }
         }
+
+        [TestMethod]
+        public void AutoFitHandlesRotatedContents()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Sheet");
+                sheet.Cells[1, 2].Value = "iiiiiiiiiiiiiiiiiiii";
+                sheet.Column(2).AutoFit();
+                var normalWidth = sheet.Column(2).Width;
+                sheet.Cells[1, 2].Style.TextRotation = 30;
+                sheet.Column(2).AutoFit();
+                var rotatedWidth = sheet.Column(2).Width;
+                Assert.IsTrue(rotatedWidth < normalWidth);
+            }
+        }
         #endregion
     }
 }
