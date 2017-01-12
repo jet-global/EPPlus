@@ -848,103 +848,106 @@ namespace OfficeOpenXml
 			}
 
 			var styles = _worksheet.Workbook.Styles;
-			var nf = styles.Fonts[styles.CellXfs[0].FontId];
-			var fs = FontStyle.Regular;
-			if (nf.Bold) fs |= FontStyle.Bold;
-			if (nf.UnderLine) fs |= FontStyle.Underline;
-			if (nf.Italic) fs |= FontStyle.Italic;
-			if (nf.Strike) fs |= FontStyle.Strikeout;
-			var nfont = new Font(nf.Name, nf.Size, fs);
+			var normal = styles.Fonts[styles.CellXfs[0].FontId];
+			var normalStyle = FontStyle.Regular;
+			if (normal.Bold) normalStyle |= FontStyle.Bold;
+			if (normal.UnderLine) normalStyle |= FontStyle.Underline;
+			if (normal.Italic) normalStyle |= FontStyle.Italic;
+			if (normal.Strike) normalStyle |= FontStyle.Strikeout;
+			var defaultFont = new Font(normal.Name, normal.Size, normalStyle);
 
-			var normalSize = Convert.ToSingle(ExcelWorkbook.GetWidthPixels(nf.Name, nf.Size));
-
-			Bitmap b;
-			Graphics g = null;
-			try
+			using (Graphics g = Graphics.FromImage(new Bitmap(20, 20)))
 			{
-				//Check for missing GDI+, then use WPF istead.
-				b = new Bitmap(1, 1);
-				g = Graphics.FromImage(b);
-				g.PageUnit = GraphicsUnit.Pixel;
-			}
-			catch
-			{
-				return;
-			}
-
-			foreach (var cell in this)
-			{
-				if (_worksheet.Column(cell.Start.Column).Hidden)    //Issue 15338
-					continue;
-
-				if (cell.Merge == true) continue;
-				var fntID = styles.CellXfs[cell.StyleID].FontId;
-				Font f;
-				if (fontCache.ContainsKey(fntID))
+				var defaultCharacterWidth = Enumerable.Range(0, 10).Select(i => g.MeasureString(i.ToString(), defaultFont).Width).Average();
+				foreach (var cell in this)
 				{
-					f = fontCache[fntID];
-				}
-				else
-				{
-					var fnt = styles.Fonts[fntID];
-					fs = FontStyle.Regular;
-					if (fnt.Bold) fs |= FontStyle.Bold;
-					if (fnt.UnderLine) fs |= FontStyle.Underline;
-					if (fnt.Italic) fs |= FontStyle.Italic;
-					if (fnt.Strike) fs |= FontStyle.Strikeout;
-					f = new Font(fnt.Name, fnt.Size, fs);
-					//f = new wm.Typeface(new System.Windows.Media.FontFamily(fnt.Name), fnt.Italic ? System.Windows.FontStyles.Italic : System.Windows.FontStyles.Normal, fnt.Bold ? System.Windows.FontWeights.Bold : System.Windows.FontWeights.Normal, System.Windows.FontStretches.Normal);
+					if (_worksheet.Column(cell.Start.Column).Hidden)    //Issue 15338
+						continue;
 
-					fontCache.Add(fntID, f);
-				}
-				var ind = styles.CellXfs[cell.StyleID].Indent;
-				var textForWidth = cell.GetTextForWidth(f);
-				var t = textForWidth + (ind > 0 && !string.IsNullOrEmpty(textForWidth) ? new string('_', ind) : "");
-				var size = g.MeasureString(t, f, 10000, StringFormat.GenericDefault);
-
-				//var ft = new wm.FormattedText(t, CultureInfo.CurrentCulture, w.FlowDirection.LeftToRight,
-				//    f,
-				//    styles.Fonts[fntID].Size, System.Windows.Media.Brushes.Black);
-				//var wd = ft.WidthIncludingTrailingWhitespace;
-
-
-				//var wi = ft.WidthIncludingTrailingWhitespace / (72 / 96D);  //Typounit=72 DPI, WPF=96DPI
-				//var he = ft.Height / (72 / 96D);
-
-				double width;
-				double r = styles.CellXfs[cell.StyleID].TextRotation;
-				if (r <= 0)
-				{
-					//width = (wi + 15) / normalSize;
-					width = (size.Width + 5) / normalSize;
-				}
-				else
-				{
-					r = (r <= 90 ? r : r - 90);
-					width = (((size.Width - size.Height) * Math.Abs(System.Math.Cos(System.Math.PI * r / 180.0)) + size.Height) + 5) / normalSize;
-					//width = (((wi - he) * Math.Abs(Math.Cos(Math.PI * r / 180.0)) + he) + 15) / normalSize;
-					//width= (((size.Width-size.Height) * Math.Abs(Math.Cos(Math.PI * r / 180.0)) + size.Height) +15) / normalSize;
-				}
-
-				foreach (var a in afAddr)
-				{
-					if (a.Collide(cell) != eAddressCollition.No)
+					if (cell.Merge == true) continue;
+					var fntID = styles.CellXfs[cell.StyleID].FontId;
+					Font f;
+					if (fontCache.ContainsKey(fntID))
 					{
-						//width += 2.8;
-						width += 2.25;
-						break;
+						f = fontCache[fntID];
 					}
-				}
+					else
+					{
+						var fnt = styles.Fonts[fntID];
+						var fs = FontStyle.Regular;
+						if (fnt.Bold) fs |= FontStyle.Bold;
+						if (fnt.UnderLine) fs |= FontStyle.Underline;
+						if (fnt.Italic) fs |= FontStyle.Italic;
+						if (fnt.Strike) fs |= FontStyle.Strikeout;
+						f = new Font(fnt.Name, fnt.Size, fs);
+						fontCache.Add(fntID, f);
+					}
 
-				if (width > _worksheet.Column(cell._fromCol).Width)
-				{
-					_worksheet.Column(cell._fromCol).Width = width > MaximumWidth ? MaximumWidth : width;
+					var cellFonts = new List<Font> { f };
+					foreach (var cFormat in _worksheet.ConditionalFormatting.Where(format => this.IsCellInConditionalFormatAddress(cell, format)))
+					{
+						var font = cFormat.Style?.Font;
+						if (font == null)
+							continue;
+						var fs = FontStyle.Regular;
+						if (font.Bold.HasValue && font.Bold.Value) fs |= FontStyle.Bold;
+						if (font.Underline.HasValue && font.Underline.Value != ExcelUnderLineType.None) fs |= FontStyle.Underline;
+						if (font.Italic.HasValue && font.Italic.Value) fs |= FontStyle.Italic;
+						if (font.Strike.HasValue && font.Strike.Value) fs |= FontStyle.Strikeout;
+						// Conditional formatting doesn't modify font or size, just style
+						cellFonts.Add(new Font(f.Name, f.Size, fs));
+					}
+
+					double r = styles.CellXfs[cell.StyleID].TextRotation;
+					List<double> sizes = new List<double>();
+					var cellStyle = styles.CellXfs[cell.StyleID];
+					var cellPadding = cellStyle.WrapText ? 0 : 2;
+					var cellIndent = cellStyle.Indent;
+					foreach (var font in cellFonts)
+					{
+						var textForWidth = cell.GetTextForWidth(font);
+						var characterCount = textForWidth.ToCharArray().Count() + (cellIndent > 0 && !string.IsNullOrEmpty(textForWidth) ? cellIndent : 0);
+						var measurableText = new string('W', characterCount + cellPadding);
+						var textWidth = g.MeasureString(measurableText, font).Width / defaultCharacterWidth;
+						if (r != 0)
+							textWidth = textWidth; // TODO apply rotation
+						sizes.Add(textWidth);
+					}
+					var width = sizes.Max();
+
+					foreach (var a in afAddr)
+					{
+						if (a.Collide(cell) != eAddressCollition.No)
+						{
+							//width += 2.8;
+							width += 2.25;
+							break;
+						}
+					}
+
+					if (width > _worksheet.Column(cell._fromCol).Width)
+					{
+						_worksheet.Column(cell._fromCol).Width = width > MaximumWidth ? MaximumWidth : width;
+					}
 				}
 			}
 			_worksheet.Drawings.AdjustWidth(drawWidths);
 			_worksheet.Package.DoAdjustDrawings = doAdjust;
 		}
 
+		private bool IsCellInConditionalFormatAddress(ExcelRangeBase cell, ConditionalFormatting.Contracts.IExcelConditionalFormattingRule rule)
+		{
+			var addresses = rule.Address.AddressSpaceSeparated.Split(' ');
+			foreach (var address in addresses)
+			{
+				var addressBase = new ExcelAddressBase(address);
+				var collision = addressBase.Collide(cell, true);
+				if (collision != eAddressCollition.No)
+					return true;
+			}
+			return false;
+		}
+		
 		private void SetMinWidth(double minimumWidth, int fromCol, int toCol)
 		{
 			var iterator = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, 0, fromCol, 0, toCol);
@@ -971,42 +974,31 @@ namespace OfficeOpenXml
 
 		private string GetTextForWidth(Font font)
 		{
+			string formattedText = this.GetFormattedText(true);
 			if (this.Style.WrapText)
-				return GetLongestStringFromWrappedText(font);
-			return GetFormattedText(true);
+				return this.GetLongestStringFromWrappedText(formattedText, font);
+			return formattedText;
 		}
 
-		private string GetLongestStringFromWrappedText(Font font)
+		private string GetLongestStringFromWrappedText(string text, Font font)
 		{
 			var rowHeight = _worksheet.Row(this._fromRow).Height;
-			var formattedText = this.GetFormattedText(true);
 			var textHeight = ExcelFontXml.GetFontHeight(font.Name, font.Size) * 0.75;
 			var leftoverRowHeight = rowHeight % textHeight;
 			int textLines = (int)Math.Round((rowHeight - leftoverRowHeight) / textHeight);
 			if (textLines <= 1)
-				return formattedText;
-			string longestString = string.Empty;
-			bool endOfText = false;
-			var splitIndex = (int)Math.Round((double)(formattedText.Length / textLines));
-			string textToSplit = formattedText;
-			while (!endOfText)
+				return text;
+			var splitIndex = (int)Math.Round((double)(text.Length / textLines));
+			var longestTextBuilder = new StringBuilder();
+			foreach (var segment in text.Split(' '))
 			{
-				if (textToSplit.Length > splitIndex)
-				{
-					var nextSpaceOrHyphenIndex = textToSplit.IndexOf(' ', splitIndex);
-					if (nextSpaceOrHyphenIndex <= 0)
-						return textToSplit;
-					string lineOfText = textToSplit.Substring(0, nextSpaceOrHyphenIndex);
-					if (lineOfText.Length > longestString.Length)
-						longestString = lineOfText;
-					textToSplit = textToSplit.Substring(nextSpaceOrHyphenIndex + 1);
-				}
-				else
-				{
-					endOfText = true;
-				}
+				longestTextBuilder.Append(segment);
+				if (longestTextBuilder.Length >= splitIndex)
+					return longestTextBuilder.ToString();
+				longestTextBuilder.Append(" ");
 			}
-			return longestString;
+			// Theoretically shouldn't hit this case.
+			return text;
 		}
 
 		private string GetFormattedText(bool forWidthCalc)

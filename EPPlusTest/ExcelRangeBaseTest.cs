@@ -282,7 +282,7 @@ namespace EPPlusTest
                 Assert.AreEqual("SUM(1,2)", sheet.Cells[3, 3].Formula);
             }
         }
-        
+
         [TestMethod]
         public void ArrayEquality()
         {
@@ -334,9 +334,9 @@ namespace EPPlusTest
             }
         }
 
-
+        #region AutoFit Tests
         [TestMethod]
-        public void EPPlusRegressionColumnAutoFitResizesColumnToFitContentsWithDefaultRowHeight()
+        public void AutoFitResizesColumnToFitContentsWithDefaultRowHeight()
         {
             using (var package = new ExcelPackage())
             {
@@ -352,12 +352,12 @@ namespace EPPlusTest
                 sheet.Cells[2, 2].Calculate();
                 sheet.Column(2).AutoFit();
                 var actualWidth = sheet.Column(2).Width;
-                Assert.AreEqual(19, Math.Round(sheet.Column(2).Width));
+                Assert.AreEqual(21, Math.Round(sheet.Column(2).Width));
             }
         }
 
         [TestMethod]
-        public void EPPlusRegressionColumnAutoFitResizesColumnToFitContentsWithNoSpacesRegardlessOfRowHeight()
+        public void AutoFitResizesColumnToFitContentsWithNoSpacesRegardlessOfRowHeight()
         {
             using (var package = new ExcelPackage())
             {
@@ -378,7 +378,7 @@ namespace EPPlusTest
         }
 
         [TestMethod]
-        public void EPPlusRegressionColumnAutoFitResizesColumnToFitContentsWithSpecifiedRowHeight()
+        public void AutoFitResizesColumnToFitContentsWithSpecifiedRowHeight()
         {
             using (var package = new ExcelPackage())
             {
@@ -395,12 +395,11 @@ namespace EPPlusTest
                 sheet.Cells[2, 2].Calculate();
                 sheet.Column(2).AutoFit();
                 Assert.AreEqual(10, Math.Round(sheet.Column(2).Width));
-
             }
         }
 
         [TestMethod]
-        public void EPPlusRegressionColumnAutoFitResizesColumnToFitContentsWithSpecifiedRowHeightForFiveLines()
+        public void AutoFitResizesColumnToFitContentsWithSpecifiedRowHeightForFiveLines()
         {
             using (var package = new ExcelPackage())
             {
@@ -416,9 +415,29 @@ namespace EPPlusTest
                 sheet.Cells[2, 3].Formula = "=\"Next cell contents.\"";
                 sheet.Cells[2, 2].Calculate();
                 sheet.Column(2).AutoFit();
-                Assert.AreEqual(9, Math.Round(sheet.Column(2).Width));
-
+                Assert.AreEqual(10, Math.Round(sheet.Column(2).Width));
             }
         }
+
+        [TestMethod]
+        public void AutoFitAccountsForConditionalFormatting()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Sheet");
+                sheet.Cells[1, 2].Value = "iiiiiiiiiiiiiiiiiiii";
+                sheet.Column(2).AutoFit();
+                var normalWidth = sheet.Column(2).Width;
+                var conditionalFormattingRule = sheet.Cells[1, 2].ConditionalFormatting.AddEqual();
+                // The formula doesn't actually have to match, as auto-fitting will take the largest
+                // possible font.
+                conditionalFormattingRule.Formula = "iiiiiiiiiiiiiiiiiiii";
+                conditionalFormattingRule.Style.Font.Bold = true;
+                sheet.Column(2).AutoFit();
+                var boldWidth = sheet.Column(2).Width;
+                Assert.IsTrue(boldWidth > normalWidth);
+            }
+        }
+        #endregion
     }
 }
