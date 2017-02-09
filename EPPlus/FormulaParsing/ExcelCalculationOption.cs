@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace OfficeOpenXml.FormulaParsing
+﻿namespace OfficeOpenXml.FormulaParsing
 {
-    public class ExcelCalculationOption
-    {
-        public ExcelCalculationOption()
-        {
-            AllowCirculareReferences = false;
-        }
-        public bool AllowCirculareReferences { get; set; }
-    }
+	/// <summary>
+	/// A data structure representing the available options when calculating a workbook.
+	/// </summary>
+	public class ExcelCalculationOption
+	{
+		#region Properties
+		public bool AllowCircularReferences { get; set; }
+		#endregion
+	}
 }

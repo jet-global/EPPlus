@@ -43,7 +43,8 @@ namespace OfficeOpenXml.ConditionalFormatting
   /// </summary>
   public class ExcelConditionalFormattingContainsBlanks
     : ExcelConditionalFormattingRule,
-    IExcelConditionalFormattingContainsBlanks
+    IExcelConditionalFormattingContainsBlanks,
+		IExcelConditionalFormattingWithFormula
   {
     /****************************************************************************************/
 
