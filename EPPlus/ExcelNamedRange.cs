@@ -13,17 +13,17 @@
 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
  * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
  *
- * All code and executables are provided "as is" with no warranty either express or implied. 
+ * All code and executables are provided "as is" with no warranty either express or implied.
  * The author accepts no liability for any damage or loss of business that this product may cause.
  *
  * Code change notes:
- * 
+ *
  * Author							Change						Date
  * ******************************************************************************
  * Jan Källman		Added this class		        2010-01-28
@@ -35,90 +35,114 @@ using System.Text;
 
 namespace OfficeOpenXml
 {
-    /// <summary>
-    /// A named range. 
-    /// </summary>
-    public sealed class ExcelNamedRange : ExcelRangeBase 
-    {
-        ExcelWorksheet _sheet;
-        /// <summary>
-        /// A named range
-        /// </summary>
-        /// <param name="name">The name</param>
-        /// <param name="nameSheet">The sheet containing the name. null if its a global name</param>
-        /// <param name="sheet">Sheet where the address points</param>
-        /// <param name="address">The address</param>
-        /// <param name="index">The index in the collection</param>
-        public ExcelNamedRange(string name, ExcelWorksheet nameSheet , ExcelWorksheet sheet, string address, int index) :
-            base(sheet, address)
-        {
-            Name = name;
-            _sheet = nameSheet;
-            Index = index;
+	/// <summary>
+	/// A named range.
+	/// </summary>
+	public sealed class ExcelNamedRange : ExcelRangeBase
+	{
+		ExcelWorksheet _sheet;
+		/// <summary>
+		/// A named range
+		/// </summary>
+		/// <param name="name">The name</param>
+		/// <param name="nameSheet">The sheet containing the name. null if its a global name</param>
+		/// <param name="sheet">Sheet where the address points</param>
+		/// <param name="address">The address</param>
+		/// <param name="index">The index in the collection</param>
+		public ExcelNamedRange(string name, ExcelWorksheet nameSheet, ExcelWorksheet sheet, string address, int index) :
+			 base(sheet, address)
+		{
+			Name = name;
+			_sheet = nameSheet;
+			Index = index;
 
-        }
-        internal ExcelNamedRange(string name,ExcelWorkbook wb, ExcelWorksheet nameSheet, int index) :
-            base(wb, nameSheet, name, true)
-        {
-            Name = name;
-            _sheet = nameSheet;
-            Index = index;
-        }
+		}
+		internal ExcelNamedRange(string name, ExcelWorkbook wb, ExcelWorksheet nameSheet, int index) :
+			 base(wb, nameSheet, name, true)
+		{
+			Name = name;
+			_sheet = nameSheet;
+			Index = index;
+		}
 
-        /// <summary>
-        /// Name of the range
-        /// </summary>
-        public string Name
-        {
-            get;
-            internal set;
-        }
-        /// <summary>
-        /// Is the named range local for the sheet 
-        /// </summary>
-        public int LocalSheetId
-        {
-            get
-            {
-                if (_sheet == null)
-                {
-                    return -1;
-                }
-                else
-                {
-                    return _sheet.PositionID-1;
-                }
-            }
-        }
-        internal ExcelWorksheet LocalSheet => _sheet;
+		/// <summary>
+		/// Name of the range
+		/// </summary>
+		public string Name
+		{
+			get;
+			internal set;
+		}
 
-        internal int Index
-        {
-            get;
-            set;
-        }
-        /// <summary>
-        /// Is the name hidden
-        /// </summary>
-        public bool IsNameHidden
-        {
-            get;
-            set;
-        }
-        /// <summary>
-        /// A comment for the Name
-        /// </summary>
-        public string NameComment
-        {
-            get;
-            set;
-        }
-        internal object NameValue { get; set; }
-        internal string NameFormula { get; set; }
-        public override string ToString()
-        {
-            return Name;
-        }
+		/// <summary>
+		/// Returns the "localSheetId" property, which is really the sheet's positionID minus one.
+		/// </summary>
+		public int LocalSheetID
+		{
+			get
+			{
+				if (_sheet == null)
+				{
+					return -1;
+				}
+				else
+				{
+					return _sheet.PositionID - 1;
+				}
+			}
+		}
 
-    }
+		/// <summary>
+		/// Returns the worksheet's actual "SheetID" property, or -1 if it is not a local named range.
+		/// </summary>
+		public int ActualSheetID
+		{
+			get
+			{
+				if (_sheet == null)
+				{
+					return -1;
+				}
+				else
+				{
+					return _sheet.SheetID;
+				}
+			}
+		}
+
+		internal ExcelWorksheet LocalSheet => _sheet;
+
+		internal int Index
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Is the name hidden
+		/// </summary>
+		public bool IsNameHidden
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// A comment for the Name
+		/// </summary>
+		public string NameComment
+		{
+			get;
+			set;
+		}
+
+		internal object NameValue { get; set; }
+
+		internal string NameFormula { get; set; }
+
+		public override string ToString()
+		{
+			return Name;
+		}
+	}
 }

@@ -23,6 +23,8 @@ namespace EPPlusTest
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
 				Assert.AreEqual("'Sheet'!$C$6", namedRange.Address);
+				Assert.AreEqual(-1, namedRange.ActualSheetID);
+				Assert.AreEqual(-1, namedRange.LocalSheetID);
 			}
 		}
 

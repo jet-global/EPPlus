@@ -342,7 +342,7 @@ namespace OfficeOpenXml.FormulaParsing
                     return null;
                 }
             }
-            id = ExcelAddressBase.GetCellID(nameItem.LocalSheetId, nameItem.Index, 0);
+            id = ExcelAddressBase.GetCellID(nameItem.LocalSheetID, nameItem.Index, 0);
 
             if (_names.ContainsKey(id))
             {
