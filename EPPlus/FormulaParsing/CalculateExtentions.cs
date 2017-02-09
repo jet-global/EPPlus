@@ -29,176 +29,206 @@
  * Jan Källman                      Added                       2012-03-04
  *******************************************************************************/
 
-using System.Threading;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Exceptions;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+
 namespace OfficeOpenXml
 {
-    public static class CalculationExtension
-    {
-        public static void Calculate(this ExcelWorkbook workbook)
-        {
-            Calculate(workbook, new ExcelCalculationOption(){AllowCirculareReferences=false});
-        }
-        public static void Calculate(this ExcelWorkbook workbook, ExcelCalculationOption options)
-        {
-            Init(workbook);
+	public static class CalculationExtension
+	{
+		#region Public Static Methods
+		/// <summary>
+		/// Recalculate this <see cref="ExcelWorkbook"/>.
+		/// </summary>
+		/// <param name="workbook">The workbook to be calculated.</param>
+		public static void Calculate(this ExcelWorkbook workbook)
+		{
+			Calculate(workbook, new ExcelCalculationOption() { AllowCircularReferences = false });
+		}
 
-            var dc = DependencyChainFactory.Create(workbook, options);
-            workbook.FormulaParser.InitNewCalc();
-            if (workbook.FormulaParser.Logger != null)
-            {
-                var msg = string.Format("Starting... number of cells to parse: {0}", dc.list.Count);
-                workbook.FormulaParser.Logger.Log(msg);
-            }
+		/// <summary>
+		/// Recalculate this <paramref name="workbook"/> with the specified <paramref name="options"/>.
+		/// </summary>
+		/// <param name="workbook">The workbook to calculate.</param>
+		/// <param name="options">The calculation options (whether or not circular references are allowed). </param>
+		public static void Calculate(this ExcelWorkbook workbook, ExcelCalculationOption options)
+		{
+			Init(workbook);
 
-            //TODO: Remove when tests are done. Outputs the dc to a text file.
-            //var fileDc = new System.IO.StreamWriter("c:\\temp\\dc.txt");
+			var dc = DependencyChainFactory.Create(workbook, options);
+			workbook.FormulaParser.InitNewCalc();
+			if (workbook.FormulaParser.Logger != null)
+			{
+				var msg = string.Format("Starting... number of cells to parse: {0}", dc.List.Count);
+				workbook.FormulaParser.Logger.Log(msg);
+			}
+			CalcChain(workbook, workbook.FormulaParser, dc);
+		}
 
-            //for (int i = 0; i < dc.list.Count; i++)
-            //{
-            //    fileDc.WriteLine(i.ToString() + "," + dc.list[i].Column.ToString() + "," + dc.list[i].Row.ToString() + "," + (dc.list[i].ws==null ? "" : dc.list[i].ws.Name) + "," + dc.list[i].Formula);
-            //}
-            //fileDc.Close();
-            //fileDc = new System.IO.StreamWriter("c:\\temp\\dcorder.txt");
-            //for (int i = 0; i < dc.CalcOrder.Count; i++)
-            //{
-            //    fileDc.WriteLine(dc.CalcOrder[i].ToString());
-            //}
-            //fileDc.Close();
-            //fileDc = null;
+		/// <summary>
+		/// Recalculate this <paramref name="worksheet"/>.
+		/// </summary>
+		/// <param name="worksheet">The worksheet to recalculate.</param>
+		public static void Calculate(this ExcelWorksheet worksheet)
+		{
+			Calculate(worksheet, new ExcelCalculationOption());
+		}
 
-            //TODO: Add calculation here
+		/// <summary>
+		/// Recalculate this <paramref name="worksheet"/> with the specified <paramref name="options"/>.
+		/// </summary>
+		/// <param name="worksheet">The worksheet to calculate.</param>
+		/// <param name="options">The calculation options (whether or not circular references are allowed). </param>
+		public static void Calculate(this ExcelWorksheet worksheet, ExcelCalculationOption options)
+		{
+			Init(worksheet.Workbook);
+			var dc = DependencyChainFactory.Create(worksheet, options);
+			var parser = worksheet.Workbook.FormulaParser;
+			parser.InitNewCalc();
+			if (parser.Logger != null)
+			{
+				var msg = string.Format("Starting... number of cells to parse: {0}", dc.List.Count);
+				parser.Logger.Log(msg);
+			}
+			CalcChain(worksheet.Workbook, parser, dc);
+		}
 
-            CalcChain(workbook, workbook.FormulaParser, dc);
+		/// <summary>
+		/// Recalculate this <paramref name="range"/>.
+		/// </summary>
+		/// <param name="range">The range to be calculated.</param>
+		public static void Calculate(this ExcelRangeBase range)
+		{
+			Calculate(range, new ExcelCalculationOption());
+		}
 
-            //workbook._isCalculated = true;
-        }
-        public static void Calculate(this ExcelWorksheet worksheet)
-        {
-            Calculate(worksheet, new ExcelCalculationOption());
-        }
-        public static void Calculate(this ExcelWorksheet worksheet, ExcelCalculationOption options)
-        {
-            Init(worksheet.Workbook);
-            //worksheet.Workbook._formulaParser = null; TODO:Cant reset. Don't work with userdefined or overrided worksheet functions
-            var dc = DependencyChainFactory.Create(worksheet, options);
-            var parser = worksheet.Workbook.FormulaParser;
-            parser.InitNewCalc();
-            if (parser.Logger != null)
-            {
-                var msg = string.Format("Starting... number of cells to parse: {0}", dc.list.Count);
-                parser.Logger.Log(msg);
-            }
-            CalcChain(worksheet.Workbook, parser, dc);
-        }
-        public static void Calculate(this ExcelRangeBase range)
-        {
-            Calculate(range, new ExcelCalculationOption());
-        }
-        public static void Calculate(this ExcelRangeBase range, ExcelCalculationOption options)
-        {
-            Init(range._workbook);
-            var parser = range._workbook.FormulaParser;
-            parser.InitNewCalc();
-            var dc = DependencyChainFactory.Create(range, options);
-            CalcChain(range._workbook, parser, dc);
-        }
-        public static object Calculate(this ExcelWorksheet worksheet, string Formula)
-        {
-            return Calculate(worksheet, Formula, new ExcelCalculationOption());
-        }
-        public static object Calculate(this ExcelWorksheet worksheet, string Formula, ExcelCalculationOption options)
-        {
-            try
-            {
-                worksheet.CheckSheetType();
-                if(string.IsNullOrEmpty(Formula.Trim())) return null;
-                Init(worksheet.Workbook);
-                var parser = worksheet.Workbook.FormulaParser;
-                parser.InitNewCalc();
-                if (Formula[0] == '=') Formula = Formula.Substring(1); //Remove any starting equal sign
-                var dc = DependencyChainFactory.Create(worksheet, Formula, options);
-                var f = dc.list[0];
-                dc.CalcOrder.RemoveAt(dc.CalcOrder.Count - 1);
+		/// <summary>
+		/// Recalculate this <paramref name="range"/> with the specified <paramref name="options"/>.
+		/// </summary>
+		/// <param name="range">The range to be calculated.</param>
+		/// <param name="options">Settings for this calculation.</param>
+		public static void Calculate(this ExcelRangeBase range, ExcelCalculationOption options)
+		{
+			Init(range._workbook);
+			var parser = range._workbook.FormulaParser;
+			parser.InitNewCalc();
+			var dc = DependencyChainFactory.Create(range, options);
+			CalcChain(range._workbook, parser, dc);
+		}
 
-                CalcChain(worksheet.Workbook, parser, dc);
+		/// <summary>
+		/// Calculate a specific <paramref name="formula"/> in the context of the specified <paramref name="worksheet"/>.
+		/// </summary>
+		/// <param name="worksheet">The worksheet whose context should be used during the calculation for references that do not specify a sheet.</param>
+		/// <param name="formula">The formula to be calculated.</param>
+		/// <returns>The result of the calculation.</returns>
+		public static object Calculate(this ExcelWorksheet worksheet, string formula)
+		{
+			return Calculate(worksheet, formula, new ExcelCalculationOption());
+		}
 
-                return parser.ParseCell(f.Tokens, worksheet.Name, -1, -1);
-            }
-            catch (Exception ex)
-            {
-                return new ExcelErrorValueException(ex.Message, ExcelErrorValue.Create(eErrorType.Value));
-            }
-        }
-        private static void CalcChain(ExcelWorkbook wb, FormulaParser parser, DependencyChain dc)
-        {
-            var debug = parser.Logger != null;
-            foreach (var ix in dc.CalcOrder)
-            {
-                var item = dc.list[ix];
-                try
-                {
-                    var ws = wb.Worksheets.GetBySheetID(item.SheetID);
-                    var v = parser.ParseCell(item.Tokens, ws == null ? "" : ws.Name, item.Row, item.Column);
-                    SetValue(wb, item, v);
-                    if (debug)
-                    {
-                        parser.Logger.LogCellCounted();
-                    }
-                    Thread.Sleep(0);
-                }
-                catch (FormatException fe)
-                {
-                    throw (fe);
-                }
-                catch (Exception ex) when ((ex is OperationCanceledException) == false)
-                {
-                    var error = ExcelErrorValue.Parse(ExcelErrorValue.Values.Value);
-                    SetValue(wb, item, error);
-                }
-            }
-        }
-        private static void Init(ExcelWorkbook workbook)
-        {
-            workbook.FormulaTokens = new CellStore<List<Token>>();;
-            foreach (var ws in workbook.Worksheets)
-            {
-                if (!(ws is ExcelChartsheet))
-                {
-                    if (ws._formulaTokens != null)
-                    {
-                        ws._formulaTokens.Dispose();
-                    }
-                    ws._formulaTokens = new CellStore<List<Token>>();
-                }
-            }
-        }
+		/// <summary>
+		/// Calculate a specific <paramref name="formula"/> in the context of the specified <paramref name="worksheet"/> with the specified <paramref name="options"/>.
+		/// </summary>
+		/// <param name="worksheet">The worksheet whose context should be used during the calculation for references that do not specify a sheet.</param>
+		/// <param name="formula">The formula to be calculated.</param>
+		/// <param name="options">The options for this calculation. At the moment, this does nothing.</param>
+		/// <returns>The result of the calculation.</returns>
+		public static object Calculate(this ExcelWorksheet worksheet, string formula, ExcelCalculationOption options)
+		{
+			try
+			{
+				worksheet.CheckSheetType();
+				if (string.IsNullOrEmpty(formula.Trim())) return null;
+				Init(worksheet.Workbook);
+				var parser = worksheet.Workbook.FormulaParser;
+				parser.InitNewCalc();
+				if (formula[0] == '=') formula = formula.Substring(1); //Remove any starting equal sign
+				var dc = DependencyChainFactory.Create(worksheet, formula, options);
+				var f = dc.List[0];
+				dc.CalcOrder.RemoveAt(dc.CalcOrder.Count - 1);
 
-        private static void SetValue(ExcelWorkbook workbook, FormulaCell item, object v)
-        {
-            if (item.Column == 0)
-            {
-                if (item.SheetID == -1)
-                {
-                    workbook.Names[item.Row].NameValue = v;
-                }
-                else
-                {
-                    var sh = workbook.Worksheets.GetBySheetID(item.SheetID);
-                    sh.Names[item.Row].NameValue = v;
-                }
-            }
-            else
-            {
-                var sheet = workbook.Worksheets.GetBySheetID(item.SheetID);
-                sheet.SetValueInner(item.Row, item.Column, v);
-            }
-        }
-    }
+				CalcChain(worksheet.Workbook, parser, dc);
+
+				return parser.ParseCell(f.Tokens, worksheet.Name, -1, -1);
+			}
+			catch (Exception ex)
+			{
+				return new ExcelErrorValueException(ex.Message, ExcelErrorValue.Create(eErrorType.Value));
+			}
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static void CalcChain(ExcelWorkbook wb, FormulaParser parser, DependencyChain dc)
+		{
+			var debug = parser.Logger != null;
+			foreach (var ix in dc.CalcOrder)
+			{
+				var item = dc.List[ix];
+				try
+				{
+					var ws = wb.Worksheets.GetBySheetID(item.SheetID);
+					var v = parser.ParseCell(item.Tokens, ws == null ? "" : ws.Name, item.Row, item.Column);
+					SetValue(wb, item, v);
+					if (debug)
+					{
+						parser.Logger.LogCellCounted();
+					}
+					Thread.Sleep(0);
+				}
+				catch (FormatException fe)
+				{
+					throw (fe);
+				}
+				catch (Exception ex) when ((ex is OperationCanceledException) == false)
+				{
+					var error = ExcelErrorValue.Parse(ExcelErrorValue.Values.Value);
+					SetValue(wb, item, error);
+				}
+			}
+		}
+
+		private static void Init(ExcelWorkbook workbook)
+		{
+			workbook.FormulaTokens = new CellStore<List<Token>>(); ;
+			foreach (var ws in workbook.Worksheets)
+			{
+				if (!(ws is ExcelChartsheet))
+				{
+					if (ws._formulaTokens != null)
+					{
+						ws._formulaTokens.Dispose();
+					}
+					ws._formulaTokens = new CellStore<List<Token>>();
+				}
+			}
+		}
+
+		private static void SetValue(ExcelWorkbook workbook, FormulaCell item, object v)
+		{
+			if (item.Column == 0)
+			{
+				if (item.SheetID == -1)
+				{
+					workbook.Names[item.Row].NameValue = v;
+				}
+				else
+				{
+					var sh = workbook.Worksheets.GetBySheetID(item.SheetID);
+					sh.Names[item.Row].NameValue = v;
+				}
+			}
+			else
+			{
+				var sheet = workbook.Worksheets.GetBySheetID(item.SheetID);
+				sheet.SetValueInner(item.Row, item.Column, v);
+			}
+		}
+		#endregion
+	}
 }

@@ -9,6 +9,7 @@ namespace EPPlusTest
 	[TestClass]
 	public class ExcelRangeBaseTest : TestBase
 	{
+		#region Copy Tests
 		[TestMethod]
 		public void CopyCopiesCommentsFromSingleCellRanges()
 		{
@@ -75,24 +76,9 @@ namespace EPPlusTest
 			Assert.AreEqual("test1", destinationExcelRangeE5.Comment.Author);
 			Assert.AreEqual("Testing comment 3", destinationExcelRangeE5.Comment.Text);
 		}
+		#endregion
 
-		[TestMethod]
-		public void SettingAddressHandlesMultiAddresses()
-		{
-			using (ExcelPackage package = new ExcelPackage())
-			{
-				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				var name = package.Workbook.Names.Add("Test", worksheet.Cells[3, 3]);
-				name.Address = "Sheet1!C3";
-				name.Address = "Sheet1!D3";
-				Assert.IsNull(name.Addresses);
-				name.Address = "C3:D3,E3:F3";
-				Assert.IsNotNull(name.Addresses);
-				name.Address = "Sheet1!C3";
-				Assert.IsNull(name.Addresses);
-			}
-		}
-
+		#region Shared Formula Overwrite Tests
 		[TestMethod]
 		public void OverwrittenSharedFormulaRowsAreRespected()
 		{
@@ -264,7 +250,9 @@ namespace EPPlusTest
 					newFile.Delete();
 			}
 		}
+		#endregion
 
+		#region SetFormula Tests
 		[TestMethod]
 		public void SetFormulaRemovesLeadingEquals()
 		{
@@ -275,7 +263,9 @@ namespace EPPlusTest
 				Assert.AreEqual("SUM(1,2)", sheet.Cells[3, 3].Formula);
 			}
 		}
+		#endregion
 
+		#region SetSharedFormula Tests
 		[TestMethod]
 		public void SetSharedFormulaRemovesLeadingEquals()
 		{
@@ -286,7 +276,9 @@ namespace EPPlusTest
 				Assert.AreEqual("SUM(1,2)", sheet.Cells[3, 3].Formula);
 			}
 		}
+		#endregion
 
+		#region Equals Tests with array values
 		[TestMethod]
 		public void ArrayEquality()
 		{
@@ -337,6 +329,7 @@ namespace EPPlusTest
 				CollectionAssert.AreEqual(new List<object> { "false" }, (List<object>)worksheet.Cells[3, 3].Value);
 			}
 		}
+		#endregion
 
 		#region AutoFit Tests
 		[TestMethod]
