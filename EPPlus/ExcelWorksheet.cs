@@ -438,19 +438,19 @@ namespace OfficeOpenXml
 		/// The ID for the worksheet's relationship with the workbook in the package
 		/// </summary>
 		internal string RelationshipID { get { return (this._relationshipID); } }
+		#endregion
 
+		#region Public Properties
 		/// <summary>
 		/// The unique identifier for the worksheet.
 		/// </summary>
-		internal int SheetID { get { return (this._sheetID); } }
+		public int SheetID { get { return (this._sheetID); } }
 
 		/// <summary>
 		/// The position of the worksheet.
 		/// </summary>
-		internal int PositionID { get { return (this._positionID); } set { this._positionID = value; } }
-		#endregion
+		public int PositionID { get { return (this._positionID); } internal set { this._positionID = value; } }
 
-		#region Public Properties
 		/// <summary>
 		/// Returns a ExcelWorksheetView object that allows you to set the view state properties of the worksheet
 		/// </summary>
