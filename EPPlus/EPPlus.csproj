@@ -311,7 +311,7 @@
     <Compile Include="ExcelTextFormat.cs" />
     <Compile Include="FormulaManager.cs" />
     <Compile Include="FormulaParsing\CalculateExtentions.cs" />
-    <Compile Include="FormulaParsing\DependencyChain\DependenyChainFactory.cs" />
+    <Compile Include="FormulaParsing\DependencyChain\DependencyChainFactory.cs" />
     <Compile Include="FormulaParsing\DependencyChain\DependencyChain.cs" />
     <Compile Include="FormulaParsing\DependencyChain\FormulaCell.cs" />
     <Compile Include="FormulaParsing\EpplusExcelDataProvider.cs" />
@@ -868,7 +868,7 @@
     <Compile Include="ConditionalFormatting\CF Implementation.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
