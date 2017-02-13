@@ -21,7 +21,51 @@ namespace EPPlusTest
 			Assert.IsNull(excelAddress.Addresses);
 		}
 
-		[TestMethod]
+        [TestMethod]
+        public void ExcelAddressBase_FullColumn()
+        {
+            var excelAddress = new ExcelAddressBase("C:C");
+            Assert.AreEqual("C:C", excelAddress.Address);
+            Assert.IsFalse(excelAddress._fromRowFixed);
+            Assert.IsFalse(excelAddress._fromColFixed);
+            Assert.IsFalse(excelAddress._toRowFixed);
+            Assert.IsFalse(excelAddress._toColFixed);
+        }
+
+        [TestMethod]
+        public void ExcelAddressBase_FullColumnAbsolute()
+        {
+            var excelAddress = new ExcelAddressBase("$C:$C");
+            Assert.AreEqual("$C:$C", excelAddress.Address);
+            Assert.IsFalse(excelAddress._fromRowFixed);
+            Assert.IsTrue(excelAddress._fromColFixed);
+            Assert.IsFalse(excelAddress._toRowFixed);
+            Assert.IsTrue(excelAddress._toColFixed);
+        }
+
+        [TestMethod]
+        public void ExcelAddressBase_FullRow()
+        {
+            var excelAddress = new ExcelAddressBase("5:5");
+            Assert.AreEqual("5:5", excelAddress.Address);
+            Assert.IsFalse(excelAddress._fromRowFixed);
+            Assert.IsFalse(excelAddress._fromColFixed);
+            Assert.IsFalse(excelAddress._toRowFixed);
+            Assert.IsFalse(excelAddress._toColFixed);
+        }
+
+        [TestMethod]
+        public void ExcelAddressBase_FullRowAbsolute()
+        {
+            var excelAddress = new ExcelAddressBase("$5:$5");
+            Assert.AreEqual("$5:$5", excelAddress.Address);
+            Assert.IsTrue(excelAddress._fromRowFixed);
+            Assert.IsFalse(excelAddress._fromColFixed);
+            Assert.IsTrue(excelAddress._toRowFixed);
+            Assert.IsFalse(excelAddress._toColFixed);
+        }
+
+        [TestMethod]
 		public void ExcelAddressBase_AddressWithWorksheet()
 		{
 			var excelAddress = new ExcelAddressBase("worksheet!C3");

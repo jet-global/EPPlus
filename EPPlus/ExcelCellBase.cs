@@ -503,6 +503,7 @@ namespace OfficeOpenXml
 				colStartIx = sheetMarkerIndex + 1;
 			}
 			address = Utils.ConvertUtil._invariantTextInfo.ToUpper(address);
+            bool foundAbsolute = false;
 			for (int i = colStartIx; i < address.Length; i++)
 			{
 				char c = address[i];
@@ -511,25 +512,26 @@ namespace OfficeOpenXml
 					col *= 26;
 					col += ((int)c) - 64;
 					colLength++;
+                    if (foundAbsolute)
+                    {
+                        fixedCol = true;
+                        foundAbsolute = false;
+                    }
 				}
 				else if (c >= '0' && c <= '9')
 				{
 					row *= 10;
 					row += ((int)c) - 48;
 					colPart = false;
+                    if (foundAbsolute)
+                    {
+                        fixedRow = true;
+                        foundAbsolute = false;
+                    }
 				}
 				else if (c == '$')
 				{
-					if (i == colStartIx)
-					{
-						colStartIx++;
-						fixedCol = true;
-					}
-					else
-					{
-						colPart = false;
-						fixedRow = true;
-					}
+                    foundAbsolute = true;
 				}
 				else
 				{
@@ -668,11 +670,11 @@ namespace OfficeOpenXml
 			}
 			else
 			{
-				if (FromRow == 1 && ToRow == ExcelPackage.MaxRows)
+				if (FromRow == 1 && ToRow >= ExcelPackage.MaxRows)
 				{
 					return GetColumnLetter(FromColumn, FixedFromColumn) + ":" + GetColumnLetter(ToColumn, FixedToColumn);
 				}
-				else if (FromColumn == 1 && ToColumn == ExcelPackage.MaxColumns)
+				else if (FromColumn == 1 && ToColumn >= ExcelPackage.MaxColumns)
 				{
 					return (FixedFromRow ? "$" : "") + FromRow.ToString() + ":" + (FixedToRow ? "$" : "") + ToRow.ToString();
 				}
