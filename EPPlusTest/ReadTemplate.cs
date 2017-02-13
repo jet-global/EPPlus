@@ -259,7 +259,7 @@ namespace EPPlusTest
         {
             var package = new ExcelPackage(new FileInfo(@"c:\temp\original.xlsx"));
             var ws = package.Workbook.Worksheets[1];
-            package.Workbook.Calculate(new OfficeOpenXml.FormulaParsing.ExcelCalculationOption() { AllowCirculareReferences = true });
+            package.Workbook.Calculate(new OfficeOpenXml.FormulaParsing.ExcelCalculationOption() { AllowCircularReferences = true });
             package.SaveAs(new FileInfo(@"c:\temp\bug2.xlsx"));
         }
         [Ignore]
