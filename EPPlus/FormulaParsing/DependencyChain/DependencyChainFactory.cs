@@ -114,7 +114,7 @@ namespace OfficeOpenXml.FormulaParsing
 			var id = ExcelCellBase.GetCellID(ws == null ? 0 : ws.SheetID, name.Index, 0);
 			if (!depChain.Index.ContainsKey(id))
 			{
-				var f = new FormulaCell() { SheetID = ws == null ? 0 : ws.SheetID, Row = name.Index, Column = 0, Formula = name.NameFormula };
+				var f = new FormulaCell() { SheetID = ws == null ? -1 : ws.SheetID, Row = name.Index, Column = 0, Formula = name.NameFormula };
 				if (!string.IsNullOrEmpty(f.Formula))
 				{
 					f.Tokens = lexer.Tokenize(f.Formula, (ws == null ? null : ws.Name)).ToList();
