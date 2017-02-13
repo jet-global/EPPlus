@@ -1145,7 +1145,7 @@ namespace OfficeOpenXml
 							XmlElement elem = this.WorkbookXml.CreateElement("definedName", ExcelPackage.schemaMain);
 							top.AppendChild(elem);
 							elem.SetAttribute("name", name.Name);
-							elem.SetAttribute("localSheetId", name.LocalSheetId.ToString());
+							elem.SetAttribute("localSheetId", name.LocalSheetID.ToString());
 							if (name.IsNameHidden)
 								elem.SetAttribute("hidden", "1");
 							if (!string.IsNullOrEmpty(name.NameComment))

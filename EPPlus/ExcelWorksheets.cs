@@ -13,17 +13,17 @@
 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
  * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
  *
- * All code and executables are provided "as is" with no warranty either express or implied. 
+ * All code and executables are provided "as is" with no warranty either express or implied.
  * The author accepts no liability for any damage or loss of business that this product may cause.
  *
  * Code change notes:
- * 
+ *
  * Author							Change						Date
  * ******************************************************************************
  * Jan Källman		    Initial Release		       2009-10-01
@@ -50,7 +50,7 @@ namespace OfficeOpenXml
 	/// </summary>
 	public class ExcelWorksheets : XmlHelper, IEnumerable<ExcelWorksheet>, IDisposable
 	{
-		#region Constants 
+		#region Constants
 		private const string ERR_DUP_WORKSHEET = "A worksheet with this name already exists in the workbook";
 		internal const string WORKSHEET_CONTENTTYPE = @"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml";
 		internal const string CHARTSHEET_CONTENTTYPE = @"application/vnd.openxmlformats-officedocument.spreadsheetml.chartsheet+xml";
@@ -282,8 +282,8 @@ namespace OfficeOpenXml
 		{
 			/*
             * Hack to prefetch all the drawings,
-            * so that all the images are referenced, 
-            * to prevent the deletion of the image file, 
+            * so that all the images are referenced,
+            * to prevent the deletion of the image file,
             * when referenced more than once
             */
 			foreach (var ws in this.Worksheets)
@@ -305,7 +305,7 @@ namespace OfficeOpenXml
 			//Delete any parts still with relations to the Worksheet.
 			this.DeleteRelationsAndParts(worksheet.Part);
 
-			//Delete the worksheet part and relation from the package 
+			//Delete the worksheet part and relation from the package
 			this.Package.Workbook.Part.DeleteRelationship(worksheet.RelationshipID);
 
 			//Delete worksheet from the workbook XML
@@ -513,7 +513,7 @@ namespace OfficeOpenXml
 			{
 				throw new ArgumentException("The worksheet name can not start or end with an apostrophe.");
 			}
-			if (Name.Length > 31) Name = Name.Substring(0, 31);   //A sheet can have max 31 char's            
+			if (Name.Length > 31) Name = Name.Substring(0, 31);   //A sheet can have max 31 char's
 			return Name;
 		}
 
@@ -563,15 +563,15 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Gets a sheet by its specified <paramref name="localSheetID"/>.
+		/// Gets a sheet by its specified <paramref name="sheetID"/>.
 		/// </summary>
-		/// <param name="localSheetID">The local sheet Id of the worksheet to retrieve.</param>
-		/// <returns>The first worksheet with the specified ID.</returns>
-		internal ExcelWorksheet GetBySheetID(int localSheetID)
+		/// <param name="sheetID">The sheet Id of the worksheet to retrieve (NOT the localSheetID property of a named range).</param>
+		/// <returns>The first worksheet with the specified SheetID.</returns>
+		internal ExcelWorksheet GetBySheetID(int sheetID)
 		{
 			foreach (ExcelWorksheet ws in this)
 			{
-				if (ws.SheetID == localSheetID)
+				if (ws.SheetID == sheetID)
 				{
 					return ws;
 				}
@@ -582,7 +582,7 @@ namespace OfficeOpenXml
 
 		#region Public Operators
 		/// <summary>
-		/// Returns the worksheet at the specified position.  
+		/// Returns the worksheet at the specified position.
 		/// </summary>
 		/// <param name="PositionID">The 1-base position of the worksheet.</param>
 		/// <returns>The worksheet at the specified position.</returns>

@@ -101,6 +101,7 @@
     <Compile Include="ExcelAddressTest.cs" />
     <Compile Include="ExcelCellBaseTest.cs" />
     <Compile Include="ExcelNamedRangeCollectionTest.cs" />
+    <Compile Include="ExcelNamedRangeTest.cs" />
     <Compile Include="ExcelPackageTest.cs" />
     <Compile Include="ExcelWorksheetTests.cs" />
     <Compile Include="FormulaManagerTest.cs" />

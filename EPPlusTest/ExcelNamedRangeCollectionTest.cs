@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 
 namespace EPPlusTest
@@ -23,6 +18,8 @@ namespace EPPlusTest
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
 				Assert.AreEqual("'Sheet'!$C$6", namedRange.Address);
+				Assert.AreEqual(-1, namedRange.ActualSheetID);
+				Assert.AreEqual(-1, namedRange.LocalSheetID);
 			}
 		}
 
