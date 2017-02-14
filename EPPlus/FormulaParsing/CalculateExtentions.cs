@@ -181,10 +181,6 @@ namespace OfficeOpenXml
 					}
 					Thread.Sleep(0);
 				}
-				catch (FormatException fe)
-				{
-					throw (fe);
-				}
 				catch (Exception ex) when ((ex is OperationCanceledException) == false)
 				{
 					var error = ExcelErrorValue.Parse(ExcelErrorValue.Values.Value);
