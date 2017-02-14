@@ -183,6 +183,7 @@ namespace OfficeOpenXml
 				}
 				catch (Exception ex) when ((ex is OperationCanceledException) == false)
 				{
+                    parser.Logger?.Log(ex);
 					var error = ExcelErrorValue.Parse(ExcelErrorValue.Values.Value);
 					SetValue(wb, item, error);
 				}

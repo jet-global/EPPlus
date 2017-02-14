@@ -37,6 +37,13 @@ namespace OfficeOpenXml.FormulaParsing.Logging
             }
         }
 
+        public void Log(Exception ex)
+        {
+            WriteSeparatorAndTimeStamp();
+            _sw.WriteLine(ex);
+            _sw.WriteLine();
+        }
+
         public void Log(ParsingContext context, Exception ex)
         {
             WriteSeparatorAndTimeStamp();

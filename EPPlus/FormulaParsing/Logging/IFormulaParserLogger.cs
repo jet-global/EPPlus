@@ -8,6 +8,11 @@ namespace OfficeOpenXml.FormulaParsing.Logging
     public interface IFormulaParserLogger : IDisposable
     {
         /// <summary>
+        /// Called to log exceptions that occur outside of a parsing context.
+        /// </summary>
+        /// <param name="ex">The <see cref="Exception"/> that was thrown.</param>
+        void Log(Exception ex);
+        /// <summary>
         /// Called each time an exception occurs during formula parsing.
         /// </summary>
         /// <param name="context"></param>
