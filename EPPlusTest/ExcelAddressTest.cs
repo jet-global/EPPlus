@@ -204,7 +204,7 @@ namespace EPPlusTest
 		}
 		#endregion
 
-		#region AddRow Tests
+		#region AddRow Tests some other thing
 		[TestMethod]
 		public void AddRowBeforeFromRow()
 		{
@@ -303,10 +303,298 @@ namespace EPPlusTest
 			Assert.AreEqual(5, newAddress.End.Row);
 			Assert.AreEqual(5, newAddress.End.Column);
 		}
-		#endregion
 
-		#region DeleteRow Tests
-		[TestMethod]
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingLessThanMinimumRowRelative()
+        {
+            var excelAddress = new ExcelAddressBase("A:A");
+            excelAddress = excelAddress.AddRow(0, 1);
+            Assert.AreEqual("A:A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingLessThanMinimumRowAbsolute()
+        {
+            var excelAddress = new ExcelAddressBase("$A:$A");
+            excelAddress = excelAddress.AddRow(0, 1);
+            Assert.AreEqual("$A:$A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingLessThanMinimumRowRelativeSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("A:A");
+            excelAddress = excelAddress.AddRow(0, 1, true);
+            Assert.AreEqual("A:A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingLessThanMinimumRowAbsoluteSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("$A:$A");
+            excelAddress = excelAddress.AddRow(0, 1, true);
+            Assert.AreEqual("$A:$A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingLessThanMinimumRowRelative()
+        {
+            var excelAddress = new ExcelAddressBase("1:1");
+            excelAddress = excelAddress.AddColumn(0, 1);
+            Assert.AreEqual("1:1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingLessThanMinimumRowAbsolute()
+        {
+            var excelAddress = new ExcelAddressBase("$1:$1");
+            excelAddress = excelAddress.AddColumn(0, 1);
+            Assert.AreEqual("$1:$1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingLessThanMinimumRowRelativeSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("1:1");
+            excelAddress = excelAddress.AddColumn(0, 1, true);
+            Assert.AreEqual("1:1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingLessThanMinimumRowAbsoluteSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("$1:$1");
+            excelAddress = excelAddress.AddColumn(0, 1, true);
+            Assert.AreEqual("$1:$1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingValidRowRelative()
+        {
+            var excelAddress = new ExcelAddressBase("A:A");
+            excelAddress = excelAddress.AddRow(50, 1);
+            Assert.AreEqual("A:A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingValidRowAbsolute()
+        {
+            var excelAddress = new ExcelAddressBase("$A:$A");
+            excelAddress = excelAddress.AddRow(50, 1);
+            Assert.AreEqual("$A:$A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingValidRowRelativeSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("A:A");
+            excelAddress = excelAddress.AddRow(50, 1, true);
+            Assert.AreEqual("A:A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingValidRowAbsoluteSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("$A:$A");
+            excelAddress = excelAddress.AddRow(50, 1, true);
+            Assert.AreEqual("$A:$A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingValidColumnRelative()
+        {
+            var excelAddress = new ExcelAddressBase("1:1");
+            excelAddress = excelAddress.AddColumn(50, 1);
+            Assert.AreEqual("1:1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingValidColumnAbsolute()
+        {
+            var excelAddress = new ExcelAddressBase("$1:$1");
+            excelAddress = excelAddress.AddColumn(50, 1);
+            Assert.AreEqual("$1:$1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingValidColumnRelativeSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("1:1");
+            excelAddress = excelAddress.AddColumn(50, 1, true);
+            Assert.AreEqual("1:1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingValidColumnAbsoluteSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("$1:$1");
+            excelAddress = excelAddress.AddColumn(50, 1, true);
+            Assert.AreEqual("$1:$1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingGreaterThanMaxRowRelative()
+        {
+            var excelAddress = new ExcelAddressBase("A:A");
+            excelAddress = excelAddress.AddRow(ExcelPackage.MaxRows + 1, 1);
+            Assert.AreEqual("A:A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingGreaterThanMaxRowAbsolute()
+        {
+            var excelAddress = new ExcelAddressBase("$A:$A");
+            excelAddress = excelAddress.AddRow(ExcelPackage.MaxRows + 1, 1);
+            Assert.AreEqual("$A:$A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingGreaterThanMaxRowRelativeSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("A:A");
+            excelAddress = excelAddress.AddRow(ExcelPackage.MaxRows + 1, 1, true);
+            Assert.AreEqual("A:A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddRowToFullColumnDoesNothingGreaterThanMaxRowAbsoluteSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("$A:$A");
+            excelAddress = excelAddress.AddRow(ExcelPackage.MaxRows + 1, 1, true);
+            Assert.AreEqual("$A:$A", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(ExcelPackage.MaxRows, excelAddress.End.Row);
+            Assert.AreEqual(1, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingGreaterThanMaxColumnRelative()
+        {
+            var excelAddress = new ExcelAddressBase("1:1");
+            excelAddress = excelAddress.AddColumn(ExcelPackage.MaxColumns + 1, 1);
+            Assert.AreEqual("1:1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingGreaterThanMaxColumnAbsolute()
+        {
+            var excelAddress = new ExcelAddressBase("$1:$1");
+            excelAddress = excelAddress.AddColumn(ExcelPackage.MaxColumns + 1, 1);
+            Assert.AreEqual("$1:$1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingGreaterThanMaxColumnRelativeSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("1:1");
+            excelAddress = excelAddress.AddColumn(ExcelPackage.MaxColumns + 1, 1, true);
+            Assert.AreEqual("1:1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+
+        [TestMethod]
+        public void AddColumnToFullRowDoesNothingGreaterThanMaxColumnAbsoluteSetFixed()
+        {
+            var excelAddress = new ExcelAddressBase("$1:$1");
+            excelAddress = excelAddress.AddColumn(ExcelPackage.MaxColumns + 1, 1, true);
+            Assert.AreEqual("$1:$1", excelAddress.Address);
+            Assert.AreEqual(1, excelAddress.Start.Row);
+            Assert.AreEqual(1, excelAddress.Start.Column);
+            Assert.AreEqual(1, excelAddress.End.Row);
+            Assert.AreEqual(ExcelPackage.MaxColumns, excelAddress.End.Column);
+        }
+        #endregion
+
+        #region DeleteRow Tests
+        [TestMethod]
 		public void DeleteRowAfterToRow()
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);

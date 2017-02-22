@@ -357,12 +357,16 @@ namespace OfficeOpenXml
 		/// <returns>A modified <see cref="ExcelAddressBase"/>.</returns>
 		public ExcelAddressBase AddRow(int row, int rows, bool setFixed = false)
 		{
+            // We're forced to assume full column here and so no change should be applied because we may exceed valid dimensions.
+            // And because of how this function is used we should return a new instance of ExcelAddressBase.
+            if (_fromRow == 1 && _toRow == ExcelPackage.MaxRows)
+                return new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
 			if (row > _toRow)
 				return this;
 			else if (row <= _fromRow)
-				return new ExcelAddressBase((setFixed && _fromRowFixed ? _fromRow : _fromRow + rows), _fromCol, (setFixed && _toRowFixed ? _toRow : _toRow + rows), _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
+				return new ExcelAddressBase((setFixed && _fromRowFixed ? _fromRow : Math.Min(_fromRow + rows, ExcelPackage.MaxRows)), _fromCol, (setFixed && _toRowFixed ? _toRow : Math.Min(_toRow + rows, ExcelPackage.MaxRows)), _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
 			else
-				return new ExcelAddressBase(_fromRow, _fromCol, (setFixed && _toRowFixed ? _toRow : _toRow + rows), _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
+				return new ExcelAddressBase(_fromRow, _fromCol, (setFixed && _toRowFixed ? _toRow : Math.Min(_toRow + rows, ExcelPackage.MaxRows)), _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
 		}
 
 		/// <summary>
@@ -397,13 +401,17 @@ namespace OfficeOpenXml
 		/// <param name="setFixed">Indicates whether or not treat the reference as fixed.</param>
 		/// <returns>A modified <see cref="ExcelAddressBase"/>.</returns>
 		public ExcelAddressBase AddColumn(int col, int cols, bool setFixed = false)
-		{
-			if (col > _toCol)
+        {
+            // We're forced to assume full row here and so no change should be applied because we may exceed valid dimensions.
+            // And because of how this function is used we should return a new instance of ExcelAddressBase.
+            if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns)
+                return new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
+            if (col > _toCol)
 				return this;
 			else if (col <= _fromCol)
-				return new ExcelAddressBase(_fromRow, (setFixed && _fromColFixed ? _fromCol : _fromCol + cols), _toRow, (setFixed && _toColFixed ? _toCol : _toCol + cols), _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
+				return new ExcelAddressBase(_fromRow, (setFixed && _fromColFixed ? _fromCol : Math.Min(_fromCol + cols, ExcelPackage.MaxColumns)), _toRow, (setFixed && _toColFixed ? _toCol : Math.Min(_toCol + cols, ExcelPackage.MaxColumns)), _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
 			else
-				return new ExcelAddressBase(_fromRow, _fromCol, _toRow, (setFixed && _toColFixed ? _toCol : _toCol + cols), _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
+				return new ExcelAddressBase(_fromRow, _fromCol, _toRow, (setFixed && _toColFixed ? _toCol : Math.Min(_toCol + cols, ExcelPackage.MaxColumns)), _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
 		}
 
 		/// <summary>

@@ -76,7 +76,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
             if (indexVal.DataType == DataType.ExcelAddress)
             {
                 var address = new ExcelAddress(indexVal.Value.ToString());
-                var indexObj = context.ExcelDataProvider.GetRangeValue(address.WorkSheet, address._fromRow, address._fromCol);
+                var indexObj = context.ExcelDataProvider.GetRangeValue(address.WorkSheet ?? context.Scopes.Current.Address.Worksheet, address._fromRow, address._fromCol);
                 LookupIndex = (int) _argumentParsers.GetParser(DataType.Integer).Parse(indexObj);
             }
             else

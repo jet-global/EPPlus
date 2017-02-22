@@ -55,6 +55,64 @@ namespace EPPlusTest.Excel.Functions
         }
 
         [TestMethod]
+        public void LookupArgumentsShouldSetColIndexFromReferenceSameSheet()
+        {
+            // This test addresses a bug fix where under certain cases a faulty lookup is created
+            // that always references the first sheet. That's why there is an unused Worksheet1.
+            const int expectedIndex = 9;
+            using (var excelPackage = new ExcelPackage())
+            using (var worksheet1 = excelPackage.Workbook.Worksheets.Add("Worksheet1"))
+            using (var worksheet2 = excelPackage.Workbook.Worksheets.Add("Worksheet2"))
+            {
+                worksheet1.Cells["C3"].Value = expectedIndex + 1;
+                worksheet2.Cells["C3"].Value = expectedIndex;
+                var parsingContext = this.BuildParsingContext(excelPackage);
+                var scopeAddress = parsingContext.RangeAddressFactory.Create("Worksheet2!D4");
+                using (parsingContext.Scopes.NewScope(scopeAddress))
+                {
+                    var args = new[]
+                    {
+                        new FunctionArgument(1),
+                        new FunctionArgument("A:B", DataType.ExcelAddress),
+                        new FunctionArgument("C3", DataType.ExcelAddress)
+                    };
+                    var lookupArgs = new LookupArguments(args, parsingContext);
+                    Assert.AreEqual(expectedIndex, lookupArgs.LookupIndex);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void LookupArgumentsShouldSetColIndexFromReferenceDifferentSheet()
+        {
+            // This test addresses a bug fix where under certain cases a faulty lookup is created
+            // that always references the first sheet. That's why there is an unused Worksheet1.
+            const int expectedIndex = 9;
+            using (var excelPackage = new ExcelPackage())
+            using (var worksheet1 = excelPackage.Workbook.Worksheets.Add("Worksheet1"))
+            using (var worksheet2 = excelPackage.Workbook.Worksheets.Add("Worksheet2"))
+            using (var worksheet3 = excelPackage.Workbook.Worksheets.Add("Worksheet3"))
+            {
+                worksheet1.Cells["C3"].Value = expectedIndex + 1;
+                worksheet2.Cells["C3"].Value = expectedIndex + 2;
+                worksheet3.Cells["C3"].Value = expectedIndex;
+                var parsingContext = this.BuildParsingContext(excelPackage);
+                var scopeAddress = parsingContext.RangeAddressFactory.Create("Worksheet2!D4");
+                using (parsingContext.Scopes.NewScope(scopeAddress))
+                {
+                    var args = new[]
+                    {
+                        new FunctionArgument(1),
+                        new FunctionArgument("A:B", DataType.ExcelAddress),
+                        new FunctionArgument("Worksheet3!C3", DataType.ExcelAddress)
+                    };
+                    var lookupArgs = new LookupArguments(args, parsingContext);
+                    Assert.AreEqual(expectedIndex, lookupArgs.LookupIndex);
+                }
+            }
+        }
+
+        [TestMethod]
         public void LookupArgumentsShouldSetRangeLookupToTrueAsDefaultValue()
         {
             var args = FunctionsHelper.CreateArgs(1, "A:B", 2);
@@ -595,5 +653,15 @@ namespace EPPlusTest.Excel.Functions
 			var result = func.Execute(args, parsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
-	}
+
+        #region Helper Methods
+        private ParsingContext BuildParsingContext(ExcelPackage excelPackage)
+        {
+            var parsingContext = ParsingContext.Create();
+            parsingContext.ExcelDataProvider = new EpplusExcelDataProvider(excelPackage);
+            parsingContext.RangeAddressFactory = new RangeAddressFactory(parsingContext.ExcelDataProvider);
+            return parsingContext;
+        }
+        #endregion
+    }
 }
