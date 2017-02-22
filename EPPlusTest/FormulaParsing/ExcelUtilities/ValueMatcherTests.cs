@@ -103,5 +103,140 @@ namespace EPPlusTest.ExcelUtilities
             var result = _matcher.IsMatch(o1, o2);
             Assert.AreEqual(-2, result);
         }
+
+        [TestMethod]
+        public void ShouldReturn0ForEqualDates()
+        {
+            object o1 = DateTime.Parse("1/1/2017");
+            object o2 = DateTime.Parse("1/1/2017");
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturn1ForGreaterFirstDate()
+        {
+            object o1 = DateTime.Parse("1/2/2017");
+            object o2 = DateTime.Parse("1/1/2017");
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturnNegative1ForLesserFirstDate()
+        {
+            object o1 = DateTime.Parse("1/1/2017");
+            object o2 = DateTime.Parse("1/2/2017");
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturn0ForEqualDatesFirstIsString()
+        {
+            object o1 = "1/1/2017";
+            object o2 = DateTime.Parse("1/1/2017");
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturn1ForGreaterFirstDateFirstIsString()
+        {
+            object o1 = "1/2/2017";
+            object o2 = DateTime.Parse("1/1/2017");
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturnNegative1ForLesserFirstDateFirstIsString()
+        {
+            object o1 = "1/1/2017";
+            object o2 = DateTime.Parse("1/2/2017");
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturn0ForEqualDatesSecondIsString()
+        {
+            object o1 = DateTime.Parse("1/1/2017");
+            object o2 = "1/1/2017";
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturn1ForGreaterFirstDateSecondIsString()
+        {
+            object o1 = DateTime.Parse("1/2/2017");
+            object o2 = "1/1/2017";
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturnNegative1ForLesserFirstDateSecondIsString()
+        {
+            object o1 = DateTime.Parse("1/1/2017");
+            object o2 = "1/2/2017";
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturn0ForEqualDateFirstDateIsOADate()
+        {
+            object o1 = DateTime.Parse("1/1/2017").ToOADate();
+            object o2 = DateTime.Parse("1/1/2017");
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturn1ForGreaterFirstDateFirstDateIsOADate()
+        {
+            object o1 = DateTime.Parse("1/2/2017").ToOADate();
+            object o2 = DateTime.Parse("1/1/2017");
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturnNegative1ForLesserFirstDateFirstDateIsOADate()
+        {
+            object o1 = DateTime.Parse("1/1/2017").ToOADate();
+            object o2 = DateTime.Parse("1/2/2017");
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturn0ForEqualDateSecondDateIsOADate()
+        {
+            object o1 = DateTime.Parse("1/1/2017");
+            object o2 = DateTime.Parse("1/1/2017").ToOADate();
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturn1ForGreaterFirstDateSecondDateIsOADate()
+        {
+            object o1 = DateTime.Parse("1/2/2017");
+            object o2 = DateTime.Parse("1/1/2017").ToOADate();
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        public void ShouldReturnNegative1ForLesserFirstDateSecondDateIsOADate()
+        {
+            object o1 = DateTime.Parse("1/1/2017");
+            object o2 = DateTime.Parse("1/2/2017").ToOADate();
+            var result = _matcher.IsMatch(o1, o2);
+            Assert.AreEqual(-1, result);
+        }
     }
 }
