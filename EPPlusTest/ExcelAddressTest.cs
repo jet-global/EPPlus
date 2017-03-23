@@ -113,10 +113,17 @@ namespace EPPlusTest
 			Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
 			Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
 		}
-		#endregion
 
-		#region FullAddress Tests
-		[TestMethod]
+        [TestMethod]
+        public void ExcelAddressBase_AddressWithWorksheetWithExclamationPointInName()
+        {
+            var excelAddress = new ExcelAddressBase("'work!sheet'!C3");
+            Assert.AreEqual("work!sheet", excelAddress.WorkSheet);
+        }
+        #endregion
+
+        #region FullAddress Tests
+        [TestMethod]
 		public void FullAddress()
 		{
 			var excelAddress = new ExcelAddressBase("[workbook]worksheet!C3");
