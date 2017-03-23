@@ -480,12 +480,12 @@ namespace OfficeOpenXml
 					pos = address.IndexOf("'", pos + 2);
 				}
 				var wbws = address.Substring(1, pos - 1).Replace("''", "'");
-				SetWbWs(wbws);
+				this.SetWbWs(wbws);
 				_address = address.Substring(pos + 2);
 			}
 			else if (Utils.ConvertUtil._invariantCompareInfo.IsPrefix(address, "[")) //Remove any external reference
 			{
-				SetWbWs(address);
+                this.SetWbWs(address, true);
 			}
 			else
 			{
@@ -493,19 +493,19 @@ namespace OfficeOpenXml
 			}
 			if (_address.IndexOfAny(new char[] { ',', '!', '[' }) > -1)
 			{
-				//Advanced address. Including Sheet or multi or table.
-				ExtractAddress(_address);
+                //Advanced address. Including Sheet or multi or table.
+                this.ExtractAddress(_address);
 			}
 			else
 			{
 				//Simple address
-				GetRowColFromAddress(_address, out _fromRow, out _fromCol, out _toRow, out _toCol, out _fromRowFixed, out _fromColFixed, out _toRowFixed, out _toColFixed);
+				ExcelCellBase.GetRowColFromAddress(_address, out _fromRow, out _fromCol, out _toRow, out _toCol, out _fromRowFixed, out _fromColFixed, out _toRowFixed, out _toColFixed);
 				_addresses = null;
 				_start = null;
 				_end = null;
 			}
 			_address = address;
-			Validate();
+			this.Validate();
 		}
 
 		/// <summary>
@@ -700,7 +700,7 @@ namespace OfficeOpenXml
 			return adr;
 		}
 
-		private void SetWbWs(string address)
+		private void SetWbWs(string address, bool containsExternalReference = false)
 		{
 			int pos;
 			if (address[0] == '[')
@@ -714,13 +714,13 @@ namespace OfficeOpenXml
 				_wb = "";
 				_ws = address;
 			}
-			pos = _ws.IndexOf("!");
-			if (pos > -1)
-			{
-				_address = _ws.Substring(pos + 1);
-				_ws = _ws.Substring(0, pos);
-			}
-		}
+            pos = _ws.LastIndexOf("!");
+            if (containsExternalReference && pos > -1)
+            {
+                _address = _ws.Substring(pos + 1);
+                _ws = _ws.Substring(0, pos);
+            }
+        }
 
 		private void Validate()
 		{
