@@ -1,0 +1,23 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+*.snk
+*.pfx
+*.suo
+*.vspscc
+*.vssscc
+*.user
+/.vs/
+/**/bin/
+/**/obj/
+/**/packages/
+
+*.vspx
+*.psess
+
+/.tfignore
+
+/password.txt
+
+/TestResults
