@@ -256,7 +256,7 @@ namespace OfficeOpenXml.Table.PivotTable
                 string prevName = Name;
                 if (WorkSheet.Tables._tableNames.ContainsKey(prevName))
                 {
-                    int ix = WorkSheet.Tables._tableNames[prevName];
+                    int ix = WorkSheet.Tables.TableNames[prevName];
                     WorkSheet.Tables._tableNames.Remove(prevName);
                     WorkSheet.Tables._tableNames.Add(value, ix);
                 }

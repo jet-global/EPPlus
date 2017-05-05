@@ -19,8 +19,9 @@ using OfficeOpenXml.Table.PivotTable;
 namespace EPPlusTest
 {
 	[TestClass]
-	public class WorkSheetTest : TestBase
+	public class ExcelWorksheetTest : TestBase
 	{
+		#region Tests From Previous EPPlus Contributors
 		[TestMethod]
 		public void RunWorksheetTests()
 		{
@@ -904,7 +905,7 @@ namespace EPPlusTest
 			if (newFile.Exists)
 			{
 				newFile.Delete();  // ensures we create a new workbook
-								   //newFile = new FileInfo(dir + @"sample8.xlsx");
+										 //newFile = new FileInfo(dir + @"sample8.xlsx");
 			}
 
 			ExcelPackage package = new ExcelPackage();
@@ -2538,7 +2539,9 @@ namespace EPPlusTest
 				//so the inbuilt dispose method doesn't work properly.
 			} //using (ExcelPackage ep = new ExcelPackage(new FileInfo(some_file))
 		}
+		#endregion
 
+		#region Cross-Sheet Reference Update Tests
 		[TestMethod]
 		public void InsertRowsUpdatesReferencesCorrectly()
 		{
@@ -2727,28 +2730,7 @@ namespace EPPlusTest
 				Assert.AreEqual("Goodbye, world!", sheet1.Cells[4, 4].Value);
 			}
 		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
-		public void ExcelWorksheetRenameWithStartApostropheThrowsException()
-		{
-			using (var package = new ExcelPackage())
-			{
-				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
-				sheet1.Name = "'New Name";
-			}
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
-		public void ExcelWorksheetRenameWithEndApostropheThrowsException()
-		{
-			using (var package = new ExcelPackage())
-			{
-				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
-				sheet1.Name = "New Name'";
-			}
-		}
+		#endregion
 
 		#region Date1904 Test Cases
 		[TestMethod]
@@ -2991,6 +2973,7 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region CopySheet Tests
 		[TestMethod]
 		public void CopySheetWithSharedFormula()
 		{
@@ -3008,6 +2991,7 @@ namespace EPPlusTest
 				Assert.AreEqual("SUM(B2:C2)", sheet2.Cells["D2"].Formula);
 			}
 		}
+		#endregion
 
 		#region InsertRows Tests
 		[TestMethod]
@@ -3423,6 +3407,28 @@ namespace EPPlusTest
 				Assert.AreEqual("Sheet2", worksheet);
 			}
 		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void ExcelWorksheetRenameWithStartApostropheThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Name = "'New Name";
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void ExcelWorksheetRenameWithEndApostropheThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Name = "New Name'";
+			}
+		}
 		#endregion
 
 		#region Save Tests
@@ -3495,6 +3501,7 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region Calculate Tests
 		[TestMethod]
 		public void DateFunctionsWorkWithDifferentCultureDateFormats()
 		{
@@ -3549,5 +3556,6 @@ namespace EPPlusTest
 			}
 			Thread.CurrentThread.CurrentCulture = currentCulture;
 		}
+		#endregion
 	}
 }
