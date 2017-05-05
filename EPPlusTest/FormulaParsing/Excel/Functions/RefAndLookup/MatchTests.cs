@@ -1,7 +1,6 @@
-﻿using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing;
+using System.IO;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 {
