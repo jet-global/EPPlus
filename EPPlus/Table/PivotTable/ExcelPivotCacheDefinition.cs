@@ -199,7 +199,7 @@ namespace OfficeOpenXml.Table.PivotTable
                             }
                             foreach (var w in PivotTable.WorkSheet.Workbook.Worksheets)
                             {
-                                if (w.Tables._tableNames.ContainsKey(name))
+                                if (w.Tables.TableNames.ContainsKey(name))
                                 {
 									_sourceRange = new ExcelRangeBase(w.Workbook, w, name, true);
                                     break;

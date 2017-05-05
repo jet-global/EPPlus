@@ -848,7 +848,7 @@ namespace OfficeOpenXml
 		{
 			foreach (var ws in this.Worksheets)
 			{
-				if (ws.Tables._tableNames.ContainsKey(name))
+				if (ws.Tables.TableNames.ContainsKey(name))
 				{
 					return true;
 				}

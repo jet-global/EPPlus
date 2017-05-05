@@ -254,11 +254,11 @@ namespace OfficeOpenXml.Table.PivotTable
                     throw (new ArgumentException("PivotTable name is not unique"));
                 }
                 string prevName = Name;
-                if (WorkSheet.Tables._tableNames.ContainsKey(prevName))
+                if (WorkSheet.Tables.TableNames.ContainsKey(prevName))
                 {
                     int ix = WorkSheet.Tables.TableNames[prevName];
-                    WorkSheet.Tables._tableNames.Remove(prevName);
-                    WorkSheet.Tables._tableNames.Add(value, ix);
+                    WorkSheet.Tables.TableNames.Remove(prevName);
+                    WorkSheet.Tables.TableNames.Add(value, ix);
                 }
                 SetXmlNodeString(NAME_PATH, value);
                 SetXmlNodeString(DISPLAY_NAME_PATH, cleanDisplayName(value));

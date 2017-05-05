@@ -52,7 +52,7 @@ namespace OfficeOpenXml.Table
 			}
 		}
 
-		private Dictionary<string, int> TableNames { get; } = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
+		internal Dictionary<string, int> TableNames { get; } = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
 
 		private List<ExcelTable> Tables { get; } = new List<ExcelTable>();
 
