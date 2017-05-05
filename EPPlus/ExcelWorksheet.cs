@@ -3864,6 +3864,12 @@ namespace OfficeOpenXml
 		/// </summary>
 		private void SaveTables()
 		{
+			if(this.Tables.Count == 0)
+			{
+				XmlNode tbls = TopNode.SelectSingleNode("d:tableParts", NameSpaceManager);
+				if (tbls != null)
+					tbls.ParentNode.RemoveChild(tbls);
+			}
 			foreach (var tbl in Tables)
 			{
 				if (tbl.ShowHeader || tbl.ShowTotal)
@@ -3922,7 +3928,6 @@ namespace OfficeOpenXml
 
 					this.CreateNode("d:tableParts");
 					XmlNode tbls = TopNode.SelectSingleNode("d:tableParts", NameSpaceManager);
-
 					var tblNode = tbls.OwnerDocument.CreateElement("tablePart", ExcelPackage.schemaMain);
 					tbls.AppendChild(tblNode);
 					tblNode.SetAttribute("id", ExcelPackage.schemaRelationships, rel.Id);
