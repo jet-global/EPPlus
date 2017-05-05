@@ -28,27 +28,20 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.Excel;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
+using System.Collections.Generic;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
     public class DefaultCompiler : FunctionCompiler
     {
-        public DefaultCompiler(ExcelFunction function)
-            : base(function)
-        {
-
-        }
+        public DefaultCompiler(ExcelFunction function) : base(function) { }
 
         public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
         {
             var args = new List<FunctionArgument>();
-            Function.BeforeInvoke(context);
+            this.Function.BeforeInvoke(context);
             foreach (var child in children)
             {
                 var compileResult = child.Compile();
@@ -60,10 +53,10 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
                 }
                 else
                 {
-                    BuildFunctionArguments(compileResult.Result, args);     
+                    this.BuildFunctionArguments(compileResult.Result, compileResult.DataType, args);     
                 }
             }
-            return Function.Execute(args, context);
+            return this.Function.Execute(args, context);
         }
     }
 }

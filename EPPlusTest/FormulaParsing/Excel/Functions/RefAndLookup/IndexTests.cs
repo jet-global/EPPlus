@@ -1,73 +1,103 @@
-﻿using System;
-using System.IO;
+﻿/* Copyright (C) 2011  Jan Källman
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * See the GNU Lesser General Public License for more details.
+ *
+ * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+ * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+ *
+ * All code and executables are provided "as is" with no warranty either express or implied. 
+ * The author accepts no liability for any damage or loss of business that this product may cause.
+ *
+ * Code change notes:
+ * 
+ * Author							Change						Date
+ *******************************************************************************
+ * Mats Alm   		                Added		                2013-12-03
+ *******************************************************************************/
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
-using OfficeOpenXml.FormulaParsing.Exceptions;
+using System.IO;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 {
     [TestClass]
     public class IndexTests
     {
-        private ParsingContext _parsingContext;
-        private ExcelPackage _package;
-        private ExcelWorksheet _worksheet;
+        #region Properties
+        private ParsingContext ParsingContext { get; set; }
+        private ExcelPackage Package { get; set; }
+        private ExcelWorksheet Worksheet { get; set; }
+        #endregion
 
+        #region TestInitialize/TestCleanup
         [TestInitialize]
         public void Initialize()
         {
-            _parsingContext = ParsingContext.Create();
-            _package = new ExcelPackage(new MemoryStream());
-            _worksheet = _package.Workbook.Worksheets.Add("test");
+            this.ParsingContext = ParsingContext.Create();
+            this.Package = new ExcelPackage(new MemoryStream());
+            this.Worksheet = this.Package.Workbook.Worksheets.Add("test");
         }
 
         [TestCleanup]
         public void Cleanup()
         {
-            _package.Dispose();
+            this.Package.Dispose();
         }
+        #endregion
 
-		[TestMethod]
+        #region Index Tests
+        [TestMethod]
 		public void IndexReturnsPoundValueWhenTooFewArgumentsAreSupplied()
 		{
-			_worksheet.Cells["A1"].Value = 1d;
-			_worksheet.Cells["A2"].Value = 3d;
-			_worksheet.Cells["A3"].Value = 5d;
-
-			_worksheet.Cells["A4"].Formula = "INDEX(A1:A3,213)";
-
-			_worksheet.Calculate();
-
-			Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), _worksheet.Cells["A4"].Value);
+			this.Worksheet.Cells["A1"].Value = 1d;
+			this.Worksheet.Cells["A2"].Value = 3d;
+			this.Worksheet.Cells["A3"].Value = 5d;
+			this.Worksheet.Cells["A4"].Formula = "INDEX(A1:A3,213)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), this.Worksheet.Cells["A4"].Value);
 		}
 
 		[TestMethod]
-        public void Index_Should_Return_Value_By_Index()
+        public void IndexReturnsValueByIndex()
         {
             var func = new Index();
-            var result = func.Execute(
-                FunctionsHelper.CreateArgs(
-                    FunctionsHelper.CreateArgs(1, 2, 5),
-                    3
-                    ),_parsingContext);
+            var result = func.Execute(FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(1, 2, 5), 3), this.ParsingContext);
             Assert.AreEqual(5, result.Result);
         }
 
         [TestMethod]
-        public void Index_Should_Handle_SingleRange()
+        public void IndexHandlesSingleRange()
         {
-            _worksheet.Cells["A1"].Value = 1d;
-            _worksheet.Cells["A2"].Value = 3d;
-            _worksheet.Cells["A3"].Value = 5d;
-
-            _worksheet.Cells["A4"].Formula = "INDEX(A1:A3;3)";
-
-            _worksheet.Calculate();
-
-            Assert.AreEqual(5d, _worksheet.Cells["A4"].Value);
+            this.Worksheet.Cells["A1"].Value = 1d;
+            this.Worksheet.Cells["A2"].Value = 3d;
+            this.Worksheet.Cells["A3"].Value = 5d;
+            this.Worksheet.Cells["A4"].Formula = "INDEX(A1:A3,3)";
+            this.Worksheet.Calculate();
+            Assert.AreEqual(5d, this.Worksheet.Cells["A4"].Value);
         }
-	}
+
+        [TestMethod]
+        public void IndexHandlesNAError()
+        {
+            this.Worksheet.Cells["A1"].Value = 1d;
+            this.Worksheet.Cells["A2"].Value = 3d;
+            this.Worksheet.Cells["A3"].Value = 5d;
+            this.Worksheet.Cells["A4"].Value = ExcelErrorValue.Create(eErrorType.NA);
+            this.Worksheet.Cells["A5"].Formula = "INDEX(A1:A3,A4)";
+            this.Worksheet.Calculate();
+            Assert.AreEqual(ExcelErrorValue.Create(eErrorType.NA), this.Worksheet.Cells["A5"].Value);
+        }
+        #endregion
+    }
 }

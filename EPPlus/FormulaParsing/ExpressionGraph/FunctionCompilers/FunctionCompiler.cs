@@ -28,28 +28,20 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
-using System.Collections;
 using OfficeOpenXml.FormulaParsing.Utilities;
+using System.Collections.Generic;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
     public abstract class FunctionCompiler
     {
-        protected ExcelFunction Function
-        {
-            get;
-            private set;
-        }
+        protected ExcelFunction Function { get; private set; }
 
         public FunctionCompiler(ExcelFunction function)
         {
             Require.That(function).Named("function").IsNotNull();
-            Function = function;
+            this.Function = function;
         }
 
         protected void BuildFunctionArguments(object result, DataType dataType, List<FunctionArgument> args)
@@ -60,7 +52,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
                 var objects = result as IEnumerable<object>;
                 foreach (var arg in objects)
                 {
-                    BuildFunctionArguments(arg, dataType, argList);
+                    this.BuildFunctionArguments(arg, dataType, argList);
                 }
                 args.Add(new FunctionArgument(argList));
             }
@@ -68,11 +60,6 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
             {
                 args.Add(new FunctionArgument(result, dataType));
             }
-        }
-
-        protected void BuildFunctionArguments(object result, List<FunctionArgument> args)
-        {
-            BuildFunctionArguments(result, DataType.Unknown, args);
         }
 
         public abstract CompileResult Compile(IEnumerable<Expression> children, ParsingContext context);

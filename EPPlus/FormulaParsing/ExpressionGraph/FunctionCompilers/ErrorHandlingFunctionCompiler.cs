@@ -28,44 +28,41 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using OfficeOpenXml.FormulaParsing.Exceptions;
+using System;
+using System.Collections.Generic;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
     public class ErrorHandlingFunctionCompiler : FunctionCompiler
     {
-        public ErrorHandlingFunctionCompiler(ExcelFunction function)
-            : base(function)
-        {
-
-        }
+        public ErrorHandlingFunctionCompiler(ExcelFunction function) : base(function) { }
         public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
         {
             var args = new List<FunctionArgument>();
-            Function.BeforeInvoke(context);
+            this.Function.BeforeInvoke(context);
             foreach (var child in children)
             {
                 try
                 {
                     var arg = child.Compile();
-                    BuildFunctionArguments(arg != null ? arg.Result : null, args);
+                    if (arg != null)
+                        this.BuildFunctionArguments(arg.Result, arg.DataType, args);
+                    else
+                        this.BuildFunctionArguments(null, DataType.Unknown, args);
                 }
-                catch (ExcelErrorValueException efe)
+                catch (ExcelErrorValueException ex)
                 {
-                    return ((ErrorHandlingFunction)Function).HandleError(efe.ErrorValue.ToString());
+                    return ((ErrorHandlingFunction)this.Function).HandleError(ex.ErrorValue.ToString());
                 }
-                catch// (Exception e)
+                catch (Exception)
                 {
-                    return ((ErrorHandlingFunction)Function).HandleError(ExcelErrorValue.Values.Value);
+                    return ((ErrorHandlingFunction)this.Function).HandleError(ExcelErrorValue.Values.Value);
                 }
                 
             }
-            return Function.Execute(args, context);
+            return this.Function.Execute(args, context);
         }
     }
 }

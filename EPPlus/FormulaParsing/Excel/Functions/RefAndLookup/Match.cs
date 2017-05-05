@@ -22,12 +22,10 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
+using OfficeOpenXml.FormulaParsing.ExcelUtilities;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
@@ -40,57 +38,44 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
             ClosestBelow = 1
         }
 
-        public Match()
-            : base(new WildCardValueMatcher(), new CompileResultFactory())
-        {
-
-        }
+        public Match() : base(new WildCardValueMatcher(), new CompileResultFactory()) { }
 
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            if(ValidateArguments(arguments, 2) == false)
+            if (this.ValidateArguments(arguments, 2) == false)
             	return new CompileResult(eErrorType.Value);
-
             var searchedValue = arguments.ElementAt(0).Value;
-            var address =  arguments.ElementAt(1).IsExcelRange ? arguments.ElementAt(1).ValueAsRangeInfo.Address.FullAddress : ArgToString(arguments, 1);
+            var address =  arguments.ElementAt(1).IsExcelRange ? arguments.ElementAt(1).ValueAsRangeInfo.Address.FullAddress : this.ArgToString(arguments, 1);
             var rangeAddressFactory = new RangeAddressFactory(context.ExcelDataProvider);
             var rangeAddress = rangeAddressFactory.Create(address);
-            var matchType = GetMatchType(arguments);
+            var matchType = this.GetMatchType(arguments);
             var args = new LookupArguments(searchedValue, address, 0, 0, false, arguments.ElementAt(1).ValueAsRangeInfo);
-            var lookupDirection = GetLookupDirection(rangeAddress);
+            var lookupDirection = this.GetLookupDirection(rangeAddress);
             var navigator = LookupNavigatorFactory.Create(lookupDirection, args, context);
             int? lastValidIndex = null;
             do
             {
-                var matchResult = IsMatch(navigator.CurrentValue, searchedValue);
-
+                var matchResult = this.IsMatch(navigator.CurrentValue, searchedValue);
                 // For all match types, if the match result indicated equality, return the index (1 based)
                 if (matchResult == 0)
-                {
-                    return CreateResult(navigator.Index + 1, DataType.Integer);
-                }
-
+                    return this.CreateResult(navigator.Index + 1, DataType.Integer);
                 if ((matchType == MatchType.ClosestBelow && matchResult < 0) || (matchType == MatchType.ClosestAbove && matchResult > 0))
-                {
                     lastValidIndex = navigator.Index + 1;
-                }
                 // If matchType is ClosestBelow or ClosestAbove and the match result test failed, no more searching is required
                 else if (matchType == MatchType.ClosestBelow || matchType == MatchType.ClosestAbove)
-                {
                     break;
-                }
             }
             while (navigator.MoveNext());
-            return CreateResult(lastValidIndex, DataType.Integer);
+            if (lastValidIndex == null)
+                return this.CreateResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
+            return this.CreateResult(lastValidIndex, DataType.Integer);
         }
 
         private MatchType GetMatchType(IEnumerable<FunctionArgument> arguments)
         {
             var matchType = MatchType.ClosestBelow;
             if (arguments.Count() > 2)
-            {
-                matchType = (MatchType)ArgToInt(arguments, 2);
-            }
+                matchType = (MatchType)this.ArgToInt(arguments, 2);
             return matchType;
         }
     }
