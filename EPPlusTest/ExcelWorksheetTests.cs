@@ -3425,6 +3425,7 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region Save Tests
 		[TestMethod]
 		public void SaveWorksheetDoesNotSetHiddenRowHeightToZero()
 		{
@@ -3457,6 +3458,42 @@ namespace EPPlusTest
 					file.Delete();
 			}
 		}
+
+		[TestMethod]
+		public void SaveIncludesOnlyThoseTablesThatAreNotDeleted()
+		{
+			var file = new FileInfo(Path.GetTempFileName());
+			file.Delete();
+			try
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets.Add("Table Sheet");
+					sheet.Tables.Add(sheet.Cells["B2:J10"], "TopTable");
+					sheet.Tables.Add(sheet.Cells["L2:Z10"], "RightTable");
+					sheet.Tables.Add(sheet.Cells["B12:Z26"], "BottomTable");
+					package.Save();
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets["Table Sheet"];
+					Assert.AreEqual(3, sheet.Tables.Count);
+					sheet.Tables.Delete(1);
+					Assert.AreEqual(2, sheet.Tables.Count);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets["Table Sheet"];
+					Assert.AreEqual(2, sheet.Tables.Count);
+				}
+			}
+			finally
+			{
+				file.Delete();
+			}
+		}
+		#endregion
 
 		[TestMethod]
 		public void DateFunctionsWorkWithDifferentCultureDateFormats()
