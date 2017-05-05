@@ -70,11 +70,6 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
             }
         }
 
-        protected void BuildFunctionArguments(object result, List<FunctionArgument> args)
-        {
-            BuildFunctionArguments(result, DataType.Unknown, args);
-        }
-
         public abstract CompileResult Compile(IEnumerable<Expression> children, ParsingContext context);
     }
 }

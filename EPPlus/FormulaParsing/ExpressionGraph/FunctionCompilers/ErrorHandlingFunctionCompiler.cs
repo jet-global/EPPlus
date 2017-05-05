@@ -53,7 +53,10 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
                 try
                 {
                     var arg = child.Compile();
-                    BuildFunctionArguments(arg != null ? arg.Result : null, args);
+                    if (arg != null)
+                        BuildFunctionArguments(arg.Result, arg.DataType, args);
+                    else
+                        BuildFunctionArguments(null, DataType.Unknown, args);
                 }
                 catch (ExcelErrorValueException efe)
                 {

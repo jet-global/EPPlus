@@ -40,17 +40,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
             ClosestBelow = 1
         }
 
-        public Match()
-            : base(new WildCardValueMatcher(), new CompileResultFactory())
-        {
-
-        }
+        public Match() : base(new WildCardValueMatcher(), new CompileResultFactory()) { }
 
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            if(ValidateArguments(arguments, 2) == false)
+            if (ValidateArguments(arguments, 2) == false)
             	return new CompileResult(eErrorType.Value);
-
             var searchedValue = arguments.ElementAt(0).Value;
             var address =  arguments.ElementAt(1).IsExcelRange ? arguments.ElementAt(1).ValueAsRangeInfo.Address.FullAddress : ArgToString(arguments, 1);
             var rangeAddressFactory = new RangeAddressFactory(context.ExcelDataProvider);
@@ -63,24 +58,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
             do
             {
                 var matchResult = IsMatch(navigator.CurrentValue, searchedValue);
-
                 // For all match types, if the match result indicated equality, return the index (1 based)
                 if (matchResult == 0)
-                {
                     return CreateResult(navigator.Index + 1, DataType.Integer);
-                }
-
                 if ((matchType == MatchType.ClosestBelow && matchResult < 0) || (matchType == MatchType.ClosestAbove && matchResult > 0))
-                {
                     lastValidIndex = navigator.Index + 1;
-                }
                 // If matchType is ClosestBelow or ClosestAbove and the match result test failed, no more searching is required
                 else if (matchType == MatchType.ClosestBelow || matchType == MatchType.ClosestAbove)
-                {
                     break;
-                }
             }
             while (navigator.MoveNext());
+            if (lastValidIndex == null)
+                return CreateResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
             return CreateResult(lastValidIndex, DataType.Integer);
         }
 
@@ -88,9 +77,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
         {
             var matchType = MatchType.ClosestBelow;
             if (arguments.Count() > 2)
-            {
                 matchType = (MatchType)ArgToInt(arguments, 2);
-            }
             return matchType;
         }
     }
