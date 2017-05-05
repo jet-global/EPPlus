@@ -1,4 +1,28 @@
-﻿using OfficeOpenXml.FormulaParsing.Exceptions;
+﻿/* Copyright (C) 2011  Jan Källman
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * See the GNU Lesser General Public License for more details.
+ *
+ * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+ * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+ *
+ * All code and executables are provided "as is" with no warranty either express or implied. 
+ * The author accepts no liability for any damage or loss of business that this product may cause.
+ *
+ * Code change notes:
+ * 
+ * Author							Change						Date
+ *******************************************************************************
+ * Mats Alm   		                Added		                2013-12-03
+ *******************************************************************************/
+using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System;
 using System.Collections.Generic;
@@ -10,7 +34,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
     {
         public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
         {
-            if (ValidateArguments(arguments, 2) == false)
+            if (this.ValidateArguments(arguments, 2) == false)
             	return new CompileResult(eErrorType.Value);
             var arg1 = arguments.ElementAt(0);
             var arg2 = arguments.ElementAt(1);
@@ -18,7 +42,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
             var crf = new CompileResultFactory();
             if (args != null)
             {
-                var index = ArgToInt(arguments, 1);
+                var index = this.ArgToInt(arguments, 1);
                 if (index > args.Count())
                     throw new ExcelErrorValueException(eErrorType.Ref);
                 var candidate = args.ElementAt(index - 1);
@@ -28,12 +52,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
                 return crf.Create(arg2.Value);
             if (arg1.IsExcelRange)
             {
-                var row = ArgToInt(arguments, 1);                 
-                var col = arguments.Count() > 2 ? ArgToInt(arguments, 2) : 1;
-                var ri = arg1.ValueAsRangeInfo;
-                if (row > ri.Address._toRow - ri.Address._fromRow + 1 || col > ri.Address._toCol - ri.Address._fromCol + 1)
+                var row = this.ArgToInt(arguments, 1);                 
+                var column = arguments.Count() > 2 ? this.ArgToInt(arguments, 2) : 1;
+                var rangeInfo = arg1.ValueAsRangeInfo;
+                if (row > rangeInfo.Address._toRow - rangeInfo.Address._fromRow + 1 || column > rangeInfo.Address._toCol - rangeInfo.Address._fromCol + 1)
 					return new CompileResult(eErrorType.Value);
-                var candidate = ri.GetOffset(row-1, col-1);
+                var candidate = rangeInfo.GetOffset(row-1, column-1);
                 return crf.Create(candidate);
             }
             throw new NotImplementedException();

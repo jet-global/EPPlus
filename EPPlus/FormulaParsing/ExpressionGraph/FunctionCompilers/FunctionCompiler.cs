@@ -36,16 +36,12 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
     public abstract class FunctionCompiler
     {
-        protected ExcelFunction Function
-        {
-            get;
-            private set;
-        }
+        protected ExcelFunction Function { get; private set; }
 
         public FunctionCompiler(ExcelFunction function)
         {
             Require.That(function).Named("function").IsNotNull();
-            Function = function;
+            this.Function = function;
         }
 
         protected void BuildFunctionArguments(object result, DataType dataType, List<FunctionArgument> args)
@@ -56,7 +52,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
                 var objects = result as IEnumerable<object>;
                 foreach (var arg in objects)
                 {
-                    BuildFunctionArguments(arg, dataType, argList);
+                    this.BuildFunctionArguments(arg, dataType, argList);
                 }
                 args.Add(new FunctionArgument(argList));
             }
