@@ -550,6 +550,18 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
+		/// Gets the number of distinct autoFilter ranges present on the worksheet.
+		/// </summary>
+		public int AutoFilterCount
+		{
+			get
+			{
+				var autoFilters = this.WorksheetXml.SelectNodes("//d:autoFilter", this.NameSpaceManager);
+				return autoFilters.Count;
+			}
+		}
+
+		/// <summary>
 		/// Provides access to named ranges
 		/// </summary>
 		public ExcelNamedRangeCollection Names
@@ -1995,6 +2007,14 @@ namespace OfficeOpenXml
 				}
 			}
 			return 0;
+		}
+
+		/// <summary>
+		/// Removes all "autoFilter" nodes from the worksheet.
+		/// </summary>
+		public void RemoveAutoFilters()
+		{
+			this.DeleteAllNode("d:autoFilter");
 		}
 
 		/// <summary>
