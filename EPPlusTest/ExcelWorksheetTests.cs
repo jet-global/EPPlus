@@ -3501,6 +3501,35 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region AutoFilters Tests
+		[TestMethod]
+		public void HasAutoFiltersApplied()
+		{
+			var file = new FileInfo(Path.GetTempFileName());
+			file.Delete();
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.AutoFilterAddress = new ExcelAddressBase("B2:D4");
+				Assert.AreEqual(1, sheet.AutoFilterCount);
+				package.Save();
+			}
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(1, sheet.AutoFilterCount);
+				sheet.RemoveAutoFilters();
+				Assert.AreEqual(0, sheet.AutoFilterCount);
+				package.Save();
+			}
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(0, sheet.AutoFilterCount);
+			}
+		}
+		#endregion
+
 		#region Calculate Tests
 		[TestMethod]
 		public void DateFunctionsWorkWithDifferentCultureDateFormats()
