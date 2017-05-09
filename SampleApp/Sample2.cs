@@ -30,8 +30,6 @@
  * Jan Källman		Added		10-SEP-2009
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using OfficeOpenXml;
 
@@ -52,20 +50,20 @@ namespace EPPlusSamples
 			{
 				// get the first worksheet in the workbook
 				ExcelWorksheet worksheet = package.Workbook.Worksheets[1];
-                int col = 2; //The item description
-				// output the data in column 2
+				int col = 2; //The item description
+								 // output the data in column 2
 				for (int row = 2; row < 5; row++)
 					Console.WriteLine("\tCell({0},{1}).Value={2}", row, col, worksheet.Cells[row, col].Value);
 
 				// output the formula in row 5
-				Console.WriteLine("\tCell({0},{1}).Formula={2}", 3, 5, worksheet.Cells[3, 5].Formula);                
-                Console.WriteLine("\tCell({0},{1}).FormulaR1C1={2}", 3, 5, worksheet.Cells[3, 5].FormulaR1C1);
+				Console.WriteLine("\tCell({0},{1}).Formula={2}", 3, 5, worksheet.Cells[3, 5].Formula);
+				Console.WriteLine("\tCell({0},{1}).FormulaR1C1={2}", 3, 5, worksheet.Cells[3, 5].FormulaR1C1);
 
-                // output the formula in row 5
-                Console.WriteLine("\tCell({0},{1}).Formula={2}", 5, 3, worksheet.Cells[5, 3].Formula);
-                Console.WriteLine("\tCell({0},{1}).FormulaR1C1={2}", 5, 3, worksheet.Cells[5, 3].FormulaR1C1);
+				// output the formula in row 5
+				Console.WriteLine("\tCell({0},{1}).Formula={2}", 5, 3, worksheet.Cells[5, 3].Formula);
+				Console.WriteLine("\tCell({0},{1}).FormulaR1C1={2}", 5, 3, worksheet.Cells[5, 3].FormulaR1C1);
 
-            } // the using statement automatically calls Dispose() which closes the package.
+			} // the using statement automatically calls Dispose() which closes the package.
 
 			Console.WriteLine();
 			Console.WriteLine("Sample 2 complete");

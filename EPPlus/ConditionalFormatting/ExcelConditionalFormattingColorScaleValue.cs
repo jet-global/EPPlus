@@ -29,15 +29,9 @@
  * Eyal Seagull        Added       		  2012-04-03
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Drawing;
 using System.Xml;
 using OfficeOpenXml.Utils;
-using System.Text.RegularExpressions;
-using System.Globalization;
-using System.Security;
 
 namespace OfficeOpenXml.ConditionalFormatting
 {
@@ -59,21 +53,21 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/****************************************************************************************/
 
 		#region Constructors
-    /// <summary>
-    /// Initialize the cfvo (§18.3.1.11) node
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="type"></param>
-    /// <param name="color"></param>
-    /// <param name="value"></param>
-    /// <param name="formula"></param>
-    /// <param name="ruleType"></param>
-    /// <param name="address"></param>
-    /// <param name="priority"></param>
-    /// <param name="worksheet"></param>
-    /// <param name="itemElementNode">The cfvo (§18.3.1.11) node parent. Can be any of the following:
-    /// colorScale (§18.3.1.16); dataBar (§18.3.1.28); iconSet (§18.3.1.49)</param>
-    /// <param name="namespaceManager"></param>
+		/// <summary>
+		/// Initialize the cfvo (§18.3.1.11) node
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="type"></param>
+		/// <param name="color"></param>
+		/// <param name="value"></param>
+		/// <param name="formula"></param>
+		/// <param name="ruleType"></param>
+		/// <param name="address"></param>
+		/// <param name="priority"></param>
+		/// <param name="worksheet"></param>
+		/// <param name="itemElementNode">The cfvo (§18.3.1.11) node parent. Can be any of the following:
+		/// colorScale (§18.3.1.16); dataBar (§18.3.1.28); iconSet (§18.3.1.49)</param>
+		/// <param name="namespaceManager"></param>
 		internal ExcelConditionalFormattingColorScaleValue(
 			eExcelConditionalFormattingValueObjectPosition position,
 			eExcelConditionalFormattingValueObjectType type,
@@ -81,8 +75,8 @@ namespace OfficeOpenXml.ConditionalFormatting
 			double value,
 			string formula,
 			eExcelConditionalFormattingRuleType ruleType,
-      ExcelAddress address,
-      int priority,
+		ExcelAddress address,
+		int priority,
 			ExcelWorksheet worksheet,
 			XmlNode itemElementNode,
 			XmlNamespaceManager namespaceManager)
@@ -100,8 +94,8 @@ namespace OfficeOpenXml.ConditionalFormatting
 			// Schema order list
 			SchemaNodeOrder = new string[]
 			{
-        ExcelConditionalFormattingConstants.Nodes.Cfvo,
-        ExcelConditionalFormattingConstants.Nodes.Color
+		  ExcelConditionalFormattingConstants.Nodes.Cfvo,
+		  ExcelConditionalFormattingConstants.Nodes.Color
 			};
 
 			// Check if the parent does not exists
@@ -119,27 +113,27 @@ namespace OfficeOpenXml.ConditionalFormatting
 				}
 
 				// Point to the <cfvo> parent node
-        itemElementNode = _worksheet.WorksheetXml.SelectSingleNode(
-					string.Format(
-						"//{0}[{1}='{2}']/{3}[{4}='{5}']/{6}",
-					// {0}
-						ExcelConditionalFormattingConstants.Paths.ConditionalFormatting,
-					// {1}
-						ExcelConditionalFormattingConstants.Paths.SqrefAttribute,
-					// {2}
-						address.Address,
-					// {3}
-						ExcelConditionalFormattingConstants.Paths.CfRule,
-					// {4}
-						ExcelConditionalFormattingConstants.Paths.PriorityAttribute,
-					// {5}
-						priority,
-					// {6}
-						parentNodePath),
-					_worksheet.NameSpaceManager);
+				itemElementNode = _worksheet.WorksheetXml.SelectSingleNode(
+						 string.Format(
+							 "//{0}[{1}='{2}']/{3}[{4}='{5}']/{6}",
+							 // {0}
+							 ExcelConditionalFormattingConstants.Paths.ConditionalFormatting,
+							 // {1}
+							 ExcelConditionalFormattingConstants.Paths.SqrefAttribute,
+							 // {2}
+							 address.Address,
+							 // {3}
+							 ExcelConditionalFormattingConstants.Paths.CfRule,
+							 // {4}
+							 ExcelConditionalFormattingConstants.Paths.PriorityAttribute,
+							 // {5}
+							 priority,
+							 // {6}
+							 parentNodePath),
+						 _worksheet.NameSpaceManager);
 
 				// Check for en error (rule type does not have <cfvo>)
-        if (itemElementNode == null)
+				if (itemElementNode == null)
 				{
 					throw new Exception(
 						ExcelConditionalFormattingConstants.Errors.MissingCfvoParentNode);
@@ -147,9 +141,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 			}
 
 			// Point to the <cfvo> parent node (<colorScale>, <dataBar> or <iconSet>)
-      // This is different than normal, as TopNode does not point to the node itself but to
-      // its PARENT. Later, in the CreateNodeByOrdem method the TopNode will be updated.
-      TopNode = itemElementNode;
+			// This is different than normal, as TopNode does not point to the node itself but to
+			// its PARENT. Later, in the CreateNodeByOrdem method the TopNode will be updated.
+			TopNode = itemElementNode;
 
 			// Save the attributes
 			Position = position;
@@ -180,8 +174,8 @@ namespace OfficeOpenXml.ConditionalFormatting
 			double value,
 			string formula,
 			eExcelConditionalFormattingRuleType ruleType,
-      ExcelAddress address,
-      int priority,
+		ExcelAddress address,
+		int priority,
 			ExcelWorksheet worksheet,
 			XmlNamespaceManager namespaceManager)
 			: this(
@@ -191,8 +185,8 @@ namespace OfficeOpenXml.ConditionalFormatting
 				value,
 				formula,
 				ruleType,
-        address,
-        priority,
+		  address,
+		  priority,
 				worksheet,
 				null,
 				namespaceManager)
@@ -215,8 +209,8 @@ namespace OfficeOpenXml.ConditionalFormatting
 			eExcelConditionalFormattingValueObjectType type,
 			Color color,
 			eExcelConditionalFormattingRuleType ruleType,
-      ExcelAddress address,
-      int priority,
+		ExcelAddress address,
+		int priority,
 			ExcelWorksheet worksheet,
 			XmlNamespaceManager namespaceManager)
 			: this(
@@ -226,8 +220,8 @@ namespace OfficeOpenXml.ConditionalFormatting
 				0,
 				null,
 				ruleType,
-        address,
-        priority,
+		  address,
+		  priority,
 				worksheet,
 				null,
 				namespaceManager)
@@ -267,10 +261,10 @@ namespace OfficeOpenXml.ConditionalFormatting
 			string attributePath,
 			string attributeValue)
 		{
-      // Save the current TopNode
-      XmlNode currentTopNode = TopNode;
+			// Save the current TopNode
+			XmlNode currentTopNode = TopNode;
 
-      string nodePath = ExcelConditionalFormattingValueObjectType.GetNodePathByNodeType(nodeType);
+			string nodePath = ExcelConditionalFormattingValueObjectType.GetNodePathByNodeType(nodeType);
 			int nodeOrder = GetNodeOrder();
 			eNodeInsertOrder nodeInsertOrder = eNodeInsertOrder.SchemaOrder;
 			XmlNode referenceNode = null;
@@ -281,9 +275,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 				referenceNode = TopNode.SelectSingleNode(
 					string.Format(
 						"{0}[position()={1}]",
-					// {0}
+						// {0}
 						nodePath,
-					// {1}
+						// {1}
 						nodeOrder - 1),
 					_worksheet.NameSpaceManager);
 
@@ -299,25 +293,25 @@ namespace OfficeOpenXml.ConditionalFormatting
 				TopNode,
 				string.Format(
 					"{0}[position()={1}]",
-				// {0}
+					// {0}
 					nodePath,
-				// {1}
+					// {1}
 					nodeOrder),
 				nodeInsertOrder,
 				referenceNode);
 
-      // Point to the new node as the temporary TopNode (we need it for the XmlHelper functions)
-      TopNode = node;
+			// Point to the new node as the temporary TopNode (we need it for the XmlHelper functions)
+			TopNode = node;
 
-      // Add/Remove the attribute (if the attributeValue is empty then it will be removed)
-      SetXmlNodeString(
-        node,
-        attributePath,
-        attributeValue,
-        true);
+			// Add/Remove the attribute (if the attributeValue is empty then it will be removed)
+			SetXmlNodeString(
+			  node,
+			  attributePath,
+			  attributeValue,
+			  true);
 
-      // Point back to the <cfvo>/<color> parent node
-      TopNode = currentTopNode;
+			// Point back to the <cfvo>/<color> parent node
+			TopNode = currentTopNode;
 		}
 		#endregion Methos
 
@@ -352,11 +346,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 				var typeAttribute = GetXmlNodeString(
 					string.Format(
 						"{0}[position()={1}]/{2}",
-					// {0}
+						// {0}
 						ExcelConditionalFormattingConstants.Paths.Cfvo,
-					// {1}
+						// {1}
 						GetNodeOrder(),
-					// {2}
+						// {2}
 						ExcelConditionalFormattingConstants.Paths.TypeAttribute));
 
 				return ExcelConditionalFormattingValueObjectType.GetTypeByAttrbiute(typeAttribute);
@@ -383,21 +377,21 @@ namespace OfficeOpenXml.ConditionalFormatting
 				// Check if we need to remove the @val attribute
 				if (removeValAttribute)
 				{
-				  string nodePath = ExcelConditionalFormattingValueObjectType.GetNodePathByNodeType(
-						eExcelConditionalFormattingValueObjectNodeType.Cfvo);
-				  int nodeOrder = GetNodeOrder();
+					string nodePath = ExcelConditionalFormattingValueObjectType.GetNodePathByNodeType(
+						 eExcelConditionalFormattingValueObjectNodeType.Cfvo);
+					int nodeOrder = GetNodeOrder();
 
 					// Remove the attribute (removed when the value = '')
-				  CreateComplexNode(
-				    TopNode,
-				    string.Format(
-				      "{0}[position()={1}]/{2}=''",
-				    // {0}
-				      nodePath,
-				    // {1}
-				      nodeOrder,
-				    // {2}
-				      ExcelConditionalFormattingConstants.Paths.ValAttribute));
+					CreateComplexNode(
+					  TopNode,
+					  string.Format(
+						 "{0}[position()={1}]/{2}=''",
+						 // {0}
+						 nodePath,
+						 // {1}
+						 nodeOrder,
+						 // {2}
+						 ExcelConditionalFormattingConstants.Paths.ValAttribute));
 				}
 			}
 		}
@@ -413,11 +407,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 				var colorCode = GetXmlNodeString(
 					string.Format(
 						"{0}[position()={1}]/{2}",
-					// {0}
+						// {0}
 						ExcelConditionalFormattingConstants.Paths.Color,
-					// {1}
+						// {1}
 						GetNodeOrder(),
-					// {2}
+						// {2}
 						ExcelConditionalFormattingConstants.Paths.RgbAttribute));
 
 				return ExcelConditionalFormattingHelper.ConvertFromColorCode(colorCode);
@@ -442,11 +436,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 				return GetXmlNodeDouble(
 					string.Format(
 						"{0}[position()={1}]/{2}",
-					// {0}
+						// {0}
 						ExcelConditionalFormattingConstants.Paths.Cfvo,
-					// {1}
+						// {1}
 						GetNodeOrder(),
-					// {2}
+						// {2}
 						ExcelConditionalFormattingConstants.Paths.ValAttribute));
 			}
 			set
@@ -485,11 +479,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 				return GetXmlNodeString(
 					string.Format(
 						"{0}[position()={1}]/{2}",
-					// {0}
+						// {0}
 						ExcelConditionalFormattingConstants.Paths.Cfvo,
-					// {1}
+						// {1}
 						GetNodeOrder(),
-					// {2}
+						// {2}
 						ExcelConditionalFormattingConstants.Paths.ValAttribute));
 			}
 			set

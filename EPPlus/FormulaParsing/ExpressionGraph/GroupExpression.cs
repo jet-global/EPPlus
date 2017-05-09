@@ -28,44 +28,40 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
-    public class GroupExpression : Expression
-    {
-        public GroupExpression(bool isNegated)
-            : this(isNegated, new ExpressionCompiler())
-        {
+	public class GroupExpression : Expression
+	{
+		public GroupExpression(bool isNegated)
+			 : this(isNegated, new ExpressionCompiler())
+		{
 
-        }
+		}
 
-        public GroupExpression(bool isNegated, IExpressionCompiler expressionCompiler)
-        {
-            _expressionCompiler = expressionCompiler;
-            _isNegated = isNegated;
-        }
+		public GroupExpression(bool isNegated, IExpressionCompiler expressionCompiler)
+		{
+			_expressionCompiler = expressionCompiler;
+			_isNegated = isNegated;
+		}
 
-        private readonly IExpressionCompiler _expressionCompiler;
-        private readonly bool _isNegated;
+		private readonly IExpressionCompiler _expressionCompiler;
+		private readonly bool _isNegated;
 
 
-        public override CompileResult Compile()
-        {
-            var result =  _expressionCompiler.Compile(Children);
-            if (result.IsNumeric && _isNegated)
-            {
-                return new CompileResult(result.ResultNumeric * -1, result.DataType);
-            }
-            return result;
-        }
+		public override CompileResult Compile()
+		{
+			var result = _expressionCompiler.Compile(Children);
+			if (result.IsNumeric && _isNegated)
+			{
+				return new CompileResult(result.ResultNumeric * -1, result.DataType);
+			}
+			return result;
+		}
 
-        public override bool IsGroupedExpression
-        {
-            get { return true; }
-        }
-    }
+		public override bool IsGroupedExpression
+		{
+			get { return true; }
+		}
+	}
 }

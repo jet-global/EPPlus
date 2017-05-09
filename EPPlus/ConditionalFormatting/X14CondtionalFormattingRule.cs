@@ -39,7 +39,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 				{
 					_formulae = new List<X14ConditionalFormattingFormula>();
 					var formulaNodes = this.TopNode.SelectNodes(@"x14:cfRule//xm:f", this.NameSpaceManager);
-					foreach(XmlNode node in formulaNodes)
+					foreach (XmlNode node in formulaNodes)
 					{
 						_formulae.Add(new X14ConditionalFormattingFormula(this.NameSpaceManager, node));
 					}

@@ -28,15 +28,12 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 {
-    public interface ISourceCodeTokenizer
-    {
-        IEnumerable<Token> Tokenize(string input, string worksheet);
-    }
+	public interface ISourceCodeTokenizer
+	{
+		IEnumerable<Token> Tokenize(string input, string worksheet);
+	}
 }

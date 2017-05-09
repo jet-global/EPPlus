@@ -22,39 +22,34 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using OfficeOpenXml.FormulaParsing.Exceptions;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
-    /// <summary>
-    /// Base class for functions that handles an error that occurs during the
-    /// normal execution of the function.
-    /// If an exception occurs during the Execute-call that exception will be
-    /// caught by the compiler, then the HandleError-method will be called.
-    /// </summary>
-    public abstract class ErrorHandlingFunction : ExcelFunction
-    {
-        /// <summary>
-        /// Indicates that the function is an ErrorHandlingFunction.
-        /// </summary>
-        public override bool IsErrorHandlingFunction
-        {
-            get
-            {
-                return true;
-            }
-        }
+	/// <summary>
+	/// Base class for functions that handles an error that occurs during the
+	/// normal execution of the function.
+	/// If an exception occurs during the Execute-call that exception will be
+	/// caught by the compiler, then the HandleError-method will be called.
+	/// </summary>
+	public abstract class ErrorHandlingFunction : ExcelFunction
+	{
+		/// <summary>
+		/// Indicates that the function is an ErrorHandlingFunction.
+		/// </summary>
+		public override bool IsErrorHandlingFunction
+		{
+			get
+			{
+				return true;
+			}
+		}
 
-        /// <summary>
-        /// Method that should be implemented to handle the error.
-        /// </summary>
-        /// <param name="errorCode"></param>
-        /// <returns></returns>
-        public abstract CompileResult HandleError(string errorCode);
-    }
+		/// <summary>
+		/// Method that should be implemented to handle the error.
+		/// </summary>
+		/// <param name="errorCode"></param>
+		/// <returns></returns>
+		public abstract CompileResult HandleError(string errorCode);
+	}
 }

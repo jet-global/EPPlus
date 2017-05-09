@@ -31,27 +31,27 @@
 
 namespace OfficeOpenXml.Drawing.Sparkline
 {
-    /// <summary>
-    /// Represents the values of the ST_SparklineType type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx.
-    /// </summary>
-    public enum SparklineType
-    {
-        Line, Column, Stacked
-    }
+	/// <summary>
+	/// Represents the values of the ST_SparklineType type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx.
+	/// </summary>
+	public enum SparklineType
+	{
+		Line, Column, Stacked
+	}
 
-    /// <summary>
-    /// Represents the values of the ST_SparklineAxisMinMax type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx
-    /// </summary>
-    public enum SparklineAxisMinMax
-    {
-        Individual, Group, Custom
-    }
+	/// <summary>
+	/// Represents the values of the ST_SparklineAxisMinMax type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx
+	/// </summary>
+	public enum SparklineAxisMinMax
+	{
+		Individual, Group, Custom
+	}
 
-    /// <summary>
-    /// Represents the values of the ST_DispBlanksAs type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx.
-    /// </summary>
-    public enum DispBlanksAs
-    {
-        Span, Gap, Zero
-    }
+	/// <summary>
+	/// Represents the values of the ST_DispBlanksAs type as defined at https://msdn.microsoft.com/en-us/library/hh656506(v=office.12).aspx.
+	/// </summary>
+	public enum DispBlanksAs
+	{
+		Span, Gap, Zero
+	}
 }

@@ -25,19 +25,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 {
-    public class Len : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            if(ValidateArguments(arguments, 1) == false)
-            	return new CompileResult(eErrorType.Value);
-            var length = arguments.First().ValueFirst.ToString().Length;
-            return CreateResult(Convert.ToDouble(length), DataType.Integer);
-        }
-    }
+	public class Len : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			var length = arguments.First().ValueFirst.ToString().Length;
+			return CreateResult(Convert.ToDouble(length), DataType.Integer);
+		}
+	}
 }

@@ -30,12 +30,12 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
-using System.Globalization;
-using System.Text;
-using System.Xml;
-using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
+using System.IO;
+using System.Text;
+using System.Xml;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Drawing

@@ -22,43 +22,35 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
-    public class Time : TimeBaseFunction
-    {
-        public Time()
-            : base()
-        {
-
-        }
-
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-			if(ValidateArguments(arguments, 1) == false)
+	public class Time : TimeBaseFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var firstArg = arguments.ElementAt(0).Value.ToString();
-            if(arguments.Count() == 1 && TimeStringParser.CanParse(firstArg))
-            {
-                var result = TimeStringParser.Parse(firstArg);
-                return new CompileResult(result, DataType.Time);
-            }
-			if(ValidateArguments(arguments, 3) == false)
+			if (arguments.Count() == 1 && TimeStringParser.CanParse(firstArg))
+			{
+				var result = TimeStringParser.Parse(firstArg);
+				return new CompileResult(result, DataType.Time);
+			}
+			if (ValidateArguments(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
 			var hour = ArgToInt(arguments, 0);
-            var min = ArgToInt(arguments, 1);
-            var sec = ArgToInt(arguments, 2);
+			var min = ArgToInt(arguments, 1);
+			var sec = ArgToInt(arguments, 2);
 
 			if (sec < 0 || sec > 59 || min < 0 || min > 59 || min < 0 || hour > 23)
 				return new CompileResult(eErrorType.Value);
 
-            var secondsOfThisTime = (double)(hour * 60 * 60 + min * 60 + sec);
-            return CreateResult(GetTimeSerialNumber(secondsOfThisTime), DataType.Time);
-        }
-    }
+			var secondsOfThisTime = (double)(hour * 60 * 60 + min * 60 + sec);
+			return CreateResult(GetTimeSerialNumber(secondsOfThisTime), DataType.Time);
+		}
+	}
 }

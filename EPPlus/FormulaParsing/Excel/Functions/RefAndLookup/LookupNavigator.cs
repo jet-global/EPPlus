@@ -22,45 +22,40 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.Utilities;
-using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
-    public abstract class LookupNavigator
-    {
-        protected readonly LookupDirection Direction;
-        protected readonly LookupArguments Arguments;
-        protected readonly ParsingContext ParsingContext;
+	public abstract class LookupNavigator
+	{
+		protected readonly LookupDirection Direction;
+		protected readonly LookupArguments Arguments;
+		protected readonly ParsingContext ParsingContext;
 
 
 
-        public LookupNavigator(LookupDirection direction, LookupArguments arguments, ParsingContext parsingContext)
-        {
-            Require.That(arguments).Named("arguments").IsNotNull();
-            Require.That(parsingContext).Named("parsingContext").IsNotNull();
-            Require.That(parsingContext.ExcelDataProvider).Named("parsingContext.ExcelDataProvider").IsNotNull();
-            Direction = direction;
-            Arguments = arguments;
-            ParsingContext = parsingContext;
-        }
+		public LookupNavigator(LookupDirection direction, LookupArguments arguments, ParsingContext parsingContext)
+		{
+			Require.That(arguments).Named("arguments").IsNotNull();
+			Require.That(parsingContext).Named("parsingContext").IsNotNull();
+			Require.That(parsingContext.ExcelDataProvider).Named("parsingContext.ExcelDataProvider").IsNotNull();
+			Direction = direction;
+			Arguments = arguments;
+			ParsingContext = parsingContext;
+		}
 
-        public abstract int Index
-        {
-            get;
-        }
+		public abstract int Index
+		{
+			get;
+		}
 
-        public abstract bool MoveNext();
+		public abstract bool MoveNext();
 
-        public abstract object CurrentValue
-        {
-            get;
-        }
+		public abstract object CurrentValue
+		{
+			get;
+		}
 
-        public abstract object GetLookupValue();
-    }
+		public abstract object GetLookupValue();
+	}
 }

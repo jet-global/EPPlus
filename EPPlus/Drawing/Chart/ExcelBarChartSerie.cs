@@ -29,55 +29,52 @@
  * Jan Källman		Initial Release		        2009-10-01
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 
 namespace OfficeOpenXml.Drawing.Chart
 {
-    /// <summary>
-    /// A serie for a scatter chart
-    /// </summary>
-    public sealed class ExcelBarChartSerie : ExcelChartSerie
-    {
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        /// <param name="chartSeries">Parent collection</param>
-        /// <param name="ns">Namespacemanager</param>
-        /// <param name="node">Topnode</param>
-        /// <param name="isPivot">Is pivotchart</param>
-        internal ExcelBarChartSerie(ExcelChartSeries chartSeries, XmlNamespaceManager ns, XmlNode node, bool isPivot) :
-            base(chartSeries, ns, node, isPivot)
-        {
-        }
-        ExcelChartSerieDataLabel _DataLabel = null;
-        /// <summary>
-        /// Datalabel
-        /// </summary>
-        public ExcelChartSerieDataLabel DataLabel
-        {
-            get
-            {
-                if (_DataLabel == null)
-                {
-                    _DataLabel = new ExcelChartSerieDataLabel(_ns, _node);
-                }
-                return _DataLabel;
-            }
-        }
-        const string INVERTIFNEGATIVE_PATH = "c:invertIfNegative/@val";
-        internal bool InvertIfNegative
-        {
-            get
-            {
-                return GetXmlNodeBool(INVERTIFNEGATIVE_PATH, true);
-            }
-            set
-            {
-                SetXmlNodeBool(INVERTIFNEGATIVE_PATH, value);
-            }
-        }
-    }
+	/// <summary>
+	/// A serie for a scatter chart
+	/// </summary>
+	public sealed class ExcelBarChartSerie : ExcelChartSerie
+	{
+		/// <summary>
+		/// Default constructor
+		/// </summary>
+		/// <param name="chartSeries">Parent collection</param>
+		/// <param name="ns">Namespacemanager</param>
+		/// <param name="node">Topnode</param>
+		/// <param name="isPivot">Is pivotchart</param>
+		internal ExcelBarChartSerie(ExcelChartSeries chartSeries, XmlNamespaceManager ns, XmlNode node, bool isPivot) :
+			 base(chartSeries, ns, node, isPivot)
+		{
+		}
+		ExcelChartSerieDataLabel _DataLabel = null;
+		/// <summary>
+		/// Datalabel
+		/// </summary>
+		public ExcelChartSerieDataLabel DataLabel
+		{
+			get
+			{
+				if (_DataLabel == null)
+				{
+					_DataLabel = new ExcelChartSerieDataLabel(_ns, _node);
+				}
+				return _DataLabel;
+			}
+		}
+		const string INVERTIFNEGATIVE_PATH = "c:invertIfNegative/@val";
+		internal bool InvertIfNegative
+		{
+			get
+			{
+				return GetXmlNodeBool(INVERTIFNEGATIVE_PATH, true);
+			}
+			set
+			{
+				SetXmlNodeBool(INVERTIFNEGATIVE_PATH, value);
+			}
+		}
+	}
 }

@@ -23,86 +23,83 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
-    public class FunctionArgument
-    {
-        public FunctionArgument(object val)
-        {
-            Value = val;
-            DataType = DataType.Unknown;
-        }
+	public class FunctionArgument
+	{
+		public FunctionArgument(object val)
+		{
+			Value = val;
+			DataType = DataType.Unknown;
+		}
 
-        public FunctionArgument(object val, DataType dataType)
-            :this(val)
-        {
-            DataType = dataType;
-        }
+		public FunctionArgument(object val, DataType dataType)
+			 : this(val)
+		{
+			DataType = dataType;
+		}
 
-        private ExcelCellState _excelCellState;
+		private ExcelCellState _excelCellState;
 
-        public void SetExcelStateFlag(ExcelCellState state)
-        {
-            _excelCellState |= state;
-        }
+		public void SetExcelStateFlag(ExcelCellState state)
+		{
+			_excelCellState |= state;
+		}
 
-        public bool ExcelStateFlagIsSet(ExcelCellState state)
-        {
-            return (_excelCellState & state) != 0;
-        }
+		public bool ExcelStateFlagIsSet(ExcelCellState state)
+		{
+			return (_excelCellState & state) != 0;
+		}
 
-        public object Value { get; private set; }
+		public object Value { get; private set; }
 
-        public DataType DataType { get; }
+		public DataType DataType { get; }
 
-        public Type Type
-        {
-            get { return Value != null ? Value.GetType() : null; }
-        }
+		public Type Type
+		{
+			get { return Value != null ? Value.GetType() : null; }
+		}
 
-        public bool IsExcelRange
-        {
-            get { return Value != null && Value is EpplusExcelDataProvider.IRangeInfo; }
-        }
+		public bool IsExcelRange
+		{
+			get { return Value != null && Value is EpplusExcelDataProvider.IRangeInfo; }
+		}
 
-        public bool ValueIsExcelError
-        {
-            get { return ExcelErrorValue.Values.IsErrorValue(Value); }
-        }
+		public bool ValueIsExcelError
+		{
+			get { return ExcelErrorValue.Values.IsErrorValue(Value); }
+		}
 
-        public ExcelErrorValue ValueAsExcelErrorValue
-        {
-            get { return ExcelErrorValue.Parse(Value.ToString()); }
-        }
+		public ExcelErrorValue ValueAsExcelErrorValue
+		{
+			get { return ExcelErrorValue.Parse(Value.ToString()); }
+		}
 
-        public EpplusExcelDataProvider.IRangeInfo ValueAsRangeInfo
-        {
-            get { return Value as EpplusExcelDataProvider.IRangeInfo; }
-        }
-        public object ValueFirst
-        {
-            get
-            {
-                if (Value is ExcelDataProvider.INameInfo)
-                {
-                    Value = ((ExcelDataProvider.INameInfo)Value).Value;
-                }
-                var v = Value as ExcelDataProvider.IRangeInfo;
-                if (v==null)
-                {
-                    return Value;
-                }
-                else
-                {
-                    return v.GetValue(v.Address._fromRow, v.Address._fromCol);
-                }
-            }
-        }
+		public EpplusExcelDataProvider.IRangeInfo ValueAsRangeInfo
+		{
+			get { return Value as EpplusExcelDataProvider.IRangeInfo; }
+		}
+		public object ValueFirst
+		{
+			get
+			{
+				if (Value is ExcelDataProvider.INameInfo)
+				{
+					Value = ((ExcelDataProvider.INameInfo)Value).Value;
+				}
+				var v = Value as ExcelDataProvider.IRangeInfo;
+				if (v == null)
+				{
+					return Value;
+				}
+				else
+				{
+					return v.GetValue(v.Address._fromRow, v.Address._fromCol);
+				}
+			}
+		}
 
-    }
+	}
 }

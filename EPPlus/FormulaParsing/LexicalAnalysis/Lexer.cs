@@ -28,41 +28,38 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 //using OfficeOpenXml.FormulaParsing.Excel.Functions;
 
 namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 {
-    public class Lexer : ILexer
-    {
-        public Lexer(FunctionRepository functionRepository, INameValueProvider nameValueProvider)
-            :this(new SourceCodeTokenizer(functionRepository, nameValueProvider), new SyntacticAnalyzer())
-        {
+	public class Lexer : ILexer
+	{
+		public Lexer(FunctionRepository functionRepository, INameValueProvider nameValueProvider)
+			 : this(new SourceCodeTokenizer(functionRepository, nameValueProvider), new SyntacticAnalyzer())
+		{
 
-        }
+		}
 
-        public Lexer(ISourceCodeTokenizer tokenizer, ISyntacticAnalyzer analyzer)
-        {
-            _tokenizer = tokenizer;
-            _analyzer = analyzer;
-        }
+		public Lexer(ISourceCodeTokenizer tokenizer, ISyntacticAnalyzer analyzer)
+		{
+			_tokenizer = tokenizer;
+			_analyzer = analyzer;
+		}
 
-        private readonly ISourceCodeTokenizer _tokenizer;
-        private readonly ISyntacticAnalyzer _analyzer;
+		private readonly ISourceCodeTokenizer _tokenizer;
+		private readonly ISyntacticAnalyzer _analyzer;
 
-        public IEnumerable<Token> Tokenize(string input)
-        {
-            return Tokenize(input, null);
-        }
-        public IEnumerable<Token> Tokenize(string input, string worksheet)
-        {
-            var tokens = _tokenizer.Tokenize(input, worksheet);
-            _analyzer.Analyze(tokens);
-            return tokens;
-        }
-    }
+		public IEnumerable<Token> Tokenize(string input)
+		{
+			return Tokenize(input, null);
+		}
+		public IEnumerable<Token> Tokenize(string input, string worksheet)
+		{
+			var tokens = _tokenizer.Tokenize(input, worksheet);
+			_analyzer.Analyze(tokens);
+			return tokens;
+		}
+	}
 }

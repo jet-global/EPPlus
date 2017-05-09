@@ -28,40 +28,40 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
+using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using OfficeOpenXml.FormulaParsing.Utilities;
-using System.Collections.Generic;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
-    public abstract class FunctionCompiler
-    {
-        protected ExcelFunction Function { get; private set; }
+	public abstract class FunctionCompiler
+	{
+		protected ExcelFunction Function { get; private set; }
 
-        public FunctionCompiler(ExcelFunction function)
-        {
-            Require.That(function).Named("function").IsNotNull();
-            this.Function = function;
-        }
+		public FunctionCompiler(ExcelFunction function)
+		{
+			Require.That(function).Named("function").IsNotNull();
+			this.Function = function;
+		}
 
-        protected void BuildFunctionArguments(object result, DataType dataType, List<FunctionArgument> args)
-        {
-            if (result is IEnumerable<object> && !(result is ExcelDataProvider.IRangeInfo))
-            {
-                var argList = new List<FunctionArgument>();
-                var objects = result as IEnumerable<object>;
-                foreach (var arg in objects)
-                {
-                    this.BuildFunctionArguments(arg, dataType, argList);
-                }
-                args.Add(new FunctionArgument(argList));
-            }
-            else
-            {
-                args.Add(new FunctionArgument(result, dataType));
-            }
-        }
+		protected void BuildFunctionArguments(object result, DataType dataType, List<FunctionArgument> args)
+		{
+			if (result is IEnumerable<object> && !(result is ExcelDataProvider.IRangeInfo))
+			{
+				var argList = new List<FunctionArgument>();
+				var objects = result as IEnumerable<object>;
+				foreach (var arg in objects)
+				{
+					this.BuildFunctionArguments(arg, dataType, argList);
+				}
+				args.Add(new FunctionArgument(argList));
+			}
+			else
+			{
+				args.Add(new FunctionArgument(result, dataType));
+			}
+		}
 
-        public abstract CompileResult Compile(IEnumerable<Expression> children, ParsingContext context);
-    }
+		public abstract CompileResult Compile(IEnumerable<Expression> children, ParsingContext context);
+	}
 }

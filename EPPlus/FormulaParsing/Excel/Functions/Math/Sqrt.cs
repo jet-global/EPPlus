@@ -22,23 +22,20 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-    public class Sqrt : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            if(ValidateArguments(arguments, 1) == false)
-            	return new CompileResult(eErrorType.Value);
-            var arg = ArgToDecimal(arguments, 0);
-            var result = System.Math.Sqrt((double)arg);
-            return CreateResult((double)result, DataType.Decimal);
-        }
-    }
+	public class Sqrt : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			var arg = ArgToDecimal(arguments, 0);
+			var result = System.Math.Sqrt((double)arg);
+			return CreateResult((double)result, DataType.Decimal);
+		}
+	}
 }

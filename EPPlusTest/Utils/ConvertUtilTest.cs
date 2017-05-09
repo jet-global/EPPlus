@@ -43,7 +43,7 @@ namespace EPPlusTest.Utils
 			Assert.IsTrue(ConvertUtil.TryParseNumericString(numericString, out result));
 			Assert.AreEqual(expected, result);
 		}
-		
+
 		[TestMethod]
 		public void TryParseDateString()
 		{

@@ -30,13 +30,6 @@
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  * Eyal Seagull		    Conditional Formatting      2012-04-03
  *******************************************************************************/
-using OfficeOpenXml.ConditionalFormatting;
-using OfficeOpenXml.DataValidation;
-using OfficeOpenXml.Drawing.Sparkline;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
-using OfficeOpenXml.Style;
-using OfficeOpenXml.Style.XmlAccess;
-using OfficeOpenXml.Table;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -51,9 +44,13 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
-
-using wm = System.Windows.Media;
-using w = System.Windows;
+using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.DataValidation;
+using OfficeOpenXml.Drawing.Sparkline;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using OfficeOpenXml.Style;
+using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Table;
 
 namespace OfficeOpenXml
 {
@@ -529,7 +526,7 @@ namespace OfficeOpenXml
 
 					if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns) //FullRow
 					{
-						var rows =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, 1, 0, ExcelPackage.MaxRows, 0);
+						var rows = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, 1, 0, ExcelPackage.MaxRows, 0);
 						rows.MoveNext();
 						while (rows.Value._value != null)
 						{
@@ -562,7 +559,7 @@ namespace OfficeOpenXml
 				}
 				else //Only set name on created cells. (uncreated cells is set on full row or full column).
 				{
-					var cells =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
+					var cells = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
 					while (cells.MoveNext())
 					{
 						_worksheet.SetStyleInner(cells.Row, cells.Column, _styleID);
@@ -909,10 +906,10 @@ namespace OfficeOpenXml
 						var characterCount = textForWidth.ToCharArray().Count() + (cellIndent > 0 && !string.IsNullOrEmpty(textForWidth) ? cellIndent : 0);
 						var measurableText = new string('W', characterCount + cellPadding);
 						var textWidth = g.MeasureString(measurableText, font).Width / defaultCharacterWidth;
-                        if (r == 0)
-						    sizes.Add(textWidth);
-                        else
-                            sizes.Add(Convert.ToSingle(Math.Cos(Math.PI * (r <= 90 ? r : r - 90) / 180.0) * textWidth));
+						if (r == 0)
+							sizes.Add(textWidth);
+						else
+							sizes.Add(Convert.ToSingle(Math.Cos(Math.PI * (r <= 90 ? r : r - 90) / 180.0) * textWidth));
 					}
 					var width = sizes.Max();
 
@@ -948,7 +945,7 @@ namespace OfficeOpenXml
 			}
 			return false;
 		}
-		
+
 		private void SetMinWidth(double minimumWidth, int fromCol, int toCol)
 		{
 			var iterator = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, 0, fromCol, 0, toCol);
@@ -1793,8 +1790,8 @@ namespace OfficeOpenXml
 				rowArray.Add(dr.ItemArray);
 			}
 
-			for(int column = 0; column < Table.Columns.Count; column++)
-				for(int row = 0; row < rowArray.Count; row++)
+			for (int column = 0; column < Table.Columns.Count; column++)
+				for (int row = 0; row < rowArray.Count; row++)
 				{
 					var val = rowArray[row][column];
 					if (val != null && val != DBNull.Value && !string.IsNullOrEmpty(val.ToString()))
@@ -2349,7 +2346,7 @@ namespace OfficeOpenXml
 			}
 
 			//Copy styles with no cell value
-			var cses =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
+			var cses = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
 			while (cses.MoveNext())
 			{
 				if (!_worksheet.ExistsValueInner(cses.Row, cses.Column))
@@ -2642,7 +2639,7 @@ namespace OfficeOpenXml
 				_enumAddressIx++;
 				if (_enumAddressIx < _addresses.Count)
 				{
-					cellEnum =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values,
+					cellEnum = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values,
 						_addresses[_enumAddressIx]._fromRow,
 						_addresses[_enumAddressIx]._fromCol,
 						_addresses[_enumAddressIx]._toRow,
@@ -2660,7 +2657,7 @@ namespace OfficeOpenXml
 		public void Reset()
 		{
 			_enumAddressIx = -1;
-			cellEnum =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
+			cellEnum = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_worksheet._values, _fromRow, _fromCol, _toRow, _toCol);
 		}
 		#endregion
 	}

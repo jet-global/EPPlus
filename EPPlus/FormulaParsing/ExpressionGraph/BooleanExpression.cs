@@ -28,33 +28,29 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
-    public class BooleanExpression : AtomicExpression
-    {
-        private bool? _precompiledValue;
+	public class BooleanExpression : AtomicExpression
+	{
+		private bool? _precompiledValue;
 
-        public BooleanExpression(string expression)
-            : base(expression)
-        {
+		public BooleanExpression(string expression)
+			 : base(expression)
+		{
 
-        }
+		}
 
-        public BooleanExpression(bool value)
-            : base(value ? "true" : "false")
-        {
-            _precompiledValue = value;
-        }
+		public BooleanExpression(bool value)
+			 : base(value ? "true" : "false")
+		{
+			_precompiledValue = value;
+		}
 
-        public override CompileResult Compile()
-        {
-            var result = _precompiledValue ?? bool.Parse(ExpressionString);
-            return new CompileResult(result, DataType.Boolean);
-        }
-    }
+		public override CompileResult Compile()
+		{
+			var result = _precompiledValue ?? bool.Parse(ExpressionString);
+			return new CompileResult(result, DataType.Boolean);
+		}
+	}
 }

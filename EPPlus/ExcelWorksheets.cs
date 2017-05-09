@@ -32,16 +32,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
+using OfficeOpenXml.Drawing.Slicers;
 using OfficeOpenXml.Drawing.Sparkline;
 using OfficeOpenXml.Drawing.Vml;
 using OfficeOpenXml.Utils;
 using OfficeOpenXml.VBA;
-using OfficeOpenXml.Drawing.Slicers;
 
 namespace OfficeOpenXml
 {
@@ -79,7 +79,7 @@ namespace OfficeOpenXml
 		/// <param name="package">The excel package.</param>
 		/// <param name="namespaceManager">The namespace manager with the namespaces for the node.</param>
 		/// <param name="topNode">The top XML node of the Worksheets collection.</param>
-		internal ExcelWorksheets(ExcelPackage package, XmlNamespaceManager namespaceManager, XmlNode topNode) :	base(namespaceManager, topNode)
+		internal ExcelWorksheets(ExcelPackage package, XmlNamespaceManager namespaceManager, XmlNode topNode) : base(namespaceManager, topNode)
 		{
 			this.Package = package;
 			this.NamespaceManager = namespaceManager;
@@ -907,7 +907,7 @@ namespace OfficeOpenXml
 
 			Dictionary<int, int> styleCashe = new Dictionary<int, int>();
 			int row, col;
-			var val =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(originalWorksheet._values);
+			var val = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(originalWorksheet._values);
 			while (val.MoveNext())
 			{
 				row = val.Row;

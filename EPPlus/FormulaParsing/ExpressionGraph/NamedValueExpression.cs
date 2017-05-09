@@ -28,50 +28,46 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
-    public class NamedValueExpression : AtomicExpression
-    {
-        public NamedValueExpression(string expression, ParsingContext parsingContext)
-            : base(expression)
-        {
-            _parsingContext = parsingContext;
-        }
+	public class NamedValueExpression : AtomicExpression
+	{
+		public NamedValueExpression(string expression, ParsingContext parsingContext)
+			 : base(expression)
+		{
+			_parsingContext = parsingContext;
+		}
 
-        private readonly ParsingContext _parsingContext;
+		private readonly ParsingContext _parsingContext;
 
-        public override CompileResult Compile()
-        {
-            var c = this._parsingContext.Scopes.Current;
-            var name = _parsingContext.ExcelDataProvider.GetName(c.Address.Worksheet, ExpressionString);
-            //var result = _parsingContext.Parser.Parse(value.ToString());
+		public override CompileResult Compile()
+		{
+			var c = this._parsingContext.Scopes.Current;
+			var name = _parsingContext.ExcelDataProvider.GetName(c.Address.Worksheet, ExpressionString);
+			//var result = _parsingContext.Parser.Parse(value.ToString());
 
-            if (name == null)
-            {
-                throw (new Exceptions.ExcelErrorValueException(ExcelErrorValue.Create(eErrorType.Name)));
-            }
-            if (name.Value==null)
-            {
-                return null;
-            }
-            if (name.Value is ExcelDataProvider.IRangeInfo)
-            {
-                var range = (ExcelDataProvider.IRangeInfo)name.Value;
-                if (range.IsMulti)
-                {
-                    return new CompileResult(name.Value, DataType.Enumerable);
-                }
-                else
-                {
-                    if (range.IsEmpty && range.Address._fromRowFixed == true && range.Address._fromColFixed == true)
-                    {
-                        return null;
-                    }
+			if (name == null)
+			{
+				throw (new Exceptions.ExcelErrorValueException(ExcelErrorValue.Create(eErrorType.Name)));
+			}
+			if (name.Value == null)
+			{
+				return null;
+			}
+			if (name.Value is ExcelDataProvider.IRangeInfo)
+			{
+				var range = (ExcelDataProvider.IRangeInfo)name.Value;
+				if (range.IsMulti)
+				{
+					return new CompileResult(name.Value, DataType.Enumerable);
+				}
+				else
+				{
+					if (range.IsEmpty && range.Address._fromRowFixed == true && range.Address._fromColFixed == true)
+					{
+						return null;
+					}
 					var address = range.Address;
 					var column = address.Start.Column;
 					var row = address.Start.Row;
@@ -88,18 +84,18 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 							row = ExcelPackage.MaxRows;
 					}
 					var factory = new CompileResultFactory();
-                    return factory.Create(range.Worksheet.Cells[row, column].Value);
-                }
-            }
-            else
-            {                
-                var factory = new CompileResultFactory();
-                return factory.Create(name.Value);
-            }
+					return factory.Create(range.Worksheet.Cells[row, column].Value);
+				}
+			}
+			else
+			{
+				var factory = new CompileResultFactory();
+				return factory.Create(name.Value);
+			}
 
-            
-            
-            //return new CompileResultFactory().Create(result);
-        }
-    }
+
+
+			//return new CompileResultFactory().Create(result);
+		}
+	}
 }

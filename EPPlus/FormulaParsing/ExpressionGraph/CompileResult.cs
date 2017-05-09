@@ -29,71 +29,67 @@
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
-    public class CompileResult
-    {
-        private static CompileResult _empty = new CompileResult(null, DataType.Empty);
+	public class CompileResult
+	{
+		private static CompileResult _empty = new CompileResult(null, DataType.Empty);
 
-        public static CompileResult Empty
-        {
-            get { return _empty; }
-        }
+		public static CompileResult Empty
+		{
+			get { return _empty; }
+		}
 
 		private double? _ResultNumeric;
 
-        public CompileResult(object result, DataType dataType)
-        {
-            Result = result;
-            DataType = dataType;
-        }
+		public CompileResult(object result, DataType dataType)
+		{
+			Result = result;
+			DataType = dataType;
+		}
 
-        public CompileResult(eErrorType errorType)
-        {
-            Result = ExcelErrorValue.Create(errorType);
-            DataType = DataType.ExcelError;
-        }
+		public CompileResult(eErrorType errorType)
+		{
+			Result = ExcelErrorValue.Create(errorType);
+			DataType = DataType.ExcelError;
+		}
 
-        public CompileResult(ExcelErrorValue errorValue)
-        {
-            Require.Argument(errorValue).IsNotNull("errorValue");
-            Result = errorValue;
-            DataType = DataType.ExcelError;
-        }
+		public CompileResult(ExcelErrorValue errorValue)
+		{
+			Require.Argument(errorValue).IsNotNull("errorValue");
+			Result = errorValue;
+			DataType = DataType.ExcelError;
+		}
 
-        public object Result
-        {
-            get;
-            private set;
-        }
+		public object Result
+		{
+			get;
+			private set;
+		}
 
-        public object ResultValue
-        {
-            get
-            {
-                var r = Result as ExcelDataProvider.IRangeInfo;
-                if (r == null)
-                {
-                    return Result;
-                }
-                else
-                {
-                    return r.GetValue(r.Address._fromRow, r.Address._fromCol);
-                }
-            }
-        }
+		public object ResultValue
+		{
+			get
+			{
+				var r = Result as ExcelDataProvider.IRangeInfo;
+				if (r == null)
+				{
+					return Result;
+				}
+				else
+				{
+					return r.GetValue(r.Address._fromRow, r.Address._fromCol);
+				}
+			}
+		}
 
-        public double ResultNumeric
-        {
-            get
-            {
+		public double ResultNumeric
+		{
+			get
+			{
 				// We assume that Result does not change unless it is a range.
 				if (_ResultNumeric == null)
 				{
@@ -129,27 +125,27 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 					}
 				}
 				return _ResultNumeric.Value;
-            }
-        }
+			}
+		}
 
-        public DataType DataType
-        {
-            get;
-            private set;
-        }
-        
-        public bool IsNumeric
-        {
-            get 
-            {
-                return DataType == DataType.Decimal || DataType == DataType.Integer || DataType == DataType.Empty || DataType == DataType.Boolean || DataType == DataType.Date; 
-            }
-        }
+		public DataType DataType
+		{
+			get;
+			private set;
+		}
 
-        public bool IsNumericString
-        {
-            get
-            {
+		public bool IsNumeric
+		{
+			get
+			{
+				return DataType == DataType.Decimal || DataType == DataType.Integer || DataType == DataType.Empty || DataType == DataType.Boolean || DataType == DataType.Date;
+			}
+		}
+
+		public bool IsNumericString
+		{
+			get
+			{
 				double result;
 				if (DataType == DataType.String && ConvertUtil.TryParseNumericString(Result, out result))
 				{
@@ -157,8 +153,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 					return true;
 				}
 				return false;
-            }
-        }
+			}
+		}
 
 		public bool IsDateString
 		{
@@ -176,6 +172,6 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 
 		public bool IsResultOfSubtotal { get; set; }
 
-        public bool IsHiddenCell { get; set; }
-    }
+		public bool IsHiddenCell { get; set; }
+	}
 }

@@ -22,25 +22,23 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-01-10
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 {
-    public class Hyperlink : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            if(ValidateArguments(arguments, 1) == false)
-            	return new CompileResult(eErrorType.Value);
-            if (arguments.Count() > 1)
-            {
-                return CreateResult(ArgToString(arguments, 1), DataType.String);
-            }
-            return CreateResult(ArgToString(arguments, 0), DataType.String);
-        }
-    }
+	public class Hyperlink : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			if (arguments.Count() > 1)
+			{
+				return CreateResult(ArgToString(arguments, 1), DataType.String);
+			}
+			return CreateResult(ArgToString(arguments, 0), DataType.String);
+		}
+	}
 }

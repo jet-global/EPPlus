@@ -30,15 +30,6 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-27
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using OfficeOpenXml.Style;
-using System.Text.RegularExpressions;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
-using System.Linq;
-using OfficeOpenXml.FormulaParsing.Excel.Functions;
-using OfficeOpenXml.FormulaParsing;
 namespace OfficeOpenXml
 {
 	/// <summary>
@@ -503,7 +494,7 @@ namespace OfficeOpenXml
 				colStartIx = sheetMarkerIndex + 1;
 			}
 			address = Utils.ConvertUtil._invariantTextInfo.ToUpper(address);
-            bool foundAbsolute = false;
+			bool foundAbsolute = false;
 			for (int i = colStartIx; i < address.Length; i++)
 			{
 				char c = address[i];
@@ -512,26 +503,26 @@ namespace OfficeOpenXml
 					col *= 26;
 					col += ((int)c) - 64;
 					colLength++;
-                    if (foundAbsolute)
-                    {
-                        fixedCol = true;
-                        foundAbsolute = false;
-                    }
+					if (foundAbsolute)
+					{
+						fixedCol = true;
+						foundAbsolute = false;
+					}
 				}
 				else if (c >= '0' && c <= '9')
 				{
 					row *= 10;
 					row += ((int)c) - 48;
 					colPart = false;
-                    if (foundAbsolute)
-                    {
-                        fixedRow = true;
-                        foundAbsolute = false;
-                    }
+					if (foundAbsolute)
+					{
+						fixedRow = true;
+						foundAbsolute = false;
+					}
 				}
 				else if (c == '$')
 				{
-                    foundAbsolute = true;
+					foundAbsolute = true;
 				}
 				else
 				{

@@ -7,9 +7,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
-using OfficeOpenXml.Style;
 using OfficeOpenXml.Drawing.Slicers;
-using System.Linq;
+using OfficeOpenXml.Style;
 
 namespace EPPlusTest
 {

@@ -22,36 +22,32 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-04-19
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Database
 {
-    public class ExcelDatabaseCriteriaField
-    {
-        public ExcelDatabaseCriteriaField(string fieldName)
-        {
-            FieldName = fieldName;
-        }
+	public class ExcelDatabaseCriteriaField
+	{
+		public ExcelDatabaseCriteriaField(string fieldName)
+		{
+			FieldName = fieldName;
+		}
 
-        public ExcelDatabaseCriteriaField(int fieldIndex)
-        {
-            FieldIndex = fieldIndex;
-        }
+		public ExcelDatabaseCriteriaField(int fieldIndex)
+		{
+			FieldIndex = fieldIndex;
+		}
 
-        public override string ToString()
-        {
-            if (!string.IsNullOrEmpty(FieldName))
-            {
-                return FieldName;
-            }
-            return base.ToString();
-        }
+		public override string ToString()
+		{
+			if (!string.IsNullOrEmpty(FieldName))
+			{
+				return FieldName;
+			}
+			return base.ToString();
+		}
 
-        public string FieldName { get; private set; }
+		public string FieldName { get; private set; }
 
-        public int? FieldIndex { get; private set; }
-    }
+		public int? FieldIndex { get; private set; }
+	}
 }

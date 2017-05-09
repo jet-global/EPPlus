@@ -29,17 +29,13 @@
  * Eyal Seagull    Conditional Formatting Adaption    2012-04-17
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
 
 namespace OfficeOpenXml.ConditionalFormatting
 {
 	/// <summary>
-  /// Functions related to the <see cref="ExcelConditionalFormattingTimePeriodType"/>
+	/// Functions related to the <see cref="ExcelConditionalFormattingTimePeriodType"/>
 	/// </summary>
-  internal static class ExcelConditionalFormattingTimePeriodType
+	internal static class ExcelConditionalFormattingTimePeriodType
 	{
 		/// <summary>
 		/// 
@@ -51,83 +47,83 @@ namespace OfficeOpenXml.ConditionalFormatting
 		{
 			switch (type)
 			{
-        case eExcelConditionalFormattingTimePeriodType.Last7Days:
-          return ExcelConditionalFormattingConstants.TimePeriods.Last7Days;
+				case eExcelConditionalFormattingTimePeriodType.Last7Days:
+					return ExcelConditionalFormattingConstants.TimePeriods.Last7Days;
 
-        case eExcelConditionalFormattingTimePeriodType.LastMonth:
-          return ExcelConditionalFormattingConstants.TimePeriods.LastMonth;
+				case eExcelConditionalFormattingTimePeriodType.LastMonth:
+					return ExcelConditionalFormattingConstants.TimePeriods.LastMonth;
 
-        case eExcelConditionalFormattingTimePeriodType.LastWeek:
-          return ExcelConditionalFormattingConstants.TimePeriods.LastWeek;
+				case eExcelConditionalFormattingTimePeriodType.LastWeek:
+					return ExcelConditionalFormattingConstants.TimePeriods.LastWeek;
 
-        case eExcelConditionalFormattingTimePeriodType.NextMonth:
-          return ExcelConditionalFormattingConstants.TimePeriods.NextMonth;
+				case eExcelConditionalFormattingTimePeriodType.NextMonth:
+					return ExcelConditionalFormattingConstants.TimePeriods.NextMonth;
 
-        case eExcelConditionalFormattingTimePeriodType.NextWeek:
-          return ExcelConditionalFormattingConstants.TimePeriods.NextWeek;
+				case eExcelConditionalFormattingTimePeriodType.NextWeek:
+					return ExcelConditionalFormattingConstants.TimePeriods.NextWeek;
 
-        case eExcelConditionalFormattingTimePeriodType.ThisMonth:
-          return ExcelConditionalFormattingConstants.TimePeriods.ThisMonth;
+				case eExcelConditionalFormattingTimePeriodType.ThisMonth:
+					return ExcelConditionalFormattingConstants.TimePeriods.ThisMonth;
 
-        case eExcelConditionalFormattingTimePeriodType.ThisWeek:
-          return ExcelConditionalFormattingConstants.TimePeriods.ThisWeek;
+				case eExcelConditionalFormattingTimePeriodType.ThisWeek:
+					return ExcelConditionalFormattingConstants.TimePeriods.ThisWeek;
 
-        case eExcelConditionalFormattingTimePeriodType.Today:
-          return ExcelConditionalFormattingConstants.TimePeriods.Today;
+				case eExcelConditionalFormattingTimePeriodType.Today:
+					return ExcelConditionalFormattingConstants.TimePeriods.Today;
 
-        case eExcelConditionalFormattingTimePeriodType.Tomorrow:
-          return ExcelConditionalFormattingConstants.TimePeriods.Tomorrow;
+				case eExcelConditionalFormattingTimePeriodType.Tomorrow:
+					return ExcelConditionalFormattingConstants.TimePeriods.Tomorrow;
 
-        case eExcelConditionalFormattingTimePeriodType.Yesterday:
-          return ExcelConditionalFormattingConstants.TimePeriods.Yesterday;
+				case eExcelConditionalFormattingTimePeriodType.Yesterday:
+					return ExcelConditionalFormattingConstants.TimePeriods.Yesterday;
 			}
 
 			return string.Empty;
 		}
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="attribute"></param>
-    /// <returns></returns>
-    public static eExcelConditionalFormattingTimePeriodType GetTypeByAttribute(
-      string attribute)
-    {
-      switch (attribute)
-      {
-        case ExcelConditionalFormattingConstants.TimePeriods.Last7Days:
-          return eExcelConditionalFormattingTimePeriodType.Last7Days;
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="attribute"></param>
+		/// <returns></returns>
+		public static eExcelConditionalFormattingTimePeriodType GetTypeByAttribute(
+		  string attribute)
+		{
+			switch (attribute)
+			{
+				case ExcelConditionalFormattingConstants.TimePeriods.Last7Days:
+					return eExcelConditionalFormattingTimePeriodType.Last7Days;
 
-        case ExcelConditionalFormattingConstants.TimePeriods.LastMonth:
-          return eExcelConditionalFormattingTimePeriodType.LastMonth;
+				case ExcelConditionalFormattingConstants.TimePeriods.LastMonth:
+					return eExcelConditionalFormattingTimePeriodType.LastMonth;
 
-        case ExcelConditionalFormattingConstants.TimePeriods.LastWeek:
-          return eExcelConditionalFormattingTimePeriodType.LastWeek;
+				case ExcelConditionalFormattingConstants.TimePeriods.LastWeek:
+					return eExcelConditionalFormattingTimePeriodType.LastWeek;
 
-        case ExcelConditionalFormattingConstants.TimePeriods.NextMonth:
-          return eExcelConditionalFormattingTimePeriodType.NextMonth;
+				case ExcelConditionalFormattingConstants.TimePeriods.NextMonth:
+					return eExcelConditionalFormattingTimePeriodType.NextMonth;
 
-        case ExcelConditionalFormattingConstants.TimePeriods.NextWeek:
-          return eExcelConditionalFormattingTimePeriodType.NextWeek;
+				case ExcelConditionalFormattingConstants.TimePeriods.NextWeek:
+					return eExcelConditionalFormattingTimePeriodType.NextWeek;
 
-        case ExcelConditionalFormattingConstants.TimePeriods.ThisMonth:
-          return eExcelConditionalFormattingTimePeriodType.ThisMonth;
+				case ExcelConditionalFormattingConstants.TimePeriods.ThisMonth:
+					return eExcelConditionalFormattingTimePeriodType.ThisMonth;
 
-        case ExcelConditionalFormattingConstants.TimePeriods.ThisWeek:
-          return eExcelConditionalFormattingTimePeriodType.ThisWeek;
+				case ExcelConditionalFormattingConstants.TimePeriods.ThisWeek:
+					return eExcelConditionalFormattingTimePeriodType.ThisWeek;
 
-        case ExcelConditionalFormattingConstants.TimePeriods.Today:
-          return eExcelConditionalFormattingTimePeriodType.Today;
+				case ExcelConditionalFormattingConstants.TimePeriods.Today:
+					return eExcelConditionalFormattingTimePeriodType.Today;
 
-        case ExcelConditionalFormattingConstants.TimePeriods.Tomorrow:
-          return eExcelConditionalFormattingTimePeriodType.Tomorrow;
+				case ExcelConditionalFormattingConstants.TimePeriods.Tomorrow:
+					return eExcelConditionalFormattingTimePeriodType.Tomorrow;
 
-        case ExcelConditionalFormattingConstants.TimePeriods.Yesterday:
-          return eExcelConditionalFormattingTimePeriodType.Yesterday;
-      }
+				case ExcelConditionalFormattingConstants.TimePeriods.Yesterday:
+					return eExcelConditionalFormattingTimePeriodType.Yesterday;
+			}
 
-      throw new Exception(
-        ExcelConditionalFormattingConstants.Errors.UnexistentTimePeriodTypeAttribute);
-    }
-  }
+			throw new Exception(
+			  ExcelConditionalFormattingConstants.Errors.UnexistentTimePeriodTypeAttribute);
+		}
+	}
 }

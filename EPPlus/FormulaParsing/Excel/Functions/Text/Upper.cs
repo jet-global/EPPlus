@@ -22,21 +22,19 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 {
-    public class Upper : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            if(ValidateArguments(arguments, 1) == false)
-            	return new CompileResult(eErrorType.Value);
-            return CreateResult(Utils.ConvertUtil._invariantTextInfo.ToUpper(arguments.First().ValueFirst.ToString()), DataType.String);
-        }
-    }
+	public class Upper : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			return CreateResult(Utils.ConvertUtil._invariantTextInfo.ToUpper(arguments.First().ValueFirst.ToString()), DataType.String);
+		}
+	}
 }

@@ -28,48 +28,44 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 {
-    public class Token
-    {
-        public Token(string token, TokenType tokenType)
-        {
-            Value = token;
-            TokenType = tokenType;
-        }
+	public class Token
+	{
+		public Token(string token, TokenType tokenType)
+		{
+			Value = token;
+			TokenType = tokenType;
+		}
 
-        public string Value { get; internal set; }
+		public string Value { get; internal set; }
 
-        public TokenType TokenType { get; internal set; }
+		public TokenType TokenType { get; internal set; }
 
-        public void Append(string stringToAppend)
-        {
-            Value += stringToAppend;
-        }
+		public void Append(string stringToAppend)
+		{
+			Value += stringToAppend;
+		}
 
-        public bool IsNegated { get; private set; }
-        
-        public void Negate()
-        {
+		public bool IsNegated { get; private set; }
 
-            if (
-                TokenType == TokenType.Decimal 
-                || 
-                TokenType == TokenType.Integer
-                ||
-                TokenType == TokenType.ExcelAddress)
-            {
-                IsNegated = true;
-            }
-        }
-        public override string ToString()
-        {
-            return TokenType.ToString() + ", " + Value;
-        }
-    }
+		public void Negate()
+		{
+
+			if (
+				 TokenType == TokenType.Decimal
+				 ||
+				 TokenType == TokenType.Integer
+				 ||
+				 TokenType == TokenType.ExcelAddress)
+			{
+				IsNegated = true;
+			}
+		}
+		public override string ToString()
+		{
+			return TokenType.ToString() + ", " + Value;
+		}
+	}
 }

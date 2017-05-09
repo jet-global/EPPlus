@@ -87,7 +87,7 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Gets or sets a value indicating whether or not this Named range is hidden.
 		/// </summary>
-		public bool IsNameHidden {	get; set; }
+		public bool IsNameHidden { get; set; }
 
 		/// <summary>
 		/// Gets the <see cref="ExcelWorksheet"/> that this named range is local to, or null if the named range has a workbook scope.
@@ -97,7 +97,7 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Gets or sets the index value of this named range in its parent <see cref="ExcelNamedRangeCollection"/>.
 		/// </summary>
-		internal int Index {	get; set; }
+		internal int Index { get; set; }
 
 		/// <summary>
 		/// Gets or sets the value of this Named Range.

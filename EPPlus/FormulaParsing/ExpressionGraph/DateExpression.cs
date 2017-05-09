@@ -29,25 +29,21 @@
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
-    public class DateExpression : AtomicExpression
-    {
-        public DateExpression(string expression)
-            : base(expression)
-        {
+	public class DateExpression : AtomicExpression
+	{
+		public DateExpression(string expression)
+			 : base(expression)
+		{
 
-        }
+		}
 
-        public override CompileResult Compile()
-        {
-            var date = double.Parse(ExpressionString);
-            return new CompileResult(DateTime.FromOADate(date), DataType.Date);
-        }
-    }
+		public override CompileResult Compile()
+		{
+			var date = double.Parse(ExpressionString);
+			return new CompileResult(DateTime.FromOADate(date), DataType.Date);
+		}
+	}
 }

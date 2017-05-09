@@ -37,7 +37,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 	/// <summary>
 	/// Represents a single Excel Slicer in an <see cref="ExcelSlicers"/> file.
 	/// </summary>
-	public class ExcelSlicer: XmlHelper
+	public class ExcelSlicer : XmlHelper
 	{
 		#region Class Variables
 		private string _name;
@@ -99,7 +99,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// <param name="node">The "<slicer/>" node that this slicer represents.</param>
 		/// <param name="namespaceManager">The namespace manager to use to process the slicer.</param>
 		/// <param name="worksheet">The <see cref="ExcelWorksheet"/> that the slicer's drawing exists on.</param>
-		internal ExcelSlicer(XmlNode node, XmlNamespaceManager namespaceManager, ExcelWorksheet worksheet): base(namespaceManager, node)
+		internal ExcelSlicer(XmlNode node, XmlNamespaceManager namespaceManager, ExcelWorksheet worksheet) : base(namespaceManager, node)
 		{
 			this.Worksheet = worksheet;
 			var cacheName = node.Attributes["cache"].Value;

@@ -33,12 +33,11 @@
  *******************************************************************************/
 
 using System;
-using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Xml;
 using OfficeOpenXml.Style;
-using System.Globalization;
-using System.IO;
 namespace OfficeOpenXml
 {
 	/// <summary>
@@ -230,8 +229,8 @@ namespace OfficeOpenXml
 
 		/// <summary>
 		/// Creates complex XML nodes
-    /// </summary>
-    /// <remarks>
+		/// </summary>
+		/// <remarks>
 		/// 1. "d:conditionalFormatting"
 		///		1.1. Creates/find the first "conditionalFormatting" node
 		/// 
@@ -258,7 +257,7 @@ namespace OfficeOpenXml
 		/// 6. "d:cfRule/@id=''"
 		///		6.1. Creates/find the first "cfRule" node
 		///		6.1. Remove the @id attribute
-    ///	</remarks>
+		///	</remarks>
 		/// <param name="topNode"></param>
 		/// <param name="path"></param>
 		/// <param name="nodeInsertOrder"></param>
@@ -279,7 +278,7 @@ namespace OfficeOpenXml
 			XmlNode node = topNode;
 			string nameSpaceURI = string.Empty;
 
-      //TODO: BUG: when the "path" contains "/" in an attrribue value, it gives an error.
+			//TODO: BUG: when the "path" contains "/" in an attrribue value, it gives an error.
 
 			// Separate the XPath to Nodes and Attributes
 			foreach (string subPath in path.Split('/'))
@@ -303,7 +302,7 @@ namespace OfficeOpenXml
 						// @attribute='attribute value' --> Create attribute + update value
 						string[] attributeSplit = subPath.Split('=');
 						string attributeName = attributeSplit[0].Substring(1, attributeSplit[0].Length - 1);
-						string attributeValue = null;	// Null means no attribute value
+						string attributeValue = null; // Null means no attribute value
 
 						// Check if we have an attribute value to set
 						if (attributeSplit.Length > 1)
@@ -436,12 +435,12 @@ namespace OfficeOpenXml
 							{
 								case eNodeInsertOrder.After:
 									node.InsertAfter(subNode, referenceNode);
-                                    referenceNode = null;
-                                    break;
+									referenceNode = null;
+									break;
 
 								case eNodeInsertOrder.Before:
 									node.InsertBefore(subNode, referenceNode);
-                                    referenceNode = null;
+									referenceNode = null;
 									break;
 
 								case eNodeInsertOrder.First:
@@ -550,10 +549,10 @@ namespace OfficeOpenXml
 				}
 			}
 		}
-    internal void DeleteTopNode()
-    {
-      TopNode.ParentNode.RemoveChild(TopNode);
-    }
+		internal void DeleteTopNode()
+		{
+			TopNode.ParentNode.RemoveChild(TopNode);
+		}
 		internal void SetXmlNodeString(string path, string value)
 		{
 			SetXmlNodeString(TopNode, path, value, false, false);
@@ -646,7 +645,7 @@ namespace OfficeOpenXml
 		internal bool GetXmlNodeBool(string path, bool blankValue)
 		{
 			string value = GetXmlNodeString(path);
-			if (value == "1" || value == "-1" || value.Equals("true",StringComparison.InvariantCultureIgnoreCase))
+			if (value == "1" || value == "-1" || value.Equals("true", StringComparison.InvariantCultureIgnoreCase))
 			{
 				return true;
 			}
@@ -671,19 +670,19 @@ namespace OfficeOpenXml
 				return int.MinValue;
 			}
 		}
-        internal int? GetXmlNodeIntNull(string path)
-        {
-            int i;
-            string s = GetXmlNodeString(path);
-            if (s!="" && int.TryParse(s, out i))
-            {
-                return i;
-            }
-            else
-            {
-                return null;
-            }
-        }
+		internal int? GetXmlNodeIntNull(string path)
+		{
+			int i;
+			string s = GetXmlNodeString(path);
+			if (s != "" && int.TryParse(s, out i))
+			{
+				return i;
+			}
+			else
+			{
+				return null;
+			}
+		}
 
 		internal decimal GetXmlNodeDecimal(string path)
 		{
@@ -697,19 +696,19 @@ namespace OfficeOpenXml
 				return 0;
 			}
 		}
-        internal decimal? GetXmlNodeDecimalNull(string path)
-        {
-            decimal d;
-            if (decimal.TryParse(GetXmlNodeString(path), NumberStyles.Any, CultureInfo.InvariantCulture, out d))
-            {
-                return d;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        internal double? GetXmlNodeDoubleNull(string path)
+		internal decimal? GetXmlNodeDecimalNull(string path)
+		{
+			decimal d;
+			if (decimal.TryParse(GetXmlNodeString(path), NumberStyles.Any, CultureInfo.InvariantCulture, out d))
+			{
+				return d;
+			}
+			else
+			{
+				return null;
+			}
+		}
+		internal double? GetXmlNodeDoubleNull(string path)
 		{
 			string s = GetXmlNodeString(path);
 			if (s == "")
@@ -719,7 +718,7 @@ namespace OfficeOpenXml
 			else
 			{
 				double v;
-                if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out v))
+				if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out v))
 				{
 					return v;
 				}
@@ -728,8 +727,8 @@ namespace OfficeOpenXml
 					return null;
 				}
 			}
-		}		
-        internal double GetXmlNodeDouble(string path)
+		}
+		internal double GetXmlNodeDouble(string path)
 		{
 			string s = GetXmlNodeString(path);
 			if (s == "")
@@ -738,7 +737,7 @@ namespace OfficeOpenXml
 			}
 			else
 			{
-                double v;
+				double v;
 				if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out v))
 				{
 					return v;
@@ -750,56 +749,56 @@ namespace OfficeOpenXml
 			}
 		}
 
-    internal string GetXmlNodeString(XmlNode node, string path)
-    {
-      if (node == null)
-      {
-        return "";
-      }
+		internal string GetXmlNodeString(XmlNode node, string path)
+		{
+			if (node == null)
+			{
+				return "";
+			}
 
-      XmlNode nameNode = node.SelectSingleNode(path, NameSpaceManager);
+			XmlNode nameNode = node.SelectSingleNode(path, NameSpaceManager);
 
-      if (nameNode != null)
-      {
-        if (nameNode.NodeType == XmlNodeType.Attribute)
-        {
-          return nameNode.Value != null ? nameNode.Value : "";
-        }
-        else
-        {
-          return nameNode.InnerText;
-        }
-      }
-      else
-      {
-        return "";
-      }
-    }
+			if (nameNode != null)
+			{
+				if (nameNode.NodeType == XmlNodeType.Attribute)
+				{
+					return nameNode.Value != null ? nameNode.Value : "";
+				}
+				else
+				{
+					return nameNode.InnerText;
+				}
+			}
+			else
+			{
+				return "";
+			}
+		}
 		internal string GetXmlNodeString(string path)
 		{
-            return GetXmlNodeString(TopNode, path);
+			return GetXmlNodeString(TopNode, path);
 		}
-        internal static Uri GetNewUri(Packaging.ZipPackage package, string sUri)
-        {
-            var id = 1;
-            return GetNewUri(package, sUri, ref id);
-        }
-        internal static Uri GetNewUri(Packaging.ZipPackage package, string sUri, ref int id)
-        {
-            Uri uri = new Uri(string.Format(sUri, id), UriKind.Relative);
-            while (package.PartExists(uri))
-            {
-                uri = new Uri(string.Format(sUri, ++id), UriKind.Relative);
-            }
-            return uri;
-        }
-        /// <summary>
-        /// Insert the new node before any of the nodes in the comma separeted list
-        /// </summary>
-        /// <param name="parentNode">Parent node</param>
-        /// <param name="beforeNodes">comma separated list containing nodes to insert after. Left to right order</param>
-        /// <param name="newNode">The new node to be inserterd</param>
-        internal void InserAfter(XmlNode parentNode, string beforeNodes, XmlNode newNode)
+		internal static Uri GetNewUri(Packaging.ZipPackage package, string sUri)
+		{
+			var id = 1;
+			return GetNewUri(package, sUri, ref id);
+		}
+		internal static Uri GetNewUri(Packaging.ZipPackage package, string sUri, ref int id)
+		{
+			Uri uri = new Uri(string.Format(sUri, id), UriKind.Relative);
+			while (package.PartExists(uri))
+			{
+				uri = new Uri(string.Format(sUri, ++id), UriKind.Relative);
+			}
+			return uri;
+		}
+		/// <summary>
+		/// Insert the new node before any of the nodes in the comma separeted list
+		/// </summary>
+		/// <param name="parentNode">Parent node</param>
+		/// <param name="beforeNodes">comma separated list containing nodes to insert after. Left to right order</param>
+		/// <param name="newNode">The new node to be inserterd</param>
+		internal void InserAfter(XmlNode parentNode, string beforeNodes, XmlNode newNode)
 		{
 			string[] nodePaths = beforeNodes.Split(',');
 
@@ -814,34 +813,34 @@ namespace OfficeOpenXml
 			}
 			parentNode.InsertAfter(newNode, null);
 		}
-        internal static void LoadXmlSafe(XmlDocument xmlDoc, Stream stream)
-        {
-            XmlReaderSettings settings = new XmlReaderSettings();
-            //Disable entity parsing (to aviod xmlbombs, External Entity Attacks etc).
-            settings.DtdProcessing = DtdProcessing.Prohibit;
-            XmlReader reader = XmlReader.Create(stream, settings);
-            xmlDoc.Load(reader);
-        }
-        internal static void LoadXmlSafe(XmlDocument xmlDoc, string xml, Encoding encoding)
-        {
-            var stream = new MemoryStream(encoding.GetBytes(xml));
-            LoadXmlSafe(xmlDoc, stream);
-        }
-        /// <summary>
-        /// Sets an attribute on an existing node.
-        /// </summary>
-        /// <param name="topNode">The node where the attribute should be set.</param>
-        /// <param name="attribute">The string name of the attribute to be set.</param>
-        /// <param name="value">The new attribute value.</param>
-        internal static void SetAttribute(XmlNode topNode, string attribute, string value)
-        {
-            var node = topNode.Attributes[attribute];
-            if (node == null)
-            {
-                node = topNode.OwnerDocument.CreateAttribute(attribute);
-                topNode.Attributes.Append(node);
-            }
-            node.Value = value;
-        }
-    }
+		internal static void LoadXmlSafe(XmlDocument xmlDoc, Stream stream)
+		{
+			XmlReaderSettings settings = new XmlReaderSettings();
+			//Disable entity parsing (to aviod xmlbombs, External Entity Attacks etc).
+			settings.DtdProcessing = DtdProcessing.Prohibit;
+			XmlReader reader = XmlReader.Create(stream, settings);
+			xmlDoc.Load(reader);
+		}
+		internal static void LoadXmlSafe(XmlDocument xmlDoc, string xml, Encoding encoding)
+		{
+			var stream = new MemoryStream(encoding.GetBytes(xml));
+			LoadXmlSafe(xmlDoc, stream);
+		}
+		/// <summary>
+		/// Sets an attribute on an existing node.
+		/// </summary>
+		/// <param name="topNode">The node where the attribute should be set.</param>
+		/// <param name="attribute">The string name of the attribute to be set.</param>
+		/// <param name="value">The new attribute value.</param>
+		internal static void SetAttribute(XmlNode topNode, string attribute, string value)
+		{
+			var node = topNode.Attributes[attribute];
+			if (node == null)
+			{
+				node = topNode.OwnerDocument.CreateAttribute(attribute);
+				topNode.Attributes.Append(node);
+			}
+			node.Value = value;
+		}
+	}
 }

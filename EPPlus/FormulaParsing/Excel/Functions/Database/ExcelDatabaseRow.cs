@@ -22,39 +22,35 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-04-19
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OfficeOpenXml.FormulaParsing.Excel.Operators;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Database
 {
-    public class ExcelDatabaseRow
-    {
-        private Dictionary<int, string> _fieldIndexes = new Dictionary<int, string>();
-        private readonly Dictionary<string, object> _items = new Dictionary<string, object>();
-        private int _colIndex = 1;
-        public object this[string field]
-        {
-            get { return _items[field]; }
+	public class ExcelDatabaseRow
+	{
+		private Dictionary<int, string> _fieldIndexes = new Dictionary<int, string>();
+		private readonly Dictionary<string, object> _items = new Dictionary<string, object>();
+		private int _colIndex = 1;
+		public object this[string field]
+		{
+			get { return _items[field]; }
 
-            set
-            {
-                _items[field] = value;
-                _fieldIndexes[_colIndex++] = field;
-            }
-        }
+			set
+			{
+				_items[field] = value;
+				_fieldIndexes[_colIndex++] = field;
+			}
+		}
 
-        public object this[int index]
-        {
-            get
-            {
-                var field = _fieldIndexes[index];
-                return _items[field];
-            }
-        }
-        
-        
-    }
+		public object this[int index]
+		{
+			get
+			{
+				var field = _fieldIndexes[index];
+				return _items[field];
+			}
+		}
+
+
+	}
 }

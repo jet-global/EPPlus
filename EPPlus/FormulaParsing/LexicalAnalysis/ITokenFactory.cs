@@ -28,17 +28,14 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 {
-    public interface ITokenFactory
-    {
-        Token Create(IEnumerable<Token> tokens, string token);
-        Token Create(IEnumerable<Token> tokens, string token, string worksheet);
-        Token Create(string token, TokenType explicitTokenType);
-    }
+	public interface ITokenFactory
+	{
+		Token Create(IEnumerable<Token> tokens, string token);
+		Token Create(IEnumerable<Token> tokens, string token, string worksheet);
+		Token Create(string token, TokenType explicitTokenType);
+	}
 }

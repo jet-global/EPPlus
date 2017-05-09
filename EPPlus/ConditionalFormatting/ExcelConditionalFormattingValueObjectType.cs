@@ -29,9 +29,6 @@
  * Eyal Seagull    Conditional Formatting Adaption    2012-04-03
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace OfficeOpenXml.ConditionalFormatting
@@ -45,7 +42,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// Get the sequencial order of a cfvo/color by its position.
 		/// </summary>
 		/// <param name="position"></param>
-        /// <param name="ruleType"></param>
+		/// <param name="ruleType"></param>
 		/// <returns>1, 2 or 3</returns>
 		internal static int GetOrderByPosition(
 			eExcelConditionalFormattingValueObjectPosition position,
@@ -87,24 +84,24 @@ namespace OfficeOpenXml.ConditionalFormatting
 				case ExcelConditionalFormattingConstants.CfvoType.Min:
 					return eExcelConditionalFormattingValueObjectType.Min;
 
-        case ExcelConditionalFormattingConstants.CfvoType.Max:
+				case ExcelConditionalFormattingConstants.CfvoType.Max:
 					return eExcelConditionalFormattingValueObjectType.Max;
 
-        case ExcelConditionalFormattingConstants.CfvoType.Num:
+				case ExcelConditionalFormattingConstants.CfvoType.Num:
 					return eExcelConditionalFormattingValueObjectType.Num;
 
-        case ExcelConditionalFormattingConstants.CfvoType.Formula:
+				case ExcelConditionalFormattingConstants.CfvoType.Formula:
 					return eExcelConditionalFormattingValueObjectType.Formula;
 
-        case ExcelConditionalFormattingConstants.CfvoType.Percent:
+				case ExcelConditionalFormattingConstants.CfvoType.Percent:
 					return eExcelConditionalFormattingValueObjectType.Percent;
 
-        case ExcelConditionalFormattingConstants.CfvoType.Percentile:
+				case ExcelConditionalFormattingConstants.CfvoType.Percentile:
 					return eExcelConditionalFormattingValueObjectType.Percentile;
 			}
 
 			throw new Exception(
-        ExcelConditionalFormattingConstants.Errors.UnexistentCfvoTypeAttribute);
+		  ExcelConditionalFormattingConstants.Errors.UnexistentCfvoTypeAttribute);
 		}
 
 		/// <summary>
@@ -112,7 +109,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// </summary>
 		/// <param name="position"></param>
 		///<param name="ruleType"></param>
-        /// <param name="topNode"></param>
+		/// <param name="topNode"></param>
 		/// <param name="nameSpaceManager"></param>
 		/// <returns></returns>
 		public static XmlNode GetCfvoNodeByPosition(
@@ -125,16 +122,16 @@ namespace OfficeOpenXml.ConditionalFormatting
 			var node = topNode.SelectSingleNode(
 				string.Format(
 					"{0}[position()={1}]",
-				// {0}
+					// {0}
 					ExcelConditionalFormattingConstants.Paths.Cfvo,
-				// {1}
+					// {1}
 					ExcelConditionalFormattingValueObjectType.GetOrderByPosition(position, ruleType)),
 				nameSpaceManager);
 
 			if (node == null)
 			{
 				throw new Exception(
-          ExcelConditionalFormattingConstants.Errors.MissingCfvoNode);
+			 ExcelConditionalFormattingConstants.Errors.MissingCfvoNode);
 			}
 
 			return node;
@@ -154,19 +151,19 @@ namespace OfficeOpenXml.ConditionalFormatting
 					return ExcelConditionalFormattingConstants.CfvoType.Min;
 
 				case eExcelConditionalFormattingValueObjectType.Max:
-          return ExcelConditionalFormattingConstants.CfvoType.Max;
+					return ExcelConditionalFormattingConstants.CfvoType.Max;
 
 				case eExcelConditionalFormattingValueObjectType.Num:
-          return ExcelConditionalFormattingConstants.CfvoType.Num;
+					return ExcelConditionalFormattingConstants.CfvoType.Num;
 
 				case eExcelConditionalFormattingValueObjectType.Formula:
-          return ExcelConditionalFormattingConstants.CfvoType.Formula;
+					return ExcelConditionalFormattingConstants.CfvoType.Formula;
 
 				case eExcelConditionalFormattingValueObjectType.Percent:
-          return ExcelConditionalFormattingConstants.CfvoType.Percent;
+					return ExcelConditionalFormattingConstants.CfvoType.Percent;
 
 				case eExcelConditionalFormattingValueObjectType.Percentile:
-          return ExcelConditionalFormattingConstants.CfvoType.Percentile;
+					return ExcelConditionalFormattingConstants.CfvoType.Percentile;
 			}
 
 			return string.Empty;
@@ -188,13 +185,13 @@ namespace OfficeOpenXml.ConditionalFormatting
 					return ExcelConditionalFormattingConstants.Paths.ColorScale;
 
 				case eExcelConditionalFormattingRuleType.ThreeIconSet:
-                case eExcelConditionalFormattingRuleType.FourIconSet:
-                case eExcelConditionalFormattingRuleType.FiveIconSet:
-					        return ExcelConditionalFormattingConstants.Paths.IconSet;
+				case eExcelConditionalFormattingRuleType.FourIconSet:
+				case eExcelConditionalFormattingRuleType.FiveIconSet:
+					return ExcelConditionalFormattingConstants.Paths.IconSet;
 
-                case eExcelConditionalFormattingRuleType.DataBar:
-                  return ExcelConditionalFormattingConstants.Paths.DataBar;
-              }
+				case eExcelConditionalFormattingRuleType.DataBar:
+					return ExcelConditionalFormattingConstants.Paths.DataBar;
+			}
 
 			return string.Empty;
 		}
@@ -207,7 +204,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		public static string GetNodePathByNodeType(
 			eExcelConditionalFormattingValueObjectNodeType nodeType)
 		{
-			switch(nodeType)
+			switch (nodeType)
 			{
 				case eExcelConditionalFormattingValueObjectNodeType.Cfvo:
 					return ExcelConditionalFormattingConstants.Paths.Cfvo;

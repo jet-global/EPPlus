@@ -22,45 +22,45 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using OfficeOpenXml.FormulaParsing.Exceptions;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OfficeOpenXml.FormulaParsing.Exceptions;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
-    public class Index : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            if (this.ValidateArguments(arguments, 2) == false)
-            	return new CompileResult(eErrorType.Value);
-            var arg1 = arguments.ElementAt(0);
-            var arg2 = arguments.ElementAt(1);
-            var args = arg1.Value as IEnumerable<FunctionArgument>;
-            var crf = new CompileResultFactory();
-            if (args != null)
-            {
-                var index = this.ArgToInt(arguments, 1);
-                if (index > args.Count())
-                    throw new ExcelErrorValueException(eErrorType.Ref);
-                var candidate = args.ElementAt(index - 1);
-                return crf.Create(candidate.Value);
-            }
-            if (arg2 != null && arg2.Value is ExcelErrorValue && arg2.Value.ToString() == ExcelErrorValue.Values.NA)
-                return crf.Create(arg2.Value);
-            if (arg1.IsExcelRange)
-            {
-                var row = this.ArgToInt(arguments, 1);                 
-                var column = arguments.Count() > 2 ? this.ArgToInt(arguments, 2) : 1;
-                var rangeInfo = arg1.ValueAsRangeInfo;
-                if (row > rangeInfo.Address._toRow - rangeInfo.Address._fromRow + 1 || column > rangeInfo.Address._toCol - rangeInfo.Address._fromCol + 1)
+	public class Index : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (this.ValidateArguments(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
+			var arg1 = arguments.ElementAt(0);
+			var arg2 = arguments.ElementAt(1);
+			var args = arg1.Value as IEnumerable<FunctionArgument>;
+			var crf = new CompileResultFactory();
+			if (args != null)
+			{
+				var index = this.ArgToInt(arguments, 1);
+				if (index > args.Count())
+					throw new ExcelErrorValueException(eErrorType.Ref);
+				var candidate = args.ElementAt(index - 1);
+				return crf.Create(candidate.Value);
+			}
+			if (arg2 != null && arg2.Value is ExcelErrorValue && arg2.Value.ToString() == ExcelErrorValue.Values.NA)
+				return crf.Create(arg2.Value);
+			if (arg1.IsExcelRange)
+			{
+				var row = this.ArgToInt(arguments, 1);
+				var column = arguments.Count() > 2 ? this.ArgToInt(arguments, 2) : 1;
+				var rangeInfo = arg1.ValueAsRangeInfo;
+				if (row > rangeInfo.Address._toRow - rangeInfo.Address._fromRow + 1 || column > rangeInfo.Address._toCol - rangeInfo.Address._fromCol + 1)
 					return new CompileResult(eErrorType.Value);
-                var candidate = rangeInfo.GetOffset(row-1, column-1);
-                return crf.Create(candidate);
-            }
-            throw new NotImplementedException();
-        }
-    }
+				var candidate = rangeInfo.GetOffset(row - 1, column - 1);
+				return crf.Create(candidate);
+			}
+			throw new NotImplementedException();
+		}
+	}
 }

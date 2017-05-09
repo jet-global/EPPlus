@@ -1,35 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace OfficeOpenXml.FormulaParsing
+﻿namespace OfficeOpenXml.FormulaParsing
 {
-    public class NameValueProvider : INameValueProvider
-    {
-        private NameValueProvider()
-        {
+	public class NameValueProvider : INameValueProvider
+	{
+		private NameValueProvider()
+		{
 
-        }
+		}
 
-        public static INameValueProvider Empty
-        {
-            get { return new NameValueProvider(); }
-        }
+		public static INameValueProvider Empty
+		{
+			get { return new NameValueProvider(); }
+		}
 
-        public bool IsNamedValue(string key, string worksheet)
-        {
-            return false;
-        }
+		public bool IsNamedValue(string key, string worksheet)
+		{
+			return false;
+		}
 
-        public object GetNamedValue(string key)
-        {
-            return null;
-        }
+		public object GetNamedValue(string key)
+		{
+			return null;
+		}
 
-        public void Reload()
-        {
-            
-        }
-    }
+		public void Reload()
+		{
+
+		}
+	}
 }

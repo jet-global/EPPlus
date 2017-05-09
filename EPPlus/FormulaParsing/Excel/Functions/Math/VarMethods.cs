@@ -22,37 +22,35 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-04-19
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.Exceptions;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-    internal static class VarMethods
-    {
-        private static double Divide(double left, double right)
-        {
-            if (System.Math.Abs(right - 0d) < double.Epsilon)
-            {
-                throw new ExcelErrorValueException(eErrorType.Div0);
-            }
-            return left / right;
-        }
+	internal static class VarMethods
+	{
+		private static double Divide(double left, double right)
+		{
+			if (System.Math.Abs(right - 0d) < double.Epsilon)
+			{
+				throw new ExcelErrorValueException(eErrorType.Div0);
+			}
+			return left / right;
+		}
 
-        public static double Var(IEnumerable<double> args)
-        {
-            double avg = args.Average();
-            double d = args.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
-            return Divide(d, (args.Count() - 1));
-        }
+		public static double Var(IEnumerable<double> args)
+		{
+			double avg = args.Average();
+			double d = args.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
+			return Divide(d, (args.Count() - 1));
+		}
 
-        public static double VarP(IEnumerable<double> args)
-        {
-            double avg = args.Average();
-            double d = args.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
-            return Divide(d, args.Count()); 
-        }
-    }
+		public static double VarP(IEnumerable<double> args)
+		{
+			double avg = args.Average();
+			double d = args.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
+			return Divide(d, args.Count());
+		}
+	}
 }

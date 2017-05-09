@@ -29,18 +29,14 @@
  * Mats Alm   		                Added       		        2011-01-08
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.DataValidation.Formulas.Contracts;
 
 namespace OfficeOpenXml.DataValidation.Contracts
 {
-    /// <summary>
-    /// Data validation interface for custom validation.
-    /// </summary>
-    public interface IExcelDataValidationCustom : IExcelDataValidationWithFormula<IExcelDataValidationFormula>, IExcelDataValidationWithOperator
-    {
-    }
+	/// <summary>
+	/// Data validation interface for custom validation.
+	/// </summary>
+	public interface IExcelDataValidationCustom : IExcelDataValidationWithFormula<IExcelDataValidationFormula>, IExcelDataValidationWithOperator
+	{
+	}
 }

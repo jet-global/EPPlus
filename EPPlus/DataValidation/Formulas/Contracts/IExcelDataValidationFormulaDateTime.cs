@@ -30,16 +30,13 @@
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.DataValidation.Formulas.Contracts
 {
-    /// <summary>
-    /// Validation formula interface for <see cref="DateTime"/>
-    /// </summary>
-    public interface IExcelDataValidationFormulaDateTime : IExcelDataValidationFormulaWithValue<DateTime?>
-    {
-    }
+	/// <summary>
+	/// Validation formula interface for <see cref="DateTime"/>
+	/// </summary>
+	public interface IExcelDataValidationFormulaDateTime : IExcelDataValidationFormulaWithValue<DateTime?>
+	{
+	}
 }

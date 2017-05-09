@@ -29,22 +29,19 @@
  * Jan Källman		Added		25-Oct-2012
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.Packaging
 {
-    public class ZipPackageRelationship
-    {
-        public Uri TargetUri { get; internal set; }
+	public class ZipPackageRelationship
+	{
+		public Uri TargetUri { get; internal set; }
 
-        public Uri SourceUri { get; internal set; }
+		public Uri SourceUri { get; internal set; }
 
-        public string RelationshipType { get; internal set; }
+		public string RelationshipType { get; internal set; }
 
-        public TargetMode TargetMode { get; internal set; }
+		public TargetMode TargetMode { get; internal set; }
 
-        public string Id { get; internal set; }
-    }
+		public string Id { get; internal set; }
+	}
 }

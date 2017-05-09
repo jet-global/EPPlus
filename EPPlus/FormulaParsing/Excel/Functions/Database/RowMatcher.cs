@@ -22,69 +22,65 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-04-06
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.FormulaParsing.Utilities;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Database
 {
-    public class RowMatcher
-    {
-        private readonly WildCardValueMatcher _wildCardValueMatcher;
-        private readonly ExpressionEvaluator _expressionEvaluator;
+	public class RowMatcher
+	{
+		private readonly WildCardValueMatcher _wildCardValueMatcher;
+		private readonly ExpressionEvaluator _expressionEvaluator;
 
-        public RowMatcher()
-            : this(new WildCardValueMatcher(), new ExpressionEvaluator())
-        {
-            
-        }
+		public RowMatcher()
+			 : this(new WildCardValueMatcher(), new ExpressionEvaluator())
+		{
 
-        public RowMatcher(WildCardValueMatcher wildCardValueMatcher, ExpressionEvaluator expressionEvaluator)
-        {
-            _wildCardValueMatcher = wildCardValueMatcher;
-            _expressionEvaluator = expressionEvaluator;
-        }
+		}
 
-        public bool IsMatch(ExcelDatabaseRow row, ExcelDatabaseCriteria criteria)
-        {
-            var retVal = true;
-            foreach (var c in criteria.Items)
-            {
-                var candidate = c.Key.FieldIndex.HasValue ? row[c.Key.FieldIndex.Value] : row[c.Key.FieldName];
-                var crit = c.Value;
-                if (candidate.IsNumeric() && crit.IsNumeric())
-                {
-                    if(System.Math.Abs(ConvertUtil.GetValueDouble(candidate) - ConvertUtil.GetValueDouble(crit)) > double.Epsilon) return false;
-                }
-                else
-                {
-                    var criteriaString = crit.ToString();
-                    if (!Evaluate(candidate, criteriaString))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return retVal;
-        }
+		public RowMatcher(WildCardValueMatcher wildCardValueMatcher, ExpressionEvaluator expressionEvaluator)
+		{
+			_wildCardValueMatcher = wildCardValueMatcher;
+			_expressionEvaluator = expressionEvaluator;
+		}
 
-        private bool Evaluate(object obj, string expression)
-        {
-            if (obj == null) return false;
-            double? candidate = default(double?);
-            if (ConvertUtil.IsNumeric(obj))
-            {
-                candidate = ConvertUtil.GetValueDouble(obj);
-            }
-            if (candidate.HasValue)
-            {
-                return _expressionEvaluator.Evaluate(candidate.Value, expression);
-            }
-            return _wildCardValueMatcher.IsMatch(expression, obj.ToString()) == 0;
-        }
-    }
+		public bool IsMatch(ExcelDatabaseRow row, ExcelDatabaseCriteria criteria)
+		{
+			var retVal = true;
+			foreach (var c in criteria.Items)
+			{
+				var candidate = c.Key.FieldIndex.HasValue ? row[c.Key.FieldIndex.Value] : row[c.Key.FieldName];
+				var crit = c.Value;
+				if (candidate.IsNumeric() && crit.IsNumeric())
+				{
+					if (System.Math.Abs(ConvertUtil.GetValueDouble(candidate) - ConvertUtil.GetValueDouble(crit)) > double.Epsilon) return false;
+				}
+				else
+				{
+					var criteriaString = crit.ToString();
+					if (!Evaluate(candidate, criteriaString))
+					{
+						return false;
+					}
+				}
+			}
+			return retVal;
+		}
+
+		private bool Evaluate(object obj, string expression)
+		{
+			if (obj == null) return false;
+			double? candidate = default(double?);
+			if (ConvertUtil.IsNumeric(obj))
+			{
+				candidate = ConvertUtil.GetValueDouble(obj);
+			}
+			if (candidate.HasValue)
+			{
+				return _expressionEvaluator.Evaluate(candidate.Value, expression);
+			}
+			return _wildCardValueMatcher.IsMatch(expression, obj.ToString()) == 0;
+		}
+	}
 }

@@ -53,7 +53,8 @@ namespace OfficeOpenXml
 		/// <param name="positionID">The index of the sheet in the Worksheets collection.</param>
 		/// <param name="hidden">The <see cref="eWorkSheetHidden"/> state of the worksheet.</param>
 		public ExcelChartsheet(XmlNamespaceManager ns, ExcelPackage pck, string relID, Uri uriWorksheet, string sheetName, int sheetID, int positionID, eWorkSheetHidden hidden) :
-			base(ns, pck, relID, uriWorksheet, sheetName, sheetID, positionID, hidden) { }
+			base(ns, pck, relID, uriWorksheet, sheetName, sheetID, positionID, hidden)
+		{ }
 		#endregion
 	}
 }

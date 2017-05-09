@@ -28,30 +28,26 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 {
-    public enum Operators
-    {
-        Undefined,
-        Concat,
-        Plus,
-        Minus,
-        Multiply,
-        Divide,
-        Modulus,
-        Percent,
-        Equals,
-        GreaterThan,
-        GreaterThanOrEqual,
-        LessThan,
-        LessThanOrEqual,
-        NotEqualTo,
-        IntegerDivision,
-        Exponentiation
-    }
+	public enum Operators
+	{
+		Undefined,
+		Concat,
+		Plus,
+		Minus,
+		Multiply,
+		Divide,
+		Modulus,
+		Percent,
+		Equals,
+		GreaterThan,
+		GreaterThanOrEqual,
+		LessThan,
+		LessThanOrEqual,
+		NotEqualTo,
+		IntegerDivision,
+		Exponentiation
+	}
 }

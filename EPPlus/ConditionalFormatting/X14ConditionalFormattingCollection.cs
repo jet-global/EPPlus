@@ -24,7 +24,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		{
 			string x14CFpath = @"d:worksheet/d:extLst/d:ext/x14:conditionalFormattings/x14:conditionalFormatting";
 			var nodes = worksheet.WorksheetXml.SelectNodes(x14CFpath, worksheet.NameSpaceManager);
-			foreach(XmlNode node in nodes)
+			foreach (XmlNode node in nodes)
 			{
 				var x14Rule = new X14CondtionalFormattingRule(node, worksheet.NameSpaceManager);
 				this.X14Rules.Add(x14Rule);

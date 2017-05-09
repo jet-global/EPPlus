@@ -25,48 +25,48 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
-    public class Address : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-			if(ValidateArguments(arguments, 2) == false)
+	public class Address : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-            var row = ArgToInt(arguments, 0);
-            var col = ArgToInt(arguments, 1);
-            if(row < 0 && col < 0)
+			var row = ArgToInt(arguments, 0);
+			var col = ArgToInt(arguments, 1);
+			if (row < 0 && col < 0)
 				return new CompileResult(eErrorType.Value);
-            var referenceType = ExcelReferenceType.AbsoluteRowAndColumn;
-            var worksheetSpec = string.Empty;
-            if (arguments.Count() > 2)
-            {
-                var arg3 = ArgToInt(arguments, 2);
-                if(arg3 < 1 || arg3 > 4)
+			var referenceType = ExcelReferenceType.AbsoluteRowAndColumn;
+			var worksheetSpec = string.Empty;
+			if (arguments.Count() > 2)
+			{
+				var arg3 = ArgToInt(arguments, 2);
+				if (arg3 < 1 || arg3 > 4)
 					return new CompileResult(eErrorType.Value);
-                referenceType = (ExcelReferenceType)ArgToInt(arguments, 2);
-            }
-            if (arguments.Count() > 3)
-            {
-                var fourthArg = arguments.ElementAt(3).Value;
-                if (fourthArg is bool && !(bool)fourthArg)
-                {
-                    throw new InvalidOperationException("Excelformulaparser does not support the R1C1 format!");
-                }
-            }
-            if (arguments.Count() > 4)
-            {
-                var fifthArg = arguments.ElementAt(4).Value;
-                if (fifthArg is string && !string.IsNullOrEmpty(fifthArg.ToString()))
-                {
-                    worksheetSpec = fifthArg + "!";
-                }
-            }
-            var translator = new IndexToAddressTranslator(context.ExcelDataProvider, referenceType);
-            return CreateResult(worksheetSpec + translator.ToAddress(col, row), DataType.ExcelAddress);
-        }
-    }
+				referenceType = (ExcelReferenceType)ArgToInt(arguments, 2);
+			}
+			if (arguments.Count() > 3)
+			{
+				var fourthArg = arguments.ElementAt(3).Value;
+				if (fourthArg is bool && !(bool)fourthArg)
+				{
+					throw new InvalidOperationException("Excelformulaparser does not support the R1C1 format!");
+				}
+			}
+			if (arguments.Count() > 4)
+			{
+				var fifthArg = arguments.ElementAt(4).Value;
+				if (fifthArg is string && !string.IsNullOrEmpty(fifthArg.ToString()))
+				{
+					worksheetSpec = fifthArg + "!";
+				}
+			}
+			var translator = new IndexToAddressTranslator(context.ExcelDataProvider, referenceType);
+			return CreateResult(worksheetSpec + translator.ToAddress(col, row), DataType.ExcelAddress);
+		}
+	}
 }

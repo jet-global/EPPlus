@@ -29,44 +29,40 @@
  * Mats Alm   		                Added       		        2011-01-08
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OfficeOpenXml.DataValidation.Formulas.Contracts;
 using System.Xml;
+using OfficeOpenXml.DataValidation.Formulas.Contracts;
 
 namespace OfficeOpenXml.DataValidation.Formulas
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class ExcelDataValidationFormulaCustom : ExcelDataValidationFormula, IExcelDataValidationFormula
-    {
-        public ExcelDataValidationFormulaCustom(XmlNamespaceManager namespaceManager, XmlNode topNode, string formulaPath)
-            : base(namespaceManager, topNode, formulaPath)
-        {
-            var value = GetXmlNodeString(formulaPath);
-            if (!string.IsNullOrEmpty(value))
-            {
-                ExcelFormula = value;
-            }
-            State = FormulaState.Formula;
-        }
+	/// <summary>
+	/// 
+	/// </summary>
+	internal class ExcelDataValidationFormulaCustom : ExcelDataValidationFormula, IExcelDataValidationFormula
+	{
+		public ExcelDataValidationFormulaCustom(XmlNamespaceManager namespaceManager, XmlNode topNode, string formulaPath)
+			 : base(namespaceManager, topNode, formulaPath)
+		{
+			var value = GetXmlNodeString(formulaPath);
+			if (!string.IsNullOrEmpty(value))
+			{
+				ExcelFormula = value;
+			}
+			State = FormulaState.Formula;
+		}
 
-        internal override string GetXmlValue()
-        {
-            return ExcelFormula;
-        }
+		internal override string GetXmlValue()
+		{
+			return ExcelFormula;
+		}
 
-        protected override string GetValueAsString()
-        {
-            return ExcelFormula;
-        }
+		protected override string GetValueAsString()
+		{
+			return ExcelFormula;
+		}
 
-        internal override void ResetValue()
-        {
-            ExcelFormula = null;
-        }
-    }
+		internal override void ResetValue()
+		{
+			ExcelFormula = null;
+		}
+	}
 }

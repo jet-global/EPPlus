@@ -30,130 +30,128 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 using OfficeOpenXml.Table.PivotTable;
 
 namespace OfficeOpenXml.Drawing.Chart
 {
-    /// <summary>
-    /// A Surface chart
-    /// </summary>
-    public sealed class ExcelSurfaceChart : ExcelChart
-    {
-        #region "Constructors"
-        internal ExcelSurfaceChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
-            base(drawings, node, type, topChart, PivotTableSource)
-        {
-            Init();
-        }
-        internal ExcelSurfaceChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, Packaging.ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
-           base(drawings, node, uriChart, part, chartXml, chartNode)
-        {
-            Init();
-        }
+	/// <summary>
+	/// A Surface chart
+	/// </summary>
+	public sealed class ExcelSurfaceChart : ExcelChart
+	{
+		#region "Constructors"
+		internal ExcelSurfaceChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
+			 base(drawings, node, type, topChart, PivotTableSource)
+		{
+			Init();
+		}
+		internal ExcelSurfaceChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, Packaging.ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
+			base(drawings, node, uriChart, part, chartXml, chartNode)
+		{
+			Init();
+		}
 
-        internal ExcelSurfaceChart(ExcelChart topChart, XmlNode chartNode) : 
-            base(topChart, chartNode)
-        {
-            Init();
-        }
-        private void Init()
-        {
- 	        _floor=new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:floor", NameSpaceManager));
-            _backWall = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:sideWall", NameSpaceManager));
-            _sideWall = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:backWall", NameSpaceManager));
-            SetTypeProperties();
-        }
-        #endregion
+		internal ExcelSurfaceChart(ExcelChart topChart, XmlNode chartNode) :
+			 base(topChart, chartNode)
+		{
+			Init();
+		}
+		private void Init()
+		{
+			_floor = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:floor", NameSpaceManager));
+			_backWall = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:sideWall", NameSpaceManager));
+			_sideWall = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:backWall", NameSpaceManager));
+			SetTypeProperties();
+		}
+		#endregion
 
 
-        ExcelChartSurface _floor;
-        public ExcelChartSurface Floor
-        {
-            get
-            {
-                return _floor;
-            }
-        }
-        ExcelChartSurface _sideWall;
-        public ExcelChartSurface SideWall
-        {
-            get
-            {
-                return _sideWall;
-            }
-        }
-        ExcelChartSurface _backWall;
-        public ExcelChartSurface BackWall
-        {
-            get
-            {
-                return _backWall;
-            }
-        }
-        const string WIREFRAME_PATH = "c:wireframe/@val";
-        public bool Wireframe
-        {
-            get
-            {
-                return _chartXmlHelper.GetXmlNodeBool(WIREFRAME_PATH);
-            }
-            set
-            {
-                _chartXmlHelper.SetXmlNodeBool(WIREFRAME_PATH, value);
-            }
-        }        
-        internal void SetTypeProperties()
-        {
-               if(ChartType==eChartType.SurfaceWireframe || ChartType==eChartType.SurfaceTopViewWireframe)
-               {
-                   Wireframe=true;
-               }
-               else 
-               {
-                   Wireframe=false;
-               }
+		ExcelChartSurface _floor;
+		public ExcelChartSurface Floor
+		{
+			get
+			{
+				return _floor;
+			}
+		}
+		ExcelChartSurface _sideWall;
+		public ExcelChartSurface SideWall
+		{
+			get
+			{
+				return _sideWall;
+			}
+		}
+		ExcelChartSurface _backWall;
+		public ExcelChartSurface BackWall
+		{
+			get
+			{
+				return _backWall;
+			}
+		}
+		const string WIREFRAME_PATH = "c:wireframe/@val";
+		public bool Wireframe
+		{
+			get
+			{
+				return _chartXmlHelper.GetXmlNodeBool(WIREFRAME_PATH);
+			}
+			set
+			{
+				_chartXmlHelper.SetXmlNodeBool(WIREFRAME_PATH, value);
+			}
+		}
+		internal void SetTypeProperties()
+		{
+			if (ChartType == eChartType.SurfaceWireframe || ChartType == eChartType.SurfaceTopViewWireframe)
+			{
+				Wireframe = true;
+			}
+			else
+			{
+				Wireframe = false;
+			}
 
-                if(ChartType==eChartType.SurfaceTopView || ChartType==eChartType.SurfaceTopViewWireframe)
-                {
-                   View3D.RotY = 0;
-                   View3D.RotX = 90;
-                }
-                else
-                {
-                   View3D.RotY = 20;
-                   View3D.RotX = 15;
-                }
-                View3D.RightAngleAxes = false;
-                View3D.Perspective = 0;
-                Axis[1].CrossBetween = eCrossBetween.MidCat;
-        }
-        internal override eChartType GetChartType(string name)
-        {
-            if(Wireframe)
-            {
-                if (name == "surfaceChart")
-                {
-                    return eChartType.SurfaceTopViewWireframe;
-                }
-                else
-                {
-                    return eChartType.SurfaceWireframe;
-                }
-            }
-            else
-            {
-                if (name == "surfaceChart")
-                {
-                    return eChartType.SurfaceTopView;
-                }
-                else
-                {
-                    return eChartType.Surface;
-                }
-            }
-        }
-    }
+			if (ChartType == eChartType.SurfaceTopView || ChartType == eChartType.SurfaceTopViewWireframe)
+			{
+				View3D.RotY = 0;
+				View3D.RotX = 90;
+			}
+			else
+			{
+				View3D.RotY = 20;
+				View3D.RotX = 15;
+			}
+			View3D.RightAngleAxes = false;
+			View3D.Perspective = 0;
+			Axis[1].CrossBetween = eCrossBetween.MidCat;
+		}
+		internal override eChartType GetChartType(string name)
+		{
+			if (Wireframe)
+			{
+				if (name == "surfaceChart")
+				{
+					return eChartType.SurfaceTopViewWireframe;
+				}
+				else
+				{
+					return eChartType.SurfaceWireframe;
+				}
+			}
+			else
+			{
+				if (name == "surfaceChart")
+				{
+					return eChartType.SurfaceTopView;
+				}
+				else
+				{
+					return eChartType.Surface;
+				}
+			}
+		}
+	}
 }

@@ -8,9 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EPPlusWebSample {
-    
-    
-    public partial class GetSample {
-    }
+namespace EPPlusWebSample
+{
+
+
+	public partial class GetSample
+	{
+	}
 }

@@ -58,7 +58,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// Instantiate a new <see cref="ExcelSlicers"/> object representing the slicers on a particular <paramref name="worksheet"/>.
 		/// </summary>
 		/// <param name="worksheet">The <see cref="ExcelWorksheet"/> whose slicers are being represented.</param>
-		internal ExcelSlicers(ExcelWorksheet worksheet): base(ExcelSlicer.SlicerDocumentNamespaceManager, null)
+		internal ExcelSlicers(ExcelWorksheet worksheet) : base(ExcelSlicer.SlicerDocumentNamespaceManager, null)
 		{
 			this.Worksheet = worksheet;
 			var slicerFiles = this.Worksheet.Part.GetRelationshipsByType(ExcelPackage.schemaSlicerRelationship);
@@ -68,7 +68,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 				var uri = new Uri(path, UriKind.Relative);
 				var possiblePart = this.Worksheet.Package.GetXmlFromUri(uri);
 				XmlNodeList slicerNodes = possiblePart.SelectNodes("default:slicers/default:slicer", this.NameSpaceManager);
-				for(int i = 0; i < slicerNodes.Count; i++)
+				for (int i = 0; i < slicerNodes.Count; i++)
 				{
 					var slicerNode = slicerNodes[i];
 					this.Slicers.Add(new ExcelSlicer(slicerNode, this.NameSpaceManager, this.Worksheet));

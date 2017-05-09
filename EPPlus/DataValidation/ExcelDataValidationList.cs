@@ -29,60 +29,56 @@
  * Mats Alm   		                Added       		        2011-01-08
  * Jan Källman		                License changed GPL-->LGPL  2011-12-27
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OfficeOpenXml.DataValidation.Formulas.Contracts;
-using OfficeOpenXml.DataValidation.Formulas;
 using System.Xml;
 using OfficeOpenXml.DataValidation.Contracts;
+using OfficeOpenXml.DataValidation.Formulas;
+using OfficeOpenXml.DataValidation.Formulas.Contracts;
 
 namespace OfficeOpenXml.DataValidation
 {
-    /// <summary>
-    /// This class represents an List data validation.
-    /// </summary>
-    public class ExcelDataValidationList : ExcelDataValidationWithFormula<IExcelDataValidationFormulaList>, IExcelDataValidationList
-    {
-       
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="worksheet"></param>
-        /// <param name="address"></param>
-        /// <param name="validationType"></param>
-        internal ExcelDataValidationList(ExcelWorksheet worksheet, string address, ExcelDataValidationType validationType)
-            : base(worksheet, address, validationType)
-        {
-            Formula = new ExcelDataValidationFormulaList(NameSpaceManager, TopNode, _formula1Path);
-        }
+	/// <summary>
+	/// This class represents an List data validation.
+	/// </summary>
+	public class ExcelDataValidationList : ExcelDataValidationWithFormula<IExcelDataValidationFormulaList>, IExcelDataValidationList
+	{
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="worksheet"></param>
-        /// <param name="address"></param>
-        /// <param name="validationType"></param>
-        /// <param name="itemElementNode"></param>
-        internal ExcelDataValidationList(ExcelWorksheet worksheet, string address, ExcelDataValidationType validationType, XmlNode itemElementNode)
-            : base(worksheet, address, validationType, itemElementNode)
-        {
-            Formula = new ExcelDataValidationFormulaList(NameSpaceManager, TopNode, _formula1Path);
-        }
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="worksheet"></param>
+		/// <param name="address"></param>
+		/// <param name="validationType"></param>
+		internal ExcelDataValidationList(ExcelWorksheet worksheet, string address, ExcelDataValidationType validationType)
+			 : base(worksheet, address, validationType)
+		{
+			Formula = new ExcelDataValidationFormulaList(NameSpaceManager, TopNode, _formula1Path);
+		}
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="worksheet"></param>
-        /// <param name="address"></param>
-        /// <param name="validationType"></param>
-        /// <param name="itemElementNode"></param>
-        /// <param name="namespaceManager">Namespace manager, for test purposes</param>
-        internal ExcelDataValidationList(ExcelWorksheet worksheet, string address, ExcelDataValidationType validationType, XmlNode itemElementNode, XmlNamespaceManager namespaceManager)
-            : base(worksheet, address, validationType, itemElementNode, namespaceManager)
-        {
-            Formula = new ExcelDataValidationFormulaList(NameSpaceManager, TopNode, _formula1Path);
-        }
-    }
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="worksheet"></param>
+		/// <param name="address"></param>
+		/// <param name="validationType"></param>
+		/// <param name="itemElementNode"></param>
+		internal ExcelDataValidationList(ExcelWorksheet worksheet, string address, ExcelDataValidationType validationType, XmlNode itemElementNode)
+			 : base(worksheet, address, validationType, itemElementNode)
+		{
+			Formula = new ExcelDataValidationFormulaList(NameSpaceManager, TopNode, _formula1Path);
+		}
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="worksheet"></param>
+		/// <param name="address"></param>
+		/// <param name="validationType"></param>
+		/// <param name="itemElementNode"></param>
+		/// <param name="namespaceManager">Namespace manager, for test purposes</param>
+		internal ExcelDataValidationList(ExcelWorksheet worksheet, string address, ExcelDataValidationType validationType, XmlNode itemElementNode, XmlNamespaceManager namespaceManager)
+			 : base(worksheet, address, validationType, itemElementNode, namespaceManager)
+		{
+			Formula = new ExcelDataValidationFormulaList(NameSpaceManager, TopNode, _formula1Path);
+		}
+	}
 }

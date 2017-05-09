@@ -22,63 +22,59 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using OfficeOpenXml.FormulaParsing.Exceptions;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-    public class Sum : HiddenValuesHandlingFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            var retVal = 0d;
-            if (arguments != null)
-            {
-                foreach (var arg in arguments)
-                {
-                    retVal += Calculate(arg, context);                    
-                }
-            }
-            return CreateResult(retVal, DataType.Decimal);
-        }
+	public class Sum : HiddenValuesHandlingFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			var retVal = 0d;
+			if (arguments != null)
+			{
+				foreach (var arg in arguments)
+				{
+					retVal += Calculate(arg, context);
+				}
+			}
+			return CreateResult(retVal, DataType.Decimal);
+		}
 
-        
-        private double Calculate(FunctionArgument arg, ParsingContext context)
-        {
-            var retVal = 0d;
-            if (ShouldIgnore(arg))
-            {
-                return retVal;
-            }
-            if (arg.Value is IEnumerable<FunctionArgument>)
-            {
-                foreach (var item in (IEnumerable<FunctionArgument>)arg.Value)
-                {
-                    retVal += Calculate(item, context);
-                }
-            }
-            else if (arg.Value is ExcelDataProvider.IRangeInfo)
-            {
-                foreach (var c in (ExcelDataProvider.IRangeInfo)arg.Value)
-                {
-                    if (ShouldIgnore(c, context) == false)
-                    {
-                        CheckForAndHandleExcelError(c);
-                        retVal += c.ValueDouble;
-                    }
-                }
-            }
-            else
-            {
-                CheckForAndHandleExcelError(arg);
-                retVal += ConvertUtil.GetValueDouble(arg.Value, true);
-            }
-            return retVal;
-        }
-    }
+
+		private double Calculate(FunctionArgument arg, ParsingContext context)
+		{
+			var retVal = 0d;
+			if (ShouldIgnore(arg))
+			{
+				return retVal;
+			}
+			if (arg.Value is IEnumerable<FunctionArgument>)
+			{
+				foreach (var item in (IEnumerable<FunctionArgument>)arg.Value)
+				{
+					retVal += Calculate(item, context);
+				}
+			}
+			else if (arg.Value is ExcelDataProvider.IRangeInfo)
+			{
+				foreach (var c in (ExcelDataProvider.IRangeInfo)arg.Value)
+				{
+					if (ShouldIgnore(c, context) == false)
+					{
+						CheckForAndHandleExcelError(c);
+						retVal += c.ValueDouble;
+					}
+				}
+			}
+			else
+			{
+				CheckForAndHandleExcelError(arg);
+				retVal += ConvertUtil.GetValueDouble(arg.Value, true);
+			}
+			return retVal;
+		}
+	}
 }

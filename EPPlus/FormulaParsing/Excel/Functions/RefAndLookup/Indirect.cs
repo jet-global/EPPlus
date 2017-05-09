@@ -22,33 +22,30 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2014-04-13
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
-    public class Indirect : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            if(ValidateArguments(arguments, 1) == false)
-            	return new CompileResult(eErrorType.Value);
-            var address = ArgToString(arguments, 0);
-            var adr = new ExcelAddress(address);
-            var ws = adr.WorkSheet;
-            if (string.IsNullOrEmpty(ws))
-            {
-                ws = context.Scopes.Current.Address.Worksheet;
-            }
-            var result = context.ExcelDataProvider.GetRange(ws, adr._fromRow, adr._fromCol, address);
-            if (result.IsEmpty)
-            {
-                return CompileResult.Empty;
-            }
-            return new CompileResult(result, DataType.Enumerable);
-        }
-    }
+	public class Indirect : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			var address = ArgToString(arguments, 0);
+			var adr = new ExcelAddress(address);
+			var ws = adr.WorkSheet;
+			if (string.IsNullOrEmpty(ws))
+			{
+				ws = context.Scopes.Current.Address.Worksheet;
+			}
+			var result = context.ExcelDataProvider.GetRange(ws, adr._fromRow, adr._fromCol, address);
+			if (result.IsEmpty)
+			{
+				return CompileResult.Empty;
+			}
+			return new CompileResult(result, DataType.Enumerable);
+		}
+	}
 }

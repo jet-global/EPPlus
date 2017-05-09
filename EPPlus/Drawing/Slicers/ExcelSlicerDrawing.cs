@@ -38,7 +38,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 	/// Represents an Excel Slicer Drawing.
 	/// Loosely corresponds to a drawing.xml part.
 	/// </summary>
-	public class ExcelSlicerDrawing: ExcelDrawing
+	public class ExcelSlicerDrawing : ExcelDrawing
 	{
 		#region Class Variables
 		private string _name = null;
@@ -60,7 +60,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 		{
 			get
 			{
-				if(this._name == null)
+				if (this._name == null)
 					this._name = this.TopNode.SelectSingleNode("mc:AlternateContent/mc:Choice/xdr:graphicFrame/a:graphic/a:graphicData/sle:slicer", this.NameSpaceManager).Attributes["name"].Value;
 				return this._name;
 			}

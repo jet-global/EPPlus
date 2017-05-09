@@ -22,53 +22,49 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2014-01-06
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-    public class AverageA : HiddenValuesHandlingFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            if(ValidateArguments(arguments, 1) == false)
+	public class AverageA : HiddenValuesHandlingFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Div0);
-            double nValues = 0d, result = 0d;
-            foreach (var arg in arguments)
-            {
-                var error = Calculate(arg, context, ref result, ref nValues);
+			double nValues = 0d, result = 0d;
+			foreach (var arg in arguments)
+			{
+				var error = Calculate(arg, context, ref result, ref nValues);
 				if (error != null)
 					return new CompileResult(error.Value);
-            }
-            return CreateResult(Divide(result, nValues), DataType.Decimal);
-        }
+			}
+			return CreateResult(Divide(result, nValues), DataType.Decimal);
+		}
 
-        private eErrorType? Calculate(FunctionArgument arg, ParsingContext context, ref double retVal, ref double nValues, bool isInArray = false)
-        {
-            if (ShouldIgnore(arg))
-            {
+		private eErrorType? Calculate(FunctionArgument arg, ParsingContext context, ref double retVal, ref double nValues, bool isInArray = false)
+		{
+			if (ShouldIgnore(arg))
+			{
 				return null;
-            }
-            if (arg.Value is IEnumerable<FunctionArgument>)
-            {
-                foreach (var item in (IEnumerable<FunctionArgument>)arg.Value)
-                {
-                    var error = Calculate(item, context, ref retVal, ref nValues, true);
+			}
+			if (arg.Value is IEnumerable<FunctionArgument>)
+			{
+				foreach (var item in (IEnumerable<FunctionArgument>)arg.Value)
+				{
+					var error = Calculate(item, context, ref retVal, ref nValues, true);
 					if (error != null)
 						return error;
-                }
-            }
-            else if (arg.IsExcelRange)
-            {
-                foreach (var c in arg.ValueAsRangeInfo)
-                {
-                    if (ShouldIgnore(c, context)) continue;
-                    CheckForAndHandleExcelError(c);
+				}
+			}
+			else if (arg.IsExcelRange)
+			{
+				foreach (var c in arg.ValueAsRangeInfo)
+				{
+					if (ShouldIgnore(c, context)) continue;
+					CheckForAndHandleExcelError(c);
 					if (IsNumeric(c.Value) && !(c.Value is bool))
 					{
 						nValues++;
@@ -84,39 +80,39 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						nValues++;
 					}
 				}
-            }
-            else
-            {
-                var numericValue = GetNumericValue(arg.Value, isInArray);
-                if (numericValue.HasValue)
-                {
-                    nValues++;
-                    retVal += numericValue.Value;
-                }
-                else if ((arg.Value is string))
-                {
-                    if (isInArray)
-                    {
-                        nValues++;
-                    }
-                    else
-                    {
-                        return eErrorType.Value;   
-                    }
-                }
-            }
-            CheckForAndHandleExcelError(arg);
+			}
+			else
+			{
+				var numericValue = GetNumericValue(arg.Value, isInArray);
+				if (numericValue.HasValue)
+				{
+					nValues++;
+					retVal += numericValue.Value;
+				}
+				else if ((arg.Value is string))
+				{
+					if (isInArray)
+					{
+						nValues++;
+					}
+					else
+					{
+						return eErrorType.Value;
+					}
+				}
+			}
+			CheckForAndHandleExcelError(arg);
 			return null;
-        }
+		}
 
-        private double? GetNumericValue(object obj, bool isInArray)
-        {
+		private double? GetNumericValue(object obj, bool isInArray)
+		{
 			double number;
 			System.DateTime date;
-            if (IsNumeric(obj) && !(obj is bool))
-            {
-                return ConvertUtil.GetValueDouble(obj);
-            }
+			if (IsNumeric(obj) && !(obj is bool))
+			{
+				return ConvertUtil.GetValueDouble(obj);
+			}
 			if (!isInArray)
 			{
 				if (obj is bool)
@@ -134,6 +130,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 			}
 			return default(double?);
-        }
-    }
+		}
+	}
 }

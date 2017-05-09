@@ -31,96 +31,94 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
-using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
-    /// <summary>
-    /// Why do the If function require a compiler of its own you might ask;)
-    /// 
-    /// It is because it only needs to evaluate one of the two last expressions. This
-    /// compiler handles this - it ignores the irrelevant expression.
-    /// </summary>
-    public class IfFunctionCompiler : FunctionCompiler
-    {
-        public IfFunctionCompiler(ExcelFunction function)
-            : base(function)
-        {
-            Require.That(function).Named("function").IsNotNull();
-            if (!(function is If)) throw new ArgumentException("function must be of type If");
-        }
+	/// <summary>
+	/// Why do the If function require a compiler of its own you might ask;)
+	/// 
+	/// It is because it only needs to evaluate one of the two last expressions. This
+	/// compiler handles this - it ignores the irrelevant expression.
+	/// </summary>
+	public class IfFunctionCompiler : FunctionCompiler
+	{
+		public IfFunctionCompiler(ExcelFunction function)
+			 : base(function)
+		{
+			Require.That(function).Named("function").IsNotNull();
+			if (!(function is If)) throw new ArgumentException("function must be of type If");
+		}
 
-        public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
-        {
+		public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
+		{
 			// 2 is allowed, Excel returns FALSE if false is the outcome of the expression
 			if (children.Count() < 2)
 				return new CompileResult(eErrorType.Value);
-            var args = new List<FunctionArgument>();
-            Function.BeforeInvoke(context);
-            var firstChild = children.ElementAt(0);
-            var v = firstChild.Compile().Result;
+			var args = new List<FunctionArgument>();
+			Function.BeforeInvoke(context);
+			var firstChild = children.ElementAt(0);
+			var v = firstChild.Compile().Result;
 
-            /****  Handle names and ranges ****/
-            if (v is ExcelDataProvider.INameInfo)
-            {
-                v = ((ExcelDataProvider.INameInfo)v).Value;
-            }
-            
-            if (v is ExcelDataProvider.IRangeInfo)
-            {
-                var r=((ExcelDataProvider.IRangeInfo)v);
-                if(r.GetNCells()>1)
-                {
+			/****  Handle names and ranges ****/
+			if (v is ExcelDataProvider.INameInfo)
+			{
+				v = ((ExcelDataProvider.INameInfo)v).Value;
+			}
+
+			if (v is ExcelDataProvider.IRangeInfo)
+			{
+				var r = ((ExcelDataProvider.IRangeInfo)v);
+				if (r.GetNCells() > 1)
+				{
 					return new CompileResult(eErrorType.Value);
 				}
-                v = r.GetOffset(0, 0);
-            }
-            bool boolVal;
-            if(v is bool)
-            {
-                boolVal = (bool)v;
-            }
-            else if(!Utils.ConvertUtil.TryParseBooleanString(v, out boolVal))
-            {
-                if(OfficeOpenXml.Utils.ConvertUtil.IsNumeric(v))
-                {
-                    boolVal = OfficeOpenXml.Utils.ConvertUtil.GetValueDouble(v)!=0;
-                }
-                else
-                {
+				v = r.GetOffset(0, 0);
+			}
+			bool boolVal;
+			if (v is bool)
+			{
+				boolVal = (bool)v;
+			}
+			else if (!Utils.ConvertUtil.TryParseBooleanString(v, out boolVal))
+			{
+				if (OfficeOpenXml.Utils.ConvertUtil.IsNumeric(v))
+				{
+					boolVal = OfficeOpenXml.Utils.ConvertUtil.GetValueDouble(v) != 0;
+				}
+				else
+				{
 					return new CompileResult(eErrorType.Value);
-                }
-            }
-            /****  End Handle names and ranges ****/
-            
-            args.Add(new FunctionArgument(boolVal));
-            if (boolVal)
-            {
-                var val = children.ElementAt(1).Compile().Result;
-                args.Add(new FunctionArgument(val));
-                args.Add(new FunctionArgument(null));
-            }
-            else
-            {
-                object val;
-                var child = children.ElementAtOrDefault(2);
-                if (child == null)
-                {
-                    // if no false expression given, Excel returns false
-                    val = false;
-                }
-                else
-                {
-                    val = child.Compile().Result;
-                }
-                args.Add(new FunctionArgument(null));
-                args.Add(new FunctionArgument(val));
-            }
-            return Function.Execute(args, context);
-        }
-    }
+				}
+			}
+			/****  End Handle names and ranges ****/
+
+			args.Add(new FunctionArgument(boolVal));
+			if (boolVal)
+			{
+				var val = children.ElementAt(1).Compile().Result;
+				args.Add(new FunctionArgument(val));
+				args.Add(new FunctionArgument(null));
+			}
+			else
+			{
+				object val;
+				var child = children.ElementAtOrDefault(2);
+				if (child == null)
+				{
+					// if no false expression given, Excel returns false
+					val = false;
+				}
+				else
+				{
+					val = child.Compile().Result;
+				}
+				args.Add(new FunctionArgument(null));
+				args.Add(new FunctionArgument(val));
+			}
+			return Function.Execute(args, context);
+		}
+	}
 }

@@ -25,27 +25,27 @@
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
-    public abstract class TimeBaseFunction : ExcelFunction
-    {
-        public TimeBaseFunction()
-        {
-            TimeStringParser = new TimeStringParser();
-        }
+	public abstract class TimeBaseFunction : ExcelFunction
+	{
+		public TimeBaseFunction()
+		{
+			TimeStringParser = new TimeStringParser();
+		}
 
-        protected TimeStringParser TimeStringParser
-        {
-            get;
-            private set;
-        }
+		protected TimeStringParser TimeStringParser
+		{
+			get;
+			private set;
+		}
 
-        protected double SecondsInADay
-        {
-            get{ return 24 * 60 * 60; }
-        }
+		protected double SecondsInADay
+		{
+			get { return 24 * 60 * 60; }
+		}
 
-        protected double GetTimeSerialNumber(double seconds)
-        {
-            return seconds / SecondsInADay;
-        }
-    }
+		protected double GetTimeSerialNumber(double seconds)
+		{
+			return seconds / SecondsInADay;
+		}
+	}
 }

@@ -158,7 +158,7 @@ namespace OfficeOpenXml
 		public static ICellStoreEnumerator<T> GetNewEnumerator(ICellStore<T> cellStore)
 		{
 			var specificCellStore = cellStore as CellStore<T>;
-			if(specificCellStore != null)
+			if (specificCellStore != null)
 				return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore);
 			throw new NotImplementedException($"No CellStoreEnumerator accepts the type {cellStore.GetType()}.");
 		}

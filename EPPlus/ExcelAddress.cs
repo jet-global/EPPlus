@@ -357,10 +357,10 @@ namespace OfficeOpenXml
 		/// <returns>A modified <see cref="ExcelAddressBase"/>.</returns>
 		public ExcelAddressBase AddRow(int row, int rows, bool setFixed = false)
 		{
-            // We're forced to assume full column here and so no change should be applied because we may exceed valid dimensions.
-            // And because of how this function is used we should return a new instance of ExcelAddressBase.
-            if (_fromRow == 1 && _toRow == ExcelPackage.MaxRows)
-                return new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
+			// We're forced to assume full column here and so no change should be applied because we may exceed valid dimensions.
+			// And because of how this function is used we should return a new instance of ExcelAddressBase.
+			if (_fromRow == 1 && _toRow == ExcelPackage.MaxRows)
+				return new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
 			if (row > _toRow)
 				return this;
 			else if (row <= _fromRow)
@@ -401,12 +401,12 @@ namespace OfficeOpenXml
 		/// <param name="setFixed">Indicates whether or not treat the reference as fixed.</param>
 		/// <returns>A modified <see cref="ExcelAddressBase"/>.</returns>
 		public ExcelAddressBase AddColumn(int col, int cols, bool setFixed = false)
-        {
-            // We're forced to assume full row here and so no change should be applied because we may exceed valid dimensions.
-            // And because of how this function is used we should return a new instance of ExcelAddressBase.
-            if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns)
-                return new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
-            if (col > _toCol)
+		{
+			// We're forced to assume full row here and so no change should be applied because we may exceed valid dimensions.
+			// And because of how this function is used we should return a new instance of ExcelAddressBase.
+			if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns)
+				return new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
+			if (col > _toCol)
 				return this;
 			else if (col <= _fromCol)
 				return new ExcelAddressBase(_fromRow, (setFixed && _fromColFixed ? _fromCol : Math.Min(_fromCol + cols, ExcelPackage.MaxColumns)), _toRow, (setFixed && _toColFixed ? _toCol : Math.Min(_toCol + cols, ExcelPackage.MaxColumns)), _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
@@ -445,11 +445,11 @@ namespace OfficeOpenXml
 		public bool IsValidRowCol()
 		{
 			return !(_fromRow > _toRow ||
-				   _fromCol > _toCol ||
-				   _fromRow < 1 ||
-				   _fromCol < 1 ||
-				   _toRow > ExcelPackage.MaxRows ||
-				   _toCol > ExcelPackage.MaxColumns);
+					_fromCol > _toCol ||
+					_fromRow < 1 ||
+					_fromCol < 1 ||
+					_toRow > ExcelPackage.MaxRows ||
+					_toCol > ExcelPackage.MaxColumns);
 		}
 
 		/// <summary>
@@ -485,7 +485,7 @@ namespace OfficeOpenXml
 			}
 			else if (Utils.ConvertUtil._invariantCompareInfo.IsPrefix(address, "[")) //Remove any external reference
 			{
-                this.SetWbWs(address, true);
+				this.SetWbWs(address, true);
 			}
 			else
 			{
@@ -493,8 +493,8 @@ namespace OfficeOpenXml
 			}
 			if (_address.IndexOfAny(new char[] { ',', '!', '[' }) > -1)
 			{
-                //Advanced address. Including Sheet or multi or table.
-                this.ExtractAddress(_address);
+				//Advanced address. Including Sheet or multi or table.
+				this.ExtractAddress(_address);
 			}
 			else
 			{
@@ -714,13 +714,13 @@ namespace OfficeOpenXml
 				_wb = "";
 				_ws = address;
 			}
-            pos = _ws.LastIndexOf("!");
-            if (containsExternalReference && pos > -1)
-            {
-                _address = _ws.Substring(pos + 1);
-                _ws = _ws.Substring(0, pos);
-            }
-        }
+			pos = _ws.LastIndexOf("!");
+			if (containsExternalReference && pos > -1)
+			{
+				_address = _ws.Substring(pos + 1);
+				_ws = _ws.Substring(0, pos);
+			}
+		}
 
 		private void Validate()
 		{

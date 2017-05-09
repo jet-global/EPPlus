@@ -22,35 +22,33 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-    public class Mina : ExcelFunction
-    {
-        private readonly DoubleEnumerableArgConverter _argConverter;
+	public class Mina : ExcelFunction
+	{
+		private readonly DoubleEnumerableArgConverter _argConverter;
 
-        public Mina()
-            : this(new DoubleEnumerableArgConverter())
-        {
+		public Mina()
+			 : this(new DoubleEnumerableArgConverter())
+		{
 
-        }
-        public Mina(DoubleEnumerableArgConverter argConverter)
-        {
-            Require.That(argConverter).Named("argConverter").IsNotNull();
-            _argConverter = argConverter;
-        }
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-			if(ValidateArguments(arguments, 1) == false)
+		}
+		public Mina(DoubleEnumerableArgConverter argConverter)
+		{
+			Require.That(argConverter).Named("argConverter").IsNotNull();
+			_argConverter = argConverter;
+		}
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var values = _argConverter.ConvertArgsIncludingOtherTypes(arguments);
-            return CreateResult(values.Min(), DataType.Decimal);
-        }
-    }
+			return CreateResult(values.Min(), DataType.Decimal);
+		}
+	}
 }

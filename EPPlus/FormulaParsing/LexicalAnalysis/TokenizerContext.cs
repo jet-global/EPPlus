@@ -28,116 +28,115 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 {
-    public class TokenizerContext
-    {
-        public TokenizerContext(string formula)
-        {
-            if (!string.IsNullOrEmpty(formula))
-            {
-                _chars = formula.ToArray();
-            }
-            _result = new List<Token>();
-            _currentToken = new StringBuilder();
-        }
+	public class TokenizerContext
+	{
+		public TokenizerContext(string formula)
+		{
+			if (!string.IsNullOrEmpty(formula))
+			{
+				_chars = formula.ToArray();
+			}
+			_result = new List<Token>();
+			_currentToken = new StringBuilder();
+		}
 
-        private char[] _chars;
-        private List<Token> _result;
-        private StringBuilder _currentToken;
+		private char[] _chars;
+		private List<Token> _result;
+		private StringBuilder _currentToken;
 
-        public char[] FormulaChars
-        {
-            get { return _chars; }
-        }
+		public char[] FormulaChars
+		{
+			get { return _chars; }
+		}
 
-        public IList<Token> Result
-        {
-            get { return _result; }
-        }
+		public IList<Token> Result
+		{
+			get { return _result; }
+		}
 
-        public bool IsInString
-        {
-            get;
-            private set;
-        }
+		public bool IsInString
+		{
+			get;
+			private set;
+		}
 
-        public bool IsInSheetName
-        {
-            get;
-            private set;
-        }
+		public bool IsInSheetName
+		{
+			get;
+			private set;
+		}
 
-        public void ToggleIsInString()
-        {
-            IsInString = !IsInString;
-        }
+		public void ToggleIsInString()
+		{
+			IsInString = !IsInString;
+		}
 
-        public void ToggleIsInSheetName()
-        {
-            IsInSheetName = !IsInSheetName;
-        }
+		public void ToggleIsInSheetName()
+		{
+			IsInSheetName = !IsInSheetName;
+		}
 
-        internal int BracketCount
-        {
-            get;
-            set;
-        }
+		internal int BracketCount
+		{
+			get;
+			set;
+		}
 
-        public string CurrentToken
-        {
-            get { return _currentToken.ToString(); }
-        }
+		public string CurrentToken
+		{
+			get { return _currentToken.ToString(); }
+		}
 
-        public bool CurrentTokenHasValue
-        {
-            get { return !string.IsNullOrEmpty(IsInString ? CurrentToken : CurrentToken.Trim()); }
-        }
+		public bool CurrentTokenHasValue
+		{
+			get { return !string.IsNullOrEmpty(IsInString ? CurrentToken : CurrentToken.Trim()); }
+		}
 
-        public void NewToken()
-        {
-            _currentToken = new StringBuilder();
-        }
+		public void NewToken()
+		{
+			_currentToken = new StringBuilder();
+		}
 
-        public void AddToken(Token token)
-        {
-            _result.Add(token);
-        }
+		public void AddToken(Token token)
+		{
+			_result.Add(token);
+		}
 
-        public void AppendToCurrentToken(char c)
-        {
-            _currentToken.Append(c.ToString());
-        }
+		public void AppendToCurrentToken(char c)
+		{
+			_currentToken.Append(c.ToString());
+		}
 
-        public void AppendToLastToken(string stringToAppend)
-        {
-            _result.Last().Append(stringToAppend);
-        }
+		public void AppendToLastToken(string stringToAppend)
+		{
+			_result.Last().Append(stringToAppend);
+		}
 
-        public void SetLastTokenType(TokenType type)
-        {
-            _result.Last().TokenType = type;
-        }
+		public void SetLastTokenType(TokenType type)
+		{
+			_result.Last().TokenType = type;
+		}
 
-        public void ReplaceLastToken(Token newToken)
-        {
-            var count = _result.Count;
-            if (count > 0)
-            {
-                _result.RemoveAt(count - 1);   
-            }
-            _result.Add(newToken);
-        }
+		public void ReplaceLastToken(Token newToken)
+		{
+			var count = _result.Count;
+			if (count > 0)
+			{
+				_result.RemoveAt(count - 1);
+			}
+			_result.Add(newToken);
+		}
 
-        public Token LastToken
-        {
-            get { return _result.Count > 0 ? _result.Last() : null; }
-        }
+		public Token LastToken
+		{
+			get { return _result.Count > 0 ? _result.Last() : null; }
+		}
 
-    }
+	}
 }

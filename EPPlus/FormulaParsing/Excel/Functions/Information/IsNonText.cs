@@ -22,23 +22,21 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-01-15
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Information
 {
-    public class IsNonText : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-			if(ValidateArguments(arguments, 1) == false)
+	public class IsNonText : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var firstArg = arguments.ElementAt(0);
-            if (firstArg.Value == null || firstArg.ValueIsExcelError) return CreateResult(false, DataType.Boolean);
-            return CreateResult(!(firstArg.Value is string), DataType.Boolean);
-        }
-    }
+			if (firstArg.Value == null || firstArg.ValueIsExcelError) return CreateResult(false, DataType.Boolean);
+			return CreateResult(!(firstArg.Value is string), DataType.Boolean);
+		}
+	}
 }

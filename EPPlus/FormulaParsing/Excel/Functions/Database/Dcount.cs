@@ -22,74 +22,72 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-04-06
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Database
 {
-    public class Dcount : ExcelFunction
-    {
-        private readonly RowMatcher _rowMatcher;
+	public class Dcount : ExcelFunction
+	{
+		private readonly RowMatcher _rowMatcher;
 
-        public Dcount()
-            : this(new RowMatcher())
-        {
-            
-        }
+		public Dcount()
+			 : this(new RowMatcher())
+		{
 
-        public Dcount(RowMatcher rowMatcher)
-        {
-            _rowMatcher = rowMatcher;
-        }
+		}
 
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-			if(ValidateArguments(arguments, 2) == false)
+		public Dcount(RowMatcher rowMatcher)
+		{
+			_rowMatcher = rowMatcher;
+		}
+
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-            var dbAddress = arguments.ElementAt(0).ValueAsRangeInfo.Address.Address;
-            string field = null;
-            string criteriaRange = null;
-            if (arguments.Count() == 2)
-            {
-                criteriaRange = arguments.ElementAt(1).ValueAsRangeInfo.Address.Address;
-            }
-            else
-            {
-                field = ArgToString(arguments, 1).ToLower(CultureInfo.InvariantCulture);
-                criteriaRange = arguments.ElementAt(2).ValueAsRangeInfo.Address.Address;
-            } 
-            var db = new ExcelDatabase(context.ExcelDataProvider, dbAddress);
-            var criteria = new ExcelDatabaseCriteria(context.ExcelDataProvider, criteriaRange);
+			var dbAddress = arguments.ElementAt(0).ValueAsRangeInfo.Address.Address;
+			string field = null;
+			string criteriaRange = null;
+			if (arguments.Count() == 2)
+			{
+				criteriaRange = arguments.ElementAt(1).ValueAsRangeInfo.Address.Address;
+			}
+			else
+			{
+				field = ArgToString(arguments, 1).ToLower(CultureInfo.InvariantCulture);
+				criteriaRange = arguments.ElementAt(2).ValueAsRangeInfo.Address.Address;
+			}
+			var db = new ExcelDatabase(context.ExcelDataProvider, dbAddress);
+			var criteria = new ExcelDatabaseCriteria(context.ExcelDataProvider, criteriaRange);
 
-            var nHits = 0;
-            while (db.HasMoreRows)
-            {
-                var dataRow = db.Read();
-                if (_rowMatcher.IsMatch(dataRow, criteria))
-                {
-                    // if a fieldname is supplied, count only this row if the value
-                    // of the supplied field is numeric.
-                    if (!string.IsNullOrEmpty(field))
-                    {
-                        var candidate = dataRow[field];
-                        if (ConvertUtil.IsNumeric(candidate))
-                        {
-                            nHits++;
-                        }
-                    }
-                    else
-                    {
-                        // no fieldname was supplied, always count matching row.
-                        nHits++;    
-                    }
-                }
-            }
-            return CreateResult(nHits, DataType.Integer);
-        }
-    }
+			var nHits = 0;
+			while (db.HasMoreRows)
+			{
+				var dataRow = db.Read();
+				if (_rowMatcher.IsMatch(dataRow, criteria))
+				{
+					// if a fieldname is supplied, count only this row if the value
+					// of the supplied field is numeric.
+					if (!string.IsNullOrEmpty(field))
+					{
+						var candidate = dataRow[field];
+						if (ConvertUtil.IsNumeric(candidate))
+						{
+							nHits++;
+						}
+					}
+					else
+					{
+						// no fieldname was supplied, always count matching row.
+						nHits++;
+					}
+				}
+			}
+			return CreateResult(nHits, DataType.Integer);
+		}
+	}
 }

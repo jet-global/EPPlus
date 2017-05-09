@@ -23,31 +23,29 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
-    public class BoolArgumentParser : ArgumentParser
-    {
-        public override object Parse(object obj)
-        {
-            if (obj is ExcelDataProvider.IRangeInfo)
-            {
-                var r = ((ExcelDataProvider.IRangeInfo)obj).FirstOrDefault();
-                obj = (r == null ? null : r.Value);
-            }
-            if (obj == null) return false;
-            if (obj is bool) return (bool)obj;
-            if (obj.IsNumeric()) return Convert.ToBoolean(obj);
-            bool result;
-            if (bool.TryParse(obj.ToString(), out result))
-            {
-                return result;
-            }
-            return result;
-        }
-    }
+	public class BoolArgumentParser : ArgumentParser
+	{
+		public override object Parse(object obj)
+		{
+			if (obj is ExcelDataProvider.IRangeInfo)
+			{
+				var r = ((ExcelDataProvider.IRangeInfo)obj).FirstOrDefault();
+				obj = (r == null ? null : r.Value);
+			}
+			if (obj == null) return false;
+			if (obj is bool) return (bool)obj;
+			if (obj.IsNumeric()) return Convert.ToBoolean(obj);
+			bool result;
+			if (bool.TryParse(obj.ToString(), out result))
+			{
+				return result;
+			}
+			return result;
+		}
+	}
 }

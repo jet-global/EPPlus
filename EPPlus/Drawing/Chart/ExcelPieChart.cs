@@ -30,77 +30,75 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 using OfficeOpenXml.Table.PivotTable;
 
 namespace OfficeOpenXml.Drawing.Chart
 {
-    /// <summary>
-    /// Provides access to pie chart specific properties
-    /// </summary>
-    public class ExcelPieChart : ExcelChart
-    {
-        internal ExcelPieChart(ExcelDrawings drawings, XmlNode node, eChartType type, bool isPivot) :
-            base(drawings, node, type, isPivot)
-        {
-        }
-        internal ExcelPieChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
-            base(drawings, node, type, topChart, PivotTableSource)
-        {
-        }
+	/// <summary>
+	/// Provides access to pie chart specific properties
+	/// </summary>
+	public class ExcelPieChart : ExcelChart
+	{
+		internal ExcelPieChart(ExcelDrawings drawings, XmlNode node, eChartType type, bool isPivot) :
+			 base(drawings, node, type, isPivot)
+		{
+		}
+		internal ExcelPieChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
+			 base(drawings, node, type, topChart, PivotTableSource)
+		{
+		}
 
-        internal ExcelPieChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, Packaging.ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
-           base(drawings, node, uriChart, part, chartXml, chartNode)
-        {
-        }
+		internal ExcelPieChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, Packaging.ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
+			base(drawings, node, uriChart, part, chartXml, chartNode)
+		{
+		}
 
-        internal ExcelPieChart(ExcelChart topChart, XmlNode chartNode) :
-            base(topChart, chartNode)
-        {
-        }
-        ExcelChartDataLabel _DataLabel = null;
-        /// <summary>
-        /// Access to datalabel properties
-        /// </summary>
-        public ExcelChartDataLabel DataLabel
-        {
-            get
-            {
-                if (_DataLabel == null)
-                {
-                    _DataLabel = new ExcelChartDataLabel(NameSpaceManager, ChartNode);
-                }
-                return _DataLabel;
-            }
-        }
+		internal ExcelPieChart(ExcelChart topChart, XmlNode chartNode) :
+			 base(topChart, chartNode)
+		{
+		}
+		ExcelChartDataLabel _DataLabel = null;
+		/// <summary>
+		/// Access to datalabel properties
+		/// </summary>
+		public ExcelChartDataLabel DataLabel
+		{
+			get
+			{
+				if (_DataLabel == null)
+				{
+					_DataLabel = new ExcelChartDataLabel(NameSpaceManager, ChartNode);
+				}
+				return _DataLabel;
+			}
+		}
 
-        internal override eChartType GetChartType(string name)
-        {
-            if (name == "pieChart")
-            {
-                if (Series != null && Series.Count > 0 && ((ExcelPieChartSerie)Series[0]).Explosion>0)
-                {
-                    return eChartType.PieExploded;
-                }
-                else
-                {
-                    return eChartType.Pie;
-                }
-            }
-            else if (name == "pie3DChart")
-            {
-                if (Series != null && Series.Count > 0 && ((ExcelPieChartSerie)Series[0]).Explosion > 0)
-                {
-                    return eChartType.PieExploded3D;
-                }
-                else
-                {
-                    return eChartType.Pie3D;
-                }
-            }
-            return base.GetChartType(name);
-        }
-    }
+		internal override eChartType GetChartType(string name)
+		{
+			if (name == "pieChart")
+			{
+				if (Series != null && Series.Count > 0 && ((ExcelPieChartSerie)Series[0]).Explosion > 0)
+				{
+					return eChartType.PieExploded;
+				}
+				else
+				{
+					return eChartType.Pie;
+				}
+			}
+			else if (name == "pie3DChart")
+			{
+				if (Series != null && Series.Count > 0 && ((ExcelPieChartSerie)Series[0]).Explosion > 0)
+				{
+					return eChartType.PieExploded3D;
+				}
+				else
+				{
+					return eChartType.Pie3D;
+				}
+			}
+			return base.GetChartType(name);
+		}
+	}
 }

@@ -22,23 +22,19 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-04-06
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Database
 {
-    public class ExcelDatabaseField
-    {
-        
-        public string FieldName { get; private set; }
-        public int ColIndex { get; private set; }
+	public class ExcelDatabaseField
+	{
 
-        public ExcelDatabaseField(string fieldName, int colIndex)
-        {
-            FieldName = fieldName;
-            ColIndex = colIndex;
-        }
-    }
+		public string FieldName { get; private set; }
+		public int ColIndex { get; private set; }
+
+		public ExcelDatabaseField(string fieldName, int colIndex)
+		{
+			FieldName = fieldName;
+			ColIndex = colIndex;
+		}
+	}
 }

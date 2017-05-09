@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-/*******************************************************************************
+﻿/*******************************************************************************
  * You may amend and distribute as you like, but don't remove this header!
  *
  * EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
@@ -30,40 +28,38 @@ using System.Collections.Generic;
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System.Linq;
-using System.Text;
 using System.Globalization;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
-    public class DecimalExpression : AtomicExpression
-    {
-        private readonly double? _compiledValue;
-        private readonly bool _negate;
+	public class DecimalExpression : AtomicExpression
+	{
+		private readonly double? _compiledValue;
+		private readonly bool _negate;
 
-        public DecimalExpression(string expression)
-            : this(expression, false)
-        {
-            
-        }
+		public DecimalExpression(string expression)
+			 : this(expression, false)
+		{
 
-        public DecimalExpression(string expression, bool negate)
-            : base(expression)
-        {
-            _negate = negate;
-        }
+		}
 
-        public DecimalExpression(double compiledValue)
-            : base(compiledValue.ToString(CultureInfo.InvariantCulture))
-        {
-            _compiledValue = compiledValue;
-        }
+		public DecimalExpression(string expression, bool negate)
+			 : base(expression)
+		{
+			_negate = negate;
+		}
 
-        public override CompileResult Compile()
-        {
-            double result = _compiledValue.HasValue ? _compiledValue.Value : double.Parse(ExpressionString, CultureInfo.InvariantCulture);
-            result = _negate ? result * -1 : result;
-            return new CompileResult(result, DataType.Decimal);
-        }
-    }
+		public DecimalExpression(double compiledValue)
+			 : base(compiledValue.ToString(CultureInfo.InvariantCulture))
+		{
+			_compiledValue = compiledValue;
+		}
+
+		public override CompileResult Compile()
+		{
+			double result = _compiledValue.HasValue ? _compiledValue.Value : double.Parse(ExpressionString, CultureInfo.InvariantCulture);
+			result = _negate ? result * -1 : result;
+			return new CompileResult(result, DataType.Decimal);
+		}
+	}
 }

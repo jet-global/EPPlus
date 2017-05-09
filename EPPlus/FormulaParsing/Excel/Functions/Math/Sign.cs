@@ -22,31 +22,28 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-    public class Sign : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            if(ValidateArguments(arguments, 1) == false)
-            	return new CompileResult(eErrorType.Value);
-            var result = 0d;
-            var val = ArgToDecimal(arguments, 0);
-            if (val < 0)
-            {
-                result = -1;
-            }
-            else if (val > 0)
-            {
-                result = 1;
-            }
-            return CreateResult(result, DataType.Decimal);
-        }
-    }
+	public class Sign : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			var result = 0d;
+			var val = ArgToDecimal(arguments, 0);
+			if (val < 0)
+			{
+				result = -1;
+			}
+			else if (val > 0)
+			{
+				result = 1;
+			}
+			return CreateResult(result, DataType.Decimal);
+		}
+	}
 }

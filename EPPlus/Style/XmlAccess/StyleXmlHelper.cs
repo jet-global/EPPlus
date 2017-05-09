@@ -29,50 +29,47 @@
  * Jan Källman		                Initial Release		        2009-10-01
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 namespace OfficeOpenXml.Style.XmlAccess
 {
-    /// <summary>
-    /// Xml helper class for cell style classes
-    /// </summary>
-    public abstract class  StyleXmlHelper : XmlHelper
-    {
-        internal StyleXmlHelper(XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
-        { 
+	/// <summary>
+	/// Xml helper class for cell style classes
+	/// </summary>
+	public abstract class StyleXmlHelper : XmlHelper
+	{
+		internal StyleXmlHelper(XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
+		{
 
-        }
-        internal StyleXmlHelper(XmlNamespaceManager nameSpaceManager, XmlNode topNode) : base(nameSpaceManager, topNode)
-        {
-        }
-        internal abstract XmlNode CreateXmlNode(XmlNode top);
-        internal abstract string Id
-        {
-            get;
-        }
-        internal long useCnt=0;
-        internal int newID=int.MinValue;
-        protected bool GetBoolValue(XmlNode topNode, string path)
-        {
-            var node = topNode.SelectSingleNode(path, NameSpaceManager);
-            if (node is XmlAttribute)
-            {
-                return node.Value != "0";
-            }
-            else
-            {
-                if (node != null && ((node.Attributes["val"] != null && node.Attributes["val"].Value != "0") || node.Attributes["val"] == null))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }                
-            }
-        }
+		}
+		internal StyleXmlHelper(XmlNamespaceManager nameSpaceManager, XmlNode topNode) : base(nameSpaceManager, topNode)
+		{
+		}
+		internal abstract XmlNode CreateXmlNode(XmlNode top);
+		internal abstract string Id
+		{
+			get;
+		}
+		internal long useCnt = 0;
+		internal int newID = int.MinValue;
+		protected bool GetBoolValue(XmlNode topNode, string path)
+		{
+			var node = topNode.SelectSingleNode(path, NameSpaceManager);
+			if (node is XmlAttribute)
+			{
+				return node.Value != "0";
+			}
+			else
+			{
+				if (node != null && ((node.Attributes["val"] != null && node.Attributes["val"].Value != "0") || node.Attributes["val"] == null))
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
 
-    }
+	}
 }

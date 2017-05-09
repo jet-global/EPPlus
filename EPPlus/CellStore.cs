@@ -32,12 +32,9 @@
 // #define DEBUGGING
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 /// <summary>
 /// This is the store for all Rows, Columns and Cells.
@@ -1589,14 +1586,14 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 				// Should the new value be stored on the previous page?
 				if (columnIndex._pages[pagePos - 1].RowCount > pos)
 				{
-						pagePos--;
+					pagePos--;
 				}
 				else
 				{
 					pos -= columnIndex._pages[pagePos - 1].RowCount;
 				}
 				pageItem = columnIndex._pages[pagePos];
-				ix = (short) (ix - pageItem.IndexOffset);
+				ix = (short)(ix - pageItem.IndexOffset);
 			}
 			else //Expand to double size.
 			{

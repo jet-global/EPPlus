@@ -29,22 +29,18 @@
  * Mats Alm   		                Added       		        2011-01-08
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.DataValidation.Formulas.Contracts
 {
-    /// <summary>
-    /// Interface for a formula with a value
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IExcelDataValidationFormulaWithValue<T> : IExcelDataValidationFormula
-    {
-        /// <summary>
-        /// The value.
-        /// </summary>
-        T Value { get; set; }
-    }
+	/// <summary>
+	/// Interface for a formula with a value
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	public interface IExcelDataValidationFormulaWithValue<T> : IExcelDataValidationFormula
+	{
+		/// <summary>
+		/// The value.
+		/// </summary>
+		T Value { get; set; }
+	}
 }

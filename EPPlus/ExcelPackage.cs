@@ -33,12 +33,12 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-27
  *******************************************************************************/
 using System;
-using System.Xml;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
-using OfficeOpenXml.Utils;
+using System.Xml;
 using OfficeOpenXml.Encryption;
+using OfficeOpenXml.Utils;
 namespace OfficeOpenXml
 {
 	#region Enumerators
@@ -1089,7 +1089,7 @@ namespace OfficeOpenXml
 		private void CreateBlankWb()
 		{
 			XmlDocument workbook = Workbook.WorkbookXml; // this will create the workbook xml in the package
-														 // create the relationship to the main part
+																		// create the relationship to the main part
 			this.Package.CreateRelationship(UriHelper.GetRelativeUri(new Uri("/xl", UriKind.Relative), Workbook.WorkbookUri), Packaging.TargetMode.Internal, schemaRelationships + "/officeDocument");
 		}
 

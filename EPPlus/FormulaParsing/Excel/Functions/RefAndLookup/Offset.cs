@@ -22,64 +22,62 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-01-11
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
-    public class Offset : LookupFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			if(ValidateArguments(functionArguments, 3) == false)
+	public class Offset : LookupFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
+			if (ValidateArguments(functionArguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
-            var startRange = ArgToString(functionArguments, 0);
-            var rowOffset = ArgToInt(functionArguments, 1);
-            var colOffset = ArgToInt(functionArguments, 2);
-            int width = 0, height = 0;
-            if (functionArguments.Length > 3)
-            {
-                height = ArgToInt(functionArguments, 3);
-                if(height == 0)
+			var startRange = ArgToString(functionArguments, 0);
+			var rowOffset = ArgToInt(functionArguments, 1);
+			var colOffset = ArgToInt(functionArguments, 2);
+			int width = 0, height = 0;
+			if (functionArguments.Length > 3)
+			{
+				height = ArgToInt(functionArguments, 3);
+				if (height == 0)
 					return new CompileResult(eErrorType.Ref);
-            }
-            if (functionArguments.Length > 4)
-            {
-                width = ArgToInt(functionArguments, 4);
-                if(width == 0)
+			}
+			if (functionArguments.Length > 4)
+			{
+				width = ArgToInt(functionArguments, 4);
+				if (width == 0)
 					return new CompileResult(eErrorType.Ref);
-            }
+			}
 
-            var adr = new ExcelAddress(startRange);
-            var ws = adr.WorkSheet;
+			var adr = new ExcelAddress(startRange);
+			var ws = adr.WorkSheet;
 
-            var fromRow = adr._fromRow + rowOffset;
-            var fromCol = adr._fromCol + colOffset;
-            var toRow = (height != 0 ? height : adr._toRow) + rowOffset;
-            var toCol = (width != 0 ? width : adr._toCol) + colOffset;
-            //var toRow = (height != 0 ? fromRow + height : adr._toRow + rowOffset);
-            //var toCol = (width != 0 ? fromCol + width : adr._toCol + colOffset);
+			var fromRow = adr._fromRow + rowOffset;
+			var fromCol = adr._fromCol + colOffset;
+			var toRow = (height != 0 ? height : adr._toRow) + rowOffset;
+			var toCol = (width != 0 ? width : adr._toCol) + colOffset;
+			//var toRow = (height != 0 ? fromRow + height : adr._toRow + rowOffset);
+			//var toCol = (width != 0 ? fromCol + width : adr._toCol + colOffset);
 
-            var newRange = context.ExcelDataProvider.GetRange(ws, fromRow, fromCol, toRow, toCol);
-            if (!newRange.IsMulti)
-            {
-                if (newRange.IsEmpty) return CompileResult.Empty;
-                var val = newRange.GetValue(fromRow, fromCol);
-                if (IsNumeric(val))
-                {
-                    return CreateResult(val, DataType.Decimal);
-                }
-                if (val is ExcelErrorValue)
-                {
-                    return CreateResult(val, DataType.ExcelError);
-                }
-                return CreateResult(val, DataType.String);
-            }
-            return CreateResult(newRange, DataType.Enumerable);
-        }
-    }
+			var newRange = context.ExcelDataProvider.GetRange(ws, fromRow, fromCol, toRow, toCol);
+			if (!newRange.IsMulti)
+			{
+				if (newRange.IsEmpty) return CompileResult.Empty;
+				var val = newRange.GetValue(fromRow, fromCol);
+				if (IsNumeric(val))
+				{
+					return CreateResult(val, DataType.Decimal);
+				}
+				if (val is ExcelErrorValue)
+				{
+					return CreateResult(val, DataType.ExcelError);
+				}
+				return CreateResult(val, DataType.String);
+			}
+			return CreateResult(newRange, DataType.Enumerable);
+		}
+	}
 }

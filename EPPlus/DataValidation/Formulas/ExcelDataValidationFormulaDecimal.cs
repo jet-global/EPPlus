@@ -29,42 +29,38 @@
  * Mats Alm   		                Added       		        2011-01-08
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Globalization;
 using System.Xml;
 using OfficeOpenXml.DataValidation.Formulas.Contracts;
-using System.Globalization;
 
 namespace OfficeOpenXml.DataValidation.Formulas
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class ExcelDataValidationFormulaDecimal : ExcelDataValidationFormulaValue<double?>, IExcelDataValidationFormulaDecimal
-    {
-        public ExcelDataValidationFormulaDecimal(XmlNamespaceManager namespaceManager, XmlNode topNode, string formulaPath)
-            : base(namespaceManager, topNode, formulaPath)
-        {
-            var value = GetXmlNodeString(formulaPath);
-            if (!string.IsNullOrEmpty(value))
-            {
-                double dValue = default(double);
-                if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out dValue))
-                {
-                    Value = dValue;
-                }
-                else
-                {
-                    ExcelFormula = value;
-                }
-            }
-        }
+	/// <summary>
+	/// 
+	/// </summary>
+	internal class ExcelDataValidationFormulaDecimal : ExcelDataValidationFormulaValue<double?>, IExcelDataValidationFormulaDecimal
+	{
+		public ExcelDataValidationFormulaDecimal(XmlNamespaceManager namespaceManager, XmlNode topNode, string formulaPath)
+			 : base(namespaceManager, topNode, formulaPath)
+		{
+			var value = GetXmlNodeString(formulaPath);
+			if (!string.IsNullOrEmpty(value))
+			{
+				double dValue = default(double);
+				if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out dValue))
+				{
+					Value = dValue;
+				}
+				else
+				{
+					ExcelFormula = value;
+				}
+			}
+		}
 
-        protected override string GetValueAsString()
-        {
-            return Value.HasValue ? Value.Value.ToString("R15", CultureInfo.InvariantCulture) : string.Empty;
-        }
-    }
+		protected override string GetValueAsString()
+		{
+			return Value.HasValue ? Value.Value.ToString("R15", CultureInfo.InvariantCulture) : string.Empty;
+		}
+	}
 }

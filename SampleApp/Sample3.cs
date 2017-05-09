@@ -47,11 +47,10 @@
  * The author accepts no liability for any damage or loss of business that this product may cause.
  */
 using System;
-using System.IO;
-using System.Xml;
-using OfficeOpenXml;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.IO;
+using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
 namespace EPPlusSamples
@@ -61,17 +60,17 @@ namespace EPPlusSamples
 		/// <summary>
 		/// Sample 3 - creates a workbook and populates using data from the AdventureWorks database
 		/// This sample requires the AdventureWorks database.  
-        /// This one is from the orginal Excelpackage sample project, but without the template
+		/// This one is from the orginal Excelpackage sample project, but without the template
 		/// </summary>
 		/// <param name="outputDir">The output directory</param>
 		/// <param name="templateDir">The location of the sample template</param>
 		/// <param name="connectionString">The connection string to your copy of the AdventureWorks database</param>
 		public static string RunSample3(DirectoryInfo outputDir, string connectionString)
 		{
-			
-            string file = outputDir.FullName + @"\sample3.xlsx";
-            if (File.Exists(file)) File.Delete(file);
-            FileInfo newFile = new FileInfo(outputDir.FullName + @"\sample3.xlsx");
+
+			string file = outputDir.FullName + @"\sample3.xlsx";
+			if (File.Exists(file)) File.Delete(file);
+			FileInfo newFile = new FileInfo(outputDir.FullName + @"\sample3.xlsx");
 
 			// ok, we can run the real code of the sample now
 			using (ExcelPackage xlPackage = new ExcelPackage(newFile))
@@ -81,48 +80,48 @@ namespace EPPlusSamples
 
 				// get handle to the existing worksheet
 				ExcelWorksheet worksheet = xlPackage.Workbook.Worksheets.Add("Sales");
-                var namedStyle = xlPackage.Workbook.Styles.CreateNamedStyle("HyperLink");   //This one is language dependent
-                namedStyle.Style.Font.UnderLine = true;
-                namedStyle.Style.Font.Color.SetColor(Color.Blue);
-                if (worksheet != null)
+				var namedStyle = xlPackage.Workbook.Styles.CreateNamedStyle("HyperLink");   //This one is language dependent
+				namedStyle.Style.Font.UnderLine = true;
+				namedStyle.Style.Font.Color.SetColor(Color.Blue);
+				if (worksheet != null)
 				{
 					const int startRow = 5;
 					int row = startRow;
-                    //Create Headers and format them 
-                    worksheet.Cells["A1"].Value = "AdventureWorks Inc.";
-                    using (ExcelRange r = worksheet.Cells["A1:G1"])
-                    {
-                        r.Merge = true;
-                        r.Style.Font.SetFromFont(new Font("Britannic Bold", 22, FontStyle.Italic));
-                        r.Style.Font.Color.SetColor(Color.White);
-                        r.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.CenterContinuous;
-                        r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                        r.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(23,55,93));
-                    }
-                    worksheet.Cells["A2"].Value = "Year-End Sales Report";
-                    using (ExcelRange r = worksheet.Cells["A2:G2"])
-                    {
-                        r.Merge = true;
-                        r.Style.Font.SetFromFont(new Font("Britannic Bold", 18, FontStyle.Italic));
-                        r.Style.Font.Color.SetColor(Color.Black);
-                        r.Style.HorizontalAlignment = ExcelHorizontalAlignment.CenterContinuous;
-                        r.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                        r.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(184,204,228));
-                    }
+					//Create Headers and format them 
+					worksheet.Cells["A1"].Value = "AdventureWorks Inc.";
+					using (ExcelRange r = worksheet.Cells["A1:G1"])
+					{
+						r.Merge = true;
+						r.Style.Font.SetFromFont(new Font("Britannic Bold", 22, FontStyle.Italic));
+						r.Style.Font.Color.SetColor(Color.White);
+						r.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.CenterContinuous;
+						r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+						r.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(23, 55, 93));
+					}
+					worksheet.Cells["A2"].Value = "Year-End Sales Report";
+					using (ExcelRange r = worksheet.Cells["A2:G2"])
+					{
+						r.Merge = true;
+						r.Style.Font.SetFromFont(new Font("Britannic Bold", 18, FontStyle.Italic));
+						r.Style.Font.Color.SetColor(Color.Black);
+						r.Style.HorizontalAlignment = ExcelHorizontalAlignment.CenterContinuous;
+						r.Style.Fill.PatternType = ExcelFillStyle.Solid;
+						r.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(184, 204, 228));
+					}
 
-                    worksheet.Cells["A4"].Value = "Name";
-                    worksheet.Cells["B4"].Value = "Job Title";
-                    worksheet.Cells["C4"].Value = "Region";
-                    worksheet.Cells["D4"].Value = "Monthly Quota";
-                    worksheet.Cells["E4"].Value = "Quota YTD";
-                    worksheet.Cells["F4"].Value = "Sales YTD";
-                    worksheet.Cells["G4"].Value = "Quota %";
-                    worksheet.Cells["A4:G4"].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    worksheet.Cells["A4:G4"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(184, 204, 228));
-                    worksheet.Cells["A4:G4"].Style.Font.Bold = true;
+					worksheet.Cells["A4"].Value = "Name";
+					worksheet.Cells["B4"].Value = "Job Title";
+					worksheet.Cells["C4"].Value = "Region";
+					worksheet.Cells["D4"].Value = "Monthly Quota";
+					worksheet.Cells["E4"].Value = "Quota YTD";
+					worksheet.Cells["F4"].Value = "Sales YTD";
+					worksheet.Cells["G4"].Value = "Quota %";
+					worksheet.Cells["A4:G4"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+					worksheet.Cells["A4:G4"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(184, 204, 228));
+					worksheet.Cells["A4:G4"].Style.Font.Bold = true;
 
 
-                    // lets connect to the AdventureWorks sample database for some data
+					// lets connect to the AdventureWorks sample database for some data
 					using (SqlConnection sqlConn = new SqlConnection(connectionString))
 					{
 						sqlConn.Open();
@@ -157,26 +156,26 @@ namespace EPPlusSamples
 								}
 								sqlReader.Close();
 
-                                worksheet.Cells[startRow, 1, row - 1, 1].StyleName = "HyperLink";
-                                worksheet.Cells[startRow, 4, row - 1, 6].Style.Numberformat.Format = "[$$-409]#,##0";
-                                worksheet.Cells[startRow, 7, row - 1, 7].Style.Numberformat.Format = "0%";
+								worksheet.Cells[startRow, 1, row - 1, 1].StyleName = "HyperLink";
+								worksheet.Cells[startRow, 4, row - 1, 6].Style.Numberformat.Format = "[$$-409]#,##0";
+								worksheet.Cells[startRow, 7, row - 1, 7].Style.Numberformat.Format = "0%";
 
-                                worksheet.Cells[startRow, 7, row - 1, 7].FormulaR1C1 = "=IF(RC[-2]=0,0,RC[-1]/RC[-2])";
+								worksheet.Cells[startRow, 7, row - 1, 7].FormulaR1C1 = "=IF(RC[-2]=0,0,RC[-1]/RC[-2])";
 
-                                //Set column width
-                                worksheet.Column(1).Width = 25;
-                                worksheet.Column(2).Width = 28;
-                                worksheet.Column(3).Width = 18;
-                                worksheet.Column(4).Width = 12;
-                                worksheet.Column(5).Width = 10;
-                                worksheet.Column(6).Width = 10;
-                                worksheet.Column(7).Width = 12;
-                            }
+								//Set column width
+								worksheet.Column(1).Width = 25;
+								worksheet.Column(2).Width = 28;
+								worksheet.Column(3).Width = 18;
+								worksheet.Column(4).Width = 12;
+								worksheet.Column(5).Width = 10;
+								worksheet.Column(6).Width = 10;
+								worksheet.Column(7).Width = 12;
+							}
 						}
 						sqlConn.Close();
 					}
 
-                    // lets set the header text 
+					// lets set the header text 
 					worksheet.HeaderFooter.OddHeader.CenteredText = "AdventureWorks Inc. Sales Report";
 					// add the page number to the footer plus the total number of pages
 					worksheet.HeaderFooter.OddFooter.RightAlignedText =
@@ -198,13 +197,13 @@ namespace EPPlusSamples
 
 				// set some extended property values
 				xlPackage.Workbook.Properties.Company = "AdventureWorks Inc.";
-                xlPackage.Workbook.Properties.HyperlinkBase = new Uri("http://www.codeplex.com/MSFTDBProdSamples");
+				xlPackage.Workbook.Properties.HyperlinkBase = new Uri("http://www.codeplex.com/MSFTDBProdSamples");
 
 				// set some custom property values
 				xlPackage.Workbook.Properties.SetCustomPropertyValue("Checked by", "John Tunnicliffe");
 				xlPackage.Workbook.Properties.SetCustomPropertyValue("EmployeeID", "1147");
 				xlPackage.Workbook.Properties.SetCustomPropertyValue("AssemblyName", "ExcelPackage");
-				
+
 				// save the new spreadsheet
 				xlPackage.Save();
 			}

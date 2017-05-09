@@ -22,46 +22,39 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-01-11
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Xml.XPath;
-using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using OfficeOpenXml.FormulaParsing.Utilities;
-using OfficeOpenXml.Utils;
-using Require = OfficeOpenXml.FormulaParsing.Utilities.Require;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-    public class CountIfs : MultipleRangeCriteriasFunction
-    {
+	public class CountIfs : MultipleRangeCriteriasFunction
+	{
 
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			if(ValidateArguments(arguments, 2) == false)
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
+			if (ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
 			var argRanges = new List<ExcelDataProvider.IRangeInfo>();
-            var criterias = new List<string>();
-            for (var ix = 0; ix < 30; ix +=2)
-            {
-                if (functionArguments.Length <= ix) break;
-                var rangeInfo = functionArguments[ix].ValueAsRangeInfo;
-                argRanges.Add(rangeInfo);
-                var value = functionArguments[ix + 1].Value != null ? functionArguments[ix + 1].Value.ToString() : null;
-                criterias.Add(value);
-            }
-            IEnumerable<int> matchIndexes = GetMatchIndexes(argRanges[0], criterias[0]);
-            var enumerable = matchIndexes as IList<int> ?? matchIndexes.ToList();
-            for (var ix = 1; ix < argRanges.Count && enumerable.Any(); ix++)
-            {
-                var indexes = GetMatchIndexes(argRanges[ix], criterias[ix]);
-                matchIndexes = enumerable.Intersect(indexes);
-            }
-            
-            return CreateResult((double)matchIndexes.Count(), DataType.Integer);
-        }
-    }
+			var criterias = new List<string>();
+			for (var ix = 0; ix < 30; ix += 2)
+			{
+				if (functionArguments.Length <= ix) break;
+				var rangeInfo = functionArguments[ix].ValueAsRangeInfo;
+				argRanges.Add(rangeInfo);
+				var value = functionArguments[ix + 1].Value != null ? functionArguments[ix + 1].Value.ToString() : null;
+				criterias.Add(value);
+			}
+			IEnumerable<int> matchIndexes = GetMatchIndexes(argRanges[0], criterias[0]);
+			var enumerable = matchIndexes as IList<int> ?? matchIndexes.ToList();
+			for (var ix = 1; ix < argRanges.Count && enumerable.Any(); ix++)
+			{
+				var indexes = GetMatchIndexes(argRanges[ix], criterias[ix]);
+				matchIndexes = enumerable.Intersect(indexes);
+			}
+
+			return CreateResult((double)matchIndexes.Count(), DataType.Integer);
+		}
+	}
 }

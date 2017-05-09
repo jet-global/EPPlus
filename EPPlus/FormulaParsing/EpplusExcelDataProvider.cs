@@ -2,8 +2,8 @@
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
-using OfficeOpenXml.Utils;
 using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing
 {

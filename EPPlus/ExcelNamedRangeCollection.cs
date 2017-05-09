@@ -30,10 +30,10 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-27
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace OfficeOpenXml
 {
@@ -212,7 +212,7 @@ namespace OfficeOpenXml
 				{
 					try
 					{
-						if (namedRange._fromColFixed && (namedRange.Start.Column ==1 && namedRange.End.Column == ExcelPackage.MaxColumns) == false)
+						if (namedRange._fromColFixed && (namedRange.Start.Column == 1 && namedRange.End.Column == ExcelPackage.MaxColumns) == false)
 						{
 							if (colFrom <= namedRange.Start.Column)
 							{

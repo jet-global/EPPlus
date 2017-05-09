@@ -22,28 +22,26 @@
  *******************************************************************************
  * Jan Källman   		            Added		                2014-01-17
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 {
-    public class Text : ExcelFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-            if(ValidateArguments(arguments, 2) == false)
-            	return new CompileResult(eErrorType.Value);
-            var value = arguments.First().ValueFirst;
-            var format = ArgToString(arguments, 1);
-            format = format.Replace(System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator, ".");
-            format = format.Replace(System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator.Replace((char)160,' '), ","); //Special handling for No-Break Space
+	public class Text : ExcelFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
+			var value = arguments.First().ValueFirst;
+			var format = ArgToString(arguments, 1);
+			format = format.Replace(System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator, ".");
+			format = format.Replace(System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator.Replace((char)160, ' '), ","); //Special handling for No-Break Space
 
-            var result = context.ExcelDataProvider.GetFormat(value, format);
+			var result = context.ExcelDataProvider.GetFormat(value, format);
 
-            return CreateResult(result, DataType.String);
-        }
-    }
+			return CreateResult(result, DataType.String);
+		}
+	}
 }

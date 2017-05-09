@@ -30,122 +30,120 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Xml;
 using OfficeOpenXml.Table.PivotTable;
 
 namespace OfficeOpenXml.Drawing.Chart
 {
-    /// <summary>
-    /// Provides access to line chart specific properties
-    /// </summary>
-    public class ExcelRadarChart : ExcelChart
-    {
-        #region "Constructors"
-        internal ExcelRadarChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, Packaging.ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
-            base(drawings, node, uriChart, part, chartXml, chartNode)
-        {
-            SetTypeProperties();
-        }
+	/// <summary>
+	/// Provides access to line chart specific properties
+	/// </summary>
+	public class ExcelRadarChart : ExcelChart
+	{
+		#region "Constructors"
+		internal ExcelRadarChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, Packaging.ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
+			 base(drawings, node, uriChart, part, chartXml, chartNode)
+		{
+			SetTypeProperties();
+		}
 
-        internal ExcelRadarChart(ExcelChart topChart, XmlNode chartNode) :
-            base(topChart, chartNode)
-        {
-            SetTypeProperties();
-        }
-        internal ExcelRadarChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
-            base(drawings, node, type, topChart, PivotTableSource)
-        {
-            SetTypeProperties();
-        }
-        #endregion
-        private void SetTypeProperties()
-        {
-            if (ChartType == eChartType.RadarFilled)
-            {
-                RadarStyle = eRadarStyle.Filled;
-            }
-            else if  (ChartType == eChartType.RadarMarkers)
-            {
-                RadarStyle =  eRadarStyle.Marker;
-            }
-            else
-            {
-                RadarStyle = eRadarStyle.Standard;
-            }
-        }
+		internal ExcelRadarChart(ExcelChart topChart, XmlNode chartNode) :
+			 base(topChart, chartNode)
+		{
+			SetTypeProperties();
+		}
+		internal ExcelRadarChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
+			 base(drawings, node, type, topChart, PivotTableSource)
+		{
+			SetTypeProperties();
+		}
+		#endregion
+		private void SetTypeProperties()
+		{
+			if (ChartType == eChartType.RadarFilled)
+			{
+				RadarStyle = eRadarStyle.Filled;
+			}
+			else if (ChartType == eChartType.RadarMarkers)
+			{
+				RadarStyle = eRadarStyle.Marker;
+			}
+			else
+			{
+				RadarStyle = eRadarStyle.Standard;
+			}
+		}
 
-        string STYLE_PATH = "c:radarStyle/@val";
-        /// <summary>
-        /// The type of radarchart
-        /// </summary>
-        public eRadarStyle RadarStyle
-        {
-            get
-            {
-                var v=_chartXmlHelper?.GetXmlNodeString(STYLE_PATH);
-                if (string.IsNullOrEmpty(v))
-                {
-                    return eRadarStyle.Standard;
-                }
-                else
-                {
-                    return (eRadarStyle)Enum.Parse(typeof(eRadarStyle), v, true);
-                }
-            }
-            set
-            {
-                _chartXmlHelper?.SetXmlNodeString(STYLE_PATH, value.ToString().ToLower(CultureInfo.InvariantCulture));
-            }
-        }
+		string STYLE_PATH = "c:radarStyle/@val";
+		/// <summary>
+		/// The type of radarchart
+		/// </summary>
+		public eRadarStyle RadarStyle
+		{
+			get
+			{
+				var v = _chartXmlHelper?.GetXmlNodeString(STYLE_PATH);
+				if (string.IsNullOrEmpty(v))
+				{
+					return eRadarStyle.Standard;
+				}
+				else
+				{
+					return (eRadarStyle)Enum.Parse(typeof(eRadarStyle), v, true);
+				}
+			}
+			set
+			{
+				_chartXmlHelper?.SetXmlNodeString(STYLE_PATH, value.ToString().ToLower(CultureInfo.InvariantCulture));
+			}
+		}
 
-        //string SMOOTH_PATH = "c:smooth/@val";
-        ///// <summary>
-        ///// If the series has smooth lines
-        ///// </summary>
-        //public bool Smooth
-        //{
-        //    get
-        //    {
-        //        return _chartXmlHelper.GetXmlNodeBool(SMOOTH_PATH, false);
-        //    }
-        //    set
-        //    {
-        //        _chartXmlHelper.SetXmlNodeBool(SMOOTH_PATH, value);
-        //    }
-        //}
-        //string _chartTopPath = "c:chartSpace/c:chart/c:plotArea/{0}";
-        ExcelChartDataLabel _DataLabel = null;
-        /// <summary>
-        /// Access to datalabel properties
-        /// </summary>
-        public ExcelChartDataLabel DataLabel
-        {
-            get
-            {
-                if (_DataLabel == null)
-                {
-                    _DataLabel = new ExcelChartDataLabel(NameSpaceManager, ChartNode);
-                }
-                return _DataLabel;
-            }
-        }
-        internal override eChartType GetChartType(string name)
-        {
-            if (RadarStyle == eRadarStyle.Filled)
-            {
-                return eChartType.RadarFilled;
-            }
-            else if (RadarStyle == eRadarStyle.Marker)
-            {
-                return eChartType.RadarMarkers;
-            }
-            else
-            {
-                return eChartType.Radar;
-            }
-        }
-    }
+		//string SMOOTH_PATH = "c:smooth/@val";
+		///// <summary>
+		///// If the series has smooth lines
+		///// </summary>
+		//public bool Smooth
+		//{
+		//    get
+		//    {
+		//        return _chartXmlHelper.GetXmlNodeBool(SMOOTH_PATH, false);
+		//    }
+		//    set
+		//    {
+		//        _chartXmlHelper.SetXmlNodeBool(SMOOTH_PATH, value);
+		//    }
+		//}
+		//string _chartTopPath = "c:chartSpace/c:chart/c:plotArea/{0}";
+		ExcelChartDataLabel _DataLabel = null;
+		/// <summary>
+		/// Access to datalabel properties
+		/// </summary>
+		public ExcelChartDataLabel DataLabel
+		{
+			get
+			{
+				if (_DataLabel == null)
+				{
+					_DataLabel = new ExcelChartDataLabel(NameSpaceManager, ChartNode);
+				}
+				return _DataLabel;
+			}
+		}
+		internal override eChartType GetChartType(string name)
+		{
+			if (RadarStyle == eRadarStyle.Filled)
+			{
+				return eChartType.RadarFilled;
+			}
+			else if (RadarStyle == eRadarStyle.Marker)
+			{
+				return eChartType.RadarMarkers;
+			}
+			else
+			{
+				return eChartType.Radar;
+			}
+		}
+	}
 }

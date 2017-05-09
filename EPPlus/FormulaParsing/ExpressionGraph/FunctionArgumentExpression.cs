@@ -28,47 +28,43 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
-    public class FunctionArgumentExpression : GroupExpression
-    {
-        private readonly Expression _function;
+	public class FunctionArgumentExpression : GroupExpression
+	{
+		private readonly Expression _function;
 
-        public FunctionArgumentExpression(Expression function)
-            : base(false)
-        {
-            _function = function;
-        }
+		public FunctionArgumentExpression(Expression function)
+			 : base(false)
+		{
+			_function = function;
+		}
 
-        public override bool ParentIsLookupFunction
-        {
-            get
-            {
-                return base.ParentIsLookupFunction;
-            }
-            set
-            {
-                base.ParentIsLookupFunction = value;
-                foreach (var child in Children)
-                {
-                    child.ParentIsLookupFunction = value;
-                }
-            }
-        }
+		public override bool ParentIsLookupFunction
+		{
+			get
+			{
+				return base.ParentIsLookupFunction;
+			}
+			set
+			{
+				base.ParentIsLookupFunction = value;
+				foreach (var child in Children)
+				{
+					child.ParentIsLookupFunction = value;
+				}
+			}
+		}
 
-        public override bool IsGroupedExpression
-        {
-            get { return false; }
-        }
+		public override bool IsGroupedExpression
+		{
+			get { return false; }
+		}
 
-        public override Expression PrepareForNextChild()
-        {
-            return _function.PrepareForNextChild();
-        }
-    }
+		public override Expression PrepareForNextChild()
+		{
+			return _function.PrepareForNextChild();
+		}
+	}
 }

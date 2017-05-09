@@ -25,19 +25,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-    public class Product : HiddenValuesHandlingFunction
-    {
-        public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-        {
-			if(ValidateArguments(arguments, 1) == false)
+	public class Product : HiddenValuesHandlingFunction
+	{
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-            var result = 0d;
-            var index = 0;
+			var result = 0d;
+			var index = 0;
 			try
 			{
 				while (AreEqual(result, 0d) && index < arguments.Count())
@@ -74,26 +73,26 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-        }
+		}
 
-        private double CalculateFirstItem(IEnumerable<FunctionArgument> arguments, int index, ParsingContext context)
-        {
-            var element = arguments.ElementAt(index);
-            var argList = new List<FunctionArgument> { element };
-            var valueList = ArgsToDoubleEnumerable(false, false, argList, context);
-            var result = 0d;
-            foreach (var value in valueList)
-            {
-                if (result == 0d && value > 0d)
-                {
-                    result = value;
-                }
-                else
-                {
-                    result *= value;
-                }
-            }
-            return result;
-        }
-    }
+		private double CalculateFirstItem(IEnumerable<FunctionArgument> arguments, int index, ParsingContext context)
+		{
+			var element = arguments.ElementAt(index);
+			var argList = new List<FunctionArgument> { element };
+			var valueList = ArgsToDoubleEnumerable(false, false, argList, context);
+			var result = 0d;
+			foreach (var value in valueList)
+			{
+				if (result == 0d && value > 0d)
+				{
+					result = value;
+				}
+				else
+				{
+					result *= value;
+				}
+			}
+			return result;
+		}
+	}
 }

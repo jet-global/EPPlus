@@ -30,87 +30,85 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Xml;
 
 namespace OfficeOpenXml.Drawing.Chart
 {
-    /// <summary>
-    /// A serie for a scatter chart
-    /// </summary>
-    public sealed class ExcelRadarChartSerie : ExcelChartSerie
-    {
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        /// <param name="chartSeries">Parent collection</param>
-        /// <param name="ns">Namespacemanager</param>
-        /// <param name="node">Topnode</param>
-        /// <param name="isPivot">Is pivotchart</param>
-        internal ExcelRadarChartSerie(ExcelChartSeries chartSeries, XmlNamespaceManager ns, XmlNode node, bool isPivot) :
-            base(chartSeries, ns, node, isPivot)
-        {
-            if (chartSeries.Chart.ChartType == eChartType.Radar)
-            {
-                Marker = eMarkerStyle.None;
-            }
-        }
-        ExcelChartSerieDataLabel _DataLabel = null;
-        /// <summary>
-        /// Datalabel
-        /// </summary>
-        public ExcelChartSerieDataLabel DataLabel
-        {
-            get
-            {
-                if (_DataLabel == null)
-                {
-                    _DataLabel = new ExcelChartSerieDataLabel(_ns, _node);
-                }
-                return _DataLabel;
-            }
-        }
-        const string markerPath = "c:marker/c:symbol/@val";
-        /// <summary>
-        /// Marker symbol 
-        /// </summary>
-        public eMarkerStyle Marker
-        {
-            get
-            {
-                string marker = GetXmlNodeString(markerPath);
-                if (marker == "" || marker=="none")
-                {
-                    return eMarkerStyle.None;
-                }
-                else
-                {
-                    return (eMarkerStyle)Enum.Parse(typeof(eMarkerStyle), marker, true);
-                }                
-            }
-            internal set
-            {
-                SetXmlNodeString(markerPath, value.ToString().ToLower(CultureInfo.InvariantCulture));
-            }
-        }
-        const string MARKERSIZE_PATH = "c:marker/c:size/@val";
-        public int MarkerSize
-        {
-            get
-            {
-                return GetXmlNodeInt(MARKERSIZE_PATH);
-            }
-            set
-            {
-                if (value < 2 && value > 72)
-                {
-                    throw (new ArgumentOutOfRangeException("MarkerSize out of range. Range from 2-72 allowed."));
-                }
-                SetXmlNodeString(MARKERSIZE_PATH, value.ToString(CultureInfo.InvariantCulture));
-            }
-        }
+	/// <summary>
+	/// A serie for a scatter chart
+	/// </summary>
+	public sealed class ExcelRadarChartSerie : ExcelChartSerie
+	{
+		/// <summary>
+		/// Default constructor
+		/// </summary>
+		/// <param name="chartSeries">Parent collection</param>
+		/// <param name="ns">Namespacemanager</param>
+		/// <param name="node">Topnode</param>
+		/// <param name="isPivot">Is pivotchart</param>
+		internal ExcelRadarChartSerie(ExcelChartSeries chartSeries, XmlNamespaceManager ns, XmlNode node, bool isPivot) :
+			 base(chartSeries, ns, node, isPivot)
+		{
+			if (chartSeries.Chart.ChartType == eChartType.Radar)
+			{
+				Marker = eMarkerStyle.None;
+			}
+		}
+		ExcelChartSerieDataLabel _DataLabel = null;
+		/// <summary>
+		/// Datalabel
+		/// </summary>
+		public ExcelChartSerieDataLabel DataLabel
+		{
+			get
+			{
+				if (_DataLabel == null)
+				{
+					_DataLabel = new ExcelChartSerieDataLabel(_ns, _node);
+				}
+				return _DataLabel;
+			}
+		}
+		const string markerPath = "c:marker/c:symbol/@val";
+		/// <summary>
+		/// Marker symbol 
+		/// </summary>
+		public eMarkerStyle Marker
+		{
+			get
+			{
+				string marker = GetXmlNodeString(markerPath);
+				if (marker == "" || marker == "none")
+				{
+					return eMarkerStyle.None;
+				}
+				else
+				{
+					return (eMarkerStyle)Enum.Parse(typeof(eMarkerStyle), marker, true);
+				}
+			}
+			internal set
+			{
+				SetXmlNodeString(markerPath, value.ToString().ToLower(CultureInfo.InvariantCulture));
+			}
+		}
+		const string MARKERSIZE_PATH = "c:marker/c:size/@val";
+		public int MarkerSize
+		{
+			get
+			{
+				return GetXmlNodeInt(MARKERSIZE_PATH);
+			}
+			set
+			{
+				if (value < 2 && value > 72)
+				{
+					throw (new ArgumentOutOfRangeException("MarkerSize out of range. Range from 2-72 allowed."));
+				}
+				SetXmlNodeString(MARKERSIZE_PATH, value.ToString(CultureInfo.InvariantCulture));
+			}
+		}
 
-    }
+	}
 }
