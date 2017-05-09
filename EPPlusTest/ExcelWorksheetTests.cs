@@ -3507,25 +3507,66 @@ namespace EPPlusTest
 		{
 			var file = new FileInfo(Path.GetTempFileName());
 			file.Delete();
-			using (var package = new ExcelPackage(file))
+			try
 			{
-				var sheet = package.Workbook.Worksheets.Add("Sheet1");
-				sheet.AutoFilterAddress = new ExcelAddressBase("B2:D4");
-				Assert.AreEqual(1, sheet.AutoFilterCount);
-				package.Save();
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets.Add("Sheet1");
+					sheet.AutoFilterAddress = new ExcelAddressBase("B2:D4");
+					Assert.IsTrue(sheet.HasAutoFilters);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					Assert.IsTrue(sheet.HasAutoFilters);
+					sheet.RemoveAutoFilters();
+					Assert.IsFalse(sheet.HasAutoFilters);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					Assert.IsFalse(sheet.HasAutoFilters);
+				}
 			}
-			using (var package = new ExcelPackage(file))
+			finally
 			{
-				var sheet = package.Workbook.Worksheets.First();
-				Assert.AreEqual(1, sheet.AutoFilterCount);
-				sheet.RemoveAutoFilters();
-				Assert.AreEqual(0, sheet.AutoFilterCount);
-				package.Save();
+				file.Delete();
 			}
-			using (var package = new ExcelPackage(file))
+		}
+
+		[TestMethod]
+		public void HasAutoFiltersWithRangeSpecifiedAutoFilter()
+		{
+			var file = new FileInfo(Path.GetTempFileName());
+			file.Delete();
+			try
 			{
-				var sheet = package.Workbook.Worksheets.First();
-				Assert.AreEqual(0, sheet.AutoFilterCount);
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets.Add("Sheet1");
+					sheet.Cells["B2:D4"].AutoFilter = true;
+					Assert.IsTrue(sheet.HasAutoFilters);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					Assert.IsTrue(sheet.HasAutoFilters);
+					sheet.RemoveAutoFilters();
+					Assert.IsFalse(sheet.HasAutoFilters);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					Assert.IsFalse(sheet.HasAutoFilters);
+				}
+			}
+			finally
+			{
+				file.Delete();
 			}
 		}
 		#endregion

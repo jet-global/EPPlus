@@ -552,12 +552,13 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Gets the number of distinct autoFilter ranges present on the worksheet.
 		/// </summary>
-		public int AutoFilterCount
+		public bool HasAutoFilters
 		{
 			get
 			{
 				var autoFilters = this.WorksheetXml.SelectNodes("//d:autoFilter", this.NameSpaceManager);
-				return autoFilters.Count;
+				var autoFilteredRanges = this.Names.ContainsKey("_xlnm._FilterDatabase") ? 1 : 0;
+				return (autoFilters.Count + autoFilteredRanges) > 0;
 			}
 		}
 
@@ -2015,6 +2016,11 @@ namespace OfficeOpenXml
 		public void RemoveAutoFilters()
 		{
 			this.DeleteAllNode("d:autoFilter");
+			if (this.Names.ContainsKey("_xlnm._FilterDatabase"))
+			{
+				this.Names.Remove("_xlnm._FilterDatabase");
+			}
+			this.TopNode.SelectSingleNode("d:sheetPr", this.NameSpaceManager)?.Attributes?.RemoveNamedItem("filterMode");
 		}
 
 		/// <summary>
