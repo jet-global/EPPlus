@@ -30,6 +30,15 @@
  * Jan Källman		    License changed GPL-->LGPL  2011-12-27
  * Eyal Seagull		    Conditional Formatting      2012-04-03
  *******************************************************************************/
+using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.DataValidation;
+using OfficeOpenXml.Drawing.Sparkline;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using OfficeOpenXml.Style;
+using OfficeOpenXml.Style.XmlAccess;
+using static OfficeOpenXml.Style.XmlAccess.ExcelNumberFormatXml;
+using OfficeOpenXml.Table;
+using OfficeOpenXml.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -44,13 +53,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
-using OfficeOpenXml.ConditionalFormatting;
-using OfficeOpenXml.DataValidation;
-using OfficeOpenXml.Drawing.Sparkline;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
-using OfficeOpenXml.Style;
-using OfficeOpenXml.Style.XmlAccess;
-using OfficeOpenXml.Table;
 
 namespace OfficeOpenXml
 {
@@ -1005,7 +1007,7 @@ namespace OfficeOpenXml
 			if (v == null) return "";
 			var styles = Worksheet.Workbook.Styles;
 			var nfID = styles.CellXfs[StyleID].NumberFormatId;
-			ExcelNumberFormatXml.ExcelFormatTranslator nf = null;
+			ExcelFormatTranslator nf = null;
 			for (int i = 0; i < styles.NumberFormats.Count; i++)
 			{
 				if (nfID == styles.NumberFormats[i].NumFmtId)
@@ -1014,104 +1016,78 @@ namespace OfficeOpenXml
 					break;
 				}
 			}
-
-			string format, textFormat;
-			if (forWidthCalc)
-			{
-				format = nf.NetFormatForWidth;
-				textFormat = nf.NetTextFormatForWidth;
-			}
-			else
-			{
-				format = nf.NetFormat;
-				textFormat = nf.NetTextFormat;
-			}
-
-			return FormatValue(v, nf, format, textFormat);
+			return ExcelRangeBase.FormatValue(v, nf, forWidthCalc);
 		}
 
-		internal static string FormatValue(object v, ExcelNumberFormatXml.ExcelFormatTranslator nf, string format, string textFormat)
+		private static string FormatNumericValue(object value, ExcelFormatTranslator nf, string format)
 		{
-			if (v is decimal || v.GetType().IsPrimitive)
+			double d;
+			try
 			{
-				double d;
-				try
-				{
-					d = Convert.ToDouble(v);
-				}
-				catch
-				{
-					return "";
-				}
-
-				if (nf.DataType == ExcelNumberFormatXml.eFormatType.Number)
-				{
-					if (string.IsNullOrEmpty(nf.FractionFormat))
-					{
-						return d.ToString(format, nf.Culture);
-					}
-					else
-					{
-						return nf.FormatFraction(d);
-					}
-				}
-				else if (nf.DataType == ExcelNumberFormatXml.eFormatType.DateTime)
-				{
-					var date = DateTime.FromOADate(d);
-					return date.ToString(format, nf.Culture);
-				}
+				d = Convert.ToDouble(value);
 			}
-			else if (v is DateTime)
+			catch
 			{
-				if (nf.DataType == ExcelNumberFormatXml.eFormatType.DateTime)
-				{
-					return ((DateTime)v).ToString(format, nf.Culture);
-				}
-				else
-				{
-					double d = ((DateTime)v).ToOADate();
-					if (string.IsNullOrEmpty(nf.FractionFormat))
-					{
-						return d.ToString(format, nf.Culture);
-					}
-					else
-					{
-						return nf.FormatFraction(d);
-					}
-				}
+				return string.Empty;
 			}
-			else if (v is TimeSpan)
+			if (nf.DataType == eFormatType.Number)
 			{
-				if (nf.DataType == ExcelNumberFormatXml.eFormatType.DateTime)
-				{
-					return new DateTime(((TimeSpan)v).Ticks).ToString(format, nf.Culture);
-				}
+				if (string.IsNullOrEmpty(nf.FractionFormat))
+					return d.ToString(format, nf.Culture);
 				else
-				{
-					double d = DateTime.FromOADate(0).Add((TimeSpan)v).ToOADate();
-					if (string.IsNullOrEmpty(nf.FractionFormat))
-					{
-						return d.ToString(format, nf.Culture);
-					}
-					else
-					{
-						return nf.FormatFraction(d);
-					}
-				}
+					return nf.FormatFraction(d);
 			}
 			else
 			{
-				if (textFormat == "")
-				{
-					return v.ToString();
-				}
-				else
-				{
-					return string.Format(textFormat, v);
-				}
+				var date = DateTime.FromOADate(d);
+				return date.ToString(format, nf.Culture);
 			}
-			return v.ToString();
 		}
+
+		private static string FormatDateValue(DateTime date, ExcelFormatTranslator nf, string format)
+		{
+			if (nf.DataType == eFormatType.DateTime)
+				return date.ToString(format, nf.Culture);
+			else
+			{
+				double d = date.ToOADate();
+				if (string.IsNullOrEmpty(nf.FractionFormat))
+					return d.ToString(format, nf.Culture);
+				else
+					return nf.FormatFraction(d);
+			}
+		}
+
+		private static string FormatTimeSpanValue(TimeSpan timeSpan, ExcelFormatTranslator nf, string format)
+		{
+			if (nf.DataType == eFormatType.DateTime)
+				return new DateTime(timeSpan.Ticks).ToString(format, nf.Culture);
+			else
+			{
+				double d = DateTime.FromOADate(0).Add(timeSpan).ToOADate();
+				if (string.IsNullOrEmpty(nf.FractionFormat))
+					return d.ToString(format, nf.Culture);
+				else
+					return nf.FormatFraction(d);
+			}
+		}
+
+		internal static string FormatValue(object value, ExcelFormatTranslator nf, bool forWidthCalc = false)
+		{
+			string format = forWidthCalc ? nf.NetFormatForWidth : nf.NetFormat;
+			string textFormat = forWidthCalc ? nf.NetTextFormatForWidth : nf.NetTextFormat;
+			if (value is DateTime)
+				return ExcelRangeBase.FormatDateValue((DateTime)value, nf, format);
+			else if (ConvertUtil.TryParseDateString(value, out DateTime date))
+				return ExcelRangeBase.FormatDateValue(date, nf, format);
+			else if (value is TimeSpan)
+				return ExcelRangeBase.FormatTimeSpanValue((TimeSpan)value, nf, format);
+			else if (ConvertUtil.IsNumeric(value) && (nf.DataType == eFormatType.Number || nf.DataType == eFormatType.DateTime))
+				return ExcelRangeBase.FormatNumericValue(value, nf, format);
+			else
+				return textFormat == string.Empty ? value.ToString() : string.Format(textFormat, value);
+		}
+
 		/// <summary>
 		/// Gets or sets a formula for a range.
 		/// </summary>

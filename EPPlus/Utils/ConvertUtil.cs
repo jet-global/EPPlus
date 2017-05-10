@@ -10,9 +10,13 @@ namespace OfficeOpenXml.Utils
 	{
 		internal static bool IsNumeric(object candidate)
 		{
-			if (candidate == null) return false;
-			return (candidate.GetType().IsPrimitive || candidate is double || candidate is decimal || candidate is DateTime || candidate is TimeSpan || candidate is long);
+			if (candidate == null)
+				return false;
+			return candidate is byte || candidate is sbyte || candidate is short || candidate is ushort || candidate is int || candidate is uint ||
+					candidate is long || candidate is ulong || candidate is Single || candidate is double || candidate is decimal || candidate is bool ||
+					candidate is DateTime || ConvertUtil.TryParseDateString(candidate, out DateTime date) || candidate is TimeSpan;
 		}
+
 		/// <summary>
 		/// Tries to parse a double from the specified <paramref name="candidate"/> which is expected to be a string value.
 		/// </summary>
@@ -32,6 +36,7 @@ namespace OfficeOpenXml.Utils
 			result = 0;
 			return false;
 		}
+
 		/// <summary>
 		/// Tries to parse a boolean value from the specificed <paramref name="candidate"/>.
 		/// </summary>
@@ -45,6 +50,7 @@ namespace OfficeOpenXml.Utils
 			result = false;
 			return false;
 		}
+
 		/// <summary>
 		/// Tries to parse a <see cref="DateTime"/> from the specified <paramref name="candidate"/> which is expected to be a string value.
 		/// </summary>
@@ -64,49 +70,42 @@ namespace OfficeOpenXml.Utils
 			result = DateTime.MinValue;
 			return false;
 		}
+
 		/// <summary>
-		/// Convert an object value to a double 
+		/// Convert an object value to a double.
 		/// </summary>
-		/// <param name="v"></param>
-		/// <param name="ignoreBool"></param>
-		/// <param name="retNaN">Return NaN if invalid double otherwise 0</param>
-		/// <returns></returns>
-		internal static double GetValueDouble(object v, bool ignoreBool = false, bool retNaN = false)
+		/// <param name="value">The value to convert to a double.</param>
+		/// <param name="ignoreBool">If the value is a boolean, indicates the boolean value should be ignored and 0 returned instead.</param>
+		/// <param name="returnNaN">If true, returns NaN if the double is invalid; otherwise returns 0.</param>
+		/// <returns>The value converted to a double, if possible; otherwise, returns NaN or 0 based on the value of <paramref name="returnNaN"/>.</returns>
+		internal static double GetValueDouble(object value, bool ignoreBool = false, bool returnNaN = false)
 		{
-			double d;
+			double result;
 			try
 			{
-				if (ignoreBool && v is bool)
-				{
+				if (ignoreBool && value is bool)
 					return 0;
-				}
-				if (IsNumeric(v))
+				if (ConvertUtil.IsNumeric(value))
 				{
-					if (v is DateTime)
-					{
-						d = ((DateTime)v).ToOADate();
-					}
-					else if (v is TimeSpan)
-					{
-						d = DateTime.FromOADate(0).Add((TimeSpan)v).ToOADate();
-					}
+					if (value is DateTime)
+						result = ((DateTime)value).ToOADate();
+					else if (ConvertUtil.TryParseDateString(value, out DateTime date))
+						result = date.ToOADate();
+					else if (value is TimeSpan)
+						result = DateTime.FromOADate(0).Add((TimeSpan)value).ToOADate();
 					else
-					{
-						d = Convert.ToDouble(v, CultureInfo.InvariantCulture);
-					}
+						result = Convert.ToDouble(value, CultureInfo.InvariantCulture);
 				}
 				else
-				{
-					d = retNaN ? double.NaN : 0;
-				}
+					result = returnNaN ? double.NaN : 0;
 			}
-
 			catch
 			{
-				d = retNaN ? double.NaN : 0;
+				result = returnNaN ? double.NaN : 0;
 			}
-			return d;
+			return result;
 		}
+
 		/// <summary>
 		/// OOXML requires that "," , and &amp; be escaped, but ' and " should *not* be escaped, nor should
 		/// any extended Unicode characters. This function only encodes the required characters.
@@ -120,6 +119,7 @@ namespace OfficeOpenXml.Utils
 		{
 			return s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
 		}
+
 		/// <summary>
 		/// Return true if preserve space attribute is set.
 		/// </summary>
@@ -150,8 +150,8 @@ namespace OfficeOpenXml.Utils
 					sw.Write(t[i]);
 				}
 			}
-
 		}
+
 		/// <summary>
 		/// Return true if preserve space attribute is set.
 		/// </summary>
@@ -183,8 +183,8 @@ namespace OfficeOpenXml.Utils
 					sb.Append(t[i]);
 				}
 			}
-
 		}
+
 		/// <summary>
 		/// Return true if preserve space attribute is set.
 		/// </summary>
@@ -231,7 +231,7 @@ namespace OfficeOpenXml.Utils
 			return ret.ToString();
 		}
 
-		#region internal cache objects
+		#region Internal Cache Objects
 		internal static TextInfo _invariantTextInfo = CultureInfo.InvariantCulture.TextInfo;
 		internal static CompareInfo _invariantCompareInfo = CompareInfo.GetCompareInfo(CultureInfo.InvariantCulture.LCID);
 		#endregion
