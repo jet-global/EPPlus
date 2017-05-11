@@ -1019,7 +1019,7 @@ namespace OfficeOpenXml
 			return ExcelRangeBase.FormatValue(v, nf, forWidthCalc);
 		}
 
-		private static string FormatNumericValue(object value, ExcelFormatTranslator nf, string format)
+		private static bool TryFormatNumericValue(object value, ExcelFormatTranslator nf, string format, out string formatted)
 		{
 			double d;
 			try
@@ -1028,20 +1028,25 @@ namespace OfficeOpenXml
 			}
 			catch
 			{
-				return string.Empty;
+				formatted = string.Empty;
+				return false;
 			}
 			if (nf.DataType == eFormatType.Number)
 			{
 				if (string.IsNullOrEmpty(nf.FractionFormat))
-					return d.ToString(format, nf.Culture);
+					formatted = d.ToString(format, nf.Culture);
 				else
-					return nf.FormatFraction(d);
+					formatted =  nf.FormatFraction(d);
+				return true;
 			}
-			else
+			else if (nf.DataType == eFormatType.DateTime)
 			{
 				var date = DateTime.FromOADate(d);
-				return date.ToString(format, nf.Culture);
+				formatted = date.ToString(format, nf.Culture);
+				return true;
 			}
+			formatted = string.Empty;
+			return false;
 		}
 
 		private static string FormatDateValue(DateTime date, ExcelFormatTranslator nf, string format)
@@ -1076,16 +1081,16 @@ namespace OfficeOpenXml
 		{
 			string format = forWidthCalc ? nf.NetFormatForWidth : nf.NetFormat;
 			string textFormat = forWidthCalc ? nf.NetTextFormatForWidth : nf.NetTextFormat;
-			if (value is DateTime)
-				return ExcelRangeBase.FormatDateValue((DateTime)value, nf, format);
-			else if (ConvertUtil.TryParseDateString(value, out DateTime date))
+			if (value is DateTime date)
 				return ExcelRangeBase.FormatDateValue(date, nf, format);
-			else if (value is TimeSpan)
-				return ExcelRangeBase.FormatTimeSpanValue((TimeSpan)value, nf, format);
-			else if (ConvertUtil.IsNumeric(value) && (nf.DataType == eFormatType.Number || nf.DataType == eFormatType.DateTime))
-				return ExcelRangeBase.FormatNumericValue(value, nf, format);
+			else if (ConvertUtil.TryParseDateString(value, out date))
+				return ExcelRangeBase.FormatDateValue(date, nf, format);
+			else if (value is TimeSpan timeSpan)
+				return ExcelRangeBase.FormatTimeSpanValue(timeSpan, nf, format);
+			else if (ConvertUtil.IsNumeric(value) && ExcelRangeBase.TryFormatNumericValue(value, nf, format, out string formatted))
+				return formatted;
 			else
-				return textFormat == string.Empty ? value.ToString() : string.Format(textFormat, value);
+				return string.IsNullOrEmpty(textFormat) ? value.ToString() : string.Format(textFormat, value);
 		}
 
 		/// <summary>

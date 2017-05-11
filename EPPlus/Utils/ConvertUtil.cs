@@ -76,7 +76,7 @@ namespace OfficeOpenXml.Utils
 		/// </summary>
 		/// <param name="value">The value to convert to a double.</param>
 		/// <param name="ignoreBool">If the value is a boolean, indicates the boolean value should be ignored and 0 returned instead.</param>
-		/// <param name="returnNaN">If true, returns NaN if the double is invalid; otherwise returns 0.</param>
+		/// <param name="returnNaN">If true, returns NaN if the double is invalid; otherwise returns 0 if the double is invalid.</param>
 		/// <returns>The value converted to a double, if possible; otherwise, returns NaN or 0 based on the value of <paramref name="returnNaN"/>.</returns>
 		internal static double GetValueDouble(object value, bool ignoreBool = false, bool returnNaN = false)
 		{
@@ -87,12 +87,12 @@ namespace OfficeOpenXml.Utils
 					return 0;
 				if (ConvertUtil.IsNumeric(value))
 				{
-					if (value is DateTime)
-						result = ((DateTime)value).ToOADate();
-					else if (ConvertUtil.TryParseDateString(value, out DateTime date))
+					if (value is DateTime date)
 						result = date.ToOADate();
-					else if (value is TimeSpan)
-						result = DateTime.FromOADate(0).Add((TimeSpan)value).ToOADate();
+					else if (ConvertUtil.TryParseDateString(value, out date))
+						result = date.ToOADate();
+					else if (value is TimeSpan timeSpan)
+						result = DateTime.FromOADate(0).Add(timeSpan).ToOADate();
 					else
 						result = Convert.ToDouble(value, CultureInfo.InvariantCulture);
 				}

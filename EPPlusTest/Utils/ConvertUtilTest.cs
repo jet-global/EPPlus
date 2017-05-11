@@ -97,8 +97,6 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void GetValueDouble()
 		{
-			Assert.IsTrue(((int)3).GetType().IsPrimitive);
-			Assert.IsTrue(((Int32)3).GetType().IsPrimitive);
 			Assert.AreEqual(5d, ConvertUtil.GetValueDouble((byte)5));
 			Assert.AreEqual(5d, ConvertUtil.GetValueDouble((short)5));
 			Assert.AreEqual(5d, ConvertUtil.GetValueDouble((int)5));
