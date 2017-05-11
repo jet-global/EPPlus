@@ -468,37 +468,6 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		public void FormatValueDateStringCurrentCultureFormat()
-		{
-			var currentCulture = Thread.CurrentThread.CurrentCulture;
-			try
-			{
-				using (var package = new ExcelPackage())
-				{
-					var sheet = package.Workbook.Worksheets.Add("Sheet");
-					var nf = sheet.Workbook.Styles.NumberFormats[11].FormatTranslator;
-					Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-					Assert.AreEqual("31-Dec-17", ExcelRangeBase.FormatValue("12/31/2017", nf));
-				}
-			}
-			finally
-			{
-				Thread.CurrentThread.CurrentCulture = currentCulture;
-			}
-		}
-
-		[TestMethod]
-		public void FormatValueDateStringInvariantCultureFormat()
-		{
-			using (var package = new ExcelPackage())
-			{
-				var sheet = package.Workbook.Worksheets.Add("Sheet");
-				var nf = sheet.Workbook.Styles.NumberFormats[11].FormatTranslator;
-				Assert.AreEqual("31-Dec-17", ExcelRangeBase.FormatValue("2017-12-31", nf));
-			}
-		}
-
-		[TestMethod]
 		public void FormatValueTimeSpan()
 		{
 			using (var package = new ExcelPackage())
