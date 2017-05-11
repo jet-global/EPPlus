@@ -1083,11 +1083,9 @@ namespace OfficeOpenXml
 			string textFormat = forWidthCalc ? nf.NetTextFormatForWidth : nf.NetTextFormat;
 			if (value is DateTime date)
 				return ExcelRangeBase.FormatDateValue(date, nf, format);
-			else if (ConvertUtil.TryParseDateString(value, out date))
-				return ExcelRangeBase.FormatDateValue(date, nf, format);
 			else if (value is TimeSpan timeSpan)
 				return ExcelRangeBase.FormatTimeSpanValue(timeSpan, nf, format);
-			else if (ConvertUtil.IsNumeric(value) && ExcelRangeBase.TryFormatNumericValue(value, nf, format, out string formatted))
+			else if (!(value is string) && ConvertUtil.IsNumeric(value) && ExcelRangeBase.TryFormatNumericValue(value, nf, format, out string formatted))
 				return formatted;
 			else
 				return string.IsNullOrEmpty(textFormat) ? value.ToString() : string.Format(textFormat, value);
