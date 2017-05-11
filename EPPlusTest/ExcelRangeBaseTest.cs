@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Threading;
 
 namespace EPPlusTest
 {
@@ -449,6 +451,94 @@ namespace EPPlusTest
 				sheet.Column(2).AutoFit();
 				var rotatedWidth = sheet.Column(2).Width;
 				Assert.IsTrue(rotatedWidth < normalWidth);
+			}
+		}
+		#endregion
+
+		#region FormatValue Tests
+		[TestMethod]
+		public void FormatValueDateTime()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var nf = sheet.Workbook.Styles.NumberFormats[10].FormatTranslator;
+				Assert.AreEqual("12/31/2017",  ExcelRangeBase.FormatValue(new DateTime(2017, 12, 31), nf));
+			}
+		}
+
+		[TestMethod]
+		public void FormatValueDateStringCurrentCultureFormat()
+		{
+			var currentCulture = Thread.CurrentThread.CurrentCulture;
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var sheet = package.Workbook.Worksheets.Add("Sheet");
+					var nf = sheet.Workbook.Styles.NumberFormats[11].FormatTranslator;
+					Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+					Assert.AreEqual("31-Dec-17", ExcelRangeBase.FormatValue("12/31/2017", nf));
+				}
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
+		[TestMethod]
+		public void FormatValueDateStringInvariantCultureFormat()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var nf = sheet.Workbook.Styles.NumberFormats[11].FormatTranslator;
+				Assert.AreEqual("31-Dec-17", ExcelRangeBase.FormatValue("2017-12-31", nf));
+			}
+		}
+
+		[TestMethod]
+		public void FormatValueTimeSpan()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var nf = sheet.Workbook.Styles.NumberFormats[16].FormatTranslator;
+				Assert.AreEqual("10:20", ExcelRangeBase.FormatValue(new TimeSpan(10, 20, 0), nf));
+			}
+		}
+
+		[TestMethod]
+		public void FormatValueNumber()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var nf = sheet.Workbook.Styles.NumberFormats[6].FormatTranslator;
+				Assert.AreEqual("55.50%", ExcelRangeBase.FormatValue(0.555, nf));
+			}
+		}
+
+		[TestMethod]
+		public void FormatValueNumberDate()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var nf = sheet.Workbook.Styles.NumberFormats[11].FormatTranslator;
+				Assert.AreEqual("19-Apr-01", ExcelRangeBase.FormatValue(37000, nf));
+			}
+		}
+
+		[TestMethod]
+		public void FormatValueToString()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var nf = sheet.Workbook.Styles.NumberFormats[0].FormatTranslator;
+				Assert.AreEqual("A", ExcelRangeBase.FormatValue('A', nf));
 			}
 		}
 		#endregion

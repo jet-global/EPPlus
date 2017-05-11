@@ -73,5 +73,46 @@ namespace EPPlusTest.Utils
 			Assert.IsTrue(ConvertUtil.TryParseDateString(dateString, out result));
 			Assert.AreEqual(new DateTime(2013, 1, 15, 15, 26, 0), result);
 		}
+
+		[TestMethod]
+		public void IsNumeric()
+		{
+			Assert.IsFalse(ConvertUtil.IsNumeric(null));
+			Assert.IsTrue(ConvertUtil.IsNumeric((byte)5));
+			Assert.IsTrue(ConvertUtil.IsNumeric((short)5));
+			Assert.IsTrue(ConvertUtil.IsNumeric((int)5));
+			Assert.IsTrue(ConvertUtil.IsNumeric((long)5));
+			Assert.IsTrue(ConvertUtil.IsNumeric((Single)5));
+			Assert.IsTrue(ConvertUtil.IsNumeric((double)5));
+			Assert.IsTrue(ConvertUtil.IsNumeric((decimal)5));
+			Assert.IsTrue(ConvertUtil.IsNumeric(true));
+			Assert.IsFalse(ConvertUtil.IsNumeric('5'));
+			Assert.IsFalse(ConvertUtil.IsNumeric("5"));
+			// Excel treats dates  and date strings as numeric.
+			Assert.IsTrue(ConvertUtil.IsNumeric("1/1/2000"));
+			Assert.IsTrue(ConvertUtil.IsNumeric(new DateTime(2000, 1, 1)));
+			Assert.IsTrue(ConvertUtil.IsNumeric(new TimeSpan(5, 0, 0, 0)));
+		}
+
+		[TestMethod]
+		public void GetValueDouble()
+		{
+			Assert.AreEqual(5d, ConvertUtil.GetValueDouble((byte)5));
+			Assert.AreEqual(5d, ConvertUtil.GetValueDouble((short)5));
+			Assert.AreEqual(5d, ConvertUtil.GetValueDouble((int)5));
+			Assert.AreEqual(5d, ConvertUtil.GetValueDouble((long)5));
+			Assert.AreEqual(5d, ConvertUtil.GetValueDouble((Single)5));
+			Assert.AreEqual(5d, ConvertUtil.GetValueDouble((double)5));
+			Assert.AreEqual(5d, ConvertUtil.GetValueDouble((decimal)5));
+			Assert.AreEqual(1, ConvertUtil.GetValueDouble(true));
+			Assert.AreEqual(0, ConvertUtil.GetValueDouble(true, true));
+			Assert.AreEqual(36526d, ConvertUtil.GetValueDouble(new DateTime(2000, 1, 1)));
+			Assert.AreEqual(36526d, ConvertUtil.GetValueDouble("1/1/2000"));
+			Assert.AreEqual(5d, ConvertUtil.GetValueDouble(new TimeSpan(5, 0, 0, 0)));
+			Assert.AreEqual(0d, ConvertUtil.GetValueDouble('a'));
+			Assert.AreEqual(double.NaN, ConvertUtil.GetValueDouble('a', false, true));
+			Assert.AreEqual(0d, ConvertUtil.GetValueDouble("Not a number"));
+			Assert.AreEqual(double.NaN, ConvertUtil.GetValueDouble("Not a number", false, true));
+		}
 	}
 }
