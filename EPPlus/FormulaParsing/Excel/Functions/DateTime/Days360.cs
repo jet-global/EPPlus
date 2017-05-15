@@ -16,8 +16,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-			System.DateTime dt1, dt2;
-			if (!this.TryGetArgumentDateValueAtIndex(arguments, 0, out dt1) || !this.TryGetArgumentDateValueAtIndex(arguments, 1, out dt2))
+			if (!this.TryGetArgumentDateValueAtIndex(arguments, 0, out System.DateTime dt1) || !this.TryGetArgumentDateValueAtIndex(arguments, 1, out System.DateTime dt2))
 				return new CompileResult(eErrorType.Value);
 			var calcType = Days360Calctype.Us;
 			if (arguments.Count() > 2)
