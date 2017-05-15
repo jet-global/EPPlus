@@ -365,6 +365,30 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
+		public void Days360ShouldHandleNullFirstDateArgument()
+		{
+			var func = new Days360();
+
+			var dt2arg = new DateTime(2013, 3, 31).ToOADate();
+
+			var result = func.Execute(FunctionsHelper.CreateArgs(null, dt2arg, false), _parsingContext);
+			Assert.Fail("");
+			Assert.AreEqual(40771, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360ShouldHandleNullSecondDateArgument()
+		{
+			var func = new Days360();
+
+			var dt1arg = new DateTime(2013, 2, 28).ToOADate();
+
+			var result = func.Execute(FunctionsHelper.CreateArgs(dt1arg, null, false), _parsingContext);
+			Assert.Fail("");
+			Assert.AreEqual(-40740, result.Result);
+		}
+
+		[TestMethod]
 		public void YearFracShouldReturnCorrectResultWithUsBasis()
 		{
 			var func = new Yearfrac();

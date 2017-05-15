@@ -16,11 +16,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-			var numDate1 = ArgToDecimal(arguments, 0);
-			var numDate2 = ArgToDecimal(arguments, 1);
-			var dt1 = System.DateTime.FromOADate(numDate1);
-			var dt2 = System.DateTime.FromOADate(numDate2);
-
+			System.DateTime dt1, dt2;
+			if (!this.TryGetArgumentDateValueAtIndex(arguments, 0, out dt1) || !this.TryGetArgumentDateValueAtIndex(arguments, 1, out dt2))
+				return new CompileResult(eErrorType.Value);
 			var calcType = Days360Calctype.Us;
 			if (arguments.Count() > 2)
 			{
@@ -70,11 +68,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			return CreateResult(result, DataType.Integer);
 		}
 
-		private int GetNumWholeMonths(System.DateTime dt1, System.DateTime dt2)
+		private bool TryGetArgumentDateValueAtIndex(IEnumerable<FunctionArgument> arguments, int index, out System.DateTime date)
 		{
-			var startDate = new System.DateTime(dt1.Year, dt1.Month, 1).AddMonths(1);
-			var endDate = new System.DateTime(dt2.Year, dt2.Month, 1);
-			return ((endDate.Year - startDate.Year) * 12) + (endDate.Month - startDate.Month);
+			try
+			{
+				double dateNumber = (arguments.ElementAt(index).Value == null) ? 0 : ArgToDecimal(arguments, index);
+				date = System.DateTime.FromOADate(dateNumber);
+				return true;
+			}
+			catch
+			{
+				date = new System.DateTime();
+				return false;
+			}
 		}
 	}
 }
