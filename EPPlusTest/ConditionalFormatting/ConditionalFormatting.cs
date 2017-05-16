@@ -197,10 +197,12 @@ namespace EPPlusTest
 			ws.SetValue(4, 3, 4);
 			ws.SetValue(5, 3, 5);
 		}
+
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\MultiColorConditionalFormatting.xlsx")]
 		public void TwoAndThreeColorConditionalFormattingFromFileDoesNotGetOverwrittenWithDefaultValues()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\MultiColorConditionalFormatting.xlsx"));
+			var file = new FileInfo(@"MultiColorConditionalFormatting.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{

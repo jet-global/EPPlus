@@ -711,9 +711,10 @@ namespace EPPlusTest
 
 		#region Read Chart Tests
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\ScatterFromExcel.xlsx")]
 		public void ReadExcelScatterChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\ScatterFromExcel.xlsx"));
+			var file = new FileInfo("ScatterFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -726,9 +727,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\BubbleFromExcel.xlsx")]
 		public void ReadExcelBubbleChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\BubbleFromExcel.xlsx"));
+			var file = new FileInfo("BubbleFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -742,9 +744,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\3DBubbleFromExcel.xlsx")]
 		public void ReadExcel3DBubbleChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\3DBubbleFromExcel.xlsx"));
+			var file = new FileInfo("3DBubbleFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -758,9 +761,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\BarFromExcel.xlsx")]
 		public void ReadExcelBarChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\BarFromExcel.xlsx"));
+			var file = new FileInfo("BarFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -777,9 +781,11 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\LineChartFromExcel.xlsx")]
+
 		public void ReadExcelLineChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\LineChartFromExcel.xlsx"));
+			var file = new FileInfo("LineChartFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -792,9 +798,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\BoxAndWhiskerFromExcel.xlsx")]
 		public void ReadExcelBoxAndWhiskerChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\BoxAndWhiskerFromExcel.xlsx"));
+			var file = new FileInfo("BoxAndWhiskerFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -805,9 +812,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\ColumnFromExcel.xlsx")]
 		public void ReadExcelColumnChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\ColumnFromExcel.xlsx"));
+			var file = new FileInfo("ColumnFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -825,9 +833,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\ComboFromExcel.xlsx")]
 		public void ReadExcelComboChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\ComboFromExcel.xlsx"));
+			var file = new FileInfo("ComboFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -841,9 +850,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\HistogramFromExcel.xlsx")]
 		public void ReadExcelHistogramChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\HistogramFromExcel.xlsx"));
+			var file = new FileInfo(@"HistogramFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -855,9 +865,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PieFromExcel.xlsx")]
 		public void ReadExcelPieChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\PieFromExcel.xlsx"));
+			var file = new FileInfo( @"PieFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -875,9 +886,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\SlicerFromExcel.xlsx")]
 		public void ReadExcelSlicer()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\SlicerFromExcel.xlsx"));
+			var file = new FileInfo(@"SlicerFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
@@ -901,7 +913,7 @@ namespace EPPlusTest
 			var tempFile = new FileInfo(Path.GetTempFileName());
 			try
 			{
-				var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\SlicerFromExcel.xlsx"));
+				var file = new FileInfo("SlicerFromExcel.xlsx");
 				Assert.IsTrue(file.Exists);
 				using (var package = new ExcelPackage(file))
 				{
@@ -969,7 +981,7 @@ namespace EPPlusTest
 			var tempFile = new FileInfo(Path.GetTempFileName());
 			try
 			{
-				var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\SlicerFromExcel.xlsx"));
+				var file = new FileInfo("SlicerFromExcel.xlsx");
 				Assert.IsTrue(file.Exists);
 				using (var package = new ExcelPackage(file))
 				{

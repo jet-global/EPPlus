@@ -3070,9 +3070,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\ComboFromExcel.xlsx")]
 		public void InsertRowsUpdatesComboChart()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\ComboFromExcel.xlsx"));
+			var file = new FileInfo("ComboFromExcel.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{

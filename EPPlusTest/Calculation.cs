@@ -66,10 +66,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"Workbooks\FormulaTest.xlsx")]
 		public void Calulation4()
 		{
-			var dir = AppDomain.CurrentDomain.BaseDirectory;
-			var file = new FileInfo(Path.Combine(dir, "Workbooks", "FormulaTest.xlsx"));
+			var file = new FileInfo("FormulaTest.xlsx");
 			Assert.IsTrue(file.Exists);
 			var pck = new ExcelPackage(file);
 			pck.Workbook.Calculate();
@@ -77,10 +77,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"Workbooks\FormulaTest.xlsx")]
 		public void CalulationValidationExcel()
 		{
-			var dir = AppDomain.CurrentDomain.BaseDirectory;
-			var file = new FileInfo(Path.Combine(dir, "Workbooks", "FormulaTest.xlsx"));
+			var file = new FileInfo("FormulaTest.xlsx");
 			Assert.IsTrue(file.Exists);
 
 			var pck = new ExcelPackage(file);
