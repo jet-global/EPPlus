@@ -12,9 +12,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			European,
 			Us
 		}
+		#region Public ExcelFunction Overrides
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 2) == false)
+			if (this.ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
 			if (!this.TryGetArgumentDateValueAtIndex(arguments, 0, out System.DateTime dt1) || !this.TryGetArgumentDateValueAtIndex(arguments, 1, out System.DateTime dt2))
 				return new CompileResult(eErrorType.Value);
@@ -66,12 +67,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var result = (endYear * 12 * 30 + endMonth * 30 + endDay) - (startYear * 12 * 30 + startMonth * 30 + startDay);
 			return CreateResult(result, DataType.Integer);
 		}
+		#endregion
 
+		#region Private Methods
 		private bool TryGetArgumentDateValueAtIndex(IEnumerable<FunctionArgument> arguments, int index, out System.DateTime date)
 		{
 			try
 			{
-				double dateNumber = (arguments.ElementAt(index).Value == null) ? 0 : ArgToDecimal(arguments, index);
+				double dateNumber = (arguments.ElementAt(index).Value == null) ? 0 : this.ArgToDecimal(arguments, index);
 				date = System.DateTime.FromOADate(dateNumber);
 				return true;
 			}
@@ -81,5 +84,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return false;
 			}
 		}
+		#endregion
 	}
 }
