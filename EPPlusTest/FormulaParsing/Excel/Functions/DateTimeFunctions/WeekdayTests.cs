@@ -33,7 +33,8 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
-	class WeekdayTests : DateTimeFunctionsTestBase
+	[TestClass]
+	public class WeekdayTests : DateTimeFunctionsTestBase
 	{
 		#region Weekday Function (Execute) Tests
 		[TestMethod]
@@ -68,6 +69,50 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithStringArgumentReturnsPoundValue()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs("word");
+			var result = func.Execute(args, this.ParsingContext);
+			
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithNonzeroIntArgumentReturnsIntMod7()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs(8);
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithZeroIntArgumentReturns7()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs(0);
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(7, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithArgumentAsDateFunctionReturns()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 17));
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(4, result.Result);
 		}
 		#endregion
 	}
