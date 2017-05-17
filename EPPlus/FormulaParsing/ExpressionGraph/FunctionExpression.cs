@@ -77,7 +77,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 					_parsingContext.Configuration.Logger.LogFunction(ExpressionString);
 				}
 				var compiler = _functionCompilerFactory.Create(function);
-				var result = compiler.Compile(HasChildren ? Children : Enumerable.Empty<Expression>(), _parsingContext);
+				var result = compiler.Compile(this.Children.Any() ? this.Children : Enumerable.Empty<Expression>(), _parsingContext);
 				if (_isNegated)
 				{
 					if (!result.IsNumeric)
@@ -102,7 +102,6 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 				}
 				return new CompileResult(e.ErrorValue, DataType.ExcelError);
 			}
-
 		}
 
 		public override Expression PrepareForNextChild()

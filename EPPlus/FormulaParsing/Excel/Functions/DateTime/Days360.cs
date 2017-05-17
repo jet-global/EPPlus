@@ -52,8 +52,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				{
 					startDay = 30;
 				}
-				// If D2 is 31 and D1 is 30 or 31, then change D2 to 30.
-				if (endDay == 31 && (startDay == 30 || startDay == 31))
+				// If D2 is 31 and D1 is 30 or 31, then change D2 to 30 unless first argument is null (because Excel adds a day in this case).
+				if (endDay == 31 && (startDay == 30 || startDay == 31) && arguments.First().Value != null)
 				{
 					endDay = 30;
 				}
