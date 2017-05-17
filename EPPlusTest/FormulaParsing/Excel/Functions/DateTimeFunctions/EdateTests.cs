@@ -33,7 +33,8 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
-	class EdateTests : DateTimeFunctionsTestBase
+	[TestClass]
+	public class EdateTests : DateTimeFunctionsTestBase
 	{
 		#region EdateTests Function (Execute) Tests
 		[TestMethod]

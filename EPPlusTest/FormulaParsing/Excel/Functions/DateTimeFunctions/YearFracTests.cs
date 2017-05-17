@@ -33,7 +33,8 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
-	class YearFracTests : DateTimeFunctionsTestBase
+	[TestClass]
+	public class YearFracTests : DateTimeFunctionsTestBase
 	{
 		#region YearFrac Function (Execute) Tests
 		[TestMethod]

@@ -32,7 +32,8 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
-	class SecondTests : DateTimeFunctionsTestBase
+	[TestClass]
+	public class SecondTests : DateTimeFunctionsTestBase
 	{
 		#region Second Function (Execute) Tests
 		[TestMethod]

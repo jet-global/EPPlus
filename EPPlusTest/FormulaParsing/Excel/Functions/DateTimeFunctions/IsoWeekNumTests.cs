@@ -33,7 +33,8 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
-	class IsoWeekNumTests : DateTimeFunctionsTestBase
+	[TestClass]
+	public class IsoWeekNumTests : DateTimeFunctionsTestBase
 	{
 		#region IsoWeekNum Function (Execute) Tests
 		[TestMethod]

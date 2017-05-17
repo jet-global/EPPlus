@@ -12,15 +12,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			European,
 			Us
 		}
+		#region Public ExcelFunction Overrides
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 2) == false)
+			if (this.ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-			var numDate1 = ArgToDecimal(arguments, 0);
-			var numDate2 = ArgToDecimal(arguments, 1);
-			var dt1 = System.DateTime.FromOADate(numDate1);
-			var dt2 = System.DateTime.FromOADate(numDate2);
-
+			if (!this.TryGetArgumentDateValueAtIndex(arguments, 0, out System.DateTime dt1) || !this.TryGetArgumentDateValueAtIndex(arguments, 1, out System.DateTime dt2))
+				return new CompileResult(eErrorType.Value);
 			var calcType = Days360Calctype.Us;
 			if (arguments.Count() > 2)
 			{
@@ -55,8 +53,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				{
 					startDay = 30;
 				}
-				// If D2 is 31 and D1 is 30 or 31, then change D2 to 30.
-				if (endDay == 31 && (startDay == 30 || startDay == 31))
+				// If D2 is 31 and D1 is 30 or 31, then change D2 to 30 unless first argument is null (because Excel adds a day in this case).
+				if (endDay == 31 && (startDay == 30 || startDay == 31) && arguments.First().Value != null)
 				{
 					endDay = 30;
 				}
@@ -69,12 +67,23 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var result = (endYear * 12 * 30 + endMonth * 30 + endDay) - (startYear * 12 * 30 + startMonth * 30 + startDay);
 			return CreateResult(result, DataType.Integer);
 		}
+		#endregion
 
-		private int GetNumWholeMonths(System.DateTime dt1, System.DateTime dt2)
+		#region Private Methods
+		private bool TryGetArgumentDateValueAtIndex(IEnumerable<FunctionArgument> arguments, int index, out System.DateTime date)
 		{
-			var startDate = new System.DateTime(dt1.Year, dt1.Month, 1).AddMonths(1);
-			var endDate = new System.DateTime(dt2.Year, dt2.Month, 1);
-			return ((endDate.Year - startDate.Year) * 12) + (endDate.Month - startDate.Month);
+			try
+			{
+				double dateNumber = (arguments.ElementAt(index).Value == null) ? 0 : this.ArgToDecimal(arguments, index);
+				date = System.DateTime.FromOADate(dateNumber);
+				return true;
+			}
+			catch
+			{
+				date = new System.DateTime();
+				return false;
+			}
 		}
+		#endregion
 	}
 }

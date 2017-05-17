@@ -35,6 +35,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
+	[TestClass]
 	public class MonthTests : DateTimeFunctionsTestBase
 	{
 		#region Month Function (Execute) Tests
