@@ -62,6 +62,62 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void WeekdayShouldReturnCorrectResultForASundayWhenReturnTypeIs11()
+		{
+			var func = new Weekday();
+			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 11), this.ParsingContext);
+			Assert.AreEqual(7, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayShouldReturnCorrectResultForASundayWhenReturnTypeIs12()
+		{
+			var func = new Weekday();
+			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 12), this.ParsingContext);
+			Assert.AreEqual(6, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayShouldReturnCorrectResultForASundayWhenReturnTypeIs13()
+		{
+			var func = new Weekday();
+			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 13), this.ParsingContext);
+			Assert.AreEqual(5, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayShouldReturnCorrectResultForASundayWhenReturnTypeIs14()
+		{
+			var func = new Weekday();
+			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 14), this.ParsingContext);
+			Assert.AreEqual(4, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayShouldReturnCorrectResultForASundayWhenReturnTypeIs15()
+		{
+			var func = new Weekday();
+			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 15), this.ParsingContext);
+			Assert.AreEqual(3, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayShouldReturnCorrectResultForASundayWhenReturnTypeIs16()
+		{
+			var func = new Weekday();
+			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 16), this.ParsingContext);
+			Assert.AreEqual(2, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayShouldReturnCorrectResultForASundayWhenReturnTypeIs17()
+		{
+			var func = new Weekday();
+			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 17), this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
 		public void WeekdayWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Weekday();
@@ -83,7 +139,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WeekdayWithNonzeroIntArgumentReturnsIntMod7()
+		public void WeekdayWithNonzeroIntArgumentReturnsThatIntMod7()
 		{
 			var func = new Weekday();
 
@@ -94,7 +150,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WeekdayWithZeroIntArgumentReturns7()
+		public void WeekdayWithArgumentAsTheNumberZeroReturnsTheNumber7()
 		{
 			var func = new Weekday();
 
@@ -105,14 +161,36 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WeekdayWithArgumentAsDateFunctionReturns()
+		public void WeekdayWithDATEFunctionRepresentationOfSundayArgumentReturnsCorrentResult()
 		{
 			var func = new Weekday();
 
-			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 17));
+			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14));
 			var result = func.Execute(args, this.ParsingContext);
 
-			Assert.AreEqual(4, result.Result);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithInvalidReturnTypeArgumentReturnsPoundNum()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14), 4);
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithNegativeDateArgumentReturnsPoundNum()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs(-1);
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
 	}
