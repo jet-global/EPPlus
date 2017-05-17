@@ -10,9 +10,10 @@ namespace EPPlusTest
 	public class WorkbookTests
 	{
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\ExternalLinks.xlsx")]
 		public void WorkbookReferenceInNamedRangeDoesNotCorruptWorkbook()
 		{
-			var file = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Workbooks\ExternalLinks.xlsx"));
+			var file = new FileInfo(@"ExternalLinks.xlsx");
 			var newFile = new FileInfo("test.xlsx");
 			if (newFile.Exists)
 				newFile.Delete();

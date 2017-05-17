@@ -82,6 +82,7 @@ namespace EPPlusTest
 
 		#region Shared Formula Overwrite Tests
 		[TestMethod]
+		[DeploymentItem(@"Workbooks\SharedFormulasRows.xlsx")]
 		public void OverwrittenSharedFormulaRowsAreRespected()
 		{
 			// In Excel, a cell in a shared formula range can have its formula replaced by something
@@ -91,7 +92,7 @@ namespace EPPlusTest
 			if (newFile.Exists)
 				newFile.Delete();
 			var dir = AppDomain.CurrentDomain.BaseDirectory;
-			var file = new FileInfo(Path.Combine(dir, "Workbooks", "SharedFormulasRows.xlsx"));
+			var file = new FileInfo("SharedFormulasRows.xlsx");
 			Assert.IsTrue(file.Exists);
 			try
 			{
@@ -128,6 +129,7 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"Workbooks\SharedFormulasColumns.xlsx")]
 		public void OverwrittenSharedFormulaColumnsAreRespected()
 		{
 			// In Excel, a cell in a shared formula range can have its formula replaced by something
@@ -137,7 +139,7 @@ namespace EPPlusTest
 			if (newFile.Exists)
 				newFile.Delete();
 			var dir = AppDomain.CurrentDomain.BaseDirectory;
-			var file = new FileInfo(Path.Combine(dir, "Workbooks", "SharedFormulasColumns.xlsx"));
+			var file = new FileInfo("SharedFormulasColumns.xlsx");
 			Assert.IsTrue(file.Exists);
 			try
 			{
