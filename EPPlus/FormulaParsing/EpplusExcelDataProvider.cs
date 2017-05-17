@@ -473,18 +473,21 @@ namespace OfficeOpenXml.FormulaParsing
 		}
 		public override string GetFormat(object value, string format)
 		{
-			ExcelNumberFormatXml.ExcelFormatTranslator formatTranslator = null;
-			foreach (var numberFormat in _package.Workbook.Styles.NumberFormats)
+			var styles = _package.Workbook.Styles;
+			ExcelNumberFormatXml.ExcelFormatTranslator ft = null;
+			foreach (var f in styles.NumberFormats)
 			{
-				if (numberFormat.Format == format)
+				if (f.Format == format)
 				{
-					formatTranslator = numberFormat.FormatTranslator;
+					ft = f.FormatTranslator;
 					break;
 				}
 			}
-			if (formatTranslator == null)
-				formatTranslator = new ExcelNumberFormatXml.ExcelFormatTranslator(format, -1);
-			return ExcelRangeBase.FormatValue(value, formatTranslator);
+			if (ft == null)
+			{
+				ft = new ExcelNumberFormatXml.ExcelFormatTranslator(format, -1);
+			}
+			return ExcelRangeBase.FormatValue(value, ft, format, ft.NetFormat);
 		}
 		public override List<LexicalAnalysis.Token> GetRangeFormulaTokens(string worksheetName, int row, int column)
 		{

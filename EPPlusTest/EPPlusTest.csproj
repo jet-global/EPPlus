@@ -107,7 +107,6 @@
     <Compile Include="FormulaManagerTest.cs" />
     <Compile Include="ExcelStyleTest.cs" />
     <Compile Include="FormulaParsing\CalculationExtensionsTest.cs" />
-    <Compile Include="FormulaParsing\EpplusExcelDataProviderTest.cs" />
     <Compile Include="FormulaParsing\ExcelUtilities\ExpressionEvaluatorTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Database\DatabaseFunctionTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\DateTest.cs" />

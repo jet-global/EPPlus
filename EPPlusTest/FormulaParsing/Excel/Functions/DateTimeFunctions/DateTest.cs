@@ -68,6 +68,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void DateFunctionShouldMonthFromPrevYearIfMonthAndDayIsNegative()
+		{
+			var expectedDate = new DateTime(2011, 10, 30);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2012, -1, -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
 		public void DateWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Date();

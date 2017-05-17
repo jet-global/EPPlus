@@ -77,6 +77,7 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void IsNumeric()
 		{
+			Assert.Fail("This will fail until IsNumeric is fixed to not consider chars numbers.");
 			Assert.IsFalse(ConvertUtil.IsNumeric(null));
 			Assert.IsTrue(ConvertUtil.IsNumeric((byte)5));
 			Assert.IsTrue(ConvertUtil.IsNumeric((short)5));
@@ -88,8 +89,8 @@ namespace EPPlusTest.Utils
 			Assert.IsTrue(ConvertUtil.IsNumeric(true));
 			Assert.IsFalse(ConvertUtil.IsNumeric('5'));
 			Assert.IsFalse(ConvertUtil.IsNumeric("5"));
-			// Excel treats dates  and date strings as numeric.
-			Assert.IsTrue(ConvertUtil.IsNumeric("1/1/2000"));
+			// Excel treats dates as numeric, but not date strings.
+			Assert.IsFalse(ConvertUtil.IsNumeric("1/1/2000"));
 			Assert.IsTrue(ConvertUtil.IsNumeric(new DateTime(2000, 1, 1)));
 			Assert.IsTrue(ConvertUtil.IsNumeric(new TimeSpan(5, 0, 0, 0)));
 		}
@@ -107,7 +108,7 @@ namespace EPPlusTest.Utils
 			Assert.AreEqual(1, ConvertUtil.GetValueDouble(true));
 			Assert.AreEqual(0, ConvertUtil.GetValueDouble(true, true));
 			Assert.AreEqual(36526d, ConvertUtil.GetValueDouble(new DateTime(2000, 1, 1)));
-			Assert.AreEqual(36526d, ConvertUtil.GetValueDouble("1/1/2000"));
+			Assert.AreEqual(double.NaN, ConvertUtil.GetValueDouble("1/1/2000", retNaN: true));
 			Assert.AreEqual(5d, ConvertUtil.GetValueDouble(new TimeSpan(5, 0, 0, 0)));
 			Assert.AreEqual(0d, ConvertUtil.GetValueDouble('a'));
 			Assert.AreEqual(double.NaN, ConvertUtil.GetValueDouble('a', false, true));
