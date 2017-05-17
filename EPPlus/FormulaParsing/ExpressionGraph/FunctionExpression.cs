@@ -39,6 +39,37 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 	/// </summary>
 	public class FunctionExpression : AtomicExpression
 	{
+		#region Class Variables
+		private readonly ParsingContext _parsingContext;
+		private readonly FunctionCompilerFactory _functionCompilerFactory;
+		private readonly bool _isNegated;
+		#endregion
+
+		#region Properties
+		private ParsingContext ParsingContext
+		{
+			get
+			{
+				return this._parsingContext;
+			}
+		}
+		private FunctionCompilerFactory FunctionCompilerFactory
+		{
+			get
+			{
+				return this._functionCompilerFactory;
+			}
+		}
+		private bool IsNegated
+		{
+			get
+			{
+				return this._isNegated;
+			}
+		}
+		#endregion
+
+		#region Constructors
 		/// <summary>
 		/// Constructor
 		/// </summary>
@@ -48,45 +79,42 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		public FunctionExpression(string expression, ParsingContext parsingContext, bool isNegated)
 			 : base(expression)
 		{
-			_parsingContext = parsingContext;
-			_functionCompilerFactory = new FunctionCompilerFactory(parsingContext.Configuration.FunctionRepository);
-			_isNegated = isNegated;
+			this._parsingContext = parsingContext;
+			this._functionCompilerFactory = new FunctionCompilerFactory(parsingContext.Configuration.FunctionRepository);
+			this._isNegated = isNegated;
 			base.AddChild(new FunctionArgumentExpression(this));
 		}
+		#endregion
 
-		private readonly ParsingContext _parsingContext;
-		private readonly FunctionCompilerFactory _functionCompilerFactory;
-		private readonly bool _isNegated;
-
-
+		#region Public Expression Overrides
 		public override CompileResult Compile()
 		{
 			try
 			{
-				var function = _parsingContext.Configuration.FunctionRepository.GetFunction(ExpressionString);
+				var function = this.ParsingContext.Configuration.FunctionRepository.GetFunction(this.ExpressionString);
 				if (function == null)
 				{
-					if (_parsingContext.Debug)
+					if (this.ParsingContext.Debug)
 					{
-						_parsingContext.Configuration.Logger.Log(_parsingContext, string.Format("'{0}' is not a supported function", ExpressionString));
+						this.ParsingContext.Configuration.Logger.Log(this.ParsingContext, string.Format("'{0}' is not a supported function", this.ExpressionString));
 					}
 					return new CompileResult(ExcelErrorValue.Create(eErrorType.Name), DataType.ExcelError);
 				}
-				if (_parsingContext.Debug)
+				if (this.ParsingContext.Debug)
 				{
-					_parsingContext.Configuration.Logger.LogFunction(ExpressionString);
+					this.ParsingContext.Configuration.Logger.LogFunction(this.ExpressionString);
 				}
-				var compiler = _functionCompilerFactory.Create(function);
-				var result = compiler.Compile(this.Children.Any() ? this.Children : Enumerable.Empty<Expression>(), _parsingContext);
-				if (_isNegated)
+				var compiler = this.FunctionCompilerFactory.Create(function);
+				var result = compiler.Compile(this.Children.Any() ? this.Children : Enumerable.Empty<Expression>(), this.ParsingContext);
+				if (this.IsNegated)
 				{
 					if (!result.IsNumeric)
 					{
-						if (_parsingContext.Debug)
+						if (this.ParsingContext.Debug)
 						{
 							var msg = string.Format("Trying to negate a non-numeric value ({0}) in function '{1}'",
-								 result.Result, ExpressionString);
-							_parsingContext.Configuration.Logger.Log(_parsingContext, msg);
+								 result.Result, this.ExpressionString);
+							this.ParsingContext.Configuration.Logger.Log(this.ParsingContext, msg);
 						}
 						return new CompileResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 					}
@@ -96,9 +124,9 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			}
 			catch (ExcelErrorValueException e)
 			{
-				if (_parsingContext.Debug)
+				if (this.ParsingContext.Debug)
 				{
-					_parsingContext.Configuration.Logger.Log(_parsingContext, e);
+					this.ParsingContext.Configuration.Logger.Log(this.ParsingContext, e);
 				}
 				return new CompileResult(e.ErrorValue, DataType.ExcelError);
 			}
@@ -109,18 +137,27 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			return base.AddChild(new FunctionArgumentExpression(this));
 		}
 
+		/// <summary>
+		/// Returns true if Children is non-empty and the first element in Children has any children, false otherwise.
+		/// </summary>
 		public override bool HasChildren
 		{
 			get
 			{
-				return (Children.Any() && Children.First().Children.Any());
+				return (this.Children.Any() && this.Children.First().Children.Any());
 			}
 		}
 
+		/// <summary>
+		/// Adds the given child to the last element in Children.
+		/// </summary>
+		/// <param name="child">The expression to be added to Children.</param>
+		/// <returns>Returns the given expression.</returns>
 		public override Expression AddChild(Expression child)
 		{
-			Children.Last().AddChild(child);
+			this.Children.Last().AddChild(child);
 			return child;
 		}
+		#endregion
 	}
 }
