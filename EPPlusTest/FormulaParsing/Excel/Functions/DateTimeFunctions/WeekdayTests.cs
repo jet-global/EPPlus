@@ -192,6 +192,39 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void WeekdayWithStringAsSecondArgumentReturnsPoundValue()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14),"word");
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithSecondArgumentNullReturnsPoundNum()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14), null);
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithFirstArgumentNullReturnsPoundNum()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs(null, 3);
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
 		#endregion
 	}
 }
