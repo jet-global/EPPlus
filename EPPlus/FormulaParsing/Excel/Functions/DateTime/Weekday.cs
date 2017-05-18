@@ -22,6 +22,7 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.Exceptions;
@@ -52,23 +53,28 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 			if (serialNumberCandidate is string)
 			{
-				foreach(var a in serialNumberCandidate.ToString().ToCharArray())
+				var isDateString = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime date);
+				if (!isDateString)
+					return new CompileResult(eErrorType.Value);
+			}
+
+			if (arguments.Count() > 1)
+			{
+				var returnTypeCandidate = arguments.ElementAt(1).Value;
+
+				if (returnTypeCandidate is null)
+					return new CompileResult(eErrorType.Num);
+				else if (returnTypeCandidate is string)
 				{
-					if ((int)a < 45 || (int)a > 57)
-						return new CompileResult(eErrorType.Value);
-					if ((int)a == 46)
+					var isValidReturnType = Int32.TryParse(returnTypeCandidate.ToString(), out int result);
+					if (!isValidReturnType)
 						return new CompileResult(eErrorType.Value);
 				}
-			}
-				
 
-			if (arguments.Count() > 1 && arguments.ElementAt(1).Value is null)
-				return new CompileResult(eErrorType.Num);
-			else if (arguments.Count() > 1 && arguments.ElementAt(1).Value is string)
-				return new CompileResult(eErrorType.Value);
+			}
 
 			var serialNumber = this.ArgToDecimal(arguments, 0);
-
+			
 			if(serialNumber < 0)
 				return new CompileResult(eErrorType.Num);
 
