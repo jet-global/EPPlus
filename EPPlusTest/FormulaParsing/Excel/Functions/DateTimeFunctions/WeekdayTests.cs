@@ -25,6 +25,8 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Globalization;
+using System.Threading;
 using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -285,6 +287,26 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs("5.17.2017");
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(4, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithGermanDateAsStringWithPeriodsReturnsCorrectResult()
+		{
+			// Test the case where the serial_number input is expressed as
+			// a German date in a String.
+			var currentCulture = Thread.CurrentThread.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("de-DE");
+				var func = new Weekday();
+				var args = FunctionsHelper.CreateArgs("3.5.2017");
+				var result = func.Execute(args, this.ParsingContext);
+				Assert.AreEqual(4, result.Result);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
 		}
 		#endregion
 	}
