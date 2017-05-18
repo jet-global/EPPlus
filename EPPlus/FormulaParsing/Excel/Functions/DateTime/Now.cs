@@ -27,11 +27,20 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// A class that has the current date and time on the local computer.
+	/// </summary>
 	public class Now : ExcelFunction
 	{
+		/// <summary>
+		/// Returns the current date and time on the local computer as an OA Date.
+		/// </summary>
+		/// <param name="arguments">Unused in method, but necessary to override method.</param>
+		/// <param name="context">Unused in method, but necessary to override method.</param>
+		/// <returns>The current date and time on the local computer as an OA Date.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			return CreateResult(System.DateTime.Now.ToOADate(), DataType.Date);
+			return this.CreateResult(System.DateTime.Now.ToOADate(), DataType.Date);
 		}
 	}
 }
