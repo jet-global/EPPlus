@@ -30,6 +30,9 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
+	/// <summary>
+	/// Evaluates the Excel COLUMN function.
+	/// </summary>
 	public class Column : LookupFunction
 	{
 		#region Public ExcelFunction overrides
@@ -41,13 +44,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		/// <returns>Returns a <see cref="CompileResult"/> containing either the resulting column or an error value.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			string rangeAddress = arguments.Count() == 0 ? string.Empty : ArgToString(arguments, 0);
+			string rangeAddress = arguments.Count() == 0 ? string.Empty : this.ArgToString(arguments, 0);
 			if (arguments == null || arguments.Count() == 0 || string.IsNullOrEmpty(rangeAddress))
 			{
 				return CreateResult(context.Scopes.Current.Address.FromCol, DataType.Integer);
 			}
 			if (!ExcelAddressUtil.IsValidAddress(rangeAddress))
-				throw new ArgumentException("An invalid argument was supplied");
+				return new CompileResult(eErrorType.Value);
 			var factory = new RangeAddressFactory(context.ExcelDataProvider);
 			var address = factory.Create(rangeAddress);
 			return CreateResult(address.FromCol, DataType.Integer);

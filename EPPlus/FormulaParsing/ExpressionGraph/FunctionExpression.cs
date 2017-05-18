@@ -39,34 +39,20 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 	/// </summary>
 	public class FunctionExpression : AtomicExpression
 	{
-		#region Class Variables
-		private readonly ParsingContext _parsingContext;
-		private readonly FunctionCompilerFactory _functionCompilerFactory;
-		private readonly bool _isNegated;
-		#endregion
-
 		#region Properties
-		private ParsingContext ParsingContext
+		/// <summary>
+		/// Gets a value indicating whether the formula expression has a first child with children of its own.
+		/// </summary>
+		public override bool HasChildren
 		{
 			get
 			{
-				return this._parsingContext;
+				return (this.Children.Any() && this.Children.First().Children.Any());
 			}
 		}
-		private FunctionCompilerFactory FunctionCompilerFactory
-		{
-			get
-			{
-				return this._functionCompilerFactory;
-			}
-		}
-		private bool IsNegated
-		{
-			get
-			{
-				return this._isNegated;
-			}
-		}
+		private ParsingContext ParsingContext { get; }
+		private FunctionCompilerFactory FunctionCompilerFactory { get; }
+		private bool IsNegated { get; }
 		#endregion
 
 		#region Constructors
@@ -79,14 +65,18 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		public FunctionExpression(string expression, ParsingContext parsingContext, bool isNegated)
 			 : base(expression)
 		{
-			this._parsingContext = parsingContext;
-			this._functionCompilerFactory = new FunctionCompilerFactory(parsingContext.Configuration.FunctionRepository);
-			this._isNegated = isNegated;
+			this.ParsingContext = parsingContext;
+			this.FunctionCompilerFactory = new FunctionCompilerFactory(parsingContext.Configuration.FunctionRepository);
+			this.IsNegated = isNegated;
 			base.AddChild(new FunctionArgumentExpression(this));
 		}
 		#endregion
 
 		#region Public Expression Overrides
+		/// <summary>
+		/// Compiles the expression string.
+		/// </summary>
+		/// <returns>A <see cref="CompileResult"/> containing either the resulting compiled value or an error.</returns>
 		public override CompileResult Compile()
 		{
 			try
@@ -132,27 +122,20 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			}
 		}
 
+		/// <summary>
+		/// Adds the current instance as a child of the base class.
+		/// </summary>
+		/// <returns>Returns the newly added child <see cref="Expression"/>.</returns>
 		public override Expression PrepareForNextChild()
 		{
 			return base.AddChild(new FunctionArgumentExpression(this));
 		}
 
 		/// <summary>
-		/// Returns true if Children is non-empty and the first element in Children has any children, false otherwise.
-		/// </summary>
-		public override bool HasChildren
-		{
-			get
-			{
-				return (this.Children.Any() && this.Children.First().Children.Any());
-			}
-		}
-
-		/// <summary>
-		/// Adds the given child to the last element in Children.
+		/// Adds the given <paramref name="child"/> to the last element in Children.
 		/// </summary>
 		/// <param name="child">The expression to be added to Children.</param>
-		/// <returns>Returns the given expression.</returns>
+		/// <returns>Returns the given <paramref name="child"/>.</returns>
 		public override Expression AddChild(Expression child)
 		{
 			this.Children.Last().AddChild(child);
