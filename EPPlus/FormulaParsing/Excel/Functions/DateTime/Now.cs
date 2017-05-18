@@ -28,7 +28,7 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
 	/// <summary>
-	/// A class that has the current date and time on the local computer.
+	/// An Excel function that gets the current date and time on the local computer.
 	/// </summary>
 	public class Now : ExcelFunction
 	{
