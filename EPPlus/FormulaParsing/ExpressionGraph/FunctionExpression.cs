@@ -39,6 +39,23 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 	/// </summary>
 	public class FunctionExpression : AtomicExpression
 	{
+		#region Properties
+		/// <summary>
+		/// Gets a value indicating whether the formula expression has a first child with children of its own.
+		/// </summary>
+		public override bool HasChildren
+		{
+			get
+			{
+				return (this.Children.Any() && this.Children.First().Children.Any());
+			}
+		}
+		private ParsingContext ParsingContext { get; }
+		private FunctionCompilerFactory FunctionCompilerFactory { get; }
+		private bool IsNegated { get; }
+		#endregion
+
+		#region Constructors
 		/// <summary>
 		/// Constructor
 		/// </summary>
@@ -48,45 +65,46 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		public FunctionExpression(string expression, ParsingContext parsingContext, bool isNegated)
 			 : base(expression)
 		{
-			_parsingContext = parsingContext;
-			_functionCompilerFactory = new FunctionCompilerFactory(parsingContext.Configuration.FunctionRepository);
-			_isNegated = isNegated;
+			this.ParsingContext = parsingContext;
+			this.FunctionCompilerFactory = new FunctionCompilerFactory(parsingContext.Configuration.FunctionRepository);
+			this.IsNegated = isNegated;
 			base.AddChild(new FunctionArgumentExpression(this));
 		}
+		#endregion
 
-		private readonly ParsingContext _parsingContext;
-		private readonly FunctionCompilerFactory _functionCompilerFactory;
-		private readonly bool _isNegated;
-
-
+		#region Public Expression Overrides
+		/// <summary>
+		/// Compiles the expression string.
+		/// </summary>
+		/// <returns>A <see cref="CompileResult"/> containing either the resulting compiled value or an error.</returns>
 		public override CompileResult Compile()
 		{
 			try
 			{
-				var function = _parsingContext.Configuration.FunctionRepository.GetFunction(ExpressionString);
+				var function = this.ParsingContext.Configuration.FunctionRepository.GetFunction(this.ExpressionString);
 				if (function == null)
 				{
-					if (_parsingContext.Debug)
+					if (this.ParsingContext.Debug)
 					{
-						_parsingContext.Configuration.Logger.Log(_parsingContext, string.Format("'{0}' is not a supported function", ExpressionString));
+						this.ParsingContext.Configuration.Logger.Log(this.ParsingContext, string.Format("'{0}' is not a supported function", this.ExpressionString));
 					}
 					return new CompileResult(ExcelErrorValue.Create(eErrorType.Name), DataType.ExcelError);
 				}
-				if (_parsingContext.Debug)
+				if (this.ParsingContext.Debug)
 				{
-					_parsingContext.Configuration.Logger.LogFunction(ExpressionString);
+					this.ParsingContext.Configuration.Logger.LogFunction(this.ExpressionString);
 				}
-				var compiler = _functionCompilerFactory.Create(function);
-				var result = compiler.Compile(this.Children.Any() ? this.Children : Enumerable.Empty<Expression>(), _parsingContext);
-				if (_isNegated)
+				var compiler = this.FunctionCompilerFactory.Create(function);
+				var result = compiler.Compile(this.Children.Any() ? this.Children : Enumerable.Empty<Expression>(), this.ParsingContext);
+				if (this.IsNegated)
 				{
 					if (!result.IsNumeric)
 					{
-						if (_parsingContext.Debug)
+						if (this.ParsingContext.Debug)
 						{
 							var msg = string.Format("Trying to negate a non-numeric value ({0}) in function '{1}'",
-								 result.Result, ExpressionString);
-							_parsingContext.Configuration.Logger.Log(_parsingContext, msg);
+								 result.Result, this.ExpressionString);
+							this.ParsingContext.Configuration.Logger.Log(this.ParsingContext, msg);
 						}
 						return new CompileResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 					}
@@ -96,31 +114,33 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			}
 			catch (ExcelErrorValueException e)
 			{
-				if (_parsingContext.Debug)
+				if (this.ParsingContext.Debug)
 				{
-					_parsingContext.Configuration.Logger.Log(_parsingContext, e);
+					this.ParsingContext.Configuration.Logger.Log(this.ParsingContext, e);
 				}
 				return new CompileResult(e.ErrorValue, DataType.ExcelError);
 			}
 		}
 
+		/// <summary>
+		/// Adds the current instance as a child of the base class.
+		/// </summary>
+		/// <returns>Returns the newly added child <see cref="Expression"/>.</returns>
 		public override Expression PrepareForNextChild()
 		{
 			return base.AddChild(new FunctionArgumentExpression(this));
 		}
 
-		public override bool HasChildren
-		{
-			get
-			{
-				return (Children.Any() && Children.First().Children.Any());
-			}
-		}
-
+		/// <summary>
+		/// Adds the given <paramref name="child"/> to the last element in Children.
+		/// </summary>
+		/// <param name="child">The expression to be added to Children.</param>
+		/// <returns>Returns the given <paramref name="child"/>.</returns>
 		public override Expression AddChild(Expression child)
 		{
-			Children.Last().AddChild(child);
+			this.Children.Last().AddChild(child);
 			return child;
 		}
+		#endregion
 	}
 }
