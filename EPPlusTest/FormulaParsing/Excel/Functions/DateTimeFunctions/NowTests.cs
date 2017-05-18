@@ -37,8 +37,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	public class NowTests : DateTimeFunctionsTestBase
 	{
 		[TestMethod]
-		public void NowFunctionShouldReturnNow()
+		public void NowFunctionReturnsNow()
 		{
+			//Testing to make sure the Now Function returns the accurate date/time. 
 			var startTime = DateTime.Now;
 			Thread.Sleep(1);
 			var func = new Now();
