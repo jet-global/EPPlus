@@ -42,7 +42,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// A return type of 1 requests the weekday as a 1-indexed value where
 			// the week starts on Sunday.
-
 			var func = new Weekday();
 			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 1), this.ParsingContext);
 			Assert.AreEqual(1, result.Result);
@@ -53,7 +52,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// A return type of 2 requests the weekday as a 1-indexed value where
 			// the week starts on Monday.
-
 			var func = new Weekday();
 			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 2), this.ParsingContext);
 			Assert.AreEqual(7, result.Result);
@@ -64,7 +62,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// A return type of 3 requests the weekday as a 0-indexed value where
 			// the week starts on Monday.
-
 			var func = new Weekday();
 			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 3), this.ParsingContext);
 			Assert.AreEqual(6, result.Result);
@@ -75,7 +72,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// A return type of 11 requests the weekday as a 1-indexed value where
 			// the week starts on Monday.
-
 			var func = new Weekday();
 			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 11), this.ParsingContext);
 			Assert.AreEqual(7, result.Result);
@@ -86,7 +82,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// A return type of 12 requests the weekday as a 1-indexed value where
 			// the week starts on Tuesday.
-
 			var func = new Weekday();
 			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 12), this.ParsingContext);
 			Assert.AreEqual(6, result.Result);
@@ -97,7 +92,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// A return type of 13 requests the weekday as a 1-indexed value where
 			// the week starts on Wednesday.
-
 			var func = new Weekday();
 			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 13), this.ParsingContext);
 			Assert.AreEqual(5, result.Result);
@@ -108,7 +102,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// A return type of 14 requests the weekday as a 1-indexed value where
 			// the week starts on Thursday.
-
 			var func = new Weekday();
 			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 14), this.ParsingContext);
 			Assert.AreEqual(4, result.Result);
@@ -119,7 +112,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// A return type of 15 requests the weekday as a 1-indexed value where
 			// the week starts on Friday.
-
 			var func = new Weekday();
 			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 15), this.ParsingContext);
 			Assert.AreEqual(3, result.Result);
@@ -130,7 +122,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// A return type of 16 requests the weekday as a 1-indexed value where
 			// the week starts on Saturday.
-
 			var func = new Weekday();
 			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 16), this.ParsingContext);
 			Assert.AreEqual(2, result.Result);
@@ -141,7 +132,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// A return type of 17 requests the weekday as a 1-indexed value where
 			// the week starts on Sunday.
-
 			var func = new Weekday();
 			var result = func.Execute(FunctionsHelper.CreateArgs(new DateTime(2012, 4, 1).ToOADate(), 17), this.ParsingContext);
 			Assert.AreEqual(1, result.Result);
@@ -172,7 +162,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			// Test the case where the serial_number input is a non-zero integer.
 			// Note that an omitted return_type is equivalent to using the
 			// WEEKDAY function with a return_type of 1.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs(8);
 			var result = func.Execute(args, this.ParsingContext);
@@ -184,7 +173,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// Test the case where the serial_number input is zero, which is
 			// treated differently than other integers.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs(0);
 			var result = func.Execute(args, this.ParsingContext);
@@ -196,7 +184,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// Test the case where the serial_number input is provided by the
 			// DATE function.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14));
 			var result = func.Execute(args, this.ParsingContext);
@@ -209,7 +196,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			// Test the case where an invalid return_type is given.
 			// Note that the WEEKDAY function only accepts 1-3 and 11-17
 			// as valid return_type values.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14), 4);
 			var result = func.Execute(args, this.ParsingContext);
@@ -220,7 +206,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void WeekdayWithNegativeDateArgumentReturnsPoundNum()
 		{
 			// Test the case where a negative serial_number input is given.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs(-1);
 			var result = func.Execute(args, this.ParsingContext);
@@ -231,7 +216,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void WeekdayWithNonNumericStringAsSecondArgumentReturnsPoundValue()
 		{
 			// Test the case where a non-numeric String is given as the return_type input.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14),"word");
 			var result = func.Execute(args, this.ParsingContext);
@@ -242,7 +226,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void WeekdayWithNumericStringAsSecondArgumentReturnsCorrectResult()
 		{
 			// Test the case where a numeric String is given as the return_type input.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs(1, "1");
 			var result = func.Execute(args, this.ParsingContext);
@@ -254,7 +237,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// Test the case where the serial_number and return_type parameters
 			// are delineated, but the return_type is left empty.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14), null);
 			var result = func.Execute(args, this.ParsingContext);
@@ -266,7 +248,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// Test the case where the serial_number and return_type parameters
 			// are delineated, but the serial_number is left empty.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs(null, 3);
 			var result = func.Execute(args, this.ParsingContext);
@@ -278,7 +259,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// Test the case where the serial_number input is expressed as
 			// a date in a String.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs("5/17/2017");
 			var result = func.Execute(args, this.ParsingContext);
@@ -290,7 +270,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// Test the case where the serial_number input is expressed as
 			// a date in a String.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs("5-17-2017");
 			var result = func.Execute(args, this.ParsingContext);
@@ -302,7 +281,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// Test the case where the serial_number input is expressed as
 			// a date in a String.
-
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs("5.17.2017");
 			var result = func.Execute(args, this.ParsingContext);

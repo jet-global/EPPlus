@@ -45,23 +45,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-
 			var serialNumberCandidate = arguments.ElementAt(0).Value;
-
 			if (serialNumberCandidate is null)
 				return new CompileResult(eErrorType.Num);
-
 			if (serialNumberCandidate is string)
 			{
 				var isDateString = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime date);
 				if (!isDateString)
 					return new CompileResult(eErrorType.Value);
 			}
-
 			if (arguments.Count() > 1)
 			{
 				var returnTypeCandidate = arguments.ElementAt(1).Value;
-
 				if (returnTypeCandidate is null)
 					return new CompileResult(eErrorType.Num);
 				else if (returnTypeCandidate is string)
@@ -70,16 +65,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					if (!isValidReturnType)
 						return new CompileResult(eErrorType.Value);
 				}
-
 			}
-
 			var serialNumber = this.ArgToDecimal(arguments, 0);
-			
 			if(serialNumber < 0)
 				return new CompileResult(eErrorType.Num);
-
 			var returnType = arguments.Count() > 1 ? ArgToInt(arguments, 1) : 1;
-
 			try
 			{
 				var result = this.CalculateDayOfWeek(System.DateTime.FromOADate(serialNumber), returnType);
