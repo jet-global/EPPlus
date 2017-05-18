@@ -51,7 +51,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(eErrorType.Num);
 
 			if (element1 is string)
-				return new CompileResult(eErrorType.Value);
+			{
+				foreach(var a in element1.ToString().ToCharArray())
+				{
+					if ((int)a < 45 || (int)a > 57)
+						return new CompileResult(eErrorType.Value);
+					if((int)a == 46)
+						return new CompileResult(eErrorType.Value);
+				}
+			}
+				
 
 			if (arguments.Count() > 1 && arguments.ElementAt(1).Value is null)
 				return new CompileResult(eErrorType.Num);

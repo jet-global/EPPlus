@@ -225,6 +225,39 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsStringWithSlashReturnsCorrectResult()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs("5/17/2017");
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(4, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateNotAsStringReturnsCorrectResult()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs(5/17/2017);
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(7, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsStringWithDashesReturnsCorrectResult()
+		{
+			var func = new Weekday();
+
+			var args = FunctionsHelper.CreateArgs("5-17-2017");
+			var result = func.Execute(args, this.ParsingContext);
+
+			Assert.AreEqual(4, result.Result);
+		}
 		#endregion
 	}
 }
