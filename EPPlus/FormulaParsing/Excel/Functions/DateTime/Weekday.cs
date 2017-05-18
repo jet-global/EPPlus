@@ -30,7 +30,7 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
 	/// <summary>
-	/// Returns the appropriate day of the week (as an int) from the given date and return type if given valid input.
+	/// Returns the appropriate day of the week (as an int) from the given date and return type.
 	/// </summary>
 	public class Weekday : ExcelFunction
 	{
@@ -42,21 +42,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>Returns the correct weekday number or an ExcelErrorValue, depending on if the input is valid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 
-			var element1 = arguments.ElementAt(0).Value;
+			var serialNumberCandidate = arguments.ElementAt(0).Value;
 
-			if (element1 is null)
+			if (serialNumberCandidate is null)
 				return new CompileResult(eErrorType.Num);
 
-			if (element1 is string)
+			if (serialNumberCandidate is string)
 			{
-				foreach(var a in element1.ToString().ToCharArray())
+				foreach(var a in serialNumberCandidate.ToString().ToCharArray())
 				{
 					if ((int)a < 45 || (int)a > 57)
 						return new CompileResult(eErrorType.Value);
-					if((int)a == 46)
+					if ((int)a == 46)
 						return new CompileResult(eErrorType.Value);
 				}
 			}
@@ -64,11 +64,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 			if (arguments.Count() > 1 && arguments.ElementAt(1).Value is null)
 				return new CompileResult(eErrorType.Num);
-
-			if (arguments.Count() >1 && arguments.ElementAt(1).Value is string)
+			else if (arguments.Count() > 1 && arguments.ElementAt(1).Value is string)
 				return new CompileResult(eErrorType.Value);
 
-			var serialNumber = ArgToDecimal(arguments, 0);
+			var serialNumber = this.ArgToDecimal(arguments, 0);
 
 			if(serialNumber < 0)
 				return new CompileResult(eErrorType.Num);
@@ -77,8 +76,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 			try
 			{
-				CalculateDayOfWeek(System.DateTime.FromOADate(serialNumber), returnType);
-				return CreateResult(CalculateDayOfWeek(System.DateTime.FromOADate(serialNumber), returnType), DataType.Integer);
+				var result = this.CalculateDayOfWeek(System.DateTime.FromOADate(serialNumber), returnType);
+				return CreateResult(result, DataType.Integer);
 			}
 			catch (ExcelErrorValueException e)
 			{
