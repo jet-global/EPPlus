@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OfficeOpenXml;
 using OfficeOpenXml.Utils;
 
 namespace EPPlusTest.Utils
@@ -114,6 +115,37 @@ namespace EPPlusTest.Utils
 			Assert.AreEqual(double.NaN, ConvertUtil.GetValueDouble('a', false, true));
 			Assert.AreEqual(0d, ConvertUtil.GetValueDouble("Not a number"));
 			Assert.AreEqual(double.NaN, ConvertUtil.GetValueDouble("Not a number", false, true));
+		}
+
+		[TestMethod]
+		public void TestTryParseObjectString()
+		{
+			DateTime resultDate;
+			eErrorType? resultError;
+			var isValidDate = ConvertUtil.TryParseDateObject(42874, out resultDate, out resultError); // May 19, 2017
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(42874, resultDate.ToOADate());
+			Assert.AreEqual(null, resultError);
+			isValidDate = ConvertUtil.TryParseDateObject("42874", out resultDate, out resultError); // May 19, 2017
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(42874, resultDate.ToOADate());
+			Assert.AreEqual(null, resultError);
+			isValidDate = ConvertUtil.TryParseDateObject("5/19/2017", out resultDate, out resultError);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(42874, resultDate.ToOADate());
+			Assert.AreEqual(null, resultError);
+			isValidDate = ConvertUtil.TryParseDateObject(-1.5, out resultDate, out resultError);
+			Assert.AreEqual(false, isValidDate);
+			Assert.AreEqual(0, resultDate.ToOADate());
+			Assert.AreEqual(eErrorType.Num, resultError);
+			isValidDate = ConvertUtil.TryParseDateObject("-1.5", out resultDate, out resultError);
+			Assert.AreEqual(false, isValidDate);
+			Assert.AreEqual(0, resultDate.ToOADate());
+			Assert.AreEqual(eErrorType.Num, resultError);
+			isValidDate = ConvertUtil.TryParseDateObject("word", out resultDate, out resultError);
+			Assert.AreEqual(false, isValidDate);
+			Assert.AreEqual(0, resultDate.ToOADate());
+			Assert.AreEqual(eErrorType.Value, resultError);
 		}
 	}
 }

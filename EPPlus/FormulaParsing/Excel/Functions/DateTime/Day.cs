@@ -23,6 +23,7 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System;
+using OfficeOpenXml.Utils;
 using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
@@ -44,27 +45,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);			
 			var serialNumberCandidate = this.GetFirstValue(arguments);
-			
-			if (serialNumberCandidate is string)
-			{
-				var isValidDate = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime dateString);
-				var isValidNum = Double.TryParse(serialNumberCandidate.ToString(), out double dateAsNumber);
-				if (isValidNum)
-					serialNumberCandidate = dateAsNumber;
-				else if (!isValidDate)
-					return new CompileResult(eErrorType.Value);
-			}
+			var isValidDate = ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error);
+			if (isValidDate)
+				return this.CreateResult(date.Day, DataType.Integer);
 			if (serialNumberCandidate is int serialNumberInt)
 				serialNumberCandidate = serialNumberInt * 1.0;
-			if (serialNumberCandidate is double serialNumberDouble)
-			{
-				if (serialNumberDouble == 0)
-					return CreateResult(0, DataType.Integer);
-				else if (serialNumberDouble < 0)
-					return new CompileResult(eErrorType.Num);
-			}
-			var date = this.ParseDate(arguments, serialNumberCandidate);
-			return this.CreateResult(date.Day, DataType.Integer);
+			if (serialNumberCandidate is double serialNumberDouble && serialNumberDouble == 0)
+				return this.CreateResult(0, DataType.Integer);
+			return new CompileResult((eErrorType)error);
 		}
 	}
 }
