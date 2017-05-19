@@ -25,18 +25,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
-	public class Month : DateParsingFunction
+	public class Month : ExcelFunction
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
-			var date = ParseDate(arguments, dateObj);
-			return CreateResult(date.Month, DataType.Integer);
+			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
+				return CreateResult(date.Month, DataType.Integer);
+			else
+				return CreateResult(error.Value, DataType.ExcelError);
 		}
 	}
 }
