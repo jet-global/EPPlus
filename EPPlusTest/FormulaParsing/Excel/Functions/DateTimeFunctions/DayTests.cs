@@ -42,8 +42,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	public class DayTests : DateTimeFunctionsTestBase
 	{
 		#region Day Function (Execute) Tests
-		
-
 		[TestMethod]
 		public void DayWithDateAsStringReturnsDayOfMonth()
 		{
@@ -94,7 +92,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 					ws.Calculate();
 					Assert.AreEqual(15, ws.Cells[5, 3].Value);
 				}
-
 				var gb = CultureInfo.CreateSpecificCulture("en-GB");
 				Thread.CurrentThread.CurrentCulture = gb;
 				using (var package = new ExcelPackage())
@@ -105,7 +102,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 					ws.Calculate();
 					Assert.AreEqual(15, ws.Cells[5, 3].Value);
 				}
-
 				var de = CultureInfo.CreateSpecificCulture("de-DE");
 				Thread.CurrentThread.CurrentCulture = de;
 				using (var package = new ExcelPackage())
