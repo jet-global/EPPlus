@@ -44,26 +44,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);			
 			var serialNumberCandidate = this.GetFirstValue(arguments);
+			
 			if (serialNumberCandidate is string)
 			{
-				var isValidDate = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime strDate);
-				var isValidNum = Double.TryParse(serialNumberCandidate.ToString(), out double dateAsNum);
+				var isValidDate = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime dateString);
+				var isValidNum = Double.TryParse(serialNumberCandidate.ToString(), out double dateAsNumber);
 				if (isValidNum)
-					serialNumberCandidate = dateAsNum;
+					serialNumberCandidate = dateAsNumber;
 				else if (!isValidDate)
 					return new CompileResult(eErrorType.Value);
 			}
-			if (serialNumberCandidate is int)
-				serialNumberCandidate = ((int)serialNumberCandidate) * 1.0;
-			if (serialNumberCandidate is double)
+			if (serialNumberCandidate is int serialNumberInt)
+				serialNumberCandidate = serialNumberInt * 1.0;
+			if (serialNumberCandidate is double serialNumberDouble)
 			{
-				if ((double)serialNumberCandidate == 0)
+				if (serialNumberDouble == 0)
 					return CreateResult(0, DataType.Integer);
-				else if ((double)serialNumberCandidate < 0)
+				else if (serialNumberDouble < 0)
 					return new CompileResult(eErrorType.Num);
 			}
 			var date = this.ParseDate(arguments, serialNumberCandidate);
-			return CreateResult(date.Day, DataType.Integer);
+			return this.CreateResult(date.Day, DataType.Integer);
 		}
 	}
 }
