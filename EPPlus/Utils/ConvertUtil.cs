@@ -86,7 +86,7 @@ namespace OfficeOpenXml.Utils
 					dateCandidate = dateAsNumber;
 			}
 			if (dateCandidate is int dateInt)
-				dateCandidate = dateInt * 1.0;
+				dateCandidate = (double)dateInt;
 			if (dateCandidate is double dateDouble)
 			{
 				if (dateDouble > 0)

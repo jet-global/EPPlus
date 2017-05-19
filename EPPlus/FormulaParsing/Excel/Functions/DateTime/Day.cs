@@ -22,36 +22,35 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
 using System.Collections.Generic;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
 	/// <summary>
 	/// Returns the corresponding day of the month (as an int) from the given date.
 	/// </summary>
-	public class Day : DateParsingFunction
+	public class Day : ExcelFunction
 	{
 		/// <summary>
 		/// Checks if the input is valid, and returns the corresponding day of the month if so.
 		/// </summary>
 		/// <param name="arguments">The given arguments used to calculate the day of the month.</param>
 		/// <param name="context">Unused in the method, but necessary to override the method.</param>
-		/// <returns></returns>
+		/// <returns>Returns the numeric day of the month for the given date, or an ExcelErrorValue, depending on if the input is valid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);			
 			var serialNumberCandidate = this.GetFirstValue(arguments);
 			var isValidDate = ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error);
+			// Zero is a special case and requires a specific output.
+			if ((serialNumberCandidate is int serialNumberInt && serialNumberInt == 0) ||
+				(serialNumberCandidate is double serialNumberDouble && serialNumberDouble == 0))
+				return this.CreateResult(0, DataType.Integer);
 			if (isValidDate)
 				return this.CreateResult(date.Day, DataType.Integer);
-			if (serialNumberCandidate is int serialNumberInt)
-				serialNumberCandidate = serialNumberInt * 1.0;
-			if (serialNumberCandidate is double serialNumberDouble && serialNumberDouble == 0)
-				return this.CreateResult(0, DataType.Integer);
 			return new CompileResult((eErrorType)error);
 		}
 	}
