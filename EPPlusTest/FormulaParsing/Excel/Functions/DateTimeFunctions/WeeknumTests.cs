@@ -85,18 +85,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WeekNumWithDateNotAsStringReturnsCorrectResult()
-		{
-			var func = new Weeknum();
-
-			var dt = 1 / 10 / 2017;
-
-			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
-
-			Assert.AreEqual(0, r1.Result);
-		}
-
-		[TestMethod]
 		public void WeekNumWithStringArgumentReturnsPoundValue()
 		{
 			var func = new Weeknum();
@@ -124,15 +112,27 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WeekNumWithIntegerArgumentReturnsCorrectValue()
+		public void WeekNumWithNonZeroIntegerArgumentReturnsCorrectValue()
 		{
 			var func = new Weeknum();
 
-			var dt = 9;
+			var dt = 365;
 
 			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
 
 			Assert.AreEqual(2, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithZeroIntegerReturnsZero()
+		{
+			var func = new Weeknum();
+
+			var dt = 0;
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(0, r1.Result);
 		}
 
 		[TestMethod]
