@@ -1617,6 +1617,7 @@ namespace OfficeOpenXml
 			{
 				sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
 			}
+			this.UpdateDataValidationRanges(0, 0, columnFrom, columns);
 		}
 
 		/// <summary>
@@ -4750,7 +4751,7 @@ namespace OfficeOpenXml
 			return _worksheetXml.DocumentElement.InsertAfter(hl, prevNode);
 		}
 
-		private void UpdateDataValidationRanges(int addRow, int numRows, int addColumns, int numColumns)
+		private void UpdateDataValidationRanges(int rowFrom, int rows, int columnFrom, int columns)
 		{
 			//Iterate backwards so we can safely edit the list as we go
 			for (int i = this.DataValidations.Count - 1; i >= 0; i--)
@@ -4759,23 +4760,25 @@ namespace OfficeOpenXml
 				var start = validation.Address.Start;
 				var end = validation.Address.End;
 
-				if(start.Row <= addRow && end.Row >= addRow)
-				{
+				if(start.Row > rowFrom || end.Row < rowFrom)
+					rows = 0;
+				if(start.Column > columnFrom || end.Column < columnFrom)
+					columns = 0;
 
-					string newAddress = start.Address + ":" + end.Address;
-					newAddress = this.Package.FormulaManager.UpdateFormulaReferences(newAddress, numRows, numColumns, addRow, addColumns, this.Name, this.Name);
-					this.DataValidations.Remove(validation);
-					var newValidation = this.DataValidations.AddListValidation(newAddress);
-					//Set all the properties we can so that it preserves data from the old validation object
-					newValidation.AllowBlank = validation.AllowBlank;
-					newValidation.Error = validation.Error;
-					newValidation.ErrorStyle = validation.ErrorStyle;
-					newValidation.ErrorTitle = validation.ErrorTitle;
-					newValidation.Prompt = validation.Prompt;
-					newValidation.PromptTitle = validation.PromptTitle;
-					newValidation.ShowErrorMessage = validation.ShowErrorMessage;
-					newValidation.ShowInputMessage = validation.ShowInputMessage;
-				}
+				string newAddress = start.Address + ":" + end.Address;
+				newAddress = this.Package.FormulaManager.UpdateFormulaReferences(newAddress, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
+				this.DataValidations.Remove(validation);
+				var newValidation = this.DataValidations.AddListValidation(newAddress);
+				//Set all the properties we can so that it preserves data from the old validation object
+				newValidation.AllowBlank = validation.AllowBlank;
+				newValidation.Error = validation.Error;
+				newValidation.ErrorStyle = validation.ErrorStyle;
+				newValidation.ErrorTitle = validation.ErrorTitle;
+				newValidation.Prompt = validation.Prompt;
+				newValidation.PromptTitle = validation.PromptTitle;
+				newValidation.ShowErrorMessage = validation.ShowErrorMessage;
+				newValidation.ShowInputMessage = validation.ShowInputMessage;
+				
 			}
 		}
 
