@@ -199,11 +199,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 		
 
+		[TestMethod]
+		public void WorkdayWithDATEFunctionAndNegativeDayInputReturnsCorrectResult()
+		{
+			var function = new Workday();
 
+			var inputDate = new DateTime(2017, 1, 2);
 
-
-
-
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
+			Assert.AreEqual(42723.00, result.Result);
+		}
 
 
 		
