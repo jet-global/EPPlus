@@ -32,6 +32,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 			var date = System.DateTime.FromOADate(dateSerial);
 
+			var calendarType = CalendarWeekRule.FirstDay;
 
 			var startDay = DayOfWeek.Sunday;
 			if (arguments.Count() > 1)
@@ -47,6 +48,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					if (!isValidReturnType)
 						return new CompileResult(eErrorType.Value);
 				}
+
+				
+
 				var argStartDay = ArgToInt(arguments, 1);
 				switch (argStartDay)
 				{
@@ -79,6 +83,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 						break;
 					case 21:
 						startDay = DayOfWeek.Thursday;
+						calendarType = CalendarWeekRule.FirstFullWeek;
 						break;
 					default:
 						// Not supported return type
@@ -92,11 +97,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					 "Could not execute Weeknum function because DateTimeFormatInfo.CurrentInfo was null");
 			}
 
-			var week = DateTimeFormatInfo.CurrentInfo.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstDay, startDay);
+			var week = DateTimeFormatInfo.CurrentInfo.Calendar.GetWeekOfYear(date, calendarType, startDay);
 			if (serialNumberCandidate is int)
 				if (dateSerial == 0)
 					week = (int)dateSerial / 7;
-			return CreateResult((int)week, DataType.Integer);
+			return CreateResult(week, DataType.Integer);
 		}
 	}
 }

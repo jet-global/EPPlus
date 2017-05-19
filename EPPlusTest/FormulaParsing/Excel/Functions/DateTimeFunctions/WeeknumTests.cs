@@ -25,6 +25,8 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Globalization;
+using System.Threading;
 using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -145,6 +147,48 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
 
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)r1.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekNumWithDateNotAsStringReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = 1 / 5 / 2017;
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(0, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithPeriodInsteadOfDashesOnUSCultureCorrecctValue()
+		{
+			var func = new Weeknum();
+
+			var dt = "1.5.2017";
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(1, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithItalianhDateAsStringWithPeriodsReturnsCorrectResult()
+		{
+			var currentCulture = Thread.CurrentThread.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("it-IT");
+				var func = new Weekday();
+				var args = FunctionsHelper.CreateArgs("3.5.2017");
+				var result = func.Execute(args, this.ParsingContext);
+				Assert.AreEqual(4, result.Result);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
 		}
 
 		//Below are the tests that include the second parameter (return type)
