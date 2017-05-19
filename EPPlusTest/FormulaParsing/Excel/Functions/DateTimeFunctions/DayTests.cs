@@ -42,19 +42,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	public class DayTests : DateTimeFunctionsTestBase
 	{
 		#region Day Function (Execute) Tests
-		[TestMethod]
-		public void DayWithDoubleInputReturnsDayInMonth()
-		{
-			var date = new DateTime(2012, 3, 12);
-			var func = new Day();
-			var args = FunctionsHelper.CreateArgs(date.ToOADate());
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(12, result.Result);
-		}
+		
 
 		[TestMethod]
 		public void DayWithDateAsStringReturnsDayOfMonth()
 		{
+			// Test the case where the date is entered in a date
+			// format in a string.
 			var func = new Day();
 			var args = FunctionsHelper.CreateArgs("2012-03-12");
 			var result = func.Execute(args, this.ParsingContext);
@@ -64,6 +58,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void DayWithDateAsLongStringReturnsDayOfMonth()
 		{
+			// Test the case where the date is entered in a different
+			// date format in a string.
 			var func = new Day();
 			var args = FunctionsHelper.CreateArgs("May 19, 2017");
 			var result = func.Execute(args, this.ParsingContext);
@@ -73,6 +69,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void DayWithInvalidArgumentReturnsPoundValue()
 		{
+			// Test the case where nothing is entered in the DAY function.
 			var func = new Day();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, this.ParsingContext);
@@ -127,7 +124,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DayWithDateAsIntegerReturnsDayOfMonth()
+		public void DayWithDateAsIntegerReturnsDayInMonth()
 		{
 			// Test the case where the date is entered as an integer.
 			// Note that 42874 is the OADate for May 19, 2017.
@@ -138,7 +135,19 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DayWithZeroAsInputReturnsZeroAsDateOfMonth()
+		public void DayWithDateAsDoubleReturnsDayInMonth()
+		{
+			// Test the case where the date is entered as a double.
+			// Note that 42874.34114 is the OADate representation of
+			// some time on May 19, 2017.
+			var func = new Day();
+			var args = FunctionsHelper.CreateArgs(42874.34114);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(19, result.Result);
+		}
+
+		[TestMethod]
+		public void DayWithZeroAsInputReturnsZeroAsDateInMonth()
 		{
 			// Test the case where zero is the input.
 			var func = new Day();
@@ -188,7 +197,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DayWithIntegerInStringAsInputReturnsDayOfMonth()
+		public void DayWithIntegerInStringAsInputReturnsDayInMonth()
 		{
 			// Test the case where the input is an integer expressed as a string.
 			// Note that 42874 is the OADate representation of May 19, 2017.
@@ -199,7 +208,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DayWithDoubleInStringAsInputReturnsDayOfMonth()
+		public void DayWithDoubleInStringAsInputReturnsDayInMonth()
 		{
 			// Test the case where the input is a double expressed as a string.
 			// Note that 42874.34114 is the OADate representation of some time

@@ -29,15 +29,15 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
 	/// <summary>
-	/// 
+	/// Returns the corresponding day of the month (as an int) from the given date.
 	/// </summary>
 	public class Day : DateParsingFunction
 	{
 		/// <summary>
-		/// 
+		/// Checks if the input is valid, and returns the corresponding day of the month if so.
 		/// </summary>
-		/// <param name="arguments"></param>
-		/// <param name="context"></param>
+		/// <param name="arguments">The given arguments used to calculate the day of the month.</param>
+		/// <param name="context">Unused in the method, but necessary to override the method.</param>
 		/// <returns></returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
@@ -54,7 +54,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					return new CompileResult(eErrorType.Value);
 			}
 			if (serialNumberCandidate is int)
-				serialNumberCandidate = (int)serialNumberCandidate * 1.0;
+				serialNumberCandidate = ((int)serialNumberCandidate) * 1.0;
 			if (serialNumberCandidate is double)
 			{
 				if ((double)serialNumberCandidate == 0)
