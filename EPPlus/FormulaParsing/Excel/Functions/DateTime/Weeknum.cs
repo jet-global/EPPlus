@@ -23,15 +23,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(eErrorType.Value);
 
 			var serialNumberCandidate = arguments.ElementAt(0).Value;
-			if (serialNumberCandidate is string)
+
+			if (serialNumberCandidate is null)
+				return new CompileResult(eErrorType.NA);
+			else if (serialNumberCandidate is string)
 			{
 				var isDateString = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime date1);
 
 				if (!isDateString)
 					return new CompileResult(eErrorType.Value);
 			}
-			else if (serialNumberCandidate is null)
-				return new CompileResult(eErrorType.NA);
+			
 
 			var dateSerial = ArgToDecimal(arguments, 0);
 
@@ -109,8 +111,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var week = DateTimeFormatInfo.CurrentInfo.Calendar.GetWeekOfYear(date, calendarType, startDay);
 			if (serialNumberCandidate is int)
 				if (dateSerial == 0)
-					week = (int)dateSerial / 7;
-			return CreateResult(week, DataType.Integer);
+					week = 0;
+			return this.CreateResult(week, DataType.Integer);
 		}
 	}
 }
