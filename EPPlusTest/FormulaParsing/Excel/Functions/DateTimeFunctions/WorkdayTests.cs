@@ -36,9 +36,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	[TestClass]
 	public class WorkdayTests : DateTimeFunctionsTestBase
 	{
+		// The below Test Cases have no Holiday parameter supplied to them.
+		// The below Test Cases has no negative second parameters.
 		#region Workday Function (Execute) Tests
 		[TestMethod]
-		public void WorkdayShouldReturnCorrectResultIfNoHolidayIsSupplied()
+		public void WorkdayWithOADateParameterReturnsCorrectResult()
 		{
 			var inputDate = new DateTime(2014, 1, 1).ToOADate();
 			var expectedDate = new DateTime(2014, 1, 29).ToOADate();
@@ -47,18 +49,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs(inputDate, 20);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(expectedDate, result.Result);
-		}
-
-		[TestMethod]
-		public void WorkdayShouldReturnCorrectResultWithNegativeArg()
-		{
-			var inputDate = new DateTime(2016, 6, 15).ToOADate();
-			var expectedDate = new DateTime(2016, 5, 4).ToOADate();
-
-			var func = new Workday();
-			var args = FunctionsHelper.CreateArgs(inputDate, -30);
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(DateTime.FromOADate(expectedDate), DateTime.FromOADate((double)result.Result));
 		}
 
 		[TestMethod]
@@ -73,6 +63,50 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(expectedDate, result.Result);
 		}
 
+		[TestMethod]
+		public void WorkdayWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Workday();
+
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WorkdayWithStringInputReturnsPoundValue()
+		{
+			var function = new Workday();
+
+			var input1 = "testString";
+			var input2 = "";
+
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, 10), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2, 10), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
+		}
+
+
+
+
+		// The below Test Cases have negative second parameters.
+		[TestMethod]
+		public void WorkdayShouldReturnCorrectResultWithNegativeArg()
+		{
+			var inputDate = new DateTime(2016, 6, 15).ToOADate();
+			var expectedDate = new DateTime(2016, 5, 4).ToOADate();
+
+			var func = new Workday();
+			var args = FunctionsHelper.CreateArgs(inputDate, -30);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(DateTime.FromOADate(expectedDate), DateTime.FromOADate((double)result.Result));
+		}
+
+
+
+
+		// The below Test Cases involve the Holiday parameter.
 		[TestMethod]
 		public void WorkdayWithNegativeArgShouldReturnCorrectWhenArrayOfHolidayDatesIsSupplied()
 		{
@@ -103,16 +137,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				var actualDate = ws.Cells["B3"].Value;
 				Assert.AreEqual(expectedDate, actualDate);
 			}
-		}
-
-		[TestMethod]
-		public void WorkdayWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Workday();
-
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
 	}
