@@ -120,7 +120,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
 
-			Assert.AreEqual(2, r1.Result);
+			Assert.AreEqual(53, r1.Result);
 		}
 
 		[TestMethod]

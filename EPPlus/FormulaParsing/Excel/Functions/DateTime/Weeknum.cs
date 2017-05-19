@@ -25,6 +25,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(eErrorType.NA);
 
 			var dateSerial = ArgToDecimal(arguments, 0);
+
 			if(dateSerial < 0)
 				return new CompileResult(eErrorType.Num);
 
@@ -90,9 +91,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				throw new InvalidOperationException(
 					 "Could not execute Weeknum function because DateTimeFormatInfo.CurrentInfo was null");
 			}
-			var week = DateTimeFormatInfo.CurrentInfo.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstDay, startDay);
 
-			return CreateResult(week, DataType.Integer);
+			var week = DateTimeFormatInfo.CurrentInfo.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstDay, startDay);
+			if (serialNumberCandidate is int)
+				if (dateSerial == 0)
+					week = (int)dateSerial / 7;
+			return CreateResult((int)week, DataType.Integer);
 		}
 	}
 }
