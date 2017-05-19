@@ -24,14 +24,13 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
-using System.Globalization;
-using System.Threading;
 using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using System.Globalization;
+using System.Threading;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
