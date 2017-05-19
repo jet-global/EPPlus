@@ -89,7 +89,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var func = new Weeknum();
 
-			var dt = 1/10/2017;
+			var dt = 1 / 10 / 2017;
 
 			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
 
@@ -154,7 +154,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var func = new Weeknum();
 
-			var dt = new DateTime(2017,1,5);
+			var dt = new DateTime(2017, 1, 5);
 
 			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 1), this.ParsingContext);
 			var r2 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
@@ -315,6 +315,36 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var r1 = func.Execute(FunctionsHelper.CreateArgs(null, 1), this.ParsingContext);
 
 			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)r1.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekNumWithNoFirstParameterAndInvalidReturnTypeReturnsPoundNA()
+		{
+			var func = new Weeknum();
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(null, 5), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)r1.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekNumWithNegativeIntAndValidReturnTypeReutrnsPoundNum()
+		{
+			var func = new Weeknum();
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(-1, 1), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)r1.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekNumWithNegativIntAndInvalidReturnTypeReturnsPoundNum()
+		{
+			var func = new Weeknum();
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(-1, 5), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)r1.Result).Type);
 		}
 		#endregion
 	}
