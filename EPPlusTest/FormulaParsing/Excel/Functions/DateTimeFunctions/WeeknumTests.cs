@@ -37,22 +37,284 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	public class WeeknumTests : DateTimeFunctionsTestBase
 	{
 		#region Weeknum Function (Execute) Tests
+		//The below tests do not include a second parameter (return type)
 		[TestMethod]
-		public void WeekNumShouldReturnCorrectResult()
+		public void WeekNumWtihNoInputReturnsPoundValue()
 		{
 			var func = new Weeknum();
-			var dt1 = new DateTime(2012, 12, 31).ToOADate();
-			var dt2 = new DateTime(2012, 1, 1).ToOADate();
-			var dt3 = new DateTime(2013, 1, 20).ToOADate();
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)r1.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekNumWithDateFunctionInputReturnsCorrectResult()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(1, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithDateAsStringReturnsCorrectResult()
+		{
+			var func = new Weeknum();
+
+			var dt = "1/10/2017";
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(2, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithDateAsStringWithDashesReturnsCorrectResult()
+		{
+			var func = new Weeknum();
+
+			var dt = "1-10-2017";
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(2, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithDateNotAsStringReturnsCorrectResult()
+		{
+			var func = new Weeknum();
+
+			var dt = 1/10/2017;
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(0, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithStringArgumentReturnsPoundValue()
+		{
+			var func = new Weeknum();
+
+			var dt1 = "testString";
+			var dt2 = "";
 
 			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt1), this.ParsingContext);
 			var r2 = func.Execute(FunctionsHelper.CreateArgs(dt2), this.ParsingContext);
-			var r3 = func.Execute(FunctionsHelper.CreateArgs(dt3, 2), this.ParsingContext);
-			var r4 = func.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
-			Assert.AreEqual(53, r1.Result, "r1.Result was not 53, but " + r1.Result.ToString());
-			Assert.AreEqual(1, r2.Result, "r2.Result was not 1, but " + r2.Result.ToString());
-			Assert.AreEqual(3, r3.Result, "r3.Result was not 3, but " + r3.Result.ToString());
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)r4.Result).Type);
+
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)r1.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)r2.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekNumWithOADateArgumentReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 10).ToOADate();
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(2, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithIntegerArgumentReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = 9;
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(2, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithNegativeIntReturnsPoundNum()
+		{
+			var func = new Weeknum();
+
+			var dt = -5;
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)r1.Result).Type);
+		}
+
+		//Below are the tests that include the second parameter (return type)
+
+		[TestMethod]
+		public void WeekNumWithReturnType1OrOmmittedReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017,1,5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 1), this.ParsingContext);
+			var r2 = func.Execute(FunctionsHelper.CreateArgs(dt), this.ParsingContext);
+
+			Assert.AreEqual(1, r1.Result);
+			Assert.AreEqual(1, r2.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithReturnType2ReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 2), this.ParsingContext);
+
+			Assert.AreEqual(2, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithReturnType11ReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 11), this.ParsingContext);
+
+			Assert.AreEqual(2, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithReturnType12ReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 12), this.ParsingContext);
+
+			Assert.AreEqual(2, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithReturnType13ReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 13), this.ParsingContext);
+
+			Assert.AreEqual(2, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithReturnType14ReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 14), this.ParsingContext);
+
+			Assert.AreEqual(2, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithReturnType15ReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 15), this.ParsingContext);
+
+			Assert.AreEqual(1, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithReturnType16ReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 16), this.ParsingContext);
+
+			Assert.AreEqual(1, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithReturnType17ReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 17), this.ParsingContext);
+
+			Assert.AreEqual(1, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithReturnType21ReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 21), this.ParsingContext);
+
+			Assert.AreEqual(1, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithInvalidReturnTypeReturnsPoundNum()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, 5), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)r1.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekNumWithNumericStringReturnTypeReturnsCorrectValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, "1"), this.ParsingContext);
+
+			Assert.AreEqual(1, r1.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithStringReturnTypeReturnsPoundValue()
+		{
+			var func = new Weeknum();
+
+			var dt = new DateTime(2017, 1, 5);
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt, "testString"), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)r1.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekNumWithNoFirstParameterAndValidReturnTypeReturnsPoundNA()
+		{
+			var func = new Weeknum();
+
+			var r1 = func.Execute(FunctionsHelper.CreateArgs(null, 1), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)r1.Result).Type);
 		}
 		#endregion
 	}
