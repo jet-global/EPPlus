@@ -6,8 +6,17 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// This class contains the formula for computing the weeknumber based on a specified date. 
+	/// </summary>
 	public class Weeknum : ExcelFunction
 	{
+		/// <summary>
+		/// Execute returns the week number based on the user's input.
+		/// </summary>
+		/// <param name="arguments">The user specified date and optional return type.</param>
+		/// <param name="context">Not used, but needed for overriding the method.</param>
+		/// <returns>The week number out of 52 based on the date given.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (ValidateArguments(arguments, 1) == false)
