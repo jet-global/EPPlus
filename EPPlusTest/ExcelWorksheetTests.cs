@@ -3185,11 +3185,11 @@ namespace EPPlusTest
 				sheet.Cells["B2:B3"].DataValidation.AddListDataValidation();
 
 				//expand the range
-				sheet.InsertRow(2,2);
+				sheet.InsertRow(3,2);
 
 				//validate that the Data Validation range has also expanded
 				var validationRange = sheet.DataValidations.First();
-				Assert.AreEqual("B2:B4", validationRange.Address.ToString());
+				Assert.AreEqual("B2:B5", validationRange.Address.ToString());
 			}
 		}
 
