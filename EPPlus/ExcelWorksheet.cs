@@ -1425,6 +1425,7 @@ namespace OfficeOpenXml
 			{
 				sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
 			}
+			this.UpdateDataValidationRanges(rowFrom, rows, 0, 0);
 		}
 
 		/// <summary>
@@ -4747,6 +4748,35 @@ namespace OfficeOpenXml
 				}
 			}
 			return _worksheetXml.DocumentElement.InsertAfter(hl, prevNode);
+		}
+
+		private void UpdateDataValidationRanges(int addRow, int numRows, int addColumns, int numColumns)
+		{
+			//Iterate backwards so we can safely edit the list as we go
+			for (int i = this.DataValidations.Count - 1; i >= 0; i--)
+			{
+				var validation = this.DataValidations.ElementAt(i);
+				var start = validation.Address.Start;
+				var end = validation.Address.End;
+
+				if(start.Row <= addRow && end.Row >= addRow)
+				{
+
+					string newAddress = start.Address + ":" + end.Address;
+					newAddress = this.Package.FormulaManager.UpdateFormulaReferences(newAddress, numRows, numColumns, addRow, addColumns, this.Name, this.Name);
+					this.DataValidations.Remove(validation);
+					var newValidation = this.DataValidations.AddListValidation(newAddress);
+					//Set all the properties we can so that it preserves data from the old validation object
+					newValidation.AllowBlank = validation.AllowBlank;
+					newValidation.Error = validation.Error;
+					newValidation.ErrorStyle = validation.ErrorStyle;
+					newValidation.ErrorTitle = validation.ErrorTitle;
+					newValidation.Prompt = validation.Prompt;
+					newValidation.PromptTitle = validation.PromptTitle;
+					newValidation.ShowErrorMessage = validation.ShowErrorMessage;
+					newValidation.ShowInputMessage = validation.ShowInputMessage;
+				}
+			}
 		}
 
 		private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)
