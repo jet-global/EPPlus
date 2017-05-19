@@ -117,35 +117,60 @@ namespace EPPlusTest.Utils
 			Assert.AreEqual(double.NaN, ConvertUtil.GetValueDouble("Not a number", false, true));
 		}
 
+		#region TryParseDateObject Tests
 		[TestMethod]
-		public void TestTryParseObjectString()
+		public void TryParseDateObjectParsesInt()
 		{
-			DateTime resultDate;
-			eErrorType? resultError;
-			var isValidDate = ConvertUtil.TryParseDateObject(42874, out resultDate, out resultError); // May 19, 2017
+			var isValidDate = ConvertUtil.TryParseDateObject(42874, out DateTime resultDate, out eErrorType? resultError);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(42874, resultDate.ToOADate());
 			Assert.AreEqual(null, resultError);
-			isValidDate = ConvertUtil.TryParseDateObject("42874", out resultDate, out resultError); // May 19, 2017
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectParsesIntWithinString()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObject("42874", out DateTime resultDate, out eErrorType? resultError);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(42874, resultDate.ToOADate());
 			Assert.AreEqual(null, resultError);
-			isValidDate = ConvertUtil.TryParseDateObject("5/19/2017", out resultDate, out resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectParsesDateAsString()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObject("5/19/2017", out DateTime resultDate, out eErrorType? resultError);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(42874, resultDate.ToOADate());
 			Assert.AreEqual(null, resultError);
-			isValidDate = ConvertUtil.TryParseDateObject(-1.5, out resultDate, out resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectDoesNotParseNegativeDouble()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObject(-1.5, out DateTime resultDate, out eErrorType? resultError);
 			Assert.AreEqual(false, isValidDate);
 			Assert.AreEqual(0, resultDate.ToOADate());
 			Assert.AreEqual(eErrorType.Num, resultError);
-			isValidDate = ConvertUtil.TryParseDateObject("-1.5", out resultDate, out resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectDoesNotParseNegativeDoubleWithinString()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObject("-1.5", out DateTime resultDate, out eErrorType? resultError);
 			Assert.AreEqual(false, isValidDate);
 			Assert.AreEqual(0, resultDate.ToOADate());
 			Assert.AreEqual(eErrorType.Num, resultError);
-			isValidDate = ConvertUtil.TryParseDateObject("word", out resultDate, out resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectDoesNotParseNonDateString()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObject("word", out DateTime resultDate, out eErrorType? resultError);
 			Assert.AreEqual(false, isValidDate);
 			Assert.AreEqual(0, resultDate.ToOADate());
 			Assert.AreEqual(eErrorType.Value, resultError);
 		}
+		#endregion
 	}
 }
