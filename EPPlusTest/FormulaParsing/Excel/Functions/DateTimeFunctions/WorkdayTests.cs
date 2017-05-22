@@ -230,7 +230,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var inputDate = "1/2/2017";
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
-			Assert.AreEqual(42723, result.Result);
+			Assert.AreEqual(42723.00, result.Result);
 		}
 
 		[TestMethod]
@@ -326,7 +326,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(42723.00, result.Result);
 		}
 
-		// The below Test Cases involve only the 'Days' Parameter.
+		// The below Test Cases involve changes only in the 'Days' Parameter.
 
 		[TestMethod]
 		public void WorkdayWithDayParameterAsDATEFunctionReturnsCorrectValue()
@@ -337,7 +337,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var startDate = new DateTime(2017, 1, 1);
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput), this.ParsingContext);
-			Assert.AreEqual(102582, result.Result);
+			Assert.AreEqual(102582.00, result.Result);
 		}
 
 		[TestMethod]
@@ -348,7 +348,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var startDate = new DateTime(2017, 1, 1);
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput), this.ParsingContext);
-			Assert.AreEqual(102582, result.Result);
+			Assert.AreEqual(102582.00, result.Result);
 		}
 
 		[TestMethod]
@@ -360,7 +360,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var startDate = new DateTime(2017, 1, 1);
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput), this.ParsingContext);
-			Assert.AreEqual(42736, result.Result);
+			Assert.AreEqual(42736.00, result.Result);
 		}
 
 		[TestMethod]
@@ -396,7 +396,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var startDate = new DateTime(2017, 1, 1);
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, 42748), this.ParsingContext);
-			Assert.AreEqual(102582, result.Result);
+			Assert.AreEqual(102582.00, result.Result);
 		}
 
 		[TestMethod]
@@ -408,7 +408,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var dayInput = "1.13.2017";
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, dayInput), this.ParsingContext);
-			Assert.AreEqual(102582, result.Result);
+			Assert.AreEqual(102582.00, result.Result);
 		}
 
 		[TestMethod]
@@ -420,9 +420,19 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var dayInput = "1-13-2017";
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, dayInput), this.ParsingContext);
-			Assert.AreEqual(102582, result.Result);
+			Assert.AreEqual(102582.00, result.Result);
 		}
 
+		[TestMethod]
+		public void WeekdayWithZeroAsDateParameterReuturnsCorrectValeue()
+		{
+			var function = new Workday();
+
+			var startDate = new DateTime(2017, 1, 1);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, 0), this.ParsingContext);
+			Assert.AreEqual(42736.00, result.Result);
+		}
 
 
 
