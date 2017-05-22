@@ -134,6 +134,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WorkdayWithDateUsingPeriodsIntseadOfSlashesReturnsCorrectValue()
 		{
+			// This functionality is different than that of Excell's. 
 			var function = new Workday();
 
 			var input = "1.2.2017";
@@ -281,6 +282,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WorkdayWithDateUsingPeriodsIntseadOfSlashesAndNegDayInputReturnsCorrectValue()
 		{
+			//This functionality is different than Excell's.
 			var function = new Workday();
 
 			var inputDate = "1.2.2017";
@@ -323,6 +325,106 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", -10), this.ParsingContext);
 			Assert.AreEqual(42723.00, result.Result);
 		}
+
+		// The below Test Cases involve only the 'Days' Parameter.
+
+		[TestMethod]
+		public void WorkdayWithDayParameterAsDATEFunctionReturnsCorrectValue()
+		{
+			var function = new Workday();
+
+			var daysInput = new DateTime(2017, 1, 13);
+			var startDate = new DateTime(2017, 1, 1);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput), this.ParsingContext);
+			Assert.AreEqual(102582, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithDayParameterTypedWithQuotesReturnsCorrectResult()
+		{
+			var function = new Workday();
+			var daysInput = "1/13/2017";
+			var startDate = new DateTime(2017, 1, 1);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput), this.ParsingContext);
+			Assert.AreEqual(102582, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithDayParameterWithNoQuotesReturnsCorrectValue()
+		{
+			var function = new Workday();
+
+			var daysInput = 1 / 13 / 2017;
+			var startDate = new DateTime(2017, 1, 1);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput), this.ParsingContext);
+			Assert.AreEqual(42736, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithDayParameterAsGenericStringReturnsPoundValue()
+		{
+			var function = new Workday();
+
+			var daysInput1 = "testString";
+			var daysInput2 = "";
+			var startDate = new DateTime(2017, 1, 1);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput1), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput2), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result2.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithNullDayParameterReturnsPoundNA()
+		{
+			var function = new Workday();
+
+			var startDate = new DateTime(2017, 1, 1);
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, null), this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDayParameterAsOADateReturnCorrectValue()
+		{
+			var function = new Workday();
+
+			var startDate = new DateTime(2017, 1, 1);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, 42748), this.ParsingContext);
+			Assert.AreEqual(102582, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDayParameterWithDotInsteadOfSlashForDateReturnsCorrectValue()
+		{
+			var function = new Workday();
+
+			var startDate = new DateTime(2017, 1,1);
+			var dayInput = "1.13.2017";
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, dayInput), this.ParsingContext);
+			Assert.AreEqual(102582, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDayParameterWithDashInsteadOfSlashForDateReturnsCorrectValue()
+		{
+			var function = new Workday();
+
+			var startDate = new DateTime(2017, 1, 1);
+			var dayInput = "1-13-2017";
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, dayInput), this.ParsingContext);
+			Assert.AreEqual(102582, result.Result);
+		}
+
+
+
 
 		// The below Test Cases involve the Holiday parameter.
 		[TestMethod]
