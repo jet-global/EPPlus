@@ -49,7 +49,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if ((dateObj is int dateInt && dateInt == 0) || (dateObj is double dateDouble && dateDouble == 0))
 				return this.CreateResult(1, DataType.Integer);
 			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
-				return CreateResult(date.Month, DataType.Integer);
+				return this.CreateResult(date.Month, DataType.Integer);
 			else
 				return new CompileResult((eErrorType)error);
 		}
