@@ -65,8 +65,8 @@ namespace OfficeOpenXml.Utils
 			return false;
 		}
 		/// <summary>
-		/// Tries to parse the given object into a <see cref="DateTime"/>. Only integers, doubles, and strings
-		/// have the possibility of being successfully parsed.
+		/// Tries to parse the given object into a <see cref="DateTime"/>. Only integers, doubles, strings
+		/// and <see cref="DateTime"/> objects have the possibility of being successfully parsed.
 		/// </summary>
 		/// <param name="dateCandidate">The object to convert into a DateTime if valid.</param>
 		/// <param name="date">The resulting <see cref="DateTime"/> that dateCandidate was converted to.</param>
@@ -76,6 +76,11 @@ namespace OfficeOpenXml.Utils
 		{
 			error = null;
 			date = DateTime.MinValue;
+			if (dateCandidate is DateTime validDate)
+			{
+				date = validDate;
+				return true;
+			}
 			if (dateCandidate is string)
 			{
 				var isValidDate = DateTime.TryParse(dateCandidate.ToString(), out date);
@@ -89,7 +94,13 @@ namespace OfficeOpenXml.Utils
 				dateCandidate = (double)dateInt;
 			if (dateCandidate is double dateDouble)
 			{
-				if (dateDouble > 0)
+				// Note: This if statement is to account for an error from Lotus 1-2-3
+				// that Excel implemented which incorrectly includes 2/29/1900 as a valid date;
+				// that day does not actually exist: See link for more information.
+				// https://support.microsoft.com/en-us/help/214058/days-of-the-week-before-march-1,-1900-are-incorrect-in-excel
+				if (dateDouble < 61)
+					dateDouble++;
+				if (dateDouble >= 2)
 				{
 					date = DateTime.FromOADate(dateDouble);
 					return true;
