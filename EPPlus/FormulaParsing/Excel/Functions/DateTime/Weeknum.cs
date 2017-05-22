@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
@@ -28,18 +29,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(eErrorType.NA);
 			else if (serialNumberCandidate is string)
 			{
-				var isDateString = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime date1);
-
+				var isDateString = ConvertUtil.TryParseDateString(serialNumberCandidate.ToString(), out System.DateTime date1);
 				if (!isDateString)
 					return new CompileResult(eErrorType.Value);
 			}
-			
 
 			var dateSerial = ArgToDecimal(arguments, 0);
 
 			if(dateSerial < 0)
 				return new CompileResult(eErrorType.Num);
-
 
 			var date = System.DateTime.FromOADate(dateSerial);
 
@@ -48,19 +46,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var startDay = DayOfWeek.Sunday;
 			if (arguments.Count() > 1)
 			{
-
 				var returnType = arguments.ElementAt(1).Value;
 
 				if (returnType is null)
 					return new CompileResult(eErrorType.Num);
 				else if(returnType is string)
 				{
-					var isValidReturnType = Int32.TryParse(returnType.ToString(), out int result);
+					var isValidReturnType = ConvertUtil.TryParseNumericString(returnType.ToString(), out double date2);
 					if (!isValidReturnType)
 						return new CompileResult(eErrorType.Value);
 				}
-
-				
 
 				var argStartDay = ArgToInt(arguments, 1);
 				switch (argStartDay)
