@@ -3212,6 +3212,28 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void InsertColumnsRowsUpdatesDataValidationRangeAcrossSheets()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
+				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
+
+				sheetValidations.DataValidations.AddListValidation(@"'Sheet'" + sheetTarget.Cells["B2:C3"].Address);
+
+				//expand the range
+				sheetTarget.InsertColumn(3, 2);
+				sheetTarget.InsertRow(3, 2);
+
+				//validate that the Data Validation range has also expanded
+				var validationRange = sheetValidations.DataValidations.First();
+				Assert.AreEqual(@"'SHEET'B2:E5", validationRange.Address.ToString());
+			}
+		}
+
+
+		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void InsertRowTooManyTotalRowsThrowsException()
 		{
