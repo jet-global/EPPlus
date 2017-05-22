@@ -35,6 +35,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
+			if ((dateObj is int dateInt && dateInt == 0) || (dateObj is double dateDouble && dateDouble == 0))
+				return this.CreateResult(1900, DataType.Integer);
 			System.DateTime date = System.DateTime.MinValue;
 			if (dateObj is string)
 			{
