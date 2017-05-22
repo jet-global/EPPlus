@@ -25,6 +25,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
@@ -35,19 +36,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
+			// 0 is a special case and requires a specific output.
 			if ((dateObj is int dateInt && dateInt == 0) || (dateObj is double dateDouble && dateDouble == 0))
 				return this.CreateResult(1900, DataType.Integer);
-			System.DateTime date = System.DateTime.MinValue;
-			if (dateObj is string)
-			{
-				date = System.DateTime.Parse(dateObj.ToString());
-			}
+			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
+				return this.CreateResult(date.Year, DataType.Integer);
 			else
-			{
-				var d = ArgToDecimal(arguments, 0);
-				date = System.DateTime.FromOADate(d);
-			}
-			return CreateResult(date.Year, DataType.Integer);
+				return new CompileResult((eErrorType)error);
 		}
 	}
 }
