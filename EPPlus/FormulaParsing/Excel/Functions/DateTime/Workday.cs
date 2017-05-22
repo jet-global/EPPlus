@@ -40,16 +40,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					return new CompileResult(eErrorType.Value);
 			}
 			
+
 			if (dateSerial == 0)
 				if (ArgToInt(arguments, 1) < 0)
 					return new CompileResult(eErrorType.Num);
-	
 
 			var startDate = System.DateTime.FromOADate(dateSerial);
 
 			var workDateSerial = ArgToDecimal(arguments, 1);
-			//var nWorkDays = System.DateTime.FromOADate(workDateSerial);
-			
 
 			var resultDate = System.DateTime.MinValue;
 

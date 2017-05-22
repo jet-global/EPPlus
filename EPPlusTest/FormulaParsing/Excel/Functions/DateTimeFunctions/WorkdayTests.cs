@@ -434,8 +434,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(42736.00, result.Result);
 		}
 
-
-
 		// The below Test Cases involve the Holiday parameter.
 		[TestMethod]
 		public void WorkdayWithNegativeArgShouldReturnCorrectWhenArrayOfHolidayDatesIsSupplied()
