@@ -22,6 +22,7 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.Exceptions;
@@ -29,21 +30,72 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// Returns the appropriate day of the week (as an int) from the given date and return type.
+	/// </summary>
 	public class Weekday : ExcelFunction
 	{
+		/// <summary>
+		/// Checks if input is valid, and returns the corresponding weekday value if so.
+		/// </summary>
+		/// <param name="arguments">The given arguments used to calculate the weekday.</param>
+		/// <param name="context">Unused in method, but necessary to override method.</param>
+		/// <returns>Returns the correct weekday number or an ExcelErrorValue, depending on if the input is valid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var serialNumber = ArgToDecimal(arguments, 0);
+			var serialNumberCandidate = arguments.ElementAt(0).Value;
+			if (serialNumberCandidate is null)
+				return new CompileResult(eErrorType.Num);
+			if (serialNumberCandidate is string)
+			{
+				var isDateString = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime date);
+				if (!isDateString)
+					return new CompileResult(eErrorType.Value);
+			}
+			if (arguments.Count() > 1)
+			{
+				var returnTypeCandidate = arguments.ElementAt(1).Value;
+				if (returnTypeCandidate is null)
+					return new CompileResult(eErrorType.Num);
+				else if (returnTypeCandidate is string)
+				{
+					var isValidReturnType = Int32.TryParse(returnTypeCandidate.ToString(), out int result);
+					if (!isValidReturnType)
+						return new CompileResult(eErrorType.Value);
+				}
+			}
+			var serialNumber = this.ArgToDecimal(arguments, 0);
+			if(serialNumber < 0)
+				return new CompileResult(eErrorType.Num);
 			var returnType = arguments.Count() > 1 ? ArgToInt(arguments, 1) : 1;
-			return CreateResult(CalculateDayOfWeek(System.DateTime.FromOADate(serialNumber), returnType), DataType.Integer);
+			try
+			{
+				var result = this.CalculateDayOfWeek(System.DateTime.FromOADate(serialNumber), returnType);
+				return CreateResult(result, DataType.Integer);
+			}
+			catch (ExcelErrorValueException e)
+			{
+				return new CompileResult(ExcelErrorValue.Values.ToErrorType(e.ErrorValue.ToString()));
+			}
 		}
 
 		private static List<int> _oneBasedStartOnSunday = new List<int> { 1, 2, 3, 4, 5, 6, 7 };
 		private static List<int> _oneBasedStartOnMonday = new List<int> { 7, 1, 2, 3, 4, 5, 6 };
-		private static List<int> _zeroBasedStartOnSunday = new List<int> { 6, 0, 1, 2, 3, 4, 5 };
+		private static List<int> _zeroBasedStartOnMonday = new List<int> { 6, 0, 1, 2, 3, 4, 5 };
+		private static List<int> _oneBasedStartOnTuesday = new List<int> { 6, 7, 1, 2, 3, 4, 5 };
+		private static List<int> _oneBasedStartOnWednesday = new List<int> { 5, 6, 7, 1, 2, 3, 4 };
+		private static List<int> _oneBasedStartOnThursday = new List<int> { 4, 5, 6, 7, 1, 2, 3 };
+		private static List<int> _oneBasedStartOnFriday = new List<int> { 3, 4, 5, 6, 7, 1, 2 };
+		private static List<int> _oneBasedStartOnSaturday = new List<int> { 2, 3, 4, 5, 6, 7, 1};
 
+		/// <summary>
+		/// Returns the appropriate day of the week (as an int) from the given date and return type.
+		/// </summary>
+		/// <param name="dateTime">The user specified date.</param>
+		/// <param name="returnType">The specified return type.</param>
+		/// <returns></returns>
 		private int CalculateDayOfWeek(System.DateTime dateTime, int returnType)
 		{
 			var dayIx = (int)dateTime.DayOfWeek;
@@ -54,7 +106,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				case 2:
 					return _oneBasedStartOnMonday[dayIx];
 				case 3:
-					return _zeroBasedStartOnSunday[dayIx];
+					return _zeroBasedStartOnMonday[dayIx];
+				case 11:
+					return _oneBasedStartOnMonday[dayIx];
+				case 12:
+					return _oneBasedStartOnTuesday[dayIx];
+				case 13:
+					return _oneBasedStartOnWednesday[dayIx];
+				case 14:
+					return _oneBasedStartOnThursday[dayIx];
+				case 15:
+					return _oneBasedStartOnFriday[dayIx];
+				case 16:
+					return _oneBasedStartOnSaturday[dayIx];
+				case 17:
+					return _oneBasedStartOnSunday[dayIx];
 				default:
 					throw new ExcelErrorValueException(eErrorType.Num);
 			}
