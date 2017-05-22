@@ -466,6 +466,137 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				Assert.AreEqual(expectedDate, actualDate);
 			}
 		}
+
+		[TestMethod]
+		public void WorkdayWithPositiveArgsAndNullHolidayDatesReturnsCorrectValue ()
+		{
+			var function = new Workday();
+
+			var inputDate = new DateTime(2017, 1, 2);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, null), this.ParsingContext);
+			Assert.AreEqual(42751.00, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithStringsAsHolidayInputReturnsPoundValue()
+		{
+			var function = new Workday();
+
+			var inputDate = new DateTime(2017, 1, 2);
+
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, "testString"), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, ""), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result2.Result).Type);
+		}
+
+		[TestMethod]
+		public void WorkdayWithNegativeIntAsHolidayInputReturnsPoundNum()
+		{
+			var function = new Workday();
+
+			var inputDate = new DateTime(2017, 1, 2);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, -1), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WorkdayWithHolidaysAsStringsReturnPoundValue()
+		{
+			var function = new Workday();
+
+			var inputDate = new DateTime(2017,1,2);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, "1/20/2017"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WorkdayWithHolidayWithDashesInsteadOfSlashesReturnsCorrectValue()
+		{
+			var function = new Workday();
+
+			var inputDate = new DateTime(2017,1,2);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, "1-25-2017"), this.ParsingContext);
+			Assert.AreEqual(42751.00, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithHolidayWithDotsInsteadOfSlashesReturnsCorrectValue()
+		{
+			// This functionality is different than that of Excel's. Excel does not support the date being 
+			// written with periods, however many European countries write their dates in this format, so
+			// EPPlus is being changed to return the correct result when this format is used.
+
+			var function = new Workday();
+
+			var inputDate = new DateTime(2017,1,2);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, "1.25.2017"), this.ParsingContext);
+			Assert.AreEqual(42751.00, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithZeroIntegerAsHolidayInputReturnsCorrectValue()
+		{
+			var function = new Workday();
+
+			var inputDate = new DateTime(2017, 1, 2);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, 0), this.ParsingContext);
+			Assert.AreEqual(42751.00, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithNonZeroIntegerAsHolidayInputReturnsCorrectValue()
+		{
+			var function = new Workday();
+
+			var inputDate = new DateTime(2017, 1, 2);
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 5, 1), this.ParsingContext);
+			Assert.AreEqual(42744.00, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateFunctionHolidayInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["A1"].Value = new DateTime(2016, 7, 27);
+				ws.Cells["B1"].Value = new DateTime(2016, 7, 11);
+				ws.Cells["B2"].Value = new DateTime(2016, 7, 8);
+				ws.Cells["B3"].Formula = "WORKDAY(A1,40, B1:B2)";
+				ws.Calculate();
+
+				//var expectedDate = new DateTime(2016, 6, 13).ToOADate();
+				var actualDate = ws.Cells["B3"].Value;
+				Assert.AreEqual(42795.00, actualDate);
+			}
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateNotAsStringReturnsCorrectInput()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("test");
+				ws.Cells["A1"].Value = new DateTime(2016, 7, 27).ToOADate();
+				ws.Cells["B1"].Value = 1/20/2017;
+				ws.Cells["B2"].Value = 1/25/2017;
+				ws.Cells["B3"].Formula = "WORKDAY(A1,40, B1:B2)";
+				ws.Calculate();
+
+				//var expectedDate = new DateTime(2016, 6, 13).ToOADate();
+				var actualDate = ws.Cells["B3"].Value;
+				Assert.AreEqual(42795.00, actualDate);
+			}
+		}
 		#endregion
 	}
 }

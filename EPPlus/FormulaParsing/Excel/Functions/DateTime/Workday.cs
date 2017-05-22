@@ -2,6 +2,7 @@
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
@@ -20,6 +21,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(eErrorType.NA);
 			else if (serialNumberCandidate is string)
 			{
+				//Fix the below line to use the new function Cole created
 				var isDateString = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime output);
 				if (!isDateString)
 					return new CompileResult(eErrorType.Value);
@@ -35,6 +37,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var workDaysCandidate = arguments.ElementAt(1).Value;
 			if (workDaysCandidate is string)
 			{
+				//Fix the below line to use the new function Cole created
 				var isWorkDayString = System.DateTime.TryParse(workDaysCandidate.ToString(), out System.DateTime output2);
 				if (!isWorkDayString)
 					return new CompileResult(eErrorType.Value);
@@ -55,6 +58,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var result = calculator.CalculateWorkday(startDate, (int)workDateSerial);
 			if (functionArguments.Length > 2)
 			{
+				var holidayCandidate = arguments.ElementAt(2).Value;
+				if (holidayCandidate is string)
+				{
+					var isHolidayString = ConvertUtil.TryParseDateString(holidayCandidate, out System.DateTime output3);
+					if (!isHolidayString)
+						return new CompileResult(eErrorType.Value);
+				}
+
 				result = calculator.AdjustResultWithHolidays(result, functionArguments[2]);
 			}
 
