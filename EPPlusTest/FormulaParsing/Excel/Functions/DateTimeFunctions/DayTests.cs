@@ -29,9 +29,9 @@ using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using System;
 using System.Globalization;
 using System.Threading;
-using System;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
@@ -261,56 +261,56 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void February27IsOADate59InEPPlusButIsOADate58InExcel()
+		public void DayHandlesExcelOffByOneErrorFor27February1900()
 		{
 			// This test exists as a reminder that, for any date before March 1, 1900 (which has OADate == 61),
-			// Excel and EPPlus have different OADates to represent that date.
+			// Excel and the C# Library System.DateTime have different OADates to represent that date.
 			var date = new DateTime(1900, 2, 27); // The date being represented, 2/27/1900.
-			Assert.AreEqual(59, date.ToOADate()); // The OADate from EPPlus.
+			Assert.AreEqual(59, date.ToOADate()); // The OADate from System.DateTime.
 			var func = new Day();
-			var args = FunctionsHelper.CreateArgs(58); // The OADate from Excel.
+			var args = FunctionsHelper.CreateArgs(58); // The OADate from Excel for 2/27/1900.
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(27, result.Result); // The day calculated using Excel's OADate, corresponding to 2/27/1900.
 		}
 
 		[TestMethod]
-		public void February28IsOADate60InEPPlusButIsOADate59InExcel()
+		public void DayHandlesExcelOffByOneErrorFor28February1900()
 		{
 			// This test exists as a reminder that, for any date before March 1, 1900 (which has OADate == 61),
-			// Excel and EPPlus have different OADates to represent that date.
+			// Excel and the C# Library System.DateTime have different OADates to represent that date.
 			var date = new DateTime(1900, 2, 28); // The date being represented, 2/28/1900.
-			Assert.AreEqual(60, date.ToOADate()); // The OADate from EPPlus.
+			Assert.AreEqual(60, date.ToOADate()); // The OADate from System.DateTime.
 			var func = new Day();
-			var args = FunctionsHelper.CreateArgs(59); // The OADate from Excel.
+			var args = FunctionsHelper.CreateArgs(59); // The OADate from Excel for 2/28/1900.
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(28, result.Result); // The day calculated using Excel's OADate, corresponding to 2/28/1900.
 		}
 
 		[TestMethod]
-		public void OADate60IsFebruary29InExcelButIsFebruary28InEPPlus()
+		public void DayTreatsNonExistentDateOf29February1900As1March1900()
 		{
-			// This test exists as a reminder that, since EPPlus does not accept 2/29/1900 as a valid date
+			// This test exists as a reminder that, since the C# Library System.DateTime does not accept 2/29/1900 as a valid date
 			// (because that day doesn't exist), the OADate for 2/29/1900 from Excel (which Excel considers a valid date)
 			// is instead mapped to 3/1/1900 when using the Day function. So using the OADates 60 and 61 in the Day function
 			// will both calculate the day using 3/1/1900 as the date.
 			var func = new Day();
-			var args = FunctionsHelper.CreateArgs(60); // The OADate from Excel.
+			var args = FunctionsHelper.CreateArgs(60); // The OADate from Excel for 2/29/1900, which doesnt exist in System.DateTime, so also the OADate for 3/1/1900.
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(1, result.Result); // The day calculated using Excel's OADate, corresponding to 3/1/1900.
 		}
 
 		[TestMethod]
-		public void March1IsOADate61InBothEPPlusAndExcel()
+		public void DayHandlesExcelOffByOneErrorFor1March1900()
 		{
 			// This test exists as a reminder that March 1, 1900 is the date where Excel
-			// and EPPlus' OADates sync back up; 61 is the OADate for March 1, 1900 in
+			// and the C# Library System.DateTime's OADates sync back up; 61 is the OADate for March 1, 1900 in
 			// both Excel and EPPlus.
 			var date = new DateTime(1900, 3, 1); // The date being represented, 3/1/1900.
-			Assert.AreEqual(61, date.ToOADate()); // The OADate from EPPlus.
+			Assert.AreEqual(61, date.ToOADate()); // The OADate from System.DateTime.
 			var func = new Day();
-			var args = FunctionsHelper.CreateArgs(61); // The OADate from Excel.
+			var args = FunctionsHelper.CreateArgs(61); // The OADate from Excel for 3/1/1900.
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(1, result.Result); // The date calculated using Excel's OADate.
+			Assert.AreEqual(1, result.Result); // The date calculated using Excel's OADate, corresponding to 3/1/1900.
 		}
 
 		[TestMethod]
