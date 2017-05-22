@@ -58,14 +58,22 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var result = calculator.CalculateWorkday(startDate, (int)workDateSerial);
 			if (functionArguments.Length > 2)
 			{
-				var holidayCandidate = arguments.ElementAt(2).Value;
-				if (holidayCandidate is string)
+				for (int i = 2; i < functionArguments.Length; i++)
 				{
-					var isHolidayString = ConvertUtil.TryParseDateString(holidayCandidate, out System.DateTime output3);
-					if (!isHolidayString)
-						return new CompileResult(eErrorType.Value);
+					var holidayCandidate = arguments.ElementAt(i).Value;
+						if (holidayCandidate is string)
+						{
+							var isHolidayString = ConvertUtil.TryParseDateString(holidayCandidate, out System.DateTime output3);
+							if (!isHolidayString)
+								return new CompileResult(eErrorType.Value);
+						}
+						if (holidayCandidate is int)
+						{
+							var holidaySerial = ArgToInt(arguments, i);
+							if (holidaySerial < 0)
+								return new CompileResult(eErrorType.Num);
+						}
 				}
-
 				result = calculator.AdjustResultWithHolidays(result, functionArguments[2]);
 			}
 
