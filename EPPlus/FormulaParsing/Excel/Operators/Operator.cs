@@ -341,25 +341,51 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				return new CompileResult(errorVal);
 			}
+			return new CompileResult(comparison(Compare(l, r)), DataType.Boolean);
+		}
+
+		public static int Compare(CompileResult leftInput, CompileResult rightInput)
+		{
 			object left, right;
-			left = GetObjFromOther(l, r);
-			right = GetObjFromOther(r, l);
-			if (ConvertUtil.IsNumeric(left) && ConvertUtil.IsNumeric(right))
+			left = GetObjFromOther(leftInput, rightInput);
+			right = GetObjFromOther(rightInput, leftInput);
+			var leftIsNumeric = ConvertUtil.IsNumeric(left) && !(left is bool);
+			var rightIsNumeric = ConvertUtil.IsNumeric(right) && !(right is bool);
+
+			if (leftIsNumeric && rightIsNumeric)
 			{
-				var lnum = ConvertUtil.GetValueDouble(left);
-				var rnum = ConvertUtil.GetValueDouble(right);
-				if (Math.Abs(lnum - rnum) < double.Epsilon)
+				var leftNumber = ConvertUtil.GetValueDouble(left);
+				var rightNumber = ConvertUtil.GetValueDouble(right);
+				if (Math.Abs(leftNumber - rightNumber) < double.Epsilon)
 				{
-					return new CompileResult(comparison(0), DataType.Boolean);
+					return 0;
 				}
-				var comparisonResult = lnum.CompareTo(rnum);
-				return new CompileResult(comparison(comparisonResult), DataType.Boolean);
+				return leftNumber.CompareTo(rightNumber);
 			}
-			else
+			// Numbers are less than text are less than logical values:
+			else if (leftIsNumeric)
+				return -1;
+			else if (rightIsNumeric)
+				return 1;
+			else if (leftInput.DataType == DataType.String && rightInput.DataType == DataType.Boolean)
+				return -1;
+			else if (leftInput.DataType == DataType.Boolean && rightInput.DataType == DataType.String)
+				return 1;
+			else if (leftInput.DataType == DataType.Boolean && rightInput.DataType == DataType.Boolean)
+			{
+					if (left == right)
+						return 0;
+					else if ((bool)left == true)
+						return 1;
+					else
+						return -1;
+			}
+			else if (leftInput.DataType == DataType.String && rightInput.DataType == DataType.String)
 			{
 				var comparisonResult = CompareString(left, right);
-				return new CompileResult(comparison(comparisonResult), DataType.Boolean);
+				return comparisonResult;
 			}
+			throw new InvalidOperationException($"Comparing operands of the given types {leftInput.DataType.ToString()} and {rightInput.DataType.ToString()} is not supported.");
 		}
 
 		private static int CompareString(object l, object r)

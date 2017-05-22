@@ -14,6 +14,23 @@ namespace EPPlusTest.Excel
 	public class OperatorsTests
 	{
 		[TestMethod]
+		public void OperatorGreaterThanNumbersAreLessThanTextValuesAreLessThanLogicalValues()
+		{
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult("text", DataType.String)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult("1", DataType.String)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult(true, DataType.Boolean)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult(false, DataType.Boolean)).Result);
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult(true, DataType.Boolean), new CompileResult("10000", DataType.String)).Result);
+		}
+
+		// Numbers to numbers
+		// Numbers to text
+		// Numbers to logicals
+		// Logicals to text
+		// Logicals to logicals
+		// text to text
+
+		[TestMethod]
 		public void OperatorPlusShouldThrowExceptionIfNonNumericOperand()
 		{
 			var result = Operator.Plus.Apply(new CompileResult(1, DataType.Integer), new CompileResult("a", DataType.String));

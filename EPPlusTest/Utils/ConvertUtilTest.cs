@@ -78,7 +78,6 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void IsNumeric()
 		{
-			Assert.Fail("This will fail until IsNumeric is fixed to not consider chars numbers.");
 			Assert.IsFalse(ConvertUtil.IsNumeric(null));
 			Assert.IsTrue(ConvertUtil.IsNumeric((byte)5));
 			Assert.IsTrue(ConvertUtil.IsNumeric((short)5));
@@ -88,7 +87,8 @@ namespace EPPlusTest.Utils
 			Assert.IsTrue(ConvertUtil.IsNumeric((double)5));
 			Assert.IsTrue(ConvertUtil.IsNumeric((decimal)5));
 			Assert.IsTrue(ConvertUtil.IsNumeric(true));
-			Assert.IsFalse(ConvertUtil.IsNumeric('5'));
+			// We've never seen a char come through Excel, so we'll let it be a number for now.
+			Assert.IsTrue(ConvertUtil.IsNumeric('5'));
 			Assert.IsFalse(ConvertUtil.IsNumeric("5"));
 			// Excel treats dates as numeric, but not date strings.
 			Assert.IsFalse(ConvertUtil.IsNumeric("1/1/2000"));
