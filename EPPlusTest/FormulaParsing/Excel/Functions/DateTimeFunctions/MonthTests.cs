@@ -51,17 +51,30 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void MonthShouldReturnMonthOfYearWithStringParam()
 		{
-			var date = new DateTime(2012, 3, 12);
+			// Test the case where the date is entered in date format
+			// within a string.
 			var func = new Month();
 			var result = func.Execute(FunctionsHelper.CreateArgs("2012-03-12"), this.ParsingContext);
 			Assert.AreEqual(3, result.Result);
 		}
 
 		[TestMethod]
+		public void MonthWithLongDateAsStringReturnsMonthOfYear()
+		{
+			// Test the case where the date is entered in 
+			// long date format within a string.
+			var func = new Month();
+			var result = func.Execute(FunctionsHelper.CreateArgs("March 12, 2012"), this.ParsingContext);
+			Assert.AreEqual(3, result.Result);
+		}
+
+		[TestMethod]
 		public void MonthWithInvalidArgumentReturnsPoundValue()
 		{
-			var func = new Month();
 
+			// Test the case where the nothing is entered in
+			// the MONTH function.
+			var func = new Month();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
@@ -70,6 +83,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void MonthFunctionWorksInDifferentCultureDateFormats()
 		{
+			// Test the case where the dates are entered into
+			// the MONTH function under different cultures.
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
 			{
@@ -99,6 +114,124 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			{
 				Thread.CurrentThread.CurrentCulture = currentCulture;
 			}
+		}
+
+		[TestMethod]
+		public void MonthWithDateAsIntegerReturnsMonthInYear()
+		{
+			// Test the case where the date is entered as an integer.
+			// Note that 42874 is the OADate for May 19, 2017.
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs(42874);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(5, result.Result);
+		}
+
+		[TestMethod]
+		public void MonthWithDateAsDoubleReturnsMonthInYear()
+		{
+			// Test the case where the date is entered as a double.
+			// Note that 42874.34114 is the OADate representation of
+			// some time on May 19, 2017.
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs(42874.34114);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(5, result.Result);
+		}
+
+		[TestMethod]
+		public void MonthWithZeroAsInputReturnsOneAsDateInMonth()
+		{
+			// Test the case where zero is the input.
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs(0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void MonthWithNegativeIntegerAsInputReturnsPoundNum()
+		{
+			// Test the case where a negative integer is the input.
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs(-1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MonthWithNegativeDoubleAsInputReturnsPoundNum()
+		{
+			// Test the case where a negative double is the input
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs(-1.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MonthWithNonDateStringAsInputReturnsPoundValue()
+		{
+			// Test the case where a non-date string is the input.
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs("word");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MonthWithEmptyStringAsInputReturnsPoundValue()
+		{
+			// Test the case where an empty string is the input.
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs("");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MonthWithIntegerInStringAsInputReturnsMonthInYear()
+		{
+			// Test the case where the input is an integer expressed as a string.
+			// Note that 42874 is the OADate representation of May 19, 2017.
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs("42874");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(5, result.Result);
+		}
+
+		[TestMethod]
+		public void MonthWithDoubleInStringAsInputReturnsMonthInYear()
+		{
+			// Test the case where the input is a double expressed as a string.
+			// Note that 42874.34114 is the OADate representation of some time
+			// on May 19, 2017.
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs("42874.43114");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(5, result.Result);
+		}
+
+		[TestMethod]
+		public void MonthWithNegativeIntegerInStringAsInputReturnsPoundNum()
+		{
+			// Test the case where the input is a negative integer expressed
+			// as a string.
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs("-1");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MonthWithNegativeDoubleInStringAsInputReturnsPoundNum()
+		{
+			// Test the case where the input is a negative double expressed
+			// as a string.
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs("-1.5");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
 	}

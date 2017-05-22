@@ -29,17 +29,29 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// Returns the corresponding month of the year (as an int) from the given date.
+	/// </summary>
 	public class Month : ExcelFunction
 	{
+		/// <summary>
+		/// Checks if the input is a valid date, and returns the corresponding month of the year if so.
+		/// </summary>
+		/// <param name="arguments">The given arguments used to calculate the month of the year.</param>
+		/// <param name="context">Unused in the method, but necessary to override the method.</param>
+		/// <returns>Returns the numeric month of the year for the given date, or an ExcelErrorValue, depending on if the input is valid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
+			// 0 is a special case and requires specific output.
+			if ((dateObj is int dateInt && dateInt == 0) || (dateObj is double dateDouble && dateDouble == 0))
+				return this.CreateResult(1, DataType.Integer);
 			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
 				return CreateResult(date.Month, DataType.Integer);
 			else
-				return CreateResult(error.Value, DataType.ExcelError);
+				return new CompileResult((eErrorType)error);
 		}
 	}
 }
