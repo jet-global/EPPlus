@@ -116,8 +116,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var input = 1 / 2 / 2017;
 
-			var result = function.Execute(FunctionsHelper.CreateArgs(input, 10), this.ParsingContext);
-			Assert.AreEqual(13, result.Result);
+			var result = function.Execute(FunctionsHelper.CreateArgs(input, 5), this.ParsingContext);
+			Assert.AreEqual(6.00, result.Result);
 		}
 
 		[TestMethod]
@@ -160,8 +160,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var input = 0;
 
-			var result = function.Execute(FunctionsHelper.CreateArgs(input, 10), this.ParsingContext);
-			Assert.AreEqual(13, result.Result);
+			var result = function.Execute(FunctionsHelper.CreateArgs(input, 15), this.ParsingContext);
+			Assert.AreEqual(20.00, result.Result);
 		}
 
 		[TestMethod]
@@ -170,7 +170,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var function = new Workday();
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(null, 10), this.ParsingContext);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
@@ -210,9 +210,119 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(42723.00, result.Result);
 		}
 
+		[TestMethod]
+		public void WorkdayWithDateNotAsStringAndNegDayInputReturnsPoundNum()
+		{
+			var function = new Workday();
 
+			var inputDate = 1 / 2 / 2017;
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
 		
+		[TestMethod]
+		public void WorkdayWithDateAsStringAndNegDayInputReturnsCorrectValue()
+		{
+			var function = new Workday();
 
+			var inputDate = "1/2/2017";
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
+			Assert.AreEqual(42723, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithGenericStringAndNegDayInputReturnsPoundValue()
+		{
+			var function = new Workday();
+
+			var inputDate1 = "testString";
+			var inputDate2 = "";
+
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(inputDate1, -10), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(inputDate2, -10), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result2.Result).Type);
+		}
+
+		[TestMethod]
+		public void WorkdayWithEmptyFirstParameterAndNegDateInputREturnsPoundNA()
+		{
+			var function = new Workday();
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(null,-10), this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WorkdayWithOADateFirstInputNegDayInputReturnsCorrectValue()
+		{
+			var function = new Workday();
+
+			var inputDate = new DateTime(2017, 1, 2).ToOADate();
+
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
+
+			Assert.AreEqual(42723.00, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithIntFirstInputNegativeDayInputReturnsPoundNum()
+		{
+			var function = new Workday();
+
+			var inputDate = 10;
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WorkdayWithDateUsingPeriodsIntseadOfSlashesAndNegDayInputReturnsCorrectValue()
+		{
+			var function = new Workday();
+
+			var inputDate = "1.2.2017";
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
+			Assert.AreEqual(42723.00, result.Result);
+		}
+
+
+		[TestMethod]
+		public void WorkdayWithNegFirstInputAndNegDateInputReturnsPoundNum()
+		{
+			var function = new Workday();
+			var inputDate = -1;
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WorkdayWithZeroFirstInputNegDateInputReturnsPoundNum()
+		{
+			var function = new Workday();
+			var result = function.Execute(FunctionsHelper.CreateArgs(0, -10), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WorkdayWithNullSecondParameterReturnsPoundNA()
+		{
+			var function = new Workday();
+
+			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", null), this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WorkdayDateWithSlashesFirstInputAndNegDateInputReturnsCorrectInput()
+		{
+			var function = new Workday();
+
+			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", -10), this.ParsingContext);
+			Assert.AreEqual(42723.00, result.Result);
+		}
 
 		// The below Test Cases involve the Holiday parameter.
 		[TestMethod]
