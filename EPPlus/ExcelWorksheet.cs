@@ -4771,6 +4771,8 @@ namespace OfficeOpenXml
 
 						string newAddress = start.Address + ":" + end.Address;
 						newAddress = this.Package.FormulaManager.UpdateFormulaReferences(newAddress, rows, columns, rowFrom, columnFrom, sheet.Name, sheet.Name);
+						if(validation.Address.WorkSheet != null)
+							newAddress = "\'" + validation.Address.WorkSheet + "\'!" + newAddress;
 						sheet.DataValidations.Remove(validation);
 						var newValidation = sheet.DataValidations.AddListValidation(newAddress);
 						//Set all the properties we can so that it preserves data from the old validation object
@@ -4785,33 +4787,6 @@ namespace OfficeOpenXml
 					}
 				}
 			}
-			//Iterate backwards so we can safely edit the list as we go
-			//for (int i = this.DataValidations.Count - 1; i >= 0; i--)
-			//{
-			//	var validation = this.DataValidations.ElementAt(i);
-			//	var start = validation.Address.Start;
-			//	var end = validation.Address.End;
-
-			//	if(start.Row > rowFrom || end.Row < rowFrom)
-			//		rows = 0;
-			//	if(start.Column > columnFrom || end.Column < columnFrom)
-			//		columns = 0;
-
-			//	string newAddress = start.Address + ":" + end.Address;
-			//	newAddress = this.Package.FormulaManager.UpdateFormulaReferences(newAddress, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
-			//	this.DataValidations.Remove(validation);
-			//	var newValidation = this.DataValidations.AddListValidation(newAddress);
-			//	//Set all the properties we can so that it preserves data from the old validation object
-			//	newValidation.AllowBlank = validation.AllowBlank;
-			//	newValidation.Error = validation.Error;
-			//	newValidation.ErrorStyle = validation.ErrorStyle;
-			//	newValidation.ErrorTitle = validation.ErrorTitle;
-			//	newValidation.Prompt = validation.Prompt;
-			//	newValidation.PromptTitle = validation.PromptTitle;
-			//	newValidation.ShowErrorMessage = validation.ShowErrorMessage;
-			//	newValidation.ShowInputMessage = validation.ShowInputMessage;
-				
-			//}
 		}
 
 		private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)
