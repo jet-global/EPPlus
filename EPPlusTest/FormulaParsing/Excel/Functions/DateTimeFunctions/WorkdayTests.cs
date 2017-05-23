@@ -656,6 +656,64 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			}
 		}
 
+
+		[TestMethod]
+		public void WeekdayWithLargeNumberOfHolidaysAsOADatesReturnsCorrectInput()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("test");
+				ws.Cells["A1"].Value = new DateTime(2017, 1, 2).ToOADate();
+				ws.Cells["B1"].Value = new DateTime(2017, 1, 7).ToOADate();
+				ws.Cells["B2"].Value = new DateTime(2017, 1, 8).ToOADate();
+				ws.Cells["B3"].Value = new DateTime(2017, 1, 9).ToOADate();
+				ws.Cells["b4"].Value = new DateTime(2017, 1, 10).ToOADate();
+				ws.Cells["B5"].Value = new DateTime(2017, 1, 11).ToOADate();
+				ws.Cells["B6"].Value = new DateTime(2017, 1, 12).ToOADate();
+				ws.Cells["B7"].Value = new DateTime(2017, 1, 13).ToOADate();
+				ws.Cells["B8"].Value = new DateTime(2017, 1, 14).ToOADate();
+				ws.Cells["B9"].Value = new DateTime(2017, 1, 15).ToOADate();
+				ws.Cells["B10"].Value = new DateTime(2017, 1,16).ToOADate();
+				ws.Cells["B11"].Value = new DateTime(2017, 1, 17).ToOADate();
+				ws.Cells["B12"].Value = new DateTime(2017, 1, 18).ToOADate();
+				ws.Cells["B13"].Value = new DateTime(2017, 1, 19).ToOADate();
+				ws.Cells["B14"].Value = new DateTime(2017, 1, 20).ToOADate();
+				ws.Cells["B15"].Value = new DateTime(2017, 1, 21).ToOADate();
+				ws.Cells["B16"].Value = new DateTime(2017, 1, 22).ToOADate();
+				ws.Cells["B17"].Value = new DateTime(2017, 1, 23).ToOADate();
+				ws.Cells["B18"].Value = new DateTime(2017, 1, 24).ToOADate();
+				ws.Cells["B19"].Value = new DateTime(2017, 1, 25).ToOADate();
+				ws.Cells["B20"].Value = new DateTime(2017, 1, 26).ToOADate();
+				ws.Cells["B21"].Value = new DateTime(2017, 1, 27).ToOADate();
+				ws.Cells["B22"].Value = new DateTime(2017, 1, 28).ToOADate();
+				ws.Cells["B23"].Value = new DateTime(2017, 1, 29).ToOADate();
+				ws.Cells["B24"].Value = new DateTime(2017, 1, 30).ToOADate();
+				ws.Cells["B25"].Value = new DateTime(2017, 1, 31).ToOADate();
+				ws.Cells["B26"].Value = new DateTime(2017, 2, 1).ToOADate();
+				ws.Cells["B27"].Value = new DateTime(2017, 2, 2).ToOADate();
+				ws.Cells["B28"].Value = new DateTime(2017, 2, 3).ToOADate();
+				ws.Cells["B29"].Value = new DateTime(2017, 2, 4).ToOADate();
+				ws.Cells["B30"].Value = new DateTime(2017, 2, 5).ToOADate();
+				ws.Cells["B31"].Value = new DateTime(2017, 2, 6).ToOADate();
+				ws.Cells["B32"].Value = new DateTime(2017, 2, 7).ToOADate();
+				ws.Cells["B33"].Value = new DateTime(2017, 2, 8).ToOADate();
+				ws.Cells["B34"].Value = new DateTime(2017, 2, 9).ToOADate();
+				ws.Cells["B35"].Value = new DateTime(2017, 2, 10).ToOADate();
+				ws.Cells["B36"].Value = new DateTime(2017, 2, 11).ToOADate();
+				ws.Cells["B37"].Value = new DateTime(2017, 2, 12).ToOADate();
+				ws.Cells["B38"].Value = new DateTime(2017, 2, 13).ToOADate();
+				ws.Cells["B39"].Value = new DateTime(2017, 3, 15).ToOADate();
+				ws.Cells["B40"].Value = new DateTime(2017, 4, 1).ToOADate();
+				ws.Cells["B41"].Value = new DateTime(2017, 5, 4).ToOADate();
+
+				ws.Cells["C1"].Formula = "WORKDAY(A1, 150, B1:B41)";
+				ws.Calculate();
+
+				Assert.AreEqual(42985.00, ws.Cells["C1"].Value);
+
+			}
+		}
+
 		#endregion
 	}
 }

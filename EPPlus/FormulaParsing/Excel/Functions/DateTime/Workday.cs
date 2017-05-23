@@ -11,6 +11,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
+
 			if (ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
 			if (arguments.ElementAt(1).Value is null)
@@ -56,8 +57,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var result = calculator.CalculateWorkday(startDate, (int)workDateSerial);
 
 			bool test = false;
-			bool test2 = false;
-
 			if (functionArguments.Length > 2)
 			{
 				for (int i = 2; i < functionArguments.Length; i++)
@@ -76,15 +75,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 						if (holidaySerial < 0)
 							return new CompileResult(eErrorType.Num);
 					}
+
 				}
 				result = calculator.AdjustResultWithHolidays(result, functionArguments[2]);
 			}
 			if (dateSerial == 0)
 				if (dateSerial % 5 == 0)
 					return CreateResult(result.EndDate.ToOADate()-1, DataType.Date);
-			if(test)
+			if (test)
 				return CreateResult(result.EndDate.ToOADate()+1, DataType.Date);
-
 			return CreateResult(result.EndDate.ToOADate(), DataType.Date);
 		}
 	}

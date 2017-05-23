@@ -20,19 +20,22 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 		private void Initialize()
 		{
 			var holidays = _holidayArg.Value as IEnumerable<FunctionArgument>;
+
+
 			if (holidays != null)
 			{
 				foreach (var holidayDate in from arg in holidays where ConvertUtil.IsNumeric(arg.Value) select ConvertUtil.GetValueDouble(arg.Value) into dateSerial select System.DateTime.FromOADate(dateSerial))
 				{
 					_holidayDates.Add(holidayDate);
 				}
-				foreach (var holiday in holidays)
+
+				foreach(var arg in holidays)
 				{
-					var test = ConvertUtil.TryParseDateObject(holiday, out System.DateTime date, out eErrorType? error);
-					if (!test)
+					if (!ConvertUtil.TryParseDateObject(arg, out System.DateTime date, out eErrorType? error))
 						continue;
-					_holidayDates.Add(System.DateTime.FromOADate((double)holiday.Value));
+					//_holidayDates.Add(arg.DataType);
 				}
+
 			}
 
 			var range = _holidayArg.Value as ExcelDataProvider.IRangeInfo;
@@ -43,16 +46,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 					_holidayDates.Add(holidayDate);
 				}
 			}
-			if ( _holidayDates is null)
-			{
-				foreach (var holiday in holidays)
-				{
-					var test = ConvertUtil.TryParseDateObject(holiday, out System.DateTime date, out eErrorType? error);
-					if (!test)
-						continue;
-					_holidayDates.Add(System.DateTime.FromOADate((double)holiday.Value));
-				}
-			}
+
 			if (ConvertUtil.IsNumeric(_holidayArg.Value))
 			{
 				_holidayDates.Add(System.DateTime.FromOADate(ConvertUtil.GetValueDouble(_holidayArg.Value)));
