@@ -21,8 +21,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(eErrorType.NA);
 			else if (serialNumberCandidate is string)
 			{
-				//Fix the below line to use the new function Cole created
-				var isDateString = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime output);
+				var isDateString = ConvertUtil.TryParseDateString(serialNumberCandidate.ToString(), out System.DateTime output);
 				if (!isDateString)
 					return new CompileResult(eErrorType.Value);
 			}
@@ -37,8 +36,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var workDaysCandidate = arguments.ElementAt(1).Value;
 			if (workDaysCandidate is string)
 			{
-				//Fix the below line to use the new function Cole created
-				var isWorkDayString = System.DateTime.TryParse(workDaysCandidate.ToString(), out System.DateTime output2);
+				var isWorkDayString = ConvertUtil.TryParseDateString(workDaysCandidate.ToString(), out System.DateTime output2);
 				if (!isWorkDayString)
 					return new CompileResult(eErrorType.Value);
 			}
@@ -56,26 +54,33 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 			var calculator = new WorkdayCalculator();
 			var result = calculator.CalculateWorkday(startDate, (int)workDateSerial);
+
+
+
+
 			if (functionArguments.Length > 2)
 			{
 				for (int i = 2; i < functionArguments.Length; i++)
 				{
 					var holidayCandidate = arguments.ElementAt(i).Value;
-						if (holidayCandidate is string)
-						{
-							var isHolidayString = ConvertUtil.TryParseDateString(holidayCandidate, out System.DateTime output3);
-							if (!isHolidayString)
-								return new CompileResult(eErrorType.Value);
-						}
-						if (holidayCandidate is int)
-						{
-							var holidaySerial = ArgToInt(arguments, i);
-							if (holidaySerial < 0)
-								return new CompileResult(eErrorType.Num);
-						}
+					if (holidayCandidate is string)
+					{
+						var isHolidayString = ConvertUtil.TryParseDateString(holidayCandidate, out System.DateTime output3);
+						if (!isHolidayString)
+							return new CompileResult(eErrorType.Value);
+					}
+					else if (holidayCandidate is int)
+					{
+						var holidaySerial = ArgToInt(arguments, i);
+						if (holidaySerial < 0)
+							return new CompileResult(eErrorType.Num);
+						break;
+					}
+					result = calculator.AdjustResultWithHolidays(result, functionArguments[i]);
 				}
-				result = calculator.AdjustResultWithHolidays(result, functionArguments[2]);
 			}
+
+
 
 			if(dateSerial == 0)
 				if(dateSerial % 5 == 0)

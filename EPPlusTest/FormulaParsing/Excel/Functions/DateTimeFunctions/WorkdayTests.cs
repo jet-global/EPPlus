@@ -504,14 +504,12 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayWithHolidaysAsStringsReturnPoundValue()
+		public void WorkdayWithHolidaysAsStringsReturnsCorrectValue()
 		{
 			var function = new Workday();
 
-			var inputDate = new DateTime(2017,1,2);
-
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, "1/20/2017"), this.ParsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 41, "1/25/2017"), this.ParsingContext);
+			Assert.AreEqual(42795.00,result.Result);
 		}
 
 		[TestMethod]
@@ -568,9 +566,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			using (var package = new ExcelPackage())
 			{
 				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["A1"].Value = new DateTime(2016, 7, 27);
-				ws.Cells["B1"].Value = new DateTime(2016, 7, 11);
-				ws.Cells["B2"].Value = new DateTime(2016, 7, 8);
+				ws.Cells["A1"].Value = new DateTime(2017, 1, 2);
+				ws.Cells["B1"].Value = new DateTime(2017, 1, 20);
+				ws.Cells["B2"].Value = new DateTime(2017, 1, 25);
 				ws.Cells["B3"].Formula = "WORKDAY(A1,40, B1:B2)";
 				ws.Calculate();
 
@@ -586,16 +584,77 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			using (var package = new ExcelPackage())
 			{
 				var ws = package.Workbook.Worksheets.Add("test");
-				ws.Cells["A1"].Value = new DateTime(2016, 7, 27).ToOADate();
+				ws.Cells["A1"].Value = "1/2/2017";
 				ws.Cells["B1"].Value = 1/20/2017;
 				ws.Cells["B2"].Value = 1/25/2017;
 				ws.Cells["B3"].Formula = "WORKDAY(A1,40, B1:B2)";
 				ws.Calculate();
 
-				//var expectedDate = new DateTime(2016, 6, 13).ToOADate();
 				var actualDate = ws.Cells["B3"].Value;
-				Assert.AreEqual(42795.00, actualDate);
+				Assert.AreEqual(42794.00, actualDate);
 			}
+		
+			var function = new Workday();
+			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 40, 1 / 20 / 2017), this.ParsingContext);
+			Assert.AreEqual(42794.00, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithLargeNumberOfHolidaysReturnsCorrectInput()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("test");
+				ws.Cells["A1"].Value = "1/2/2017";
+				ws.Cells["B1"].Value = "1/7/2017";
+				ws.Cells["B2"].Value = "1/8/2017";
+				ws.Cells["B3"].Value = "1/9/2017";
+				ws.Cells["b4"].Value = "1/10/2017";
+				ws.Cells["B5"].Value = "1/11/2017";
+				ws.Cells["B6"].Value = "1/12/2017";
+				ws.Cells["B7"].Value = "1/13/2017";
+				ws.Cells["B8"].Value = "1/14/2017";
+				ws.Cells["B9"].Value = "1/15/2017";
+				ws.Cells["B10"].Value = "1/16/2017";
+				ws.Cells["B11"].Value = "1/17/2017";
+				ws.Cells["B12"].Value = "1/18/2017";
+				ws.Cells["B13"].Value = "1/19/2017";
+				ws.Cells["B14"].Value = "1/20/2017";
+				ws.Cells["B15"].Value = "1/21/2017";
+				ws.Cells["B16"].Value = "1/22/2017";
+				ws.Cells["B17"].Value = "1/23/2017";
+				ws.Cells["B18"].Value = "1/24/2017";
+				ws.Cells["B19"].Value = "1/25/2017";
+				ws.Cells["B20"].Value = "1/26/2017";
+				ws.Cells["B21"].Value = "1/27/2017";
+				ws.Cells["B22"].Value = "1/28/2017";
+				ws.Cells["B23"].Value = "1/29/2017";
+				ws.Cells["B24"].Value = "1/30/2017";
+				ws.Cells["B25"].Value = "1/31/2017";
+				ws.Cells["B26"].Value = "2/1/2017";
+				ws.Cells["B27"].Value = "2/2/2017";
+				ws.Cells["B28"].Value = "2/3/2017";
+				ws.Cells["B29"].Value = "2/4/2017";
+				ws.Cells["B30"].Value = "2/5/2017";
+				ws.Cells["B31"].Value = "2/6/2017";
+				ws.Cells["B32"].Value = "2/7/2017";
+				ws.Cells["B33"].Value = "2/8/2017";
+				ws.Cells["B34"].Value = "2/9/2017";
+				ws.Cells["B35"].Value = "2/10/2017";
+				ws.Cells["B36"].Value = "2/11/2017";
+				ws.Cells["B37"].Value = "2/12/2017";
+				ws.Cells["B38"].Value = "2/13/2017";
+				ws.Cells["B39"].Value = "3/15/2017";
+				ws.Cells["B40"].Value = "4/1/2017";
+				ws.Cells["B41"].Value = "5/4/2017";
+
+				ws.Cells["C1"].Formula = "WORKDAY(A1, 150, B1:B41)";
+				ws.Calculate();
+
+				Assert.AreEqual(42985.00, ws.Cells["C1"].Value);
+
+			}
+
 		}
 		#endregion
 	}
