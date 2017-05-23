@@ -22,10 +22,10 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System.Collections.Generic;
-using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
@@ -39,19 +39,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// </summary>
 		/// <param name="arguments">The given arguments used to calculate the month of the year.</param>
 		/// <param name="context">Unused in the method, but necessary to override the method.</param>
-		/// <returns>Returns the numeric month of the year for the given date, or an ExcelErrorValue, depending on if the input is valid.</returns>
+		/// <returns>Returns the numeric month of the year for the given date, or an <see cref="ExcelErrorValue"/>, depending on if the input is valid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
-			// 0 is a special case and requires specific output.
-			if ((dateObj is int dateInt && dateInt == 0) || (dateObj is double dateDouble && dateDouble == 0))
+			// Zero and fractions are special cases and require specific output.
+			if ((dateObj is int dateInt && dateInt == 0) ||
+				(dateObj is double dateDouble && dateDouble < 1 && dateDouble >= 0))
 				return this.CreateResult(1, DataType.Integer);
 			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
 				return this.CreateResult(date.Month, DataType.Integer);
 			else
-				return new CompileResult((eErrorType)error);
+				return new CompileResult(error.Value);
 		}
 	}
 }
