@@ -124,6 +124,99 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(date.ToOADate(), result.Result);
 		}
 		
+		[TestMethod]
+		public void EdateWithNegativeIntegerAsStringAsFirstParameterReturnsPoundNum()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("-1", 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithNegativeDoubleAsStringAsFirstParameterReturnsPoundNum()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("-1.5", 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithIntegerAsFirstParameterReturnsCorrectResult()
+		{
+			// Note that 42877 is the OADate for 5/22/2017
+			var date = new DateTime(2017, 5, 22);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(42877, 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(date.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithDoubleAsFirstParameterReturnsCorrectResult()
+		{
+			// Note that 42877.5 is the OADate for some time on 5/22/2017.
+			var date = new DateTime(2017, 5, 22);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(42877.5, 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(date.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithZeroAsFirstParameterReturnsZero()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(0,0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithOADateOfOneAsFirstParameterReturnsOne()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(1,0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithNegativeIntegerAsFirstParameterReturnsPoundNum()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(-1,0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithNegativeDoubleAsFirstParameterReturnsPoundNum()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(-1.5,0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithNegativeFirstParamaterAndNonNumericStringSecondParamaterReturnsPoundNum()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(-1,"word");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithNonNumericStringAsBothParametersReturnsPoundValue()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("word","word");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 		#endregion
 	}
 }
