@@ -217,6 +217,145 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void EdateWithDateTimeObjectAsFirstParameterReturnsCorrectResult()
+		{
+			var inputDate = new DateTime(2017, 1, 1);
+			var expectedDate = new DateTime(2017, 2, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithIntegerAsSecondParameterReturnsCorrectResult()
+		{
+			var inputDate = new DateTime(2017, 1, 1);
+			var expectedDate = new DateTime(2017, 3, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, 2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithDoubleAsSecondParameterReturnsCorrectResult()
+		{
+			var inputDate = new DateTime(2017, 1, 1);
+			var expectedDate = new DateTime(2017, 2, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, 1.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithNegativeIntegerAsSecondParamaterReturnsCorrectResult()
+		{
+			var inputDate = new DateTime(2017, 1, 1);
+			var expectedDate = new DateTime(2016, 12, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithNegativeDoubleAsSecondParamaterReturnsCorrectResult()
+		{
+			var inputDate = new DateTime(2017, 1, 1);
+			var expectedDate = new DateTime(2016, 12, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, -1.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithIntegerAsStringAsSecondParamaterReturnsCorrectResult()
+		{
+			var inputDate = new DateTime(2017, 1, 1);
+			var expectedDate = new DateTime(2017, 2, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, "1");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithDoubleAsStringAsSecondParamaterReturnsCorrectResult()
+		{
+			var inputDate = new DateTime(2017, 1, 1);
+			var expectedDate = new DateTime(2017, 2, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, "1.5");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithNonNumericStringAsSecondParamaterReturnsPoundValue()
+		{
+			var inputDate = new DateTime(2017, 1, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, "word");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithEmptyStringAsSecondParamaterReturnsPoundValue()
+		{
+			var inputDate = new DateTime(2017, 1, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, string.Empty);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithOriginalDateWithMoreDaysThanCalculatedDateReturnsCorrectResult()
+		{
+			var inputDate = new DateTime(2017, 3, 31);
+			var expectedDate = new DateTime(2017, 4, 30);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithZeroAsFirstParamaterAndIntegerAsSecondParamaterReturnsCorrectResult()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(0, 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(31, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWhereCalculatedDateWouldBeBeforeExcelEpochDateReturnsPoundNum()
+		{
+			var inputDate = new DateTime(1900, 1, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithCalculatedDateBefore1March1900ReturnsCorrectOADate()
+		{
+			var inputDate = new DateTime(1900, 1, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(32, result.Result);
+		}
+
+		// Note that any date calculations resulting in dates before 3/1/1900 will need to be special-cased.
 		#endregion
 	}
 }
