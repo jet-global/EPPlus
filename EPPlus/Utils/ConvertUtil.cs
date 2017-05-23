@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace OfficeOpenXml.Utils
 {
+	/// <summary>
+	/// Utility to convert values.
+	/// </summary>
 	public static class ConvertUtil
 	{
 		internal static bool IsNumeric(object candidate)
