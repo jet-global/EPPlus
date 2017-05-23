@@ -534,8 +534,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var inputDate = new DateTime(2017,1,2);
 
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 41, "1.25.2017"), this.ParsingContext);
-			Assert.AreEqual(42795.00, result.Result);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 500, "3.30.2017"), this.ParsingContext);
+			Assert.AreEqual(43438.00, result.Result);
 		}
 
 		[TestMethod]

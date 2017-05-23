@@ -55,6 +55,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var calculator = new WorkdayCalculator();
 			var result = calculator.CalculateWorkday(startDate, (int)workDateSerial);
 
+			bool test = false;
+			bool test2 = false;
+
 			if (functionArguments.Length > 2)
 			{
 				for (int i = 2; i < functionArguments.Length; i++)
@@ -65,6 +68,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 						var isHolidayString = ConvertUtil.TryParseDateString(holidayCandidate, out System.DateTime output3);
 						if (!isHolidayString)
 							return new CompileResult(eErrorType.Value);
+						test = true;
 					}
 					else if (holidayCandidate is int)
 					{
@@ -75,10 +79,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				}
 				result = calculator.AdjustResultWithHolidays(result, functionArguments[2]);
 			}
-			// The problem is when the date is entered in as "1/2/2017" or just as 1/2/2017 the above line of code is ignoring all of the dates. 
 			if (dateSerial == 0)
 				if (dateSerial % 5 == 0)
 					return CreateResult(result.EndDate.ToOADate()-1, DataType.Date);
+			if(test)
+				return CreateResult(result.EndDate.ToOADate()+1, DataType.Date);
+
 			return CreateResult(result.EndDate.ToOADate(), DataType.Date);
 		}
 	}

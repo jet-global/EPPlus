@@ -26,13 +26,31 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 				{
 					_holidayDates.Add(holidayDate);
 				}
+				foreach (var holiday in holidays)
+				{
+					var test = ConvertUtil.TryParseDateObject(holiday, out System.DateTime date, out eErrorType? error);
+					if (!test)
+						continue;
+					_holidayDates.Add(System.DateTime.FromOADate((double)holiday.Value));
+				}
 			}
+
 			var range = _holidayArg.Value as ExcelDataProvider.IRangeInfo;
 			if (range != null)
 			{
 				foreach (var holidayDate in from cell in range where ConvertUtil.IsNumeric(cell.Value) select ConvertUtil.GetValueDouble(cell.Value) into dateSerial select System.DateTime.FromOADate(dateSerial))
 				{
 					_holidayDates.Add(holidayDate);
+				}
+			}
+			if ( _holidayDates is null)
+			{
+				foreach (var holiday in holidays)
+				{
+					var test = ConvertUtil.TryParseDateObject(holiday, out System.DateTime date, out eErrorType? error);
+					if (!test)
+						continue;
+					_holidayDates.Add(System.DateTime.FromOADate((double)holiday.Value));
 				}
 			}
 			if (ConvertUtil.IsNumeric(_holidayArg.Value))
