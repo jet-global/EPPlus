@@ -30,7 +30,7 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
 	/// <summary>
-	/// Returns the corresponding year of the given date as an int.
+	/// Returns the corresponding year of the given date.
 	/// </summary>
 	public class Year : ExcelFunction
 	{
@@ -52,7 +52,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
 				return this.CreateResult(date.Year, DataType.Integer);
 			else
-				return new CompileResult((eErrorType)error);
+				return new CompileResult(error.Value);
 		}
 	}
 }

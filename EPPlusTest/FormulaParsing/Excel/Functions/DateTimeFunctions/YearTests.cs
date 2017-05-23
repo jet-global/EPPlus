@@ -182,8 +182,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			// Note that 42874.34114 is the OADate representation of some time
 			// on May 19, 2017.
+			var date = new DateTime(2017, 5, 19);
+			date.AddHours(6);
+			date.AddMinutes(30);
 			var func = new Year();
-			var args = FunctionsHelper.CreateArgs("42874.43114");
+			var args = FunctionsHelper.CreateArgs(date.ToOADate());
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(2017, result.Result);
 		}
