@@ -171,6 +171,144 @@ namespace EPPlusTest.Utils
 			Assert.AreEqual(0, resultDate.ToOADate());
 			Assert.AreEqual(eErrorType.Value, resultError);
 		}
+
+		[TestMethod]
+		public void TryParseDateObjectWithDateTimeObjectReturnsCorrectResult()
+		{
+			var date = new DateTime(2017, 5, 23);
+			var isValidDate = ConvertUtil.TryParseDateObject(date, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(date, resultDate);
+			Assert.AreEqual(null, resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectWithDateTimeObjectWithOADateLessThan61ReturnsCorrectResult()
+		{
+			var date = new DateTime(1900, 2, 28);
+			var isValidDate = ConvertUtil.TryParseDateObject(date, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(date, resultDate);
+			Assert.AreEqual(null, resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectHandlesOffByOneErrorFor27February1900()
+		{
+			var date = new DateTime(1900, 2, 27);
+			Assert.AreEqual(59, date.ToOADate()); // The OADate from System.DateTime for 2/27/1900 is 59.
+												  // The OADate from Excel for 2/27/1900 is 58.
+			var isValidDate = ConvertUtil.TryParseDateObject(58, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(true, isValidDate);
+			// Calculate the date using Excel's OADates, not System.DateTime's OADates.
+			Assert.AreEqual(date, resultDate);
+			Assert.AreEqual(null, resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectHandlesOffByOneErrorFor28February1900()
+		{
+			var date = new DateTime(1900, 2, 28);
+			Assert.AreEqual(60, date.ToOADate()); // The OADate from System.DateTime for 2/28/1900 is 60.
+												  // The OADate from Excel for 2/28/1900 is 59.
+			var isValidDate = ConvertUtil.TryParseDateObject(59, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(date, resultDate);
+			Assert.AreEqual(null, resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectTreatsNonExistentDate29February1900As1March1900()
+		{
+			var date = new DateTime(1900, 3, 1);
+			Assert.AreEqual(61, date.ToOADate()); // The OADate from System.DateTime for 3/1/1900 is 61.
+												  // The OADate from Excel for 2/29/1900 is 60, a day that doesn't exist.
+												  // System.DateTime uses OADate 60 for 2/28/1900 and considers 2/29/1900 an invalid date.
+												  // Since 60 cannot be parsed as 2/29/1900, it is instead parsed as 3/1/1900.
+												  // So using 60 or 61 as the input object in TryParseDateObject will produce the date 3/1/1900.
+			var isValidDate = ConvertUtil.TryParseDateObject(60, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(date, resultDate);
+			Assert.AreEqual(null, resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectUsesSameOADatesForExcelAndDateTimeFor1March1900()
+		{
+			// This test is a reminder that Excel and System.DateTime have their OADates sync back
+			// up at the OADate 61, which is 3/1/1900; all dates after 3/1/1900 have the same OADate
+			// in Excel and System.DateTime.
+			var date = new DateTime(1900, 3, 1);
+			Assert.AreEqual(61, date.ToOADate());
+			var isValidDate = ConvertUtil.TryParseDateObject(61, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(date, resultDate);
+			Assert.AreEqual(null, resultError);
+			
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectUsesSameOADatesForExcelAndDateTimeAfter1March1900()
+		{
+			// This test is to confirm that OADates after 3/1/1900 are the same
+			// in Excel and System.DateTime.
+			var date = new DateTime(1900, 3, 2);
+			Assert.AreEqual(62, date.ToOADate());
+			var isValidDate = ConvertUtil.TryParseDateObject(62, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(date, resultDate);
+			Assert.AreEqual(null, resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectWithDateAsDoubleNear1March1900ReturnsCorrectYearMonthDay()
+		{
+			// Test the case where a time and day close to 3/1/1900 returns
+			// the correct result. Note that Excel represents 2/28/1900 as the
+			// OADate 59.
+			var date = new DateTime(1900, 2, 28);
+			var isValidDate = ConvertUtil.TryParseDateObject(59.99999, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(1900, resultDate.Year);
+			Assert.AreEqual(2, resultDate.Month);
+			Assert.AreEqual(28, resultDate.Day);
+			Assert.AreNotEqual(date.TimeOfDay, resultDate.TimeOfDay);
+			Assert.AreEqual(null, resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectWithOADate1ReturnsCorrectResult()
+		{
+			var date = new DateTime(1900, 1, 1);
+			var isValidDate = ConvertUtil.TryParseDateObject(1, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(date, resultDate);
+			Assert.AreEqual(null, resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectWithOADate0ReturnsInvalidDate()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObject(0, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(false, isValidDate);
+			Assert.AreEqual(eErrorType.Num, resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectWithTimeComponentForOADate0ReturnsInvalidDate()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObject(0.5, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(false, isValidDate);
+			Assert.AreEqual(eErrorType.Num, resultError);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectWithNegativeOADate0WithTimeComponentReturnsInvalidDate()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObject(0.5, out DateTime resultDate, out eErrorType? resultError);
+			Assert.AreEqual(false, isValidDate);
+			Assert.AreEqual(eErrorType.Num, resultError);
+		}
 		#endregion
 	}
 }
