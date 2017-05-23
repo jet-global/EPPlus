@@ -3220,7 +3220,7 @@ namespace EPPlusTest
 				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
 				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
 
-				sheetValidations.DataValidations.AddListValidation(@"'Sheet'" + sheetTarget.Cells["B2:C3"].Address);
+				sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["B2:C3"].Address);
 
 				//expand the range
 				sheetTarget.InsertColumn(3, 2);
@@ -3228,7 +3228,7 @@ namespace EPPlusTest
 
 				//validate that the Data Validation range has also expanded
 				var validationRange = sheetValidations.DataValidations.First();
-				Assert.AreEqual(@"'SHEET'B2:E5", validationRange.Address.ToString());
+				Assert.AreEqual(@"'SHEET'!B2:E5", validationRange.Address.ToString());
 			}
 		}
 
