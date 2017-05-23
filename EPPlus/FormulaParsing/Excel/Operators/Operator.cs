@@ -241,7 +241,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		}
 
 		private static IOperator _eq;
-		public static IOperator Eq
+		public static IOperator EqualsOperator
 		{
 			get
 			{
@@ -362,7 +362,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 				}
 				return leftNumber.CompareTo(rightNumber);
 			}
-			// Numbers are less than text are less than logical values:
+			// Numbers are less than text are less than logical values: https://stackoverflow.com/questions/35050151/excel-if-statement-comparing-text-with-number
+			// I can't find an MSDN source for this, but I've been testing it functionally and I can't find a counterexample.
+			// If you find an MSDN source for this, please add a link here. 
 			else if (leftIsNumeric)
 				return -1;
 			else if (rightIsNumeric)

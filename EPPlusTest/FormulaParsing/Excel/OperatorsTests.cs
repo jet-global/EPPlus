@@ -14,13 +14,40 @@ namespace EPPlusTest.Excel
 	public class OperatorsTests
 	{
 		[TestMethod]
-		public void OperatorGreaterThanNumbersAreLessThanTextValuesAreLessThanLogicalValues()
+		public void OperatorLogicalOperatorsShouldCorrectlyCompareIntegersAndText()
 		{
-			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult("text", DataType.String)).Result);
+			// Numbers are always LESS THAN text.
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult("Numbers are always less than text.", DataType.String)).Result);
 			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult("1", DataType.String)).Result);
-			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult(true, DataType.Boolean)).Result);
-			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult(false, DataType.Boolean)).Result);
-			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult(true, DataType.Boolean), new CompileResult("10000", DataType.String)).Result);
+			Assert.AreEqual(false, Operator.GreaterThanOrEqual.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult("1", DataType.String)).Result);
+			Assert.AreEqual(true, Operator.LessThan.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult("1", DataType.String)).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(1000000, DataType.Integer), new CompileResult("1", DataType.String)).Result);
+			Assert.AreEqual(false, Operator.EqualsOperator.Apply(new CompileResult(1, DataType.Integer), new CompileResult("1", DataType.String)).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(1, DataType.Integer), new CompileResult("1", DataType.String)).Result);
+
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult("Text is greater than numbers.", DataType.String), new CompileResult(1000000, DataType.Integer)).Result);
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult("1", DataType.String), new CompileResult(1000000, DataType.Integer)).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult("1", DataType.String), new CompileResult(1000000, DataType.Integer)).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult("1", DataType.String), new CompileResult(1000000, DataType.Integer)).Result);
+			Assert.AreEqual(false, Operator.LessThanOrEqual.Apply(new CompileResult("1", DataType.String), new CompileResult(1000000, DataType.Integer)).Result);
+		}
+
+		[TestMethod]
+		public void OperatorLogicalOperatorsShouldCorrectlyCompareDecimalsAndText()
+		{
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000.0d, DataType.Decimal), new CompileResult("Numbers are always less than text.", DataType.String)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(1000000.0d, DataType.Decimal), new CompileResult("1", DataType.String)).Result);
+			Assert.AreEqual(false, Operator.GreaterThanOrEqual.Apply(new CompileResult(1000000.0d, DataType.Decimal), new CompileResult("1", DataType.String)).Result);
+			Assert.AreEqual(true, Operator.LessThan.Apply(new CompileResult(1000000.0d, DataType.Decimal), new CompileResult("1", DataType.String)).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(1000000.0d, DataType.Decimal), new CompileResult("1", DataType.String)).Result);
+			Assert.AreEqual(false, Operator.EqualsOperator.Apply(new CompileResult(1, DataType.Decimal), new CompileResult("1", DataType.String)).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(1, DataType.Decimal), new CompileResult("1", DataType.String)).Result);
+
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult("Text is greater than numbers.", DataType.String), new CompileResult(1000000.0d, DataType.Decimal)).Result);
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult("1", DataType.String), new CompileResult(1000000.0d, DataType.Decimal)).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult("1", DataType.String), new CompileResult(1000000.0d, DataType.Decimal)).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult("1", DataType.String), new CompileResult(1000000.0d, DataType.Decimal)).Result);
+			Assert.AreEqual(false, Operator.LessThanOrEqual.Apply(new CompileResult("1", DataType.String), new CompileResult(1000000.0d, DataType.Decimal)).Result);
 		}
 
 		// Numbers to numbers
@@ -132,14 +159,14 @@ namespace EPPlusTest.Excel
 		[TestMethod]
 		public void OperatorEqShouldReturnTruefSuppliedValuesAreEqual()
 		{
-			var result = Operator.Eq.Apply(new CompileResult(12, DataType.Integer), new CompileResult(12, DataType.Integer));
+			var result = Operator.EqualsOperator.Apply(new CompileResult(12, DataType.Integer), new CompileResult(12, DataType.Integer));
 			Assert.IsTrue((bool)result.Result);
 		}
 
 		[TestMethod]
 		public void OperatorEqShouldReturnFalsefSuppliedValuesDiffer()
 		{
-			var result = Operator.Eq.Apply(new CompileResult(11, DataType.Integer), new CompileResult(12, DataType.Integer));
+			var result = Operator.EqualsOperator.Apply(new CompileResult(11, DataType.Integer), new CompileResult(12, DataType.Integer));
 			Assert.IsFalse((bool)result.Result);
 		}
 
@@ -202,7 +229,7 @@ namespace EPPlusTest.Excel
 			// Comparison operators always compare string-wise and don't parse out the actual numbers.
 			operatorResult = Operator.NotEqualsTo.Apply(result1, new CompileResult(number1.ToString("n0"), DataType.String));
 			Assert.IsTrue((bool)operatorResult.Result);
-			operatorResult = Operator.Eq.Apply(result1, new CompileResult(number1.ToString("n0"), DataType.String));
+			operatorResult = Operator.EqualsOperator.Apply(result1, new CompileResult(number1.ToString("n0"), DataType.String));
 			Assert.IsFalse((bool)operatorResult.Result);
 			operatorResult = Operator.GreaterThan.Apply(result1, result2);
 			Assert.IsTrue((bool)operatorResult.Result);
@@ -239,7 +266,7 @@ namespace EPPlusTest.Excel
 			operatorResult = Operator.Plus.Apply(result1, result2);
 			Assert.AreEqual(numericDate1 + numericDate2, operatorResult.Result);
 			// Comparison operators always compare string-wise and don't parse out the actual numbers.
-			operatorResult = Operator.Eq.Apply(result1, new CompileResult(date1.ToString("f"), DataType.String));
+			operatorResult = Operator.EqualsOperator.Apply(result1, new CompileResult(date1.ToString("f"), DataType.String));
 			Assert.IsFalse((bool)operatorResult.Result);
 			operatorResult = Operator.NotEqualsTo.Apply(result1, new CompileResult(date1.ToString("f"), DataType.String));
 			Assert.IsTrue((bool)operatorResult.Result);
@@ -283,7 +310,7 @@ namespace EPPlusTest.Excel
 				operatorResult = Operator.Plus.Apply(result1, result2);
 				Assert.AreEqual(numericDate1 + numericDate2, operatorResult.Result);
 				// Comparison operators always compare string-wise and don't parse out the actual numbers.
-				operatorResult = Operator.Eq.Apply(result1, new CompileResult(date1.ToString("f"), DataType.String));
+				operatorResult = Operator.EqualsOperator.Apply(result1, new CompileResult(date1.ToString("f"), DataType.String));
 				Assert.IsFalse((bool)operatorResult.Result);
 				operatorResult = Operator.NotEqualsTo.Apply(result1, new CompileResult(date1.ToString("f"), DataType.String));
 				Assert.IsTrue((bool)operatorResult.Result);
