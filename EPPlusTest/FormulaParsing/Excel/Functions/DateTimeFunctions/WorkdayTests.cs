@@ -519,8 +519,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var inputDate = new DateTime(2017,1,2);
 
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, "1-25-2017"), this.ParsingContext);
-			Assert.AreEqual(42751.00, result.Result);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 41, "1-25-2017"), this.ParsingContext);
+			Assert.AreEqual(42795.00, result.Result);
 		}
 
 		[TestMethod]
@@ -534,8 +534,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var inputDate = new DateTime(2017,1,2);
 
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, "1.25.2017"), this.ParsingContext);
-			Assert.AreEqual(42751.00, result.Result);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 41, "1.25.2017"), this.ParsingContext);
+			Assert.AreEqual(42795.00, result.Result);
 		}
 
 		[TestMethod]
@@ -545,8 +545,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var inputDate = new DateTime(2017, 1, 2);
 
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, 0), this.ParsingContext);
-			Assert.AreEqual(42751.00, result.Result);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 40, 0), this.ParsingContext);
+			Assert.AreEqual(42793.00, result.Result);
 		}
 
 		[TestMethod]
@@ -579,7 +579,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WeekdayWithDateNotAsStringReturnsCorrectInput()
+		public void WeekdayWithHolidayDateNotAsStringReturnsCorrectInput()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -654,8 +654,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				Assert.AreEqual(42985.00, ws.Cells["C1"].Value);
 
 			}
-
 		}
+
 		#endregion
 	}
 }

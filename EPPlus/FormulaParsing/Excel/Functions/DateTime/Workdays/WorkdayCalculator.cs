@@ -115,7 +115,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 				workdaysCounted++;
 				endDate = tmpDate;
 			}
-
 			return new WorkdayCalculatorResult(workdaysCounted, calculatedResult.StartDate, endDate, direction);
 		}
 	}
