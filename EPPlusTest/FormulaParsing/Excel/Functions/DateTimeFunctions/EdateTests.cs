@@ -63,6 +63,35 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(exp3, dt3, "dt1 was not " + exp3.ToString("yyyy-MM-dd") + ", but " + dt3.ToString("yyyy-MM-dd"));
 			Assert.AreEqual(eErrorType.Value, (r4.Result as ExcelErrorValue).Type);
 		}
+
+		[TestMethod]
+		public void EdateWithDateAsStringAsFirstParameterReturnsCorrectResult()
+		{
+			var date = new DateTime(2017, 5, 22);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("5/22/2017", 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(date.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithDateAsLongStringAsFirstParameterReturnsCorrectResult()
+		{
+			var date = new DateTime(2017, 5, 22);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("May 22, 2017", 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(date.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithNonDateStringAsFirstParameterReturnsPoundValue()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("word", 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 		#endregion
 	}
 }
