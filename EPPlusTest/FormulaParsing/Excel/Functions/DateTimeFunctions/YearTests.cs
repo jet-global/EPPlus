@@ -40,30 +40,26 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	{
 		#region Year Function (Execute) Tests
 		[TestMethod]
-		public void YearShouldReturnCorrectYear()
+		public void YearWithDateAsStringAsInputReturnsCorrectYear()
 		{
-			// Test the case where the date is entered as an double.
-			var date = new DateTime(2012, 3, 12);
 			var func = new Year();
-			var result = func.Execute(FunctionsHelper.CreateArgs(date.ToOADate()), this.ParsingContext);
+			var args = FunctionsHelper.CreateArgs("2012-03-12");
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(2012, result.Result);
 		}
 
 		[TestMethod]
-		public void YearShouldReturnCorrectYearWithStringParam()
+		public void YearWithLongDateAsStringAsInputReturnsCorrectYear()
 		{
-			// Test the case where the date is entered in a date
-			// format within a string.
 			var func = new Year();
-			var result = func.Execute(FunctionsHelper.CreateArgs("2012-03-12"), this.ParsingContext);
+			var args = FunctionsHelper.CreateArgs("March 12, 2012");
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(2012, result.Result);
 		}
 
 		[TestMethod]
 		public void YearWithInvalidArgumentReturnsPoundValue()
 		{
-			// Test the case where nothing is entered in the
-			// YEAR function.
 			var func = new Year();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, this.ParsingContext);
@@ -73,8 +69,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearFunctionWorksInDifferentCultureDateFormats()
 		{
-			// Test the case where the date is represented
-			// under different cultures.
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
 			{
@@ -109,7 +103,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithDateAsIntegerReturnsCorrectYear()
 		{
-			// Test the case where the date is entered as an integer.
 			// Note that 42874 is the OADate for May 19, 2017.
 			var func = new Year();
 			var args = FunctionsHelper.CreateArgs(42874);
@@ -120,7 +113,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithDateAsDoubleReturnsCorrectYear()
 		{
-			// Test the case where the date is entered as a double.
 			// Note that 42874.34114 is the OADate representation of
 			// some time on May 19, 2017.
 			var func = new Year();
@@ -132,7 +124,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithZeroAsInputReturns1900AsYear()
 		{
-			// Test the case where zero is the input.
+			// Excel treats 0 as a special case OADate.
 			var func = new Year();
 			var args = FunctionsHelper.CreateArgs(0);
 			var result = func.Execute(args, this.ParsingContext);
@@ -142,7 +134,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithNegativeIntegerAsInputReturnsPoundNum()
 		{
-			// Test the case where a negative integer is the input.
 			var func = new Year();
 			var args = FunctionsHelper.CreateArgs(-1);
 			var result = func.Execute(args, this.ParsingContext);
@@ -152,7 +143,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithNegativeDoubleAsInputReturnsPoundNum()
 		{
-			// Test the case where a negative double is the input
 			var func = new Year();
 			var args = FunctionsHelper.CreateArgs(-1.5);
 			var result = func.Execute(args, this.ParsingContext);
@@ -162,7 +152,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithNonDateStringAsInputReturnsPoundValue()
 		{
-			// Test the case where a non-date string is the input.
 			var func = new Year();
 			var args = FunctionsHelper.CreateArgs("word");
 			var result = func.Execute(args, this.ParsingContext);
@@ -172,9 +161,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithEmptyStringAsInputReturnsPoundValue()
 		{
-			// Test the case where an empty string is the input.
 			var func = new Year();
-			var args = FunctionsHelper.CreateArgs("");
+			var args = FunctionsHelper.CreateArgs(string.Empty);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
@@ -182,7 +170,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithIntegerInStringAsInputReturnsCorrectYear()
 		{
-			// Test the case where the input is an integer expressed as a string.
 			// Note that 42874 is the OADate representation of May 19, 2017.
 			var func = new Year();
 			var args = FunctionsHelper.CreateArgs("42874");
@@ -193,7 +180,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithDoubleInStringAsInputReturnsCorrectYear()
 		{
-			// Test the case where the input is a double expressed as a string.
 			// Note that 42874.34114 is the OADate representation of some time
 			// on May 19, 2017.
 			var func = new Year();
@@ -205,8 +191,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithNegativeIntegerInStringAsInputReturnsPoundNum()
 		{
-			// Test the case where the input is a negative integer expressed
-			// as a string.
 			var func = new Year();
 			var args = FunctionsHelper.CreateArgs("-1");
 			var result = func.Execute(args, this.ParsingContext);
@@ -216,10 +200,61 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearWithNegativeDoubleInStringAsInputReturnsPoundNum()
 		{
-			// Test the case where the input is a negative double expressed
-			// as a string.
 			var func = new Year();
 			var args = FunctionsHelper.CreateArgs("-1.5");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearWithDateTimeObjectReturnsCorrectYear()
+		{
+			var date = new DateTime(2017, 5, 22);
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(date);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2017, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithDateTimeObjectForOADateLessThan61ReturnsCorrectYear()
+		{
+			var date = new DateTime(1900, 2, 28);
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(date);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1900, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithOADate1ReturnsCorrectYear()
+		{
+			// OADate 1 corresponds to 1/1/1900 in Excel. Test the case where Excel's epoch date
+			// is used as the input.
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1900, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithOADateBetween0And1ReturnsZero()
+		{
+			// Test the case where a time value is given for Excel's
+			// "zeroeth" day, which Excel treats as a special day.
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(0.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1900, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithNegativeOADateBetweenNegative1And0ReturnsPoundNum()
+		{
+			// Test the case where a negative time value is given for Excel's
+			// "zeroeth" day, which Excel treats as a special day.
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(-0.5);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
