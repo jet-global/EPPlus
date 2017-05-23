@@ -25,27 +25,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// Returns the corresponding year of the given date.
+	/// </summary>
 	public class Year : ExcelFunction
 	{
+		/// <summary>
+		/// Check if the given input is a valid date, and return the corresponding year if so.
+		/// </summary>
+		/// <param name="arguments">The given arguments used to calculate the year.</param>
+		/// <param name="context">Unused in the method, but necessary to override the method.</param>
+		/// <returns>Returns the numeric year of the given date, or an <see cref="ExcelErrorValue"/>, depending on if the input is valid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
-			System.DateTime date = System.DateTime.MinValue;
-			if (dateObj is string)
-			{
-				date = System.DateTime.Parse(dateObj.ToString());
-			}
+			// Zero and fractions are special cases and require specific output.
+			if ((dateObj is int dateInt && dateInt == 0) ||
+				(dateObj is double dateDouble && dateDouble < 1 && dateDouble >= 0))
+				return this.CreateResult(1900, DataType.Integer);
+			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
+				return this.CreateResult(date.Year, DataType.Integer);
 			else
-			{
-				var d = ArgToDecimal(arguments, 0);
-				date = System.DateTime.FromOADate(d);
-			}
-			return CreateResult(date.Year, DataType.Integer);
+				return new CompileResult(error.Value);
 		}
 	}
 }
