@@ -65,6 +65,45 @@ namespace OfficeOpenXml.Utils
 			return false;
 		}
 		/// <summary>
+		/// Tries to parse the given object into a <see cref="DateTime"/>. Only integers, doubles, and strings
+		/// have the possibility of being successfully parsed.
+		/// </summary>
+		/// <param name="dateCandidate">The object to convert into a DateTime if valid.</param>
+		/// <param name="date">The resulting <see cref="DateTime"/> that dateCandidate was converted to.</param>
+		/// <param name="error">Null if the parse was successful, or the <see cref="eErrorType"/> indicating why the parse was unsuccessful.</param>
+		/// <returns>True if <paramref name="dateCandidate"/> was successfully parsed into a <see cref="DateTime"/>, and false otherwise.</returns>
+		internal static bool TryParseDateObject(object dateCandidate, out DateTime date, out eErrorType? error)
+		{
+			error = null;
+			date = DateTime.MinValue;
+			if (dateCandidate is string)
+			{
+				var isValidDate = DateTime.TryParse(dateCandidate.ToString(), out date);
+				if (isValidDate)
+					return true;
+				var isValidNumber = Double.TryParse(dateCandidate.ToString(), out double dateAsNumber);
+				if (isValidNumber)
+					dateCandidate = dateAsNumber;
+			}
+			if (dateCandidate is int dateInt)
+				dateCandidate = (double)dateInt;
+			if (dateCandidate is double dateDouble)
+			{
+				if (dateDouble > 0)
+				{
+					date = DateTime.FromOADate(dateDouble);
+					return true;
+				}
+				else
+				{
+					error = eErrorType.Num;
+					return false;
+				}
+			}
+			error = eErrorType.Value;
+			return false;
+		}
+		/// <summary>
 		/// Convert an object value to a double 
 		/// </summary>
 		/// <param name="v"></param>
