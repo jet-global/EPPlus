@@ -92,6 +92,24 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void EdateWithEmptyStringAsFirstParameterReturnsPoundValue()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(string.Empty, 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithIntegerAsStringAsFirstParameterReturnsCorrectResult()
+		{
+			// Note that 42877 is the OADate for 5/22/2017.
+			var date = new DateTime(2017, 5, 22);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("42877", 0);
+		}
 		#endregion
 	}
 }
