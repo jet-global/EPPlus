@@ -6,7 +6,10 @@ using System.Text.RegularExpressions;
 
 namespace OfficeOpenXml.Utils
 {
-	internal static class ConvertUtil
+	/// <summary>
+	/// Utility to convert values.
+	/// </summary>
+	public static class ConvertUtil
 	{
 		internal static bool IsNumeric(object candidate)
 		{
@@ -72,7 +75,7 @@ namespace OfficeOpenXml.Utils
 		/// <param name="date">The resulting <see cref="DateTime"/> that dateCandidate was converted to.</param>
 		/// <param name="error">Null if the parse was successful, or the <see cref="eErrorType"/> indicating why the parse was unsuccessful.</param>
 		/// <returns>True if <paramref name="dateCandidate"/> was successfully parsed into a <see cref="DateTime"/>, and false otherwise.</returns>
-		internal static bool TryParseDateObject(object dateCandidate, out DateTime date, out eErrorType? error)
+		public static bool TryParseDateObject(object dateCandidate, out DateTime date, out eErrorType? error)
 		{
 			error = null;
 			date = DateTime.MinValue;
