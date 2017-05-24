@@ -42,7 +42,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WorkdayWithOADateParameterReturnsCorrectResult()
 		{
-			// Test case where the first input is an OADate .
 			var inputDate = new DateTime(2014, 1, 1).ToOADate();
 			var expectedDate = new DateTime(2014, 1, 29).ToOADate();
 			var function = new Workday();
@@ -54,7 +53,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WorkdayShouldReturnCorrectResultWithFourDaysSupplied()
 		{
-			// Test case where the number of workdays is four.
 			var inputDate = new DateTime(2014, 1, 1).ToOADate();
 			var expectedDate = new DateTime(2014, 1, 7).ToOADate();
 			var function = new Workday();
@@ -66,7 +64,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WorkdayWithInvalidArgumentReturnsPoundValue()
 		{
-			// Test case where the first argument is empty (invalid).
 			var function = new Workday();
 			var args = FunctionsHelper.CreateArgs();
 			var result = function.Execute(args, this.ParsingContext);
@@ -76,7 +73,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WorkdayWithStringInputReturnsPoundValue()
 		{
-			// Test case where the first argument is a non-date string and an empty string.
 			var function = new Workday();
 			var input1 = "testString";
 			var input2 = "";
@@ -89,7 +85,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WorkdayWithIntegerInputReturnsCorrectValue()
 		{
-			// Test case where the first argument is an integer.
 			var function = new Workday();
 			var input = 10;
 			var result = function.Execute(FunctionsHelper.CreateArgs(input, 10), this.ParsingContext);
@@ -99,7 +94,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WorkdayWithDateAsStringReturnsCorrectValue()
 		{
-			// Test case where the first argument is a date as a string.
 			var function = new Workday();
 			var input = "1/2/2017";
 			var result = function.Execute(FunctionsHelper.CreateArgs(input, 10), this.ParsingContext);
