@@ -38,33 +38,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	{
 		#region EdateTests Function (Execute) Tests
 		[TestMethod]
-		public void EdateShouldReturnCorrectResult()
-		{
-			var func = new Edate();
-
-			var dt1arg = new DateTime(2012, 1, 31).ToOADate();
-			var dt2arg = new DateTime(2013, 1, 1).ToOADate();
-			var dt3arg = new DateTime(2013, 2, 28).ToOADate();
-
-			var r1 = func.Execute(FunctionsHelper.CreateArgs(dt1arg, 1), this.ParsingContext);
-			var r2 = func.Execute(FunctionsHelper.CreateArgs(dt2arg, -1), this.ParsingContext);
-			var r3 = func.Execute(FunctionsHelper.CreateArgs(dt3arg, 2), this.ParsingContext);
-			var r4 = func.Execute(FunctionsHelper.CreateArgs(dt3arg), this.ParsingContext);
-			var dt1 = DateTime.FromOADate((double)r1.Result);
-			var dt2 = DateTime.FromOADate((double)r2.Result);
-			var dt3 = DateTime.FromOADate((double)r3.Result);
-
-			var exp1 = new DateTime(2012, 2, 29);
-			var exp2 = new DateTime(2012, 12, 1);
-			var exp3 = new DateTime(2013, 4, 28);
-
-			Assert.AreEqual(exp1, dt1, "dt1 was not " + exp1.ToString("yyyy-MM-dd") + ", but " + dt1.ToString("yyyy-MM-dd"));
-			Assert.AreEqual(exp2, dt2, "dt1 was not " + exp2.ToString("yyyy-MM-dd") + ", but " + dt2.ToString("yyyy-MM-dd"));
-			Assert.AreEqual(exp3, dt3, "dt1 was not " + exp3.ToString("yyyy-MM-dd") + ", but " + dt3.ToString("yyyy-MM-dd"));
-			Assert.AreEqual(eErrorType.Value, (r4.Result as ExcelErrorValue).Type);
-		}
-
-		[TestMethod]
 		public void EdateWithDateAsStringAsFirstParameterReturnsCorrectResult()
 		{
 			var date = new DateTime(2017, 5, 22);
@@ -467,6 +440,36 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs(inputDate, -1);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithMonthsAddedReturnsCorrectResult()
+		{
+			// Note that 196 is the OADate for 7/14/1900.
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("4/14/1900", 3);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(196, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithAYearOfMonthsAddedReturnsCorrectResult()
+		{
+			// Note that 470 is the OADate for 4/14/1901.
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("4/14/1900", 12);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(470, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithMonthsSubtractedReturnsCorrectResult()
+		{
+			// Note that 45 is the OADate for 2/14/1900.
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("4/14/1900", -2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(45, result.Result);
 		}
 		#endregion
 	}
