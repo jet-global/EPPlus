@@ -14,7 +14,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 	{
 		/// <summary>
 		/// Execute returns the date based on the user's input.
-		/// 
 		/// </summary>
 		/// <param name="arguments">The user specified date, number of workdays, and optional dates of holidays</param>
 		/// <param name="context">Not used, but needed for overriding the method.</param>
@@ -29,18 +28,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var serialNumberCandidate = arguments.ElementAt(0).Value;
 			var workDaysCandidate = arguments.ElementAt(1).Value;
 
-			if (workDaysCandidate is null)
+			if (workDaysCandidate == null)
 				return new CompileResult(eErrorType.NA);
 			if (serialNumberCandidate == null)
 				return new CompileResult(eErrorType.NA);
 
-			else if (serialNumberCandidate is string)
-			{
-				if(!ConvertUtil.TryParseDateString(serialNumberCandidate.ToString(), out System.DateTime output))
-					return new CompileResult(eErrorType.Value);
-			}
+			if(!ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime output, out eErrorType? error))
+				return new CompileResult(error.Value);
+
 			else if (serialNumberCandidate is int && ArgToInt(functionArguments, 1) < 0)
-					return new CompileResult(eErrorType.Num);
+					return new CompileResult((eErrorType)error);
 
 			if (workDaysCandidate is string)
 			{
