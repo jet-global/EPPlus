@@ -30,6 +30,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using System;
+using System.Globalization;
+using System.Threading;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
@@ -490,6 +492,40 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs("4/14/1900", -2);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(45.0, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateFunctionWorksInDifferentCultureFormats()
+		{
+			// Note that 196.0 is the Excel OADate for July 14, 1900 (7/14/1900).
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				var us = CultureInfo.CreateSpecificCulture("en-US");
+				Thread.CurrentThread.CurrentCulture = us;
+				using (var package = new ExcelPackage())
+				{
+					var ws = package.Workbook.Worksheets.Add("Sheet1");
+					ws.Cells[2, 2].Value = "4/14/1900";
+					ws.Cells[4, 3].Formula = "EDATE(B2,3)";
+					ws.Calculate();
+					Assert.AreEqual(196.0, ws.Cells[4, 3].Value);
+				}
+				var gb = CultureInfo.CreateSpecificCulture("en-GB");
+				Thread.CurrentThread.CurrentCulture = gb;
+				using (var package = new ExcelPackage())
+				{
+					var ws = package.Workbook.Worksheets.Add("Sheet1");
+					ws.Cells[2, 2].Value = "14/4/1900";
+					ws.Cells[4, 3].Formula = "EDATE(B2,3)";
+					ws.Calculate();
+					Assert.AreEqual(196.0, ws.Cells[4, 3].Value);
+				}
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
 		}
 		#endregion
 	}
