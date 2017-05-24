@@ -44,12 +44,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);			
 			var serialNumberCandidate = this.GetFirstValue(arguments);
-			var isValidDate = ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error);
-			// Zero is a special case and requires a specific output.
+			// Zero and fractions are special cases and require specific output.
 			if ((serialNumberCandidate is int serialNumberInt && serialNumberInt == 0) ||
-				(serialNumberCandidate is double serialNumberDouble && serialNumberDouble == 0))
+				(serialNumberCandidate is double serialNumberDouble && serialNumberDouble < 1 && serialNumberDouble >= 0))
 				return this.CreateResult(0, DataType.Integer);
-			if (isValidDate)
+			if (ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error))
 				return this.CreateResult(date.Day, DataType.Integer);
 			return new CompileResult((eErrorType)error);
 		}

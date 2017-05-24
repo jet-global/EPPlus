@@ -6,7 +6,10 @@ using System.Text.RegularExpressions;
 
 namespace OfficeOpenXml.Utils
 {
-	internal static class ConvertUtil
+	/// <summary>
+	/// Utility to convert values.
+	/// </summary>
+	public static class ConvertUtil
 	{
 		internal static bool IsNumeric(object candidate)
 		{
@@ -65,17 +68,22 @@ namespace OfficeOpenXml.Utils
 			return false;
 		}
 		/// <summary>
-		/// Tries to parse the given object into a <see cref="DateTime"/>. Only integers, doubles, and strings
-		/// have the possibility of being successfully parsed.
+		/// Tries to parse the given object into a <see cref="DateTime"/>. Only integers, doubles, strings
+		/// and <see cref="DateTime"/> objects have the possibility of being successfully parsed.
 		/// </summary>
 		/// <param name="dateCandidate">The object to convert into a DateTime if valid.</param>
 		/// <param name="date">The resulting <see cref="DateTime"/> that dateCandidate was converted to.</param>
 		/// <param name="error">Null if the parse was successful, or the <see cref="eErrorType"/> indicating why the parse was unsuccessful.</param>
 		/// <returns>True if <paramref name="dateCandidate"/> was successfully parsed into a <see cref="DateTime"/>, and false otherwise.</returns>
-		internal static bool TryParseDateObject(object dateCandidate, out DateTime date, out eErrorType? error)
+		public static bool TryParseDateObject(object dateCandidate, out DateTime date, out eErrorType? error)
 		{
 			error = null;
 			date = DateTime.MinValue;
+			if (dateCandidate is DateTime validDate)
+			{
+				date = validDate;
+				return true;
+			}
 			if (dateCandidate is string)
 			{
 				var isValidDate = DateTime.TryParse(dateCandidate.ToString(), out date);
@@ -89,7 +97,13 @@ namespace OfficeOpenXml.Utils
 				dateCandidate = (double)dateInt;
 			if (dateCandidate is double dateDouble)
 			{
-				if (dateDouble > 0)
+				// Note: This if statement is to account for an error from Lotus 1-2-3
+				// that Excel implemented which incorrectly includes 2/29/1900 as a valid date;
+				// that day does not actually exist: See link for more information.
+				// https://support.microsoft.com/en-us/help/214058/days-of-the-week-before-march-1,-1900-are-incorrect-in-excel
+				if (dateDouble < 61)
+					dateDouble++;
+				if (dateDouble >= 2)
 				{
 					date = DateTime.FromOADate(dateDouble);
 					return true;

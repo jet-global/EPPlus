@@ -40,20 +40,20 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	{
 		#region Year Function (Execute) Tests
 		[TestMethod]
-		public void YearShouldReturnCorrectYear()
+		public void YearWithDateAsStringAsInputReturnsCorrectYear()
 		{
-			var date = new DateTime(2012, 3, 12);
 			var func = new Year();
-			var result = func.Execute(FunctionsHelper.CreateArgs(date.ToOADate()), this.ParsingContext);
+			var args = FunctionsHelper.CreateArgs("2012-03-12");
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(2012, result.Result);
 		}
 
 		[TestMethod]
-		public void YearShouldReturnCorrectYearWithStringParam()
+		public void YearWithLongDateAsStringAsInputReturnsCorrectYear()
 		{
-			var date = new DateTime(2012, 3, 12);
 			var func = new Year();
-			var result = func.Execute(FunctionsHelper.CreateArgs("2012-03-12"), this.ParsingContext);
+			var args = FunctionsHelper.CreateArgs("March 12, 2012");
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(2012, result.Result);
 		}
 
@@ -61,7 +61,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void YearWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Year();
-
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
@@ -99,6 +98,168 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			{
 				Thread.CurrentThread.CurrentCulture = currentCulture;
 			}
+		}
+
+		[TestMethod]
+		public void YearWithDateAsIntegerReturnsCorrectYear()
+		{
+			// Note that 42874 is the OADate for May 19, 2017.
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(42874);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2017, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithDateAsDoubleReturnsCorrectYear()
+		{
+			// Note that 42874.34114 is the OADate representation of
+			// some time on May 19, 2017.
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(42874.34114);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2017, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithZeroAsInputReturns1900AsYear()
+		{
+			// Excel treats 0 as a special case OADate.
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1900, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithNegativeIntegerAsInputReturnsPoundNum()
+		{
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(-1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearWithNegativeDoubleAsInputReturnsPoundNum()
+		{
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(-1.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearWithNonDateStringAsInputReturnsPoundValue()
+		{
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs("word");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearWithEmptyStringAsInputReturnsPoundValue()
+		{
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(string.Empty);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearWithIntegerInStringAsInputReturnsCorrectYear()
+		{
+			// Note that 42874 is the OADate representation of May 19, 2017.
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs("42874");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2017, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithDoubleInStringAsInputReturnsCorrectYear()
+		{
+			// Note that 42874.34114 is the OADate representation of some time
+			// on May 19, 2017.
+			var date = new DateTime(2017, 5, 19);
+			date.AddHours(6);
+			date.AddMinutes(30);
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(date.ToOADate());
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2017, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithNegativeIntegerInStringAsInputReturnsPoundNum()
+		{
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs("-1");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearWithNegativeDoubleInStringAsInputReturnsPoundNum()
+		{
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs("-1.5");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearWithDateTimeObjectReturnsCorrectYear()
+		{
+			var date = new DateTime(2017, 5, 22);
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(date);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2017, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithDateTimeObjectForOADateLessThan61ReturnsCorrectYear()
+		{
+			var date = new DateTime(1900, 2, 28);
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(date);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1900, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithOADate1ReturnsCorrectYear()
+		{
+			// OADate 1 corresponds to 1/1/1900 in Excel. Test the case where Excel's epoch date
+			// is used as the input.
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1900, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithOADateBetween0And1ReturnsZero()
+		{
+			// Test the case where a time value is given for Excel's
+			// "zeroeth" day, which Excel treats as a special day.
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(0.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1900, result.Result);
+		}
+
+		[TestMethod]
+		public void YearWithNegativeOADateBetweenNegative1And0ReturnsPoundNum()
+		{
+			// Test the case where a negative time value is given for Excel's
+			// "zeroeth" day, which Excel treats as a special day.
+			var func = new Year();
+			var args = FunctionsHelper.CreateArgs(-0.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
 	}
