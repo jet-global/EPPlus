@@ -127,7 +127,6 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\TodayTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\WeekdayTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\WeeknumTests.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\Workdays\AdditionalHolidayDaysTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\WorkdayTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\YearFracTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\YearTests.cs" />
