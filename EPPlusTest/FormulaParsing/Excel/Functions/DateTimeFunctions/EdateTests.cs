@@ -167,6 +167,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void EdateWithZeroAsFirstParameterReturnsZero()
 		{
+			// Zero is a special case and requires special output.
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(0,0);
 			var result = func.Execute(args, this.ParsingContext);
@@ -216,6 +217,76 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs("word","word");
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithDate1March1900ReturnsCorrectResult()
+		{
+			// Note that for testing dates before 3/1/1900 (which has OADate 61), the OADate has to be written literally,
+			// rather than as the result of calling ToOADate() on an expected DateTime object,
+			// to ensure that the serial number being output is based on Excel's OADates and not
+			// System.DateTime's OADates, which are all off by one for dates before 3/1/1900.
+			var inputDate = new DateTime(1900, 3, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(61, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithDate28February1900ReturnsCorrectResult()
+		{
+			// Note that for testing dates before 3/1/1900 (which has OADate 61), the OADate has to be written literally,
+			// rather than as the result of calling ToOADate() on an expected DateTime object,
+			// to ensure that the serial number being output is based on Excel's OADates and not
+			// System.DateTime's OADates, which are all off by one for dates before 3/1/1900.
+			var inputDate = new DateTime(1900, 2, 28);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(59, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithDate27February1900ReturnsCorrectResult()
+		{
+			// Note that for testing dates before 3/1/1900 (which has OADate 61), the OADate has to be written literally,
+			// rather than as the result of calling ToOADate() on an expected DateTime object,
+			// to ensure that the serial number being output is based on Excel's OADates and not
+			// System.DateTime's OADates, which are all off by one for dates before 3/1/1900.
+			var inputDate = new DateTime(1900, 2, 27);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(58, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithNullFirstParamaterReturnsPoundNA()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(null, 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithNullSecondParamaterReturnsPoundNA()
+		{
+			var inputDate = new DateTime(2017, 1, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, null);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithBothParamatersNullReturnsPoundNA()
+		{
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(null, null);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
@@ -329,6 +400,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void EdateWithZeroAsFirstParamaterAndIntegerAsSecondParamaterReturnsCorrectResult()
 		{
+			// Zero is a special case date and requires specific output.
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(0, 1);
 			var result = func.Execute(args, this.ParsingContext);
@@ -348,6 +420,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void EdateWithCalculatedDateBefore1March1900ReturnsCorrectOADate()
 		{
+			// Note that for testing dates before 3/1/1900 (which has OADate 61), the OADate has to be written literally,
+			// rather than as the result of calling ToOADate() on an expected DateTime object,
+			// to ensure that the serial number being output is based on Excel's OADates and not
+			// System.DateTime's OADates, which are all off by one for dates before 3/1/1900.
 			var inputDate = new DateTime(1900, 1, 1);
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(inputDate, 1);
@@ -355,7 +431,43 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(32, result.Result);
 		}
 
-		// Note that any date calculations resulting in dates before 3/1/1900 will need to be special-cased.
+		[TestMethod]
+		public void EdateWithMonthsAddedToReachNonExistentDateReturnsCorrectResult()
+		{
+			// Note that for testing dates before 3/1/1900 (which has OADate 61), the OADate has to be written literally,
+			// rather than as the result of calling ToOADate() on an expected DateTime object,
+			// to ensure that the serial number being output is based on Excel's OADates and not
+			// System.DateTime's OADates, which are all off by one for dates before 3/1/1900.
+			var inputDate = new DateTime(1900, 1, 29);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(59, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithMonthsSubtractedToReachTheEpochDateReturnsPoundNum()
+		{
+			var inputDate = new DateTime(1900, 1, 31);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EdateWithMonthsSubtractedToCalculateRightBeforeTheEpochDateReturnsCorrectResult()
+		{
+			// Note that for testing dates before 3/1/1900 (which has OADate 61), the OADate has to be written literally,
+			// rather than as the result of calling ToOADate() on an expected DateTime object,
+			// to ensure that the serial number being output is based on Excel's OADates and not
+			// System.DateTime's OADates, which are all off by one for dates before 3/1/1900.
+			var inputDate = new DateTime(1900, 2, 1);
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(inputDate, -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
 		#endregion
 	}
 }
