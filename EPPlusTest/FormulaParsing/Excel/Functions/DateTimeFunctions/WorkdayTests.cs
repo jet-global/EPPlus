@@ -506,10 +506,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WorkdayWithZeroIntegerAsHolidayInputReturnsCorrectValue()
 		{
+			// Test case where the third argument is zero.
 			var function = new Workday();
-
 			var inputDate = new DateTime(2017, 1, 2);
-
 			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 40, 0), this.ParsingContext);
 			Assert.AreEqual(42793.00, result.Result);
 		}
@@ -517,10 +516,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WorkdayWithNonZeroIntegerAsHolidayInputReturnsCorrectValue()
 		{
+			// Test case where the third argument is a non-zero integer.
 			var function = new Workday();
-
 			var inputDate = new DateTime(2017, 1, 2);
-
 			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 5, 1), this.ParsingContext);
 			Assert.AreEqual(42744.00, result.Result);
 		}
@@ -528,6 +526,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WeekdayWithDateFunctionHolidayInputReturnsCorrectValue()
 		{
+			// Test  case where the third argument is a result of the DATE Function. 
 			using (var package = new ExcelPackage())
 			{
 				var ws = package.Workbook.Worksheets.Add("Sheet1");
@@ -536,8 +535,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["B2"].Value = new DateTime(2017, 1, 25);
 				ws.Cells["B3"].Formula = "WORKDAY(A1,40, B1:B2)";
 				ws.Calculate();
-
-				//var expectedDate = new DateTime(2016, 6, 13).ToOADate();
 				var actualDate = ws.Cells["B3"].Value;
 				Assert.AreEqual(42795.00, actualDate);
 			}
@@ -546,6 +543,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WeekdayWithHolidayDateNotAsStringReturnsCorrectInput()
 		{
+			// Test case where the third argument is a date not as a string. It is tested in the 
+			// Excel environment as well as just regularly executing the function. 
 			using (var package = new ExcelPackage())
 			{
 				var ws = package.Workbook.Worksheets.Add("test");
@@ -554,11 +553,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["B2"].Value = 2 / 15 / 2017;
 				ws.Cells["B3"].Formula = "WORKDAY(A1,40, B1:B2)";
 				ws.Calculate();
-
 				var actualDate = ws.Cells["B3"].Value;
 				Assert.AreEqual(42793.00, actualDate);
 			}
-
 			var function = new Workday();
 			var holiInput = 1 / 20 / 2017;
 			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 40, holiInput), this.ParsingContext);
@@ -568,6 +565,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WeekdayWithLargeNumberOfHolidaysReturnsCorrectInput()
 		{
+			// Test case where 30 holiday dates are supplied as strings.
 			using (var package = new ExcelPackage())
 			{
 				var ws = package.Workbook.Worksheets.Add("test");
@@ -613,19 +611,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["B39"].Value = "3/15/2017";
 				ws.Cells["B40"].Value = "4/1/2017";
 				ws.Cells["B41"].Value = "5/4/2017";
-
 				ws.Cells["C1"].Formula = "WORKDAY(A1, 150, B1:B41)";
 				ws.Calculate();
-
 				Assert.AreEqual(42985.00, ws.Cells["C1"].Value);
-
 			}
 		}
-
 
 		[TestMethod]
 		public void WeekdayWithLargeNumberOfHolidaysAsOADatesReturnsCorrectInput()
 		{
+			// Test case where 30 holiday dates are supplied as OADates.
 			using (var package = new ExcelPackage())
 			{
 				var ws = package.Workbook.Worksheets.Add("test");
@@ -671,12 +666,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["B39"].Value = new DateTime(2017, 3, 15).ToOADate();
 				ws.Cells["B40"].Value = new DateTime(2017, 4, 1).ToOADate();
 				ws.Cells["B41"].Value = new DateTime(2017, 5, 4).ToOADate();
-
 				ws.Cells["C1"].Formula = "WORKDAY(A1, 150, B1:B41)";
 				ws.Calculate();
-
 				Assert.AreEqual(42985.00, ws.Cells["C1"].Value);
-
 			}
 		}
 		#endregion
