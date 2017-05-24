@@ -198,7 +198,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(DateTime.FromOADate(expectedDate), DateTime.FromOADate((double)result.Result));
 		}
 
-		
+
 
 		[TestMethod]
 		public void WorkdayWithDATEFunctionAndNegativeDayInputReturnsCorrectResult()
@@ -221,7 +221,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
-		
+
 		[TestMethod]
 		public void WorkdayWithDateAsStringAndNegDayInputReturnsCorrectValue()
 		{
@@ -253,7 +253,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new Workday();
 
-			var result = function.Execute(FunctionsHelper.CreateArgs(null,-10), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs(null, -10), this.ParsingContext);
 			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)result.Result).Type);
 		}
 
@@ -404,7 +404,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new Workday();
 
-			var startDate = new DateTime(2017, 1,1);
+			var startDate = new DateTime(2017, 1, 1);
 			var dayInput = "1.13.2017";
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, dayInput), this.ParsingContext);
@@ -468,7 +468,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayWithPositiveArgsAndNullHolidayDatesReturnsCorrectValue ()
+		public void WorkdayWithPositiveArgsAndNullHolidayDatesReturnsCorrectValue()
 		{
 			var function = new Workday();
 
@@ -509,7 +509,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var function = new Workday();
 
 			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 41, "1/25/2017"), this.ParsingContext);
-			Assert.AreEqual(42795.00,result.Result);
+			Assert.AreEqual(42795.00, result.Result);
 		}
 
 		[TestMethod]
@@ -517,7 +517,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new Workday();
 
-			var inputDate = new DateTime(2017,1,2);
+			var inputDate = new DateTime(2017, 1, 2);
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 41, "1-25-2017"), this.ParsingContext);
 			Assert.AreEqual(42795.00, result.Result);
@@ -532,7 +532,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var function = new Workday();
 
-			var inputDate = new DateTime(2017,1,2);
+			var inputDate = new DateTime(2017, 1, 2);
 
 			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 500, "3.30.2017"), this.ParsingContext);
 			Assert.AreEqual(43438.00, result.Result);
@@ -585,18 +585,19 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			{
 				var ws = package.Workbook.Worksheets.Add("test");
 				ws.Cells["A1"].Value = "1/2/2017";
-				ws.Cells["B1"].Value = 1/20/2017;
-				ws.Cells["B2"].Value = 1/25/2017;
+				ws.Cells["B1"].Value = 5 / 4 / 2017;
+				ws.Cells["B2"].Value = 2 / 15 / 2017;
 				ws.Cells["B3"].Formula = "WORKDAY(A1,40, B1:B2)";
 				ws.Calculate();
 
 				var actualDate = ws.Cells["B3"].Value;
-				Assert.AreEqual(42794.00, actualDate);
+				Assert.AreEqual(42793.00, actualDate);
 			}
-		
+
 			var function = new Workday();
-			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 40, 1 / 20 / 2017), this.ParsingContext);
-			Assert.AreEqual(42794.00, result.Result);
+			var holiInput = 1 / 20 / 2017;
+			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 40, holiInput), this.ParsingContext);
+			Assert.AreEqual(42793.00, result.Result);
 		}
 
 		[TestMethod]
@@ -673,7 +674,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["B7"].Value = new DateTime(2017, 1, 13).ToOADate();
 				ws.Cells["B8"].Value = new DateTime(2017, 1, 14).ToOADate();
 				ws.Cells["B9"].Value = new DateTime(2017, 1, 15).ToOADate();
-				ws.Cells["B10"].Value = new DateTime(2017, 1,16).ToOADate();
+				ws.Cells["B10"].Value = new DateTime(2017, 1, 16).ToOADate();
 				ws.Cells["B11"].Value = new DateTime(2017, 1, 17).ToOADate();
 				ws.Cells["B12"].Value = new DateTime(2017, 1, 18).ToOADate();
 				ws.Cells["B13"].Value = new DateTime(2017, 1, 19).ToOADate();
@@ -713,7 +714,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			}
 		}
-
 		#endregion
 	}
 }
