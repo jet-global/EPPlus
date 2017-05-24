@@ -24,12 +24,12 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
 using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using System;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
@@ -144,7 +144,17 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(0,0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0, result.Result);
+			Assert.AreEqual(0.0, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithFractionAsStringAsFirstParameterReturnsZero()
+		{
+			// Zero is a special case and requires special output.
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("0.5", 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.0, result.Result);
 		}
 
 		[TestMethod]
@@ -153,7 +163,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(1,0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(1, result.Result);
+			Assert.AreEqual(1.0, result.Result);
 		}
 
 		[TestMethod]
@@ -203,7 +213,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(inputDate, 0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(61, result.Result);
+			Assert.AreEqual(61.0, result.Result);
 		}
 
 		[TestMethod]
@@ -217,7 +227,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(inputDate, 0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(59, result.Result);
+			Assert.AreEqual(59.0, result.Result);
 		}
 
 		[TestMethod]
@@ -231,7 +241,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(inputDate, 0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(58, result.Result);
+			Assert.AreEqual(58.0, result.Result);
 		}
 
 		[TestMethod]
@@ -377,7 +387,17 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(0, 1);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(31, result.Result);
+			Assert.AreEqual(31.0, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithZeroAsStringAsFirstParamaterAndIntegerAsSecondParamaterReturnsCorrectResult()
+		{
+			// Zero is a special case date and requires specific output.
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("0", 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(31.0, result.Result);
 		}
 
 		[TestMethod]
@@ -401,7 +421,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(inputDate, 1);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(32, result.Result);
+			Assert.AreEqual(32.0, result.Result);
 		}
 
 		[TestMethod]
@@ -415,7 +435,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(inputDate, 1);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(59, result.Result);
+			Assert.AreEqual(59.0, result.Result);
 		}
 
 		[TestMethod]
@@ -439,7 +459,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(inputDate, -1);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(1, result.Result);
+			Assert.AreEqual(1.0, result.Result);
 		}
 
 		[TestMethod]
@@ -449,7 +469,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("4/14/1900", 3);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(196, result.Result);
+			Assert.AreEqual(196.0, result.Result);
 		}
 
 		[TestMethod]
@@ -459,7 +479,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("4/14/1900", 12);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(470, result.Result);
+			Assert.AreEqual(470.0, result.Result);
 		}
 
 		[TestMethod]
@@ -469,7 +489,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("4/14/1900", -2);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(45, result.Result);
+			Assert.AreEqual(45.0, result.Result);
 		}
 		#endregion
 	}
