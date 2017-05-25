@@ -34,9 +34,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (serialNumberCandidate == null)
 				return new CompileResult(eErrorType.NA);
 
-			bool isSerialZero = (serialNumberCandidate is int dateAsInt && dateAsInt == 0);
+			bool isSerialIntZero = (serialNumberCandidate is int dateAsInt && dateAsInt == 0);
+			bool isSerialDoubleZero = (serialNumberCandidate is double dateAsDouble && dateAsDouble == 0.00);
 
-			if (ConvertUtil.TryParseDateObject(serialNumberCandidate, out output, out eErrorType? error) || isSerialZero)
+			if (ConvertUtil.TryParseDateObject(serialNumberCandidate, out output, out eErrorType? error) || isSerialIntZero || isSerialDoubleZero)
 			{
 				if (serialNumberCandidate is int && ArgToInt(functionArguments, 1) < 0)
 					return new CompileResult(eErrorType.Num);
@@ -50,8 +51,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				var dateSerial = this.ArgToDecimal(arguments, 0);
 				if (dateSerial < 0)
 					return new CompileResult(eErrorType.Num);
-				if (isSerialZero && this.ArgToInt(arguments, 1) < 0)
+				if (isSerialIntZero && this.ArgToInt(arguments, 1) < 0)
 						return new CompileResult(eErrorType.Num);
+				if (isSerialDoubleZero && this.ArgToInt(arguments, 1) < 0)
+					return new CompileResult(eErrorType.Num);
 
 				var startDate = System.DateTime.FromOADate(dateSerial);
 				var workDateSerial = this.ArgToDecimal(arguments, 1);
@@ -75,7 +78,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 						dateResult = calculator.AdjustResultWithHolidays(dateResult, functionArguments[2]);
 					}
 				}
-				if(isSerialZero)
+				if(isSerialIntZero || isSerialDoubleZero)
 					return CreateResult(dateResult.EndDate.ToOADate()-1, DataType.Date);
 				return CreateResult(dateResult.EndDate.ToOADate(), DataType.Date);
 			}
