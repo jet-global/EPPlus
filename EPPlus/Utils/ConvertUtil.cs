@@ -121,9 +121,9 @@ namespace OfficeOpenXml.Utils
 		{
 			error = null;
 			date = DateTime.MinValue;
-			if (dateCandidate is DateTime dateDateTime)
+			if (dateCandidate is DateTime validDate)
 			{
-				date = dateDateTime;
+				date = validDate;
 				return true;
 			}
 			if (TryParseDateObjectToOADate(dateCandidate, out double OADate))
