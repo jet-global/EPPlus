@@ -24,14 +24,14 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System;
+using System.Globalization;
+using System.Threading;
 using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using System;
-using System.Globalization;
-using System.Threading;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
@@ -42,21 +42,21 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void EdateWithDateAsStringAsFirstParameterReturnsCorrectResult()
 		{
-			var date = new DateTime(2017, 5, 22);
+			var expectedDate = new DateTime(2017, 5, 22);
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("5/22/2017", 0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(date.ToOADate(), result.Result);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
 		}
 
 		[TestMethod]
 		public void EdateWithDateAsLongStringAsFirstParameterReturnsCorrectResult()
 		{
-			var date = new DateTime(2017, 5, 22);
+			var expectedDate = new DateTime(2017, 5, 22);
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("May 22, 2017", 0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(date.ToOADate(), result.Result);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
 		}
 
 		[TestMethod]
@@ -81,22 +81,22 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void EdateWithIntegerAsStringAsFirstParameterReturnsCorrectResult()
 		{
 			// Note that 42877 is the OADate for 5/22/2017.
-			var date = new DateTime(2017, 5, 22);
+			var expectedDate = new DateTime(2017, 5, 22);
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("42877", 0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(date.ToOADate(), result.Result);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
 		}
 
 		[TestMethod]
 		public void EdateWithDoubleAsStringAsFirstParameterReturnsCorrectResult()
 		{
 			// Note that 42877.5 is the OADate for some time on 5/22/2017.
-			var date = new DateTime(2017, 5, 22);
+			var expectedDate = new DateTime(2017, 5, 22);
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("42877.5", 0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(date.ToOADate(), result.Result);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
 		}
 		
 		[TestMethod]
@@ -121,22 +121,22 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void EdateWithIntegerAsFirstParameterReturnsCorrectResult()
 		{
 			// Note that 42877 is the OADate for 5/22/2017
-			var date = new DateTime(2017, 5, 22);
+			var expectedDate = new DateTime(2017, 5, 22);
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(42877, 0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(date.ToOADate(), result.Result);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
 		}
 
 		[TestMethod]
 		public void EdateWithDoubleAsFirstParameterReturnsCorrectResult()
 		{
 			// Note that 42877.5 is the OADate for some time on 5/22/2017.
-			var date = new DateTime(2017, 5, 22);
+			var expectedDate = new DateTime(2017, 5, 22);
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(42877.5, 0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(date.ToOADate(), result.Result);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
 		}
 
 		[TestMethod]
@@ -152,7 +152,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void EdateWithFractionAsStringAsFirstParameterReturnsZero()
 		{
-			// Zero is a special case and requires special output.
+			// Fraction input is a special case and requires special output.
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("0.5", 0);
 			var result = func.Execute(args, this.ParsingContext);
@@ -187,7 +187,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithNegativeFirstParamaterAndNonNumericStringSecondParamaterReturnsPoundNum()
+		public void EdateWithNegativeFirstParameterAndNonNumericStringSecondParameterReturnsPoundNum()
 		{
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(-1,"word");
@@ -247,7 +247,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithNullFirstParamaterReturnsPoundNA()
+		public void EdateWithNullFirstParameterReturnsPoundNA()
 		{
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(null, 0);
@@ -256,7 +256,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithNullSecondParamaterReturnsPoundNA()
+		public void EdateWithNullSecondParameterReturnsPoundNA()
 		{
 			var inputDate = new DateTime(2017, 1, 1);
 			var func = new Edate();
@@ -266,7 +266,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithBothParamatersNullReturnsPoundNA()
+		public void EdateWithBothParametersNullReturnsPoundNA()
 		{
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs(null, null);
@@ -308,7 +308,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithNegativeIntegerAsSecondParamaterReturnsCorrectResult()
+		public void EdateWithNegativeIntegerAsSecondParameterReturnsCorrectResult()
 		{
 			var inputDate = new DateTime(2017, 1, 1);
 			var expectedDate = new DateTime(2016, 12, 1);
@@ -319,7 +319,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithNegativeDoubleAsSecondParamaterReturnsCorrectResult()
+		public void EdateWithNegativeDoubleAsSecondParameterReturnsCorrectResult()
 		{
 			var inputDate = new DateTime(2017, 1, 1);
 			var expectedDate = new DateTime(2016, 12, 1);
@@ -330,7 +330,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithIntegerAsStringAsSecondParamaterReturnsCorrectResult()
+		public void EdateWithIntegerAsStringAsSecondParameterReturnsCorrectResult()
 		{
 			var inputDate = new DateTime(2017, 1, 1);
 			var expectedDate = new DateTime(2017, 2, 1);
@@ -341,7 +341,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithDoubleAsStringAsSecondParamaterReturnsCorrectResult()
+		public void EdateWithDoubleAsStringAsSecondParameterReturnsCorrectResult()
 		{
 			var inputDate = new DateTime(2017, 1, 1);
 			var expectedDate = new DateTime(2017, 2, 1);
@@ -352,7 +352,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithNonNumericStringAsSecondParamaterReturnsPoundValue()
+		public void EdateWithNonNumericStringAsSecondParameterReturnsPoundValue()
 		{
 			var inputDate = new DateTime(2017, 1, 1);
 			var func = new Edate();
@@ -362,7 +362,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithEmptyStringAsSecondParamaterReturnsPoundValue()
+		public void EdateWithEmptyStringAsSecondParameterReturnsPoundValue()
 		{
 			var inputDate = new DateTime(2017, 1, 1);
 			var func = new Edate();
@@ -383,7 +383,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithZeroAsFirstParamaterAndIntegerAsSecondParamaterReturnsCorrectResult()
+		public void EdateWithZeroAsFirstParameterAndIntegerAsSecondParameterReturnsCorrectResult()
 		{
 			// Zero is a special case date and requires specific output.
 			var func = new Edate();
@@ -393,7 +393,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EdateWithZeroAsStringAsFirstParamaterAndIntegerAsSecondParamaterReturnsCorrectResult()
+		public void EdateWithZeroAsStringAsFirstParameterAndIntegerAsSecondParameterReturnsCorrectResult()
 		{
 			// Zero is a special case date and requires specific output.
 			var func = new Edate();
@@ -467,27 +467,27 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void EdateWithMonthsAddedReturnsCorrectResult()
 		{
-			// Note that 196 is the OADate for 7/14/1900.
+			var expectedDate = new DateTime(1900, 7, 14);
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("4/14/1900", 3);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(196.0, result.Result);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
 		}
 
 		[TestMethod]
 		public void EdateWithAYearOfMonthsAddedReturnsCorrectResult()
 		{
-			// Note that 470 is the OADate for 4/14/1901.
+			var expectedDate = new DateTime(1901, 4, 14);
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("4/14/1900", 12);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(470.0, result.Result);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
 		}
 
 		[TestMethod]
 		public void EdateWithMonthsSubtractedReturnsCorrectResult()
 		{
-			// Note that 45 is the OADate for 2/14/1900.
+			// Note that 45 is the Excel OADate for 2/14/1900.
 			var func = new Edate();
 			var args = FunctionsHelper.CreateArgs("4/14/1900", -2);
 			var result = func.Execute(args, this.ParsingContext);
