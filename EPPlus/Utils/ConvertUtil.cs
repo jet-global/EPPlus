@@ -126,7 +126,7 @@ namespace OfficeOpenXml.Utils
 				date = validDate;
 				return true;
 			}
-			if (TryParseDateObjectToOADate(dateCandidate, out double OADate))
+			else if (TryParseDateObjectToOADate(dateCandidate, out double OADate))
 			{
 				// Note: This if statement is to account for an error from Lotus 1-2-3
 				// that Excel implemented which incorrectly includes 2/29/1900 as a valid date;
@@ -146,7 +146,7 @@ namespace OfficeOpenXml.Utils
 				}
 			}
 			error = eErrorType.Value;
-			return false;			
+			return false;
 		}
 		/// <summary>
 		/// Convert an object value to a double 
