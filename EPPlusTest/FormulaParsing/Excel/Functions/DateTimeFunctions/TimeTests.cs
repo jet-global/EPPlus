@@ -40,56 +40,143 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void TimeShouldReturnACorrectSerialNumber()
 		{
 			var expectedResult = this.GetTime(10, 11, 12);
-			var func = new Time();
-			var result = func.Execute(FunctionsHelper.CreateArgs(10, 11, 12), this.ParsingContext);
+			var function = new Time();
+			var result = function.Execute(FunctionsHelper.CreateArgs(10, 11, 12), this.ParsingContext);
 			Assert.AreEqual(expectedResult, result.Result);
 		}
 
 		[TestMethod]
 		public void TimeShouldParseStringCorrectly()
 		{
+			//Ask Matt about this 
 			var expectedResult = this.GetTime(10, 11, 12);
-			var func = new Time();
-			var result = func.Execute(FunctionsHelper.CreateArgs("10:11:12"), this.ParsingContext);
+			var function = new Time();
+			var result = function.Execute(FunctionsHelper.CreateArgs("10:11:12"), this.ParsingContext);
 			Assert.AreEqual(expectedResult, result.Result);
-		}
-
-		[TestMethod]
-		public void TimeShouldErrorIfSecondsIsOutOfRange()
-		{
-			var func = new Time();
-			var result = func.Execute(FunctionsHelper.CreateArgs(10, 11, 60), this.ParsingContext);
-			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)(result.Result)).Type);
-		}
-
-		[TestMethod]
-		public void TimeShouldErrorIfMinuteIsOutOfRange()
-		{
-			var func = new Time();
-			var result = func.Execute(FunctionsHelper.CreateArgs(10, 60, 12), this.ParsingContext);
-			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)(result.Result)).Type);
-		}
-
-		[TestMethod]
-		public void TimeShouldErrorIfHourIsOutOfRange()
-		{
-			var func = new Time();
-			var result = func.Execute(FunctionsHelper.CreateArgs(24, 12, 12), this.ParsingContext);
-			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)(result.Result)).Type);
 		}
 
 		[TestMethod]
 		public void TimeWithInvalidArgumentReturnsPoundValue()
 		{
-			var func = new Time();
+			var function = new Time();
 
 			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
+			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
+
+		[TestMethod]
+		public void TimeWithLastArgNegativeReturnsCorrectValue()
+		{
+			var function = new Time();
+
+			var args = FunctionsHelper.CreateArgs(10, 10, -10);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.423726852, result.Result);
+		}
+
+		[TestMethod]
+		public void TimeWithSecondArgNegativeReturnsCorrectValue()
+		{
+			var function = new Time();
+
+			var args = FunctionsHelper.CreateArgs(10, -10, 10);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.409837963, result.Result);
+		}
+
+		[TestMethod]
+		public void TimeWithLastTwoArgsNegativeReturnsCorrectValue()
+		{
+			var function = new Time();
+
+			var args = FunctionsHelper.CreateArgs(10, -10, -10);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.409606481, result.Result);
+		}
+
+		[TestMethod]
+		public void TimeWithFirstArgNegativeReturnsPoundNum()
+		{
+			//This test case tests all four cases where the first argument is negative. They all should return #NUM!
+			var function = new Time();
+
+			var case1Args = FunctionsHelper.CreateArgs(-10, 10, 10);
+			var case2Args = FunctionsHelper.CreateArgs(-10, 10, -10);
+			var case3Args = FunctionsHelper.CreateArgs(-10, -10, 10);
+			var case4Args = FunctionsHelper.CreateArgs(-10, -10, -10);
+
+			var case1Result = function.Execute(case1Args, this.ParsingContext);
+			var case2Result = function.Execute(case2Args, this.ParsingContext);
+			var case3Result = function.Execute(case3Args, this.ParsingContext);
+			var case4Result = function.Execute(case4Args, this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)case1Result.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)case2Result.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)case3Result.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)case4Result.Result).Type);
+		}
+
+		[TestMethod]
+		public void TimeWithMaxTimeInputsReturnsCorrectValue()
+		{
+			var function = new Time();
+
+			var args = FunctionsHelper.CreateArgs(32767, 32767, 32767);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.425775463, result.Result);
+		}
+
+		[TestMethod]
+		public void TimeWithOnePastMaxTimeInputReturnsPoundNum()
+		{
+			var function = new Time();
+
+			var args = FunctionsHelper.CreateArgs(32768, 32768, 32768);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void TimeWithGenericStringOrEmptyStringReturnsPoundValue()
+		{
+			//This test case tests all three cases where the input is a generic string or an empty string. They should all return #VALUE!
+			var function = new Time();
+
+			var case1Args = FunctionsHelper.CreateArgs("string", 10, 10);
+			var case2Args = FunctionsHelper.CreateArgs(10, "string", 10);
+
+		}
+
+		[TestMethod]
+		public void TimeWithArgsAsNumericStringReturnsCorrectResult()
+		{
+
+		}
+
+		[TestMethod]
+		public void TimeWithOmittedThirdParamReturnsCorrectResult()
+		{
+
+		}
+
+		[TestMethod]
+		public void TimeWithOmittedSecondParameterReturnsCorrectResult()
+		{
+
+		}
+
+		[TestMethod]
+		public void TimeWithOmittedSecondAndThirdParametersReturnsCorrectResult()
+		{
+
+		}
+
+		[TestMethod]
+		public void MaxTimeInARegularDayReturnsCorrectResult()
+		{
+
+		}
 	}
 }
