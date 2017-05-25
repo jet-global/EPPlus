@@ -61,22 +61,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 				if (functionArguments.Length > 2)
 				{
-					// Need to use the tryparsedateobject here as well
 					for (int i = 2; i < functionArguments.Length; i++)
 					{ 
 						var holidayCandidate = arguments.ElementAt(i).Value;
-						if (holidayCandidate is string)
-						{
-							var isHolidayString = ConvertUtil.TryParseDateString(holidayCandidate, out output);
-							if (!isHolidayString)
-								return new CompileResult(eErrorType.Value);
-						}
-						else if (holidayCandidate is int)
-						{
-							var holidaySerial = ArgToInt(arguments, i);
-							if (holidaySerial < 0)
-								return new CompileResult(eErrorType.Num);
-						}
+						bool isHolidayZero = (serialNumberCandidate is int holAsint && holAsint == 0);
+
+						if (holidayCandidate is int holAsInt && holAsInt < 0)
+							return new CompileResult(eErrorType.Num);
+						
+						if (holidayCandidate is string && !ConvertUtil.TryParseDateString(holidayCandidate, out output))
+							return new CompileResult(eErrorType.Value);
+
 						dateResult = calculator.AdjustResultWithHolidays(dateResult, functionArguments[2]);
 					}
 				}

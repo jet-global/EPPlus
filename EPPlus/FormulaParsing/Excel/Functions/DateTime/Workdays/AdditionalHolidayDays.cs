@@ -9,26 +9,28 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 	/// </summary>
 	public class AdditionalHolidayDays
 	{
-		private readonly FunctionArgument _holidayArg;
+		#region Properties
 		private List<System.DateTime> HolidayDates { get; } = new List<System.DateTime>();
+		#endregion
+		#region Constructor
 		/// <summary>
 		/// The constructor for this class calls the method Initalize, which does the transformation of the list. 
 		/// </summary>
 		/// <param name="holidayArg">The list of FunctionArguments to be turned into DateTime objects.</param>
 		public AdditionalHolidayDays(FunctionArgument holidayArg)
 		{
-			_holidayArg = holidayArg;
-			Initialize();
+			Initialize( holidayArg);
 		}
 
-		public IEnumerable<System.DateTime> AdditionalDates => HolidayDates;
-
+		public IEnumerable<System.DateTime> AdditionalDates => this.HolidayDates;
+		#endregion
+		#region Private Methods
 		/// <summary>
 		/// Initalize takes the list of FunctionArguments and turns it into a list of DateTime objects. It handles the cases 
 		/// where the arguments are dates as OADates, results of the DATE Function, integers, and strings.
 		/// It works for both arrays of dates or dates as values from an Excel worksheet.
 		/// </summary>
-		private void Initialize()
+		private void Initialize(FunctionArgument _holidayArg)
 		{
 			var holidays = _holidayArg.Value as IEnumerable<FunctionArgument>;
 
@@ -56,8 +58,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 
 			if (ConvertUtil.TryParseDateObject(_holidayArg.Value, out date, out error))
 			{
-				HolidayDates.Add(date);
+				this.HolidayDates.Add(date);
 			}
 		}
+		#endregion
 	}
 }
