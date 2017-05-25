@@ -24,12 +24,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (!this.ValidateArguments(arguments, 2))
 				return new CompileResult(eErrorType.Value);
-			var dateObj = arguments.ElementAt(0).Value;
+			//var dateObj = arguments.ElementAt(0).Value;
+			var dateObj = this.GetFirstValue(arguments);
 			var monthsObj = arguments.ElementAt(1).Value;
 			if (dateObj == null || monthsObj== null)
 				return new CompileResult(eErrorType.NA);
+			// Check for an input date of 0 or a fraction expressed as a string, which require special output.
 			if (dateObj is string dateString && Double.TryParse(dateString, out double dateAsNumber))
-				dateObj = dateAsNumber;
+			{
+				if (dateAsNumber < 1 && dateAsNumber >= 0)
+					dateObj = dateAsNumber;
+			}
 			var isZeroDate = ((dateObj is int dateInt && dateInt == 0) ||
 				(dateObj is double dateDouble && dateDouble < 1 && dateDouble >= 0));
 			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime validDate, out eErrorType? error) || isZeroDate)

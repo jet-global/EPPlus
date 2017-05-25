@@ -521,6 +521,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 					ws.Calculate();
 					Assert.AreEqual(196.0, ws.Cells[4, 3].Value);
 				}
+				var de = CultureInfo.CreateSpecificCulture("de-DE");
+				Thread.CurrentThread.CurrentCulture = de;
+				using (var package = new ExcelPackage())
+				{
+					var ws = package.Workbook.Worksheets.Add("Sheet1");
+					ws.Cells[2, 2].Value = "15.1.2014";
+					ws.Cells[4, 3].Formula = "EDATE(B2,0)";
+					ws.Calculate();
+					Assert.AreEqual(41654.0, ws.Cells[4, 3].Value);
+				}
 			}
 			finally
 			{
