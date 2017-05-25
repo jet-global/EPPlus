@@ -48,27 +48,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
-			var OADate = -1.0;
-			if (dateObj is System.DateTime dateDateTime)
-				OADate = dateDateTime.ToOADate();
-			else if (dateObj is string dateString)
+			if (ConvertUtil.TryParseDateObjectToOADate(dateObj, out double OADate))
 			{
-				if (System.DateTime.TryParse(dateString, out System.DateTime dateFromString))
-					OADate = dateFromString.ToOADate();
-				else if (Double.TryParse(dateString, out double dateDouble))
-					OADate = dateDouble;
-				else
-					return new CompileResult(eErrorType.Value);
+				OADate = System.Math.Round(OADate, 5);
+				if (OADate < 0)
+					return new CompileResult(eErrorType.Num);
+				var date = System.DateTime.FromOADate(OADate);
+				return this.CreateResult(date.Minute, DataType.Integer);
 			}
-			else if (dateObj is int dateInt)
-				OADate = dateInt;
-			else if (dateObj is double dateDouble)
-				OADate = dateDouble;
-			OADate = System.Math.Round(OADate, 5);
-			if (OADate < 0)
-				return new CompileResult(eErrorType.Num);
-			var date = System.DateTime.FromOADate(OADate);
-			return this.CreateResult(date.Minute, DataType.Integer);
+			else
+				return new CompileResult(eErrorType.Value);
 		}
 	}
 }

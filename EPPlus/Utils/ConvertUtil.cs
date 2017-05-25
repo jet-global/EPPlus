@@ -68,6 +68,48 @@ namespace OfficeOpenXml.Utils
 			return false;
 		}
 		/// <summary>
+		/// Tries to parse the given object into the OADate version of that object. Only integers, doubles,
+		/// strings, and <see cref="DateTime"/> objects have the possibility of being successfully parsed.
+		/// </summary>
+		/// <param name="dateCandidate">The object to convert into an OADate.</param>
+		/// <param name="OADate">The resulting OADate that <paramref name="dateCandidate"/> was converted to.</param>
+		/// <returns>Return true if the given object was successfully parsed into an OADate, or false otherwise.</returns>
+		public static bool TryParseDateObjectToOADate(object dateCandidate, out double OADate)
+		{
+			OADate = -1.0;
+			if (dateCandidate is DateTime dateDateTime)
+			{
+				OADate = dateDateTime.ToOADate();
+				return true;
+			}
+			else if (dateCandidate is string dateString)
+			{
+				if (DateTime.TryParse(dateString, out DateTime dateFromString))
+				{
+					OADate = dateFromString.ToOADate();
+					return true;
+				}
+				else if (Double.TryParse(dateString, out double dateDouble))
+				{
+					OADate = dateDouble;
+					return true;
+				}
+				else
+					return false;
+			}
+			else if (dateCandidate is int dateInt)
+			{
+				OADate = dateInt;
+				return true;
+			}
+			else if (dateCandidate is double dateDouble)
+			{
+				OADate = dateDouble;
+				return true;
+			}
+			return false;
+		}
+		/// <summary>
 		/// Tries to parse the given object into a <see cref="DateTime"/>. Only integers, doubles, strings
 		/// and <see cref="DateTime"/> objects have the possibility of being successfully parsed.
 		/// </summary>
@@ -79,33 +121,22 @@ namespace OfficeOpenXml.Utils
 		{
 			error = null;
 			date = DateTime.MinValue;
-			if (dateCandidate is DateTime validDate)
+			if (dateCandidate is DateTime dateDateTime)
 			{
-				date = validDate;
+				date = dateDateTime;
 				return true;
 			}
-			if (dateCandidate is string)
-			{
-				var isValidDate = DateTime.TryParse(dateCandidate.ToString(), out date);
-				if (isValidDate)
-					return true;
-				var isValidNumber = Double.TryParse(dateCandidate.ToString(), out double dateAsNumber);
-				if (isValidNumber)
-					dateCandidate = dateAsNumber;
-			}
-			if (dateCandidate is int dateInt)
-				dateCandidate = (double)dateInt;
-			if (dateCandidate is double dateDouble)
+			if (TryParseDateObjectToOADate(dateCandidate, out double OADate))
 			{
 				// Note: This if statement is to account for an error from Lotus 1-2-3
 				// that Excel implemented which incorrectly includes 2/29/1900 as a valid date;
 				// that day does not actually exist: See link for more information.
 				// https://support.microsoft.com/en-us/help/214058/days-of-the-week-before-march-1,-1900-are-incorrect-in-excel
-				if (dateDouble < 61)
-					dateDouble++;
-				if (dateDouble >= 2)
+				if (OADate < 61)
+					OADate++;
+				if (OADate >= 2)
 				{
-					date = DateTime.FromOADate(dateDouble);
+					date = DateTime.FromOADate(OADate);
 					return true;
 				}
 				else
@@ -115,7 +146,7 @@ namespace OfficeOpenXml.Utils
 				}
 			}
 			error = eErrorType.Value;
-			return false;
+			return false;			
 		}
 		/// <summary>
 		/// Convert an object value to a double 
