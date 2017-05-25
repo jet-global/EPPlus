@@ -40,22 +40,39 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	{
 		#region Minute Function (Execute) Tests
 		[TestMethod]
-		public void MinuteShouldReturnCorrectResult()
+		public void MinuteWithTimeOnlyReturnsCorrectResult()
 		{
 			var func = new Minute();
-			var result = func.Execute(FunctionsHelper.CreateArgs(GetTime(9, 14, 14)), this.ParsingContext);
+			var args = FunctionsHelper.CreateArgs(GetTime(9, 14, 14));
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(14, result.Result);
-
-			result = func.Execute(FunctionsHelper.CreateArgs(GetTime(9, 55, 14)), this.ParsingContext);
-			Assert.AreEqual(55, result.Result);
 		}
 
 		[TestMethod]
-		public void MinuteShouldReturnCorrectResultWithStringArgument()
+		public void MinuteWithTimeOnlyAsStringReturnsCorrectResult()
 		{
 			var func = new Minute();
-			var result = func.Execute(FunctionsHelper.CreateArgs("2012-03-27 10:11:12"), this.ParsingContext);
+			var args = FunctionsHelper.CreateArgs("6:28:48");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(28, result.Result);
+		}
+
+		[TestMethod]
+		public void MinuteWithDateAndTimeAsStringAsInputReturnsCorrectResult()
+		{
+			var func = new Minute();
+			var args = FunctionsHelper.CreateArgs("2012-03-27 10:11:12");
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(11, result.Result);
+		}
+
+		[TestMethod]
+		public void MinuteWithDateAndTimeAsDifferentStringAsInputReturnsCorrectResult()
+		{
+			var func = new Minute();
+			var args = FunctionsHelper.CreateArgs("3/1/1900 8:47:32 PM");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(47, result.Result);
 		}
 
 		[TestMethod]
@@ -154,15 +171,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void MinuteWithDateAndTimeAsStringAsInputReturnsCorrectResult()
-		{
-			var func = new Minute();
-			var args = FunctionsHelper.CreateArgs("3/1/1900 8:47:32 PM");
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(47, result.Result);
-		}
-
-		[TestMethod]
 		public void MinuteWithZeroAsInputReturnsCorrectResult()
 		{
 			var func = new Minute();
@@ -208,6 +216,32 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void MinuteAsStringWithSixthDecimalPlaceProperlyRoundsUp()
+		{
+			// Note that Excel's max time value only goes out to 5 decimal places;
+			// The 6th decimal place is rounded up if greater than or equal to 5,
+			// and rounded down if less than 5.
+			// Without the 6th decimal place, 61.99999 is the date and time for 3/1/1900 23:59:59.
+			var func = new Minute();
+			var args = FunctionsHelper.CreateArgs("61.999995");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
+
+		[TestMethod]
+		public void MinuteAsStringWithSixthDecimalPlaceProperlyRoundsDown()
+		{
+			// Note that Excel's max time value only goes out to 5 decimal places;
+			// The 6th decimal place is rounded up if greater than or equal to 5,
+			// and rounded down if less than 5.
+			// Without the 6th decimal place, 61.99999 is the date and time for 3/1/1900 23:59:59.
+			var func = new Minute();
+			var args = FunctionsHelper.CreateArgs("61.999994");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(59, result.Result);
+		}
+
+		[TestMethod]
 		public void MinuteWithExcelEpochOADateReturnsCorrectResult()
 		{
 			var func = new Minute();
@@ -225,6 +259,19 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			// 0.99999 is the date and time for 1/0/1900 (the special 0-date) at 23:59:59.
 			var func = new Minute();
 			var args = FunctionsHelper.CreateArgs(0.999995);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
+
+		[TestMethod]
+		public void MinuteAsStringWithFractionAsInputProperlyRoundsUpToExcelEpochDate()
+		{
+			// Note that Excel's max time value only goes out to 5 decimal places;
+			// The 6th decimal place is rounded up if greater than or equal to 5,
+			// and rounded down if less than 5.
+			// 0.99999 is the date and time for 1/0/1900 (the special 0-date) at 23:59:59.
+			var func = new Minute();
+			var args = FunctionsHelper.CreateArgs("0.999995");
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(0, result.Result);
 		}
@@ -270,9 +317,12 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				{
 					var ws = package.Workbook.Worksheets.Add("Sheet1");
 					ws.Cells[2, 2].Value = "15.1.2014 6:28:48";
-					ws.Cells[4, 3].Formula = "MINUTE(B2,0)";
+					ws.Cells[4, 3].Formula = "MINUTE(B2)";
+					ws.Cells[3, 2].Value = "15.1.2014";
+					ws.Cells[5, 3].Formula = "MINUTE(B3)";
 					ws.Calculate();
 					Assert.AreEqual(28, ws.Cells[4, 3].Value);
+					Assert.AreEqual(0, ws.Cells[5, 3].Value);
 				}
 			}
 			finally
