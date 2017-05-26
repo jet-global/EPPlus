@@ -68,18 +68,27 @@ namespace OfficeOpenXml.Utils
 			return false;
 		}
 		/// <summary>
-		/// Tries to parse the given object into the OADate version of that object. Only integers, doubles,
+		/// Tries to parse the given object into the Excel OADate version of that object. Only integers, doubles,
 		/// strings, and <see cref="DateTime"/> objects have the possibility of being successfully parsed.
+		/// IMPORTANT: This method assumes that any ints or doubles passed into it are already Excel OADates;
+		/// Do not pass in System.DateTime OADates as ints/doubles if the OADate is less than 61, because
+		/// the result of this method will be incorrect.
 		/// </summary>
-		/// <param name="dateCandidate">The object to convert into an OADate.</param>
-		/// <param name="OADate">The resulting OADate that <paramref name="dateCandidate"/> was converted to.</param>
-		/// <returns>Return true if the given object was successfully parsed into an OADate, or false otherwise.</returns>
+		/// <param name="dateCandidate">The object to convert into an Excel OADate.</param>
+		/// <param name="OADate">The resulting Excel OADate that <paramref name="dateCandidate"/> was converted to.</param>
+		/// <returns>Return true if the given object was successfully parsed into an Excel OADate, or false otherwise.</returns>
 		public static bool TryParseDateObjectToOADate(object dateCandidate, out double OADate)
 		{
 			OADate = -1.0;
 			if (dateCandidate is DateTime dateDateTime)
 			{
 				OADate = dateDateTime.ToOADate();
+				// Note: This if statement is to account for an error from Lotus 1-2-3
+				// that Excel implemented which incorrectly includes 2/29/1900 as a valid date;
+				// that day does not actually exist: See link for more information.
+				// https://support.microsoft.com/en-us/help/214058/days-of-the-week-before-march-1,-1900-are-incorrect-in-excel
+				if (OADate < 61)
+					OADate--;
 				return true;
 			}
 			else if (dateCandidate is string dateString)
@@ -87,6 +96,12 @@ namespace OfficeOpenXml.Utils
 				if (DateTime.TryParse(dateString, out DateTime dateFromString))
 				{
 					OADate = dateFromString.ToOADate();
+					// Note: This if statement is to account for an error from Lotus 1-2-3
+					// that Excel implemented which incorrectly includes 2/29/1900 as a valid date;
+					// that day does not actually exist: See link for more information.
+					// https://support.microsoft.com/en-us/help/214058/days-of-the-week-before-march-1,-1900-are-incorrect-in-excel
+					if (OADate < 61)
+						OADate--;
 					return true;
 				}
 				else if (Double.TryParse(dateString, out double dateDouble))
