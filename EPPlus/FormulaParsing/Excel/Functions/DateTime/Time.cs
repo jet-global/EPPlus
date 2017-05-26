@@ -29,8 +29,17 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// This class contains the formula for computing the time based on the user's input. 
+	/// </summary>
 	public class Time : TimeBaseFunction
 	{
+		/// <summary>
+		/// Execute returns the time as a decimal number. 
+		/// </summary>
+		/// <param name="arguments">The user's specified hour, minute, and second.</param>
+		/// <param name="context">Not used, but needed for overriding the method. </param>
+		/// <returns>The time as a double (decimal numer).</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (ValidateArguments(arguments, 1) == false)
@@ -48,7 +57,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(result, DataType.Time);
 			}
 			
-
 			if (arguments.Count() == 3 && arguments.ElementAt(2).Value == null)
 				return new CompileResult(eErrorType.Value);
 
@@ -78,20 +86,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			{
 				//When the maximum input is used in the TIME function it performs all three modifications to the individual
 				//parameters, adds them and then performs another calculation if necessary.
-				//Dealing with the hour being over 23
+				//Dealing with the hour being over 23.
 				var newHour = hour % 24;
-				//Dealing with the minute being over 59 and adjusting the hour as such
+				//Dealing with the minute being over 59 and adjusting the hour as such.
 				var newMin = min % 60;
 				var minAsHour = min / 60;
 				minAsHour = minAsHour % 24;
 				newHour += minAsHour;
-				//Dealing with the second being over 59 and adjusting the hour and minute as such
+				//Dealing with the second being over 59 and adjusting the hour and minute as such.
 				var secAsHour = (sec / 60) / 60;
 				var secAsMin = sec / 60;
 				while(secAsMin > 59)
 					secAsMin = secAsMin % 60;
 				var newSec = sec - ((secAsHour*60*60) + (secAsMin*60));
-
+				//Final calculation to account for the fact that the hour might be over 23.
 				hour = (newHour + secAsHour) % 24;
 				min = newMin + secAsMin;
 				sec = newSec;
