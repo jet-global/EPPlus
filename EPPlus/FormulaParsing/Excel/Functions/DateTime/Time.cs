@@ -35,14 +35,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
+			if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out double resl))
+				return new CompileResult(eErrorType.Value);
 
 			var firstArg = arguments.ElementAt(0).Value.ToString();
+			if (!ConvertUtil.TryParseNumericString(firstArg, out double reslt))
+				return new CompileResult(eErrorType.Value);
+
 			if (arguments.Count() == 1 && TimeStringParser.CanParse(firstArg))
 			{
 				var result = TimeStringParser.Parse(firstArg);
 				return new CompileResult(result, DataType.Time);
 			}
-
+			
 			if (arguments.Count() == 3 && arguments.ElementAt(2).Value == null)
 				return new CompileResult(eErrorType.Value);
 
@@ -63,8 +68,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				sec = ArgToInt(arguments, 2);
 			}
 			
-			
-
 			if (hour < 0)
 				return new CompileResult(eErrorType.Num);
 			if (hour > 32767 || min > 32767 || sec > 32767)
