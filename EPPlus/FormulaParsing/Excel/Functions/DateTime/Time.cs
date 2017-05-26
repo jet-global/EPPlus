@@ -48,6 +48,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(result, DataType.Time);
 			}
 			
+
 			if (arguments.Count() == 3 && arguments.ElementAt(2).Value == null)
 				return new CompileResult(eErrorType.Value);
 
