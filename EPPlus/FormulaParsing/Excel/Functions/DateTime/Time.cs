@@ -59,6 +59,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			
 			if (arguments.Count() == 3 && arguments.ElementAt(2).Value == null)
 				return new CompileResult(eErrorType.Value);
+			if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out double resl2))
+				return new CompileResult(eErrorType.Value);
+			if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out double resl3))
+				return new CompileResult(eErrorType.Value);
 
 			var hour = 0;
 			var sec = 0;

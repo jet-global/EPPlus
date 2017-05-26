@@ -58,7 +58,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void TimeWithInvalidArgumentReturnsPoundValue()
 		{
 			var function = new Time();
-
 			var args = FunctionsHelper.CreateArgs();
 			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
@@ -88,7 +87,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void TimeWithLastTwoArgsNegativeReturnsCorrectValue()
 		{
 			var function = new Time();
-
 			var args = FunctionsHelper.CreateArgs(10, -10, -10);
 			var result = function.Execute(args, this.ParsingContext);
 			var expectedResult = this.GetTime(9, 49, 50);
@@ -121,7 +119,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void TimeWithMaxTimeInputsReturnsCorrectValue()
 		{
 			var function = new Time();
-
 			var args = FunctionsHelper.CreateArgs(32767, 32767, 32767);
 			var result = function.Execute(args, this.ParsingContext);
 			var expectedResult = this.GetTime(10, 13, 7);
@@ -162,7 +159,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void TimeWithOnePastMaxTimeInputReturnsPoundNum()
 		{
 			var function = new Time();
-
 			var args = FunctionsHelper.CreateArgs(32768, 32768, 32768);
 			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
@@ -175,25 +171,25 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var function = new Time();
 
 			var case1Args = FunctionsHelper.CreateArgs("string", 10, 10);
-			//var case2Args = FunctionsHelper.CreateArgs(10, "string", 10);
-			//var case3Args = FunctionsHelper.CreateArgs(10, 10, "string");
-			//var case4Args = FunctionsHelper.CreateArgs("", 10, 10);
-			//var case5Args = FunctionsHelper.CreateArgs(10, "", 10);
-			//var case6Args = FunctionsHelper.CreateArgs(10, 10, "");
+			var case2Args = FunctionsHelper.CreateArgs(10, "string", 10);
+			var case3Args = FunctionsHelper.CreateArgs(10, 10, "string");
+			var case4Args = FunctionsHelper.CreateArgs("", 10, 10);
+			var case5Args = FunctionsHelper.CreateArgs(10, "", 10);
+			var case6Args = FunctionsHelper.CreateArgs(10, 10, "");
 
 			var case1Result = function.Execute(case1Args, this.ParsingContext);
-			//var case2Result = function.Execute(case2Args, this.ParsingContext);
-			//var case3Result = function.Execute(case3Args, this.ParsingContext);
-			//var case4Result = function.Execute(case4Args, this.ParsingContext);
-			//var case5Result = function.Execute(case5Args, this.ParsingContext);
-			//var case6Result = function.Execute(case6Args, this.ParsingContext);
+			var case2Result = function.Execute(case2Args, this.ParsingContext);
+			var case3Result = function.Execute(case3Args, this.ParsingContext);
+			var case4Result = function.Execute(case4Args, this.ParsingContext);
+			var case5Result = function.Execute(case5Args, this.ParsingContext);
+			var case6Result = function.Execute(case6Args, this.ParsingContext);
 
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case1Result.Result).Type);
-			//Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case2Result.Result).Type);
-			//Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case3Result.Result).Type);
-			//Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case4Result.Result).Type);
-			//Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case5Result.Result).Type);
-			//Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case6Result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case2Result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case3Result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case4Result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case5Result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case6Result.Result).Type);
 		}
 
 		[TestMethod]
