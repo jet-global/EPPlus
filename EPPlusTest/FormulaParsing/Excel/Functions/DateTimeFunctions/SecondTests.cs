@@ -49,6 +49,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void SecondWithMaxTimeOnlyReturnsCorrectResult()
+		{
+			var func = new Second();
+			var args = FunctionsHelper.CreateArgs(GetTime(23, 59, 59));
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(59, result.Result);
+		}
+
+		[TestMethod]
 		public void SecondWithTimeOnlyAsStringReturnsCorrectResult()
 		{
 			var func = new Second();

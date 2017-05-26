@@ -29,17 +29,36 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// Returns the seconds of a time or date and time value. The seconds value is given as an integer
+	/// in the range of 0 to 59.
+	/// </summary>
 	public class Second : ExcelFunction
 	{
+		/// <summary>
+		/// Given a date or time represented as a string, int, double, or <see cref="System.DateTime"/> object,
+		/// return the seconds value of that time.
+		/// </summary>
+		/// <param name="arguments">The given arguments used to calculate the seconds.</param>
+		/// <param name="context">Unused in the method, but necessary to override the method.</param>
+		/// <returns>Returns the seconds of the given time, or an <see cref="ExcelErrorValue"/> if the input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
-			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
+			if (ConvertUtil.TryParseDateObjectToOADate(dateObj, out double OADate))
+			{
+				// Check the special case where the time value is close to rolling over to the next day, which requires special rounding.
+				if (OADate - System.Math.Truncate(OADate) > 0.999988425925926)
+					OADate = System.Math.Round(OADate, 5);
+				if (OADate < 0.0)
+					return new CompileResult(eErrorType.Num);
+				var date = System.DateTime.FromOADate(OADate);
 				return this.CreateResult(date.Second, DataType.Integer);
+			}
 			else
-				return this.CreateResult(error.Value, DataType.ExcelError);
+				return new CompileResult(eErrorType.Value);
 		}
 	}
 }
