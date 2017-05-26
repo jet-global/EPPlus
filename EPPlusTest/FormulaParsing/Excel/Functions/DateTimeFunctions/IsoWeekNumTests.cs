@@ -80,7 +80,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void IsoWeekNumWithDateNotAsStringReturnsCorrectValue()
 		{
 			var function = new IsoWeekNum();
-			var args = FunctionsHelper.CreateArgs(5 / 26 / 2017);
+			var args = FunctionsHelper.CreateArgs(5.0 / 26.0 / 2017.0);
 			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(52, result.Result);
 		}
@@ -89,15 +89,22 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void IsoWeekNumWithPositiveIntInputReturnsCorrectValue()
 		{
 			var function = new IsoWeekNum();
-			var args = FunctionsHelper.CreateArgs(5);
+			var args = FunctionsHelper.CreateArgs(55);
 			var result = function.Execute(args, this.ParsingContext);
-			Assert.AreEqual(1, result.Result);
+			Assert.AreEqual(8, result.Result);
 
 		}
 
 		[TestMethod]
 		public void IsoWeekNumWithNegativeIntInputReturnsPoundNum()
 		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("test");
+				ws.Cells["B1"].Formula = "ISOWEEKNUM(-10)";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+			}
 			var function = new IsoWeekNum();
 			var args = FunctionsHelper.CreateArgs(-10);
 			var result = function.Execute(args, this.ParsingContext);

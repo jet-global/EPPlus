@@ -31,7 +31,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			{
 				return this.CreateResult(this.WeekNumber(date1), DataType.Integer);
 			}
-			else if (dateCandidate.Value is int)
+			else if (dateCandidate.Value is int || dateCandidate.Value is double)
 			{
 				var dateInt = this.ArgToInt(arguments, 0);
 				if (dateInt < 0)
