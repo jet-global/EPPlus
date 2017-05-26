@@ -229,16 +229,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void TimeWithOmittedSecondParameterReturnsCorrectResult()
-		{
-			var function = new Time();
-			var args = FunctionsHelper.CreateArgs(10, null, 10);
-			var result = function.Execute(args, this.ParsingContext);
-			var expectedResult = this.GetTime(10,0,10);
-			Assert.AreEqual(expectedResult, result.Result);
-		}
-
-		[TestMethod]
 		public void TimeWithOmittedSecondAndThirdParametersReturnsCorrectResult()
 		{
 			var function = new Time();
@@ -248,14 +238,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(expectedResult, result.Result);
 		}
 
-		[TestMethod]
-		public void TimeWithOmittedFirstParameterReturnsCorrectResult()
-		{
-			var function = new Time();
-			var args = FunctionsHelper.CreateArgs(null, 10, 10);
-			var result = function.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.007060185185185, result.Result);
-		}
 
 		[TestMethod]
 		public void MaxTimeInARegularDayReturnsCorrectResult()
