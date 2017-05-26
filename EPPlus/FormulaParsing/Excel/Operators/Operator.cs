@@ -34,8 +34,12 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 {
+	/// <summary>
+	/// Provides logic for executing an operator within a formula, such as '+', '-', '=', or an ampersand.
+	/// </summary>
 	public class Operator : IOperator
 	{
+		#region Constants
 		private const int PrecedencePercent = 2;
 		private const int PrecedenceExp = 4;
 		private const int PrecedenceMultiplyDevide = 6;
@@ -44,61 +48,23 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		private const int PrecedenceAddSubtract = 12;
 		private const int PrecedenceConcat = 15;
 		private const int PrecedenceComparison = 25;
+		#endregion
 
-		private Operator() { }
+		#region Class Variables
+		private readonly int myPrecedence;
+		#endregion
 
-		private Operator(Operators @operator, int precedence, Func<CompileResult, CompileResult, CompileResult> implementation)
-		{
-			_implementation = implementation;
-			_precedence = precedence;
-			_operator = @operator;
-		}
-
-		private readonly Func<CompileResult, CompileResult, CompileResult> _implementation;
-		private readonly int _precedence;
-		private readonly Operators _operator;
-
-		int IOperator.Precedence
-		{
-			get { return _precedence; }
-		}
-
-		Operators IOperator.Operator
-		{
-			get { return _operator; }
-		}
-
-		public CompileResult Apply(CompileResult left, CompileResult right)
-		{
-			if (left.Result is ExcelErrorValue)
-			{
-				return new CompileResult(left.Result, DataType.ExcelError);
-				//throw(new ExcelErrorValueException((ExcelErrorValue)left.Result));
-			}
-			else if (right.Result is ExcelErrorValue)
-			{
-				return new CompileResult(right.Result, DataType.ExcelError);
-				//throw(new ExcelErrorValueException((ExcelErrorValue)right.Result));
-			}
-			return _implementation(left, right);
-		}
-
-		public override string ToString()
-		{
-			return "Operator: " + _operator;
-		}
-
+		#region Static Operator Implementations
 		private static IOperator _plus;
 		public static IOperator Plus
 		{
 			get
 			{
-				return _plus ?? (_plus = new Operator(Operators.Plus, PrecedenceAddSubtract, (l, r) =>
+				return _plus ?? (_plus = new Operator(OperatorType.Plus, PrecedenceAddSubtract, (l, r) =>
 				{
 					l = l == null || l.Result == null ? new CompileResult(0, DataType.Integer) : l;
 					r = r == null || r.Result == null ? new CompileResult(0, DataType.Integer) : r;
-					ExcelErrorValue errorVal;
-					if (EitherIsError(l, r, out errorVal))
+					if (EitherIsError(l, r, out ExcelErrorValue errorVal))
 					{
 						return new CompileResult(errorVal);
 					}
@@ -121,7 +87,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				return _minus ?? (_minus = new Operator(Operators.Minus, PrecedenceAddSubtract, (l, r) =>
+				return _minus ?? (_minus = new Operator(OperatorType.Minus, PrecedenceAddSubtract, (l, r) =>
 				{
 					l = l == null || l.Result == null ? new CompileResult(0, DataType.Integer) : l;
 					r = r == null || r.Result == null ? new CompileResult(0, DataType.Integer) : r;
@@ -145,7 +111,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				return _multiply ?? (_multiply = new Operator(Operators.Multiply, PrecedenceMultiplyDevide, (l, r) =>
+				return _multiply ?? (_multiply = new Operator(OperatorType.Multiply, PrecedenceMultiplyDevide, (l, r) =>
 				{
 					l = l ?? new CompileResult(0, DataType.Integer);
 					r = r ?? new CompileResult(0, DataType.Integer);
@@ -168,7 +134,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				return _divide ?? (_divide = new Operator(Operators.Divide, PrecedenceMultiplyDevide, (l, r) =>
+				return _divide ?? (_divide = new Operator(OperatorType.Divide, PrecedenceMultiplyDevide, (l, r) =>
 				{
 					if (!(l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) ||
 							  !(r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
@@ -191,40 +157,42 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			}
 		}
 
+		private static IOperator _exp;
 		public static IOperator Exp
 		{
 			get
 			{
-				return new Operator(Operators.Exponentiation, PrecedenceExp, (l, r) =>
-					 {
-						 if (l == null && r == null)
-						 {
-							 return new CompileResult(eErrorType.Value);
-						 }
-						 l = l ?? new CompileResult(0, DataType.Integer);
-						 r = r ?? new CompileResult(0, DataType.Integer);
-						 if ((l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) &&
-						  (r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
-						 {
-							 return new CompileResult(Math.Pow(l.ResultNumeric, r.ResultNumeric), DataType.Decimal);
-						 }
-						 return new CompileResult(0d, DataType.Decimal);
-					 });
+				return _exp ?? (_exp = new Operator(OperatorType.Exponentiation, PrecedenceExp, (l, r) =>
+				{
+					if (l == null && r == null)
+					{
+						return new CompileResult(eErrorType.Value);
+					}
+					l = l ?? new CompileResult(0, DataType.Integer);
+					r = r ?? new CompileResult(0, DataType.Integer);
+					if ((l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) &&
+					 (r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
+					{
+						return new CompileResult(Math.Pow(l.ResultNumeric, r.ResultNumeric), DataType.Decimal);
+					}
+					return new CompileResult(0d, DataType.Decimal);
+				}));
 			}
 		}
 
+		private static IOperator _concat;
 		public static IOperator Concat
 		{
 			get
 			{
-				return new Operator(Operators.Concat, PrecedenceConcat, (l, r) =>
-					 {
-						 l = l ?? new CompileResult(string.Empty, DataType.String);
-						 r = r ?? new CompileResult(string.Empty, DataType.String);
-						 var lStr = Convert.ToString(l.ResultValue);
-						 var rStr = Convert.ToString(r.ResultValue);
-						 return new CompileResult(string.Concat(lStr, rStr), DataType.String);
-					 });
+				return _concat ?? (_concat = new Operator(OperatorType.Concat, PrecedenceConcat, (l, r) =>
+				{
+					l = l ?? new CompileResult(string.Empty, DataType.String);
+					r = r ?? new CompileResult(string.Empty, DataType.String);
+					var lStr = Convert.ToString(l.ResultValue);
+					var rStr = Convert.ToString(r.ResultValue);
+					return new CompileResult(string.Concat(lStr, rStr), DataType.String);
+				}));
 			}
 		}
 
@@ -235,7 +203,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				return _greaterThan ??
 						 (_greaterThan =
-							  new Operator(Operators.GreaterThan, PrecedenceComparison,
+							  new Operator(OperatorType.GreaterThan, PrecedenceComparison,
 									(l, r) => Compare(l, r, (compRes) => compRes > 0)));
 			}
 		}
@@ -247,7 +215,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				return _eq ??
 						 (_eq =
-							  new Operator(Operators.Equals, PrecedenceComparison,
+							  new Operator(OperatorType.Equals, PrecedenceComparison,
 									(l, r) => Compare(l, r, (compRes) => compRes == 0)));
 			}
 		}
@@ -259,7 +227,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				return _notEqualsTo ??
 						 (_notEqualsTo =
-							  new Operator(Operators.NotEqualTo, PrecedenceComparison,
+							  new Operator(OperatorType.NotEqualTo, PrecedenceComparison,
 									(l, r) => Compare(l, r, (compRes) => compRes != 0)));
 			}
 		}
@@ -271,7 +239,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				return _greaterThanOrEqual ??
 						 (_greaterThanOrEqual =
-							  new Operator(Operators.GreaterThanOrEqual, PrecedenceComparison,
+							  new Operator(OperatorType.GreaterThanOrEqual, PrecedenceComparison,
 									(l, r) => Compare(l, r, (compRes) => compRes >= 0)));
 			}
 		}
@@ -283,17 +251,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				return _lessThan ??
 						 (_lessThan =
-							  new Operator(Operators.LessThan, PrecedenceComparison,
+							  new Operator(OperatorType.LessThan, PrecedenceComparison,
 									(l, r) => Compare(l, r, (compRes) => compRes < 0)));
 			}
 		}
 
+		private static IOperator _lessThanOrEqual;
 		public static IOperator LessThanOrEqual
 		{
 			get
 			{
-				//return new Operator(Operators.LessThanOrEqual, PrecedenceComparison, (l, r) => new CompileResult(Compare(l, r) <= 0, DataType.Boolean));
-				return new Operator(Operators.LessThanOrEqual, PrecedenceComparison, (l, r) => Compare(l, r, (compRes) => compRes <= 0));
+				return _lessThanOrEqual ?? (_lessThanOrEqual = new Operator(OperatorType.LessThanOrEqual, PrecedenceComparison, (l, r) => Compare(l, r, (compRes) => compRes <= 0)));
 			}
 		}
 
@@ -304,51 +272,110 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				if (_percent == null)
 				{
-					_percent = new Operator(Operators.Percent, PrecedencePercent, (l, r) =>
-						 {
-							 l = l ?? new CompileResult(0, DataType.Integer);
-							 r = r ?? new CompileResult(0, DataType.Integer);
-							 if (l.DataType == DataType.Integer && r.DataType == DataType.Integer)
-							 {
-								 return new CompileResult(l.ResultNumeric * r.ResultNumeric, DataType.Integer);
-							 }
-							 else if ((l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) &&
-							  (r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
-							 {
-								 return new CompileResult(l.ResultNumeric * r.ResultNumeric, DataType.Decimal);
-							 }
-							 return new CompileResult(eErrorType.Value);
-						 });
+					_percent = new Operator(OperatorType.Percent, PrecedencePercent, (l, r) =>
+					{
+						l = l ?? new CompileResult(0, DataType.Integer);
+						r = r ?? new CompileResult(0, DataType.Integer);
+						if (l.DataType == DataType.Integer && r.DataType == DataType.Integer)
+						{
+							return new CompileResult(l.ResultNumeric * r.ResultNumeric, DataType.Integer);
+						}
+						else if ((l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) &&
+						 (r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
+						{
+							return new CompileResult(l.ResultNumeric * r.ResultNumeric, DataType.Decimal);
+						}
+						return new CompileResult(eErrorType.Value);
+					});
 				}
 				return _percent;
 			}
 		}
+		#endregion
 
-		private static object GetObjFromOther(CompileResult obj, CompileResult other)
+		#region Properties
+		int IOperator.Precedence
 		{
-			if (obj.Result == null)
+			get { return this.myPrecedence; }
+		}
+
+		OperatorType IOperator.Operator
+		{
+			get { return this.OperatorType; }
+		}
+
+		private Func<CompileResult, CompileResult, CompileResult> Implementation { get; }
+
+		private OperatorType OperatorType { get; }
+		#endregion
+
+		#region Constructors
+		private Operator() { }
+
+		private Operator(OperatorType @operator, int precedence, Func<CompileResult, CompileResult, CompileResult> implementation)
+		{
+			this.Implementation = implementation;
+			this.myPrecedence = precedence;
+			this.OperatorType = @operator;
+		}
+		#endregion
+
+
+		#region Public Methods
+		/// <summary>
+		/// Applies the specified <see cref="IOperator"/> given the specified <paramref name="left"/> and <paramref name="right"/> arguments.
+		/// </summary>
+		/// <param name="left">The left argument to the operator.</param>
+		/// <param name="right">The right argument to the operator.</param>
+		/// <returns>The result of performing the specified operation on the operands.</returns>
+		public CompileResult Apply(CompileResult left, CompileResult right)
+		{
+			if (left.Result is ExcelErrorValue)
+			{
+				return new CompileResult(left.Result, DataType.ExcelError);
+			}
+			else if (right.Result is ExcelErrorValue)
+			{
+				return new CompileResult(right.Result, DataType.ExcelError);
+			}
+			return this.Implementation(left, right);
+		}
+
+		/// <summary>
+		/// Gets a string that contains the operator type.
+		/// </summary>
+		/// <returns>Gets a string that describes the <see cref="Operator.OperatorType"/>.</returns>
+		public override string ToString()
+		{
+			return "Operator: " + this.OperatorType;
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static object GetObjectWithDefaultValueThatMatchesTheOtherObjectType(CompileResult target, CompileResult other)
+		{
+			if (target.Result == null)
 			{
 				if (other.DataType == DataType.String) return string.Empty;
 				else return 0d;
 			}
-			return obj.ResultValue;
+			return target.ResultValue;
 		}
 
-		private static CompileResult Compare(CompileResult l, CompileResult r, Func<int, bool> comparison)
+		private static CompileResult Compare(CompileResult left, CompileResult right, Func<int, bool> comparison)
 		{
-			ExcelErrorValue errorVal;
-			if (EitherIsError(l, r, out errorVal))
+			if (Operator.EitherIsError(left, right, out ExcelErrorValue errorValue))
 			{
-				return new CompileResult(errorVal);
+				return new CompileResult(errorValue);
 			}
-			return new CompileResult(comparison(Compare(l, r)), DataType.Boolean);
+			return new CompileResult(comparison(Operator.Compare(left, right)), DataType.Boolean);
 		}
 
 		private static int Compare(CompileResult leftInput, CompileResult rightInput)
 		{
 			object left, right;
-			left = GetObjFromOther(leftInput, rightInput);
-			right = GetObjFromOther(rightInput, leftInput);
+			left = Operator.GetObjectWithDefaultValueThatMatchesTheOtherObjectType(leftInput, rightInput);
+			right = Operator.GetObjectWithDefaultValueThatMatchesTheOtherObjectType(rightInput, leftInput);
 			var leftIsNumeric = ConvertUtil.IsNumeric(left) && !(left is bool);
 			var rightIsNumeric = ConvertUtil.IsNumeric(right) && !(right is bool);
 
@@ -356,15 +383,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				var leftNumber = ConvertUtil.GetValueDouble(left);
 				var rightNumber = ConvertUtil.GetValueDouble(right);
-				if (Math.Abs(leftNumber - rightNumber) < double.Epsilon)
+				if (leftNumber.Equals(rightNumber))
 				{
 					return 0;
 				}
 				return leftNumber.CompareTo(rightNumber);
 			}
 			// Numbers are less than text are less than logical values: https://stackoverflow.com/questions/35050151/excel-if-statement-comparing-text-with-number
-			// I can't find an MSDN source for this, but I've been testing it functionally and I can't find a counterexample.
-			// If you find an MSDN source for this, please add a link here. 
 			else if (leftIsNumeric)
 				return -1;
 			else if (rightIsNumeric)
@@ -384,7 +409,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			}
 			else if (leftInput.DataType == DataType.String && rightInput.DataType == DataType.String)
 			{
-				var comparisonResult = CompareString(left, right);
+				var comparisonResult = Operator.CompareString(left, right);
 				return comparisonResult;
 			}
 			throw new InvalidOperationException($"Comparing operands of the given types {leftInput.DataType.ToString()} and {rightInput.DataType.ToString()} is not supported.");
@@ -394,7 +419,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			var sl = (l ?? "").ToString();
 			var sr = (r ?? "").ToString();
-			return System.String.Compare(sl, sr, System.StringComparison.OrdinalIgnoreCase);
+			return string.Compare(sl, sr, System.StringComparison.OrdinalIgnoreCase);
 		}
 
 		private static bool EitherIsError(CompileResult l, CompileResult r, out ExcelErrorValue errorVal)
@@ -412,5 +437,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			errorVal = null;
 			return false;
 		}
+		#endregion
 	}
 }

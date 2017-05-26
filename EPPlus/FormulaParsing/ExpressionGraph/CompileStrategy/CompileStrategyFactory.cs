@@ -36,7 +36,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.CompileStrategy
 	{
 		public CompileStrategy Create(Expression expression)
 		{
-			if (expression.Operator.Operator == Operators.Concat)
+			if (expression.Operator.Operator == OperatorType.Concat)
 			{
 				return new StringConcatStrategy(expression);
 			}
