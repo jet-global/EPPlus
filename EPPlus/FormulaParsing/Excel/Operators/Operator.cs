@@ -55,12 +55,30 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		#endregion
 
 		#region Static Operator Implementations
-		private static IOperator _plus;
+		#region Backing Properties for lazy loading
+		private static IOperator myPlus;
+		private static IOperator myMinus;
+		private static IOperator myMultiply;
+		private static IOperator myDivide;
+		private static IOperator myExp;
+		private static IOperator myConcat;
+		private static IOperator myGreaterThan;
+		private static IOperator myEqualsTo;
+		private static IOperator myNotEqualsTo;
+		private static IOperator myGreaterThanOrEqual;
+		private static IOperator myLessThan;
+		private static IOperator myLessThanOrEqual;
+		private static IOperator myPercent;
+		#endregion
+
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Plus operation.
+		/// </summary>
 		public static IOperator Plus
 		{
 			get
 			{
-				return _plus ?? (_plus = new Operator(OperatorType.Plus, PrecedenceAddSubtract, (l, r) =>
+				return myPlus ?? (myPlus = new Operator(OperatorType.Plus, PrecedenceAddSubtract, (l, r) =>
 				{
 					l = l == null || l.Result == null ? new CompileResult(0, DataType.Integer) : l;
 					r = r == null || r.Result == null ? new CompileResult(0, DataType.Integer) : r;
@@ -82,12 +100,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			}
 		}
 
-		private static IOperator _minus;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Minus operation.
+		/// </summary>
 		public static IOperator Minus
 		{
 			get
 			{
-				return _minus ?? (_minus = new Operator(OperatorType.Minus, PrecedenceAddSubtract, (l, r) =>
+				return myMinus ?? (myMinus = new Operator(OperatorType.Minus, PrecedenceAddSubtract, (l, r) =>
 				{
 					l = l == null || l.Result == null ? new CompileResult(0, DataType.Integer) : l;
 					r = r == null || r.Result == null ? new CompileResult(0, DataType.Integer) : r;
@@ -106,12 +126,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			}
 		}
 
-		private static IOperator _multiply;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Multiply operation.
+		/// </summary>
 		public static IOperator Multiply
 		{
 			get
 			{
-				return _multiply ?? (_multiply = new Operator(OperatorType.Multiply, PrecedenceMultiplyDevide, (l, r) =>
+				return myMultiply ?? (myMultiply = new Operator(OperatorType.Multiply, PrecedenceMultiplyDevide, (l, r) =>
 				{
 					l = l ?? new CompileResult(0, DataType.Integer);
 					r = r ?? new CompileResult(0, DataType.Integer);
@@ -129,12 +151,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			}
 		}
 
-		private static IOperator _divide;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Divide operation.
+		/// </summary>
 		public static IOperator Divide
 		{
 			get
 			{
-				return _divide ?? (_divide = new Operator(OperatorType.Divide, PrecedenceMultiplyDevide, (l, r) =>
+				return myDivide ?? (myDivide = new Operator(OperatorType.Divide, PrecedenceMultiplyDevide, (l, r) =>
 				{
 					if (!(l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) ||
 							  !(r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
@@ -157,12 +181,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			}
 		}
 
-		private static IOperator _exp;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Exponentiation operation.
+		/// </summary>
 		public static IOperator Exp
 		{
 			get
 			{
-				return _exp ?? (_exp = new Operator(OperatorType.Exponentiation, PrecedenceExp, (l, r) =>
+				return myExp ?? (myExp = new Operator(OperatorType.Exponentiation, PrecedenceExp, (l, r) =>
 				{
 					if (l == null && r == null)
 					{
@@ -180,12 +206,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			}
 		}
 
-		private static IOperator _concat;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Concatenate operation.
+		/// </summary>
 		public static IOperator Concat
 		{
 			get
 			{
-				return _concat ?? (_concat = new Operator(OperatorType.Concat, PrecedenceConcat, (l, r) =>
+				return myConcat ?? (myConcat = new Operator(OperatorType.Concat, PrecedenceConcat, (l, r) =>
 				{
 					l = l ?? new CompileResult(string.Empty, DataType.String);
 					r = r ?? new CompileResult(string.Empty, DataType.String);
@@ -196,83 +224,95 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			}
 		}
 
-		private static IOperator _greaterThan;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Greater-than operation.
+		/// </summary>
 		public static IOperator GreaterThan
 		{
 			get
 			{
-				return _greaterThan ??
-						 (_greaterThan =
+				return myGreaterThan ??
+						 (myGreaterThan =
 							  new Operator(OperatorType.GreaterThan, PrecedenceComparison,
 									(l, r) => Compare(l, r, (compRes) => compRes > 0)));
 			}
 		}
 
-		private static IOperator _eq;
-		public static IOperator EqualsOperator
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Equals operation.
+		/// </summary>
+		public static IOperator EqualsTo
 		{
 			get
 			{
-				return _eq ??
-						 (_eq =
+				return myEqualsTo ??
+						 (myEqualsTo =
 							  new Operator(OperatorType.Equals, PrecedenceComparison,
 									(l, r) => Compare(l, r, (compRes) => compRes == 0)));
 			}
 		}
 
-		private static IOperator _notEqualsTo;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Not-equals operation.
+		/// </summary>
 		public static IOperator NotEqualsTo
 		{
 			get
 			{
-				return _notEqualsTo ??
-						 (_notEqualsTo =
+				return myNotEqualsTo ??
+						 (myNotEqualsTo =
 							  new Operator(OperatorType.NotEqualTo, PrecedenceComparison,
 									(l, r) => Compare(l, r, (compRes) => compRes != 0)));
 			}
 		}
 
-		private static IOperator _greaterThanOrEqual;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Greater-than-or-equal-to operation.
+		/// </summary>
 		public static IOperator GreaterThanOrEqual
 		{
 			get
 			{
-				return _greaterThanOrEqual ??
-						 (_greaterThanOrEqual =
+				return myGreaterThanOrEqual ??
+						 (myGreaterThanOrEqual =
 							  new Operator(OperatorType.GreaterThanOrEqual, PrecedenceComparison,
 									(l, r) => Compare(l, r, (compRes) => compRes >= 0)));
 			}
 		}
 
-		private static IOperator _lessThan;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Less-than operation.
+		/// </summary>
 		public static IOperator LessThan
 		{
 			get
 			{
-				return _lessThan ??
-						 (_lessThan =
+				return myLessThan ??
+						 (myLessThan =
 							  new Operator(OperatorType.LessThan, PrecedenceComparison,
 									(l, r) => Compare(l, r, (compRes) => compRes < 0)));
 			}
 		}
 
-		private static IOperator _lessThanOrEqual;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Less-than-or-equal-to operation.
+		/// </summary>
 		public static IOperator LessThanOrEqual
 		{
 			get
 			{
-				return _lessThanOrEqual ?? (_lessThanOrEqual = new Operator(OperatorType.LessThanOrEqual, PrecedenceComparison, (l, r) => Compare(l, r, (compRes) => compRes <= 0)));
+				return myLessThanOrEqual ?? (myLessThanOrEqual = new Operator(OperatorType.LessThanOrEqual, PrecedenceComparison, (l, r) => Compare(l, r, (compRes) => compRes <= 0)));
 			}
 		}
 
-		private static IOperator _percent;
+		/// <summary>
+		/// Gets an <see cref="IOperator"/> that can perform the Percent operation.
+		/// </summary>
 		public static IOperator Percent
 		{
 			get
 			{
-				if (_percent == null)
-				{
-					_percent = new Operator(OperatorType.Percent, PrecedencePercent, (l, r) =>
+				return myPercent ?? (myPercent = new Operator(OperatorType.Percent, PrecedencePercent, (l, r) =>
 					{
 						l = l ?? new CompileResult(0, DataType.Integer);
 						r = r ?? new CompileResult(0, DataType.Integer);
@@ -286,9 +326,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 							return new CompileResult(l.ResultNumeric * r.ResultNumeric, DataType.Decimal);
 						}
 						return new CompileResult(eErrorType.Value);
-					});
-				}
-				return _percent;
+					}));
 			}
 		}
 		#endregion
@@ -319,7 +357,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			this.OperatorType = @operator;
 		}
 		#endregion
-
 
 		#region Public Methods
 		/// <summary>
@@ -400,12 +437,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 				return 1;
 			else if (leftInput.DataType == DataType.Boolean && rightInput.DataType == DataType.Boolean)
 			{
-					if (left.Equals(right))
-						return 0;
-					else if (left.Equals(true))
-						return 1;
-					else
-						return -1;
+				if (left.Equals(right))
+					return 0;
+				else if (left.Equals(true))
+					return 1;
+				else
+					return -1;
 			}
 			else if (leftInput.DataType == DataType.String && rightInput.DataType == DataType.String)
 			{

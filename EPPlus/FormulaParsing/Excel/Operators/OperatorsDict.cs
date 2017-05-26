@@ -41,7 +41,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			Add("*", Operator.Multiply);
 			Add("/", Operator.Divide);
 			Add("^", Operator.Exp);
-			Add("=", Operator.EqualsOperator);
+			Add("=", Operator.EqualsTo);
 			Add(">", Operator.GreaterThan);
 			Add(">=", Operator.GreaterThanOrEqual);
 			Add("<", Operator.LessThan);
