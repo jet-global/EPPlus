@@ -43,7 +43,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void SecondWithTimeOnlyReturnsCorrectResult()
 		{
 			var func = new Second();
-			var args = FunctionsHelper.CreateArgs(GetTime(9, 14, 14));
+			var args = FunctionsHelper.CreateArgs(this.GetTime(9, 14, 14));
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(14, result.Result);
 		}
@@ -52,7 +52,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void SecondWithMaxTimeOnlyReturnsCorrectResult()
 		{
 			var func = new Second();
-			var args = FunctionsHelper.CreateArgs(GetTime(23, 59, 59));
+			var args = FunctionsHelper.CreateArgs(this.GetTime(23, 59, 59));
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(59, result.Result);
 		}
@@ -70,7 +70,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void SecondWithDateAndTimeAsStringAsInputReturnsCorrectResult()
 		{
 			var func = new Second();
-			var args = FunctionsHelper.CreateArgs("2012-03-27 10:11:12");
+			var args = FunctionsHelper.CreateArgs("2013-03-27 10:11:12");
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(12, result.Result);
 		}
