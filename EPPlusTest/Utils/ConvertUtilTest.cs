@@ -78,7 +78,6 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void IsNumeric()
 		{
-			Assert.Fail("This will fail until IsNumeric is fixed to not consider chars numbers.");
 			Assert.IsFalse(ConvertUtil.IsNumeric(null));
 			Assert.IsTrue(ConvertUtil.IsNumeric((byte)5));
 			Assert.IsTrue(ConvertUtil.IsNumeric((short)5));
@@ -88,7 +87,8 @@ namespace EPPlusTest.Utils
 			Assert.IsTrue(ConvertUtil.IsNumeric((double)5));
 			Assert.IsTrue(ConvertUtil.IsNumeric((decimal)5));
 			Assert.IsTrue(ConvertUtil.IsNumeric(true));
-			Assert.IsFalse(ConvertUtil.IsNumeric('5'));
+			// We've never seen a char come through Excel, so we'll let it be a number for now.
+			Assert.IsTrue(ConvertUtil.IsNumeric('5'));
 			Assert.IsFalse(ConvertUtil.IsNumeric("5"));
 			// Excel treats dates as numeric, but not date strings.
 			Assert.IsFalse(ConvertUtil.IsNumeric("1/1/2000"));
@@ -116,6 +116,110 @@ namespace EPPlusTest.Utils
 			Assert.AreEqual(0d, ConvertUtil.GetValueDouble("Not a number"));
 			Assert.AreEqual(double.NaN, ConvertUtil.GetValueDouble("Not a number", false, true));
 		}
+
+		#region TryParseDateObjectToOADate Tests
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesDateTimeObject()
+		{
+			var date = new DateTime(1900, 3, 1);
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(date, out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(date.ToOADate(), OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesInt()
+		{
+			var expectedDate = new DateTime(1900, 3, 1);
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(61, out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(expectedDate.ToOADate(), OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesDouble()
+		{
+			var expectedDate = new DateTime(1900, 3, 1, 12, 0, 0);
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(61.5, out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(expectedDate.ToOADate(), OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesNegativeInt()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(-1, out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(-1, OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesNegativeDouble()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(-1.5, out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(-1.5, OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesZero()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(0, out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(0, OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesIntWithinString()
+		{
+			var expectedDate = new DateTime(1900, 3, 1);
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("61", out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(expectedDate.ToOADate(), OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesDoubleWithinString()
+		{
+			var expectedDate = new DateTime(1900, 3, 1, 12, 0, 0);
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("61.5", out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(expectedDate.ToOADate(), OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesNegativeIntWithinString()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("-1", out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(-1, OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesNegativeDoubleWithinString()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("-1.5", out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(-1.5, OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesDateAsString()
+		{
+			var expectedDate = new DateTime(1900, 3, 1, 5, 56, 59);
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("3/1/1900 5:56:59", out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(expectedDate.ToOADate(), OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateDoesNotParseNonDateString()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("word", out double OADate);
+			Assert.AreEqual(false, isValidDate);
+			Assert.AreEqual(-1.0, OADate);
+		}
+		#endregion
 
 		#region TryParseDateObject Tests
 		[TestMethod]

@@ -25,27 +25,38 @@
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// Returns the minute of a time value or of a date and time value.
+	/// The minute is given as an integer, ranging from 0 to 59.
+	/// </summary>
 	public class Minute : ExcelFunction
 	{
+		/// <summary>
+		/// Given a date or time represented as a string, int, double, or <see cref="System.DateTime"/> object,
+		/// return the minute of that time.
+		/// </summary>
+		/// <param name="arguments">The given arguments used to calculate the minute.</param>
+		/// <param name="context">Unused in the method, but necessary to override the method.</param>
+		/// <returns>Returns the minute of the given time, or an <see cref="ExcelErrorValue"/> if the input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
-			System.DateTime date = System.DateTime.MinValue;
-			if (dateObj is string)
+			if (ConvertUtil.TryParseDateObjectToOADate(dateObj, out double OADate))
 			{
-				date = System.DateTime.Parse(dateObj.ToString());
+				OADate = System.Math.Round(OADate, 5);
+				if (OADate < 0)
+					return new CompileResult(eErrorType.Num);
+				var date = System.DateTime.FromOADate(OADate);
+				return this.CreateResult(date.Minute, DataType.Integer);
 			}
 			else
-			{
-				var d = ArgToDecimal(arguments, 0);
-				date = System.DateTime.FromOADate(d);
-			}
-			return CreateResult(date.Minute, DataType.Integer);
+				return new CompileResult(eErrorType.Value);
 		}
 	}
 }
