@@ -344,7 +344,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			return new CompileResult(comparison(Compare(l, r)), DataType.Boolean);
 		}
 
-		public static int Compare(CompileResult leftInput, CompileResult rightInput)
+		private static int Compare(CompileResult leftInput, CompileResult rightInput)
 		{
 			object left, right;
 			left = GetObjFromOther(leftInput, rightInput);
@@ -375,9 +375,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 				return 1;
 			else if (leftInput.DataType == DataType.Boolean && rightInput.DataType == DataType.Boolean)
 			{
-					if (left == right)
+					if (left.Equals(right))
 						return 0;
-					else if ((bool)left == true)
+					else if (left.Equals(true))
 						return 1;
 					else
 						return -1;
