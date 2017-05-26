@@ -34,7 +34,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 {
 	public interface IOperator
 	{
-		Operators Operator { get; }
+		OperatorType Operator { get; }
 
 		CompileResult Apply(CompileResult left, CompileResult right);
 

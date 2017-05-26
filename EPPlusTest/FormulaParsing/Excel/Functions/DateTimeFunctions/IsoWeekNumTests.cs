@@ -25,6 +25,8 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Globalization;
+using System.Threading;
 using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -38,24 +40,154 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	{
 		#region IsoWeekNum Function (Execute) Tests
 		[TestMethod]
-		public void IsoWeekShouldReturn1When1StJan()
+		public void IsoWeekWithOADateInputReturnsCorrectValue()
 		{
-			var func = new IsoWeekNum();
-			var arg = new DateTime(2013, 1, 1).ToOADate();
-
-			var result = func.Execute(FunctionsHelper.CreateArgs(arg), this.ParsingContext);
-
+			var function = new IsoWeekNum();
+			var args = new DateTime(2013, 1, 1).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(args), this.ParsingContext);
 			Assert.AreEqual(1, result.Result);
 		}
 
 		[TestMethod]
 		public void IsoWeekNumWithInvalidArgumentReturnsPoundValue()
 		{
-			var func = new IsoWeekNum();
-
+			var function = new IsoWeekNum();
 			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
+			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithDateFunctionInputReturnsCorrectValue()
+		{
+			var function = new IsoWeekNum();
+			var date = new DateTime(2017, 5, 26);
+			var args = FunctionsHelper.CreateArgs(date);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(21, result.Result);
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithDateAsStringReturnsCorrectValue()
+		{
+			var function = new IsoWeekNum();
+			var args = FunctionsHelper.CreateArgs("5/26/2017");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(21, result.Result);
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithDateNotAsStringReturnsCorrectValue()
+		{
+			var function = new IsoWeekNum();
+			var args = FunctionsHelper.CreateArgs(5.0 / 26.0 / 2017.0);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(52, result.Result);
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithPositiveIntInputReturnsCorrectValue()
+		{
+			var function = new IsoWeekNum();
+			var args = FunctionsHelper.CreateArgs(55);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(8, result.Result);
+
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithNegativeIntInputReturnsPoundNum()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("test");
+				ws.Cells["B1"].Formula = "ISOWEEKNUM(-10)";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+			}
+			var function = new IsoWeekNum();
+			var args = FunctionsHelper.CreateArgs(-10);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithGeneralStringInputReturnsPoundValue()
+		{
+			var function = new IsoWeekNum();
+			var args = FunctionsHelper.CreateArgs("string");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithEmptyStringInputReturnsPoundValue()
+		{
+			var function = new IsoWeekNum();
+			var args = FunctionsHelper.CreateArgs("");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithZeroInputReturnsCorrectValue()
+		{
+			var function = new IsoWeekNum();
+			var args = FunctionsHelper.CreateArgs(0);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(52, result.Result);
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithDotsInsteadOfSlashesReturnsCorrectValue()
+		{
+			//This functionality is different than that of Excel's. Excel reutrns a #VALUE! when the date is enterd this
+			//way, however many European cultures write their dates with periods instead of slashes so EPPlus supports 
+			//dates in this format. 
+			var function = new IsoWeekNum();
+			var args = FunctionsHelper.CreateArgs("5.26.2017");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(21, result.Result);
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithDashesInsteadOfSlashesReturnsCorrectValue()
+		{
+			var function = new IsoWeekNum();
+			var args = FunctionsHelper.CreateArgs("5-26-2017");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(21, result.Result);
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithGermanDateAsStringWithPeriodReturnsCorrectResult()
+		{
+			//Test case for dates written in the form used by most European cultures.
+			var currentCulture = Thread.CurrentThread.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("de-DE");
+				var function = new IsoWeekNum();
+				var args = FunctionsHelper.CreateArgs("26.5.2017");
+				var result = function.Execute(args, this.ParsingContext);
+				Assert.AreEqual(21, result.Result);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
+		[TestMethod]
+		public void IsoWeekNumWithTooManyArgsReturnsPoundNA()
+		{
+			//This functionality is different than that of Excel's. Excel does not let you compute the formula if you have
+			//too many arguments, however EPPlus lets you put more than one argument in. Now it returns a #NA! to indicate 
+			//the user has put in too many arugments. 
+			var function = new IsoWeekNum();
+			var args = FunctionsHelper.CreateArgs("5-26-2017", "5-26-2017");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
 	}
