@@ -30,17 +30,33 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// 
+	/// </summary>
 	public class Hour : ExcelFunction
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="arguments"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
-			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
-				return CreateResult(date.Hour, DataType.Integer);
+			if (ConvertUtil.TryParseDateObjectToOADate(dateObj, out double OADate))
+			{
+				if (OADate - System.Math.Truncate(OADate) > 0.999988425925926)
+					OADate = System.Math.Round(OADate, 5);
+				if (OADate < 0)
+					return new CompileResult(eErrorType.Num);
+				var date = System.DateTime.FromOADate(OADate);
+				return this.CreateResult(date.Hour, DataType.Integer);
+			}
 			else
-				return CreateResult(error.Value, DataType.ExcelError);
+				return new CompileResult(eErrorType.Value);
 		}
 
 	}
