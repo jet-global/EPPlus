@@ -31,7 +31,7 @@
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 {
-	public enum Operators
+	public enum OperatorType
 	{
 		Undefined,
 		Concat,

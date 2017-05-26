@@ -112,11 +112,11 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 					var right = expression.Replace(operatorCandidate, string.Empty);
 					if (left == null && right == string.Empty)
 					{
-						return op.Operator == Operators.Equals;
+						return op.Operator == OperatorType.Equals;
 					}
 					if (left == null ^ right == string.Empty)
 					{
-						return op.Operator == Operators.NotEqualTo;
+						return op.Operator == OperatorType.NotEqualTo;
 					}
 					double leftNum, rightNum;
 					DateTime date;
@@ -133,7 +133,7 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 					}
 					if (leftIsNumeric != rightIsNumeric)
 					{
-						return op.Operator == Operators.NotEqualTo;
+						return op.Operator == OperatorType.NotEqualTo;
 					}
 					return EvaluateOperator(left, right, op);
 				}
