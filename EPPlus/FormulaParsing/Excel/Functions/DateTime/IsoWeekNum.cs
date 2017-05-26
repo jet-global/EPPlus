@@ -1,25 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// This class contains the formula for computing the week number based on the ISO calendar given a date. 
+	/// </summary>
 	public class IsoWeekNum : ExcelFunction
 	{
+		#region ExcelFunctionOverrides 
+		/// <summary>
+		/// Execute returns the week number based on the ISO calendar based on the user's input.
+		/// </summary>
+		/// <param name="arguments">The user specified date</param>
+		/// <param name="context">Not used, but needed to overload the method. The context in which the function is being executed.</param>
+		/// <returns>The week number based on the given date.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var dateInt = ArgToInt(arguments, 0);
-			var date = System.DateTime.FromOADate(dateInt);
-			return CreateResult(WeekNumber(date), DataType.Integer);
-		}
+			if (arguments.Count() > 1)
+				return new CompileResult(eErrorType.NA);
 
+			var dateCandidate = arguments.ElementAt(0);
+			if (ConvertUtil.TryParseDateObject(dateCandidate.Value, out System.DateTime date1, out eErrorType? error))
+			{
+				return this.CreateResult(this.WeekNumber(date1), DataType.Integer);
+			}
+			else if (dateCandidate.Value is int)
+			{
+				var dateInt = this.ArgToInt(arguments, 0);
+				if (dateInt < 0)
+					return new CompileResult(eErrorType.Num);
+				var date = System.DateTime.FromOADate(dateInt);
+				return this.CreateResult(WeekNumber(date), DataType.Integer);
+			}
+			else
+				return new CompileResult(eErrorType.Value);
+		}
+		#endregion
+		#region Private Methods
 		/// <summary>
 		/// This implementation was found on http://stackoverflow.com/questions/1285191/get-week-of-date-from-linq-query
 		/// </summary>
-		/// <param name="fromDate"></param>
-		/// <returns></returns>
+		/// <param name="fromDate">The date of which the week number will be determined.</param>
+		/// <returns>The week number based on the given date.</returns>
 		private int WeekNumber(System.DateTime fromDate)
 		{
 			// Get jan 1st of the year
@@ -45,5 +74,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				default: return wk;
 			}
 		}
+		#endregion
 	}
 }
