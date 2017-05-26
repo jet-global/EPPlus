@@ -64,26 +64,25 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
-		#endregion
 
 		[TestMethod]
 		public void TimeWithLastArgNegativeReturnsCorrectValue()
 		{
 			var function = new Time();
-
 			var args = FunctionsHelper.CreateArgs(10, 10, -10);
 			var result = function.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.423726852, result.Result);
+			var expectedResult = this.GetTime(10, 09, 50);
+			Assert.AreEqual(expectedResult, result.Result);
 		}
 
 		[TestMethod]
 		public void TimeWithSecondArgNegativeReturnsCorrectValue()
 		{
 			var function = new Time();
-
 			var args = FunctionsHelper.CreateArgs(10, -10, 10);
 			var result = function.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.409837963, result.Result);
+			var expectedResult = this.GetTime(9, 50, 10);
+			Assert.AreEqual(expectedResult, result.Result);
 		}
 
 		[TestMethod]
@@ -93,7 +92,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var args = FunctionsHelper.CreateArgs(10, -10, -10);
 			var result = function.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.409606481, result.Result);
+			var expectedResult = this.GetTime(9, 49, 50);
+			Assert.AreEqual(expectedResult, result.Result);
 		}
 
 		[TestMethod]
@@ -125,7 +125,38 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var args = FunctionsHelper.CreateArgs(32767, 32767, 32767);
 			var result = function.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.425775463, result.Result);
+			var expectedResult = this.GetTime(10, 13, 7);
+			Assert.AreEqual(expectedResult, result.Result);
+		}
+
+		[TestMethod]
+		public void TimeWithMaxTimeAsFirstInputOnlyReturnsCorrectValue()
+		{
+			var function = new Time();
+			var args = FunctionsHelper.CreateArgs(32767,0,0);
+			var result = function.Execute(args, this.ParsingContext);
+			var expectedResult = this.GetTime(7, 0, 0);
+			Assert.AreEqual(expectedResult, result.Result);
+		}
+
+		[TestMethod]
+		public void TimeWithMinutesOver59ReturnsCorrectValue()
+		{
+			var function = new Time();
+			var args = FunctionsHelper.CreateArgs(0, 750, 0);
+			var result = function.Execute(args, this.ParsingContext);
+			var expectedResult = this.GetTime(12, 30, 0);
+			Assert.AreEqual(expectedResult, result.Result);
+		}
+
+		[TestMethod]
+		public void TimeWithSecondsOver59ReturnsCorrecctValue()
+		{
+			var function = new Time();
+			var args = FunctionsHelper.CreateArgs(0, 0, 2000);
+			var result = function.Execute(args, this.ParsingContext);
+			var expectedResult = this.GetTime(0, 33, 20);
+			Assert.AreEqual(expectedResult, result.Result);
 		}
 
 		[TestMethod]
@@ -146,37 +177,94 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var case1Args = FunctionsHelper.CreateArgs("string", 10, 10);
 			var case2Args = FunctionsHelper.CreateArgs(10, "string", 10);
+			var case3Args = FunctionsHelper.CreateArgs(10, 10, "string");
+			var case4Args = FunctionsHelper.CreateArgs("", 10, 10);
+			var case5Args = FunctionsHelper.CreateArgs(10, "", 10);
+			var case6Args = FunctionsHelper.CreateArgs(10, 10, "");
 
+			var case1Result = function.Execute(case1Args, this.ParsingContext);
+			var case2Result = function.Execute(case2Args, this.ParsingContext);
+			var case3Result = function.Execute(case3Args, this.ParsingContext);
+			var case4Result = function.Execute(case4Args, this.ParsingContext);
+			var case5Result = function.Execute(case5Args, this.ParsingContext);
+			var case6Result = function.Execute(case6Args, this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case1Result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case2Result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case3Result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case4Result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case5Result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)case6Result.Result).Type);
 		}
 
 		[TestMethod]
 		public void TimeWithArgsAsNumericStringReturnsCorrectResult()
 		{
+			// This test case tests all three cases where the input is a numeric string. 
+			var function = new Time();
 
+			var case1Args = FunctionsHelper.CreateArgs("10", 10, 10);
+			var case2Args = FunctionsHelper.CreateArgs(10, "10", 10);
+			var case3Args = FunctionsHelper.CreateArgs(10, 10, "10");
+
+			var case1Result = function.Execute(case1Args, this.ParsingContext);
+			var case2Result = function.Execute(case2Args, this.ParsingContext);
+			var case3Result = function.Execute(case3Args, this.ParsingContext);
+
+			var expectedResult = this.GetTime(10, 10, 10);
+
+			Assert.AreEqual(expectedResult, case1Result.Result);
+			Assert.AreEqual(expectedResult, case2Result.Result);
+			Assert.AreEqual(expectedResult, case3Result.Result);
 		}
 
 		[TestMethod]
 		public void TimeWithOmittedThirdParamReturnsCorrectResult()
 		{
-
+			var function = new Time();
+			var args = FunctionsHelper.CreateArgs(10, 10);
+			var result = function.Execute(args, this.ParsingContext);
+			var exptectedResult = this.GetTime(10, 10, 0);
+			Assert.AreEqual(exptectedResult, result.Result);
 		}
 
 		[TestMethod]
 		public void TimeWithOmittedSecondParameterReturnsCorrectResult()
 		{
-
+			var function = new Time();
+			var args = FunctionsHelper.CreateArgs(10, null, 10);
+			var result = function.Execute(args, this.ParsingContext);
+			var expectedResult = this.GetTime(10,0,10);
+			Assert.AreEqual(expectedResult, result.Result);
 		}
 
 		[TestMethod]
 		public void TimeWithOmittedSecondAndThirdParametersReturnsCorrectResult()
 		{
+			var function = new Time();
+			var args = FunctionsHelper.CreateArgs(10);
+			var result = function.Execute(args, this.ParsingContext);
+			var expectedResult = this.GetTime(10, 0, 0);
+			Assert.AreEqual(expectedResult, result.Result);
+		}
 
+		[TestMethod]
+		public void TimeWithOmittedFirstParameterReturnsCorrectResult()
+		{
+			var function = new Time();
+			var args = FunctionsHelper.CreateArgs(null, 10, 10);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.007060185185185, result.Result);
 		}
 
 		[TestMethod]
 		public void MaxTimeInARegularDayReturnsCorrectResult()
 		{
-
+			var function = new Time();
+			var args = FunctionsHelper.CreateArgs(23, 59, 59);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.999988425925926, result.Result);
 		}
+		#endregion
 	}
 }
