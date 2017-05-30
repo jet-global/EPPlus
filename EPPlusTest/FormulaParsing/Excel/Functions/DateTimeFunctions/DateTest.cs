@@ -88,6 +88,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 		////////////////////////////
 
+			/*
 		[TestMethod]
 		public void Date()
 		{
@@ -96,7 +97,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(, result.Result);
 		}
-
+		*/
 		[TestMethod]
 		public void DateFunctionWithNormalDateReturnsCorrectResult()
 		{
@@ -427,6 +428,164 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
 		}
+
+		[TestMethod]
+		public void DateWithDayAs0ReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(2000, 4, 30);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 5, 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayAsNegativeIntegerReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(2000, 4, 29);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 5, -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayGreaterThan31ReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(2000, 6, 1);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 5, 32);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayGreaterThanMonthMaxNumberOfDaysReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(2000, 5, 1);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 4, 31);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayThatAffectsYearAndMonthReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(2001, 1, 1);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 12, 32);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayThatPushesDateBefore1March1900ReturnsCorrectResult()
+		{
+			// Note that 59.0 is the Excel OADate for 2/28/1900.
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(1900, 3, -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(59.0, result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayThatPushesDateBeforeExcelEpochReturnsPoundNum()
+		{
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(1900, 1, -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void DateWithDayThatPushesDateAboveMaxYearReturnsPoundNum()
+		{
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(9999, 12, 32);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void DateWithDayThatPushesDateAfterExcelEpochDateReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(3800, 1, 1);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(1899, 12, 32);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayAsNegativeIntegerWithDateBefore1March1900ReturnsCorrectResult()
+		{
+			// Note that 30.0 is the Excel OADate for 1/30/1900.
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(1900, 2, -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30.0, result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayAsDoubleReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(2000, 1, 1);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 1, 1.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayAsIntegerInStringReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(2000, 1, 1);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 1, "1");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayAsDoubleInStringReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(2000, 1, 1);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 1, "1.5");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithDayAsNonNumericStringReturnsPoundValue()
+		{
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 1, "word");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void DateWithDayAsEmptyStringReturnsPoundValue()
+		{
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 1, string.Empty);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void DateWithNullDayReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(1999, 12, 31);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 1, null);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+
 		#endregion
 	}
 }
