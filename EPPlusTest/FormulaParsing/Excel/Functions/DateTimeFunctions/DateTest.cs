@@ -39,7 +39,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	{
 		#region Date Function (Execute) Tests
 		[TestMethod]
-		public void DateFunctionShouldReturnADate()
+		public void DateFunctionReturnsADate()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(2012, 4, 3);
@@ -48,27 +48,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateFunctionShouldReturnACorrectDate()
-		{
-			var expectedDate = new DateTime(2012, 4, 3);
-			var func = new Date();
-			var args = FunctionsHelper.CreateArgs(2012, 4, 3);
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
-		}
-
-		[TestMethod]
-		public void DateFunctionShouldMonthFromPrevYearIfMonthIsNegative()
-		{
-			var expectedDate = new DateTime(2011, 11, 3);
-			var func = new Date();
-			var args = FunctionsHelper.CreateArgs(2012, -1, 3);
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
-		}
-
-		[TestMethod]
-		public void DateFunctionShouldMonthFromPrevYearIfMonthAndDayIsNegative()
+		public void DateFunctionWithNegativeMonthAndNegativeDayReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2011, 10, 30);
 			var func = new Date();
@@ -86,9 +66,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
-		////////////////////////////
-
-			/*
+		/*
 		[TestMethod]
 		public void Date()
 		{
@@ -98,6 +76,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(, result.Result);
 		}
 		*/
+
 		[TestMethod]
 		public void DateFunctionWithNormalDateReturnsCorrectResult()
 		{
@@ -270,7 +249,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void DateWithYearAsEmptyStringReturnsPoundValue()
 		{
 			var func = new Date();
-			var args = FunctionsHelper.CreateArgs(string.Empty);
+			var args = FunctionsHelper.CreateArgs(string.Empty, 1, 1);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}

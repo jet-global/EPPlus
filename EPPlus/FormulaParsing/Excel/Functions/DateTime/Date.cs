@@ -22,7 +22,9 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
@@ -33,6 +35,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (ValidateArguments(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
+
+			for (int i = 0; i < 3; i++)
+			{
+				var dateObj = arguments.ElementAt(i).Value;
+				if (!this.ArgumentIsNumeric(dateObj))
+					return new CompileResult(this.getErrorValue(dateObj));
+			}
+
+			var yearObj = arguments.ElementAt(0).Value;
+			var monthObj = arguments.ElementAt(1).Value;
+			var dayObj = arguments.ElementAt(2).Value;
+
 			var year = ArgToInt(arguments, 0);
 			var month = ArgToInt(arguments, 1);
 			var day = ArgToInt(arguments, 2);
@@ -40,7 +54,29 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			month -= 1;
 			date = date.AddMonths(month);
 			date = date.AddDays((double)(day - 1));
-			return CreateResult(date.ToOADate(), DataType.Date);
+
+			var resultOADate = date.ToOADate();
+			if (resultOADate < 61)
+				resultOADate--;
+			return CreateResult(resultOADate, DataType.Date);
+		}
+
+		private bool ArgumentIsNumeric(object argument)
+		{
+			if (argument is string argString)
+			{
+				return (Double.TryParse(argString, out double result));
+			}
+			else
+				return (argument is double || argument is int);
+		}
+
+		private eErrorType getErrorValue(object invalidObject)
+		{
+			if (invalidObject is string)
+				return eErrorType.Value;
+			else
+				return eErrorType.Num;
 		}
 	}
 }
