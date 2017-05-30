@@ -54,23 +54,23 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out double resl2))
 					return new CompileResult(eErrorType.Value);
 				hour = 0;
-				min = ArgToInt(arguments, 1);
-				sec = ArgToInt(arguments, 2);
+				min = this.ArgToInt(arguments, 1);
+				sec = this.ArgToInt(arguments, 2);
 			}
 			else if (arguments.Count() == 3 && arguments.ElementAt(1).Value == null)
 			{
 				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out double resl))
 					return new CompileResult(eErrorType.Value);
-				hour = ArgToInt(arguments, 0);
+				hour = this.ArgToInt(arguments, 0);
 				min = 0;
-				sec = ArgToInt(arguments, 2);
+				sec = this.ArgToInt(arguments, 2);
 			}
 			else if (arguments.Count() == 3 && arguments.ElementAt(2).Value == null)
 			{
 				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out double resl2))
 					return new CompileResult(eErrorType.Value);
-				hour = ArgToInt(arguments, 0);
-				min = ArgToInt(arguments, 1);
+				hour = this.ArgToInt(arguments, 0);
+				min = this.ArgToInt(arguments, 1);
 				sec = 0;
 			}
 			else if (arguments.Count() == 3)
@@ -91,21 +91,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					return new CompileResult(result, DataType.Time);
 				}
 
-				hour = ArgToInt(arguments, 0);
-				min = ArgToInt(arguments, 1);
-				sec = ArgToInt(arguments, 2);
+				hour = this.ArgToInt(arguments, 0);
+				min = this.ArgToInt(arguments, 1);
+				sec = this.ArgToInt(arguments, 2);
 			}
 			else if (arguments.Count() == 2)
 			{
-				hour = ArgToInt(arguments, 0);
-				min = ArgToInt(arguments, 1);
+				hour = this.ArgToInt(arguments, 0);
+				min = this.ArgToInt(arguments, 1);
 				sec = 0;
 			}
 			else
 			{
 				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out double resl))
 					return new CompileResult(eErrorType.Value);
-				hour = ArgToInt(arguments, 0);
+				hour = this.ArgToInt(arguments, 0);
 				min = 0;
 				sec = 0;
 			}
