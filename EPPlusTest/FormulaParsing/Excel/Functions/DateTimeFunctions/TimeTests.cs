@@ -237,7 +237,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void TimeWithOmittedThirdParamReturnsCorrectResult()
 		{
 			var function = new Time();
-			var args = FunctionsHelper.CreateArgs(10, 10);
+			var args = FunctionsHelper.CreateArgs(10, 10, null);
 			var result = function.Execute(args, this.ParsingContext);
 			var exptectedResult = this.GetTime(10, 10, 0);
 			Assert.AreEqual(exptectedResult, result.Result);
@@ -310,6 +310,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = function.Execute(args, this.ParsingContext);
 			var expectedResult = this.GetTime(0, 0, 10);
 			Assert.AreEqual(expectedResult, result.Result);
+		}
+
+		[TestMethod]
+		public void TimeWithDateReturnsPoundNum()
+		{
+			var function = new Time();
+			var args = FunctionsHelper.CreateArgs("1/1/2017", 1, 1);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
 	}

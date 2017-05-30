@@ -44,101 +44,34 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			double resul;
+			double result;
+			System.DateTime reslt;
+
 			var hour = 0;
 			var minute = 0;
 			var second = 0;
 
-			if (arguments.Count() == 3)
+			if(ValidateArguments(arguments, 3))
 			{
-				if(arguments.ElementAt(0).Value != null && arguments.ElementAt(1).Value != null && arguments.ElementAt(2) != null)
+				if(arguments.ElementAt(0).Value is string && ConvertUtil.TryParseDateString(arguments.ElementAt(0).Value, out reslt))
 				{
-					if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out resul))
-						return new CompileResult(eErrorType.Value);
-					if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out resul))
-						return new CompileResult(eErrorType.Value);
-					if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out resul))
-						return new CompileResult(eErrorType.Value);
-				}
-				else if(arguments.ElementAt(0).Value != null)
-				{
-					if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out resul))
-						return new CompileResult(eErrorType.Value);
-					if (arguments.ElementAt(1).Value != null)
-					{
-						if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out resul))
-							return new CompileResult(eErrorType.Value);
-					}
-					else
-					{
-						if(arguments.ElementAt(2).Value != null)
-							if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out resul))
-								return new CompileResult(eErrorType.Value);
-					}
-				}
-				else if(arguments.ElementAt(1).Value != null)
-				{
-					if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out resul))
-						return new CompileResult(eErrorType.Value);
-					if(arguments.ElementAt(2).Value != null)
-						if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out resul))
-							return new CompileResult(eErrorType.Value);
-				}
-				else
-				{
-					if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out resul))
-						return new CompileResult(eErrorType.Value);
+					if (!ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out result))
+						return new CompileResult(eErrorType.Num);
 				}
 
-				if (arguments.ElementAt(1).Value == null && arguments.ElementAt(2).Value == null)
-				{
-					hour = this.ArgToInt(arguments, 0);
-				}
-				else if (arguments.ElementAt(0).Value == null && arguments.ElementAt(1).Value == null)
-				{
-					second = this.ArgToInt(arguments, 2);
-				}
-				else if (arguments.ElementAt(0).Value == null && arguments.ElementAt(2).Value == null)
-				{
-					minute = this.ArgToInt(arguments, 1);
-				}
-				else if (arguments.ElementAt(0).Value == null)
-				{
-					minute = this.ArgToInt(arguments, 1);
-					second = this.ArgToInt(arguments, 2);
-				}
-				else if (arguments.ElementAt(1).Value == null)
-				{
-					hour = this.ArgToInt(arguments, 0);
-					second = this.ArgToInt(arguments, 2);
-				}
-				else if (arguments.ElementAt(2).Value == null)
-				{
-					hour = this.ArgToInt(arguments, 0);
-					minute = this.ArgToInt(arguments, 1);
-				}
-				else 
-				{
-					hour = this.ArgToInt(arguments, 0);
-					minute = this.ArgToInt(arguments, 1);
-					second = this.ArgToInt(arguments, 2);
-				}
-			}
-			else if (arguments.Count() == 2)
-			{
-				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out resul))
+				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out result))
 					return new CompileResult(eErrorType.Value);
-				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out resul))
+				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out result))
 					return new CompileResult(eErrorType.Value);
+				if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out result))
+					return new CompileResult(eErrorType.Value);
+
 				hour = this.ArgToInt(arguments, 0);
 				minute = this.ArgToInt(arguments, 1);
+				second = this.ArgToInt(arguments, 2);
 			}
 			else
-			{
-				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out resul))
-					return new CompileResult(eErrorType.Value);
-				hour = this.ArgToInt(arguments, 0);
-			}
+				return new CompileResult(eErrorType.Value);
 			
 			if (hour < 0)
 				return new CompileResult(eErrorType.Num);
