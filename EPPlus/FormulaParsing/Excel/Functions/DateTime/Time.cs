@@ -44,120 +44,150 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			
+			double resul;
 			var hour = 0;
-			var min = 0;
-			var sec = 0;
+			var minute = 0;
+			var second = 0;
 
-			if (arguments.Count() == 3 && arguments.ElementAt(0).Value == null)
+			if (arguments.Count() == 3)
 			{
-				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out double resl2))
-					return new CompileResult(eErrorType.Value);
-				hour = 0;
-				min = this.ArgToInt(arguments, 1);
-				sec = this.ArgToInt(arguments, 2);
-			}
-			else if (arguments.Count() == 3 && arguments.ElementAt(1).Value == null)
-			{
-				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out double resl))
-					return new CompileResult(eErrorType.Value);
-				hour = this.ArgToInt(arguments, 0);
-				min = 0;
-				sec = this.ArgToInt(arguments, 2);
-			}
-			else if (arguments.Count() == 3 && arguments.ElementAt(2).Value == null)
-			{
-				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out double resl2))
-					return new CompileResult(eErrorType.Value);
-				hour = this.ArgToInt(arguments, 0);
-				min = this.ArgToInt(arguments, 1);
-				sec = 0;
-			}
-			else if (arguments.Count() == 3)
-			{
-				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out double resl))
-					return new CompileResult(eErrorType.Value);
-				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out double resl2))
-					return new CompileResult(eErrorType.Value);
-				if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out double resl3))
-					return new CompileResult(eErrorType.Value);
-
-				var firstArg = arguments.ElementAt(0).Value.ToString();
-				if (!ConvertUtil.TryParseNumericString(firstArg, out double reslt))
-					return new CompileResult(eErrorType.Value);
-				if (arguments.Count() == 1 && TimeStringParser.CanParse(firstArg))
+				if(arguments.ElementAt(0).Value != null && arguments.ElementAt(1).Value != null && arguments.ElementAt(2) != null)
 				{
-					var result = TimeStringParser.Parse(firstArg);
-					return new CompileResult(result, DataType.Time);
+					if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out resul))
+						return new CompileResult(eErrorType.Value);
+					if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out resul))
+						return new CompileResult(eErrorType.Value);
+					if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out resul))
+						return new CompileResult(eErrorType.Value);
+				}
+				else if(arguments.ElementAt(0).Value != null)
+				{
+					if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out resul))
+						return new CompileResult(eErrorType.Value);
+					if (arguments.ElementAt(1).Value != null)
+					{
+						if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out resul))
+							return new CompileResult(eErrorType.Value);
+					}
+					else
+					{
+						if(arguments.ElementAt(2).Value != null)
+							if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out resul))
+								return new CompileResult(eErrorType.Value);
+					}
+				}
+				else if(arguments.ElementAt(1).Value != null)
+				{
+					if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out resul))
+						return new CompileResult(eErrorType.Value);
+					if(arguments.ElementAt(2).Value != null)
+						if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out resul))
+							return new CompileResult(eErrorType.Value);
+				}
+				else
+				{
+					if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out resul))
+						return new CompileResult(eErrorType.Value);
 				}
 
-				hour = this.ArgToInt(arguments, 0);
-				min = this.ArgToInt(arguments, 1);
-				sec = this.ArgToInt(arguments, 2);
+				if (arguments.ElementAt(1).Value == null && arguments.ElementAt(2).Value == null)
+				{
+					hour = this.ArgToInt(arguments, 0);
+				}
+				else if (arguments.ElementAt(0).Value == null && arguments.ElementAt(1).Value == null)
+				{
+					second = this.ArgToInt(arguments, 2);
+				}
+				else if (arguments.ElementAt(0).Value == null && arguments.ElementAt(2).Value == null)
+				{
+					minute = this.ArgToInt(arguments, 1);
+				}
+				else if (arguments.ElementAt(0).Value == null)
+				{
+					minute = this.ArgToInt(arguments, 1);
+					second = this.ArgToInt(arguments, 2);
+				}
+				else if (arguments.ElementAt(1).Value == null)
+				{
+					hour = this.ArgToInt(arguments, 0);
+					second = this.ArgToInt(arguments, 2);
+				}
+				else if (arguments.ElementAt(2).Value == null)
+				{
+					hour = this.ArgToInt(arguments, 0);
+					minute = this.ArgToInt(arguments, 1);
+				}
+				else 
+				{
+					hour = this.ArgToInt(arguments, 0);
+					minute = this.ArgToInt(arguments, 1);
+					second = this.ArgToInt(arguments, 2);
+				}
 			}
 			else if (arguments.Count() == 2)
 			{
+				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out resul))
+					return new CompileResult(eErrorType.Value);
+				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out resul))
+					return new CompileResult(eErrorType.Value);
 				hour = this.ArgToInt(arguments, 0);
-				min = this.ArgToInt(arguments, 1);
-				sec = 0;
+				minute = this.ArgToInt(arguments, 1);
 			}
 			else
 			{
-				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out double resl))
+				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out resul))
 					return new CompileResult(eErrorType.Value);
 				hour = this.ArgToInt(arguments, 0);
-				min = 0;
-				sec = 0;
 			}
 			
 			if (hour < 0)
 				return new CompileResult(eErrorType.Num);
-			if (hour > 32767 || min > 32767 || sec > 32767)
+			if (hour > 32767 || minute > 32767 || second > 32767)
 				return new CompileResult(eErrorType.Num);
 
-			if(hour == 32767 && min == 32767 && sec == 32767)
+			if(hour == 32767 && minute == 32767 && second == 32767)
 			{
 				//When the maximum input is used in the TIME function it performs all three modifications to the individual
 				//parameters, adds them and then performs another calculation if necessary.
 				//Dealing with the hour being over 23.
 				var newHour = hour % 24;
-				//Dealing with the minute being over 59 and adjusting the hour as such.
-				var newMin = min % 60;
-				var minAsHour = min / 60;
-				minAsHour = minAsHour % 24;
-				newHour += minAsHour;
-				//Dealing with the second being over 59 and adjusting the hour and minute as such.
-				var secAsHour = (sec / 60) / 60;
-				var secAsMin = sec / 60;
-				while(secAsMin > 59)
-					secAsMin = secAsMin % 60;
-				var newSec = sec - ((secAsHour*60*60) + (secAsMin*60));
+				//Dealing with the minuteute being over 59 and adjusting the hour as such.
+				var newMinute = minute % 60;
+				var minuteAsHour = minute / 60;
+				minuteAsHour = minuteAsHour % 24;
+				newHour += minuteAsHour;
+				//Dealing with the secondond being over 59 and adjusting the hour and minuteute as such.
+				var secondAsHour = (second / 60) / 60;
+				var secondAsMinute = second / 60;
+				while(secondAsMinute > 59)
+					secondAsMinute = secondAsMinute % 60;
+				var newSecond = second - ((secondAsHour*60*60) + (secondAsMinute*60));
 				//Final calculation to account for the fact that the hour might be over 23.
-				hour = (newHour + secAsHour) % 24;
-				min = newMin + secAsMin;
-				sec = newSec;
+				hour = (newHour + secondAsHour) % 24;
+				minute = newMinute + secondAsMinute;
+				second = newSecond;
 			}
 
 			if(hour > 23)
 				hour = hour % 24;
-			if(min > 59)
+			if(minute > 59)
 			{
-				hour = min / 60;
-				min = min % 60;
+				hour = minute / 60;
+				minute = minute % 60;
 			}
-			if(sec > 59)
+			if(second > 59)
 			{
-				var Newhour = (sec / 60) / 60;
-				var Newmin = sec / 60;
-				var hourToSec = Newhour * 60 * 60;
-				var minToSec = Newmin * 60;
-				sec = sec - (hourToSec + minToSec);
-				hour = Newhour;
-				min = Newmin;
+				var newHour = (second / 60) / 60;
+				var newMinute = second / 60;
+				var hourToSecond = newHour * 60 * 60;
+				var minuteToSecond = newMinute * 60;
+				second = second - (hourToSecond + minuteToSecond);
+				hour = newHour;
+				minute = newMinute;
 			}
 
-			var secondsOfThisTime = (double)(hour * 60 * 60 + min * 60 + sec);
-			return CreateResult(GetTimeSerialNumber(secondsOfThisTime), DataType.Time);
+			var secondondsOfThisTime = (double)(hour * 60 * 60 + minute * 60 + second);
+			return this.CreateResult(this.GetTimeSerialNumber(secondondsOfThisTime), DataType.Time);
 		}
 	}
 }
