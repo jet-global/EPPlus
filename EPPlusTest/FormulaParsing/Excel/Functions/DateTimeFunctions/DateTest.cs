@@ -585,7 +585,61 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
 		}
 
+		[TestMethod]
+		public void DateWithNegativeYearAndNonNumericStringMonthReturnsPoundValue()
+		{
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(-1, "word", 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 
+		[TestMethod]
+		public void DateWithNegativeYearAndNonNumericStringDayReturnsPoundValue()
+		{
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(-1, 1, "word");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void DateWithNullYearAndNullMonthReturnsPoundNum()
+		{
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(null, null, 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void DateWithNullYearAndNullDayReturnsCorrectResult()
+		{
+			// Note that 0.0 is the Excel OADate for 1/0/1900, Excel's special 0-date.
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(null, 1, null);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.0, result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithNullMonthAndNullDayReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(1999, 11, 30);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, null, null);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
+		public void DateWithAllNullInputsReturnsPoundNum()
+		{
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(null, null, null);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
 		#endregion
 	}
 }
