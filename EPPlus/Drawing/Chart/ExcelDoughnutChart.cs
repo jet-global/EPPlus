@@ -110,7 +110,7 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			if (name == "doughnutChart")
 			{
-				if (((ExcelPieChartSerie)Series[0]).Explosion > 0)
+				if (this.Series?.Count > 0 && ((ExcelPieChartSerie)Series[0]).Explosion > 0)
 				{
 					return eChartType.DoughnutExploded;
 				}
