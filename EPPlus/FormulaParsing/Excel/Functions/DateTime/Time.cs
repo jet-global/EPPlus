@@ -42,28 +42,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>The time as a double (decimal numer).</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
-			double result;
-			System.DateTime reslt;
-
+			double dateResult;
 			var hour = 0;
 			var minute = 0;
 			var second = 0;
 
-			if(ValidateArguments(arguments, 3))
+			if(this.ValidateArguments(arguments, 3))
 			{
-				if(arguments.ElementAt(0).Value is string && ConvertUtil.TryParseDateString(arguments.ElementAt(0).Value, out reslt))
-				{
-					if (!ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out result))
-						return new CompileResult(eErrorType.Num);
-				}
-
-				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out result))
+				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out dateResult))
 					return new CompileResult(eErrorType.Value);
-				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out result))
+				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out dateResult))
 					return new CompileResult(eErrorType.Value);
-				if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out result))
+				if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out dateResult))
 					return new CompileResult(eErrorType.Value);
 
 				hour = this.ArgToInt(arguments, 0);
@@ -82,6 +72,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			{
 				//When the maximum input is used in the TIME function it performs all three modifications to the individual
 				//parameters, adds them and then performs another calculation if necessary.
+				//The link to this information is: https://support.office.com/en-us/article/TIME-function-9a5aff99-8f7d-4611-845e-747d0b8d5457
 				//Dealing with the hour being over 23.
 				var newHour = hour % 24;
 				//Dealing with the minuteute being over 59 and adjusting the hour as such.
