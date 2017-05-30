@@ -62,7 +62,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			}
 			else
 				return new CompileResult(eErrorType.Value);
-			
 			if (hour < 0)
 				return new CompileResult(eErrorType.Num);
 			if (hour > 32767 || minute > 32767 || second > 32767)
