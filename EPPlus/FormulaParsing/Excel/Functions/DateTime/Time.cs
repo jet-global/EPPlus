@@ -44,31 +44,58 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out double resl))
-				return new CompileResult(eErrorType.Value);
-
-			var firstArg = arguments.ElementAt(0).Value.ToString();
-			if (!ConvertUtil.TryParseNumericString(firstArg, out double reslt))
-				return new CompileResult(eErrorType.Value);
-
-			if (arguments.Count() == 1 && TimeStringParser.CanParse(firstArg))
-			{
-				var result = TimeStringParser.Parse(firstArg);
-				return new CompileResult(result, DataType.Time);
-			}
 			
-			if (arguments.Count() == 3 && arguments.ElementAt(2).Value == null)
-				return new CompileResult(eErrorType.Value);
-			if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out double resl2))
-				return new CompileResult(eErrorType.Value);
-			if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out double resl3))
-				return new CompileResult(eErrorType.Value);
-
 			var hour = 0;
-			var sec = 0;
 			var min = 0;
+			var sec = 0;
 
-			if (ValidateArguments(arguments, 3) == false)
+			if (arguments.Count() == 3 && arguments.ElementAt(0).Value == null)
+			{
+				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out double resl2))
+					return new CompileResult(eErrorType.Value);
+				hour = 0;
+				min = ArgToInt(arguments, 1);
+				sec = ArgToInt(arguments, 2);
+			}
+			else if (arguments.Count() == 3 && arguments.ElementAt(1).Value == null)
+			{
+				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out double resl))
+					return new CompileResult(eErrorType.Value);
+				hour = ArgToInt(arguments, 0);
+				min = 0;
+				sec = ArgToInt(arguments, 2);
+			}
+			else if (arguments.Count() == 3 && arguments.ElementAt(2).Value == null)
+			{
+				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out double resl2))
+					return new CompileResult(eErrorType.Value);
+				hour = ArgToInt(arguments, 0);
+				min = ArgToInt(arguments, 1);
+				sec = 0;
+			}
+			else if (arguments.Count() == 3)
+			{
+				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out double resl))
+					return new CompileResult(eErrorType.Value);
+				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out double resl2))
+					return new CompileResult(eErrorType.Value);
+				if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out double resl3))
+					return new CompileResult(eErrorType.Value);
+
+				var firstArg = arguments.ElementAt(0).Value.ToString();
+				if (!ConvertUtil.TryParseNumericString(firstArg, out double reslt))
+					return new CompileResult(eErrorType.Value);
+				if (arguments.Count() == 1 && TimeStringParser.CanParse(firstArg))
+				{
+					var result = TimeStringParser.Parse(firstArg);
+					return new CompileResult(result, DataType.Time);
+				}
+
+				hour = ArgToInt(arguments, 0);
+				min = ArgToInt(arguments, 1);
+				sec = ArgToInt(arguments, 2);
+			}
+			else if (arguments.Count() == 2)
 			{
 				hour = ArgToInt(arguments, 0);
 				min = ArgToInt(arguments, 1);
@@ -76,9 +103,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			}
 			else
 			{
+				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out double resl))
+					return new CompileResult(eErrorType.Value);
 				hour = ArgToInt(arguments, 0);
-				min = ArgToInt(arguments, 1);
-				sec = ArgToInt(arguments, 2);
+				min = 0;
+				sec = 0;
 			}
 			
 			if (hour < 0)
