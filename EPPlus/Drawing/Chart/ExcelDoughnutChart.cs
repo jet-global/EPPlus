@@ -92,6 +92,7 @@ namespace OfficeOpenXml.Drawing.Chart
 		}
 		//string _holeSizePath = "c:chartSpace/c:chart/c:plotArea/{0}/c:holeSize/@val";
 		string _holeSizePath = "c:holeSize/@val";
+		
 		/// <summary>
 		/// Size of the doubnut hole
 		/// </summary>
@@ -106,20 +107,29 @@ namespace OfficeOpenXml.Drawing.Chart
 				_chartXmlHelper.SetXmlNodeString(_holeSizePath, value.ToString(CultureInfo.InvariantCulture));
 			}
 		}
+
 		internal override eChartType GetChartType(string name)
 		{
 			if (name == "doughnutChart")
 			{
-				if (((ExcelPieChartSerie)Series[0]).Explosion > 0)
-				{
+				if (this.IsExploded())
 					return eChartType.DoughnutExploded;
-				}
 				else
-				{
 					return eChartType.Doughnut;
-				}
 			}
 			return base.GetChartType(name);
+		}
+
+		private bool IsExploded()
+		{
+			if (this.Series == null)
+				return false;
+			for (int i = 0; i < this.Series.Count; i++)
+			{
+				if (((ExcelPieChartSerie)this.Series[i]).Explosion > 0)
+					return true;
+			}
+			return false;
 		}
 	}
 }
