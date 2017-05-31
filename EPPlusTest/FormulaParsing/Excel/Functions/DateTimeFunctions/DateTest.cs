@@ -594,6 +594,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void DateFunctionWithLargeMonthAndDayValuesReturnsCorrectResult()
+		{
+			var expectedDate = new DateTime(2003, 1, 1);
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(2000, 25, 366);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(expectedDate.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
 		public void DateFunctionWithNegativeYearAndNonNumericStringMonthReturnsPoundValue()
 		{
 			var func = new Date();
