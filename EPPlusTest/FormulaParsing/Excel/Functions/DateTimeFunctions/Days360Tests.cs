@@ -25,6 +25,8 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Globalization;
+using System.Threading;
 using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -169,6 +171,245 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs(15, 20);
 			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(5, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithDatesNotAsStringReturnsZero()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs(5 / 31 / 2017, 6 / 30 / 2017);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithGenericStringReturnsPoundValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("string", "string");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void Days360WithEmptyStringReturnsPoundValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("", "");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void Days360WithStartDateAfterEndDateReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("6/30/2017", "5/31/2017");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(-30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithDatesWrittenOutAsStringReturnCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("31 May 2017", "30 Jun 2017");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithDashesInsteadOfSlashesInStringReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("5-31-2017", "6-30-2017");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithPeriodInsteadOfSlashesInStringReturnsCorrectValue()
+		{
+			// This functionality is different than that of Excel's. Excel does not support inputs of this format,
+			// and instead returns a #VALUE!, however many European countries write their dates with periods instead
+			//of slashes so EPPlus supports this format of entering dates.
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("5.31.2017", "6.30.2017");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30, result.Result);
+		}
+
+		//The following test cases have true in the second parameter for the European method 
+
+		[TestMethod]
+		public void Days360WithEuropeanDatesFromDateFunctionReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var dateArg1 = new DateTime(2017, 5, 31);
+			var dateArg2 = new DateTime(2017, 6, 30);
+			var args = FunctionsHelper.CreateArgs(dateArg1, dateArg2, true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentsAsDateStringsReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("5/31/2017", "6/30/2017", true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentAndIntegerArgumentsReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs(15, 20, true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(5, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentndDatesNotAStringsReturnsZero()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs(5 / 31 / 2017, 6 / 30 / 2017, true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentAndGeneralStringReturnsPoundValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("string", "string", true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentWithEmptyStringReturnsPoundValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("", "", true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentWithStartDateAfterEndDateReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("6/30/2017", "5/31/2017", true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(-30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentAndNullFirstDateReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs(null, "6/30/2017", true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(42300, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentAndNullSecondDateReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("5/30/2017", null, true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(-42270, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentAndDatesWrittenOutAsStringsReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("31 May 2017", "30 Jun 2017", true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentAndDatesWrittenWithDashesInsteadOfSlashesReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("5-31-2017", "6-30-2017", true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithEuropeanDateArgumentAndDatesWrittenWithPeriodsInsteadOfSlashesReturnsCorrectValue()
+		{
+			// This functionality is different than that of Excel's. Excel does not support inputs of this format,
+			// and instead returns a #VALUE!, however many European countries write their dates with periods instead
+			//of slashes so EPPlus supports this format of entering dates.
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("5.31.2017", "6.30.2017", true);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithGenericStringAsMethodParameterReturnsPoundValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("5/31/2017", "6/31/2017", "string");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void Days360WithTrueOrFalseAsStringReturnsCorrecValue()
+		{
+			var function = new Days360();
+			var argsWithTrue = FunctionsHelper.CreateArgs("5/31/2017", "6/30/2017", "true");
+			var argsWithFalse = FunctionsHelper.CreateArgs("5/31/2017", "6/30/2017", "false");
+			var resultWithTrue = function.Execute(argsWithTrue, this.ParsingContext);
+			var resultWithFalse = function.Execute(argsWithFalse, this.ParsingContext);
+			Assert.AreEqual(30, resultWithTrue.Result);
+			Assert.AreEqual(30, resultWithFalse.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithIntegerAsMethodParameterReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("5/31/2017", "6/30/2017", 1500);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithDateAsMethodParameterReurnsCorrectValue()
+		{
+			var function = new Days360();
+			var dateArg = new DateTime(2017, 6, 3);
+			var args = FunctionsHelper.CreateArgs("5/31/2017", "6/30/2017", dateArg);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithGermanCultureReturnsCorrectValue()
+		{
+			var currentCulture = Thread.CurrentThread.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("de-DE");
+				var function = new Days360();
+				var args = FunctionsHelper.CreateArgs("30.5.2017", "30.6.2017");
+				var result = function.Execute(args, this.ParsingContext);
+				Assert.AreEqual(30, result.Result);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
 		}
 		#endregion
 	}
