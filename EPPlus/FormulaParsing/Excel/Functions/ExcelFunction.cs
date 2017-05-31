@@ -159,47 +159,41 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// </summary>
 		/// <param name="arguments">The list of function arguments where our input to parse is.</param>
 		/// <param name="index"> The index of the arguments to try to parse to an integer.</param>
-		/// <param name="value">The resulting value if the parse was successful. If not the value is -100.</param>
+		/// <param name="value">The resulting value if the parse was successful. If not the value is the minimum integer value.</param>
 		/// <param name="err">Null if parse was successful, or the <see cref="eErrorType"/> indicating why the parse was unsuccessful.</param>
 		/// <returns></returns>
-		protected bool TryArgToInt(IEnumerable<FunctionArgument> arguments, int index, out int value, out eErrorType? err)
+		protected bool TryGetArgAsInt(IEnumerable<FunctionArgument> arguments, int index, out int value, out eErrorType? err)
 		{
-		//	throw new NotImplementedException();
-			var val = arguments.ElementAt(index).Value;
+			var intCandidate  = arguments.ElementAt(index).Value;
 			err = null;
-			value = -100;
+			value = int.MinValue;
 
-			if (val == null)
+			if (intCandidate == null)
 			{
 				value = 0;
 				return true;
 			}
-			if (val is int)
+			else if (intCandidate is int)
 			{
 				value = this.ArgToInt(arguments, index);
 				return true;
 			}
-			if (val is double)
+			else if (intCandidate is double)
 			{
 				value = this.ArgToInt(arguments, index);
 				return true;
 			}
-			if (val is string)
+			else if (intCandidate is string)
 			{
-				if (Utils.ConvertUtil.TryParseNumericString(val, out double result))
+				if (Utils.ConvertUtil.TryParseNumericString(intCandidate, out double result))
 				{
 					value = this.ArgToInt(arguments, index);
 					return true;
 				}
-				else if (Utils.ConvertUtil.TryParseDateString(val, out System.DateTime resu))
-				{
-					err = eErrorType.Num;
-					return false;
-				}
 			}
-			if (Utils.ConvertUtil.TryParseDateObject(val, out System.DateTime re, out eErrorType? error))
+			if (Utils.ConvertUtil.TryParseDateObject(intCandidate, out System.DateTime date, out eErrorType? error))
 			{
-				value = this.ArgToInt(arguments, index);
+				value = (int)date.ToOADate();
 				return true;
 			}
 			err = eErrorType.Value;
