@@ -4757,33 +4757,17 @@ namespace OfficeOpenXml
 			{
 				for (int i = sheet.DataValidations.Count - 1; i >= 0; i--)
 				{
-					var validation = sheet.DataValidations.ElementAt(i);
-					if (validation.Address.WorkSheet == null ||
-						validation.Address.WorkSheet == this.Name.ToUpper())
+					//Update ListValidations
+					var validation = sheet.DataValidations.ElementAt(i) as DataValidation.Contracts.IExcelDataValidationList;
+					if(validation != null)
 					{
-						var start = validation.Address.Start;
-						var end = validation.Address.End;
-
-						if (start.Row > rowFrom || end.Row < rowFrom)
-							rows = 0;
-						if (start.Column > columnFrom || end.Column < columnFrom)
-							columns = 0;
-
-						string newAddress = start.Address + ":" + end.Address;
-						newAddress = this.Package.FormulaManager.UpdateFormulaReferences(newAddress, rows, columns, rowFrom, columnFrom, sheet.Name, sheet.Name);
-						if(validation.Address.WorkSheet != null)
-							newAddress = "\'" + validation.Address.WorkSheet + "\'!" + newAddress;
-						sheet.DataValidations.Remove(validation);
-						var newValidation = sheet.DataValidations.AddListValidation(newAddress);
-						//Set all the properties we can so that it preserves data from the old validation object
-						newValidation.AllowBlank = validation.AllowBlank;
-						newValidation.Error = validation.Error;
-						newValidation.ErrorStyle = validation.ErrorStyle;
-						newValidation.ErrorTitle = validation.ErrorTitle;
-						newValidation.Prompt = validation.Prompt;
-						newValidation.PromptTitle = validation.PromptTitle;
-						newValidation.ShowErrorMessage = validation.ShowErrorMessage;
-						newValidation.ShowInputMessage = validation.ShowInputMessage;
+						
+						if (validation.Address.WorkSheet == null ||
+						validation.Address.WorkSheet == this.Name.ToUpper())
+						{
+							var newFormula = this.Package.FormulaManager.UpdateFormulaReferences(validation.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, sheet.Name, sheet.Name);
+							validation.Formula.ExcelFormula = newFormula;
+						}
 					}
 				}
 			}
