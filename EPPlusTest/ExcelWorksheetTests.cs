@@ -3182,14 +3182,15 @@ namespace EPPlusTest
 			{
 				//make a Data Validation range
 				var sheet = package.Workbook.Worksheets.Add("Sheet");
-				sheet.Cells["B2:B3"].DataValidation.AddListDataValidation();
+				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$B$3";
 
 				//expand the range
 				sheet.InsertRow(3,2);
 
 				//validate that the Data Validation range has also expanded
-				var validationRange = sheet.DataValidations.First();
-				Assert.AreEqual("B2:B5", validationRange.Address.ToString());
+				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$2:$B$5", validationRange.Formula.ExcelFormula);
 			}
 		}
 
@@ -3200,14 +3201,15 @@ namespace EPPlusTest
 			{
 				//make a Data Validation range
 				var sheet = package.Workbook.Worksheets.Add("Sheet");
-				sheet.Cells["B2:C2"].DataValidation.AddListDataValidation();
+				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$C$2";
 
 				//expand the range
 				sheet.InsertColumn(3, 2);
 
 				//validate that the Data Validation range has also expanded
-				var validationRange = sheet.DataValidations.First();
-				Assert.AreEqual("B2:E2", validationRange.Address.ToString());
+				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$2:$E$2", validationRange.Formula.ExcelFormula);
 			}
 		}
 
@@ -3220,15 +3222,16 @@ namespace EPPlusTest
 				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
 				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
 
-				sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["B2:C3"].Address);
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$E$5";
 
 				//expand the range
 				sheetTarget.InsertColumn(3, 2);
 				sheetTarget.InsertRow(3, 2);
 
 				//validate that the Data Validation range has also expanded
-				var validationRange = sheetValidations.DataValidations.First();
-				Assert.AreEqual(@"'SHEET'!B2:E5", validationRange.Address.ToString());
+				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=SHEET!$B$2:$E$5", validationRange.Formula.ExcelFormula);
 			}
 		}
 
