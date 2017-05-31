@@ -18,7 +18,7 @@
 ### Why these changes are not on the mainline:
 * There are some half-cooked features in this fork (We've added support for updating existing charts, but not inserting new charts, for example); we need these features, but Jan and swmal are understandably hesitant to include these half-cooked features in the EPPlus mainline. 
 * Our coding standard requirement makes it much easier to read and maintain the code going forward, but much harder to merge with a non-standardized fork of EPPlus.
-* The EPPlus mainline maintainers (swmal, Jan Källman, and co.) process pull requests every three to six months. When we were contributing fixes back to the mainline, Jet Reports was contributing approximately 75% of all EPPlus pull requests, so it made sense for us to maintain our own fork so we could handle our own pull requests in a timely manner. 
+* We used to be responsible for approximately 75% of all EPPlus pull requests, so it made sense for us to maintain our own fork so we could handle our own pull requests in a timely manner. 
 
 ### About [Jet Reports](https://www.jetreports.com/):
 Jet Reports is one of the world leaders in business reporting and analytics, providing unparalleled access to data through fast and flexible solutions that are cost effective, provide rapid time-to-value, and are built specifically for the needs of Microsoft Dynamics ERP users. Founded in 2002, Jet Reports is headquartered in the very cool city of Portland, OR. If you're looking for a sweet new gig, [we're hiring](https://www.jetreports.com/careers/) and would love to hear from you!
