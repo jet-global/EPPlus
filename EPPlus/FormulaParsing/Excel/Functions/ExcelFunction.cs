@@ -112,12 +112,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <see cref="ExcelDataProvider.IRangeInfo">Excel range</see> the number of cells in
 		/// that range will be counted as well.
 		/// </summary>
-		/// <param name="arguments"></param>
-		/// <param name="minLength"></param>
+		/// <param name="arguments">The arguments to be evaluated.</param>
+		/// <param name="minLength">The minimum number of arguments that need to be present.</param>
 		protected bool ValidateArguments(IEnumerable<FunctionArgument> arguments, int minLength)
 		{
-			Utilities.Require.That(arguments).Named("arguments").IsNotNull();
-			return !this.TooFewArgs(arguments, minLength);
+			if (arguments == null)
+				return false;
+			else
+				return !this.TooFewArgs(arguments, minLength);
 		}
 
 		private bool TooFewArgs(IEnumerable<FunctionArgument> arguments, int minLength)
