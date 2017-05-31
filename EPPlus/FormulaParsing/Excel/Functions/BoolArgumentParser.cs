@@ -25,11 +25,20 @@
 using System;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.Utilities;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
+	/// <summary>
+	/// This class contains the formula for parsing objects to boolean type.
+	/// </summary>
 	public class BoolArgumentParser : ArgumentParser
 	{
+		/// <summary>
+		/// Parse takes an object and attempts to parse it to a boolean type. 
+		/// </summary>
+		/// <param name="obj">The object to be parsed.</param>
+		/// <returns>The resulting boolean object if successful and false if it was not.</returns>
 		public override object Parse(object obj)
 		{
 			if (obj is ExcelDataProvider.IRangeInfo)
@@ -39,6 +48,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			}
 			if (obj == null) return false;
 			if (obj is bool) return (bool)obj;
+			if (ConvertUtil.TryParseDateObject(obj, out System.DateTime date, out eErrorType? error)) return false;
 			if (obj.IsNumeric()) return Convert.ToBoolean(obj);
 			bool result;
 			if (bool.TryParse(obj.ToString(), out result))
