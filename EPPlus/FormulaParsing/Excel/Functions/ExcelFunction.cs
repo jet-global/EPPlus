@@ -152,6 +152,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		protected int ArgToInt(IEnumerable<FunctionArgument> arguments, int index)
 		{
 			var val = arguments.ElementAt(index).ValueFirst;
+			if (val == null)
+				return 0;
 			return (int)_argumentParsers.GetParser(DataType.Integer).Parse(val);
 		}
 
@@ -194,7 +196,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			}
 			if (ConvertUtil.TryParseDateObject(intCandidate, out System.DateTime date, out eErrorType? error))
 			{
-				//var testVal = date.ToOADate();
 				value = (int)date.ToOADate();
 				return true;
 			}
