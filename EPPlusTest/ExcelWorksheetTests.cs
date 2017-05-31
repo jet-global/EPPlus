@@ -3231,7 +3231,7 @@ namespace EPPlusTest
 
 				//validate that the Data Validation range has also expanded
 				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
-				Assert.AreEqual("=SHEET!$B$2:$E$5", validationRange.Formula.ExcelFormula);
+				Assert.AreEqual("='SHEET'!$B$2:$G$7", validationRange.Formula.ExcelFormula);
 			}
 		}
 
