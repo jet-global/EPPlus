@@ -58,24 +58,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithInvalidArgumentReturnsPoundValue()
+		public void DateFunctionWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
-
-		/*
-		[TestMethod]
-		public void Date()
-		{
-			var func = new Date();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(, result.Result);
-		}
-		*/
 
 		[TestMethod]
 		public void DateFunctionWithNormalDateReturnsCorrectResult()
@@ -88,7 +77,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWith1March1900ReturnsCorrectResult()
+		public void DateFunctionWith1March1900ReturnsCorrectResult()
 		{
 			// Note that 61.0 is the Excel OADate for 3/1/1900.
 			var func = new Date();
@@ -98,7 +87,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWith28February1900ReturnsCorrectResult()
+		public void DateFunctionWith28February1900ReturnsCorrectResult()
 		{
 			// Note that 59.0 is the Excel OADate for 2/28/1900.
 			var func = new Date();
@@ -108,7 +97,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWith29February1900ReturnsCorrectResult()
+		public void DateFunctionWith29February1900ReturnsCorrectResult()
 		{
 			// Note that 61.0 is the Excel OADate for 3/1/1900; since 2/29/1900 is not accepted by
 			// System.DateTime as a valid date, the Date method should push the returned date up to 3/1/1900.
@@ -119,7 +108,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearLessThanExcelEpochYearReturnsCorrectResult()
+		public void DateFunctionWithYearLessThanExcelEpochYearReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(3799, 1, 1);
 			var func = new Date();
@@ -129,7 +118,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAs1ReturnsCorrectResult()
+		public void DateFunctionWithYearAs1ReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(1901, 1, 1);
 			var func = new Date();
@@ -139,7 +128,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAs0ReturnsCorrectResult()
+		public void DateFunctionWithYearAs0ReturnsCorrectResult()
 		{
 			// Note that 1.0 is the Excel OADate for 1/1/1900.
 			var func = new Date();
@@ -149,7 +138,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithNegativeYearReturnsPoundNum()
+		public void DateFunctionWithNegativeYearReturnsPoundNum()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(-1, 1, 1);
@@ -158,7 +147,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAs10000ReturnsPoundNum()
+		public void DateFunctionWithYearAs10000ReturnsPoundNum()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(10000, 1, 1);
@@ -167,7 +156,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYear9999ReturnsCorrectResult()
+		public void DateFunctionWithYear9999ReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(9999, 1, 1);
 			var func = new Date();
@@ -177,7 +166,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAsOneDigitReturnsCorrectResult()
+		public void DateFunctionWithYearAsOneDigitReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(1909, 1, 1);
 			var func = new Date();
@@ -187,7 +176,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAsTwoDigitsReturnsCorrectResult()
+		public void DateFunctionWithYearAsTwoDigitsReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(1917, 1, 1);
 			var func = new Date();
@@ -197,7 +186,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAsThreeDigitsReturnsCorrectResult()
+		public void DateFunctionWithYearAsThreeDigitsReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2117, 1, 1);
 			var func = new Date();
@@ -207,7 +196,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAsDoubleReturnsCorrectResult()
+		public void DateFunctionWithYearAsDoubleReturnsCorrectResult()
 		{
 			// Note that 1.0 is the Excel OADate for 1/1/1900.
 			var func = new Date();
@@ -217,7 +206,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAsIntegerInStringReturnsCorrectResult()
+		public void DateFunctionWithYearAsIntegerInStringReturnsCorrectResult()
 		{
 			// Note that 1.0 is the Excel OADate for 1/1/1900.
 			var func = new Date();
@@ -227,7 +216,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAsDoubleInStringReturnsCorrectResult()
+		public void DateFunctionWithYearAsDoubleInStringReturnsCorrectResult()
 		{
 			// Note that 1.0 is the Excel OADate for 1/1/1900.
 			var func = new Date();
@@ -237,7 +226,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAsNonNumericStringReturnsPoundValue()
+		public void DateFunctionWithYearAsNonNumericStringReturnsPoundValue()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs("word", 1, 1);
@@ -246,7 +235,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAsEmptyStringReturnsPoundValue()
+		public void DateFunctionWithYearAsEmptyStringReturnsPoundValue()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(string.Empty, 1, 1);
@@ -255,7 +244,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithNullYearReturnsCorrectResult()
+		public void DateFunctionWithNullYearReturnsCorrectResult()
 		{
 			// Note that 1.0 is the Excel OADate for 1/1/1900.
 			var func = new Date();
@@ -265,7 +254,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithYearAsNegativeIntegerInStringReturnsPoundNum()
+		public void DateFunctionWithYearAsNegativeIntegerInStringReturnsPoundNum()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs("-1", 1, 1);
@@ -274,7 +263,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthAs1ReturnsCorrectResult()
+		public void DateFunctionWithMonthAs1ReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 1, 1);
 			var func = new Date();
@@ -284,7 +273,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthAs0ReturnsCorrectResult()
+		public void DateFunctionWithMonthAs0ReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(1999, 12, 1);
 			var func = new Date();
@@ -294,9 +283,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthAsNegativeIntegerReturnsCorrectResult()
+		public void DateFunctionWithMonthAsNegativeIntegerReturnsCorrectResult()
 		{
-			var expectedDate = new DateTime(1999, 12, 1);
+			var expectedDate = new DateTime(1999, 11, 1);
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(2000, -1, 1);
 			var result = func.Execute(args, this.ParsingContext);
@@ -304,7 +293,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthGreaterThan12ReturnsCorrectResult()
+		public void DateFunctionWithMonthGreaterThan12ReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2001, 1, 1);
 			var func = new Date();
@@ -314,7 +303,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthThatPushesDateBeforeMinYearReturnsPoundNum()
+		public void DateFunctionWithMonthThatPushesDateBeforeMinYearReturnsPoundNum()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(0, -1, 1);
@@ -323,7 +312,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthThatPushesDateAfterMaxYearReturnsPoundNum()
+		public void DateFunctionWithMonthThatPushesDateAfterMaxYearReturnsPoundNum()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(9999, 13, 1);
@@ -332,7 +321,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthThatPushesDateBeforeExcelEpochReturnsPoundNum()
+		public void DateFunctionWithMonthThatPushesDateBeforeExcelEpochReturnsPoundNum()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(1900, -1, 1);
@@ -341,7 +330,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthThatPushesDateAfterExcelEpochDateReturnsCorrectResult()
+		public void DateFunctionWithMonthThatPushesDateAfterExcelEpochDateReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(3800, 1, 1);
 			var func = new Date();
@@ -351,7 +340,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthAsDoubleReturnsCorrectResult()
+		public void DateFunctionWithMonthAsDoubleReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 1, 1);
 			var func = new Date();
@@ -361,7 +350,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthAsIntegerInStringReturnsCorrectResult()
+		public void DateFunctionWithMonthAsIntegerInStringReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 1, 1);
 			var func = new Date();
@@ -371,7 +360,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthAsDoubleInStringReturnsCorrectResult()
+		public void DateFunctionWithMonthAsDoubleInStringReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 1, 1);
 			var func = new Date();
@@ -381,7 +370,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthAsNonNumericStringReturnsPoundValue()
+		public void DateFunctionWithMonthAsNonNumericStringReturnsPoundValue()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(2000, "word", 1);
@@ -390,7 +379,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithMonthAsEmptyStringReturnsPoundValue()
+		public void DateFunctionWithMonthAsEmptyStringReturnsPoundValue()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(2000, string.Empty, 1);
@@ -399,7 +388,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithNullMonthReturnsCorrectResult()
+		public void DateFunctionWithNullMonthReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(1999, 12, 1);
 			var func = new Date();
@@ -409,7 +398,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayAs0ReturnsCorrectResult()
+		public void DateFunctionWithDayAs0ReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 4, 30);
 			var func = new Date();
@@ -419,7 +408,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayAsNegativeIntegerReturnsCorrectResult()
+		public void DateFunctionWithDayAsNegativeIntegerReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 4, 29);
 			var func = new Date();
@@ -429,7 +418,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayGreaterThan31ReturnsCorrectResult()
+		public void DateFunctionWithDayGreaterThan31ReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 6, 1);
 			var func = new Date();
@@ -439,7 +428,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayGreaterThanMonthMaxNumberOfDaysReturnsCorrectResult()
+		public void DateFunctionWithDayGreaterThanMonthMaxNumberOfDaysReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 5, 1);
 			var func = new Date();
@@ -449,7 +438,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayThatAffectsYearAndMonthReturnsCorrectResult()
+		public void DateFunctionWithDayThatAffectsYearAndMonthReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2001, 1, 1);
 			var func = new Date();
@@ -459,7 +448,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayThatPushesDateBefore1March1900ReturnsCorrectResult()
+		public void DateFunctionWithDayThatPushesDateBefore1March1900ReturnsCorrectResult()
 		{
 			// Note that 59.0 is the Excel OADate for 2/28/1900.
 			var func = new Date();
@@ -469,7 +458,47 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayThatPushesDateBeforeExcelEpochReturnsPoundNum()
+		public void DateFunctionWithDayThatPushesDateDownIntoFebruary1900ReturnsCorrectResult()
+		{
+			// Note that 60.0 is the Excel OADate for 2/29/1900.
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(1900, 4, -31);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(60.0, result.Result);
+		}
+
+		[TestMethod]
+		public void DateFunctionWithDayThatPushesDateUpIntoFebruary1900ReturnsCorrectResult()
+		{
+			// Note that 32.0 is the Excel OADate for 2/1/1900.
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(1900, 1, 32);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(32.0, result.Result);
+		}
+
+		[TestMethod]
+		public void DateFunctionWithDayThatPushesDateDownPastFebruary1900ReturnsCorrectResult()
+		{
+			// Note that 30.0 is the Excel OADate for 1/30/1900.
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(1900, 3, -30);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(30.0, result.Result);
+		}
+
+		[TestMethod]
+		public void DateFunctionWithDayThatPushesDateUpPastFebruary1900ReturnsCorrectResult()
+		{
+			// Note that 61.0 is the Excel OADate for 3/1/1900.
+			var func = new Date();
+			var args = FunctionsHelper.CreateArgs(1900, 1, 61);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(61.0, result.Result);
+		}
+
+		[TestMethod]
+		public void DateFunctionWithDayThatPushesDateBeforeExcelEpochReturnsPoundNum()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(1900, 1, -1);
@@ -478,7 +507,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayThatPushesDateAboveMaxYearReturnsPoundNum()
+		public void DateFunctionWithDayThatPushesDateAboveMaxYearReturnsPoundNum()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(9999, 12, 32);
@@ -487,7 +516,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayThatPushesDateAfterExcelEpochDateReturnsCorrectResult()
+		public void DateFunctionWithDayThatPushesDateAfterExcelEpochDateReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(3800, 1, 1);
 			var func = new Date();
@@ -497,7 +526,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayAsNegativeIntegerWithDateBefore1March1900ReturnsCorrectResult()
+		public void DateFunctionWithDayAsNegativeIntegerWithDateBefore1March1900ReturnsCorrectResult()
 		{
 			// Note that 30.0 is the Excel OADate for 1/30/1900.
 			var func = new Date();
@@ -507,7 +536,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayAsDoubleReturnsCorrectResult()
+		public void DateFunctionWithDayAsDoubleReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 1, 1);
 			var func = new Date();
@@ -517,7 +546,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayAsIntegerInStringReturnsCorrectResult()
+		public void DateFunctionWithDayAsIntegerInStringReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 1, 1);
 			var func = new Date();
@@ -527,7 +556,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayAsDoubleInStringReturnsCorrectResult()
+		public void DateFunctionWithDayAsDoubleInStringReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(2000, 1, 1);
 			var func = new Date();
@@ -537,7 +566,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayAsNonNumericStringReturnsPoundValue()
+		public void DateFunctionWithDayAsNonNumericStringReturnsPoundValue()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(2000, 1, "word");
@@ -546,7 +575,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithDayAsEmptyStringReturnsPoundValue()
+		public void DateFunctionWithDayAsEmptyStringReturnsPoundValue()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(2000, 1, string.Empty);
@@ -555,7 +584,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithNullDayReturnsCorrectResult()
+		public void DateFunctionWithNullDayReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(1999, 12, 31);
 			var func = new Date();
@@ -565,7 +594,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithNegativeYearAndNonNumericStringMonthReturnsPoundValue()
+		public void DateFunctionWithNegativeYearAndNonNumericStringMonthReturnsPoundValue()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(-1, "word", 1);
@@ -574,7 +603,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithNegativeYearAndNonNumericStringDayReturnsPoundValue()
+		public void DateFunctionWithNegativeYearAndNonNumericStringDayReturnsPoundValue()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(-1, 1, "word");
@@ -583,7 +612,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithNullYearAndNullMonthReturnsPoundNum()
+		public void DateFunctionWithNullYearAndNullMonthReturnsPoundNum()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(null, null, 1);
@@ -592,7 +621,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithNullYearAndNullDayReturnsCorrectResult()
+		public void DateFunctionWithNullYearAndNullDayReturnsCorrectResult()
 		{
 			// Note that 0.0 is the Excel OADate for 1/0/1900, Excel's special 0-date.
 			var func = new Date();
@@ -602,7 +631,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithNullMonthAndNullDayReturnsCorrectResult()
+		public void DateFunctionWithNullMonthAndNullDayReturnsCorrectResult()
 		{
 			var expectedDate = new DateTime(1999, 11, 30);
 			var func = new Date();
@@ -612,7 +641,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void DateWithAllNullInputsReturnsPoundNum()
+		public void DateFunctionWithAllNullInputsReturnsPoundNum()
 		{
 			var func = new Date();
 			var args = FunctionsHelper.CreateArgs(null, null, null);

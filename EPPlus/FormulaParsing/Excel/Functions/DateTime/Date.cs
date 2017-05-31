@@ -35,30 +35,77 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (ValidateArguments(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
-
-			for (int i = 0; i < 3; i++)
-			{
-				var dateObj = arguments.ElementAt(i).Value;
-				if (!this.ArgumentIsNumeric(dateObj))
-					return new CompileResult(this.getErrorValue(dateObj));
-			}
-
+			
 			var yearObj = arguments.ElementAt(0).Value;
 			var monthObj = arguments.ElementAt(1).Value;
 			var dayObj = arguments.ElementAt(2).Value;
 
-			var year = ArgToInt(arguments, 0);
-			var month = ArgToInt(arguments, 1);
-			var day = ArgToInt(arguments, 2);
+			var isValidYear = this.TryParseNumber(yearObj, out int year);
+			var isValidMonth = this.TryParseNumber(monthObj, out int month);
+			var isValidDay = this.TryParseNumber(dayObj, out int day);
+			if (!isValidYear)
+				return new CompileResult(this.getErrorValue(yearObj));
+			else if (!isValidMonth)
+				return new CompileResult(this.getErrorValue(monthObj));
+			else if (!isValidDay)
+				return new CompileResult(this.getErrorValue(dayObj));
+
+			if (year >= 10000)
+				return new CompileResult(eErrorType.Num);
+			else if (year < 1900)
+				year += 1900;
+
 			var date = new System.DateTime(year, 1, 1);
+			var startDate = date;
 			month -= 1;
-			date = date.AddMonths(month);
-			date = date.AddDays((double)(day - 1));
+			day -= 1;
+			
+			try
+			{
+				date = date.AddMonths(month);
+				startDate = date;
+				date = date.AddDays(day);
+			}
+			catch (ArgumentOutOfRangeException e)
+			{
+				return new CompileResult(eErrorType.Num);
+			}
 
 			var resultOADate = date.ToOADate();
-			if (resultOADate < 61)
+			if (resultOADate < 1)
+				return new CompileResult(eErrorType.Num);
+
+			
+			if (startDate.ToOADate() < 61 && resultOADate != 61)
 				resultOADate--;
 			return CreateResult(resultOADate, DataType.Date);
+		}
+
+		private bool TryParseNumber(object numberCandidate, out int resultNumber)
+		{
+			resultNumber = -1;
+			if (numberCandidate == null)
+			{
+				resultNumber = 0;
+				return true;
+			}
+			else if (numberCandidate is string numberString && Double.TryParse(numberString, out double parsedNumber))
+			{
+				resultNumber = (int)parsedNumber;
+				return true;
+			}
+			else if (numberCandidate is double numberDouble)
+			{
+				resultNumber = (int)numberDouble;
+				return true;
+			}
+			else if (numberCandidate is int numberInt)
+			{
+				resultNumber = numberInt;
+				return true;
+			}
+			else
+				return false;
 		}
 
 		private bool ArgumentIsNumeric(object argument)
