@@ -1,7 +1,7 @@
  This is the Jet Reports fork of EPPlus ( https://epplus.codeplex.com/ , (C) 2011-2017 Jan Källman and others as noted in the source code.)
 
 ### How this fork differs from the mainline:
-* We enforce the [a Coding Standard](https://github.com/jetreports/EPPlus/wiki/Coding-Standard), which requires:
+* We enforce [a Coding Standard](https://github.com/jetreports/EPPlus/wiki/Coding-Standard), which requires:
 	* Unit tests for all code changes,
 	* Full-word variable names,
 	* XML method comments,
