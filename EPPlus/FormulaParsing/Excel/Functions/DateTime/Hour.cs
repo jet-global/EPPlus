@@ -30,17 +30,36 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// Returns the hour of a time value, or date and time value. The hour is given as an integer,
+	/// ranging from 0 (12:00 AM) to 23 (11:00 PM).
+	/// </summary>
 	public class Hour : ExcelFunction
 	{
+		/// <summary>
+		/// Given a date or time represented as a string, int, double, or <see cref="System.DateTime"/> object,
+		/// return the hour value of that time.
+		/// </summary>
+		/// <param name="arguments">The given arguments used to calculate the hour.</param>
+		/// <param name="context">Unused in the method, but necessary to override the method.</param>
+		/// <returns>Returns the hour of the given time, or an <see cref="ExcelErrorValue"/> if the input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
-			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
-				return CreateResult(date.Hour, DataType.Integer);
+			if (ConvertUtil.TryParseDateObjectToOADate(dateObj, out double OADate))
+			{
+				// Check the special case where the time value is close to rolling over to the next day, which requires special rounding.
+				if (OADate - System.Math.Truncate(OADate) > 0.999988425925926)
+					OADate = System.Math.Round(OADate, 5);
+				if (OADate < 0)
+					return new CompileResult(eErrorType.Num);
+				var date = System.DateTime.FromOADate(OADate);
+				return this.CreateResult(date.Hour, DataType.Integer);
+			}
 			else
-				return CreateResult(error.Value, DataType.ExcelError);
+				return new CompileResult(eErrorType.Value);
 		}
 
 	}
