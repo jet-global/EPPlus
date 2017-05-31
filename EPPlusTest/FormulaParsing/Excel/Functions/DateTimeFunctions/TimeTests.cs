@@ -322,7 +322,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void TimeWithSmallDateStringReturnsPoundNum()
+		public void TimeWithSmallDateStringReturnsCorrectValue()
 		{
 			var function = new Time();
 			var args = FunctionsHelper.CreateArgs("5/1/1900", 1, 1);

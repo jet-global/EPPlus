@@ -194,7 +194,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			}
 			if (ConvertUtil.TryParseDateObject(intCandidate, out System.DateTime date, out eErrorType? error))
 			{
-				var testVal = date.ToOADate();
+				//var testVal = date.ToOADate();
 				value = (int)date.ToOADate();
 				return true;
 			}
