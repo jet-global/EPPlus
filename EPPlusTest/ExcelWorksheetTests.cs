@@ -3184,6 +3184,8 @@ namespace EPPlusTest
 				var sheet = package.Workbook.Worksheets.Add("Sheet");
 				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
 				validation.Formula.ExcelFormula = "=Sheet!$B$2:$B$3";
+				validation = sheet.Cells["D6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$B$3";
 
 				//expand the range
 				sheet.InsertRow(3,2);
@@ -3191,6 +3193,10 @@ namespace EPPlusTest
 				//validate that the Data Validation range has also expanded
 				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
 				Assert.AreEqual("='SHEET'!$B$2:$B$5", validationRange.Formula.ExcelFormula);
+
+				//validate that the implicitly addressed Data Validation range has also expanded
+				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=$B$2:$B$5", validationRange.Formula.ExcelFormula);
 			}
 		}
 
@@ -3203,6 +3209,8 @@ namespace EPPlusTest
 				var sheet = package.Workbook.Worksheets.Add("Sheet");
 				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
 				validation.Formula.ExcelFormula = "=Sheet!$B$2:$C$2";
+				validation = sheet.Cells["D6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$C$2";
 
 				//expand the range
 				sheet.InsertColumn(3, 2);
@@ -3210,6 +3218,10 @@ namespace EPPlusTest
 				//validate that the Data Validation range has also expanded
 				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
 				Assert.AreEqual("='SHEET'!$B$2:$E$2", validationRange.Formula.ExcelFormula);
+
+				//validate implicitly addressed Data Validation range has also expanded
+				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=$B$2:$E$2", validationRange.Formula.ExcelFormula);
 			}
 		}
 
@@ -3223,7 +3235,7 @@ namespace EPPlusTest
 				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
 
 				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
-				validation.Formula.ExcelFormula = "=Sheet!$B$2:$E$5";
+				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
 
 				//expand the range
 				sheetTarget.InsertColumn(3, 2);
@@ -3232,6 +3244,34 @@ namespace EPPlusTest
 				//validate that the Data Validation range has also expanded
 				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
 				Assert.AreEqual("='SHEET'!$B$2:$G$7", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void InsertColumnsRowsRetainsDataValidationRangeOtherSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
+				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
+
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
+				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
+				validation = sheetValidations.DataValidations.AddListValidation(sheetValidations.Cells["D6"].Address);
+				validation.Formula.ExcelFormula = "=$A$1:$B$2";
+
+				//expand the range
+				sheetValidations.InsertColumn(3, 2);
+				sheetValidations.InsertRow(3, 2);
+
+				//validate that the Data Validation range has not expanded
+				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$2:$E$5", validationRange.Formula.ExcelFormula);
+
+				//validate that the implicitly addressed Data Validation range has not expanded
+				validationRange = sheetValidations.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=$A$1:$B$2", validationRange.Formula.ExcelFormula);
 			}
 		}
 
