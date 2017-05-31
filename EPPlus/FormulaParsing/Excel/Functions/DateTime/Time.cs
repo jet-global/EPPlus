@@ -42,33 +42,38 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>The time as a double (decimal numer).</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			double dateResult;
+			int value;
+			eErrorType? err;
 			var hour = 0;
 			var minute = 0;
 			var second = 0;
 
-			if(this.ValidateArguments(arguments, 3))
+			if (this.ValidateArguments(arguments, 3))
 			{
-				if (arguments.ElementAt(0).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(0).Value, out dateResult))
-					return new CompileResult(eErrorType.Value);
-				if (arguments.ElementAt(1).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(1).Value, out dateResult))
-					return new CompileResult(eErrorType.Value);
-				if (arguments.ElementAt(2).Value is string && !ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out dateResult))
-					return new CompileResult(eErrorType.Value);
+				if (this.TryArgToInt(arguments, 0, out value, out err))
+					hour = value;
+				else
+					return new CompileResult((eErrorType)err);
 
-				hour = this.ArgToInt(arguments, 0);
-				minute = this.ArgToInt(arguments, 1);
-				second = this.ArgToInt(arguments, 2);
+				if (this.TryArgToInt(arguments, 1, out value, out err))
+					minute = value;
+				else
+					return new CompileResult((eErrorType)err);
+
+				if (this.TryArgToInt(arguments, 2, out value, out err))
+					second = value;
+				else
+					return new CompileResult((eErrorType)err);
 			}
 			else
 				return new CompileResult(eErrorType.Value);
-	
+
 			if (hour < 0)
 				return new CompileResult(eErrorType.Num);
 			if (hour > 32767 || minute > 32767 || second > 32767)
 				return new CompileResult(eErrorType.Num);
 
-			if(hour == 32767 && minute == 32767 && second == 32767)
+			if (hour == 32767 && minute == 32767 && second == 32767)
 			{
 				//When the maximum input is used in the TIME function it performs all three modifications to the individual
 				//parameters, adds them and then performs another calculation if necessary.
@@ -83,23 +88,23 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				//Dealing with the secondond being over 59 and adjusting the hour and minuteute as such.
 				var secondAsHour = (second / 60) / 60;
 				var secondAsMinute = second / 60;
-				while(secondAsMinute > 59)
+				while (secondAsMinute > 59)
 					secondAsMinute = secondAsMinute % 60;
-				var newSecond = second - ((secondAsHour*60*60) + (secondAsMinute*60));
+				var newSecond = second - ((secondAsHour * 60 * 60) + (secondAsMinute * 60));
 				//Final calculation to account for the fact that the hour might be over 23.
 				hour = (newHour + secondAsHour) % 24;
 				minute = newMinute + secondAsMinute;
 				second = newSecond;
 			}
 
-			if(hour > 23)
+			if (hour > 23)
 				hour = hour % 24;
-			if(minute > 59)
+			if (minute > 59)
 			{
 				hour = minute / 60;
 				minute = minute % 60;
 			}
-			if(second > 59)
+			if (second > 59)
 			{
 				var newHour = (second / 60) / 60;
 				var newMinute = second / 60;

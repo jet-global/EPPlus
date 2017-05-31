@@ -4,7 +4,6 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
-
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
@@ -156,6 +155,52 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 				return 0;
 			return (int)_argumentParsers.GetParser(DataType.Integer).Parse(val);
 		}
+
+		protected bool TryArgToInt(IEnumerable<FunctionArgument> arguments, int index, out int value, out eErrorType? err)
+		{
+		//	throw new NotImplementedException();
+			var val = arguments.ElementAt(index).Value;
+			err = null;
+			value = -100;
+
+			if (val == null)
+			{
+				value = 0;
+				return true;
+			}
+			if (val is int)
+			{
+				value = this.ArgToInt(arguments, index);
+				return true;
+			}
+			if (val is double)
+			{
+				value = this.ArgToInt(arguments, index);
+				return true;
+			}
+			if (val is string)
+			{
+				if (Utils.ConvertUtil.TryParseNumericString(val, out double result))
+				{
+					value = this.ArgToInt(arguments, index);
+					return true;
+				}
+				else if (Utils.ConvertUtil.TryParseDateString(val, out System.DateTime resu))
+				{
+					err = eErrorType.Num;
+					return false;
+				}
+			}
+			if (Utils.ConvertUtil.TryParseDateObject(val, out System.DateTime re, out eErrorType? error))
+			{
+				value = this.ArgToInt(arguments, index);
+				return true;
+			}
+			err = eErrorType.Value;
+			return false;
+		}
+
+
 
 		/// <summary>
 		/// Returns the value of the argument att the position of the 0-based
