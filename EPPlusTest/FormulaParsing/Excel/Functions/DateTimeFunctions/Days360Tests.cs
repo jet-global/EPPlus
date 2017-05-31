@@ -379,9 +379,27 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360WithIntegerAsMethodParameterReturnsCorrectValue()
 		{
 			var function = new Days360();
-			var args = FunctionsHelper.CreateArgs("5/31/2017", "6/30/2017", 1500);
+			var args = FunctionsHelper.CreateArgs("5/1/2017", "5/31/2017", 1500);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(29, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithZeroAsMethodParameterReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("5/1/2017", "5/31/2017", 0);
 			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(30, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithStringZeroAsMethodParameterReturnsCorrectValue()
+		{
+			var function = new Days360();
+			var args = FunctionsHelper.CreateArgs("5/1/2017", "5/31/2017", "0");
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
@@ -411,6 +429,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				Thread.CurrentThread.CurrentCulture = currentCulture;
 			}
 		}
+
 		#endregion
 	}
 }
