@@ -4757,17 +4757,16 @@ namespace OfficeOpenXml
 			{
 				for (int i = sheet.DataValidations.Count - 1; i >= 0; i--)
 				{
-					//Update ListValidations
 					var validation = sheet.DataValidations.ElementAt(i) as DataValidation.Contracts.IExcelDataValidationList;
 					if(validation != null)
 					{
-						string newFormula = "!";
-						if (validation.Address.WorkSheet == null ) //This formula references the sheet it is on
-							newFormula = this.Package.FormulaManager.UpdateFormulaReferences(validation.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, sheet.Name, sheet.Name);
-						else if(validation.Address.WorkSheet == this.Name.ToUpper()) //This formula references another sheet in the workbook
-							newFormula = this.Package.FormulaManager.UpdateFormulaReferences(validation.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, validation.Address.WorkSheet, validation.Address.WorkSheet);
-						if(!newFormula.Equals("!")) //Only update the formula if we've succesfully created an updated formula
-							validation.Formula.ExcelFormula = newFormula;
+						string worksheetName = "!";
+						if (validation.Address.WorkSheet == null && sheet.Name.ToUpper() == this.Name.ToUpper()) //This formula references the sheet it is on
+							worksheetName = sheet.Name;
+						else if (validation.Address.WorkSheet.ToUpper() == this.Name.ToUpper()) //This formula references another sheet in the workbook
+							worksheetName = validation.Address.WorkSheet;
+						if (!worksheetName.Equals("!")) //Only update the formula if we have a valid reference to a worksheet
+							validation.Formula.ExcelFormula = this.Package.FormulaManager.UpdateFormulaReferences(validation.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, worksheetName, this.Name);
 					}
 				}
 			}
