@@ -4761,13 +4761,13 @@ namespace OfficeOpenXml
 					var validation = sheet.DataValidations.ElementAt(i) as DataValidation.Contracts.IExcelDataValidationList;
 					if(validation != null)
 					{
-						
-						if (validation.Address.WorkSheet == null ||
-						validation.Address.WorkSheet == this.Name.ToUpper())
-						{
-							var newFormula = this.Package.FormulaManager.UpdateFormulaReferences(validation.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, sheet.Name, sheet.Name);
+						string newFormula = "!";
+						if (validation.Address.WorkSheet == null ) //This formula references the sheet it is on
+							newFormula = this.Package.FormulaManager.UpdateFormulaReferences(validation.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, sheet.Name, sheet.Name);
+						else if(validation.Address.WorkSheet == this.Name.ToUpper()) //This formula references another sheet in the workbook
+							newFormula = this.Package.FormulaManager.UpdateFormulaReferences(validation.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, validation.Address.WorkSheet, validation.Address.WorkSheet);
+						if(!newFormula.Equals("!")) //Only update the formula if we've succesfully created an updated formula
 							validation.Formula.ExcelFormula = newFormula;
-						}
 					}
 				}
 			}
