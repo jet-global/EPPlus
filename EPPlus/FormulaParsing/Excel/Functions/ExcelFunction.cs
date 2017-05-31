@@ -144,18 +144,24 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// Returns the value of the argument att the position of the 0-based
 		/// <paramref name="index"/> as an integer.
 		/// </summary>
-		/// <param name="arguments"></param>
-		/// <param name="index"></param>
+		/// <param name="arguments">The list of function arguments where our input to parse is.</param>
+		/// <param name="index">The index of the arguments to try to parse to an integer.</param>
 		/// <returns>Value of the argument as an integer.</returns>
 		/// <exception cref="ExcelErrorValueException"></exception>
 		protected int ArgToInt(IEnumerable<FunctionArgument> arguments, int index)
 		{
 			var val = arguments.ElementAt(index).ValueFirst;
-			if (val == null)
-				return 0;
 			return (int)_argumentParsers.GetParser(DataType.Integer).Parse(val);
 		}
 
+		/// <summary>
+		/// Attempts to parse an argument into an integer value.
+		/// </summary>
+		/// <param name="arguments">The list of function arguments where our input to parse is.</param>
+		/// <param name="index"> The index of the arguments to try to parse to an integer.</param>
+		/// <param name="value">The resulting value if the parse was successful. If not the value is -100.</param>
+		/// <param name="err">Null if parse was successful, or the <see cref="eErrorType"/> indicating why the parse was unsuccessful.</param>
+		/// <returns></returns>
 		protected bool TryArgToInt(IEnumerable<FunctionArgument> arguments, int index, out int value, out eErrorType? err)
 		{
 		//	throw new NotImplementedException();
