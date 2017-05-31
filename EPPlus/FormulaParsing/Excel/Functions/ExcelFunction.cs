@@ -28,6 +28,7 @@ using System.Text.RegularExpressions;
 using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.FormulaParsing.Utilities;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
@@ -115,7 +116,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <param name="minLength"></param>
 		protected bool ValidateArguments(IEnumerable<FunctionArgument> arguments, int minLength)
 		{
-			Require.That(arguments).Named("arguments").IsNotNull();
+			Utilities.Require.That(arguments).Named("arguments").IsNotNull();
 			return !this.TooFewArgs(arguments, minLength);
 		}
 
@@ -185,14 +186,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			}
 			else if (intCandidate is string)
 			{
-				if (Utils.ConvertUtil.TryParseNumericString(intCandidate, out double result))
+				if (ConvertUtil.TryParseNumericString(intCandidate, out double result))
 				{
 					value = this.ArgToInt(arguments, index);
 					return true;
 				}
 			}
-			if (Utils.ConvertUtil.TryParseDateObject(intCandidate, out System.DateTime date, out eErrorType? error))
+			if (ConvertUtil.TryParseDateObject(intCandidate, out System.DateTime date, out eErrorType? error))
 			{
+				var testVal = date.ToOADate();
 				value = (int)date.ToOADate();
 				return true;
 			}

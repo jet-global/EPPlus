@@ -320,6 +320,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void TimeWithSmallDateStringReturnsPoundNum()
+		{
+			var function = new Time();
+			var args = FunctionsHelper.CreateArgs("5/1/1900", 1, 1);
+			var result = function.Execute(args, this.ParsingContext);
+			var expectedResult = this.GetTime(2,1,1);
+			Assert.AreEqual(expectedResult, result.Result);
+		}
 		#endregion
 	}
 }
