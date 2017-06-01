@@ -25,6 +25,8 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Globalization;
+using System.Threading;
 using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -38,55 +40,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	{
 		#region YearFrac Function (Execute) Tests
 		[TestMethod]
-		public void YearFracShouldReturnCorrectResultWithUsBasis()
-		{
-			var func = new Yearfrac();
-			var dt1arg = new DateTime(2013, 2, 28).ToOADate();
-			var dt2arg = new DateTime(2013, 3, 31).ToOADate();
-
-			var result = func.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg), this.ParsingContext);
-
-			var roundedResult = System.Math.Round((double)result.Result, 4);
-
-			Assert.IsTrue(System.Math.Abs(0.0861 - roundedResult) < double.Epsilon);
-		}
-
-		[TestMethod]
-		public void YearFracShouldReturnCorrectResultWithEuroBasis()
-		{
-			var func = new Yearfrac();
-			var dt1arg = new DateTime(2013, 2, 28).ToOADate();
-			var dt2arg = new DateTime(2013, 3, 31).ToOADate();
-
-			var result = func.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg, 4), this.ParsingContext);
-
-			var roundedResult = System.Math.Round((double)result.Result, 4);
-
-			Assert.IsTrue(System.Math.Abs(0.0889 - roundedResult) < double.Epsilon);
-		}
-
-		[TestMethod]
-		public void YearFracActualActual()
-		{
-			var func = new Yearfrac();
-			var dt1arg = new DateTime(2012, 2, 28).ToOADate();
-			var dt2arg = new DateTime(2013, 3, 31).ToOADate();
-
-			var result = func.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg, 1), this.ParsingContext);
-
-			var roundedResult = System.Math.Round((double)result.Result, 4);
-
-			Assert.IsTrue(System.Math.Abs(1.0862 - roundedResult) < double.Epsilon);
-		}
-
-		[TestMethod]
-		public void YearFracTooFewArgumentsReturnsPoundValue()
+		public void YearFracWithTooFewArgumentsReturnsPoundValue()
 		{
 			var func = new Yearfrac();
 			var result = func.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, (result.Result as ExcelErrorValue).Type);
 		}
 
+		/*
 		[TestMethod]
 		public void YearFrac()
 		{
@@ -95,7 +56,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(, result.Result);
 		}
-
+		*/
 		[TestMethod]
 		public void YearFracWithDateAsIntegerReturnsCorrectResult()
 		{
@@ -558,6 +519,52 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(), string.Empty);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearFracFunctionWorksInDifferentCultureFormats()
+		{
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				var us = CultureInfo.CreateSpecificCulture("en-US");
+				Thread.CurrentThread.CurrentCulture = us;
+				using (var package = new ExcelPackage())
+				{
+					var ws = package.Workbook.Worksheets.Add("Sheet1");
+					ws.Cells[2, 2].Value = "1/1/2017";
+					ws.Cells[2, 3].Value = "5/23/2017";
+					ws.Cells[4, 3].Formula = "YEARFRAC(B2, C2)";
+					ws.Calculate();
+					Assert.AreEqual(0.394444444444444, ws.Cells[4, 3].Value);
+				}
+				var gb = CultureInfo.CreateSpecificCulture("en-GB");
+				Thread.CurrentThread.CurrentCulture = gb;
+				using (var package = new ExcelPackage())
+				{
+					var ws = package.Workbook.Worksheets.Add("Sheet1");
+					ws.Cells[2, 2].Value = "1/1/2017";
+					ws.Cells[2, 3].Value = "23/5/2017";
+					ws.Cells[4, 3].Formula = "YEARFRAC(B2, C2)";
+					ws.Calculate();
+					Assert.AreEqual(0.394444444444444, ws.Cells[4, 3].Value);
+				}
+				var de = CultureInfo.CreateSpecificCulture("de-DE");
+				Thread.CurrentThread.CurrentCulture = de;
+				using (var package = new ExcelPackage())
+				{
+					var ws = package.Workbook.Worksheets.Add("Sheet1");
+					ws.Cells[2, 2].Value = "1.1.2017";
+					ws.Cells[2, 3].Value = "23.5.2017";
+					ws.Cells[4, 3].Formula = "YEARFRAC(B2, C2)";
+					ws.Calculate();
+					Assert.AreEqual(0.394444444444444, ws.Cells[4, 3].Value);
+				}
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
 		}
 		#endregion
 	}
