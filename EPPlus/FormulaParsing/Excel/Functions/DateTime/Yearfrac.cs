@@ -89,7 +89,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					return null;
 			}
 
-			yearFracResult = System.Math.Round(yearFracResult, 15);
+			yearFracResult = System.Math.Round(yearFracResult, 11);
 			return this.CreateResult(yearFracResult, DataType.Decimal);
 		}
 

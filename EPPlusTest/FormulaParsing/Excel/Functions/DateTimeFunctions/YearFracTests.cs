@@ -65,7 +65,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs((int)(date1.ToOADate()), (int)(date2.ToOADate()));
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.394444444444444, result.Result);
+			Assert.AreEqual(0.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -76,7 +76,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate());
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.394444444444444, result.Result);
+			Assert.AreEqual(0.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -86,7 +86,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs("42736", "42878");
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.394444444444444, result.Result);
+			Assert.AreEqual(0.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -96,7 +96,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs("42736.5", "42878.5");
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.394444444444444, result.Result);
+			Assert.AreEqual(0.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -105,7 +105,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs("1/1/2017", "5/23/2017");
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.394444444444444, result.Result);
+			Assert.AreEqual(0.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -114,7 +114,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs("January 1, 2017", "May 23, 2017");
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.394444444444444, result.Result);
+			Assert.AreEqual(0.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -205,7 +205,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate());
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.394444444444444, result.Result);
+			Assert.AreEqual(0.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -216,7 +216,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate());
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(2.394444444444444, result.Result);
+			Assert.AreEqual(2.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -247,7 +247,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(), null);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.394444444444444, result.Result);
+			Assert.AreEqual(0.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -268,7 +268,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(0, 42878);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(117.397222222222, result.Result);
+
+			//var roundedResult = System.Math.Round((double)result.Result, 12);
+			//Assert.IsTrue(System.Math.Abs(117.397222222222 - roundedResult) < double.Epsilon);
+			Assert.AreEqual(117.39722222222, result.Result);
 		}
 
 		[TestMethod]
@@ -278,7 +281,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(1, 42878);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(117.394444444444, result.Result);
+			Assert.AreEqual(117.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -307,7 +310,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(),1);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.389041095890411, result.Result);
+			Assert.AreEqual(0.38904109589, result.Result);
 		}
 
 		[TestMethod]
@@ -318,7 +321,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(), 2);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.394444444444444, result.Result);
+			Assert.AreEqual(0.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -329,7 +332,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(), 3);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.389041095890411, result.Result);
+			Assert.AreEqual(0.38904109589, result.Result);
 		}
 
 		[TestMethod]
@@ -340,7 +343,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(), 4);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.394444444444444, result.Result);
+			Assert.AreEqual(0.39444444444, result.Result);
 		}
 
 		[TestMethod]
@@ -370,7 +373,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(31, 59, 2);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.0777777777777778, result.Result);
+			Assert.AreEqual(0.07777777778, result.Result);
 		}
 
 		[TestMethod]
@@ -400,7 +403,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(31, 42736, 0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(116.919444444444, result.Result);
+			Assert.AreEqual(116.91944444444, result.Result);
 		}
 
 		[TestMethod]
@@ -430,7 +433,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(31, 42736, 3);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(117, result.Result);
+			Assert.AreEqual(117.0, result.Result);
 		}
 
 		[TestMethod]
@@ -440,7 +443,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(31, 42736, 4);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(116.919444444444, result.Result);
+			Assert.AreEqual(116.91944444444, result.Result);
 		}
 
 		[TestMethod]
@@ -451,7 +454,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(), 1.5);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.389041095890411, result.Result);
+			Assert.AreEqual(0.38904109589, result.Result);
 		}
 
 		[TestMethod]
@@ -462,7 +465,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(), "1");
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.389041095890411, result.Result);
+			Assert.AreEqual(0.38904109589, result.Result);
 		}
 
 		[TestMethod]
@@ -473,7 +476,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(), "1.5");
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.389041095890411d, result.Result);
+			Assert.AreEqual(0.38904109589, result.Result);
 		}
 
 		[TestMethod]
@@ -536,7 +539,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 					ws.Cells[2, 3].Value = "5/23/2017";
 					ws.Cells[4, 3].Formula = "YEARFRAC(B2, C2)";
 					ws.Calculate();
-					Assert.AreEqual(0.394444444444444, ws.Cells[4, 3].Value);
+					Assert.AreEqual(0.39444444444, ws.Cells[4, 3].Value);
 				}
 				var gb = CultureInfo.CreateSpecificCulture("en-GB");
 				Thread.CurrentThread.CurrentCulture = gb;
@@ -547,7 +550,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 					ws.Cells[2, 3].Value = "23/5/2017";
 					ws.Cells[4, 3].Formula = "YEARFRAC(B2, C2)";
 					ws.Calculate();
-					Assert.AreEqual(0.394444444444444, ws.Cells[4, 3].Value);
+					Assert.AreEqual(0.39444444444, ws.Cells[4, 3].Value);
 				}
 				var de = CultureInfo.CreateSpecificCulture("de-DE");
 				Thread.CurrentThread.CurrentCulture = de;
@@ -558,7 +561,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 					ws.Cells[2, 3].Value = "23.5.2017";
 					ws.Cells[4, 3].Formula = "YEARFRAC(B2, C2)";
 					ws.Calculate();
-					Assert.AreEqual(0.394444444444444, ws.Cells[4, 3].Value);
+					Assert.AreEqual(0.39444444444, ws.Cells[4, 3].Value);
 				}
 			}
 			finally
