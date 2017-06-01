@@ -48,7 +48,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			}
 			if (obj == null) return false;
 			if (obj is bool) return (bool)obj;
-			if (ConvertUtil.TryParseDateObject(obj, out System.DateTime date, out eErrorType? error)) return false;
 			if (obj.IsNumeric()) return Convert.ToBoolean(obj);
 			bool result;
 			if (bool.TryParse(obj.ToString(), out result))

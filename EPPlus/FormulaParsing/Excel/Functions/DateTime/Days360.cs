@@ -30,13 +30,24 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (!this.TryGetArgumentDateValueAtIndex(arguments, 0, out System.DateTime dt1) || !this.TryGetArgumentDateValueAtIndex(arguments, 1, out System.DateTime dt2))
 				return new CompileResult(eErrorType.Value);
 			var calcType = Days360Calctype.Us;
+
 			if (arguments.Count() > 2)
 			{
+				var european = false;
 				if (arguments.ElementAt(2).Value is string && ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out double val))
 					return new CompileResult(eErrorType.Value);
-				var european = this.ArgToBool(arguments, 2);
-				if (arguments.ElementAt(2).Value is int intval && intval > 0)
+				if(arguments.ElementAt(2).Value is System.DateTime)
+				{
 					european = true;
+				}
+				else
+				{
+					european = this.ArgToBool(arguments, 2);
+					if (arguments.ElementAt(2).Value is int intval && intval > 0)
+						european = true;
+				}
+				
+
 				if (european) calcType = Days360Calctype.European;
 			}
 

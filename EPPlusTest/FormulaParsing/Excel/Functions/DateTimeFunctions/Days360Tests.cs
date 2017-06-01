@@ -43,9 +43,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360ShouldReturnCorrectResultWithNoMethodSpecified()
 		{
 			var function = new Days360();
-			var dt1arg = new DateTime(2013, 1, 1).ToOADate();
-			var dt2arg = new DateTime(2013, 3, 31).ToOADate();
-			var result = function.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg), this.ParsingContext);
+			var startDate = new DateTime(2013, 1, 1).ToOADate();
+			var endDate = new DateTime(2013, 3, 31).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, endDate), this.ParsingContext);
 			Assert.AreEqual(90, result.Result);
 		}
 
@@ -53,9 +53,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360ShouldReturnCorrectResultWithNoMethodSpecifiedMiddleOfMonthDates()
 		{
 			var function = new Days360();
-			var dt1arg = new DateTime(1982, 4, 25).ToOADate();
-			var dt2arg = new DateTime(2016, 6, 12).ToOADate();
-			var result = function.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg), this.ParsingContext);
+			var startDate = new DateTime(1982, 4, 25).ToOADate();
+			var endDate = new DateTime(2016, 6, 12).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, endDate), this.ParsingContext);
 			Assert.AreEqual(12287, result.Result);
 		}
 
@@ -63,9 +63,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360ShouldReturnCorrectResultWithEuroMethodSpecified()
 		{
 			var function = new Days360();
-			var dt1arg = new DateTime(2013, 1, 1).ToOADate();
-			var dt2arg = new DateTime(2013, 3, 31).ToOADate();
-			var result = function.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg, true), this.ParsingContext);
+			var startDate = new DateTime(2013, 1, 1).ToOADate();
+			var endDate = new DateTime(2013, 3, 31).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, endDate, true), this.ParsingContext);
 			Assert.AreEqual(89, result.Result);
 		}
 
@@ -73,9 +73,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360ShouldHandleFebWithEuroMethodSpecified()
 		{
 			var function = new Days360();
-			var dt1arg = new DateTime(2012, 2, 29).ToOADate();
-			var dt2arg = new DateTime(2013, 2, 28).ToOADate();
-			var result = function.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg, true), this.ParsingContext);
+			var startDate = new DateTime(2012, 2, 29).ToOADate();
+			var endDate = new DateTime(2013, 2, 28).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, endDate, true), this.ParsingContext);
 			Assert.AreEqual(359, result.Result);
 		}
 
@@ -83,9 +83,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360ShouldHandleFebWithUsMethodSpecified()
 		{
 			var function = new Days360();
-			var dt1arg = new DateTime(2012, 2, 29).ToOADate();
-			var dt2arg = new DateTime(2013, 2, 28).ToOADate();
-			var result = function.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg, false), this.ParsingContext);
+			var startDate = new DateTime(2012, 2, 29).ToOADate();
+			var endDate = new DateTime(2013, 2, 28).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, endDate, false), this.ParsingContext);
 			Assert.AreEqual(358, result.Result);
 		}
 
@@ -93,9 +93,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360ShouldHandleFebWithUsMethodSpecifiedEndOfMonth()
 		{
 			var function = new Days360();
-			var dt1arg = new DateTime(2013, 2, 28).ToOADate();
-			var dt2arg = new DateTime(2013, 3, 31).ToOADate();
-			var result = function.Execute(FunctionsHelper.CreateArgs(dt1arg, dt2arg, false), this.ParsingContext);
+			var startDate = new DateTime(2013, 2, 28).ToOADate();
+			var endDate = new DateTime(2013, 3, 31).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, endDate, false), this.ParsingContext);
 			Assert.AreEqual(30, result.Result);
 		}
 
@@ -103,8 +103,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360ShouldHandleNullFirstDateArgument()
 		{
 			var function = new Days360();
-			var dt2arg = new DateTime(2013, 3, 15).ToOADate();
-			var result = function.Execute(FunctionsHelper.CreateArgs(null, dt2arg, false), this.ParsingContext);
+			var endDate = new DateTime(2013, 3, 15).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(null, endDate, false), this.ParsingContext);
 			Assert.AreEqual(40755, result.Result);
 		}
 
@@ -112,8 +112,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360ShouldHandleNullFirstDateArgumentEndOfMonth()
 		{
 			var function = new Days360();
-			var dt2arg = new DateTime(2013, 3, 31).ToOADate();
-			var result = function.Execute(FunctionsHelper.CreateArgs(null, dt2arg, false), this.ParsingContext);
+			var endDate = new DateTime(2013, 3, 31).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(null, endDate, false), this.ParsingContext);
 			Assert.AreEqual(40771, result.Result);
 		}
 
@@ -121,8 +121,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360ShouldHandleNullSecondDateArgument()
 		{
 			var function = new Days360();
-			var dt1arg = new DateTime(1992, 2, 10).ToOADate();
-			var result = function.Execute(FunctionsHelper.CreateArgs(dt1arg, null, false), this.ParsingContext);
+			var startDate = new DateTime(1992, 2, 10).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, null, false), this.ParsingContext);
 			Assert.AreEqual(-33160, result.Result);
 		}
 
@@ -130,8 +130,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360ShouldHandleNullSecondDateArgumentEndOfMonth()
 		{
 			var function = new Days360();
-			var dt1arg = new DateTime(2013, 2, 28).ToOADate();
-			var result = function.Execute(FunctionsHelper.CreateArgs(dt1arg, null, false), this.ParsingContext);
+			var startDate = new DateTime(2013, 2, 28).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, null, false), this.ParsingContext);
 			Assert.AreEqual(-40740, result.Result);
 		}
 
