@@ -27,11 +27,20 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// This class contains the formula for returning today's date.
+	/// </summary>
 	public class Today : ExcelFunction
 	{
+		/// <summary>
+		/// Execute returns today's date. 
+		/// </summary>
+		/// <param name="arguments">Not used, but needed for overriding the method.</param>
+		/// <param name="context">Not used, but needed for overriding the method.</param>
+		/// <returns>Today's date as an OADate.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			return CreateResult(System.DateTime.Today.ToOADate(), DataType.Date);
+			return this.CreateResult(System.DateTime.Today.ToOADate(), DataType.Date);
 		}
 	}
 }
