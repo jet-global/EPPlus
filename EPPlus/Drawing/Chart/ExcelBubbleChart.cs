@@ -7,7 +7,7 @@ using OfficeOpenXml.Table.PivotTable;
 namespace OfficeOpenXml.Drawing.Chart
 {
 	/// <summary>
-	/// Provides access to bubble chart specific properties
+	/// Provides access to bubble chart specific properties.
 	/// </summary>
 	public sealed class ExcelBubbleChart : ExcelChart
 	{
