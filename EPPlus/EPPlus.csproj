@@ -381,7 +381,6 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Second.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Time.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\TimeBaseFunction.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTime\TimeStringParser.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Today.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Weekday.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workday.cs" />
