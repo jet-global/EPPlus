@@ -369,7 +369,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360WithTrueOrFalseAsStringReturnsCorrecValue()
 		{
 			var function = new Days360();
-			var argsWithTrue = FunctionsHelper.CreateArgs("5/31/2017", "6/30/2017", "true");
+			var argsWithTrue = FunctionsHelper.CreateArgs("5/31/2017", "6/30/2017", "tRuE");
 			var argsWithFalse = FunctionsHelper.CreateArgs("5/31/2017", "6/30/2017", "false");
 			var resultWithTrue = function.Execute(argsWithTrue, this.ParsingContext);
 			var resultWithFalse = function.Execute(argsWithFalse, this.ParsingContext);
@@ -422,7 +422,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			{
 				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("de-DE");
 				var function = new Days360();
-				var args = FunctionsHelper.CreateArgs("30.5.2017", "30.6.2017");
+				var args = FunctionsHelper.CreateArgs("30.5.2017", "30.6.2017", "TRUE");
 				var result = function.Execute(args, this.ParsingContext);
 				Assert.AreEqual(30, result.Result);
 			}

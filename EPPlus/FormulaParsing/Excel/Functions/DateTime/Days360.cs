@@ -36,7 +36,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				var european = false;
 				if (arguments.ElementAt(2).Value is string stringVal)
 				{
-					if (!stringVal.Equals("true") && !stringVal.Equals("false"))
+					if (!stringVal.Equals("true", System.StringComparison.CurrentCultureIgnoreCase) && !stringVal.Equals("false", System.StringComparison.CurrentCultureIgnoreCase))
 						return new CompileResult(eErrorType.Value);
 				}
 					
