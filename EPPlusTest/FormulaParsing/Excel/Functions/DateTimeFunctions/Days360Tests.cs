@@ -358,7 +358,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void Days360WithGenericStringAsMethodParameterReturnsPoundValue()
 		{
 			var function = new Days360();
-			var args = FunctionsHelper.CreateArgs("5/31/2017", "6/31/2017", "string");
+			var dateArg1 = new DateTime(2017, 5, 31);
+			var dateArg2 = new DateTime(2017, 6, 30);
+			var args = FunctionsHelper.CreateArgs(dateArg1, dateArg2, "string");
 			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
