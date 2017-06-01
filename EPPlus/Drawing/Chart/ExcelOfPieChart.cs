@@ -83,7 +83,7 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				if (_chartXmlHelper.GetXmlNodeString(pieTypePath) == "bar")
+				if (ChartXmlHelper.GetXmlNodeString(pieTypePath) == "bar")
 					return ePieType.Bar;
 				else
 				{
@@ -92,8 +92,8 @@ namespace OfficeOpenXml.Drawing.Chart
 			}
 			internal set
 			{
-				_chartXmlHelper.CreateNode(pieTypePath, true);
-				_chartXmlHelper.SetXmlNodeString(pieTypePath, value == ePieType.Bar ? "bar" : "pie");
+				ChartXmlHelper.CreateNode(pieTypePath, true);
+				ChartXmlHelper.SetXmlNodeString(pieTypePath, value == ePieType.Bar ? "bar" : "pie");
 			}
 		}
 		string _gapWidthPath = "c:gapWidth/@val";
@@ -104,11 +104,11 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				return _chartXmlHelper.GetXmlNodeInt(_gapWidthPath);
+				return ChartXmlHelper.GetXmlNodeInt(_gapWidthPath);
 			}
 			set
 			{
-				_chartXmlHelper.SetXmlNodeString(_gapWidthPath, value.ToString(CultureInfo.InvariantCulture));
+				ChartXmlHelper.SetXmlNodeString(_gapWidthPath, value.ToString(CultureInfo.InvariantCulture));
 			}
 		}
 		internal override eChartType GetChartType(string name)

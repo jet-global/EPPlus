@@ -192,11 +192,11 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				return GetDirectionEnum(_chartXmlHelper?.GetXmlNodeString(_directionPath));
+				return GetDirectionEnum(ChartXmlHelper?.GetXmlNodeString(_directionPath));
 			}
 			internal set
 			{
-				_chartXmlHelper.SetXmlNodeString(_directionPath, GetDirectionText(value));
+				ChartXmlHelper.SetXmlNodeString(_directionPath, GetDirectionText(value));
 			}
 		}
 		string _shapePath = "c:shape/@val";
@@ -207,11 +207,11 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				return GetShapeEnum(_chartXmlHelper?.GetXmlNodeString(_shapePath));
+				return GetShapeEnum(ChartXmlHelper?.GetXmlNodeString(_shapePath));
 			}
 			internal set
 			{
-				_chartXmlHelper.SetXmlNodeString(_shapePath, GetShapeText(value));
+				ChartXmlHelper.SetXmlNodeString(_shapePath, GetShapeText(value));
 			}
 		}
 		ExcelChartDataLabel _DataLabel = null;
@@ -237,11 +237,11 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				return _chartXmlHelper.GetXmlNodeInt(_gapWidthPath);
+				return ChartXmlHelper.GetXmlNodeInt(_gapWidthPath);
 			}
 			set
 			{
-				_chartXmlHelper.SetXmlNodeString(_gapWidthPath, value.ToString(CultureInfo.InvariantCulture));
+				ChartXmlHelper.SetXmlNodeString(_gapWidthPath, value.ToString(CultureInfo.InvariantCulture));
 			}
 		}
 		#endregion

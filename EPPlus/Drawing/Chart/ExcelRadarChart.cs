@@ -83,7 +83,7 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				var v = _chartXmlHelper?.GetXmlNodeString(STYLE_PATH);
+				var v = ChartXmlHelper?.GetXmlNodeString(STYLE_PATH);
 				if (string.IsNullOrEmpty(v))
 				{
 					return eRadarStyle.Standard;
@@ -95,7 +95,7 @@ namespace OfficeOpenXml.Drawing.Chart
 			}
 			set
 			{
-				_chartXmlHelper?.SetXmlNodeString(STYLE_PATH, value.ToString().ToLower(CultureInfo.InvariantCulture));
+				ChartXmlHelper?.SetXmlNodeString(STYLE_PATH, value.ToString().ToLower(CultureInfo.InvariantCulture));
 			}
 		}
 

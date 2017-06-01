@@ -64,11 +64,11 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				return _chartXmlHelper.GetXmlNodeBool(MARKER_PATH, false);
+				return ChartXmlHelper.GetXmlNodeBool(MARKER_PATH, false);
 			}
 			set
 			{
-				_chartXmlHelper.SetXmlNodeBool(MARKER_PATH, value, false);
+				ChartXmlHelper.SetXmlNodeBool(MARKER_PATH, value, false);
 			}
 		}
 
@@ -80,11 +80,11 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				return _chartXmlHelper.GetXmlNodeBool(SMOOTH_PATH, false);
+				return ChartXmlHelper.GetXmlNodeBool(SMOOTH_PATH, false);
 			}
 			set
 			{
-				_chartXmlHelper.SetXmlNodeBool(SMOOTH_PATH, value);
+				ChartXmlHelper.SetXmlNodeBool(SMOOTH_PATH, value);
 			}
 		}
 		//string _chartTopPath = "c:chartSpace/c:chart/c:plotArea/{0}";
@@ -107,7 +107,7 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			if (name == "lineChart")
 			{
-				if (this._chartXmlHelper == null)
+				if (this.ChartXmlHelper == null)
 					return eChartType.Line;
 				if (Marker)
 				{

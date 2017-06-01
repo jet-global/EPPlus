@@ -104,12 +104,12 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				return GetScatterEnum(_chartXmlHelper?.GetXmlNodeString(_scatterTypePath));
+				return GetScatterEnum(ChartXmlHelper?.GetXmlNodeString(_scatterTypePath));
 			}
 			internal set
 			{
-				_chartXmlHelper.CreateNode(_scatterTypePath, true);
-				_chartXmlHelper.SetXmlNodeString(_scatterTypePath, GetScatterText(value));
+				ChartXmlHelper.CreateNode(_scatterTypePath, true);
+				ChartXmlHelper.SetXmlNodeString(_scatterTypePath, GetScatterText(value));
 			}
 		}
 		string MARKER_PATH = "c:marker/@val";

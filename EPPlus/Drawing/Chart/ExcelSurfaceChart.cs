@@ -59,9 +59,9 @@ namespace OfficeOpenXml.Drawing.Chart
 		}
 		private void Init()
 		{
-			_floor = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:floor", NameSpaceManager));
-			_backWall = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:sideWall", NameSpaceManager));
-			_sideWall = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:backWall", NameSpaceManager));
+			_floor = new ExcelChartSurface(NameSpaceManager, ChartXmlHelper.TopNode.SelectSingleNode("c:floor", NameSpaceManager));
+			_backWall = new ExcelChartSurface(NameSpaceManager, ChartXmlHelper.TopNode.SelectSingleNode("c:sideWall", NameSpaceManager));
+			_sideWall = new ExcelChartSurface(NameSpaceManager, ChartXmlHelper.TopNode.SelectSingleNode("c:backWall", NameSpaceManager));
 			SetTypeProperties();
 		}
 		#endregion
@@ -96,11 +96,11 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				return _chartXmlHelper.GetXmlNodeBool(WIREFRAME_PATH);
+				return ChartXmlHelper.GetXmlNodeBool(WIREFRAME_PATH);
 			}
 			set
 			{
-				_chartXmlHelper.SetXmlNodeBool(WIREFRAME_PATH, value);
+				ChartXmlHelper.SetXmlNodeBool(WIREFRAME_PATH, value);
 			}
 		}
 		internal void SetTypeProperties()
