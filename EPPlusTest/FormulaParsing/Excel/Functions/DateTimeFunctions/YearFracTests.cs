@@ -473,7 +473,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(), "1.5");
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.389041095890411, result.Result);
+			Assert.AreEqual(0.389041095890411d, result.Result);
 		}
 
 		[TestMethod]
