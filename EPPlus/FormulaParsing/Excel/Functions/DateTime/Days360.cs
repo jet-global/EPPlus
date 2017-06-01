@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
@@ -31,7 +32,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var calcType = Days360Calctype.Us;
 			if (arguments.Count() > 2)
 			{
+				if (arguments.ElementAt(2).Value is string && ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out double val))
+					return new CompileResult(eErrorType.Value);
 				var european = this.ArgToBool(arguments, 2);
+				if (arguments.ElementAt(2).Value is int intval && intval > 0)
+					european = true;
 				if (european) calcType = Days360Calctype.European;
 			}
 
