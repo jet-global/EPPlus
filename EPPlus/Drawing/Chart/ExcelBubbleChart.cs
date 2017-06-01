@@ -11,123 +11,129 @@ namespace OfficeOpenXml.Drawing.Chart
 	/// </summary>
 	public sealed class ExcelBubbleChart : ExcelChart
 	{
-		internal ExcelBubbleChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
-			 base(drawings, node, type, topChart, PivotTableSource)
-		{
-			ShowNegativeBubbles = false;
-			BubbleScale = 100;
-			ChartSeries = new ExcelBubbleChartSeries(this, drawings.NameSpaceManager, ChartNode, PivotTableSource != null);
-			//SetTypeProperties();
-		}
+		#region Constants
+		private const string BubbleScalePath = "c:bubbleScale/@val";
+		private const string ShowNegativeBubblesPath = "c:showNegBubbles/@val";
+		private const string Bubble3dPath = "c:bubble3D/@val";
+		private const string SIZEREPRESENTS_PATH = "c:sizeRepresents/@val";
+		#endregion
 
-		internal ExcelBubbleChart(ExcelDrawings drawings, XmlNode node, eChartType type, bool isPivot) :
-			 base(drawings, node, type, isPivot)
-		{
-			ChartSeries = new ExcelBubbleChartSeries(this, drawings.NameSpaceManager, ChartNode, isPivot);
-			//SetTypeProperties();
-		}
-		internal ExcelBubbleChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
-			 base(drawings, node, uriChart, part, chartXml, chartNode)
-		{
-			ChartSeries = new ExcelBubbleChartSeries(this, _drawings.NameSpaceManager, ChartNode, false);
-			//SetTypeProperties();
-		}
-		internal ExcelBubbleChart(ExcelChart topChart, XmlNode chartNode) :
-			 base(topChart, chartNode)
-		{
-			ChartSeries = new ExcelBubbleChartSeries(this, _drawings.NameSpaceManager, ChartNode, false);
-		}
-		string BUBBLESCALE_PATH = "c:bubbleScale/@val";
+		#region Properties
 		/// <summary>
-		/// Specifies the scale factor for the bubble chart. Can range from 0 to 300, corresponding to a percentage of the default size,
+		/// Specifies the scale factor for the bubble chart. Can range from 0 to 300, corresponding to a percentage of the default size.
 		/// </summary>
 		public int BubbleScale
 		{
 			get
 			{
-				return ChartXmlHelper.GetXmlNodeInt(BUBBLESCALE_PATH);
+				return this.ChartXmlHelper.GetXmlNodeInt(ExcelBubbleChart.BubbleScalePath);
 			}
 			set
 			{
 				if (value < 0 && value > 300)
-				{
 					throw (new ArgumentOutOfRangeException("Bubblescale out of range. 0-300 allowed"));
-				}
-				ChartXmlHelper.SetXmlNodeString(BUBBLESCALE_PATH, value.ToString());
+				this.ChartXmlHelper.SetXmlNodeString(ExcelBubbleChart.BubbleScalePath, value.ToString());
 			}
 		}
-		string SHOWNEGBUBBLES_PATH = "c:showNegBubbles/@val";
+
 		/// <summary>
-		/// Specifies the scale factor for the bubble chart. Can range from 0 to 300, corresponding to a percentage of the default size,
+		/// Specifies the scale factor for the bubble chart. Can range from 0 to 300, corresponding to a percentage of the default size.
 		/// </summary>
 		public bool ShowNegativeBubbles
 		{
 			get
 			{
-				return ChartXmlHelper.GetXmlNodeBool(SHOWNEGBUBBLES_PATH);
+				return this.ChartXmlHelper.GetXmlNodeBool(ExcelBubbleChart.ShowNegativeBubblesPath);
 			}
 			set
 			{
-				ChartXmlHelper.SetXmlNodeBool(BUBBLESCALE_PATH, value, true);
+				this.ChartXmlHelper.SetXmlNodeBool(ExcelBubbleChart.BubbleScalePath, value, true);
 			}
 		}
-		string BUBBLE3D_PATH = "c:bubble3D/@val";
+
 		/// <summary>
-		/// Specifies if the bubblechart is three dimensional
+		/// Specifies if the bubblechart is three dimensional.
 		/// </summary>
 		public bool Bubble3D
 		{
 			get
 			{
-				return ChartXmlHelper?.GetXmlNodeBool(BUBBLE3D_PATH) ?? false;
+				return this.ChartXmlHelper?.GetXmlNodeBool(ExcelBubbleChart.Bubble3dPath) ?? false;
 			}
 			set
 			{
-				ChartXmlHelper.SetXmlNodeBool(BUBBLE3D_PATH, value);
-				ChartType = value ? eChartType.Bubble3DEffect : eChartType.Bubble;
+				this.ChartXmlHelper.SetXmlNodeBool(ExcelBubbleChart.Bubble3dPath, value);
+				this.ChartType = value ? eChartType.Bubble3DEffect : eChartType.Bubble;
 			}
 		}
-		string SIZEREPRESENTS_PATH = "c:sizeRepresents/@val";
+
 		/// <summary>
-		/// Specifies the scale factor for the bubble chart. Can range from 0 to 300, corresponding to a percentage of the default size,
+		/// Specifies the scale factor for the bubble chart. Can range from 0 to 300, corresponding to a percentage of the default size.
 		/// </summary>
 		public eSizeRepresents SizeRepresents
 		{
 			get
 			{
-				var v = ChartXmlHelper.GetXmlNodeString(SIZEREPRESENTS_PATH).ToLower(CultureInfo.InvariantCulture);
-				if (v == "w")
-				{
+				var xmlNodeString = this.ChartXmlHelper.GetXmlNodeString(ExcelBubbleChart.SIZEREPRESENTS_PATH).ToLower(CultureInfo.InvariantCulture);
+				if (xmlNodeString == "w")
 					return eSizeRepresents.Width;
-				}
 				else
-				{
 					return eSizeRepresents.Area;
-				}
 			}
 			set
 			{
-				ChartXmlHelper.SetXmlNodeString(SIZEREPRESENTS_PATH, value == eSizeRepresents.Width ? "w" : "area");
+				this.ChartXmlHelper.SetXmlNodeString(ExcelBubbleChart.SIZEREPRESENTS_PATH, value == eSizeRepresents.Width ? "w" : "area");
 			}
 		}
+
+		/// <summary>
+		/// The chart Series.
+		/// </summary>
 		public new ExcelBubbleChartSeries Series
 		{
 			get
 			{
-
-				return (ExcelBubbleChartSeries)ChartSeries;
+				return (ExcelBubbleChartSeries)this.ChartSeries;
 			}
 		}
+		#endregion
+
+		#region Constructors
+		internal ExcelBubbleChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
+			 base(drawings, node, type, topChart, PivotTableSource)
+		{
+			this.ShowNegativeBubbles = false;
+			this.BubbleScale = 100;
+			this.ChartSeries = new ExcelBubbleChartSeries(this, drawings.NameSpaceManager, this.ChartNode, PivotTableSource != null);
+		}
+
+		internal ExcelBubbleChart(ExcelDrawings drawings, XmlNode node, eChartType type, bool isPivot) :
+			 base(drawings, node, type, isPivot)
+		{
+			this.ChartSeries = new ExcelBubbleChartSeries(this, drawings.NameSpaceManager, this.ChartNode, isPivot);
+		}
+
+		internal ExcelBubbleChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
+			 base(drawings, node, uriChart, part, chartXml, chartNode)
+		{
+			this.ChartSeries = new ExcelBubbleChartSeries(this, this._drawings.NameSpaceManager, this.ChartNode, false);
+		}
+
+		internal ExcelBubbleChart(ExcelChart topChart, XmlNode chartNode) :
+			 base(topChart, chartNode)
+		{
+			this.ChartSeries = new ExcelBubbleChartSeries(this, this._drawings.NameSpaceManager, this.ChartNode, false);
+		}
+		#endregion
+
+		#region Internal Methods
 		internal override eChartType GetChartType(string name)
 		{
-			if (Bubble3D)
-			{
+			if (this.Bubble3D)
 				return eChartType.Bubble3DEffect;
-			}
 			else
-			{
 				return eChartType.Bubble;
-			}
 		}
+		#endregion
 	}
 }

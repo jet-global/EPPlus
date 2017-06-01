@@ -48,22 +48,22 @@ namespace OfficeOpenXml.Drawing.Chart
 
 		#region Properties
 		/// <summary>
-		/// Angle of the first slize
+		/// Angle of the first slice.
 		/// </summary>
 		public decimal FirstSliceAngle
 		{
 			get
 			{
-				return this.ChartXmlHelper.GetXmlNodeDecimal(FirstSliceAnglePath);
+				return this.ChartXmlHelper.GetXmlNodeDecimal(ExcelDoughnutChart.FirstSliceAnglePath);
 			}
 			internal set
 			{
-				this.ChartXmlHelper.SetXmlNodeString(FirstSliceAnglePath, value.ToString(CultureInfo.InvariantCulture));
+				this.ChartXmlHelper.SetXmlNodeString(ExcelDoughnutChart.FirstSliceAnglePath, value.ToString(CultureInfo.InvariantCulture));
 			}
 		}
 		
 		/// <summary>
-		/// Size of the doughnnut hole
+		/// Size of the doughnnut hole.
 		/// </summary>
 		public decimal HoleSize
 		{
@@ -73,7 +73,7 @@ namespace OfficeOpenXml.Drawing.Chart
 			}
 			internal set
 			{
-				this.ChartXmlHelper.SetXmlNodeString(HoleSizePath, value.ToString(CultureInfo.InvariantCulture));
+				this.ChartXmlHelper.SetXmlNodeString(ExcelDoughnutChart.HoleSizePath, value.ToString(CultureInfo.InvariantCulture));
 			}
 		}
 		#endregion
