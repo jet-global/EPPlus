@@ -22,25 +22,61 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// Returns the sequential serial number that represents a particular date.
+	/// </summary>
 	public class Date : ExcelFunction
 	{
+		/// <summary>
+		/// Given a year, month, and day, return the Excel OADate representing that date. If the year value is 
+		/// between 0 and 1899 inclusive, that value is added to 1900 and uses that sum as the year. If the year value is
+		/// between 1900 and 9999 inclusive, that value is used as the year. If the year value is less than 0, an <see cref="ExcelErrorValue"/>
+		/// is returned. If the month value is less than 1 or greater than 12, that month value is added from the first month of the specified
+		/// year. If the day value is less than 1 or greater than the number of days in the specified month, that number of days is added
+		/// to the first day of the specified month.
+		/// </summary>
+		/// <param name="arguments">The arguments used to calculate the Excel OADate.</param>
+		/// <param name="context">Unused in the method, but necessary to override the method.</param>
+		/// <returns>Returns the Excel OADate of the given date, or an <see cref="ExcelErrorValue"/> if the input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (ValidateArguments(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
-			var year = ArgToInt(arguments, 0);
-			var month = ArgToInt(arguments, 1);
-			var day = ArgToInt(arguments, 2);
-			var date = new System.DateTime(year, 1, 1);
-			month -= 1;
-			date = date.AddMonths(month);
-			date = date.AddDays((double)(day - 1));
-			return CreateResult(date.ToOADate(), DataType.Date);
+			var isValidYear = this.TryGetArgAsInt(arguments, 0, out int year);
+			var isValidMonth = this.TryGetArgAsInt(arguments, 1, out int month);
+			var isValidDay = this.TryGetArgAsInt(arguments, 2, out int day);
+			if (!isValidYear || !isValidMonth || !isValidDay)
+				return new CompileResult(eErrorType.Value);
+			if (year < 0 || year > 9999)
+				return new CompileResult(eErrorType.Num);
+			else if (year < 1900)
+				year += 1900;
+			var resultDate = new System.DateTime(year, 1, 1);
+			var dateWithMonthsAdded = resultDate;
+			month--;
+			day--;
+			try
+			{
+				resultDate = resultDate.AddMonths(month);
+				dateWithMonthsAdded = resultDate;
+				resultDate = resultDate.AddDays(day);
+			}
+			catch (ArgumentOutOfRangeException e)
+			{
+				return new CompileResult(eErrorType.Num);
+			}
+			var resultOADate = resultDate.ToOADate();
+			if (resultOADate < 1)
+				return new CompileResult(eErrorType.Num);
+			if (dateWithMonthsAdded.ToOADate() < 61 && resultOADate != 61)
+				resultOADate--;
+			return this.CreateResult(resultOADate, DataType.Date);
 		}
 	}
 }

@@ -24,33 +24,98 @@
  *******************************************************************************/
 using System.Collections.Generic;
 using System.Linq;
+using OfficeOpenXml.Utils;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// This class contains the formula for computing the time based on the user's input. 
+	/// </summary>
 	public class Time : TimeBaseFunction
 	{
+		/// <summary>
+		/// Execute returns the time as a decimal number. 
+		/// </summary>
+		/// <param name="arguments">The user's specified hour, minute, and second.</param>
+		/// <param name="context">Not used, but needed for overriding the method. </param>
+		/// <returns>The time as a double (decimal numer).</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
-			var firstArg = arguments.ElementAt(0).Value.ToString();
-			if (arguments.Count() == 1 && TimeStringParser.CanParse(firstArg))
+			int value;
+			var hour = 0;
+			var minute = 0;
+			var second = 0;
+
+			if (this.ValidateArguments(arguments, 3))
 			{
-				var result = TimeStringParser.Parse(firstArg);
-				return new CompileResult(result, DataType.Time);
+				if (this.TryGetArgAsInt(arguments, 0, out value))
+					hour = value;
+				else
+					return new CompileResult(eErrorType.Value);
+
+				if (this.TryGetArgAsInt(arguments, 1, out value))
+					minute = value;
+				else
+					return new CompileResult(eErrorType.Value);
+
+				if (this.TryGetArgAsInt(arguments, 2, out value))
+					second = value;
+				else
+					return new CompileResult(eErrorType.Value);
 			}
-			if (ValidateArguments(arguments, 3) == false)
-				return new CompileResult(eErrorType.Value);
-			var hour = ArgToInt(arguments, 0);
-			var min = ArgToInt(arguments, 1);
-			var sec = ArgToInt(arguments, 2);
-
-			if (sec < 0 || sec > 59 || min < 0 || min > 59 || min < 0 || hour > 23)
+			else
 				return new CompileResult(eErrorType.Value);
 
-			var secondsOfThisTime = (double)(hour * 60 * 60 + min * 60 + sec);
-			return CreateResult(GetTimeSerialNumber(secondsOfThisTime), DataType.Time);
+			if (hour < 0)
+				return new CompileResult(eErrorType.Num);
+			if (hour > 32767 || minute > 32767 || second > 32767)
+				return new CompileResult(eErrorType.Num);
+
+			if (hour == 32767 && minute == 32767 && second == 32767)
+			{
+				//When the maximum input is used in the TIME function it performs all three modifications to the individual
+				//parameters, adds them and then performs another calculation if necessary.
+				//The link to this information is: https://support.office.com/en-us/article/TIME-function-9a5aff99-8f7d-4611-845e-747d0b8d5457
+				//Dealing with the hour being over 23.
+				var newHour = hour % 24;
+				//Dealing with the minuteute being over 59 and adjusting the hour as such.
+				var newMinute = minute % 60;
+				var minuteAsHour = minute / 60;
+				minuteAsHour = minuteAsHour % 24;
+				newHour += minuteAsHour;
+				//Dealing with the secondond being over 59 and adjusting the hour and minuteute as such.
+				var secondAsHour = (second / 60) / 60;
+				var secondAsMinute = second / 60;
+				while (secondAsMinute > 59)
+					secondAsMinute = secondAsMinute % 60;
+				var newSecond = second - ((secondAsHour * 60 * 60) + (secondAsMinute * 60));
+				//Final calculation to account for the fact that the hour might be over 23.
+				hour = (newHour + secondAsHour) % 24;
+				minute = newMinute + secondAsMinute;
+				second = newSecond;
+			}
+
+			if (hour > 23)
+				hour = hour % 24;
+			if (minute > 59)
+			{
+				hour = minute / 60;
+				minute = minute % 60;
+			}
+			if (second > 59)
+			{
+				var newHour = (second / 60) / 60;
+				var newMinute = second / 60;
+				var hourToSecond = newHour * 60 * 60;
+				var minuteToSecond = newMinute * 60;
+				second = second - (hourToSecond + minuteToSecond);
+				hour = newHour;
+				minute = newMinute;
+			}
+
+			var secondondsOfThisTime = (double)(hour * 60 * 60 + minute * 60 + second);
+			return this.CreateResult(this.GetTimeSerialNumber(secondondsOfThisTime), DataType.Time);
 		}
 	}
 }
