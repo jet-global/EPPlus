@@ -112,12 +112,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <see cref="ExcelDataProvider.IRangeInfo">Excel range</see> the number of cells in
 		/// that range will be counted as well.
 		/// </summary>
-		/// <param name="arguments"></param>
-		/// <param name="minLength"></param>
+		/// <param name="arguments">The arguments to be evaluated.</param>
+		/// <param name="minLength">The minimum number of arguments that need to be present.</param>
 		protected bool ValidateArguments(IEnumerable<FunctionArgument> arguments, int minLength)
 		{
-			Utilities.Require.That(arguments).Named("arguments").IsNotNull();
-			return !this.TooFewArgs(arguments, minLength);
+			if (arguments == null)
+				return false;
+			else
+				return !this.TooFewArgs(arguments, minLength);
 		}
 
 		private bool TooFewArgs(IEnumerable<FunctionArgument> arguments, int minLength)
@@ -163,34 +165,31 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <param name="arguments">The list of function arguments where our input to parse is.</param>
 		/// <param name="index"> The index of the arguments to try to parse to an integer.</param>
 		/// <param name="value">The resulting value if the parse was successful. If not the value is the minimum integer value.</param>
-		/// <param name="err">Null if parse was successful, or the <see cref="eErrorType"/> indicating why the parse was unsuccessful.</param>
 		/// <returns></returns>
-		protected bool TryGetArgAsInt(IEnumerable<FunctionArgument> arguments, int index, out int value, out eErrorType? err)
+		protected bool TryGetArgAsInt(IEnumerable<FunctionArgument> arguments, int index, out int value)
 		{
-			var intCandidate  = arguments.ElementAt(index).Value;
-			err = null;
+			var intCandidate = arguments.ElementAt(index).Value;
 			value = int.MinValue;
-
 			if (intCandidate == null)
 			{
 				value = 0;
 				return true;
 			}
-			else if (intCandidate is int)
+			else if (intCandidate is int numberInt)
 			{
-				value = this.ArgToInt(arguments, index);
+				value = numberInt;
 				return true;
 			}
-			else if (intCandidate is double)
+			else if (intCandidate is double numberDouble)
 			{
-				value = this.ArgToInt(arguments, index);
+				value = (int)numberDouble;
 				return true;
 			}
 			else if (intCandidate is string)
 			{
 				if (ConvertUtil.TryParseNumericString(intCandidate, out double result))
 				{
-					value = this.ArgToInt(arguments, index);
+					value = (int)result;
 					return true;
 				}
 			}
@@ -199,7 +198,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 				value = (int)date.ToOADate();
 				return true;
 			}
-			err = eErrorType.Value;
 			return false;
 		}
 

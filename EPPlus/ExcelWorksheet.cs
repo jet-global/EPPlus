@@ -1425,6 +1425,7 @@ namespace OfficeOpenXml
 			{
 				sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
 			}
+			this.UpdateDataValidationRanges(rowFrom, rows, 0, 0);
 		}
 
 		/// <summary>
@@ -1616,6 +1617,7 @@ namespace OfficeOpenXml
 			{
 				sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
 			}
+			this.UpdateDataValidationRanges(0, 0, columnFrom, columns);
 		}
 
 		/// <summary>
@@ -4747,6 +4749,27 @@ namespace OfficeOpenXml
 				}
 			}
 			return _worksheetXml.DocumentElement.InsertAfter(hl, prevNode);
+		}
+
+		private void UpdateDataValidationRanges(int rowFrom, int rows, int columnFrom, int columns)
+		{
+			foreach(var sheet in this.Workbook.Worksheets)
+			{
+				for (int i = sheet.DataValidations.Count - 1; i >= 0; i--)
+				{
+					var validation = sheet.DataValidations.ElementAt(i) as DataValidation.Contracts.IExcelDataValidationList;
+					if(validation != null)
+					{
+						string worksheetName = "!";
+						if (validation.Address.WorkSheet == null && sheet.Name.ToUpper() == this.Name.ToUpper()) //This formula references the sheet it is on
+							worksheetName = sheet.Name;
+						else if (validation.Address.WorkSheet.ToUpper() == this.Name.ToUpper()) //This formula references another sheet in the workbook
+							worksheetName = validation.Address.WorkSheet;
+						if (!worksheetName.Equals("!")) //Only update the formula if we have a valid reference to a worksheet
+							validation.Formula.ExcelFormula = this.Package.FormulaManager.UpdateFormulaReferences(validation.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, worksheetName, this.Name);
+					}
+				}
+			}
 		}
 
 		private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)

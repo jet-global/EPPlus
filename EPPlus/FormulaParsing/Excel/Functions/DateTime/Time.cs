@@ -43,27 +43,26 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			int value;
-			eErrorType? error;
 			var hour = 0;
 			var minute = 0;
 			var second = 0;
 
 			if (this.ValidateArguments(arguments, 3))
 			{
-				if (this.TryGetArgAsInt(arguments, 0, out value, out error))
+				if (this.TryGetArgAsInt(arguments, 0, out value))
 					hour = value;
 				else
-					return new CompileResult((eErrorType)error);
+					return new CompileResult(eErrorType.Value);
 
-				if (this.TryGetArgAsInt(arguments, 1, out value, out error))
+				if (this.TryGetArgAsInt(arguments, 1, out value))
 					minute = value;
 				else
-					return new CompileResult((eErrorType)error);
+					return new CompileResult(eErrorType.Value);
 
-				if (this.TryGetArgAsInt(arguments, 2, out value, out error))
+				if (this.TryGetArgAsInt(arguments, 2, out value))
 					second = value;
 				else
-					return new CompileResult((eErrorType)error);
+					return new CompileResult(eErrorType.Value);
 			}
 			else
 				return new CompileResult(eErrorType.Value);

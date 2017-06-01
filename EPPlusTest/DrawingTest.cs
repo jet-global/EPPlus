@@ -886,6 +886,37 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\DoughnutFromExcel.xlsx")]
+		public void ReadExcelDoughnutChart()
+		{
+			var file = new FileInfo(@"DoughnutFromExcel.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var doughnutChart = sheet.Drawings[0] as ExcelDoughnutChart;
+				Assert.AreEqual(eChartType.Doughnut, doughnutChart.ChartType);
+				Assert.IsNotNull(doughnutChart);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", doughnutChart.Series[0].Series);
+				Assert.AreEqual(string.Empty, doughnutChart.Series[0].XSeries);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", doughnutChart.Series[1].Series);
+				Assert.AreEqual(string.Empty, doughnutChart.Series[1].XSeries);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", doughnutChart.Series[2].Series);
+				Assert.AreEqual(string.Empty, doughnutChart.Series[2].XSeries);
+
+				var explodedDoughnutChart = sheet.Drawings[1] as ExcelDoughnutChart;
+				Assert.AreEqual(eChartType.DoughnutExploded, explodedDoughnutChart.ChartType);
+				Assert.IsNotNull(explodedDoughnutChart);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", explodedDoughnutChart.Series[0].Series);
+				Assert.AreEqual(string.Empty, explodedDoughnutChart.Series[0].XSeries);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", explodedDoughnutChart.Series[1].Series);
+				Assert.AreEqual(string.Empty, explodedDoughnutChart.Series[1].XSeries);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", explodedDoughnutChart.Series[2].Series);
+				Assert.AreEqual(string.Empty, explodedDoughnutChart.Series[2].XSeries);
+			}
+		}
+
+		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\SlicerFromExcel.xlsx")]
 		public void ReadExcelSlicer()
 		{
