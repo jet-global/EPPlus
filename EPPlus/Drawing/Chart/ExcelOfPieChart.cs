@@ -41,11 +41,48 @@ namespace OfficeOpenXml.Drawing.Chart
 	/// </summary>
 	public class ExcelOfPieChart : ExcelPieChart
 	{
-		//internal ExcelOfPieChart(ExcelDrawings drawings, XmlNode node) :
-		//    base(drawings, node)
-		//{
+		#region Constants
+		private const string PieTypePath = "c:ofPieType/@val";
+		private const string GapWidthPath = "c:gapWidth/@val";
+		#endregion
 
-		//}
+		#region Properties
+		/// <summary>
+		/// Type, pie or bar
+		/// </summary>
+		public ePieType OfPieType
+		{
+			get
+			{
+				if (this.ChartXmlHelper.GetXmlNodeString(PieTypePath) == "bar")
+					return ePieType.Bar;
+				else
+					return ePieType.Pie;
+			}
+			internal set
+			{
+				this.ChartXmlHelper.CreateNode(ExcelOfPieChart.PieTypePath, true);
+				this.ChartXmlHelper.SetXmlNodeString(ExcelOfPieChart.PieTypePath, value == ePieType.Bar ? "bar" : "pie");
+			}
+		}
+
+		/// <summary>
+		/// The size of the gap between two adjacent bars/columns
+		/// </summary>
+		public int GapWidth
+		{
+			get
+			{
+				return this.ChartXmlHelper.GetXmlNodeInt(ExcelOfPieChart.GapWidthPath);
+			}
+			set
+			{
+				this.ChartXmlHelper.SetXmlNodeString(ExcelOfPieChart.GapWidthPath, value.ToString(CultureInfo.InvariantCulture));
+			}
+		}
+		#endregion
+
+		#region Constructors
 		internal ExcelOfPieChart(ExcelDrawings drawings, XmlNode node, eChartType type, bool isPivot) :
 			 base(drawings, node, type, isPivot)
 		{
@@ -62,69 +99,30 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			SetTypeProperties();
 		}
+		#endregion
 
+		#region Private Methods
 		private void SetTypeProperties()
 		{
-			if (ChartType == eChartType.BarOfPie)
-			{
-				OfPieType = ePieType.Bar;
-			}
+			if (this.ChartType == eChartType.BarOfPie)
+				this.OfPieType = ePieType.Bar;
 			else
-			{
-				OfPieType = ePieType.Pie;
-			}
+				this.OfPieType = ePieType.Pie;
 		}
+		#endregion
 
-		const string pieTypePath = "c:ofPieType/@val";
-		/// <summary>
-		/// Type, pie or bar
-		/// </summary>
-		public ePieType OfPieType
-		{
-			get
-			{
-				if (_chartXmlHelper.GetXmlNodeString(pieTypePath) == "bar")
-					return ePieType.Bar;
-				else
-				{
-					return ePieType.Pie;
-				}
-			}
-			internal set
-			{
-				_chartXmlHelper.CreateNode(pieTypePath, true);
-				_chartXmlHelper.SetXmlNodeString(pieTypePath, value == ePieType.Bar ? "bar" : "pie");
-			}
-		}
-		string _gapWidthPath = "c:gapWidth/@val";
-		/// <summary>
-		/// The size of the gap between two adjacent bars/columns
-		/// </summary>
-		public int GapWidth
-		{
-			get
-			{
-				return _chartXmlHelper.GetXmlNodeInt(_gapWidthPath);
-			}
-			set
-			{
-				_chartXmlHelper.SetXmlNodeString(_gapWidthPath, value.ToString(CultureInfo.InvariantCulture));
-			}
-		}
+		#region Internal Methods
 		internal override eChartType GetChartType(string name)
 		{
 			if (name == "ofPieChart")
 			{
-				if (OfPieType == ePieType.Bar)
-				{
+				if (this.OfPieType == ePieType.Bar)
 					return eChartType.BarOfPie;
-				}
 				else
-				{
 					return eChartType.PieOfPie;
-				}
 			}
 			return base.GetChartType(name);
 		}
+		#endregion
 	}
 }

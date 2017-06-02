@@ -40,7 +40,16 @@ namespace OfficeOpenXml.Drawing.Chart
 	/// </summary>
 	public class ExcelLineChart : ExcelChart
 	{
-		#region "Constructors"
+		#region Constants
+		private const string MarkerPath = "c:marker/@val";
+		private const string SmoothPath = "c:smooth/@val";
+		#endregion
+		
+		#region Class Variables
+		private ExcelChartDataLabel myDataLabel = null;
+		#endregion
+
+		#region Constructors
 		internal ExcelLineChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, Packaging.ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
 			 base(drawings, node, uriChart, part, chartXml, chartNode)
 		{
@@ -50,13 +59,15 @@ namespace OfficeOpenXml.Drawing.Chart
 			 base(topChart, chartNode)
 		{
 		}
+
 		internal ExcelLineChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
 			 base(drawings, node, type, topChart, PivotTableSource)
 		{
-			Smooth = false;
+			this.Smooth = false;
 		}
 		#endregion
-		string MARKER_PATH = "c:marker/@val";
+
+		#region Properties
 		/// <summary>
 		/// If the series has markers
 		/// </summary>
@@ -64,15 +75,14 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				return _chartXmlHelper.GetXmlNodeBool(MARKER_PATH, false);
+				return this.ChartXmlHelper.GetXmlNodeBool(ExcelLineChart.MarkerPath, false);
 			}
 			set
 			{
-				_chartXmlHelper.SetXmlNodeBool(MARKER_PATH, value, false);
+				this.ChartXmlHelper.SetXmlNodeBool(ExcelLineChart.MarkerPath, value, false);
 			}
 		}
 
-		string SMOOTH_PATH = "c:smooth/@val";
 		/// <summary>
 		/// If the series has smooth lines
 		/// </summary>
@@ -80,15 +90,14 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				return _chartXmlHelper.GetXmlNodeBool(SMOOTH_PATH, false);
+				return this.ChartXmlHelper.GetXmlNodeBool(ExcelLineChart.SmoothPath, false);
 			}
 			set
 			{
-				_chartXmlHelper.SetXmlNodeBool(SMOOTH_PATH, value);
+				this.ChartXmlHelper.SetXmlNodeBool(ExcelLineChart.SmoothPath, value);
 			}
 		}
-		//string _chartTopPath = "c:chartSpace/c:chart/c:plotArea/{0}";
-		ExcelChartDataLabel _DataLabel = null;
+
 		/// <summary>
 		/// Access to datalabel properties
 		/// </summary>
@@ -96,55 +105,43 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			get
 			{
-				if (_DataLabel == null)
-				{
-					_DataLabel = new ExcelChartDataLabel(NameSpaceManager, ChartNode);
-				}
-				return _DataLabel;
+				if (this.myDataLabel == null)
+					this.myDataLabel = new ExcelChartDataLabel(this.NameSpaceManager, this.ChartNode);
+				return this.myDataLabel;
 			}
 		}
+		#endregion
+
+		#region Internal Methods
 		internal override eChartType GetChartType(string name)
 		{
 			if (name == "lineChart")
 			{
-				if (this._chartXmlHelper == null)
+				if (this.ChartXmlHelper == null)
 					return eChartType.Line;
-				if (Marker)
+				if (this.Marker)
 				{
-					if (Grouping == eGrouping.Stacked)
-					{
+					if (this.Grouping == eGrouping.Stacked)
 						return eChartType.LineMarkersStacked;
-					}
-					else if (Grouping == eGrouping.PercentStacked)
-					{
+					else if (this.Grouping == eGrouping.PercentStacked)
 						return eChartType.LineMarkersStacked100;
-					}
 					else
-					{
 						return eChartType.LineMarkers;
-					}
 				}
 				else
 				{
-					if (Grouping == eGrouping.Stacked)
-					{
+					if (this.Grouping == eGrouping.Stacked)
 						return eChartType.LineStacked;
-					}
-					else if (Grouping == eGrouping.PercentStacked)
-					{
+					else if (this.Grouping == eGrouping.PercentStacked)
 						return eChartType.LineStacked100;
-					}
 					else
-					{
 						return eChartType.Line;
-					}
 				}
 			}
 			else if (name == "line3DChart")
-			{
 				return eChartType.Line3D;
-			}
 			return base.GetChartType(name);
 		}
+		#endregion
 	}
 }

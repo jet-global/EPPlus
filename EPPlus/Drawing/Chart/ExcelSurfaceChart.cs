@@ -36,16 +36,21 @@ using OfficeOpenXml.Table.PivotTable;
 namespace OfficeOpenXml.Drawing.Chart
 {
 	/// <summary>
-	/// A Surface chart
+	/// A Surface chart.
 	/// </summary>
 	public sealed class ExcelSurfaceChart : ExcelChart
 	{
-		#region "Constructors"
+		#region Constants
+		const string WireframePath = "c:wireframe/@val";
+		#endregion
+
+		#region Constructors
 		internal ExcelSurfaceChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
 			 base(drawings, node, type, topChart, PivotTableSource)
 		{
 			Init();
 		}
+
 		internal ExcelSurfaceChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, Packaging.ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
 			base(drawings, node, uriChart, part, chartXml, chartNode)
 		{
@@ -57,101 +62,75 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			Init();
 		}
+
 		private void Init()
 		{
-			_floor = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:floor", NameSpaceManager));
-			_backWall = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:sideWall", NameSpaceManager));
-			_sideWall = new ExcelChartSurface(NameSpaceManager, _chartXmlHelper.TopNode.SelectSingleNode("c:backWall", NameSpaceManager));
-			SetTypeProperties();
+			this.Floor = new ExcelChartSurface(this.NameSpaceManager, this.ChartXmlHelper.TopNode.SelectSingleNode("c:floor", this.NameSpaceManager));
+			this.BackWall = new ExcelChartSurface(this.NameSpaceManager, this.ChartXmlHelper.TopNode.SelectSingleNode("c:sideWall", this.NameSpaceManager));
+			this.SideWall = new ExcelChartSurface(this.NameSpaceManager, this.ChartXmlHelper.TopNode.SelectSingleNode("c:backWall", this.NameSpaceManager));
+			this.SetTypeProperties();
 		}
 		#endregion
 
+		#region Properties
+		public ExcelChartSurface Floor { get; private set; }
 
-		ExcelChartSurface _floor;
-		public ExcelChartSurface Floor
-		{
-			get
-			{
-				return _floor;
-			}
-		}
-		ExcelChartSurface _sideWall;
-		public ExcelChartSurface SideWall
-		{
-			get
-			{
-				return _sideWall;
-			}
-		}
-		ExcelChartSurface _backWall;
-		public ExcelChartSurface BackWall
-		{
-			get
-			{
-				return _backWall;
-			}
-		}
-		const string WIREFRAME_PATH = "c:wireframe/@val";
+		public ExcelChartSurface SideWall { get; private set; }
+
+		public ExcelChartSurface BackWall { get; private set; }
+
 		public bool Wireframe
 		{
 			get
 			{
-				return _chartXmlHelper.GetXmlNodeBool(WIREFRAME_PATH);
+				return this.ChartXmlHelper.GetXmlNodeBool(ExcelSurfaceChart.WireframePath);
 			}
 			set
 			{
-				_chartXmlHelper.SetXmlNodeBool(WIREFRAME_PATH, value);
+				this.ChartXmlHelper.SetXmlNodeBool(ExcelSurfaceChart.WireframePath, value);
 			}
 		}
+		#endregion
+
+		#region Internal Methods
 		internal void SetTypeProperties()
 		{
-			if (ChartType == eChartType.SurfaceWireframe || ChartType == eChartType.SurfaceTopViewWireframe)
+			if (this.ChartType == eChartType.SurfaceWireframe || this.ChartType == eChartType.SurfaceTopViewWireframe)
+				this.Wireframe = true;
+			else
+				this.Wireframe = false;
+			if (this.ChartType == eChartType.SurfaceTopView || this.ChartType == eChartType.SurfaceTopViewWireframe)
 			{
-				Wireframe = true;
+				this.View3D.RotY = 0;
+				this.View3D.RotX = 90;
 			}
 			else
 			{
-				Wireframe = false;
+				this.View3D.RotY = 20;
+				this.View3D.RotX = 15;
 			}
-
-			if (ChartType == eChartType.SurfaceTopView || ChartType == eChartType.SurfaceTopViewWireframe)
-			{
-				View3D.RotY = 0;
-				View3D.RotX = 90;
-			}
-			else
-			{
-				View3D.RotY = 20;
-				View3D.RotX = 15;
-			}
-			View3D.RightAngleAxes = false;
-			View3D.Perspective = 0;
-			Axis[1].CrossBetween = eCrossBetween.MidCat;
+			this.View3D.RightAngleAxes = false;
+			this.View3D.Perspective = 0;
+			this.Axis[1].CrossBetween = eCrossBetween.MidCat;
 		}
+
 		internal override eChartType GetChartType(string name)
 		{
-			if (Wireframe)
+			if (this.Wireframe)
 			{
 				if (name == "surfaceChart")
-				{
 					return eChartType.SurfaceTopViewWireframe;
-				}
 				else
-				{
 					return eChartType.SurfaceWireframe;
-				}
 			}
 			else
 			{
 				if (name == "surfaceChart")
-				{
 					return eChartType.SurfaceTopView;
-				}
 				else
-				{
 					return eChartType.Surface;
-				}
 			}
 		}
+		#endregion
 	}
 }

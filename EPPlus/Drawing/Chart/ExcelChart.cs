@@ -41,7 +41,7 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Drawing.Chart
 {
-	#region "Chart Enums"
+	#region Chart Enums
 	/// <summary>
 	/// Chart type
 	/// </summary>
@@ -349,188 +349,510 @@ namespace OfficeOpenXml.Drawing.Chart
 	}
 	#endregion
 
-
 	/// <summary>
 	/// Base class for Chart object.
 	/// </summary>
 	public class ExcelChart : ExcelDrawing
 	{
-		const string rootPath = "c:chartSpace/c:chart/c:plotArea";
-		//string _chartPath;
-		protected internal ExcelChartSeries _chartSeries;
-		internal ExcelChartAxis[] _axis;
-		protected XmlHelper _chartXmlHelper;
-		#region "Constructors"
-		internal ExcelChart(ExcelDrawings drawings, XmlNode node, eChartType type, bool isPivot) :
-			 base(drawings, node, "xdr:graphicFrame/xdr:nvGraphicFramePr/xdr:cNvPr/@name")
+		#region Constants
+		private const string RootPath = "c:chartSpace/c:chart/c:plotArea";
+		private const string DisplayBlanksAsPath = "../../c:dispBlanksAs/@val";
+		private const string PlotVisibleOnlyPath = "../../c:plotVisOnly/@val";
+		private const string ShowDLblsOverMax = "../../c:showDLblsOverMax/@val";
+		private const string GroupingPath = "c:grouping/@val";
+		private const string VaryColorsPath = "c:varyColors/@val";
+		private const string ChartSpaceChartPath = "c:chartSpace/c:chart";
+		private const string ChartSpacePath = "c:chartSpace";
+		#endregion
+
+		#region Class Variables
+		private ExcelChartPlotArea myPlotArea = null;
+		private ExcelChartLegend myLegend = null;
+		private ExcelDrawingBorder myBorder = null;
+		private ExcelDrawingFill myFill = null;
+		private ExcelChartTitle myTitle = null;
+		private bool mySecondaryAxis = false;
+		#endregion
+
+		#region Properties
+		/// <summary>
+		/// The c:chartSpace/c:chart/c:plotArea chart XmlNode.
+		/// </summary>
+		protected internal XmlNode ChartNode { get; set; } = null;
+		
+		/// <summary>
+		/// The Chart XmlHelper.
+		/// </summary>
+		protected XmlHelper ChartXmlHelper { get; set; }
+
+		/// <summary>
+		/// The Excel ChartSeries.
+		/// </summary>
+		protected internal ExcelChartSeries ChartSeries { get; set; }
+
+		/// <summary>
+		/// The reference to the worksheet.
+		/// </summary>
+		public ExcelWorksheet WorkSheet { get; internal set; }
+
+		/// <summary>
+		/// The chart xml document.
+		/// </summary>
+		public XmlDocument ChartXml { get; internal set; }
+
+		/// <summary>
+		/// The title of the chart.
+		/// </summary>
+		public ExcelChartTitle Title
 		{
-			ChartType = type;
-			CreateNewChart(drawings, type, null);
-
-			Init(drawings, _chartNode);
-
-			_chartSeries = new ExcelChartSeries(this, drawings.NameSpaceManager, _chartNode, isPivot);
-
-			SetTypeProperties();
-			LoadAxis();
-		}
-		internal ExcelChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
-			 base(drawings, node, "xdr:graphicFrame/xdr:nvGraphicFramePr/xdr:cNvPr/@name")
-		{
-			ChartType = type;
-			CreateNewChart(drawings, type, topChart);
-
-			Init(drawings, _chartNode);
-
-			_chartSeries = new ExcelChartSeries(this, drawings.NameSpaceManager, _chartNode, PivotTableSource != null);
-			if (PivotTableSource != null) SetPivotSource(PivotTableSource);
-
-			SetTypeProperties();
-			if (topChart == null)
-				LoadAxis();
-			else
+			get
 			{
-				_axis = topChart.Axis;
-				if (_axis.Length > 0)
+				if (this.myTitle == null)
 				{
-					XAxis = _axis[0];
-					YAxis = _axis[1];
+					this.myTitle = new ExcelChartTitle(this.NameSpaceManager, this.ChartXml.SelectSingleNode(ExcelChart.ChartSpaceChartPath, this.NameSpaceManager));
+				}
+				return this.myTitle;
+			}
+		}
+
+		/// <summary>
+		/// The type of chart.
+		/// </summary>
+		public eChartType ChartType { get; internal set; }
+
+		/// <summary>
+		/// The chart series.
+		/// </summary>
+		public virtual ExcelChartSeries Series
+		{
+			get
+			{
+				return this.ChartSeries;
+			}
+		}
+		
+		/// <summary>
+		/// An array containg all axis of all Chart types.
+		/// </summary>
+		public ExcelChartAxis[] Axis { get; private set; }
+
+		/// <summary>
+		/// The X axis.
+		/// </summary>
+		public ExcelChartAxis XAxis { get; private set; }
+
+		/// <summary>
+		/// The Y axis.
+		/// </summary>
+		public ExcelChartAxis YAxis { get; private set; }
+		
+		/// <summary>
+		/// If true the charttype will use the secondary axis.
+		/// The chart must contain a least one other charttype that uses the primary axis.
+		/// </summary>
+		public bool UseSecondaryAxis
+		{
+			get
+			{
+				return this.mySecondaryAxis;
+			}
+			set
+			{
+				if (this.mySecondaryAxis != value)
+				{
+					if (value)
+					{
+						if (this.IsTypePieDoughnut())
+							throw (new Exception("Pie charts do not support axis"));
+						else if (this.HasPrimaryAxis() == false)
+							throw (new Exception("Can't set to secondary axis when no serie uses the primary axis"));
+						if (this.Axis.Length == 2)
+							this.AddAxis();
+						var nodeList = this.ChartNode.SelectNodes("c:axId", this.NameSpaceManager);
+						nodeList[0].Attributes["val"].Value = this.Axis[2].Id;
+						nodeList[1].Attributes["val"].Value = this.Axis[3].Id;
+						this.XAxis = this.Axis[2];
+						this.YAxis = this.Axis[3];
+					}
+					else
+					{
+						var nodeList = this.ChartNode.SelectNodes("c:axId", this.NameSpaceManager);
+						nodeList[0].Attributes["val"].Value = this.Axis[0].Id;
+						nodeList[1].Attributes["val"].Value = this.Axis[1].Id;
+						this.XAxis = this.Axis[0];
+						this.YAxis = this.Axis[1];
+					}
+					this.mySecondaryAxis = value;
 				}
 			}
 		}
+
+		/// <summary>
+		/// The build-in chart styles. 
+		/// </summary>
+		public eChartStyle Style
+		{
+			get
+			{
+				XmlNode node = this.ChartXml.SelectSingleNode("c:chartSpace/c:style/@val", this.NameSpaceManager);
+				if (node == null)
+					return eChartStyle.None;
+				else
+				{
+					if (int.TryParse(node.Value, out int v))
+						return (eChartStyle)v;
+					else
+						return eChartStyle.None;
+				}
+			}
+			set
+			{
+				if (value == eChartStyle.None)
+				{
+					if (this.ChartXml.SelectSingleNode("c:chartSpace/c:style", this.NameSpaceManager) is XmlElement element)
+						element.ParentNode.RemoveChild(element);
+				}
+				else
+				{
+					XmlElement element = this.ChartXml.CreateElement("c:style", ExcelPackage.schemaChart);
+					element.SetAttribute("val", ((int)value).ToString());
+					XmlElement parent = this.ChartXml.SelectSingleNode(ExcelChart.ChartSpacePath, this.NameSpaceManager) as XmlElement;
+					parent.InsertBefore(element, parent.SelectSingleNode("c:chart", this.NameSpaceManager));
+				}
+			}
+		}
+
+		/// <summary>
+		/// Show data in hidden rows and columns.
+		/// </summary>
+		public bool ShowHiddenData
+		{
+			get
+			{
+				// !!Inverted value!!
+				return !this.ChartXmlHelper.GetXmlNodeBool(ExcelChart.PlotVisibleOnlyPath);
+			}
+			set
+			{
+				// !!Inverted value!!
+				this.ChartXmlHelper.SetXmlNodeBool(ExcelChart.PlotVisibleOnlyPath, !value);
+			}
+		}
+
+		/// <summary>
+		/// The ExcelPivotTable source.
+		/// </summary>
+		public ExcelPivotTable PivotTableSource { get; private set; }
+
+		/// <summary>
+		/// Specifies the possible ways to display blanks.
+		/// </summary>
+		public eDisplayBlanksAs DisplayBlanksAs
+		{
+			get
+			{
+				string value = this.ChartXmlHelper.GetXmlNodeString(ExcelChart.DisplayBlanksAsPath);
+				if (string.IsNullOrEmpty(value))
+					return eDisplayBlanksAs.Zero; // Issue 14715 Changed in Office 2010-?
+				else
+					return (eDisplayBlanksAs)Enum.Parse(typeof(eDisplayBlanksAs), value, true);
+			}
+			set
+			{
+				this.ChartSeries.SetXmlNodeString(ExcelChart.DisplayBlanksAsPath, value.ToString().ToLower(CultureInfo.InvariantCulture));
+			}
+		}
+
+		/// <summary>
+		/// Specifies data labels over the maximum of the chart shall be shown
+		/// </summary>
+		public bool ShowDataLabelsOverMaximum
+		{
+			get
+			{
+				return this.ChartXmlHelper.GetXmlNodeBool(ExcelChart.ShowDLblsOverMax, true);
+			}
+			set
+			{
+				this.ChartXmlHelper.SetXmlNodeBool(ExcelChart.ShowDLblsOverMax, value, true);
+			}
+		}
+		
+		/// <summary>
+		/// The chart PlotArea.
+		/// </summary>
+		public ExcelChartPlotArea PlotArea
+		{
+			get
+			{
+				if (this.myPlotArea == null)
+					this.myPlotArea = new ExcelChartPlotArea(this.NameSpaceManager, this.ChartXml.SelectSingleNode(ExcelChart.RootPath, this.NameSpaceManager), this);
+				return this.myPlotArea;
+			}
+			private set
+			{
+				myPlotArea = value;
+			}
+		}
+
+		/// <summary>
+		/// Legend
+		/// </summary>
+		public ExcelChartLegend Legend
+		{
+			get
+			{
+				if (this.myLegend == null)
+					this.myLegend = new ExcelChartLegend(this.NameSpaceManager, this.ChartXml.SelectSingleNode("c:chartSpace/c:chart/c:legend", this.NameSpaceManager), this);
+				return this.myLegend;
+			}
+		}
+
+		/// <summary>
+		/// Border
+		/// </summary>
+		public ExcelDrawingBorder Border
+		{
+			get
+			{
+				if (this.myBorder == null)
+					this.myBorder = new ExcelDrawingBorder(this.NameSpaceManager, this.ChartXml.SelectSingleNode(ExcelChart.ChartSpacePath, this.NameSpaceManager), "c:spPr/a:ln");
+				return this.myBorder;
+			}
+		}
+
+		/// <summary>
+		/// Fill
+		/// </summary>
+		public ExcelDrawingFill Fill
+		{
+			get
+			{
+				if (this.myFill == null)
+					this.myFill = new ExcelDrawingFill(this.NameSpaceManager, this.ChartXml.SelectSingleNode(ExcelChart.ChartSpacePath, this.NameSpaceManager), "c:spPr");
+				return this.myFill;
+			}
+		}
+
+		/// <summary>
+		/// 3D-settings
+		/// </summary>
+		public ExcelView3D View3D
+		{
+			get
+			{
+				if (IsType3D())
+					return new ExcelView3D(this.NameSpaceManager, this.ChartXml.SelectSingleNode("//c:view3D", this.NameSpaceManager));
+				else
+					throw (new Exception("Charttype does not support 3D"));
+			}
+		}
+
+		public eGrouping Grouping
+		{
+			get
+			{
+				return GetGroupingEnum(this.ChartXmlHelper?.GetXmlNodeString(ExcelChart.GroupingPath));
+			}
+			internal set
+			{
+				this.ChartXmlHelper.SetXmlNodeString(ExcelChart.GroupingPath, this.GetGroupingText(value));
+			}
+		}
+		
+		/// <summary>
+		/// If the chart has only one serie this varies the colors for each point.
+		/// </summary>
+		public bool VaryColors
+		{
+			get
+			{
+				return this.ChartXmlHelper.GetXmlNodeBool(ExcelChart.VaryColorsPath);
+			}
+			set
+			{
+				if (value)
+					this.ChartXmlHelper.SetXmlNodeString(ExcelChart.VaryColorsPath, "1");
+				else
+					this.ChartXmlHelper.SetXmlNodeString(ExcelChart.VaryColorsPath, "0");
+			}
+		}
+
+		internal Packaging.ZipPackagePart Part { get; set; }
+
+		/// <summary>
+		/// Package internal URI
+		/// </summary>
+		internal Uri UriChart { get; set; }
+
+		internal new string Id
+		{
+			get { return string.Empty; }
+		}
+		#endregion
+
+		#region Constructors
+		internal ExcelChart(ExcelDrawings drawings, XmlNode node, eChartType type, bool isPivot) :
+			 base(drawings, node, "xdr:graphicFrame/xdr:nvGraphicFramePr/xdr:cNvPr/@name")
+		{
+			this.ChartType = type;
+			this.CreateNewChart(drawings, type, null);
+
+			this.Init(drawings, this.ChartNode);
+
+			this.ChartSeries = new ExcelChartSeries(this, drawings.NameSpaceManager, this.ChartNode, isPivot);
+
+			this.SetTypeProperties();
+			this.LoadAxis();
+		}
+
+		internal ExcelChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
+			 base(drawings, node, "xdr:graphicFrame/xdr:nvGraphicFramePr/xdr:cNvPr/@name")
+		{
+			this.ChartType = type;
+			this.CreateNewChart(drawings, type, topChart);
+
+			this.Init(drawings, this.ChartNode);
+
+			this.ChartSeries = new ExcelChartSeries(this, drawings.NameSpaceManager, this.ChartNode, PivotTableSource != null);
+			if (PivotTableSource != null)
+				this.SetPivotSource(PivotTableSource);
+
+			this.SetTypeProperties();
+			if (topChart == null)
+				this.LoadAxis();
+			else
+			{
+				this.Axis = topChart.Axis;
+				if (this.Axis.Length > 0)
+				{
+					this.XAxis = this.Axis[0];
+					this.YAxis = this.Axis[1];
+				}
+			}
+		}
+
 		internal ExcelChart(ExcelDrawings drawings, XmlNode node, Uri uriChart, ZipPackagePart part, XmlDocument chartXml, XmlNode chartNode) :
 			 base(drawings, node, "xdr:graphicFrame/xdr:nvGraphicFramePr/xdr:cNvPr/@name")
 		{
-			UriChart = uriChart;
-			Part = part;
-			ChartXml = chartXml;
-			_chartNode = chartNode;
+			this.UriChart = uriChart;
+			this.Part = part;
+			this.ChartXml = chartXml;
+			this.ChartNode = chartNode;
 			// Get preliminary chart type so that chart series can be initialized correctly.
-			ChartType = GetChartType(chartNode.LocalName);
-			InitChartLoad(drawings, chartNode);
+			this.ChartType = this.GetChartType(chartNode.LocalName);
+			this.InitChartLoad(drawings, chartNode);
 			// Set precise chart type based on observed chart series.
-			ChartType = GetChartType(chartNode.LocalName);
+			this.ChartType = this.GetChartType(chartNode.LocalName);
 		}
+
 		internal ExcelChart(ExcelChart topChart, XmlNode chartNode) :
 			 base(topChart._drawings, topChart.TopNode, "xdr:graphicFrame/xdr:nvGraphicFramePr/xdr:cNvPr/@name")
 		{
-			UriChart = topChart.UriChart;
-			Part = topChart.Part;
-			ChartXml = topChart.ChartXml;
-			_plotArea = topChart.PlotArea;
-			_chartNode = chartNode;
+			this.UriChart = topChart.UriChart;
+			this.Part = topChart.Part;
+			this.ChartXml = topChart.ChartXml;
+			this.PlotArea = topChart.PlotArea;
+			this.ChartNode = chartNode;
 
-			InitChartLoad(topChart._drawings, chartNode);
+			this.InitChartLoad(topChart._drawings, chartNode);
 		}
+
 		private void InitChartLoad(ExcelDrawings drawings, XmlNode chartNode)
 		{
-			//SetChartType();
 			bool isPivot = false;
-			Init(drawings, chartNode);
-			_chartSeries = new ExcelChartSeries(this, drawings.NameSpaceManager, _chartNode, isPivot /*ChartXml.SelectSingleNode(_chartPath, drawings.NameSpaceManager)*/);
-			LoadAxis();
+			this.Init(drawings, chartNode);
+			this.ChartSeries = new ExcelChartSeries(this, drawings.NameSpaceManager, this.ChartNode, isPivot);
+			this.LoadAxis();
 		}
 
 		private void Init(ExcelDrawings drawings, XmlNode chartNode)
 		{
-			//_chartXmlHelper = new XmlHelper(drawings.NameSpaceManager, chartNode);
-			_chartXmlHelper = XmlHelperFactory.Create(drawings.NameSpaceManager, chartNode);
-			_chartXmlHelper.SchemaNodeOrder = new string[] { "ofPieType", "title", "pivotFmt", "autoTitleDeleted", "view3D", "floor", "sideWall", "backWall", "plotArea", "wireframe", "barDir", "grouping", "scatterStyle", "radarStyle", "varyColors", "ser", "dLbls", "bubbleScale", "showNegBubbles", "dropLines", "upDownBars", "marker", "smooth", "shape", "legend", "plotVisOnly", "dispBlanksAs", "gapWidth", "showDLblsOverMax", "overlap", "bandFmts", "axId", "spPr", "printSettings" };
-			WorkSheet = drawings.Worksheet;
+			this.ChartXmlHelper = XmlHelperFactory.Create(drawings.NameSpaceManager, chartNode);
+			this.ChartXmlHelper.SchemaNodeOrder = new string[] { "ofPieType", "title", "pivotFmt", "autoTitleDeleted", "view3D", "floor", "sideWall", "backWall", "plotArea", "wireframe", "barDir", "grouping", "scatterStyle", "radarStyle", "varyColors", "ser", "dLbls", "bubbleScale", "showNegBubbles", "dropLines", "upDownBars", "marker", "smooth", "shape", "legend", "plotVisOnly", "dispBlanksAs", "gapWidth", "showDLblsOverMax", "overlap", "bandFmts", "axId", "spPr", "printSettings" };
+			this.WorkSheet = drawings.Worksheet;
 		}
 		#endregion
-		#region "Private functions"
+
+		#region Private Methods
 		private void SetTypeProperties()
 		{
 			/******* Grouping *******/
-			if (IsTypeClustered())
-			{
-				Grouping = eGrouping.Clustered;
-			}
-			else if (
-				 IsTypeStacked())
-			{
-				Grouping = eGrouping.Stacked;
-			}
-			else if (
-			IsTypePercentStacked())
-			{
-				Grouping = eGrouping.PercentStacked;
-			}
+			if (this.IsTypeClustered())
+				this.Grouping = eGrouping.Clustered;
+			else if (this.IsTypeStacked())
+				this.Grouping = eGrouping.Stacked;
+			else if (this.IsTypePercentStacked())
+				this.Grouping = eGrouping.PercentStacked;
 
 			/***** 3D Perspective *****/
-			if (IsType3D())
+			if (this.IsType3D())
 			{
-				View3D.RotY = 20;
-				View3D.Perspective = 30;    //Default to 30
-				if (IsTypePieDoughnut())
-				{
-					View3D.RotX = 30;
-				}
+				this.View3D.RotY = 20;
+				this.View3D.Perspective = 30;  // Default to 30
+				if (this.IsTypePieDoughnut())
+					this.View3D.RotX = 30;
 				else
-				{
-					View3D.RotX = 15;
-				}
+					this.View3D.RotX = 15;
 			}
 		}
+
 		private void CreateNewChart(ExcelDrawings drawings, eChartType type, ExcelChart topChart)
 		{
 			if (topChart == null)
 			{
-				XmlElement graphFrame = TopNode.OwnerDocument.CreateElement("graphicFrame", ExcelPackage.schemaSheetDrawings);
-				graphFrame.SetAttribute("macro", "");
-				TopNode.AppendChild(graphFrame);
-				graphFrame.InnerXml = string.Format("<xdr:nvGraphicFramePr><xdr:cNvPr id=\"{0}\" name=\"Chart 1\" /><xdr:cNvGraphicFramePr /></xdr:nvGraphicFramePr><xdr:xfrm><a:off x=\"0\" y=\"0\" /> <a:ext cx=\"0\" cy=\"0\" /></xdr:xfrm><a:graphic><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/chart\"><c:chart xmlns:c=\"http://schemas.openxmlformats.org/drawingml/2006/chart\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" r:id=\"rId1\" />   </a:graphicData>  </a:graphic>", _id);
-				TopNode.AppendChild(TopNode.OwnerDocument.CreateElement("clientData", ExcelPackage.schemaSheetDrawings));
+				XmlElement graphFrame = this.TopNode.OwnerDocument.CreateElement("graphicFrame", ExcelPackage.schemaSheetDrawings);
+				graphFrame.SetAttribute("macro", string.Empty);
+				this.TopNode.AppendChild(graphFrame);
+				graphFrame.InnerXml = string.Format("<xdr:nvGraphicFramePr><xdr:cNvPr id=\"{0}\" name=\"Chart 1\" /><xdr:cNvGraphicFramePr /></xdr:nvGraphicFramePr><xdr:xfrm><a:off x=\"0\" y=\"0\" /> <a:ext cx=\"0\" cy=\"0\" /></xdr:xfrm><a:graphic><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/chart\"><c:chart xmlns:c=\"http://schemas.openxmlformats.org/drawingml/2006/chart\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" r:id=\"rId1\" />   </a:graphicData>  </a:graphic>", this._id);
+				this.TopNode.AppendChild(this.TopNode.OwnerDocument.CreateElement("clientData", ExcelPackage.schemaSheetDrawings));
 
 				var package = drawings.Worksheet.Package.Package;
-				UriChart = GetNewUri(package, "/xl/charts/chart{0}.xml");
+				this.UriChart = GetNewUri(package, "/xl/charts/chart{0}.xml");
 
-				ChartXml = new XmlDocument();
-				ChartXml.PreserveWhitespace = ExcelPackage.preserveWhitespace;
-				LoadXmlSafe(ChartXml, ChartStartXml(type), Encoding.UTF8);
+				this.ChartXml = new XmlDocument() { PreserveWhitespace = ExcelPackage.preserveWhitespace };
+				LoadXmlSafe(this.ChartXml, this.ChartStartXml(type), Encoding.UTF8);
 
 				// save it to the package
-				Part = package.CreatePart(UriChart, "application/vnd.openxmlformats-officedocument.drawingml.chart+xml", _drawings.Package.Compression);
+				this.Part = package.CreatePart(this.UriChart, "application/vnd.openxmlformats-officedocument.drawingml.chart+xml", this._drawings.Package.Compression);
 
-				StreamWriter streamChart = new StreamWriter(Part.GetStream(FileMode.Create, FileAccess.Write));
-				ChartXml.Save(streamChart);
+				StreamWriter streamChart = new StreamWriter(this.Part.GetStream(FileMode.Create, FileAccess.Write));
+				this.ChartXml.Save(streamChart);
 				streamChart.Close();
 				package.Flush();
 
-				var chartRelation = drawings.Part.CreateRelationship(UriHelper.GetRelativeUri(drawings.UriDrawing, UriChart), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/chart");
-				graphFrame.SelectSingleNode("a:graphic/a:graphicData/c:chart", NameSpaceManager).Attributes["r:id"].Value = chartRelation.Id;
+				var chartRelation = drawings.Part.CreateRelationship(UriHelper.GetRelativeUri(drawings.UriDrawing, this.UriChart), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/chart");
+				graphFrame.SelectSingleNode("a:graphic/a:graphicData/c:chart", this.NameSpaceManager).Attributes["r:id"].Value = chartRelation.Id;
 				package.Flush();
-				_chartNode = ChartXml.SelectSingleNode(string.Format("c:chartSpace/c:chart/c:plotArea/{0}", GetChartNodeText()), NameSpaceManager);
+				this.ChartNode = this.ChartXml.SelectSingleNode(string.Format("c:chartSpace/c:chart/c:plotArea/{0}", GetChartNodeText()), this.NameSpaceManager);
 			}
 			else
 			{
-				ChartXml = topChart.ChartXml;
-				Part = topChart.Part;
-				_plotArea = topChart.PlotArea;
-				UriChart = topChart.UriChart;
-				_axis = topChart._axis;
+				this.ChartXml = topChart.ChartXml;
+				this.Part = topChart.Part;
+				this.PlotArea = topChart.PlotArea;
+				this.UriChart = topChart.UriChart;
+				this.Axis = topChart.Axis;
 
-				XmlNode preNode = _plotArea.ChartTypes[_plotArea.ChartTypes.Count - 1].ChartNode;
-				_chartNode = ((XmlDocument)ChartXml).CreateElement(GetChartNodeText(), ExcelPackage.schemaChart);
-				preNode.ParentNode.InsertAfter(_chartNode, preNode);
+				XmlNode preNode = this.PlotArea.ChartTypes[this.PlotArea.ChartTypes.Count - 1].ChartNode;
+				this.ChartNode = this.ChartXml.CreateElement(this.GetChartNodeText(), ExcelPackage.schemaChart);
+				preNode.ParentNode.InsertAfter(this.ChartNode, preNode);
 				if (topChart.Axis.Length == 0)
-				{
-					AddAxis();
-				}
+					this.AddAxis();
 				string serieXML = GetChartSerieStartXml(type, int.Parse(topChart.Axis[0].Id), int.Parse(topChart.Axis[1].Id), topChart.Axis.Length > 2 ? int.Parse(topChart.Axis[2].Id) : -1);
-				_chartNode.InnerXml = serieXML;
+				this.ChartNode.InnerXml = serieXML;
 			}
-			GetPositionSize();
+			this.GetPositionSize();
 		}
+
 		private void LoadAxis()
 		{
-			XmlNodeList nl = _chartNode.SelectNodes("c:axId", NameSpaceManager);
-			List<ExcelChartAxis> l = new List<ExcelChartAxis>();
-			foreach (XmlNode node in nl)
+			XmlNodeList nodeList = this.ChartNode.SelectNodes("c:axId", this.NameSpaceManager);
+			List<ExcelChartAxis> excelChartAxes = new List<ExcelChartAxis>();
+			foreach (XmlNode node in nodeList)
 			{
 				string id = node.Attributes["val"].Value;
-				var axNode = ChartXml.SelectNodes(rootPath + string.Format("/*/c:axId[@val=\"{0}\"]", id), NameSpaceManager);
+				var axNode = this.ChartXml.SelectNodes(ExcelChart.RootPath + string.Format("/*/c:axId[@val=\"{0}\"]", id), this.NameSpaceManager);
 				if (axNode != null && axNode.Count > 1)
 				{
 					foreach (XmlNode axn in axNode)
@@ -538,134 +860,129 @@ namespace OfficeOpenXml.Drawing.Chart
 						if (axn.ParentNode.LocalName.EndsWith("Ax"))
 						{
 							XmlNode axisNode = axNode[1].ParentNode;
-							ExcelChartAxis ax = new ExcelChartAxis(NameSpaceManager, axisNode);
-							l.Add(ax);
+							ExcelChartAxis axis = new ExcelChartAxis(this.NameSpaceManager, axisNode);
+							excelChartAxes.Add(axis);
 						}
 					}
 				}
 			}
-			_axis = l.ToArray();
+			this.Axis = excelChartAxes.ToArray();
 
-			if (_axis.Length > 0) XAxis = _axis[0];
-			if (_axis.Length > 1) YAxis = _axis[1];
+			if (this.Axis.Length > 0)
+				this.XAxis = this.Axis[0];
+			if (this.Axis.Length > 1)
+				this.YAxis = this.Axis[1];
 		}
-		//private void SetChartType()
-		//{
-		//    ChartType = 0;
-		//    //_plotArea = new ExcelChartPlotArea(NameSpaceManager, ChartXml.SelectSingleNode("c:chartSpace/c:chart/c:plotArea", NameSpaceManager));
-		//    int pos=0;
-		//    foreach (XmlElement n in ChartXml.SelectSingleNode(rootPath, _drawings.NameSpaceManager).ChildNodes)
-		//    {
-		//        if (pos == 0)
-		//        {
-		//            ChartType = GetChartType(n.Name);
-		//            if (ChartType != 0)
-		//            {
-		//                //_chartPath = rootPath + "/" + n.Name;
-		//                PlotArea.ChartTypes.Add(this);
-		//            }
-		//        }
-		//        else
-		//        {
-		//            var chartSerieType = GetChart(_drawings, TopNode/*, n*/);
-		//            chartSerieType = GetChart(n, _drawings, TopNode, UriChart, Part, ChartXml, null, isPivot);
-		//            PlotArea.ChartTypes.Add(chartSerieType);
-		//            //var chartType = GetChartType(n.Name);
-		//        }
-		//        if (ChartType != 0)
-		//        {
-		//            pos++;
-		//        }
-		//    }
-		//}
-		internal virtual eChartType GetChartType(string name)
-		{
 
-			switch (name)
+		/// <summary>
+		/// Remove all axis that are not used any more
+		/// </summary>
+		/// <param name="excelChartAxis"></param>
+		private void CheckRemoveAxis(ExcelChartAxis excelChartAxis)
+		{
+			if (this.ExistsAxis(excelChartAxis))
 			{
-				case "area3DChart":
-					if (Grouping == eGrouping.Stacked)
-					{
-						return eChartType.AreaStacked3D;
-					}
-					else if (Grouping == eGrouping.PercentStacked)
-					{
-						return eChartType.AreaStacked1003D;
-					}
-					else
-					{
-						return eChartType.Area3D;
-					}
-				case "areaChart":
-					if (Grouping == eGrouping.Stacked)
-					{
-						return eChartType.AreaStacked;
-					}
-					else if (Grouping == eGrouping.PercentStacked)
-					{
-						return eChartType.AreaStacked100;
-					}
-					else
-					{
-						return eChartType.Area;
-					}
-				case "doughnutChart":
-					return eChartType.Doughnut;
-				case "pie3DChart":
-					return eChartType.Pie3D;
-				case "pieChart":
-					return eChartType.Pie;
-				case "radarChart":
-					return eChartType.Radar;
-				case "scatterChart":
-					return eChartType.XYScatter;
-				case "surface3DChart":
-				case "surfaceChart":
-					return eChartType.Surface;
-				case "stockChart":
-					return eChartType.StockHLC;
-				default:
-					return 0;
+				// Remove the axis
+				ExcelChartAxis[] newAxis = new ExcelChartAxis[this.Axis.Length - 1];
+				int pos = 0;
+				foreach (var ax in this.Axis)
+				{
+					if (ax != excelChartAxis)
+						newAxis[pos] = ax;
+				}
+				// Update all charttypes.
+				foreach (ExcelChart chartType in this.PlotArea.ChartTypes)
+				{
+					chartType.Axis = newAxis;
+				}
 			}
 		}
-		#region "Xml init Functions"
+
+		private bool ExistsAxis(ExcelChartAxis excelChartAxis)
+		{
+			foreach (ExcelChart chartType in this.PlotArea.ChartTypes)
+			{
+				if (chartType != this && 
+					(chartType.XAxis.AxisPosition == excelChartAxis.AxisPosition ||
+						chartType.YAxis.AxisPosition == excelChartAxis.AxisPosition))
+				{
+						return true;
+				}
+			}
+			return false;
+		}
+
+		private bool HasPrimaryAxis()
+		{
+			if (this.PlotArea.ChartTypes.Count == 1)
+				return false;
+			foreach (var chart in this.PlotArea.ChartTypes)
+			{
+				if (chart != this && chart.UseSecondaryAxis == false && chart.IsTypePieDoughnut() == false)
+					return true;
+			}
+			return false;
+		}
+
+		#region Grouping Enum Translation
+		private string GetGroupingText(eGrouping grouping)
+		{
+			switch (grouping)
+			{
+				case eGrouping.Clustered:
+					return "clustered";
+				case eGrouping.Stacked:
+					return "stacked";
+				case eGrouping.PercentStacked:
+					return "percentStacked";
+				default:
+					return "standard";
+			}
+		}
+
+		private eGrouping GetGroupingEnum(string grouping)
+		{
+			switch (grouping)
+			{
+				case "stacked":
+					return eGrouping.Stacked;
+				case "percentStacked":
+					return eGrouping.PercentStacked;
+				default: // "clustered":               
+					return eGrouping.Clustered;
+			}
+		}
+		#endregion
+
+		#region Xml Init Functions
 		private string ChartStartXml(eChartType type)
 		{
 			StringBuilder xml = new StringBuilder();
 			int axID = 1;
 			int xAxID = 2;
-			int serAxID = IsTypeSurface() ? 3 : -1;
+			int serAxID = this.IsTypeSurface() ? 3 : -1;
 
 			xml.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
 			xml.AppendFormat("<c:chartSpace xmlns:c=\"{0}\" xmlns:a=\"{1}\" xmlns:r=\"{2}\">", ExcelPackage.schemaChart, ExcelPackage.schemaDrawings, ExcelPackage.schemaRelationships);
 			xml.Append("<c:chart>");
-			xml.AppendFormat("{0}{1}<c:plotArea><c:layout/>", AddPerspectiveXml(type), AddSurfaceXml(type));
+			xml.AppendFormat("{0}{1}<c:plotArea><c:layout/>", this.AddPerspectiveXml(type), this.AddSurfaceXml(type));
 
-			string chartNodeText = GetChartNodeText();
+			string chartNodeText = this.GetChartNodeText();
 			xml.AppendFormat("<{0}>", chartNodeText);
-			xml.Append(GetChartSerieStartXml(type, axID, xAxID, serAxID));
+			xml.Append(this.GetChartSerieStartXml(type, axID, xAxID, serAxID));
 			xml.AppendFormat("</{0}>", chartNodeText);
 
-			//Axis
-			if (!IsTypePieDoughnut())
+			if (!this.IsTypePieDoughnut())
 			{
-				if (IsTypeScatterBubble())
-				{
+				if (this.IsTypeScatterBubble())
 					xml.AppendFormat("<c:valAx><c:axId val=\"{0}\"/><c:scaling><c:orientation val=\"minMax\"/></c:scaling><c:delete val=\"0\"/><c:axPos val=\"b\"/><c:tickLblPos val=\"nextTo\"/><c:crossAx val=\"{1}\"/><c:crosses val=\"autoZero\"/></c:valAx>", axID, xAxID);
-				}
 				else
-				{
 					xml.AppendFormat("<c:catAx><c:axId val=\"{0}\"/><c:scaling><c:orientation val=\"minMax\"/></c:scaling><c:delete val=\"0\"/><c:axPos val=\"b\"/><c:tickLblPos val=\"nextTo\"/><c:crossAx val=\"{1}\"/><c:crosses val=\"autoZero\"/><c:auto val=\"1\"/><c:lblAlgn val=\"ctr\"/><c:lblOffset val=\"100\"/></c:catAx>", axID, xAxID);
-				}
 				xml.AppendFormat("<c:valAx><c:axId val=\"{1}\"/><c:scaling><c:orientation val=\"minMax\"/></c:scaling><c:delete val=\"0\"/><c:axPos val=\"l\"/><c:majorGridlines/><c:tickLblPos val=\"nextTo\"/><c:crossAx val=\"{0}\"/><c:crosses val=\"autoZero\"/><c:crossBetween val=\"between\"/></c:valAx>", axID, xAxID);
-				if (serAxID == 3) //Sureface Chart
-				{
+				if (serAxID == 3) //Surface Chart
 					xml.AppendFormat("<c:serAx><c:axId val=\"{0}\"/><c:scaling><c:orientation val=\"minMax\"/></c:scaling><c:delete val=\"0\"/><c:axPos val=\"b\"/><c:tickLblPos val=\"nextTo\"/><c:crossAx val=\"{1}\"/><c:crosses val=\"autoZero\"/></c:serAx>", serAxID, xAxID);
-				}
 			}
-
 			xml.AppendFormat("</c:plotArea><c:legend><c:legendPos val=\"r\"/><c:layout/><c:overlay val=\"0\" /></c:legend><c:plotVisOnly val=\"1\"/></c:chart>", axID, xAxID);
-
 			xml.Append("<c:printSettings><c:headerFooter/><c:pageMargins b=\"0.75\" l=\"0.7\" r=\"0.7\" t=\"0.75\" header=\"0.3\" footer=\"0.3\"/><c:pageSetup/></c:printSettings></c:chartSpace>");
 			return xml.ToString();
 		}
@@ -673,52 +990,46 @@ namespace OfficeOpenXml.Drawing.Chart
 		private string GetChartSerieStartXml(eChartType type, int axID, int xAxID, int serAxID)
 		{
 			StringBuilder xml = new StringBuilder();
-
-			xml.Append(AddScatterType(type));
-			xml.Append(AddRadarType(type));
-			xml.Append(AddBarDir(type));
-			xml.Append(AddGrouping());
-			xml.Append(AddVaryColors());
-			xml.Append(AddHasMarker(type));
-			xml.Append(AddShape(type));
-			xml.Append(AddFirstSliceAng(type));
-			xml.Append(AddHoleSize(type));
-			if (ChartType == eChartType.BarStacked100 ||
-				 ChartType == eChartType.BarStacked ||
-				 ChartType == eChartType.ColumnStacked ||
-				 ChartType == eChartType.ColumnStacked100)
+			xml.Append(this.AddScatterType(type));
+			xml.Append(this.AddRadarType(type));
+			xml.Append(this.AddBarDir(type));
+			xml.Append(this.AddGrouping());
+			xml.Append(this.AddVaryColors());
+			xml.Append(this.AddHasMarker(type));
+			xml.Append(this.AddShape(type));
+			xml.Append(this.AddFirstSliceAng(type));
+			xml.Append(this.AddHoleSize(type));
+			if (this.ChartType == eChartType.BarStacked100 ||
+				 this.ChartType == eChartType.BarStacked ||
+				 this.ChartType == eChartType.ColumnStacked ||
+				 this.ChartType == eChartType.ColumnStacked100)
 			{
 				xml.Append("<c:overlap val=\"100\"/>");
 			}
-			if (IsTypeSurface())
+			if (this.IsTypeSurface())
 			{
 				xml.Append("<c:bandFmts/>");
 			}
-			xml.Append(AddAxisId(axID, xAxID, serAxID));
-
+			xml.Append(this.AddAxisId(axID, xAxID, serAxID));
 			return xml.ToString();
 		}
+
 		private string AddAxisId(int axID, int xAxID, int serAxID)
 		{
-			if (!IsTypePieDoughnut())
+			if (!this.IsTypePieDoughnut())
 			{
-				if (IsTypeSurface())
-				{
+				if (this.IsTypeSurface())
 					return string.Format("<c:axId val=\"{0}\"/><c:axId val=\"{1}\"/><c:axId val=\"{2}\"/>", axID, xAxID, serAxID);
-				}
 				else
-				{
 					return string.Format("<c:axId val=\"{0}\"/><c:axId val=\"{1}\"/>", axID, xAxID);
-				}
 			}
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
+
 		private string AddAxType()
 		{
-			switch (ChartType)
+			switch (this.ChartType)
 			{
 				case eChartType.XYScatter:
 				case eChartType.XYScatterLines:
@@ -732,6 +1043,7 @@ namespace OfficeOpenXml.Drawing.Chart
 					return "catAx";
 			}
 		}
+
 		private string AddScatterType(eChartType type)
 		{
 			if (type == eChartType.XYScatter ||
@@ -743,10 +1055,9 @@ namespace OfficeOpenXml.Drawing.Chart
 				return "<c:scatterStyle val=\"\" />";
 			}
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
+
 		private string AddRadarType(eChartType type)
 		{
 			if (type == eChartType.Radar ||
@@ -756,57 +1067,43 @@ namespace OfficeOpenXml.Drawing.Chart
 				return "<c:radarStyle val=\"\" />";
 			}
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
+
 		private string AddGrouping()
 		{
-			//IsTypeClustered() || IsTypePercentStacked() || IsTypeStacked() || 
-			if (IsTypeShape() || IsTypeLine())
-			{
+			if (this.IsTypeShape() || this.IsTypeLine())
 				return "<c:grouping val=\"standard\"/>";
-			}
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
+
 		private string AddHoleSize(eChartType type)
 		{
 			if (type == eChartType.Doughnut ||
 				 type == eChartType.DoughnutExploded)
-			{
 				return "<c:holeSize val=\"50\" />";
-			}
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
+
 		private string AddFirstSliceAng(eChartType type)
 		{
 			if (type == eChartType.Doughnut ||
 				 type == eChartType.DoughnutExploded)
-			{
 				return "<c:firstSliceAng val=\"0\" />";
-			}
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
+
 		private string AddVaryColors()
 		{
-			if (IsTypePieDoughnut())
-			{
+			if (this.IsTypePieDoughnut())
 				return "<c:varyColors val=\"1\" />";
-			}
 			else
-			{
 				return "<c:varyColors val=\"0\" />";
-			}
 		}
+
 		private string AddHasMarker(eChartType type)
 		{
 			if (type == eChartType.LineMarkers ||
@@ -818,54 +1115,39 @@ namespace OfficeOpenXml.Drawing.Chart
 				return "<c:marker val=\"1\"/>";
 			}
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
+
 		private string AddShape(eChartType type)
 		{
-			if (IsTypeShape())
-			{
+			if (this.IsTypeShape())
 				return "<c:shape val=\"box\" />";
-			}
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
+
 		private string AddBarDir(eChartType type)
 		{
-			if (IsTypeShape())
-			{
+			if (this.IsTypeShape())
 				return "<c:barDir val=\"col\" />";
-			}
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
+
 		private string AddPerspectiveXml(eChartType type)
 		{
-			//Add for 3D sharts
-			if (IsType3D())
-			{
+			if (this.IsType3D())
 				return "<c:view3D><c:perspective val=\"30\" /></c:view3D>";
-			}
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
+
 		private string AddSurfaceXml(eChartType type)
 		{
-			if (IsTypeSurface())
-			{
-				return AddSurfacePart("floor") + AddSurfacePart("sideWall") + AddSurfacePart("backWall");
-			}
+			if (this.IsTypeSurface())
+				return this.AddSurfacePart("floor") + this.AddSurfacePart("sideWall") + this.AddSurfacePart("backWall");
 			else
-			{
-				return "";
-			}
+				return string.Empty;
 		}
 
 		private string AddSurfacePart(string name)
@@ -874,182 +1156,15 @@ namespace OfficeOpenXml.Drawing.Chart
 		}
 		#endregion
 		#endregion
-		#region "Chart type functions
-		internal static bool IsType3D(eChartType chartType)
-		{
-			return chartType == eChartType.Area3D ||
-								 chartType == eChartType.AreaStacked3D ||
-								 chartType == eChartType.AreaStacked1003D ||
-								 chartType == eChartType.BarClustered3D ||
-								 chartType == eChartType.BarStacked3D ||
-								 chartType == eChartType.BarStacked1003D ||
-								 chartType == eChartType.Column3D ||
-								 chartType == eChartType.ColumnClustered3D ||
-								 chartType == eChartType.ColumnStacked3D ||
-								 chartType == eChartType.ColumnStacked1003D ||
-								 chartType == eChartType.Line3D ||
-								 chartType == eChartType.Pie3D ||
-								 chartType == eChartType.PieExploded3D ||
-								 chartType == eChartType.ConeBarClustered ||
-								 chartType == eChartType.ConeBarStacked ||
-								 chartType == eChartType.ConeBarStacked100 ||
-								 chartType == eChartType.ConeCol ||
-								 chartType == eChartType.ConeColClustered ||
-								 chartType == eChartType.ConeColStacked ||
-								 chartType == eChartType.ConeColStacked100 ||
-								 chartType == eChartType.CylinderBarClustered ||
-								 chartType == eChartType.CylinderBarStacked ||
-								 chartType == eChartType.CylinderBarStacked100 ||
-								 chartType == eChartType.CylinderCol ||
-								 chartType == eChartType.CylinderColClustered ||
-								 chartType == eChartType.CylinderColStacked ||
-								 chartType == eChartType.CylinderColStacked100 ||
-								 chartType == eChartType.PyramidBarClustered ||
-								 chartType == eChartType.PyramidBarStacked ||
-								 chartType == eChartType.PyramidBarStacked100 ||
-								 chartType == eChartType.PyramidCol ||
-								 chartType == eChartType.PyramidColClustered ||
-								 chartType == eChartType.PyramidColStacked ||
-								 chartType == eChartType.PyramidColStacked100 ||
-								 chartType == eChartType.Surface ||
-								 chartType == eChartType.SurfaceTopView ||
-								 chartType == eChartType.SurfaceTopViewWireframe ||
-								 chartType == eChartType.SurfaceWireframe;
-		}
-		internal protected bool IsType3D()
-		{
-			return IsType3D(ChartType);
-		}
-		protected bool IsTypeLine()
-		{
-			return ChartType == eChartType.Line ||
-					  ChartType == eChartType.LineMarkers ||
-					  ChartType == eChartType.LineMarkersStacked100 ||
-					  ChartType == eChartType.LineStacked ||
-					  ChartType == eChartType.LineStacked100 ||
-					  ChartType == eChartType.Line3D;
-		}
-		protected bool IsTypeScatterBubble()
-		{
-			return ChartType == eChartType.XYScatter ||
-					  ChartType == eChartType.XYScatterLines ||
-					  ChartType == eChartType.XYScatterLinesNoMarkers ||
-					  ChartType == eChartType.XYScatterSmooth ||
-					  ChartType == eChartType.XYScatterSmoothNoMarkers ||
-					  ChartType == eChartType.Bubble ||
-					  ChartType == eChartType.Bubble3DEffect;
-		}
-		protected bool IsTypeSurface()
-		{
-			return ChartType == eChartType.Surface ||
-					 ChartType == eChartType.SurfaceTopView ||
-					 ChartType == eChartType.SurfaceTopViewWireframe ||
-					 ChartType == eChartType.SurfaceWireframe;
-		}
-		protected bool IsTypeShape()
-		{
-			return ChartType == eChartType.BarClustered3D ||
-					  ChartType == eChartType.BarStacked3D ||
-					  ChartType == eChartType.BarStacked1003D ||
-					  ChartType == eChartType.BarClustered3D ||
-					  ChartType == eChartType.BarStacked3D ||
-					  ChartType == eChartType.BarStacked1003D ||
-					  ChartType == eChartType.Column3D ||
-					  ChartType == eChartType.ColumnClustered3D ||
-					  ChartType == eChartType.ColumnStacked3D ||
-					  ChartType == eChartType.ColumnStacked1003D ||
-					  //ChartType == eChartType.3DPie ||
-					  //ChartType == eChartType.3DPieExploded ||
-					  //ChartType == eChartType.Bubble3DEffect ||
-					  ChartType == eChartType.ConeBarClustered ||
-					  ChartType == eChartType.ConeBarStacked ||
-					  ChartType == eChartType.ConeBarStacked100 ||
-					  ChartType == eChartType.ConeCol ||
-					  ChartType == eChartType.ConeColClustered ||
-					  ChartType == eChartType.ConeColStacked ||
-					  ChartType == eChartType.ConeColStacked100 ||
-					  ChartType == eChartType.CylinderBarClustered ||
-					  ChartType == eChartType.CylinderBarStacked ||
-					  ChartType == eChartType.CylinderBarStacked100 ||
-					  ChartType == eChartType.CylinderCol ||
-					  ChartType == eChartType.CylinderColClustered ||
-					  ChartType == eChartType.CylinderColStacked ||
-					  ChartType == eChartType.CylinderColStacked100 ||
-					  ChartType == eChartType.PyramidBarClustered ||
-					  ChartType == eChartType.PyramidBarStacked ||
-					  ChartType == eChartType.PyramidBarStacked100 ||
-					  ChartType == eChartType.PyramidCol ||
-					  ChartType == eChartType.PyramidColClustered ||
-					  ChartType == eChartType.PyramidColStacked ||
-					  ChartType == eChartType.PyramidColStacked100; //||
-																					//ChartType == eChartType.Doughnut ||
-																					//ChartType == eChartType.DoughnutExploded;
-		}
-		protected internal bool IsTypePercentStacked()
-		{
-			return ChartType == eChartType.AreaStacked100 ||
-								ChartType == eChartType.BarStacked100 ||
-								ChartType == eChartType.BarStacked1003D ||
-								ChartType == eChartType.ColumnStacked100 ||
-								ChartType == eChartType.ColumnStacked1003D ||
-								ChartType == eChartType.ConeBarStacked100 ||
-								ChartType == eChartType.ConeColStacked100 ||
-								ChartType == eChartType.CylinderBarStacked100 ||
-								ChartType == eChartType.CylinderColStacked ||
-								ChartType == eChartType.LineMarkersStacked100 ||
-								ChartType == eChartType.LineStacked100 ||
-								ChartType == eChartType.PyramidBarStacked100 ||
-								ChartType == eChartType.PyramidColStacked100;
-		}
-		protected internal bool IsTypeStacked()
-		{
-			return ChartType == eChartType.AreaStacked ||
-								ChartType == eChartType.AreaStacked3D ||
-								ChartType == eChartType.BarStacked ||
-								ChartType == eChartType.BarStacked3D ||
-								ChartType == eChartType.ColumnStacked3D ||
-								ChartType == eChartType.ColumnStacked ||
-								ChartType == eChartType.ConeBarStacked ||
-								ChartType == eChartType.ConeColStacked ||
-								ChartType == eChartType.CylinderBarStacked ||
-								ChartType == eChartType.CylinderColStacked ||
-								ChartType == eChartType.LineMarkersStacked ||
-								ChartType == eChartType.LineStacked ||
-								ChartType == eChartType.PyramidBarStacked ||
-								ChartType == eChartType.PyramidColStacked;
-		}
-		protected bool IsTypeClustered()
-		{
-			return ChartType == eChartType.BarClustered ||
-								ChartType == eChartType.BarClustered3D ||
-								ChartType == eChartType.ColumnClustered3D ||
-								ChartType == eChartType.ColumnClustered ||
-								ChartType == eChartType.ConeBarClustered ||
-								ChartType == eChartType.ConeColClustered ||
-								ChartType == eChartType.CylinderBarClustered ||
-								ChartType == eChartType.CylinderColClustered ||
-								ChartType == eChartType.PyramidBarClustered ||
-								ChartType == eChartType.PyramidColClustered;
-		}
-		protected internal bool IsTypePieDoughnut()
-		{
-			return ChartType == eChartType.Pie ||
-								ChartType == eChartType.PieExploded ||
-								ChartType == eChartType.PieOfPie ||
-								ChartType == eChartType.Pie3D ||
-								ChartType == eChartType.PieExploded3D ||
-								ChartType == eChartType.BarOfPie ||
-								ChartType == eChartType.Doughnut ||
-								ChartType == eChartType.DoughnutExploded;
-		}
-		#endregion
+
+		#region Protected Methods
 		/// <summary>
 		/// Get the name of the chart node
 		/// </summary>
 		/// <returns>The name</returns>
 		protected string GetChartNodeText()
 		{
-			switch (ChartType)
+			switch (this.ChartType)
 			{
 				case eChartType.Area3D:
 				case eChartType.AreaStacked3D:
@@ -1140,29 +1255,31 @@ namespace OfficeOpenXml.Drawing.Chart
 					throw (new NotImplementedException("Chart type not implemented"));
 			}
 		}
+		#endregion
+
+		#region Internal Methods
 		/// <summary>
-		/// Add a secondary axis
+		/// Add a secondary axis.
 		/// </summary>
 		internal void AddAxis()
 		{
-			XmlElement catAx = ChartXml.CreateElement(string.Format("c:{0}", AddAxType()), ExcelPackage.schemaChart);
+			XmlElement catAx = this.ChartXml.CreateElement(string.Format("c:{0}", this.AddAxType()), ExcelPackage.schemaChart);
 			int axID;
-			if (_axis.Length == 0)
+			if (this.Axis.Length == 0)
 			{
-				_plotArea.TopNode.AppendChild(catAx);
+				this.PlotArea.TopNode.AppendChild(catAx);
 				axID = 1;
 			}
 			else
 			{
-				_axis[0].TopNode.ParentNode.InsertAfter(catAx, _axis[_axis.Length - 1].TopNode);
-				axID = int.Parse(_axis[0].Id) < int.Parse(_axis[1].Id) ? int.Parse(_axis[1].Id) + 1 : int.Parse(_axis[0].Id) + 1;
+				this.Axis[0].TopNode.ParentNode.InsertAfter(catAx, this.Axis[this.Axis.Length - 1].TopNode);
+				axID = int.Parse(this.Axis[0].Id) < int.Parse(this.Axis[1].Id) ? int.Parse(this.Axis[1].Id) + 1 : int.Parse(this.Axis[0].Id) + 1;
 			}
 
-
-			XmlElement valAx = ChartXml.CreateElement("c:valAx", ExcelPackage.schemaChart);
+			XmlElement valAx = this.ChartXml.CreateElement("c:valAx", ExcelPackage.schemaChart);
 			catAx.ParentNode.InsertAfter(valAx, catAx);
 
-			if (_axis.Length == 0)
+			if (this.Axis.Length == 0)
 			{
 				catAx.InnerXml = string.Format("<c:axId val=\"{0}\"/><c:scaling><c:orientation val=\"minMax\"/></c:scaling><c:delete val=\"0\" /><c:axPos val=\"b\"/><c:tickLblPos val=\"nextTo\"/><c:crossAx val=\"{1}\"/><c:crosses val=\"autoZero\"/><c:auto val=\"1\"/><c:lblAlgn val=\"ctr\"/><c:lblOffset val=\"100\"/>", axID, axID + 1);
 				valAx.InnerXml = string.Format("<c:axId val=\"{1}\"/><c:scaling><c:orientation val=\"minMax\"/></c:scaling><c:delete val=\"0\" /><c:axPos val=\"l\"/><c:majorGridlines/><c:tickLblPos val=\"nextTo\"/><c:crossAx val=\"{0}\"/><c:crosses val=\"autoZero\"/><c:crossBetween val=\"between\"/>", axID, axID + 1);
@@ -1173,520 +1290,29 @@ namespace OfficeOpenXml.Drawing.Chart
 				valAx.InnerXml = string.Format("<c:axId val=\"{0}\"/><c:scaling><c:orientation val=\"minMax\"/></c:scaling><c:delete val=\"0\" /><c:axPos val=\"r\"/><c:tickLblPos val=\"nextTo\"/><c:crossAx val=\"{1}\"/><c:crosses val=\"max\"/><c:crossBetween val=\"between\"/>", axID + 1, axID);
 			}
 
-			if (_axis.Length == 0)
-			{
-				_axis = new ExcelChartAxis[2];
-			}
+			if (this.Axis.Length == 0)
+				this.Axis = new ExcelChartAxis[2];
 			else
 			{
-				ExcelChartAxis[] newAxis = new ExcelChartAxis[_axis.Length + 2];
-				Array.Copy(_axis, newAxis, _axis.Length);
-				_axis = newAxis;
+				ExcelChartAxis[] newAxis = new ExcelChartAxis[this.Axis.Length + 2];
+				Array.Copy(this.Axis, newAxis, this.Axis.Length);
+				this.Axis = newAxis;
 			}
 
-			_axis[_axis.Length - 2] = new ExcelChartAxis(NameSpaceManager, catAx);
-			_axis[_axis.Length - 1] = new ExcelChartAxis(NameSpaceManager, valAx);
-			foreach (var chart in _plotArea.ChartTypes)
+			this.Axis[this.Axis.Length - 2] = new ExcelChartAxis(this.NameSpaceManager, catAx);
+			this.Axis[this.Axis.Length - 1] = new ExcelChartAxis(this.NameSpaceManager, valAx);
+			foreach (var chart in this.PlotArea.ChartTypes)
 			{
-				chart._axis = _axis;
+				chart.Axis = this.Axis;
 			}
 		}
+
 		internal void RemoveSecondaryAxis()
 		{
 			throw (new NotImplementedException("Not yet implemented"));
 		}
-		#region "Properties"
-		/// <summary>
-		/// Reference to the worksheet
-		/// </summary>
-		public ExcelWorksheet WorkSheet { get; internal set; }
-		/// <summary>
-		/// The chart xml document
-		/// </summary>
-		public XmlDocument ChartXml { get; internal set; }
-		/// <summary>
-		/// Type of chart
-		/// </summary>
-		public eChartType ChartType { get; internal set; }
-		internal protected XmlNode _chartNode = null;
-		internal XmlNode ChartNode
-		{
-			get
-			{
-				return _chartNode;
-			}
-		}
-		/// <summary>
-		/// Titel of the chart
-		/// </summary>
-		public ExcelChartTitle Title
-		{
-			get
-			{
-				if (_title == null)
-				{
-					_title = new ExcelChartTitle(NameSpaceManager, ChartXml.SelectSingleNode("c:chartSpace/c:chart", NameSpaceManager));
-				}
-				return _title;
-			}
-		}
-		/// <summary>
-		/// Chart series
-		/// </summary>
-		public virtual ExcelChartSeries Series
-		{
-			get
-			{
-				return _chartSeries;
-			}
-		}
-		/// <summary>
-		/// An array containg all axis of all Charttypes
-		/// </summary>
-		public ExcelChartAxis[] Axis
-		{
-			get
-			{
-				return _axis;
-			}
-		}
-		/// <summary>
-		/// The XAxis
-		/// </summary>
-		public ExcelChartAxis XAxis
-		{
-			get;
-			private set;
-		}
-		/// <summary>
-		/// The YAxis
-		/// </summary>
-		public ExcelChartAxis YAxis
-		{
-			get;
-			private set;
-		}
-		bool _secondaryAxis = false;
-		/// <summary>
-		/// If true the charttype will use the secondary axis.
-		/// The chart must contain a least one other charttype that uses the primary axis.
-		/// </summary>
-		public bool UseSecondaryAxis
-		{
-			get
-			{
-				return _secondaryAxis;
-			}
-			set
-			{
-				if (_secondaryAxis != value)
-				{
-					if (value)
-					{
-						if (IsTypePieDoughnut())
-						{
-							throw (new Exception("Pie charts do not support axis"));
-						}
-						else if (HasPrimaryAxis() == false)
-						{
-							throw (new Exception("Can't set to secondary axis when no serie uses the primary axis"));
-						}
-						if (Axis.Length == 2)
-						{
-							AddAxis();
-						}
-						var nl = ChartNode.SelectNodes("c:axId", NameSpaceManager);
-						nl[0].Attributes["val"].Value = Axis[2].Id;
-						nl[1].Attributes["val"].Value = Axis[3].Id;
-						XAxis = Axis[2];
-						YAxis = Axis[3];
-					}
-					else
-					{
-						var nl = ChartNode.SelectNodes("c:axId", NameSpaceManager);
-						nl[0].Attributes["val"].Value = Axis[0].Id;
-						nl[1].Attributes["val"].Value = Axis[1].Id;
-						XAxis = Axis[0];
-						YAxis = Axis[1];
-					}
-					_secondaryAxis = value;
-				}
-			}
-		}
-		/// <summary>
-		/// The build-in chart styles. 
-		/// </summary>
-		public eChartStyle Style
-		{
-			get
-			{
-				XmlNode node = ChartXml.SelectSingleNode("c:chartSpace/c:style/@val", NameSpaceManager);
-				if (node == null)
-				{
-					return eChartStyle.None;
-				}
-				else
-				{
-					int v;
-					if (int.TryParse(node.Value, out v))
-					{
-						return (eChartStyle)v;
-					}
-					else
-					{
-						return eChartStyle.None;
-					}
-				}
 
-			}
-			set
-			{
-				if (value == eChartStyle.None)
-				{
-					XmlElement element = ChartXml.SelectSingleNode("c:chartSpace/c:style", NameSpaceManager) as XmlElement;
-					if (element != null)
-					{
-						element.ParentNode.RemoveChild(element);
-					}
-				}
-				else
-				{
-					XmlElement element = ChartXml.CreateElement("c:style", ExcelPackage.schemaChart);
-					element.SetAttribute("val", ((int)value).ToString());
-					XmlElement parent = ChartXml.SelectSingleNode("c:chartSpace", NameSpaceManager) as XmlElement;
-					parent.InsertBefore(element, parent.SelectSingleNode("c:chart", NameSpaceManager));
-				}
-			}
-		}
-		const string _plotVisibleOnlyPath = "../../c:plotVisOnly/@val";
-		/// <summary>
-		/// Show data in hidden rows and columns
-		/// </summary>
-		public bool ShowHiddenData
-		{
-			get
-			{
-				//!!Inverted value!!
-				return !_chartXmlHelper.GetXmlNodeBool(_plotVisibleOnlyPath);
-			}
-			set
-			{
-				//!!Inverted value!!
-				_chartXmlHelper.SetXmlNodeBool(_plotVisibleOnlyPath, !value);
-			}
-		}
-		const string _displayBlanksAsPath = "../../c:dispBlanksAs/@val";
-		/// <summary>
-		/// Specifies the possible ways to display blanks
-		/// </summary>
-		public eDisplayBlanksAs DisplayBlanksAs
-		{
-			get
-			{
-				string v = _chartXmlHelper.GetXmlNodeString(_displayBlanksAsPath);
-				if (string.IsNullOrEmpty(v))
-				{
-					return eDisplayBlanksAs.Zero; //Issue 14715 Changed in Office 2010-?
-				}
-				else
-				{
-					return (eDisplayBlanksAs)Enum.Parse(typeof(eDisplayBlanksAs), v, true);
-				}
-			}
-			set
-			{
-				_chartSeries.SetXmlNodeString(_displayBlanksAsPath, value.ToString().ToLower(CultureInfo.InvariantCulture));
-			}
-		}
-		const string _showDLblsOverMax = "../../c:showDLblsOverMax/@val";
-		/// <summary>
-		/// Specifies data labels over the maximum of the chart shall be shown
-		/// </summary>
-		public bool ShowDataLabelsOverMaximum
-		{
-			get
-			{
-				return _chartXmlHelper.GetXmlNodeBool(_showDLblsOverMax, true);
-			}
-			set
-			{
-				_chartXmlHelper.SetXmlNodeBool(_showDLblsOverMax, value, true);
-			}
-		}
-		private bool HasPrimaryAxis()
-		{
-			if (_plotArea.ChartTypes.Count == 1)
-			{
-				return false;
-			}
-			foreach (var chart in _plotArea.ChartTypes)
-			{
-				if (chart != this)
-				{
-					if (chart.UseSecondaryAxis == false && chart.IsTypePieDoughnut() == false)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-		///// <summary>
-		///// Sets position of the axis of a chart-serie
-		///// </summary>
-		///// <param name="XAxis">Left or Right</param>
-		///// <param name="YAxis">Top or Bottom</param>
-		//internal void SetAxis(eXAxisPosition XAxis, eYAxisPosition YAxis)
-		//{
-		//    bool xAxisExists = false, yAxisExists = false;
-		//    foreach (var axis in _axis)
-		//    {
-		//        if (axis.AxisPosition == (eAxisPosition)XAxis)
-		//        {
-		//            //Found
-		//            xAxisExists=true;
-		//            if (axis != this.XAxis)
-		//            {
-		//                CheckRemoveAxis(this.XAxis);
-		//                this.XAxis = axis;
-		//            }
-		//        }
-		//        else if (axis.AxisPosition == (eAxisPosition)YAxis)
-		//        {
-		//            yAxisExists = true;
-		//            if (axis != this.YAxis)
-		//            {
-		//                CheckRemoveAxis(this.YAxis);
-		//                this.YAxis = axis;
-		//            }
-		//        }
-		//    }
-
-		//    if (!xAxisExists)
-		//    {
-		//        if (ExistsAxis(this.XAxis))
-		//        {
-		//            AddAxis((eAxisPosition)XAxis);
-		//            this.XAxis = Axis[Axis.Length - 1];
-		//        }
-		//        else
-		//        {
-		//            this.XAxis.AxisPosition = (eAxisPosition)XAxis;
-		//        }
-		//    }
-		//    if (!yAxisExists)
-		//    {
-		//        if (ExistsAxis(this.XAxis))
-		//        {
-		//            AddAxis((eAxisPosition)YAxis);
-		//            this.YAxis = Axis[Axis.Length - 1];
-		//        }
-		//        else
-		//        {
-		//            this.YAxis.AxisPosition = (eAxisPosition)YAxis;
-		//        }
-		//    }
-		//}
-
-		/// <summary>
-		/// Remove all axis that are not used any more
-		/// </summary>
-		/// <param name="excelChartAxis"></param>
-		private void CheckRemoveAxis(ExcelChartAxis excelChartAxis)
-		{
-			if (ExistsAxis(excelChartAxis))
-			{
-				//Remove the axis
-				ExcelChartAxis[] newAxis = new ExcelChartAxis[Axis.Length - 1];
-				int pos = 0;
-				foreach (var ax in Axis)
-				{
-					if (ax != excelChartAxis)
-					{
-						newAxis[pos] = ax;
-					}
-				}
-
-				//Update all charttypes.
-				foreach (ExcelChart chartType in _plotArea.ChartTypes)
-				{
-					chartType._axis = newAxis;
-				}
-			}
-		}
-
-		private bool ExistsAxis(ExcelChartAxis excelChartAxis)
-		{
-			foreach (ExcelChart chartType in _plotArea.ChartTypes)
-			{
-				if (chartType != this)
-				{
-					if (chartType.XAxis.AxisPosition == excelChartAxis.AxisPosition ||
-						chartType.YAxis.AxisPosition == excelChartAxis.AxisPosition)
-					{
-						//The axis exists
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-		ExcelChartPlotArea _plotArea = null;
-		/// <summary>
-		/// Plotarea
-		/// </summary>
-		public ExcelChartPlotArea PlotArea
-		{
-			get
-			{
-				if (_plotArea == null)
-				{
-					_plotArea = new ExcelChartPlotArea(NameSpaceManager, ChartXml.SelectSingleNode("c:chartSpace/c:chart/c:plotArea", NameSpaceManager), this);
-				}
-				return _plotArea;
-			}
-		}
-		ExcelChartLegend _legend = null;
-		/// <summary>
-		/// Legend
-		/// </summary>
-		public ExcelChartLegend Legend
-		{
-			get
-			{
-				if (_legend == null)
-				{
-					_legend = new ExcelChartLegend(NameSpaceManager, ChartXml.SelectSingleNode("c:chartSpace/c:chart/c:legend", NameSpaceManager), this);
-				}
-				return _legend;
-			}
-
-		}
-		ExcelDrawingBorder _border = null;
-		/// <summary>
-		/// Border
-		/// </summary>
-		public ExcelDrawingBorder Border
-		{
-			get
-			{
-				if (_border == null)
-				{
-					_border = new ExcelDrawingBorder(NameSpaceManager, ChartXml.SelectSingleNode("c:chartSpace", NameSpaceManager), "c:spPr/a:ln");
-				}
-				return _border;
-			}
-		}
-		ExcelDrawingFill _fill = null;
-		/// <summary>
-		/// Fill
-		/// </summary>
-		public ExcelDrawingFill Fill
-		{
-			get
-			{
-				if (_fill == null)
-				{
-					_fill = new ExcelDrawingFill(NameSpaceManager, ChartXml.SelectSingleNode("c:chartSpace", NameSpaceManager), "c:spPr");
-				}
-				return _fill;
-			}
-		}
-		/// <summary>
-		/// 3D-settings
-		/// </summary>
-		public ExcelView3D View3D
-		{
-			get
-			{
-				if (IsType3D())
-				{
-					return new ExcelView3D(NameSpaceManager, ChartXml.SelectSingleNode("//c:view3D", NameSpaceManager));
-				}
-				else
-				{
-					throw (new Exception("Charttype does not support 3D"));
-				}
-
-			}
-		}
-		//string _groupingPath = "c:chartSpace/c:chart/c:plotArea/{0}/c:grouping/@val";
-		string _groupingPath = "c:grouping/@val";
-		public eGrouping Grouping
-		{
-			get
-			{
-				return GetGroupingEnum(_chartXmlHelper?.GetXmlNodeString(_groupingPath));
-			}
-			internal set
-			{
-				_chartXmlHelper.SetXmlNodeString(_groupingPath, GetGroupingText(value));
-			}
-		}
-		//string _varyColorsPath = "c:chartSpace/c:chart/c:plotArea/{0}/c:varyColors/@val";
-		string _varyColorsPath = "c:varyColors/@val";
-		/// <summary>
-		/// If the chart has only one serie this varies the colors for each point.
-		/// </summary>
-		public bool VaryColors
-		{
-			get
-			{
-				return _chartXmlHelper.GetXmlNodeBool(_varyColorsPath);
-			}
-			set
-			{
-				if (value)
-				{
-					_chartXmlHelper.SetXmlNodeString(_varyColorsPath, "1");
-				}
-				else
-				{
-					_chartXmlHelper.SetXmlNodeString(_varyColorsPath, "0");
-				}
-			}
-		}
-		internal Packaging.ZipPackagePart Part { get; set; }
-		/// <summary>
-		/// Package internal URI
-		/// </summary>
-		internal Uri UriChart { get; set; }
-		internal new string Id
-		{
-			get { return ""; }
-		}
-		ExcelChartTitle _title = null;
-		#endregion
-		#region "Grouping Enum Translation"
-		private string GetGroupingText(eGrouping grouping)
-		{
-			switch (grouping)
-			{
-				case eGrouping.Clustered:
-					return "clustered";
-				case eGrouping.Stacked:
-					return "stacked";
-				case eGrouping.PercentStacked:
-					return "percentStacked";
-				default:
-					return "standard";
-
-			}
-		}
-		private eGrouping GetGroupingEnum(string grouping)
-		{
-			switch (grouping)
-			{
-				case "stacked":
-					return eGrouping.Stacked;
-				case "percentStacked":
-					return eGrouping.PercentStacked;
-				default: //"clustered":               
-					return eGrouping.Clustered;
-			}
-		}
-		#endregion
-		internal static ExcelChart GetChart(ExcelDrawings drawings, XmlNode node/*, XmlNode chartTypeNode*/)
+		internal static ExcelChart GetChart(ExcelDrawings drawings, XmlNode node)
 		{
 			XmlNode chartNode = node.SelectSingleNode("xdr:graphicFrame/a:graphic/a:graphicData/c:chart", drawings.NameSpaceManager);
 			if (chartNode != null)
@@ -1699,32 +1325,27 @@ namespace OfficeOpenXml.Drawing.Chart
 				LoadXmlSafe(chartXml, part.GetStream());
 
 				ExcelChart topChart = null;
-				foreach (XmlElement n in chartXml.SelectSingleNode(rootPath, drawings.NameSpaceManager).ChildNodes)
+				foreach (XmlElement n in chartXml.SelectSingleNode(ExcelChart.RootPath, drawings.NameSpaceManager).ChildNodes)
 				{
 					if (topChart == null)
 					{
 						topChart = GetChart(n, drawings, node, uriChart, part, chartXml, null);
 						if (topChart != null)
-						{
 							topChart.PlotArea.ChartTypes.Add(topChart);
-						}
 					}
 					else
 					{
 						var subChart = GetChart(n, null, null, null, null, null, topChart);
 						if (subChart != null)
-						{
 							topChart.PlotArea.ChartTypes.Add(subChart);
-						}
 					}
 				}
 				return topChart;
 			}
 			else
-			{
 				return null;
-			}
 		}
+
 		internal static ExcelChart GetChart(XmlElement chartNode, ExcelDrawings drawings, XmlNode node, Uri uriChart, Packaging.ZipPackagePart part, XmlDocument chartXml, ExcelChart topChart)
 		{
 			switch (chartNode.LocalName)
@@ -1733,98 +1354,58 @@ namespace OfficeOpenXml.Drawing.Chart
 				case "areaChart":
 				case "stockChart":
 					if (topChart == null)
-					{
 						return new ExcelChart(drawings, node, uriChart, part, chartXml, chartNode);
-					}
 					else
-					{
 						return new ExcelChart(topChart, chartNode);
-					}
 				case "surface3DChart":
 				case "surfaceChart":
 					if (topChart == null)
-					{
 						return new ExcelSurfaceChart(drawings, node, uriChart, part, chartXml, chartNode);
-					}
 					else
-					{
 						return new ExcelSurfaceChart(topChart, chartNode);
-					}
 				case "radarChart":
 					if (topChart == null)
-					{
 						return new ExcelRadarChart(drawings, node, uriChart, part, chartXml, chartNode);
-					}
 					else
-					{
 						return new ExcelRadarChart(topChart, chartNode);
-					}
 				case "bubbleChart":
 					if (topChart == null)
-					{
 						return new ExcelBubbleChart(drawings, node, uriChart, part, chartXml, chartNode);
-					}
 					else
-					{
 						return new ExcelBubbleChart(topChart, chartNode);
-					}
 				case "barChart":
 				case "bar3DChart":
 					if (topChart == null)
-					{
 						return new ExcelBarChart(drawings, node, uriChart, part, chartXml, chartNode);
-					}
 					else
-					{
 						return new ExcelBarChart(topChart, chartNode);
-					}
 				case "doughnutChart":
 					if (topChart == null)
-					{
 						return new ExcelDoughnutChart(drawings, node, uriChart, part, chartXml, chartNode);
-					}
 					else
-					{
 						return new ExcelDoughnutChart(topChart, chartNode);
-					}
 				case "pie3DChart":
 				case "pieChart":
 					if (topChart == null)
-					{
 						return new ExcelPieChart(drawings, node, uriChart, part, chartXml, chartNode);
-					}
 					else
-					{
 						return new ExcelPieChart(topChart, chartNode);
-					}
 				case "ofPieChart":
 					if (topChart == null)
-					{
 						return new ExcelOfPieChart(drawings, node, uriChart, part, chartXml, chartNode);
-					}
 					else
-					{
 						return new ExcelBarChart(topChart, chartNode);
-					}
 				case "lineChart":
 				case "line3DChart":
 					if (topChart == null)
-					{
 						return new ExcelLineChart(drawings, node, uriChart, part, chartXml, chartNode);
-					}
 					else
-					{
 						return new ExcelLineChart(topChart, chartNode);
-					}
 				case "scatterChart":
 					if (topChart == null)
-					{
 						return new ExcelScatterChart(drawings, node, uriChart, part, chartXml, chartNode);
-					}
 					else
-					{
 						return new ExcelScatterChart(topChart, chartNode);
-					}
 				default:
 					return null;
 			}
@@ -1909,31 +1490,27 @@ namespace OfficeOpenXml.Drawing.Chart
 					return new ExcelChart(drawings, drawNode, chartType, topChart, PivotTableSource);
 			}
 		}
-		public ExcelPivotTable PivotTableSource
-		{
-			get;
-			private set;
-		}
+
 		internal void SetPivotSource(ExcelPivotTable pivotTableSource)
 		{
-			PivotTableSource = pivotTableSource;
-			XmlElement chart = ChartXml.SelectSingleNode("c:chartSpace/c:chart", NameSpaceManager) as XmlElement;
+			this.PivotTableSource = pivotTableSource;
+			XmlElement chart = this.ChartXml.SelectSingleNode(ExcelChart.ChartSpaceChartPath, this.NameSpaceManager) as XmlElement;
 
-			var pivotSource = ChartXml.CreateElement("pivotSource", ExcelPackage.schemaChart);
+			var pivotSource = this.ChartXml.CreateElement("pivotSource", ExcelPackage.schemaChart);
 			chart.ParentNode.InsertBefore(pivotSource, chart);
-			pivotSource.InnerXml = string.Format("<c:name>[]{0}!{1}</c:name><c:fmtId val=\"0\"/>", PivotTableSource.WorkSheet.Name, pivotTableSource.Name);
+			pivotSource.InnerXml = string.Format("<c:name>[]{0}!{1}</c:name><c:fmtId val=\"0\"/>", this.PivotTableSource.WorkSheet.Name, pivotTableSource.Name);
 
-			var fmts = ChartXml.CreateElement("pivotFmts", ExcelPackage.schemaChart);
+			var fmts = this.ChartXml.CreateElement("pivotFmts", ExcelPackage.schemaChart);
 			chart.PrependChild(fmts);
 			fmts.InnerXml = "<c:pivotFmt><c:idx val=\"0\"/><c:marker><c:symbol val=\"none\"/></c:marker></c:pivotFmt>";
-
-			Series.AddPivotSerie(pivotTableSource);
+			this.Series.AddPivotSerie(pivotTableSource);
 		}
+
 		internal override void DeleteMe()
 		{
 			try
 			{
-				Part.Package.DeletePart(UriChart);
+				this.Part.Package.DeletePart(this.UriChart);
 			}
 			catch (Exception ex)
 			{
@@ -1941,5 +1518,223 @@ namespace OfficeOpenXml.Drawing.Chart
 			}
 			base.DeleteMe();
 		}
+
+		internal virtual eChartType GetChartType(string name)
+		{
+			switch (name)
+			{
+				case "area3DChart":
+					if (this.Grouping == eGrouping.Stacked)
+						return eChartType.AreaStacked3D;
+					else if (this.Grouping == eGrouping.PercentStacked)
+						return eChartType.AreaStacked1003D;
+					else
+						return eChartType.Area3D;
+				case "areaChart":
+					if (this.Grouping == eGrouping.Stacked)
+						return eChartType.AreaStacked;
+					else if (this.Grouping == eGrouping.PercentStacked)
+						return eChartType.AreaStacked100;
+					else
+						return eChartType.Area;
+				case "doughnutChart":
+					return eChartType.Doughnut;
+				case "pie3DChart":
+					return eChartType.Pie3D;
+				case "pieChart":
+					return eChartType.Pie;
+				case "radarChart":
+					return eChartType.Radar;
+				case "scatterChart":
+					return eChartType.XYScatter;
+				case "surface3DChart":
+				case "surfaceChart":
+					return eChartType.Surface;
+				case "stockChart":
+					return eChartType.StockHLC;
+				default:
+					return 0;
+			}
+		}
+		#endregion
+
+		#region Chart type functions
+		internal static bool IsType3D(eChartType chartType)
+		{
+			return chartType == eChartType.Area3D ||
+						chartType == eChartType.AreaStacked3D ||
+						chartType == eChartType.AreaStacked1003D ||
+						chartType == eChartType.BarClustered3D ||
+						chartType == eChartType.BarStacked3D ||
+						chartType == eChartType.BarStacked1003D ||
+						chartType == eChartType.Column3D ||
+						chartType == eChartType.ColumnClustered3D ||
+						chartType == eChartType.ColumnStacked3D ||
+						chartType == eChartType.ColumnStacked1003D ||
+						chartType == eChartType.Line3D ||
+						chartType == eChartType.Pie3D ||
+						chartType == eChartType.PieExploded3D ||
+						chartType == eChartType.ConeBarClustered ||
+						chartType == eChartType.ConeBarStacked ||
+						chartType == eChartType.ConeBarStacked100 ||
+						chartType == eChartType.ConeCol ||
+						chartType == eChartType.ConeColClustered ||
+						chartType == eChartType.ConeColStacked ||
+						chartType == eChartType.ConeColStacked100 ||
+						chartType == eChartType.CylinderBarClustered ||
+						chartType == eChartType.CylinderBarStacked ||
+						chartType == eChartType.CylinderBarStacked100 ||
+						chartType == eChartType.CylinderCol ||
+						chartType == eChartType.CylinderColClustered ||
+						chartType == eChartType.CylinderColStacked ||
+						chartType == eChartType.CylinderColStacked100 ||
+						chartType == eChartType.PyramidBarClustered ||
+						chartType == eChartType.PyramidBarStacked ||
+						chartType == eChartType.PyramidBarStacked100 ||
+						chartType == eChartType.PyramidCol ||
+						chartType == eChartType.PyramidColClustered ||
+						chartType == eChartType.PyramidColStacked ||
+						chartType == eChartType.PyramidColStacked100 ||
+						chartType == eChartType.Surface ||
+						chartType == eChartType.SurfaceTopView ||
+						chartType == eChartType.SurfaceTopViewWireframe ||
+						chartType == eChartType.SurfaceWireframe;
+		}
+
+		internal protected bool IsType3D()
+		{
+			return IsType3D(this.ChartType);
+		}
+
+		protected bool IsTypeLine()
+		{
+			return this.ChartType == eChartType.Line ||
+					  this.ChartType == eChartType.LineMarkers ||
+					  this.ChartType == eChartType.LineMarkersStacked100 ||
+					  this.ChartType == eChartType.LineStacked ||
+					  this.ChartType == eChartType.LineStacked100 ||
+					  this.ChartType == eChartType.Line3D;
+		}
+
+		protected bool IsTypeScatterBubble()
+		{
+			return this.ChartType == eChartType.XYScatter ||
+					  this.ChartType == eChartType.XYScatterLines ||
+					  this.ChartType == eChartType.XYScatterLinesNoMarkers ||
+					  this.ChartType == eChartType.XYScatterSmooth ||
+					  this.ChartType == eChartType.XYScatterSmoothNoMarkers ||
+					  this.ChartType == eChartType.Bubble ||
+					  this.ChartType == eChartType.Bubble3DEffect;
+		}
+
+		protected bool IsTypeSurface()
+		{
+			return this.ChartType == eChartType.Surface ||
+					 this.ChartType == eChartType.SurfaceTopView ||
+					 this.ChartType == eChartType.SurfaceTopViewWireframe ||
+					 this.ChartType == eChartType.SurfaceWireframe;
+		}
+
+		protected bool IsTypeShape()
+		{
+			return this.ChartType == eChartType.BarClustered3D ||
+					  this.ChartType == eChartType.BarStacked3D ||
+					  this.ChartType == eChartType.BarStacked1003D ||
+					  this.ChartType == eChartType.BarClustered3D ||
+					  this.ChartType == eChartType.BarStacked3D ||
+					  this.ChartType == eChartType.BarStacked1003D ||
+					  this.ChartType == eChartType.Column3D ||
+					  this.ChartType == eChartType.ColumnClustered3D ||
+					  this.ChartType == eChartType.ColumnStacked3D ||
+					  this.ChartType == eChartType.ColumnStacked1003D ||
+					  //this.ChartType == eChartType.3DPie ||
+					  //this.ChartType == eChartType.3DPieExploded ||
+					  //this.ChartType == eChartType.Bubble3DEffect ||
+					  this.ChartType == eChartType.ConeBarClustered ||
+					  this.ChartType == eChartType.ConeBarStacked ||
+					  this.ChartType == eChartType.ConeBarStacked100 ||
+					  this.ChartType == eChartType.ConeCol ||
+					  this.ChartType == eChartType.ConeColClustered ||
+					  this.ChartType == eChartType.ConeColStacked ||
+					  this.ChartType == eChartType.ConeColStacked100 ||
+					  this.ChartType == eChartType.CylinderBarClustered ||
+					  this.ChartType == eChartType.CylinderBarStacked ||
+					  this.ChartType == eChartType.CylinderBarStacked100 ||
+					  this.ChartType == eChartType.CylinderCol ||
+					  this.ChartType == eChartType.CylinderColClustered ||
+					  this.ChartType == eChartType.CylinderColStacked ||
+					  this.ChartType == eChartType.CylinderColStacked100 ||
+					  this.ChartType == eChartType.PyramidBarClustered ||
+					  this.ChartType == eChartType.PyramidBarStacked ||
+					  this.ChartType == eChartType.PyramidBarStacked100 ||
+					  this.ChartType == eChartType.PyramidCol ||
+					  this.ChartType == eChartType.PyramidColClustered ||
+					  this.ChartType == eChartType.PyramidColStacked ||
+					  this.ChartType == eChartType.PyramidColStacked100; //||
+						//this.ChartType == eChartType.Doughnut ||
+						//this.ChartType == eChartType.DoughnutExploded;
+		}
+
+		protected internal bool IsTypePercentStacked()
+		{
+			return this.ChartType == eChartType.AreaStacked100 ||
+						this.ChartType == eChartType.BarStacked100 ||
+						this.ChartType == eChartType.BarStacked1003D ||
+						this.ChartType == eChartType.ColumnStacked100 ||
+						this.ChartType == eChartType.ColumnStacked1003D ||
+						this.ChartType == eChartType.ConeBarStacked100 ||
+						this.ChartType == eChartType.ConeColStacked100 ||
+						this.ChartType == eChartType.CylinderBarStacked100 ||
+						this.ChartType == eChartType.CylinderColStacked ||
+						this.ChartType == eChartType.LineMarkersStacked100 ||
+						this.ChartType == eChartType.LineStacked100 ||
+						this.ChartType == eChartType.PyramidBarStacked100 ||
+						this.ChartType == eChartType.PyramidColStacked100;
+		}
+
+		protected internal bool IsTypeStacked()
+		{
+			return this.ChartType == eChartType.AreaStacked ||
+						this.ChartType == eChartType.AreaStacked3D ||
+						this.ChartType == eChartType.BarStacked ||
+						this.ChartType == eChartType.BarStacked3D ||
+						this.ChartType == eChartType.ColumnStacked3D ||
+						this.ChartType == eChartType.ColumnStacked ||
+						this.ChartType == eChartType.ConeBarStacked ||
+						this.ChartType == eChartType.ConeColStacked ||
+						this.ChartType == eChartType.CylinderBarStacked ||
+						this.ChartType == eChartType.CylinderColStacked ||
+						this.ChartType == eChartType.LineMarkersStacked ||
+						this.ChartType == eChartType.LineStacked ||
+						this.ChartType == eChartType.PyramidBarStacked ||
+						this.ChartType == eChartType.PyramidColStacked;
+		}
+
+		protected bool IsTypeClustered()
+		{
+			return this.ChartType == eChartType.BarClustered ||
+						this.ChartType == eChartType.BarClustered3D ||
+						this.ChartType == eChartType.ColumnClustered3D ||
+						this.ChartType == eChartType.ColumnClustered ||
+						this.ChartType == eChartType.ConeBarClustered ||
+						this.ChartType == eChartType.ConeColClustered ||
+						this.ChartType == eChartType.CylinderBarClustered ||
+						this.ChartType == eChartType.CylinderColClustered ||
+						this.ChartType == eChartType.PyramidBarClustered ||
+						this.ChartType == eChartType.PyramidColClustered;
+		}
+
+		protected internal bool IsTypePieDoughnut()
+		{
+			return this.ChartType == eChartType.Pie ||
+						this.ChartType == eChartType.PieExploded ||
+						this.ChartType == eChartType.PieOfPie ||
+						this.ChartType == eChartType.Pie3D ||
+						this.ChartType == eChartType.PieExploded3D ||
+						this.ChartType == eChartType.BarOfPie ||
+						this.ChartType == eChartType.Doughnut ||
+						this.ChartType == eChartType.DoughnutExploded;
+		}
+		#endregion
 	}
 }
