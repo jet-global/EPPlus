@@ -255,7 +255,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void YearFracWithDateAsZeroReturnsCorrectResult()
 		{
 			// Note that 42878 is the Excel OADate for 5/23/2017.
-			// 0 is the Excel OADate for 1/0/2017, which Excel treats as a special date.
+			// 0 is the Excel OADate for 1/0/1900, which Excel treats as a special date.
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(0, 42878);
 			var result = func.Execute(args, this.ParsingContext);

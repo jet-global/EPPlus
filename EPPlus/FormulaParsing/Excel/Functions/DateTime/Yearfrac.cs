@@ -16,7 +16,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// and an optional type of day count basis to use, return the fraction of the year beteen those two dates.
 		/// </summary>
 		/// <param name="arguments">The arguments used to calculate the fraction of the year.</param>
-		/// <param name="context">Used to determine the context for the Days360 function used in this method.</param>
+		/// <param name="context">Used to determine the context for the YEARFRAC function.</param>
 		/// <returns>Returns the fraction of the year between the two given dates as a double, or an <see cref="ExcelErrorValue"/> if the input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
@@ -58,44 +58,46 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				date1Num = date2Num;
 				date2Num = t;
 			}
-			var date1 = System.DateTime.FromOADate(date1Num);
-			var date2 = System.DateTime.FromOADate(date2Num);
+			var startDate = System.DateTime.FromOADate(date1Num);
+			var endDate = System.DateTime.FromOADate(date2Num);
 			functionArguments[0] = new FunctionArgument(date1Num);
 			functionArguments[1] = new FunctionArgument(date2Num);
-			var func = context.Configuration.FunctionRepository.GetFunction("days360");
-			var daysBetween = (date2 - date1).TotalDays;
+			var days360Function = context.Configuration.FunctionRepository.GetFunction("days360");
+			var daysBetween = (endDate - startDate).TotalDays;
 			// Account for the fact that Excel includes an extra day, 2/29/1900 which doesn't actually exist, 
 			// between 2/28/1900 and 3/1/1900, which are represented by System.DateTime OADates 60 and 61 respectively.
-			if (date1.ToOADate() < 61 && date2.ToOADate() >= 61)
+			if (startDate.ToOADate() < 61 && endDate.ToOADate() >= 61)
 				daysBetween++;
 			var yearFracResult = 0d;
+			// Note: See https://support.office.com/en-us/article/YEARFRAC-function-3844141e-c76d-4143-82b6-208454ddc6a8
+			// for more information on the options for the basis parameter for the YEARFRAC function.
 			switch (basis)
 			{
-				case 0:
-					var d360Result = System.Math.Abs(func.Execute(functionArguments, context).ResultNumeric);
+				case 0: // Use the US 30-day-per-month/360-day-per-year as the Day Count Basis.
+					var days360Result = System.Math.Abs(days360Function.Execute(functionArguments, context).ResultNumeric);
 					// Reproducing Excel's behavior.
-					if (date1.Month == 2 && date2.Day == 31)
+					if (startDate.Month == 2 && endDate.Day == 31)
 					{
 						var calendar = new GregorianCalendar();
-						var daysInFeb = calendar.IsLeapYear(date1.Year) ? 29 : 28;
-						if (date1.Day == daysInFeb)
-							d360Result++;
+						var daysInFeb = calendar.IsLeapYear(startDate.Year) ? 29 : 28;
+						if (startDate.Day == daysInFeb)
+							days360Result++;
 					}
-					yearFracResult = d360Result / 360d;
+					yearFracResult = days360Result / 360d;
 					break;
-				case 1:
-					yearFracResult = System.Math.Abs(daysBetween / this.CalculateAcutalYear(date1, date2));
+				case 1: // Use the actual number of days between dates/actual number of days per year as the Day Count Basis.
+					yearFracResult = System.Math.Abs(daysBetween / this.CalculateAverageDaysPerYear(startDate, endDate));
 					break;
-				case 2:
+				case 2: // Use the actual number of days between dates/360-days-per-year as the Day Count Basis
 					yearFracResult = System.Math.Abs(daysBetween / 360d);
 					break;
-				case 3:
+				case 3: // Use the actual number of days between dates/365-days-per-year as the Day Count Basis
 					yearFracResult = System.Math.Abs(daysBetween / 365d);
 					break;
-				case 4:
+				case 4: // Use the European 30-days-per-month/360-days-per-year as the Day Count Basis.
 					var args = functionArguments.ToList();
 					args.Add(new FunctionArgument(true));
-					double? result = System.Math.Abs(func.Execute(args, context).ResultNumeric / 360d);
+					double? result = System.Math.Abs(days360Function.Execute(args, context).ResultNumeric / 360d);
 					yearFracResult = result.Value;
 					break;
 				default:
@@ -108,28 +110,28 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <summary>
 		/// Calculates the average number of days in a year for the years between two given dates.
 		/// </summary>
-		/// <param name="date1">The starting date for calculating the actual year value.</param>
-		/// <param name="date2">The ending date for calculating the actual year value.</param>
-		/// <returns>Returns the average number of days in a year based on the time between <paramref name="date1"/> and <paramref name="date2"/>.</returns>
-		private double CalculateAcutalYear(System.DateTime date1, System.DateTime date2)
+		/// <param name="startDate">The starting date for calculating the actual year value.</param>
+		/// <param name="endDate">The ending date for calculating the actual year value.</param>
+		/// <returns>Returns the average number of days in a year based on the time between <paramref name="startDate"/> and <paramref name="endDate"/>.</returns>
+		private double CalculateAverageDaysPerYear(System.DateTime startDate, System.DateTime endDate)
 		{
 			var calendar = new GregorianCalendar();
 			var totalDaysPerYear = 0d;
-			var numberOfYears = date2.Year - date1.Year + 1;
-			if (new System.DateTime(date1.Year + 1, date1.Month, date1.Day) >= date2) // Check if date1 and date2 are a year or less apart.
+			var numberOfYears = endDate.Year - startDate.Year + 1;
+			if (new System.DateTime(startDate.Year + 1, startDate.Month, startDate.Day) >= endDate) // Check if the start and end dates are a year or less apart.
 			{
 				numberOfYears = 1;
 				totalDaysPerYear = 365;
-				if (calendar.IsLeapYear(date1.Year) && date1.Month <= 2)
+				if (calendar.IsLeapYear(startDate.Year) && startDate.Month <= 2)
 					totalDaysPerYear = 366;
-				else if (calendar.IsLeapYear(date2.Year) && date2.Month > 2)
+				else if (calendar.IsLeapYear(endDate.Year) && endDate.Month > 2)
 					totalDaysPerYear = 366;
-				else if (date2.Month == 2 && date2.Day == 29)
+				else if (endDate.Month == 2 && endDate.Day == 29)
 					totalDaysPerYear = 366;
 			}
 			else
 			{
-				for (var y = date1.Year; y <= date2.Year; ++y)
+				for (var y = startDate.Year; y <= endDate.Year; ++y)
 				{
 					totalDaysPerYear += calendar.IsLeapYear(y) ? 366 : 365;
 				}
