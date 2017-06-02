@@ -29,12 +29,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 			if (dateArgument == null || monthsToAddArgument == null)
 				return new CompileResult(eErrorType.NA);
-			if(ConvertUtil.TryParseDateObjectToOADate(dateArgument, out result))
+			if (ConvertUtil.TryParseDateObjectToOADate(dateArgument, out result))
 			{
 				if (result < 0)
 					return new CompileResult(eErrorType.Num);
-				date = System.DateTime.FromOADate(result);
-				if (result == 0 || result == 0.0)
+				int intResult = (int)result;
+				date = System.DateTime.FromOADate(intResult);
+				if (intResult == 0 || intResult == 0.0)
 					date = System.DateTime.FromOADate(result + 2);
 			}
 			else
