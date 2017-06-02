@@ -90,7 +90,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				resultDate = new System.DateTime(date.Year, date.Month, 1).AddMonths(monthsToAdd + 1).AddDays(-2);
 			}
 
-			return CreateResult(resultDate.ToOADate(), DataType.Date);
+			return this.CreateResult(resultDate.ToOADate(), DataType.Date);
 		}
 
 		#endregion
