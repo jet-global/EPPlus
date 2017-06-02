@@ -152,7 +152,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new Eomonth();
 			var result = function.Execute(FunctionsHelper.CreateArgs(0, 0), this.ParsingContext);
-			Assert.AreEqual(31, result.Result);
+			Assert.AreEqual(31d, result.Result);
 		}
 		// 60 returns 59 (special case)
 		[TestMethod]
@@ -240,25 +240,25 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var function = new Eomonth();
 			var arguments = FunctionsHelper.CreateArgs(5 / 15 / 2017, 1);
 			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(59, result.Result);
+			Assert.AreEqual(59d, result.Result);
 		}
 
 		[TestMethod]
 		public void EomonthWithPositiveIntegerReturnsCorrectValue()
 		{
 			var function = new Eomonth();
-			var arguments = FunctionsHelper.CreateArgs(20, 1);
+			var arguments = FunctionsHelper.CreateArgs(150, 1);
 			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(59, result.Result);
+			Assert.AreEqual(182d, result.Result);
 		}
 
 		[TestMethod]
 		public void EomonthWithDoulbeInputReturnsCorrectValue()
 		{
 			var function = new Eomonth();
-			var arguments = FunctionsHelper.CreateArgs(20, 1);
+			var arguments = FunctionsHelper.CreateArgs(150.5, 1);
 			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(59, result.Result);
+			Assert.AreEqual(182d, result.Result);
 		}
 
 		[TestMethod]
@@ -267,7 +267,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var function = new Eomonth();
 			var arguments = FunctionsHelper.CreateArgs(0, 1);
 			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(59, result.Result);
+			Assert.AreEqual(59d, result.Result);
 		}
 
 		[TestMethod]

@@ -29,12 +29,55 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (firstArgument == null || secondArgument == null)
 				return new CompileResult(eErrorType.NA);
 
-			if (!ConvertUtil.TryParseDateObject(firstArgument, out System.DateTime dt1, out eErrorType? error))
+			var date = new System.DateTime(2017,5,6);
+
+			if (firstArgument is int)
+			{
+				var temp = this.ArgToDecimal(arguments, 0);
+				if (temp < 0)
+					return new CompileResult(eErrorType.Num);
+				if (temp == 0)
+					temp = 2;
+				date = System.DateTime.FromOADate(temp);
+			}
+
+			else if (ConvertUtil.TryParseDateObject(firstArgument, out System.DateTime dt1, out eErrorType? error))
+				date = System.DateTime.FromOADate(dt1.ToOADate());
+			else
 				return new CompileResult(eErrorType.Value);
 
-			var date = System.DateTime.FromOADate(dt1.ToOADate());
-			var monthsToAdd = ArgToInt(arguments, 1);
+
+			var monthsToAdd = 0;
+
+			if (secondArgument is double)
+			{
+				var temp = this.ArgToDecimal(arguments, 1);
+				monthsToAdd = (int)temp;
+			}
+			else if(secondArgument is string)
+			{
+				if (ConvertUtil.TryParseNumericString(secondArgument, out double result))
+					monthsToAdd = (int)result;
+				else if (ConvertUtil.TryParseDateString(secondArgument.ToString(), out System.DateTime resul))
+					monthsToAdd = (int)resul.ToOADate();
+				else
+					return new CompileResult(eErrorType.Value);
+			}
+			else if (secondArgument is System.DateTime)
+			{
+				var temp = ConvertUtil.TryParseDateObject(secondArgument, out System.DateTime datee, out eErrorType? error);
+				monthsToAdd = (int)datee.ToOADate();
+			}
+			else
+				monthsToAdd = ArgToInt(arguments, 1);
+
+
 			var resultDate = new System.DateTime(date.Year, date.Month, 1).AddMonths(monthsToAdd + 1).AddDays(-1);
+			if (date.ToOADate() < 60)
+			{
+				resultDate = new System.DateTime(date.Year, date.Month, 1).AddMonths(monthsToAdd + 1).AddDays(-2);
+			}
+
 			return CreateResult(resultDate.ToOADate(), DataType.Date);
 		}
 
