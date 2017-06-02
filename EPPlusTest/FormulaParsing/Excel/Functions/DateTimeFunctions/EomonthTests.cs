@@ -178,6 +178,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void EomonthOnFeb291900AsDateReturnsFebruary28()
 		{
+			// This functionality is different from that of Excel's. This date, 2/29/1900 is not a real date however
+			// Excel supports using this date as and argument in the EOMONTH Function. Since it is not a real date
+			// EPPlus has been written to not support it as an argument and thus returns an error of type #VALUE!
 			var function = new Eomonth();
 			var result = function.Execute(FunctionsHelper.CreateArgs("2/29/1900", 1), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
