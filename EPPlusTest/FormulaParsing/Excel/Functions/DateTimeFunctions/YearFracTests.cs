@@ -43,20 +43,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void YearFracWithTooFewArgumentsReturnsPoundValue()
 		{
 			var func = new Yearfrac();
-			var result = func.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, (result.Result as ExcelErrorValue).Type);
 		}
 
-		/*
-		[TestMethod]
-		public void YearFrac()
-		{
-			var func = new Yearfrac();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(, result.Result);
-		}
-		*/
 		[TestMethod]
 		public void YearFracWithDateAsIntegerReturnsCorrectResult()
 		{
@@ -255,7 +246,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var date = new DateTime(2017, 1, 1);
 			var func = new Yearfrac();
-			var args = FunctionsHelper.CreateArgs(date, date);
+			var args = FunctionsHelper.CreateArgs(date.ToOADate(), date.ToOADate());
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(0.0, result.Result);
 		}
@@ -268,9 +259,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Yearfrac();
 			var args = FunctionsHelper.CreateArgs(0, 42878);
 			var result = func.Execute(args, this.ParsingContext);
-
-			//var roundedResult = System.Math.Round((double)result.Result, 12);
-			//Assert.IsTrue(System.Math.Abs(117.397222222222 - roundedResult) < double.Epsilon);
 			Assert.AreEqual(117.39722222222, result.Result);
 		}
 
@@ -482,7 +470,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void YearFracWithBasisAsNonEnumeratedNumberReturnsPoundNum()
 		{
-			// Note that the YEARFRAC function in Excel only has 0-4 as valid numbers for the basis parameter.
+			// Note that the YEARFRAC function in Excel only accepts 0-4 as valid numbers for the basis parameter.
 			var date1 = new DateTime(2017, 1, 1);
 			var date2 = new DateTime(2017, 5, 23);
 			var func = new Yearfrac();
@@ -522,6 +510,57 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs(date1.ToOADate(), date2.ToOADate(), string.Empty);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearFracWithNonNumericStringDateParametersAndNegativeBasisParameterReturnsPoundNum()
+		{
+			var func = new Yearfrac();
+			var args = FunctionsHelper.CreateArgs("word", "word", -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearFracWithNullDateNonNumericStringDateAndNegativeBasisReturnsPoundNum()
+		{
+			var func = new Yearfrac();
+			var args = FunctionsHelper.CreateArgs(null, "word", -1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void YearFracWithDateTimeObjectInputReturnsCorrectResult()
+		{
+			var date1 = new DateTime(2017, 1, 1);
+			var date2 = new DateTime(2017, 5, 23);
+			var func = new Yearfrac();
+			var args = FunctionsHelper.CreateArgs(date1, date2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.39444444444, result.Result);
+		}
+
+		[TestMethod]
+		public void YearFracWithDateTimeObjectInputBefore1March1900ReturnsCorrectResult()
+		{
+			var date1 = new DateTime(1900, 1, 31);
+			var date2 = new DateTime(1900, 2, 28);
+			var func = new Yearfrac();
+			var args = FunctionsHelper.CreateArgs(date1, date2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.07777777778, result.Result);
+		}
+
+		[TestMethod]
+		public void YearFracWithDateTimeObjectInputWith1March1900BetweenReturnsCorrectResult()
+		{
+			var date1 = new DateTime(1900, 1, 31);
+			var date2 = new DateTime(2017, 1, 1);
+			var func = new Yearfrac();
+			var args = FunctionsHelper.CreateArgs(date1, date2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(116.91944444444, result.Result);
 		}
 
 		[TestMethod]
