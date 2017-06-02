@@ -14,12 +14,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
 			if (ValidateArguments(functionArguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
+
 			var date1Candidate = functionArguments[0].Value;
 			var date2Candidate = functionArguments[1].Value;
+
 			if (date1Candidate == null || date2Candidate == null)
 				return new CompileResult(eErrorType.NA);
+
 			var isValidDate1 = ConvertUtil.TryParseDateObjectToOADate(date1Candidate, out double date1Num);
 			var isValidDate2 = ConvertUtil.TryParseDateObjectToOADate(date2Candidate, out double date2Num);
+
 			if (!isValidDate1)
 				return new CompileResult(eErrorType.Value);
 			else if (date1Num < 0)
@@ -28,41 +32,54 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(eErrorType.Value);
 			else if (date2Num < 0)
 				return new CompileResult(eErrorType.Num);
-			//var date1Num = parsedDate1.ToOADate();
-			//var date2Num = parsedDate2.ToOADate();
+
+			// date1Num and date2Num are Excel OADates, so they need to be converted back to DateTime OADates for the calculation.
+			
 			if (date1Num < 61)
 				date1Num++;
 			if (date2Num < 61)
 				date2Num++;
+
 			if (date1Num > date2Num) //Switch to make date1 the lowest date
 			{
 				var t = date1Num;
 				date1Num = date2Num;
 				date2Num = t;
-				var fa = functionArguments[1];
-				functionArguments[1] = functionArguments[0];
-				functionArguments[0] = fa;
+				//var fa = functionArguments[1];
+				//functionArguments[1] = functionArguments[0];
+				//functionArguments[0] = fa;
 			}
+
 			var date1 = System.DateTime.FromOADate(date1Num);
 			var date2 = System.DateTime.FromOADate(date2Num);
 
+			functionArguments[0] = new FunctionArgument(date1Num);
+			functionArguments[1] = new FunctionArgument(date2Num);
+
+			// apply basis
 			var basis = 0;
 			if (functionArguments.Count() > 2)
 			{
 				var isValidBasis = this.TryGetArgAsInt(functionArguments, 2, out basis);
 				if (!isValidBasis)
 					return new CompileResult(eErrorType.Value);
-				else if (basis < 0 || basis > 4)
-					return new CompileResult(eErrorType.Num);
+				//else if (basis < 0 || basis > 4)
+				//	return new CompileResult(eErrorType.Num);
 			}
+
 			var func = context.Configuration.FunctionRepository.GetFunction("days360");
 			var calendar = new GregorianCalendar();
 			var yearFracResult = 0d;
+			
+			var daysBetween = (date2 - date1).TotalDays;
+			if (date1.ToOADate() < 61 && date2.ToOADate() >= 61)
+				daysBetween++;
+			
 			switch (basis)
 			{
 				case 0:
 					var d360Result = System.Math.Abs(func.Execute(functionArguments, context).ResultNumeric);
-					// reproducing excels behaviour
+					// Reproducing Excel's behaviour.
 					if (date1.Month == 2 && date2.Day == 31)
 					{
 						var daysInFeb = calendar.IsLeapYear(date1.Year) ? 29 : 28;
@@ -71,13 +88,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					yearFracResult = d360Result / 360d;
 					break;
 				case 1:
-					yearFracResult = System.Math.Abs((date2 - date1).TotalDays / CalculateAcutalYear(date1, date2));
+
+					yearFracResult = System.Math.Abs(daysBetween / CalculateAcutalYear(date1, date2));
 					break;
 				case 2:
-					yearFracResult = System.Math.Abs((date2 - date1).TotalDays / 360d);
+					yearFracResult = System.Math.Abs(daysBetween / 360d);
 					break;
 				case 3:
-					yearFracResult = System.Math.Abs((date2 - date1).TotalDays / 365d);
+					yearFracResult = System.Math.Abs(daysBetween / 365d);
 					break;
 				case 4:
 					var args = functionArguments.ToList();
@@ -86,7 +104,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					yearFracResult = result.Value;
 					break;
 				default:
-					return null;
+					return new CompileResult(eErrorType.Num);
 			}
 
 			yearFracResult = System.Math.Round(yearFracResult, 11);
