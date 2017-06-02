@@ -38,8 +38,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				if (intResult == 0 || intResult == 0.0)
 					date = System.DateTime.FromOADate(result + 2);
 			}
-			else if (dateArgument.ToString().Equals("2/29/1900") || dateArgument.ToString().Equals("2.29.1900") || dateArgument.ToString().Equals("2-29-1900"))
-				date = System.DateTime.FromOADate(2);
 			else
 				return new CompileResult(eErrorType.Value);
 

@@ -180,20 +180,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new Eomonth();
 			var result = function.Execute(FunctionsHelper.CreateArgs("2/29/1900", 1), this.ParsingContext);
-			Assert.AreEqual(59d, result.Result);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void EomonthDateNotAsStringInExcelWorkbookReturnsCorrectValue()
+		public void EomonthDateWithFractionInputReturnsCorrectValue()
 		{
-			using (var package = new ExcelPackage())
-			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B2"].Formula = "EOMONTH(5/15/2017, 1)";
-				ws.Calculate();
-
-				Assert.AreEqual(59d, ws.Cells["B2"].Value);
-			}
+			var function = new Eomonth();
+			var result = function.Execute(FunctionsHelper.CreateArgs(0.3, 1), this.ParsingContext);
+			Assert.AreEqual(59d, result.Result);
 		}
 
 		// string first arg, garbage
