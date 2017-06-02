@@ -29,7 +29,6 @@ using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using System;
 
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
@@ -42,7 +41,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void TimeValueWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new TimeValue();
-
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
@@ -73,18 +71,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 			var input1 = "00:00";
 			var input2 = "00:01";
-			var input3 = "-00:01";
-			var input4 = "24:00";
+			var input3 = "24:00";
 
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
-			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 			
 			Assert.AreEqual(0.0,result1.ResultNumeric);
 			Assert.AreEqual( 0.00069444, System.Math.Round(result2.ResultNumeric, 8));
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result3.Result).Type);
-			Assert.AreEqual(0.0, result4.ResultNumeric);
+			Assert.AreEqual(0.0, result3.ResultNumeric);
 		}
 
 		[TestMethod]
@@ -102,10 +97,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			//Assert.AreEqual(result1.ResultNumeric, result2.ResultNumeric);
-			//Assert.AreEqual(result3.ResultNumeric, result4.ResultNumeric);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(0.041666667, System.Math.Round(result1.ResultNumeric,9));
+			Assert.AreEqual(0.041666667, System.Math.Round(result2.ResultNumeric,9));
+			Assert.AreEqual(0.083333333, System.Math.Round(result3.ResultNumeric, 9));
+			Assert.AreEqual(0.083333333, System.Math.Round(result4.ResultNumeric, 9));
+
 
 		}
 
@@ -157,7 +153,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(0.5, result3.ResultNumeric);
 			Assert.AreEqual(0.0, result4.ResultNumeric);
 			Assert.AreEqual(0.541666667, System.Math.Round(result6.ResultNumeric, 9));
-			Assert.AreEqual(result6.ResultNumeric, result7.ResultNumeric);
+			Assert.AreEqual(0.541666667, System.Math.Round(result7.ResultNumeric, 9));
 
 
 		}
@@ -177,9 +173,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(result1.ResultNumeric, result2.ResultNumeric);
-			Assert.AreEqual(result3.ResultNumeric, result4.ResultNumeric);
-			
+			Assert.AreEqual(0.541666667, System.Math.Round(result1.ResultNumeric, 9));
+			Assert.AreEqual(0.541666667, System.Math.Round(result2.ResultNumeric, 9));
+			Assert.AreEqual(0.666666667, System.Math.Round(result3.ResultNumeric, 9));
+			Assert.AreEqual(0.666666667, System.Math.Round(result4.ResultNumeric, 9));
 		}
 
 		[TestMethod]
@@ -197,9 +194,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(result1.ResultNumeric,result2.ResultNumeric);
-			Assert.AreEqual(result3.ResultNumeric,result4.ResultNumeric);
-			
+			Assert.AreEqual(0.6875, System.Math.Round(result1.ResultNumeric, 9));
+			Assert.AreEqual(0.6875, System.Math.Round(result2.ResultNumeric, 9));
+			Assert.AreEqual(0.104166667, System.Math.Round(result3.ResultNumeric, 9));
+			Assert.AreEqual(0.104166667, System.Math.Round(result4.ResultNumeric, 9));
+
 		}
 
 

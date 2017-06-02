@@ -29,7 +29,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
 	public class TimeStringParser
 	{
-		private const string RegEx24 = @"^[0-9]{1,2}(\:[0-9]{1,2}){0,2}$";
+		private const string RegEx24 = @"[0-9]{1,2}(\:[0-9]{1,2}){0,2}$";
 		private const string RegEx12 = @"^[0-9]{1,2}(\:[0-9]{1,2}){0,2}( PM| AM)$";
 
 		private double GetSerialNumber(int hour, int minute, int second)
@@ -63,9 +63,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 		private double InternalParse(string input)
 		{
-			if (Regex.IsMatch(input, RegEx24))
+			var match = Regex.Match(input, RegEx24);
+			if (match.Success)
 			{
-				return Parse24HourTimeString(input);
+				
+				return Parse24HourTimeString(match.Value);
 			}
 			if (Regex.IsMatch(input, RegEx12))
 			{
@@ -98,6 +100,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			int minute;
 			int second;
 			GetValuesFromString(input, out hour, out minute, out second);
+
 			ValidateValues(hour, minute, second);
 			return GetSerialNumber(hour, minute, second);
 		}
