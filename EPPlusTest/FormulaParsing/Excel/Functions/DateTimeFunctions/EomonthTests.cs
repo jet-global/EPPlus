@@ -276,7 +276,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void EomonthWithZeroInputReturnsCorrectValue()
 		{
 			var function = new Eomonth();
-			var arguments = FunctionsHelper.CreateArgs(0, 1);
+			var arguments = FunctionsHelper.CreateArgs(0.0, 1);
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(59d, result.Result);
 		}

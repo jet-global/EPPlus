@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System.Linq;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using System;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
@@ -21,64 +19,38 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>An OADate representing the end of the month the specified number of months before or after the specified date.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 2) == false)
+			if (this.ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-			var firstArgument = arguments.ElementAt(0).Value;
-			var secondArgument = arguments.ElementAt(1).Value;
-			System.DateTime dateTime;
-			eErrorType? error;
-
-			if (firstArgument == null || secondArgument == null)
-				return new CompileResult(eErrorType.NA);
-			var date = new System.DateTime(2017,5,6);
-			if (firstArgument is int)
-			{
-				var temp = this.ArgToDecimal(arguments, 0);
-				if (temp < 0)
-					return new CompileResult(eErrorType.Num);
-				if (temp == 0)
-					temp = 2;
-				date = System.DateTime.FromOADate(temp);
-			}
-			else if (ConvertUtil.TryParseDateObject(firstArgument, out dateTime, out error))
-				date = System.DateTime.FromOADate(dateTime.ToOADate());
-			else
-				return new CompileResult(eErrorType.Value);
-
+			System.DateTime date;
+			double result;
 			var monthsToAdd = 0;
-			if (secondArgument is double)
+			var dateArgument = arguments.ElementAt(0).Value;
+			var monthsToAddArgument = arguments.ElementAt(1).Value;
+
+			if (dateArgument == null || monthsToAddArgument == null)
+				return new CompileResult(eErrorType.NA);
+			if(ConvertUtil.TryParseDateObjectToOADate(dateArgument, out result))
 			{
-				var temp = this.ArgToDecimal(arguments, 1);
-				monthsToAdd = (int)temp;
-			}
-			else if(secondArgument is string)
-			{
-				if (ConvertUtil.TryParseNumericString(secondArgument, out double result))
-					monthsToAdd = (int)result;
-				else if (ConvertUtil.TryParseDateString(secondArgument.ToString(), out dateTime))
-				{
-					//This accounts for the Lotus 1-2-3 error with dates before March 1, 1900.
-					if (dateTime.ToOADate() < 61)
-					{
-						dateTime = System.DateTime.FromOADate(dateTime.ToOADate() - 1);
-					}
-					monthsToAdd = (int)dateTime.ToOADate();
-				}
-				else
-					return new CompileResult(eErrorType.Value);
-			}
-			else if (secondArgument is System.DateTime)
-			{
-				var temp = ConvertUtil.TryParseDateObject(secondArgument, out dateTime, out error);
-				//This accounts for the Lotus 1-2-3 error with dates before March 1, 1900.
-				if (dateTime.ToOADate() < 61)
-				{
-					dateTime = System.DateTime.FromOADate(dateTime.ToOADate() - 1);
-				}
-				monthsToAdd = (int)dateTime.ToOADate();
+				if (result < 0)
+					return new CompileResult(eErrorType.Num);
+				date = System.DateTime.FromOADate(result);
+				if (result == 0 || result == 0.0)
+					date = System.DateTime.FromOADate(result + 2);
 			}
 			else
-				monthsToAdd = ArgToInt(arguments, 1);
+				return new CompileResult(eErrorType.Value);
+
+			if (monthsToAddArgument is double)
+			{
+				var monthCandidate = this.ArgToDecimal(arguments, 1);
+				monthsToAdd = (int)monthCandidate;
+			}
+			else if (ConvertUtil.TryParseDateObjectToOADate(monthsToAddArgument, out result))
+			{
+				monthsToAdd = (int)result;
+			}
+			else
+				return new CompileResult(eErrorType.Value);
 
 			if (date.ToOADate() < 60 && monthsToAdd < 0)
 				return new CompileResult(eErrorType.Num);
