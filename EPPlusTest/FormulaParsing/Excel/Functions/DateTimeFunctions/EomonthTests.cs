@@ -25,6 +25,8 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Globalization;
+using System.Threading;
 using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -49,7 +51,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void EomonthWithNegativeOffset()
+		public void EomonthWithNegativeOffsetReturnsCorrectValue()
 		{
 			var function = new Eomonth();
 			var date = new DateTime(2013, 2, 4).ToOADate();
@@ -109,7 +111,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void EomonthWithStringDateFirstArgument()
 		{
 			var function = new Eomonth();
-			var dateString = "Feb 4, 2013";
+			var dateString = "4 FEB 2013";
 			var result = function.Execute(FunctionsHelper.CreateArgs(dateString, 0), this.ParsingContext);
 			var expected = new DateTime(2013, 2, 28);
 			Assert.AreEqual(expected.ToOADate(), result.Result);
@@ -221,6 +223,133 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var arguments = FunctionsHelper.CreateArgs();
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void EomonthWithDateAsStringReturnsCorrectValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs("5/15/2017", 1);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(42916d, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithDateNotAsStringReturnsCorrectValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs(5 / 15 / 2017, 1);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(59, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithPositiveIntegerReturnsCorrectValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs(20, 1);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(59, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithDoulbeInputReturnsCorrectValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs(20, 1);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(59, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithZeroInputReturnsCorrectValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs(0, 1);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(59, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithDateWithDashInsteadOfSlashReturnsCorrectValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs("5-15-2017", 1);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(42916d, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithDateWithPeriodsInsteadOfSlashesReturnsCorrectValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs("5.15.2017", 1);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(42916d, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithMonthArgumentAsDateFunctionReturnsCorretValue()
+		{
+			var function = new Eomonth();
+			var endDate = new DateTime(2017, 6, 25);
+			var arguments = FunctionsHelper.CreateArgs("5/15/2017", endDate);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(1348962d, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithMonthArgumentAsDateNotAsStringReturnsCorretValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs("5/15/2017", 6 / 25 / 2017);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(42886d, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithMonthArgumentAsDateWrittenOutReturnsCorrectValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs("5/15/2017", "25 JUN 2017");
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(1348962d, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithMonthArgumentAsNonZeroIntReturnsCorrectValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs("5/15/2017", 20);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(43496d, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthWithMonthArgumentAsDoubleReturnsCorrectValue()
+		{
+			var function = new Eomonth();
+			var arguments = FunctionsHelper.CreateArgs("5/15/2017", 20.6);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(43496d, result.Result);
+		}
+
+		[TestMethod]
+		public void EoMonthWithGermanCultureReturnCorrectValue()
+		{
+			var currentCulture = Thread.CurrentThread.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("de-DE");
+				var function = new Eomonth();
+				var arguments = FunctionsHelper.CreateArgs("15.5.2017", 20);
+				var result = function.Execute(arguments, this.ParsingContext);
+				Assert.AreEqual(43496d, result.Result);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
 		}
 		#endregion
 	}
