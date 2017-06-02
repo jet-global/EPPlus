@@ -25,12 +25,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(eErrorType.Value);
 			var firstArgument = arguments.ElementAt(0).Value;
 			var secondArgument = arguments.ElementAt(1).Value;
+			System.DateTime dateTime;
+			eErrorType? error;
 
 			if (firstArgument == null || secondArgument == null)
 				return new CompileResult(eErrorType.NA);
-
 			var date = new System.DateTime(2017,5,6);
-
 			if (firstArgument is int)
 			{
 				var temp = this.ArgToDecimal(arguments, 0);
@@ -40,15 +40,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					temp = 2;
 				date = System.DateTime.FromOADate(temp);
 			}
-
-			else if (ConvertUtil.TryParseDateObject(firstArgument, out System.DateTime dt1, out eErrorType? error))
-				date = System.DateTime.FromOADate(dt1.ToOADate());
+			else if (ConvertUtil.TryParseDateObject(firstArgument, out dateTime, out error))
+				date = System.DateTime.FromOADate(dateTime.ToOADate());
 			else
 				return new CompileResult(eErrorType.Value);
 
-
 			var monthsToAdd = 0;
-
 			if (secondArgument is double)
 			{
 				var temp = this.ArgToDecimal(arguments, 1);
@@ -58,22 +55,37 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			{
 				if (ConvertUtil.TryParseNumericString(secondArgument, out double result))
 					monthsToAdd = (int)result;
-				else if (ConvertUtil.TryParseDateString(secondArgument.ToString(), out System.DateTime resul))
-					monthsToAdd = (int)resul.ToOADate();
+				else if (ConvertUtil.TryParseDateString(secondArgument.ToString(), out dateTime))
+				{
+					//This accounts for the Lotus 1-2-3 error with dates before March 1, 1900.
+					if (dateTime.ToOADate() < 61)
+					{
+						dateTime = System.DateTime.FromOADate(dateTime.ToOADate() - 1);
+					}
+					monthsToAdd = (int)dateTime.ToOADate();
+				}
 				else
 					return new CompileResult(eErrorType.Value);
 			}
 			else if (secondArgument is System.DateTime)
 			{
-				var temp = ConvertUtil.TryParseDateObject(secondArgument, out System.DateTime datee, out eErrorType? error);
-				monthsToAdd = (int)datee.ToOADate();
+				var temp = ConvertUtil.TryParseDateObject(secondArgument, out dateTime, out error);
+				//This accounts for the Lotus 1-2-3 error with dates before March 1, 1900.
+				if (dateTime.ToOADate() < 61)
+				{
+					dateTime = System.DateTime.FromOADate(dateTime.ToOADate() - 1);
+				}
+				monthsToAdd = (int)dateTime.ToOADate();
 			}
 			else
 				monthsToAdd = ArgToInt(arguments, 1);
 
+			if (date.ToOADate() < 60 && monthsToAdd < 0)
+				return new CompileResult(eErrorType.Num);
 
 			var resultDate = new System.DateTime(date.Year, date.Month, 1).AddMonths(monthsToAdd + 1).AddDays(-1);
-			if (date.ToOADate() < 60)
+			//This accounts for the Lotus 1-2-3 error with dates before March 1, 1900.
+			if (date.ToOADate() <= 60)
 			{
 				resultDate = new System.DateTime(date.Year, date.Month, 1).AddMonths(monthsToAdd + 1).AddDays(-2);
 			}

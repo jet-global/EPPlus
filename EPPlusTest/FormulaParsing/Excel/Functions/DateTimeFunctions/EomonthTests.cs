@@ -138,6 +138,17 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void EomonthWithSmallDateAsSecondArgument()
+		{
+			var function = new Eomonth();
+			var date = new DateTime(2013, 2, 4);
+			var offsetDate = new DateTime(1900, 1, 12);
+			var result = function.Execute(FunctionsHelper.CreateArgs(date, offsetDate), this.ParsingContext);
+			var expected = new DateTime(2014, 2, 28);
+			Assert.AreEqual(expected.ToOADate(), result.Result);
+		}
+
+		[TestMethod]
 		public void EomonthWithLargeStringDateAsOffset()
 		{
 			var function = new Eomonth();
@@ -161,7 +172,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var function = new Eomonth();
 			// OADate 60 in Excel represents 2/29/1900, a day that never actually happened but existed in Lotus 1-2-3.
 			var result = function.Execute(FunctionsHelper.CreateArgs(60, 0), this.ParsingContext);
-			Assert.AreEqual(59, result.Result);
+			Assert.AreEqual(59d, result.Result);
 		}
 
 		// string first arg, garbage
