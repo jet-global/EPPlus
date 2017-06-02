@@ -31,6 +31,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
 	/// <summary>
 	/// Simple implementation of TimeValue function.
+	/// 
 	/// This makes use of the TimeStringParser class.
 	/// </summary>
 	public class TimeValue : ExcelFunction

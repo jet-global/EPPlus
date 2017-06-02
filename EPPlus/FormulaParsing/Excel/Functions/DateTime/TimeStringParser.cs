@@ -26,7 +26,16 @@ using System;
 using System.Text.RegularExpressions;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
-{
+{   /// <summary>
+	/// TimeStringParser is used in TimeValue. It handles parsing the input and returning a double of just the time.
+	/// 
+	/// Note: The double that this will return is slightly diffrent from from the one you would get from TimeValue in Excel. the diffrence is that in excel if you do timevalue("26:00") you would get a value that is
+	/// equivalent to timevalue("02:00"). This is becuase excel seems to mod the hours if they are greater then 24. In this implamentation that does not happen so you will end up with a whole number. To get the same
+	/// functionality you will need to truncate it. Eg:
+	/// 
+	/// var resultAfterParse = parser.Parse(dateStringToBeParsed);
+	/// var resultDecimalsOnly = resultAfterParse - System.Math.Truncate(resultAfterParse);
+	/// </summary>
 	public class TimeStringParser
 	{
 		private const string RegEx24 = @"[0-9]{1,2}(\:[0-9]{1,2}){0,2}$";
