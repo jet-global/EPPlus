@@ -258,9 +258,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void EomonthWithPositiveIntegerReturnsCorrectValue()
 		{
 			var function = new Eomonth();
-			var arguments = FunctionsHelper.CreateArgs(150, 1);
+			var arguments = FunctionsHelper.CreateArgs(20, 1);
 			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(182d, result.Result);
+			Assert.AreEqual(59d, result.Result);
 		}
 
 		[TestMethod]
