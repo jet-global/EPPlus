@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
@@ -7,8 +6,18 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// Return the fraction of the year represented by the number of whole days between two dates.
+	/// </summary>
 	public class Yearfrac : ExcelFunction
 	{
+		/// <summary>
+		/// Given two dates, represented as a string, int, double, or <see cref="System.DateTime"/>,
+		/// and an optional type of day count basis to use, return the fraction of the year beteen those two dates.
+		/// </summary>
+		/// <param name="arguments">The arguments used to calculate the fraction of the year.</param>
+		/// <param name="context">Used to determine the context for the Days360 function used in this method.</param>
+		/// <returns>Returns the fraction of the year between the two given dates as a double, or an <see cref="ExcelErrorValue"/> if the input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
@@ -96,6 +105,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			return this.CreateResult(yearFracResult, DataType.Decimal);
 		}
 
+		/// <summary>
+		/// Calculates the average number of days in a year for the years between two given dates.
+		/// </summary>
+		/// <param name="date1">The starting date for calculating the actual year value.</param>
+		/// <param name="date2">The ending date for calculating the actual year value.</param>
+		/// <returns>Returns the average number of days in a year based on the time between <paramref name="date1"/> and <paramref name="date2"/>.</returns>
 		private double CalculateAcutalYear(System.DateTime date1, System.DateTime date2)
 		{
 			var calendar = new GregorianCalendar();
