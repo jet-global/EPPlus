@@ -175,6 +175,27 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(59d, result.Result);
 		}
 
+		[TestMethod]
+		public void EomonthOnFeb291900AsDateReturnsFebruary28()
+		{
+			var function = new Eomonth();
+			var result = function.Execute(FunctionsHelper.CreateArgs("2/29/1900", 1), this.ParsingContext);
+			Assert.AreEqual(59d, result.Result);
+		}
+
+		[TestMethod]
+		public void EomonthDateNotAsStringInExcelWorkbookReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B2"].Formula = "EOMONTH(5/15/2017, 1)";
+				ws.Calculate();
+
+				Assert.AreEqual(59d, ws.Cells["B2"].Value);
+			}
+		}
+
 		// string first arg, garbage
 		[TestMethod]
 		public void EomonthWithGarbageStringAsFirstArgumentReturnsPoundValue()
