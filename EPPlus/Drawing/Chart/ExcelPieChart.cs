@@ -40,10 +40,33 @@ namespace OfficeOpenXml.Drawing.Chart
 	/// </summary>
 	public class ExcelPieChart : ExcelChart
 	{
+		#region Class Variables
+		private ExcelChartDataLabel myDataLabel = null;
+		#endregion
+
+		#region Properties
+		/// <summary>
+		/// Access to datalabel properties
+		/// </summary>
+		public ExcelChartDataLabel DataLabel
+		{
+			get
+			{
+				if (this.myDataLabel == null)
+				{
+					this.myDataLabel = new ExcelChartDataLabel(this.NameSpaceManager, this.ChartNode);
+				}
+				return this.myDataLabel;
+			}
+		}
+		#endregion
+
+		#region Constructors
 		internal ExcelPieChart(ExcelDrawings drawings, XmlNode node, eChartType type, bool isPivot) :
 			 base(drawings, node, type, isPivot)
 		{
 		}
+
 		internal ExcelPieChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
 			 base(drawings, node, type, topChart, PivotTableSource)
 		{
@@ -58,27 +81,14 @@ namespace OfficeOpenXml.Drawing.Chart
 			 base(topChart, chartNode)
 		{
 		}
-		ExcelChartDataLabel _DataLabel = null;
-		/// <summary>
-		/// Access to datalabel properties
-		/// </summary>
-		public ExcelChartDataLabel DataLabel
-		{
-			get
-			{
-				if (_DataLabel == null)
-				{
-					_DataLabel = new ExcelChartDataLabel(NameSpaceManager, ChartNode);
-				}
-				return _DataLabel;
-			}
-		}
+		#endregion
 
+		#region Overrides
 		internal override eChartType GetChartType(string name)
 		{
 			if (name == "pieChart")
 			{
-				if (Series != null && Series.Count > 0 && ((ExcelPieChartSerie)Series[0]).Explosion > 0)
+				if (this.Series != null && this.Series.Count > 0 && ((ExcelPieChartSerie)this.Series[0]).Explosion > 0)
 				{
 					return eChartType.PieExploded;
 				}
@@ -89,7 +99,7 @@ namespace OfficeOpenXml.Drawing.Chart
 			}
 			else if (name == "pie3DChart")
 			{
-				if (Series != null && Series.Count > 0 && ((ExcelPieChartSerie)Series[0]).Explosion > 0)
+				if (this.Series != null && this.Series.Count > 0 && ((ExcelPieChartSerie)this.Series[0]).Explosion > 0)
 				{
 					return eChartType.PieExploded3D;
 				}
@@ -100,5 +110,6 @@ namespace OfficeOpenXml.Drawing.Chart
 			}
 			return base.GetChartType(name);
 		}
+		#endregion
 	}
 }

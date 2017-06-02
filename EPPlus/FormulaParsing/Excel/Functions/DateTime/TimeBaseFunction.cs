@@ -25,26 +25,19 @@
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
+	/// <summary>
+	/// This class converts a time into a serial number.
+	/// </summary>
 	public abstract class TimeBaseFunction : ExcelFunction
 	{
-		public TimeBaseFunction()
-		{
-			TimeStringParser = new TimeStringParser();
-		}
-
-		protected TimeStringParser TimeStringParser
-		{
-			get;
-			private set;
-		}
-
-		protected double SecondsInADay
-		{
-			get { return 24 * 60 * 60; }
-		}
-
+		/// <summary>
+		/// GetTimeSerialNumber returns the time as a serial number.
+		/// </summary>
+		/// <param name="seconds">The number of seconds.</param>
+		/// <returns>The time as a serial number.</returns>
 		protected double GetTimeSerialNumber(double seconds)
 		{
+			var SecondsInADay = 24 * 60 * 60;
 			return seconds / SecondsInADay;
 		}
 	}
