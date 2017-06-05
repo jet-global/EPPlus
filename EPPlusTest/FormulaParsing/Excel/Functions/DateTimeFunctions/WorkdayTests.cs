@@ -39,9 +39,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	[TestClass]
 	public class WorkdayTests : DateTimeFunctionsTestBase
 	{
+		#region Workday Function (Execute) Tests
 		// The below Test Cases have no Holiday parameter supplied to them.
 		// The below Test Cases have no negative second parameters.
-		#region Workday Function (Execute) Tests
 		[TestMethod]
 		public void WorkdayWithOADateParameterReturnsCorrectResult()
 		{

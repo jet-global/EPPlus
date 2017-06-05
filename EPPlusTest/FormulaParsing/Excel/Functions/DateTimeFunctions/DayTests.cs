@@ -35,9 +35,6 @@ using System.Threading;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 {
-	/// <summary>
-	/// Summary description for DayFunctionTests
-	/// </summary>
 	[TestClass]
 	public class DayTests : DateTimeFunctionsTestBase
 	{
