@@ -51,7 +51,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			else if (ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error))
 				return this.CreateResult(date.Day, DataType.Integer);
 			else
-				return new CompileResult((eErrorType)error);
+				return new CompileResult(error.Value);
 		}
 	}
 }

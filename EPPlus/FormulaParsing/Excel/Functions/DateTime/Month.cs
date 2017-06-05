@@ -45,11 +45,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var dateObj = arguments.ElementAt(0).Value;
-			// Zero and fractions are special cases and require specific output.
-			if ((dateObj is int dateInt && dateInt == 0) ||
-				(dateObj is double dateDouble && dateDouble < 1 && dateDouble >= 0))
+			if (ConvertUtil.TryParseDateObjectToOADate(dateObj, out double dateDouble) &&
+				dateDouble < 1 && dateDouble >= 0) // Zero and fractions are special cases and require specific output.
 				return this.CreateResult(1, DataType.Integer);
-			if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
+			else if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))
 				return this.CreateResult(date.Month, DataType.Integer);
 			else
 				return new CompileResult(error.Value);
