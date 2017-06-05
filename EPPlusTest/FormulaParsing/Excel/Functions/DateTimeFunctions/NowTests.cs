@@ -36,6 +36,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	[TestClass]
 	public class NowTests : DateTimeFunctionsTestBase
 	{
+		#region Now Function (Execute) Tests
 		[TestMethod]
 		public void NowFunctionReturnsNow()
 		{
@@ -50,5 +51,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var resultDate = DateTime.FromOADate((double)result.Result);
 			Assert.IsTrue(resultDate > startTime && resultDate < endTime);
 		}
+		#endregion
 	}
 }
