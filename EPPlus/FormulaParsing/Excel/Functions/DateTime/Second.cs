@@ -22,6 +22,10 @@
 * All code and executables are provided "as is" with no warranty either express or implied. 
 * The author accepts no liability for any damage or loss of business that this product may cause.
 *
+*  * Author							Change						Date
+* *******************************************************************************
+* * Mats Alm   		                Added		                2013-12-03
+* *******************************************************************************
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System.Collections.Generic;
