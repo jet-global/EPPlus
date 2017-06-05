@@ -219,6 +219,38 @@ namespace EPPlusTest.Utils
 			Assert.AreEqual(false, isValidDate);
 			Assert.AreEqual(-1.0, OADate);
 		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesDoublesInStringsAsDoublesCorrectly()
+		{
+			var testNumber = "1.11";
+			var style = NumberStyles.Float | NumberStyles.AllowDecimalPoint;
+			var isValidOADate = ConvertUtil.TryParseDateObjectToOADate(testNumber, out double OADate);
+			Assert.IsTrue(OADate < 2);
+
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectAsOADateDoesNotParseGermanStyleDatesAsDoubles()
+		{
+			var testNumber = "1.11.2017";
+			var style = NumberStyles.Float | NumberStyles.AllowDecimalPoint;
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(testNumber, out double OADate);
+			Assert.IsFalse(isValidDate);
+		}
+
+		[TestMethod]
+		public void TryParse()
+		{
+			var testDate1 = "1.11.2017";
+			var testDate2 = "1-11-2017";
+			var testDate3 = "1/11/2017";
+			var style = DateTimeStyles.None;
+			//var valid = DateTime.TryParse(testNumber, CultureInfo.CurrentCulture, style, out DateTime result);
+			var valid = DateTime.TryParseExact(testDate3, "d", CultureInfo.CurrentCulture, style, out DateTime result);
+			
+			Assert.AreEqual(true, valid);
+		}
 		#endregion
 
 		#region TryParseDateObject Tests
