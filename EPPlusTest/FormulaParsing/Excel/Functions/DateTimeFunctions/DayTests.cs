@@ -357,6 +357,24 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void DayWithDateAs0InStringReturnsCorrectResult()
+		{
+			var func = new Day();
+			var args = FunctionsHelper.CreateArgs("0");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
+
+		[TestMethod]
+		public void DayWithFractionalDateInStringReturnsCorrectResult()
+		{
+			var func = new Day();
+			var args = FunctionsHelper.CreateArgs("0.5");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
 		#endregion
 	}
 }
