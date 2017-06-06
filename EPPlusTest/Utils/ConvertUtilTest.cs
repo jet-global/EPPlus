@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.Utils;
@@ -204,6 +205,14 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
+		public void TryParseDateObjectToOADateDoesNotParseNonDateString()
+		{
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("word", out double OADate);
+			Assert.AreEqual(false, isValidDate);
+			Assert.AreEqual(-1.0, OADate);
+		}
+
+		[TestMethod]
 		public void TryParseDateObjectToOADateParsesDateAsString()
 		{
 			var expectedDate = new DateTime(1900, 3, 1, 5, 56, 59);
@@ -213,11 +222,82 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void TryParseDateObjectToOADateDoesNotParseNonDateString()
+		public void TryParseDateObjectToOADateParsesDoublesInStringsAsDoublesCorrectly()
 		{
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("word", out double OADate);
-			Assert.AreEqual(false, isValidDate);
-			Assert.AreEqual(-1.0, OADate);
+			var testNumber = "1.11";
+			var isValidOADate = ConvertUtil.TryParseDateObjectToOADate(testNumber, out double OADate);
+			Assert.IsTrue(isValidOADate);
+			Assert.AreEqual(1.11, OADate);
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectToOADateParsesStringsCorrectly()
+		{
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				var us = CultureInfo.CreateSpecificCulture("en-US");
+				Thread.CurrentThread.CurrentCulture = us;
+				{
+					// This should parse as a decimal value under the US culture.
+					var decimalValue = "1.11";
+					var isValidDate = ConvertUtil.TryParseDateObjectToOADate(decimalValue, out double parseResult);
+					Assert.IsTrue(isValidDate);
+					Assert.AreEqual(1.11, parseResult);
+					// DateTime parses this as a date (M.DD.YYYY) under the US culture,
+					// but Excel does not recognize this as a valid date format under the US culture.
+					var dateValue = "1.11.2017";
+					var expectedDate = new DateTime(2017, 1, 11);
+					isValidDate = ConvertUtil.TryParseDateObjectToOADate(dateValue, out parseResult);
+					Assert.IsTrue(isValidDate);
+					Assert.AreEqual(expectedDate.ToOADate(), parseResult);
+					// DateTime parses this as a valid date under the US culture,
+					// but Excel does not recognize this as a valid date format under the US culture.
+					var USShortDate = "1,11";
+					expectedDate = new DateTime(DateTime.Today.Year, 1, 11);
+					isValidDate = ConvertUtil.TryParseDateObjectToOADate(USShortDate, out parseResult);
+					Assert.IsTrue(isValidDate);
+					Assert.AreEqual(expectedDate.ToOADate(), parseResult);
+				}
+				var de = CultureInfo.CreateSpecificCulture("de-DE");
+				Thread.CurrentThread.CurrentCulture = de;
+				{
+					// This should parse as a date (D.MM.CurrentYear) under the German culture.
+					var GermanShortDate = "1.11";
+					var isValidDate = ConvertUtil.TryParseDateObjectToOADate(GermanShortDate, out double parseResult);
+					var expectedDate = new DateTime(DateTime.Today.Year, 11, 1);
+					Assert.IsTrue(isValidDate);
+					Assert.AreEqual(expectedDate.ToOADate(), parseResult);
+					// This should parse as a date (D.MM.YYYY) under the German culture.
+					var GermanDate = "1.11.2017";
+					expectedDate = new DateTime(2017, 11, 1);
+					isValidDate = ConvertUtil.TryParseDateObjectToOADate(GermanDate, out parseResult);
+					Assert.IsTrue(isValidDate);
+					Assert.AreEqual(expectedDate.ToOADate(), parseResult);
+					// This should parse as a decimal value under the German culture.
+					var GermanDecimalValue = "1,11";
+					isValidDate = ConvertUtil.TryParseDateObjectToOADate(GermanDecimalValue, out parseResult);
+					Assert.IsTrue(isValidDate);
+					Assert.AreEqual(1.11, parseResult);
+				}
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
+		[TestMethod]
+		public void TryParseDateObjectAsOADateParsesPeriodFormatDateInString()
+		{
+			// Note that although System.DateTime considers "1.11.2017" as a valid date format under
+			// the US culture, Excel does not. EPPlus therefore does not replicate Excel's behavior in
+			// that regard. It is currently considered too much work for too little value to
+			// properly replicate Excel's behavior with dates of this format in EPPlus.
+			var expectedDate = new DateTime(2017, 1, 11);
+			var testNumber = "1.11.2017";
+			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(testNumber, out double OADate);
+			Assert.AreEqual(expectedDate.ToOADate(), OADate);
 		}
 		#endregion
 

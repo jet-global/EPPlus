@@ -36,10 +36,48 @@ using OfficeOpenXml.Table.PivotTable;
 namespace OfficeOpenXml.Drawing.Chart
 {
 	/// <summary>
-	/// Provides access to scatter chart specific properties
+	/// Provides access to scatter chart specific properties.
 	/// </summary>
 	public sealed class ExcelScatterChart : ExcelChart
 	{
+		#region Constants
+		private const string MarkerPath = "c:marker/@val";
+		private const string ScatterTypePath = "c:scatterStyle/@val";
+		#endregion
+
+		#region Properties
+		/// <summary>
+		/// If the scatter has LineMarkers or SmoothMarkers.
+		/// </summary>
+		public eScatterStyle ScatterStyle
+		{
+			get
+			{
+				return this.GetScatterEnum(this.ChartXmlHelper?.GetXmlNodeString(ExcelScatterChart.ScatterTypePath));
+			}
+			internal set
+			{
+				this.ChartXmlHelper.CreateNode(ExcelScatterChart.ScatterTypePath, true);
+				this.ChartXmlHelper.SetXmlNodeString(ExcelScatterChart.ScatterTypePath, GetScatterText(value));
+			}
+		}
+		/// <summary>
+		/// If the series has markers.
+		/// </summary>
+		public bool Marker
+		{
+			get
+			{
+				return GetXmlNodeBool(ExcelScatterChart.MarkerPath, false);
+			}
+			set
+			{
+				SetXmlNodeBool(ExcelScatterChart.MarkerPath, value, false);
+			}
+		}
+		#endregion
+
+		#region Constructors
 		internal ExcelScatterChart(ExcelDrawings drawings, XmlNode node, eChartType type, ExcelChart topChart, ExcelPivotTable PivotTableSource) :
 			 base(drawings, node, type, topChart, PivotTableSource)
 		{
@@ -57,24 +95,25 @@ namespace OfficeOpenXml.Drawing.Chart
 		{
 			SetTypeProperties();
 		}
+		#endregion
+
+		#region Private Methods
 		private void SetTypeProperties()
 		{
 			/***** ScatterStyle *****/
-			if (ChartType == eChartType.XYScatter ||
-				ChartType == eChartType.XYScatterLines ||
-				ChartType == eChartType.XYScatterLinesNoMarkers)
+			if (this.ChartType == eChartType.XYScatter ||
+				this.ChartType == eChartType.XYScatterLines ||
+				this.ChartType == eChartType.XYScatterLinesNoMarkers)
 			{
-				ScatterStyle = eScatterStyle.LineMarker;
+				this.ScatterStyle = eScatterStyle.LineMarker;
 			}
-			else if (
-				ChartType == eChartType.XYScatterSmooth ||
-				ChartType == eChartType.XYScatterSmoothNoMarkers)
+			else if (this.ChartType == eChartType.XYScatterSmooth ||
+				this.ChartType == eChartType.XYScatterSmoothNoMarkers)
 			{
-				ScatterStyle = eScatterStyle.SmoothMarker;
+				this.ScatterStyle = eScatterStyle.SmoothMarker;
 			}
 		}
-		#region "Grouping Enum Translation"
-		string _scatterTypePath = "c:scatterStyle/@val";
+
 		private eScatterStyle GetScatterEnum(string text)
 		{
 			switch (text)
@@ -97,75 +136,36 @@ namespace OfficeOpenXml.Drawing.Chart
 			}
 		}
 		#endregion
-		/// <summary>
-		/// If the scatter has LineMarkers or SmoothMarkers
-		/// </summary>
-		public eScatterStyle ScatterStyle
-		{
-			get
-			{
-				return GetScatterEnum(_chartXmlHelper?.GetXmlNodeString(_scatterTypePath));
-			}
-			internal set
-			{
-				_chartXmlHelper.CreateNode(_scatterTypePath, true);
-				_chartXmlHelper.SetXmlNodeString(_scatterTypePath, GetScatterText(value));
-			}
-		}
-		string MARKER_PATH = "c:marker/@val";
-		/// <summary>
-		/// If the series has markers
-		/// </summary>
-		public bool Marker
-		{
-			get
-			{
-				return GetXmlNodeBool(MARKER_PATH, false);
-			}
-			set
-			{
-				SetXmlNodeBool(MARKER_PATH, value, false);
-			}
-		}
+		
+		#region Internal Methods
 		internal override eChartType GetChartType(string name)
 		{
 			if (name == "scatterChart")
 			{
-				if (Series == null || Series.Count == 0)
-					// Return a generic scatter type so series can be parsed correctly.
-					return eChartType.XYScatter;
-				if (ScatterStyle == eScatterStyle.LineMarker)
+				if (this.Series == null || this.Series.Count == 0)
+					return eChartType.XYScatter;  // Return a generic scatter type so series can be parsed correctly.
+				if (this.ScatterStyle == eScatterStyle.LineMarker)
 				{
-					if (((ExcelScatterChartSerie)Series[0]).Marker == eMarkerStyle.None)
-					{
+					if (((ExcelScatterChartSerie)this.Series[0]).Marker == eMarkerStyle.None)
 						return eChartType.XYScatterLinesNoMarkers;
-					}
 					else
 					{
-						if (ExistNode("c:ser/c:spPr/a:ln/noFill"))
-						{
+						if (this.ExistNode("c:ser/c:spPr/a:ln/noFill"))
 							return eChartType.XYScatter;
-						}
 						else
-						{
 							return eChartType.XYScatterLines;
-						}
 					}
 				}
-				else if (ScatterStyle == eScatterStyle.SmoothMarker)
+				else if (this.ScatterStyle == eScatterStyle.SmoothMarker)
 				{
-					if (((ExcelScatterChartSerie)Series[0]).Marker == eMarkerStyle.None)
-					{
+					if (((ExcelScatterChartSerie)this.Series[0]).Marker == eMarkerStyle.None)
 						return eChartType.XYScatterSmoothNoMarkers;
-					}
 					else
-					{
 						return eChartType.XYScatterSmooth;
-					}
 				}
 			}
 			return base.GetChartType(name);
 		}
-
+		#endregion
 	}
 }

@@ -93,7 +93,13 @@ namespace OfficeOpenXml.Utils
 			}
 			else if (dateCandidate is string dateString)
 			{
-				if (DateTime.TryParse(dateString, out DateTime dateFromString))
+				var doubleParsingStyle = NumberStyles.Float | NumberStyles.AllowDecimalPoint;
+				if (Double.TryParse(dateString, doubleParsingStyle, CultureInfo.CurrentCulture, out double dateDouble))
+				{
+					OADate = dateDouble;
+					return true;
+				}
+				else if (DateTime.TryParse(dateString, out DateTime dateFromString))
 				{
 					OADate = dateFromString.ToOADate();
 					// Note: This if statement is to account for an error from Lotus 1-2-3
@@ -102,11 +108,6 @@ namespace OfficeOpenXml.Utils
 					// https://support.microsoft.com/en-us/help/214058/days-of-the-week-before-march-1,-1900-are-incorrect-in-excel
 					if (OADate < 61)
 						OADate--;
-					return true;
-				}
-				else if (Double.TryParse(dateString, out double dateDouble))
-				{
-					OADate = dateDouble;
 					return true;
 				}
 				else

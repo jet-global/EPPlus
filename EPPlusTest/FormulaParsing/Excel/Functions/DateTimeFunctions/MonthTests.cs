@@ -90,6 +90,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 					ws.Calculate();
 					Assert.AreEqual(1, ws.Cells[4, 3].Value);
 				}
+				var de = CultureInfo.CreateSpecificCulture("de-DE");
+				Thread.CurrentThread.CurrentCulture = de;
+				using (var package = new ExcelPackage())
+				{
+					var ws = package.Workbook.Worksheets.Add("Sheet1");
+					ws.Cells[2, 2].Value = "15.1.2014";
+					ws.Cells[4, 3].Formula = "MONTH(B2)";
+					ws.Calculate();
+					Assert.AreEqual(1, ws.Cells[4, 3].Value);
+				}
 			}
 			finally
 			{
@@ -253,6 +263,24 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs(-0.5);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MonthWithDateAs0InStringReturnsCorrectResult()
+		{
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs("0");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void MonthWithFractionalDateInStringReturnsCorrectResult()
+		{
+			var func = new Month();
+			var args = FunctionsHelper.CreateArgs("0.5");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
 		}
 		#endregion
 	}
