@@ -28,9 +28,10 @@
 * *******************************************************************************
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using System.Collections.Generic;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
@@ -48,15 +49,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);			
-			var serialNumberCandidate = this.GetFirstValue(arguments);
-			// Zero and fractions are special cases and require specific output.
-			if ((serialNumberCandidate is int serialNumberInt && serialNumberInt == 0) ||
-				(serialNumberCandidate is double serialNumberDouble && serialNumberDouble < 1 && serialNumberDouble >= 0))
+				return new CompileResult(eErrorType.Value);
+			var serialNumberCandidate = arguments.ElementAt(0).Value;
+			if (ConvertUtil.TryParseDateObjectToOADate(serialNumberCandidate, out double serialNumber) &&
+				serialNumber < 1 && serialNumber >= 0) // Zero and fractions are special cases and require specific output.
 				return this.CreateResult(0, DataType.Integer);
-			if (ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error))
+			else if (ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error))
 				return this.CreateResult(date.Day, DataType.Integer);
-			return new CompileResult((eErrorType)error);
+			else
+				return new CompileResult(error.Value);
 		}
 	}
 }

@@ -40,6 +40,195 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	{
 		#region Weekday Function (Execute) Tests
 		[TestMethod]
+		public void WeekdayWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsIntegerReturnsCorrectResult()
+		{
+			// Note that an omitted return_type is equivalent to using the
+			// WEEKDAY function with a return_type of 1.
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs(8);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsDoubleReturnsCorrectResult()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs(8.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsIntegerInStringReturnsCorrectResult()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("8");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsDoubleInStringReturnsCorrectResult()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("8.5");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsNegativeIntegerReturnsPoundNum()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs(-1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsNegativeDoubleReturnsPoundNum()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs(-1.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsNonNumericStringReturnsPoundValue()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("word");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsEmptyStringReturnsPoundValue()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs(string.Empty);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsStringReturnsCorrectResult()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("5/17/2017");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(4, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsDifferentStringReturnsCorrectResult()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("5-17-2017");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(4, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsLongStringReturnsCorrectResult()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("May 17, 2017");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(4, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsZeroReturnsCorrectResult()
+		{
+			// Note that Excel treats the OADate 0 as a special date with special output.
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs(0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(7, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsFractionReturnsCorrectResult()
+		{
+			// Note that Excel treats the OADate 0 as a special date with special output.
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs(0.5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(7, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsNegativeIntegerInStringReturnsPoundNum()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("-1");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsNegativeDoubleInStringReturnsPoundNum()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("-1.5");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsZeroInStringReturnsCorrectResult()
+		{
+			// Note that Excel treats the OADate 0 as a special date with special output.
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("0");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(7, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsFractionInStringReturnsCorrectResult()
+		{
+			// Note that Excel treats the OADate 0 as a special date with special output.
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("0.5");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(7, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAs28February1900ReturnsCorrectResult()
+		{
+			// Note that System.DateTime dates before 3/1/1900 have their OADates off by one
+			// from the Excel OADates due to Excel's inclusion of the non-existent day 2/29/1900
+			// as a valid day.
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("2/28/1900");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(3, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAs1March1900ReturnsCorrectResult()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("3/1/1900");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(5, result.Result);
+		}
+
+		[TestMethod]
 		public void WeekdayShouldReturnCorrectResultForASundayWhenReturnTypeIs1()
 		{
 			// A return type of 1 requests the weekday as a 1-indexed value where
@@ -140,62 +329,44 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WeekdayWithInvalidArgumentReturnsPoundValue()
+		public void WeekdayWithReturnTypeAsIntegerInStringReturnsCorrectResult()
 		{
 			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void WeekdayWithStringArgumentReturnsPoundValue()
-		{
-			// Test the case where the serial_number input is a non-date String.
-			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs("word");
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void WeekdayWithNonzeroIntArgumentReturnsThatIntMod7()
-		{
-			// Test the case where the serial_number input is a non-zero integer.
-			// Note that an omitted return_type is equivalent to using the
-			// WEEKDAY function with a return_type of 1.
-			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs(8);
+			var args = FunctionsHelper.CreateArgs(1, "1");
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(1, result.Result);
 		}
 
 		[TestMethod]
-		public void WeekdayWithArgumentAsTheNumberZeroReturnsTheNumber7()
+		public void WeekdayWithReturnTypeAsDoubleReturnsCorrectResult()
 		{
-			// Test the case where the serial_number input is zero, which is
-			// treated differently than other integers.
 			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs(0);
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(7, result.Result);
-		}
-
-		[TestMethod]
-		public void WeekdayWithDATEFunctionRepresentationOfSundayArgumentReturnsCorrentResult()
-		{
-			// Test the case where the serial_number input is provided by the
-			// DATE function.
-			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14));
+			var args = FunctionsHelper.CreateArgs(1, 1.5);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(1, result.Result);
 		}
 
 		[TestMethod]
-		public void WeekdayWithInvalidReturnTypeArgumentReturnsPoundNum()
+		public void WeekdayWithReturnTypeAsNonNumericStringReturnsPoundValue()
 		{
-			// Test the case where an invalid return_type is given.
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs(1, "word");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithReturnTypeAsEmptyStringReturnsPoundValue()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs(1, string.Empty);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void WeekdayWithNonEnumeratedReturnTypeReturnsPoundNum()
+		{
 			// Note that the WEEKDAY function only accepts 1-3 and 11-17
 			// as valid return_type values.
 			var func = new Weekday();
@@ -205,40 +376,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WeekdayWithNegativeDateArgumentReturnsPoundNum()
+		public void WeekdayWithNullReturnTypeReturnsPoundNum()
 		{
-			// Test the case where a negative serial_number input is given.
-			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs(-1);
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void WeekdayWithNonNumericStringAsSecondArgumentReturnsPoundValue()
-		{
-			// Test the case where a non-numeric String is given as the return_type input.
-			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14),"word");
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void WeekdayWithNumericStringAsSecondArgumentReturnsCorrectResult()
-		{
-			// Test the case where a numeric String is given as the return_type input.
-			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs(1, "1");
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(1, result.Result);
-		}
-
-		[TestMethod]
-		public void WeekdayWithSecondArgumentNullReturnsPoundNum()
-		{
-			// Test the case where the serial_number and return_type parameters
-			// are delineated, but the return_type is left empty.
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs(new DateTime(2017, 5, 14), null);
 			var result = func.Execute(args, this.ParsingContext);
@@ -246,43 +385,48 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WeekdayWithFirstArgumentNullReturnsPoundNum()
+		public void WeekdayWithNullDateReturnsCorrectResult()
 		{
-			// Test the case where the serial_number and return_type parameters
-			// are delineated, but the serial_number is left empty.
 			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs(null, 3);
+			var args = FunctionsHelper.CreateArgs(null, 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(7, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithBothParametersNullReturnsPoundNum()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs(null, null);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void WeekdayWithDateAsStringWithSlashReturnsCorrectResult()
+		public void WeekdayWithNegativeDateAndNonNumericStringReturnTypeReturnsPoundValue()
 		{
-			// Test the case where the serial_number input is expressed as
-			// a date in a String.
 			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs("5/17/2017");
+			var args = FunctionsHelper.CreateArgs(-1, "word");
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(4, result.Result);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void WeekdayWithDateAsStringWithDashesReturnsCorrectResult()
+		public void WeekdayNonNumericDateAndNegativeReturnTypeReturnsPoundValue()
 		{
-			// Test the case where the serial_number input is expressed as
-			// a date in a String.
 			var func = new Weekday();
-			var args = FunctionsHelper.CreateArgs("5-17-2017");
+			var args = FunctionsHelper.CreateArgs("word", -1);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(4, result.Result);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
 		public void WeekdayWithDateAsStringWithPeriodsReturnsCorrectResult()
 		{
-			// Test the case where the serial_number input is expressed as
-			// a date in a String.
+			// Note that Excel does not consider "5.17.2017" as a valid date format under the
+			// US culture, but System.DateTime does. In this regard, EPPlus is not completely replicating
+			// Excel's handling of specifically formatted dates. Properly handling this specific case
+			// is currently considered too much work for too little value.
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs("5.17.2017");
 			var result = func.Execute(args, this.ParsingContext);
@@ -290,18 +434,53 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void WeekdayWithDateAsStringWithCommasReturnsCorrectResult()
+		{
+			// Note that Excel does not consider "5,17,2017" as a valid date format under the
+			// US culture, but System.DateTime does. In this regard, EPPlus is not completely replicating
+			// Excel's handling of specifically formatted dates. Properly handling this specific case
+			// is currently considered too much work for too little value.
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("5,17,2017");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(4, result.Result);
+		}
+
+		[TestMethod]
 		public void WeekdayWithGermanDateAsStringWithPeriodsReturnsCorrectResult()
 		{
-			// Test the case where the serial_number input is expressed as
-			// a German date in a String.
-			var currentCulture = Thread.CurrentThread.CurrentCulture;
+			var currentCulture = CultureInfo.CurrentCulture;
 			try
 			{
+				var us = CultureInfo.CreateSpecificCulture("en-US");
+				Thread.CurrentThread.CurrentCulture = us;
+				using (var package = new ExcelPackage())
+				{
+					var ws = package.Workbook.Worksheets.Add("Sheet1");
+					ws.Cells[2, 2].Value = "5/3/2017";
+					ws.Cells[4, 3].Formula = "WEEKDAY(B2)";
+					ws.Calculate();
+					Assert.AreEqual(4, ws.Cells[4, 3].Value);
+				}
+				var gb = CultureInfo.CreateSpecificCulture("en-GB");
+				Thread.CurrentThread.CurrentCulture = gb;
+				using (var package = new ExcelPackage())
+				{
+					var ws = package.Workbook.Worksheets.Add("Sheet1");
+					ws.Cells[2, 2].Value = "3/5/2017";
+					ws.Cells[4, 3].Formula = "WEEKDAY(B2)";
+					ws.Calculate();
+					Assert.AreEqual(4, ws.Cells[4, 3].Value);
+				}
 				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("de-DE");
-				var func = new Weekday();
-				var args = FunctionsHelper.CreateArgs("3.5.2017");
-				var result = func.Execute(args, this.ParsingContext);
-				Assert.AreEqual(4, result.Result);
+				using (var package = new ExcelPackage())
+				{
+					var ws = package.Workbook.Worksheets.Add("Sheet1");
+					ws.Cells[2, 2].Value = "3.5.2017";
+					ws.Cells[4, 3].Formula = "WEEKDAY(B2)";
+					ws.Calculate();
+					Assert.AreEqual(4, ws.Cells[4, 3].Value);
+				}
 			}
 			finally
 			{
