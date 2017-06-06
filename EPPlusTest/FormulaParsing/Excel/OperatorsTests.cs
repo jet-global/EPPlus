@@ -245,10 +245,93 @@ namespace EPPlusTest.Excel
 		}
 
 		[TestMethod]
-		public void OperatoMultiplyShouldMultiplyNumericStringAndNumber()
+		public void OperatorMultiplyShouldMultiplyNumericStringAndNumber()
 		{
 			var result = Operator.Multiply.Apply(new CompileResult(1, DataType.Integer), new CompileResult("3", DataType.String));
 			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithNonZeroIntegersReturnsCorrectResult()
+		{
+			var result = Operator.Multiply.Apply(new CompileResult(5, DataType.Integer), new CompileResult(8, DataType.Integer));
+			Assert.AreEqual(40d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithZeroIntegerReturnsZero()
+		{
+			var result = Operator.Multiply.Apply(new CompileResult(5, DataType.Integer), new CompileResult(0, DataType.Integer));
+			Assert.AreEqual(0d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithTwoNegativeIntegersReturnsCorrectValue()
+		{
+			var result = Operator.Multiply.Apply(new CompileResult(-5, DataType.Integer), new CompileResult(-8, DataType.Integer));
+			Assert.AreEqual(40d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithOneNegativeIntegerReturnsCorrectValue()
+		{
+			var result = Operator.Multiply.Apply(new CompileResult(-5, DataType.Integer), new CompileResult(8, DataType.Integer));
+			Assert.AreEqual(-40d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithDoublesReturnsCorrectValue()
+		{
+			var result = Operator.Multiply.Apply(new CompileResult(3.3, DataType.Decimal), new CompileResult(-5.6, DataType.Decimal));
+			Assert.AreEqual(-18.48d, (double)result.Result, 0.000001);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithFractionsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "(2/3) * (5/4)";
+				ws.Calculate();
+				Assert.AreEqual(0.83333333, (double)ws.Cells["B1"].Value, 0.000001);
+			}
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithDateFunctionResultReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B2"].Formula = "2 * DATE(2017,5,1)";
+				ws.Calculate();
+				Assert.AreEqual(85712d, ws.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithDateAsStringReturnsCorrectValue()
+		{
+			var result = Operator.Multiply.Apply(new CompileResult(2, DataType.Integer), new CompileResult("5/1/2017", DataType.String));
+			Assert.AreEqual(85712d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithTwoRangesAsInputReturnsPoundValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Value = 1;
+				ws.Cells["B2"].Value = 1;
+				ws.Cells["B3"].Value = 1;
+				ws.Cells["B4"].Value = 1;
+				ws.Cells["B5"].Value = 1;
+				ws.Cells["B6"].Formula = "B1*B2:B5";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)ws.Cells["B6"].Value).Type);
+			}
 		}
 		#endregion
 

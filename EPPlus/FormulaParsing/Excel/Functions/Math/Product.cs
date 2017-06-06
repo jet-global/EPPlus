@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -42,6 +43,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				while (AreEqual(result, 0d) && index < arguments.Count())
 				{
 					result = CalculateFirstItem(arguments, index++, context);
+				}
+				if(result == 0)
+				{
+					if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double datet))
+					{
+						return new CompileResult(eErrorType.Value);
+					}
+					result = datet;
 				}
 				result = CalculateCollection(arguments.Skip(index), result, (arg, current) =>
 				{
@@ -85,11 +94,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				if (result == 0d && value > 0d)
 				{
-					result = value;
+				result = value;
 				}
 				else
 				{
-					result *= value;
+				result *= value;
 				}
 			}
 			return result;
