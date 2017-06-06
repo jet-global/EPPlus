@@ -226,6 +226,7 @@ namespace EPPlusTest.Utils
 		{
 			var testNumber = "1.11";
 			var isValidOADate = ConvertUtil.TryParseDateObjectToOADate(testNumber, out double OADate);
+			Assert.IsTrue(isValidOADate);
 			Assert.AreEqual(1.11, OADate);
 		}
 
@@ -287,8 +288,12 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void TryParseDateObjectAsOADateDoesNotParseGermanStyleDatesAsDoubles()
+		public void TryParseDateObjectAsOADateParsesPeriodFormatDateInString()
 		{
+			// Note that although System.DateTime considers "1.11.2017" as a valid date format under
+			// the US culture, Excel does not. EPPlus therefore does not replicate Excel's behavior in
+			// that regard. It is currently considered too much work for too little value to
+			// properly replicate Excel's behavior with dates of this format in EPPlus.
 			var expectedDate = new DateTime(2017, 1, 11);
 			var testNumber = "1.11.2017";
 			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(testNumber, out double OADate);
