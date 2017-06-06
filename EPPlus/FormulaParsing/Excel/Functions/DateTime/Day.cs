@@ -28,6 +28,8 @@
 * *******************************************************************************
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
 
