@@ -36,7 +36,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 	public class TimeStringParser
 	{
 		private const string RegEx24 = @"[0-9]{1,2}(\:[0-9]{1,2}){0,2}$";
-		private const string RegEx12 = @"^[0-9]{1,2}(\:[0-9]{1,2}){0,2}( PM| AM| am| pm| Am| Pm)$";
 
 		private double GetSerialNumber(int hour, int minute, int second)
 		{
@@ -59,6 +58,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			
 		}
 
+
 		public virtual double Parse(string input)
 		{
 			return InternalParse(input);
@@ -67,20 +67,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		public virtual bool CanParse(string input)
 		{
 			System.DateTime dt;
-			return Regex.IsMatch(input, RegEx24) || Regex.IsMatch(input, RegEx12) || System.DateTime.TryParse(input, out dt);
+			return Regex.IsMatch(input, RegEx24)|| System.DateTime.TryParse(input, out dt);
 		}
 
 		private double InternalParse(string input)
-		{
+		{	
 			var match = Regex.Match(input, RegEx24);
 			if (match.Success)
 			{
 				
 				return Parse24HourTimeString(match.Value);
-			}
-			if (Regex.IsMatch(input, RegEx12))
-			{
-				return Parse12HourTimeString(input);
 			}
 			System.DateTime dateTime;
 			if (System.DateTime.TryParse(input, out dateTime))
@@ -89,22 +85,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			}
 			return -1;
 		}
-
-		private double Parse12HourTimeString(string input)
-		{
-			string dayPart = string.Empty;
-			dayPart = input.Substring(input.Length - 2, 2);
-			dayPart = dayPart.ToLower();
-			int hour;
-			int minute;
-			int second;
-			GetValuesFromString(input, out hour, out minute, out second);
-			if (dayPart == "pm" & hour !=12) hour += 12;
-			if (dayPart == "am" & hour == 12) hour = 0;
-			ValidateValues(hour, minute, second);
-			return GetSerialNumber(hour, minute, second);
-		}
-
+		
 		private double Parse24HourTimeString(string input)
 		{
 			int hour;

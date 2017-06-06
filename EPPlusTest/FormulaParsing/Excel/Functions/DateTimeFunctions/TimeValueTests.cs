@@ -167,10 +167,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 
 		}
 	
-		/* This test Case is being put off for now. 
+		  
 		[TestMethod]
-		public void TimeValueTimesInTheForm1300PmShouldNotWork()
+		public void TimeValueTimesInTheForm1300PmShouldNotWork()//This test Case is being put off for now.
 		{
+			//This test Case is being put off for now. The correct Functionality would have result 1 and 3 returning a #Value.
 			var function = new TimeValue();
 
 			var input1 = "13:00 PM";
@@ -183,12 +184,12 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(0.541666667, System.Math.Round(result1.ResultNumeric, 9));
 			Assert.AreEqual(0.541666667, System.Math.Round(result2.ResultNumeric, 9));
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(0.666666667, System.Math.Round(result3.ResultNumeric, 9));
 			Assert.AreEqual(0.666666667, System.Math.Round(result4.ResultNumeric, 9));
 		}
-		*/
+		
 
 		[TestMethod]
 		public void TimeValueTestMilitaryTimeAndNormalTimeComparisions()

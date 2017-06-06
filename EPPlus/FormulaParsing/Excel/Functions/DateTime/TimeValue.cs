@@ -44,12 +44,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 		internal CompileResult Execute(string dateString)
 		{
-			//var testString = dateString;
 
-			//var parser = new TimeStringParser();
-			double resultAfterParse = 0.0;
-
-			TryParseDateStringToDouble(dateString, out resultAfterParse);
+			this.TryParseDateStringToDouble(dateString, out double resultAfterParse);
 
 			var resultDecimalsOnly = resultAfterParse - System.Math.Truncate(resultAfterParse);
 	
