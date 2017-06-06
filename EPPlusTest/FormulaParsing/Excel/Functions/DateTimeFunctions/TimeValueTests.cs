@@ -169,9 +169,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 	
 		  
 		[TestMethod]
-		public void TimeValueTimesInTheForm1300PmShouldNotWork()//This test Case is being put off for now.
+		public void TimeValueTimeOfTheForm1300Pm()
 		{
-			//This test Case is being put off for now. The correct Functionality would have result 1 and 3 returning a #Value.
+			//Note: In Excel, the argument 13:00 PM would return #VALUE!.
 			var function = new TimeValue();
 
 			var input1 = "13:00 PM";
