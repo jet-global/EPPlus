@@ -29,7 +29,5 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests
 			var result = _ws.Calculate("10/0 + 3");
 			Assert.AreEqual(DivByZero, result);
 		}
-
-
 	}
 }
