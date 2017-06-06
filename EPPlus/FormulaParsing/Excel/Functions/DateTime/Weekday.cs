@@ -47,59 +47,28 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var serialNumberCandidate = arguments.ElementAt(0).Value;
-
 			var returnType = 1;
 			if (arguments.Count() > 1 && !this.TryParseObjectAsInt(arguments.ElementAt(1).Value, out returnType, out eErrorType? returnTypeError))
 				return new CompileResult(returnTypeError.Value);
-
-			if (ConvertUtil.TryParseDateObjectToOADate(serialNumberCandidate, out double serialNumber) &&
-				serialNumber < 1 && serialNumber >= 0)
+			if ((ConvertUtil.TryParseDateObjectToOADate(serialNumberCandidate, out double serialNumber) &&
+				serialNumber < 1 && serialNumber >= 0) || serialNumberCandidate == null)
 				serialNumberCandidate = 7;
-
-			
-
 			if (ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error))
 			{
 				if (date.ToOADate() < 61)
-					date = new System.DateTime(date.Year, date.Month, date.Day - 1);
-				var result = this.CalculateDayOfWeek(date, returnType);
-				return this.CreateResult(result, DataType.Integer);
+					date = System.DateTime.FromOADate(date.ToOADate() - 1);
+				try
+				{
+					var result = this.CalculateDayOfWeek(date, returnType);
+					return this.CreateResult(result, DataType.Integer);
+				}
+				catch (ExcelErrorValueException eeve)
+				{
+					return new CompileResult(eeve.ErrorValue.Type);
+				}
 			}
 			else
 				return new CompileResult(error.Value);
-			//if (serialNumberCandidate is null)
-			//	return new CompileResult(eErrorType.Num);
-			//if (serialNumberCandidate is string)
-			//{
-			//	var isDateString = System.DateTime.TryParse(serialNumberCandidate.ToString(), out System.DateTime date);
-			//	if (!isDateString)
-			//		return new CompileResult(eErrorType.Value);
-			//}
-			//if (arguments.Count() > 1)
-			//{
-			//	var returnTypeCandidate = arguments.ElementAt(1).Value;
-			//	if (returnTypeCandidate is null)
-			//		return new CompileResult(eErrorType.Num);
-			//	else if (returnTypeCandidate is string)
-			//	{
-			//		var isValidReturnType = Int32.TryParse(returnTypeCandidate.ToString(), out int result);
-			//		if (!isValidReturnType)
-			//			return new CompileResult(eErrorType.Value);
-			//	}
-			//}
-			//var serialNumber = this.ArgToDecimal(arguments, 0);
-			//if(serialNumber < 0)
-			//	return new CompileResult(eErrorType.Num);
-			//var returnType = arguments.Count() > 1 ? ArgToInt(arguments, 1) : 1;
-			//try
-			//{
-			//	var result = this.CalculateDayOfWeek(System.DateTime.FromOADate(serialNumber), returnType);
-			//	return CreateResult(result, DataType.Integer);
-			//}
-			//catch (ExcelErrorValueException e)
-			//{
-			//	return new CompileResult(ExcelErrorValue.Values.ToErrorType(e.ErrorValue.ToString()));
-			//}
 		}
 
 		private static List<int> _oneBasedStartOnSunday = new List<int> { 1, 2, 3, 4, 5, 6, 7 };
@@ -151,7 +120,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			resultInt = -1;
 			error = null;
-
 			if (intCandidate == null)
 			{
 				error = eErrorType.Num;

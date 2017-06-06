@@ -415,10 +415,27 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		[TestMethod]
 		public void WeekdayWithDateAsStringWithPeriodsReturnsCorrectResult()
 		{
+			// Note that Excel does not consider "5.17.2017" as a valid date format under the
+			// US culture, but System.DateTime does. In this regard, EPPlus is not completely replicating
+			// Excel's handling of specifically formatted dates. Properly handling this specific case
+			// is currently considered too much work for too little value.
 			var func = new Weekday();
 			var args = FunctionsHelper.CreateArgs("5.17.2017");
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+			Assert.AreEqual(4, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekdayWithDateAsStringWithCommasReturnsCorrectResult()
+		{
+			// Note that Excel does not consider "5,17,2017" as a valid date format under the
+			// US culture, but System.DateTime does. In this regard, EPPlus is not completely replicating
+			// Excel's handling of specifically formatted dates. Properly handling this specific case
+			// is currently considered too much work for too little value.
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("5,17,2017");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(4, result.Result);
 		}
 
 		[TestMethod]
@@ -456,10 +473,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 					ws.Calculate();
 					Assert.AreEqual(4, ws.Cells[4, 3].Value);
 				}
-				//var func = new Weekday();
-				//var args = FunctionsHelper.CreateArgs("3.5.2017");
-				//var result = func.Execute(args, this.ParsingContext);
-				//Assert.AreEqual(4, result.Result);
 			}
 			finally
 			{

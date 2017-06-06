@@ -94,15 +94,12 @@ namespace OfficeOpenXml.Utils
 			else if (dateCandidate is string dateString)
 			{
 				var doubleParsingStyle = NumberStyles.Float | NumberStyles.AllowDecimalPoint;
-				var dateParsingStyle = DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeLocal;
-				string[] dateParsingFormats = new string[] { "d", "G" };
 				if (Double.TryParse(dateString, doubleParsingStyle, CultureInfo.CurrentCulture, out double dateDouble))
 				{
 					OADate = dateDouble;
 					return true;
 				}
-				//else if (DateTime.TryParse(dateString, out DateTime dateFromString))
-				else if (DateTime.TryParseExact(dateString, dateParsingFormats, CultureInfo.CurrentCulture, dateParsingStyle, out DateTime dateFromString))
+				else if (DateTime.TryParse(dateString, out DateTime dateFromString))
 				{
 					OADate = dateFromString.ToOADate();
 					// Note: This if statement is to account for an error from Lotus 1-2-3
