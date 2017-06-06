@@ -24,39 +24,52 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
+
 using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
-	/// <summary>
-	/// Simple implementation of TimeValue function.
-	/// 
-	/// This makes use of the TimeStringParser class.
-	/// </summary>
 	public class TimeValue : ExcelFunction
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 
-			var dateString = ArgToString(arguments, 0);
+			var dateString = this.ArgToString(arguments, 0);
 
-			return Execute(dateString);
+			return this.Execute(dateString);
 		}
 
 		internal CompileResult Execute(string dateString)
 		{
-			var testString = dateString;
+			//var testString = dateString;
 
-			var parser = new TimeStringParser();
-			var resultAfterParse = parser.Parse(testString);
+			//var parser = new TimeStringParser();
+			double resultAfterParse = 0.0;
+
+			TryParseDateStringToDouble(dateString, out resultAfterParse);
+
 			var resultDecimalsOnly = resultAfterParse - System.Math.Truncate(resultAfterParse);
 	
 			return resultAfterParse != -1 ?		//The '-1' is used to throw an error if an invalid input is supplied.
 				 CreateResult(resultDecimalsOnly, DataType.Decimal) :
 				 CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
+		}
+		private bool TryParseDateStringToDouble(string dateString, out double result )
+		{
+			var parser = new TimeStringParser();
+			if (parser.Parse(dateString) == -1)
+			{
+				result = -1;
+				return false;
+			}
+			else
+			{
+				result = parser.Parse(dateString);
+				return true;
+			}
 		}
 	}
 }

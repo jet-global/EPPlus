@@ -48,6 +48,9 @@ namespace EPPlusTest.Excel.Functions
 			Assert.IsTrue(parser.CanParse("13"), "Could not parse 13");
 			Assert.IsTrue(parser.CanParse("13:12"), "Could not parse 13:12");
 			Assert.IsTrue(parser.CanParse("1/1/2017 13:12"), "Could not parse 1/1/2017 13:12");
+			Assert.IsTrue(parser.CanParse("1.17.2011 22:00"), "Could not parse 1.17.2011 22:00");
+			Assert.IsTrue(parser.CanParse("Jan 17, 2011 22:00"), "Could not parse Jan 17, 2011 22:00");
+			Assert.IsTrue(parser.CanParse("1-17-2017 22:00"), "Could not parse 1-17-2017 22:00");
 			Assert.IsTrue(parser.CanParse("25:00"), "Could not parse 25:00");
 			Assert.AreEqual(0.55, Math.Round(parser.Parse("1/1/2017 13:12"), 9));
 			Assert.AreEqual(1.041666667, Math.Round(parser.Parse("25:00"),9));
@@ -62,6 +65,9 @@ namespace EPPlusTest.Excel.Functions
 			Assert.IsTrue(parser.CanParse("7 AM"), "Could not parse 7 AM");
 			Assert.IsTrue(parser.CanParse("4:12 PM"), "Could not parse 4:12 PM");
 			Assert.IsTrue(parser.CanParse("1/1/2017 7 AM"), "Could not parse 1/1/2017 7 AM");
+			Assert.IsTrue(parser.CanParse("1.17.2011 2:00 am"), "Could not parse 1.17.2011 2:00 am");
+			Assert.IsTrue(parser.CanParse("Jan 17, 2011 2:00 am"), "Could not parse Jan 17, 2011 2:00 am");
+			Assert.IsTrue(parser.CanParse("1-17-2017 2:00 am"), "Could not parse 1-17-2017 2:00 am");
 			Assert.AreEqual(0.291666667, Math.Round(parser.Parse("1/1/2017 7 AM"), 9));
 		}
 
