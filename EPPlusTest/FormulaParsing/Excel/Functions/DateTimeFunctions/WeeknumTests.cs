@@ -43,7 +43,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		//The below tests do not include a second parameter (return type)
 
 		[TestMethod]
-		public void WeekNumWtihNoInputReturnsPoundValue()
+		public void WeekNumWithNoInputReturnsPoundValue()
 		{
 			//Test case where there is no input into the weeknum function.
 			var function = new Weeknum();
@@ -87,7 +87,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			// Test case where the input is a general string and empty string.
 			var function = new Weeknum();
 			var date1 = "testString";
-			var date2 = "";
+			var date2 = string.Empty;
 			var result = function.Execute(FunctionsHelper.CreateArgs(date1), this.ParsingContext);
 			var r2 = function.Execute(FunctionsHelper.CreateArgs(date2), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
@@ -120,6 +120,33 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			//Test case where the input is zero.
 			var function = new Weeknum();
 			var date = 0;
+			var result = function.Execute(FunctionsHelper.CreateArgs(date), this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithFractionReturnsZero()
+		{
+			var function = new Weeknum();
+			var date = 0.5;
+			var result = function.Execute(FunctionsHelper.CreateArgs(date), this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithZeroInStringReturnsZero()
+		{
+			var function = new Weeknum();
+			var date = "0";
+			var result = function.Execute(FunctionsHelper.CreateArgs(date), this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
+
+		[TestMethod]
+		public void WeekNumWithFractionInStringReturnsZero()
+		{
+			var function = new Weeknum();
+			var date = "0.5";
 			var result = function.Execute(FunctionsHelper.CreateArgs(date), this.ParsingContext);
 			Assert.AreEqual(0, result.Result);
 		}
