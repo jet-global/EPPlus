@@ -36,7 +36,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var numberCandidate = arguments.ElementAt(0).Value;
-			var powerCandidate = arguments.ElementAt(1).Value;
+			var	powerCandidate = arguments.ElementAt(1).Value;
+
 			var number = 0.0;
 			var power = 1.0;
 
@@ -46,6 +47,42 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				number = 1;
 				power = 1;
 			}
+			else if(numberCandidate is string)
+			{
+				if (!ConvertUtil.TryParseNumericString(powerCandidate, out double res))
+					if (!ConvertUtil.TryParseDateString(powerCandidate, out System.DateTime re))
+						return new CompileResult(eErrorType.Value);
+					else if (ConvertUtil.TryParseDateString(powerCandidate, out System.DateTime ree))
+						return new CompileResult(eErrorType.Num);
+					else
+					{
+						number = this.ArgToDecimal(arguments, 0);
+						power = this.ArgToDecimal(arguments, 1);
+					}
+				else
+				{
+					number = this.ArgToDecimal(arguments, 0);
+					power = this.ArgToDecimal(arguments, 1);
+				}
+			}
+			else if (powerCandidate is string)
+			{
+				if (!ConvertUtil.TryParseNumericString(powerCandidate, out double res))
+					if (!ConvertUtil.TryParseDateString(powerCandidate, out System.DateTime re))
+						return new CompileResult(eErrorType.Value);
+					else if (ConvertUtil.TryParseDateString(powerCandidate, out System.DateTime ree))
+						return new CompileResult(eErrorType.Num);
+					else
+					{
+						number = this.ArgToDecimal(arguments, 0);
+						power = this.ArgToDecimal(arguments, 1);
+					}
+				else
+				{
+					number = this.ArgToDecimal(arguments, 0);
+					power = this.ArgToDecimal(arguments, 1);
+				}
+			}	
 			else
 			{
 				number = this.ArgToDecimal(arguments, 0);
