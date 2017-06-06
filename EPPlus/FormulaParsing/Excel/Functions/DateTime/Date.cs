@@ -73,7 +73,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				dateWithMonthsAdded = resultDate;
 				resultDate = resultDate.AddDays(day);
 			}
-			catch (ArgumentOutOfRangeException e)
+			catch (ArgumentOutOfRangeException)
 			{
 				return new CompileResult(eErrorType.Num);
 			}

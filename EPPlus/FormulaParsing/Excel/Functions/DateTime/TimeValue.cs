@@ -29,9 +29,18 @@ using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
-{
+{	
+	/// <summary>
+	/// Implements the TIMEVALUE function.
+	/// </summary>
 	public class TimeValue : ExcelFunction
 	{
+		/// <summary>
+		/// Get the value represented by the input string.
+		/// </summary>
+		/// <param name="arguments">String to be converted to a time value.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>The OADate representation of the specified string.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)

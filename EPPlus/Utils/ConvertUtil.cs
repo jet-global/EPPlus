@@ -94,7 +94,7 @@ namespace OfficeOpenXml.Utils
 			else if (dateCandidate is string dateString)
 			{
 				var doubleParsingStyle = NumberStyles.Float | NumberStyles.AllowDecimalPoint;
-				if (Double.TryParse(dateString, doubleParsingStyle, CultureInfo.CurrentCulture, out double dateDouble))
+				if (double.TryParse(dateString, doubleParsingStyle, CultureInfo.CurrentCulture, out double dateDouble))
 				{
 					OADate = dateDouble;
 					return true;

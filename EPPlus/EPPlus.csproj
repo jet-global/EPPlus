@@ -373,6 +373,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\IsoWeekNum.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Networkdays.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\NetworkdaysIntl.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\DateTime\TimeStringParser.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\TimeValue.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Weeknum.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Minute.cs" />
