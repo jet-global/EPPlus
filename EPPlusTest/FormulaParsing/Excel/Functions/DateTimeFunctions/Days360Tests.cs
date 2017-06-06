@@ -432,6 +432,38 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			}
 		}
 
+		[TestMethod]
+		public void Days360WithDates0And1ReturnsCorrectResult()
+		{
+			// Note that the Excel OADate 0 corresponds to the special date 1/0/1900 in Excel.
+			// The Excel OADate 1 corresponds to 1/1/1900.
+			var func = new Days360();
+			var args = FunctionsHelper.CreateArgs(0, 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithZeroDateAnd31January1900ReturnsCorrectResult()
+		{
+			// Note that the Excel OADate 0 corresponds to the special date 1/0/1900 in Excel.
+			// The Excel OADate 31 corresponds to 1/31/1900.
+			var func = new Days360();
+			var args = FunctionsHelper.CreateArgs(0, 31);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(31, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithZeroDateAnd1February1900ReturnsCorrectResult()
+		{
+			// Note that the Excel OADate 0 corresponds to the special date 1/0/1900 in Excel.
+			// The Excel OADate 32 corresponds to 2/1/1900.
+			var func = new Days360();
+			var args = FunctionsHelper.CreateArgs(0, 32);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(31, result.Result);
+		}
 		#endregion
 	}
 }
