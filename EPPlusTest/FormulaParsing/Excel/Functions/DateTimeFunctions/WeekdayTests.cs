@@ -133,6 +133,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void WeekdayWithDateAsDifferentStringReturnsCorrectResult()
+		{
+			var func = new Weekday();
+			var args = FunctionsHelper.CreateArgs("5-17-2017");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(4, result.Result);
+		}
+
+		[TestMethod]
 		public void WeekdayWithDateAsLongStringReturnsCorrectResult()
 		{
 			var func = new Weekday();

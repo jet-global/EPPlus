@@ -116,6 +116,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			}
 		}
 
+		/// <summary>
+		/// Parse the given object as an integer.
+		/// </summary>
+		/// <param name="intCandidate">The object to be parsed as an integer.</param>
+		/// <param name="resultInt">The resulting integer created from a successful parse.</param>
+		/// <param name="error">The <see cref="eErrorType"/> indicating the reason the parse failed.</param>
+		/// <returns>Returns true if the object was parsed successfully, and false otherwise.</returns>
 		private bool TryParseObjectAsInt(object intCandidate, out int resultInt, out eErrorType? error)
 		{
 			resultInt = -1;
