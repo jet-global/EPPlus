@@ -53,9 +53,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void ProductWithFractionInputsReturnsCorrectValue()
 		{
-			var function = new Product();
-			var result = function.Execute(FunctionsHelper.CreateArgs((2 / 3), (1 / 5)), this.ParsingContext);
-			Assert.AreEqual(0.13333333, result.Result);
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "PRODUCT((2/3),(1/5))";
+				ws.Calculate();
+				Assert.AreEqual(0.133333333, (double)ws.Cells["B1"].Value, 0.000001);
+			}
 		}
 
 		[TestMethod]
@@ -73,14 +77,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var function = new Product();
 			var result = function.Execute(FunctionsHelper.CreateArgs("5/5/2017", 2), this.ParsingContext);
 			Assert.AreEqual(85720d, result.Result);
-		}
-
-		[TestMethod]
-		public void ProductWithDateNotAsStringReturnsCorrectValue()
-		{
-			var function = new Product();
-			var result = function.Execute(FunctionsHelper.CreateArgs(5 / 5 / 2017, 2), this.ParsingContext);
-			Assert.AreEqual(0.000991572, result.Result);
 		}
 
 		[TestMethod]
