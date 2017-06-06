@@ -61,27 +61,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 		public virtual double Parse(string input)
 		{
-			return InternalParse(input);
+			return this.InternalParse(input);
 		}
 
 		public virtual bool CanParse(string input)
 		{
 			System.DateTime dt;
-			return Regex.IsMatch(input, RegEx24)|| System.DateTime.TryParse(input, out dt);
+			return Regex.IsMatch(input, TimeStringParser.RegEx24)|| System.DateTime.TryParse(input, out dt);
 		}
-
+	
 		private double InternalParse(string input)
 		{	
 			var match = Regex.Match(input, RegEx24);
 			if (match.Success)
 			{
 				
-				return Parse24HourTimeString(match.Value);
+				return this.Parse24HourTimeString(match.Value);
 			}
 			System.DateTime dateTime;
 			if (System.DateTime.TryParse(input, out dateTime))
 			{
-				return GetSerialNumber(dateTime.Hour, dateTime.Minute, dateTime.Second);
+				return this.GetSerialNumber(dateTime.Hour, dateTime.Minute, dateTime.Second);
 			}
 			return -1;
 		}
@@ -91,13 +91,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			int hour;
 			int minute;
 			int second;
-			GetValuesFromString(input, out hour, out minute, out second);
+			this.GetValuesFromString(input, out hour, out minute, out second);
 
-			ValidateValues(hour, minute, second);
+			this.ValidateValues(hour, minute, second);
 			return GetSerialNumber(hour, minute, second);
 		}
 
-		private static void GetValuesFromString(string input, out int hour, out int minute, out int second)
+		private void GetValuesFromString(string input, out int hour, out int minute, out int second)
 		{
 			hour = 0;
 			minute = 0;
