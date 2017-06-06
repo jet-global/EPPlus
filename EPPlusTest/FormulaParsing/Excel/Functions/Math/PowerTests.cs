@@ -32,15 +32,201 @@ using OfficeOpenXml;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
-	#region Power Function (Execute) Tests
 	[TestClass]
-	class PowerTests : MathFunctionsTestBase
+	public class PowerTests : MathFunctionsTestBase
 	{
+		#region Power Function (Execute) Tests
 		[TestMethod]
 		public void PowerWithPositiveIntegerArgumentsReturnsCorrectValue()
 		{
-
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(2, 2), this.ParsingContext);
+			Assert.AreEqual(4d, result.Result);
 		}
+
+		[TestMethod]
+		public void PowerWithZeroAsBaseReturnsCorrectValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(0, 5), this.ParsingContext);
+			Assert.AreEqual(0d, result.Result);
+		}
+
+		[TestMethod]
+		public void PowerWithZeroAsPowerReturnsCorrectValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(5, 0), this.ParsingContext);
+			Assert.AreEqual(1d, result.Result);
+		}
+
+		[TestMethod]
+		public void PowerWithPositiveBaseAndNegativePowerReturnsCorrectValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(2, -3), this.ParsingContext);
+			Assert.AreEqual(0.125d, result.Result);
+		}
+
+		[TestMethod]
+		public void PowerWithNegativeBaseAndEvenPowerReturnsCorrectValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-2, 2), this.ParsingContext);
+			Assert.AreEqual(4d, result.Result);
+		}
+
+		[TestMethod]
+		public void PowerWithNegativeBaseAndOddPowerReturnsCorrectValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-2, 3), this.ParsingContext);
+			Assert.AreEqual(-8d, result.Result);
+		}
+
+		[TestMethod]
+		public void PowerWithNegativeBaseAndNegativePowerReturnsCorrectValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-2, -5), this.ParsingContext);
+			Assert.AreEqual(-0.03125d, (double)result.Result, 0.00001);
+		}
+
+		[TestMethod]
+		public void	PowerWithFractionBaseReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "POWER((2/3), 5)";
+				ws.Calculate();
+				Assert.AreEqual(0.131687243d, (double)ws.Cells["B1"].Value, 0.000001);
+			}
+		}
+
+		[TestMethod]
+		public void PowerWithFractionPowerReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "POWER(2, (1/5))";
+				ws.Calculate();
+				Assert.AreEqual(1.148698355d, (double)ws.Cells["B1"].Value, 0.000001);
+			}
+		}
+
+		[TestMethod]
+		public void PowerWithFractionBaseAndPowerReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "POWER((2/3), (1/5))";
+				ws.Calculate();
+				Assert.AreEqual(0.922107911d, (double)ws.Cells["B1"].Value, 0.000001);
+			}
+		}
+
+		[TestMethod]
+		public void PowerWithBaseAsResultOfDateFunctionReturnsCorrectValue()
+		{
+			var function = new Power();
+			var dateArgument = new DateTime(2017, 5, 1);
+			var result = function.Execute(FunctionsHelper.CreateArgs(dateArgument, 2), this.ParsingContext);
+			Assert.AreEqual(1836636736d, result.Result);
+		}
+
+		[TestMethod]
+		public void PowerWithPowerAsResultOfDateFunctionReturnsPoundNum()
+		{
+			var function = new Power();
+			var dateArgument = new DateTime(2017, 5, 1);
+			var result = function.Execute(FunctionsHelper.CreateArgs(2, dateArgument), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void PowerWithBaseDateAsStringReturnsCorrectValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs("5/1/2017", 2), this.ParsingContext);
+			Assert.AreEqual(1836636736d, result.Result);
+		}
+
+		[TestMethod]
+		public void PowerWithPowerDateAsStringReturnsPoundNum()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(2, "5/1/2017"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void PowerWithDoubleAsBaseReturnsCorrectValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(2.3, 2), this.ParsingContext);
+			Assert.AreEqual(5.29d, (double)result.Result, 0.000001);
+		}
+
+		[TestMethod]
+		public void PowerWithDoubleAsPowerReturnsCorrectValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(3, 5.5), this.ParsingContext);
+			Assert.AreEqual(420.8883462d, (double)result.Result, 0.000001);
+		}
+
+		[TestMethod]
+		public void PowerWithGeneralStringAsBaseReturnsPoundValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs("string", 2), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void PowerWithGeneralStringAsPowerReturnsPoundValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(2, "string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void PowerWithNullFirstArgumentReturnsZero()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(null, 2), this.ParsingContext);
+			Assert.AreEqual(0d, result.Result);
+		}
+
+		[TestMethod]
+		public void PowerWithNullOrMissingSecondArgumentReturnsOne()
+		{
+			var function = new Power();
+			//var resultWithNullArg = function.Execute(FunctionsHelper.CreateArgs(2, null), this.ParsingContext);
+			var resultWithMissingArg = function.Execute(FunctionsHelper.CreateArgs(2), this.ParsingContext);
+			Assert.AreEqual(1d, resultWithMissingArg.Result);
+			//Assert.AreEqual(1d, resultWithNullArg.Result);
+		}
+
+		[TestMethod]
+		public void PowerWithArgumentsAsStringsReturnsCorrectValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs("2", "3"), this.ParsingContext);
+			Assert.AreEqual(8d, result.Result);
+		}
+
+		[TestMethod]
+		public void PowerWithNoArgumentsReturnsPoundValue()
+		{
+			var function = new Power();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+		#endregion
 	}
-	#endregion
 }

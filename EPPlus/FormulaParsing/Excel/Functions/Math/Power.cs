@@ -23,7 +23,9 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -31,12 +33,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 2) == false)
+			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var number = ArgToDecimal(arguments, 0);
-			var power = ArgToDecimal(arguments, 1);
-			var result = System.Math.Pow(number, power);
-			return CreateResult(result, DataType.Decimal);
+			var numberCandidate = arguments.ElementAt(0).Value;
+			var powerCandidate = arguments.ElementAt(1).Value;
+			var number = 0.0;
+			var power = 1.0;
+
+			if (numberCandidate == null) { }
+			else if (powerCandidate == null)
+			{
+				number = 1;
+				power = 1;
+			}
+			else
+			{
+				number = this.ArgToDecimal(arguments, 0);
+				power = this.ArgToDecimal(arguments, 1);
+			}
+			
+			var resultToReturn = System.Math.Pow(number, power);
+			return CreateResult(resultToReturn, DataType.Decimal);
 		}
 	}
 }
