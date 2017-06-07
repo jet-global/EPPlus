@@ -5,8 +5,17 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class contains the formula for dividing two arguments.
+	/// </summary>
 	public class Quotient : ExcelFunction
 	{
+		/// <summary>
+		/// Takes two user specified arguments and divides the first by the second. 
+		/// </summary>
+		/// <param name="arguments">The user specified arguments to divide.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The first argument divided by the second argument as an integer value.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (ValidateArguments(arguments, 2) == false)
