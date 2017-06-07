@@ -53,26 +53,26 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			if (this.ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-			var dateObj1 = arguments.ElementAt(0).Value;
-			var dateObj2 = arguments.ElementAt(1).Value;
-			if (dateObj1 == null)
-				dateObj1 = 0;
-			if (dateObj2 == null)
-				dateObj2 = 0;
-			if (!ConvertUtil.TryParseDateObjectToOADate(dateObj1, out double OADate1) ||
-				!ConvertUtil.TryParseDateObjectToOADate(dateObj2, out double OADate2))
+			var startDateObj = arguments.ElementAt(0).Value;
+			var endDateObj = arguments.ElementAt(1).Value;
+			if (startDateObj == null)
+				startDateObj = 0;
+			if (endDateObj == null)
+				endDateObj = 0;
+			if (!ConvertUtil.TryParseDateObjectToOADate(startDateObj, out double startOADate) ||
+				!ConvertUtil.TryParseDateObjectToOADate(endDateObj, out double endOADate))
 				return new CompileResult(eErrorType.Value);
-			if (OADate1 < 0 || OADate2 < 0)
+			if (startOADate < 0 || endOADate < 0)
 				return new CompileResult(eErrorType.Num);
-			// The date1Num and date2Num provided by TryParseDateObjectToOADate are Excel OADates;
+			// The startOADate and endOADate provided by TryParseDateObjectToOADate are Excel OADates;
 			// they need to be converted back to System.DateTime OADates for the special case
 			// of dates before 3/1/1900 (OADate 61 in both Excel and System.DateTime).
-			if (OADate1 < 61 && OADate1 > 0)
-				OADate1++;
-			if (OADate2 < 61 && OADate2 > 0)
-				OADate2++;
-			var startDate = System.DateTime.FromOADate(OADate1);
-			var endDate = System.DateTime.FromOADate(OADate2);
+			if (startOADate < 61 && startOADate > 0)
+				startOADate++;
+			if (endOADate < 61 && endOADate > 0)
+				endOADate++;
+			var startDate = System.DateTime.FromOADate(startOADate);
+			var endDate = System.DateTime.FromOADate(endOADate);
 			var calcType = Days360Calctype.Us;
 			if (arguments.Count() > 2)
 			{
@@ -117,7 +117,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				var calendar = new GregorianCalendar();
 				var nDaysInFeb = calendar.IsLeapYear(startDate.Year) ? 29 : 28;
 				// The OADate 0 in Excel is treated as the special date 1/0/1900, which requires specific handling.
-				var isZeroCase = ((OADate1 == 0 || OADate2 == 0) && OADate1 < OADate2);
+				var isZeroCase = ((startOADate == 0 || endOADate == 0) && startOADate < endOADate);
 
 				// If the investment is EOM and (Date1 is the last day of February) and (Date2 is the last day of February), then change D2 to 30.
 				if (startMonth == 2 && startDay == nDaysInFeb && endMonth == 2 && endDay == nDaysInFeb)
