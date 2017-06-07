@@ -86,8 +86,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			}
 			var startDate = System.DateTime.FromOADate(date1Num);
 			var endDate = System.DateTime.FromOADate(date2Num);
-			functionArguments[0] = new FunctionArgument(date1Num);
-			functionArguments[1] = new FunctionArgument(date2Num);
 			var days360Function = context.Configuration.FunctionRepository.GetFunction("days360");
 			var daysBetween = (endDate - startDate).TotalDays;
 			// Account for the fact that Excel includes an extra day, 2/29/1900 which doesn't actually exist, 

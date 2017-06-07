@@ -444,6 +444,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void Days360WithDates0And1InStringsReturnsCorrectResult()
+		{
+			var func = new Days360();
+			var args = FunctionsHelper.CreateArgs("0", "1");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
 		public void Days360WithZeroDateAnd31January1900ReturnsCorrectResult()
 		{
 			// Note that the Excel OADate 0 corresponds to the special date 1/0/1900 in Excel.
@@ -463,6 +472,39 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var args = FunctionsHelper.CreateArgs(0, 32);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(31, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithZeroDateAnd28February1900ReturnsCorrectResult()
+		{
+			// Note that the Excel OADate 0 corresponds to the special date 1/0/1900 in Excel.
+			// The Excel OADate 59 corresponds to 2/28/1900.
+			var func = new Days360();
+			var args = FunctionsHelper.CreateArgs(0, 59);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(58, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithZeroDateAnd1March1900ReturnsCorrectResult()
+		{
+			// Note that the Excel OADate 0 corresponds to the special date 1/0/1900 in Excel.
+			// The Excel OADate 61 corresponds to 3/1/1900.
+			var func = new Days360();
+			var args = FunctionsHelper.CreateArgs(0, 61);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(61, result.Result);
+		}
+
+		[TestMethod]
+		public void Days360WithZeroDateAnd31March1900ReturnsCorrectResult()
+		{
+			// Note that the Excel OADate 0 corresponds to the special date 1/0/1900 in Excel.
+			// The Excel OADate 91 corresponds to 3/31/1900.
+			var func = new Days360();
+			var args = FunctionsHelper.CreateArgs(0, 91);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(91, result.Result);
 		}
 		#endregion
 	}
