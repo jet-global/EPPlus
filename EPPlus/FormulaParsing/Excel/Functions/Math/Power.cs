@@ -34,10 +34,20 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class contains the formula for raising one number to the power of another.
+	/// </summary>
 	public class Power : ExcelFunction
 	{
+		#region Private Variables
 		private object powerCandidate;
-
+		#endregion
+		/// <summary>
+		/// Takes the user specified arguments and raises the first one to the power of the second one.
+		/// </summary>
+		/// <param name="arguments">The user specified inputs.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The first argument raised to the power of the second argument.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (ValidateArguments(arguments, 1) == false)
