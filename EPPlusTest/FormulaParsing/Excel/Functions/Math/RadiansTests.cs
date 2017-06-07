@@ -170,16 +170,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var roundedResult = System.Math.Round((double)result.Result, 12);
 			Assert.AreEqual(748.624076057928, roundedResult);
 		}
-
-		//[TestMethod]
-		//public void RadiansFunction()
-		//{
-		//	var func = new Radians();
-		//	var args = FunctionsHelper.CreateArgs();
-		//	var result = func.Execute(args, this.ParsingContext);
-		//	var roundedResult = System.Math.Round((double)result.Result, );
-		//	Assert.AreEqual(, roundedResult);
-		//}
 		#endregion
 	}
 }

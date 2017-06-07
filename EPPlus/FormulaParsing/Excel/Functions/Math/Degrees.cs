@@ -37,10 +37,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	public class Degrees : ExcelFunction
 	{
 		/// <summary>
-		/// Returns the given radian value to its corresponding value in degrees.
+		/// Returns the value in degrees of the given radian value.
 		/// </summary>
 		/// <param name="arguments">The radian value.</param>
-		/// <param name="context">Unused in method.</param>
+		/// <param name="context">Unused in the method.</param>
 		/// <returns>Returns the given radian value converted to degrees.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{

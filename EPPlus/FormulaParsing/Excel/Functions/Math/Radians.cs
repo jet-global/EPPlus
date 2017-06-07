@@ -31,8 +31,17 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Converts radians into degrees.
+	/// </summary>
 	public class Radians : ExcelFunction
 	{
+		/// <summary>
+		/// Returns the value in radians of the given degree value.
+		/// </summary>
+		/// <param name="arguments">The degree value.</param>
+		/// <param name="context">Unused in the method.</param>
+		/// <returns>Returns the given degree value converted to radians.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
