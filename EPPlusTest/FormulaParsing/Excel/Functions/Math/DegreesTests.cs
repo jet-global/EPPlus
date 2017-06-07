@@ -1,4 +1,30 @@
-﻿using EPPlusTest.FormulaParsing.TestHelpers;
+﻿/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2017 Jan Källman, Matt Delaney, and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+* For code change notes, see the source control history.
+*******************************************************************************/
+using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
@@ -8,6 +34,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class DegreesTests : MathFunctionsTestBase
 	{
+		#region Degrees Tests
 		[TestMethod]
 		public void DegreesFunctionWithTooFewArgumentsReturnsPoundValue()
 		{
@@ -43,7 +70,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var pi = System.Math.PI;
 			var args = FunctionsHelper.CreateArgs(2*pi);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(360, result.Result);
+			Assert.AreEqual(360.0, result.Result);
 		}
 
 		[TestMethod]
@@ -52,16 +79,97 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var func = new Degrees();
 			var args = FunctionsHelper.CreateArgs(-1);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(, result.Result);
+			var roundedResult = System.Math.Round((double)result.Result, 13);
+			Assert.AreEqual(-57.2957795130823, roundedResult);
 		}
 
 		[TestMethod]
-		public void DegreesFunction()
+		public void DegreesFunctionWithNegativeDoubleReturnsCorrectResult()
 		{
 			var func = new Degrees();
-			var args = FunctionsHelper.CreateArgs();
+			var args = FunctionsHelper.CreateArgs(-1.5);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(, result.Result);
+			var roundedResult = System.Math.Round((double)result.Result, 13);
+			Assert.AreEqual(-85.9436692696235, roundedResult);
 		}
+
+		[TestMethod]
+		public void DegreesFunctionWithValueGreaterThan2PiReturnsCorrectResult()
+		{
+			var func = new Degrees();
+			var args = FunctionsHelper.CreateArgs(10);
+			var result = func.Execute(args, this.ParsingContext);
+			var roundedResult = System.Math.Round((double)result.Result, 12);
+			Assert.AreEqual(572.957795130823, roundedResult);
+		}
+
+		[TestMethod]
+		public void DegreesFunctionWithIntegerInStringReturnsCorrectResult()
+		{
+			var func = new Degrees();
+			var args = FunctionsHelper.CreateArgs("1");
+			var result = func.Execute(args, this.ParsingContext);
+			var roundedResult = System.Math.Round((double)result.Result, 13);
+			Assert.AreEqual(57.2957795130823, roundedResult);
+		}
+
+		[TestMethod]
+		public void DegreesFunctionWithDoubleInStringReturnsCorrectResult()
+		{
+			var func = new Degrees();
+			var args = FunctionsHelper.CreateArgs("1.5");
+			var result = func.Execute(args, this.ParsingContext);
+			var roundedResult = System.Math.Round((double)result.Result, 13);
+			Assert.AreEqual(85.9436692696235, roundedResult);
+		}
+
+		[TestMethod]
+		public void DegreesFunctionWithNegativeIntegerInStringReturnsCorrectResult()
+		{
+			var func = new Degrees();
+			var args = FunctionsHelper.CreateArgs("-1");
+			var result = func.Execute(args, this.ParsingContext);
+			var roundedResult = System.Math.Round((double)result.Result, 13);
+			Assert.AreEqual(-57.2957795130823, roundedResult);
+		}
+
+		[TestMethod]
+		public void DegreesFunctionWithNegativeDoubleInStringReturnsCorrectResult()
+		{
+			var func = new Degrees();
+			var args = FunctionsHelper.CreateArgs("-1.5");
+			var result = func.Execute(args, this.ParsingContext);
+			var roundedResult = System.Math.Round((double)result.Result, 13);
+			Assert.AreEqual(-85.9436692696235, roundedResult);
+		}
+
+		[TestMethod]
+		public void DegreesFunctionWithNonNumericStringReturnsPoundValue()
+		{
+			var func = new Degrees();
+			var args = FunctionsHelper.CreateArgs("word");
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void DegreesFunctionWithEmptyStringReturnsPoundValue()
+		{
+			var func = new Degrees();
+			var args = FunctionsHelper.CreateArgs(string.Empty);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void DegreesFunctionWithDateInStringReturnsCorrectResult()
+		{
+			var func = new Degrees();
+			var args = FunctionsHelper.CreateArgs("6/7/2017");
+			var result = func.Execute(args, this.ParsingContext);
+			var roundedResult = System.Math.Round((double)result.Result, 8);
+			Assert.AreEqual(2457587.87065464, roundedResult);
+		}
+		#endregion
 	}
 }
