@@ -55,15 +55,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var serialNumberCandidate = arguments.ElementAt(0).Value;
 			var workDaysCandidate = arguments.ElementAt(1).Value;
 
-			if (workDaysCandidate == null)
-				return new CompileResult(eErrorType.NA);
-			if (serialNumberCandidate == null)
+			if (workDaysCandidate == null || serialNumberCandidate == null)
 				return new CompileResult(eErrorType.NA);
 
-			bool isSerialIntZero = (serialNumberCandidate is int dateAsInt && dateAsInt == 0);
-			bool isSerialDoubleZero = (serialNumberCandidate is double dateAsDouble && dateAsDouble == 0.00);
+			var serialNumberIsZero = (ConvertUtil.TryParseDateObjectToOADate(serialNumberCandidate, out double parsedSerialNumber)
+				&& parsedSerialNumber < 1 && parsedSerialNumber >= 0);
 
-			if (ConvertUtil.TryParseDateObject(serialNumberCandidate, out output, out eErrorType? error) || isSerialIntZero || isSerialDoubleZero)
+			if (ConvertUtil.TryParseDateObject(serialNumberCandidate, out output, out eErrorType? error) || serialNumberIsZero)
 			{
 				if (serialNumberCandidate is int && ArgToInt(functionArguments, 1) < 0)
 					return new CompileResult(eErrorType.Num);
@@ -74,12 +72,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 						return new CompileResult(eErrorType.Value);
 				}
 
-				var dateSerial = this.ArgToDecimal(arguments, 0);
+				var dateSerial = (int)this.ArgToDecimal(arguments, 0);
 				if (dateSerial < 0)
 					return new CompileResult(eErrorType.Num);
-				if (isSerialIntZero && this.ArgToInt(arguments, 1) < 0)
-						return new CompileResult(eErrorType.Num);
-				if (isSerialDoubleZero && this.ArgToInt(arguments, 1) < 0)
+
+				if (serialNumberIsZero && this.ArgToInt(arguments, 1) < 0)
 					return new CompileResult(eErrorType.Num);
 
 				var startDate = System.DateTime.FromOADate(dateSerial);
@@ -104,7 +101,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 						dateResult = calculator.AdjustResultWithHolidays(dateResult, functionArguments[2]);
 					}
 				}
-				if(isSerialIntZero || isSerialDoubleZero)
+				if (serialNumberIsZero)
 					return CreateResult(dateResult.EndDate.ToOADate()-1, DataType.Date);
 				return CreateResult(dateResult.EndDate.ToOADate(), DataType.Date);
 			}
