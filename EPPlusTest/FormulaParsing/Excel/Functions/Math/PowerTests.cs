@@ -206,10 +206,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		public void PowerWithNullOrMissingSecondArgumentReturnsOne()
 		{
 			var function = new Power();
-			//var resultWithNullArg = function.Execute(FunctionsHelper.CreateArgs(2, null), this.ParsingContext);
+			var resultWithNullArg = function.Execute(FunctionsHelper.CreateArgs(2, null), this.ParsingContext);
+			Assert.AreEqual(1d, resultWithNullArg.Result);
 			var resultWithMissingArg = function.Execute(FunctionsHelper.CreateArgs(2), this.ParsingContext);
 			Assert.AreEqual(1d, resultWithMissingArg.Result);
-			//Assert.AreEqual(1d, resultWithNullArg.Result);
 		}
 
 		[TestMethod]
