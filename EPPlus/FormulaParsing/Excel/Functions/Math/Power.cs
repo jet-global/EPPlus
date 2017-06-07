@@ -39,9 +39,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// </summary>
 	public class Power : ExcelFunction
 	{
-		#region Private Variables
-		private object powerCandidate;
-		#endregion
 		/// <summary>
 		/// Takes the user specified arguments and raises the first one to the power of the second one.
 		/// </summary>
@@ -55,6 +52,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var number = 0.0;
 			var power = 1.0;
 			var numberCandidate = arguments.ElementAt(0).Value;
+			object powerCandidate = null;
 
 			if (arguments.Count() == 2)
 				powerCandidate = arguments.ElementAt(1).Value;
@@ -64,10 +62,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (numberCandidate == null) { }
 			else if (powerCandidate == null)
 				number = 1;
-			else if(numberCandidate is string)
+			else if (numberCandidate is string)
 			{
-				if (!ConvertUtil.TryParseNumericString(numberCandidate, out double res))
-					if (!ConvertUtil.TryParseDateString(numberCandidate, out System.DateTime re))
+				if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
+					if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
 						return new CompileResult(eErrorType.Value);
 					else
 					{
@@ -82,10 +80,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			else if (powerCandidate is string)
 			{
-				if (!ConvertUtil.TryParseNumericString(powerCandidate, out double res))
-					if (!ConvertUtil.TryParseDateString(powerCandidate, out System.DateTime re))
+				if (!ConvertUtil.TryParseNumericString(powerCandidate, out _))
+					if (!ConvertUtil.TryParseDateString(powerCandidate, out _))
 						return new CompileResult(eErrorType.Value);
-					else if (ConvertUtil.TryParseDateString(powerCandidate, out System.DateTime ree))
+					else if (ConvertUtil.TryParseDateString(powerCandidate, out _))
 						return new CompileResult(eErrorType.Num);
 					else
 					{
@@ -110,7 +108,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			
 			var resultToReturn = System.Math.Pow(number, power);
-			return CreateResult(resultToReturn, DataType.Decimal);
+			return this.CreateResult(resultToReturn, DataType.Decimal);
 		}
 	}
 }
