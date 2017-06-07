@@ -44,7 +44,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The first argument divided by the second argument as an integer value.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 2) == false)
+			if (this.ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
 			var numeratorCandidate = arguments.ElementAt(0).Value;
 			var denominatorCandidate = arguments.ElementAt(1).Value;
@@ -59,12 +59,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				if (!ConvertUtil.TryParseDateObjectToOADate(denominatorCandidate, out candidateAsDouble))
 					return new CompileResult(eErrorType.Value);
 
-			var num = ArgToDecimal(arguments, 0);
-			var denominator = ArgToDecimal(arguments, 1);
+			var num = this.ArgToDecimal(arguments, 0);
+			var denominator = this.ArgToDecimal(arguments, 1);
 			if (denominator == 0.0)
 				return new CompileResult(eErrorType.Div0);
 			var result = (int)(num / denominator);
-			return CreateResult(result, DataType.Integer);
+			return this.CreateResult(result, DataType.Integer);
 		}
 	}
 }
