@@ -31,18 +31,28 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Converts radians into degrees.
+	/// </summary>
 	public class Degrees : ExcelFunction
 	{
+		/// <summary>
+		/// Returns the given radian value to its corresponding value in degrees.
+		/// </summary>
+		/// <param name="arguments">The radian value.</param>
+		/// <param name="context">Unused in method.</param>
+		/// <returns>Returns the given radian value converted to degrees.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var angleObj = arguments.ElementAt(0).Value;
+			// The method TryParseDateObjectToOADate attempts to parse the given object as a double.
+			// That double is only used as an OADate if the given object represented a date.
 			if (!ConvertUtil.TryParseDateObjectToOADate(angleObj, out double angle))
 				return new CompileResult(eErrorType.Value);
-			//var angle = ArgToDecimal(arguments, 0);
 			var result = (angle * 180) / System.Math.PI;
-			return CreateResult(result, DataType.Decimal);
+			return this.CreateResult(result, DataType.Decimal);
 		}
 	}
 }
