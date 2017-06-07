@@ -56,27 +56,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 			if (arguments.Count() == 2)
 				powerCandidate = arguments.ElementAt(1).Value;
-			else
-				number = 1;
 
-			if (numberCandidate == null) { }
-			else if (powerCandidate == null)
-				number = 1;
-			else if (numberCandidate is string)
+			if (numberCandidate is string)
 			{
 				if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
 					if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
 						return new CompileResult(eErrorType.Value);
-					else
-					{
-						number = this.ArgToDecimal(arguments, 0);
-						power = this.ArgToDecimal(arguments, 1);
-					}
-				else
-				{
-					number = this.ArgToDecimal(arguments, 0);
-					power = this.ArgToDecimal(arguments, 1);
-				}
 			}
 			else if (powerCandidate is string)
 			{
@@ -85,28 +70,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						return new CompileResult(eErrorType.Value);
 					else if (ConvertUtil.TryParseDateString(powerCandidate, out _))
 						return new CompileResult(eErrorType.Num);
-					else
-					{
-						number = this.ArgToDecimal(arguments, 0);
-						power = this.ArgToDecimal(arguments, 1);
-					}
-				else
-				{
-					number = this.ArgToDecimal(arguments, 0);
-					power = this.ArgToDecimal(arguments, 1);
-				}
 			}	
 			else if (powerCandidate is System.DateTime)
-			{
 				return new CompileResult(eErrorType.Num);
-			}
-			else if (arguments.Count() == 1) { }
+
+			if (numberCandidate == null) { }
+			else if (powerCandidate == null || arguments.Count() == 1)
+				power = 0;
 			else
 			{
 				number = this.ArgToDecimal(arguments, 0);
 				power = this.ArgToDecimal(arguments, 1);
 			}
-			
 			var resultToReturn = System.Math.Pow(number, power);
 			return this.CreateResult(resultToReturn, DataType.Decimal);
 		}
