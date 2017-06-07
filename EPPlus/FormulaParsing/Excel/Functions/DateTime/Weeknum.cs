@@ -59,7 +59,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				else if (!this.TryGetArgAsInt(arguments, 1, out returnType))
 					return new CompileResult(eErrorType.Value);
 			}
-			// Excel treats 0 and fractional dates as a special date and require special output.
+			// Excel treats 0 and fractional dates as special dates and require special output.
 			if (ConvertUtil.TryParseDateObjectToOADate(serialNumberCandidate, out double serialNumber) && serialNumber < 1 && serialNumber >= 0)
 				return this.getZeroWeek(returnType);
 			var isValidDate = ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error);

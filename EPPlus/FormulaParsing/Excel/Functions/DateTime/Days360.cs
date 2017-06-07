@@ -122,25 +122,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				// If the investment is EOM and (Date1 is the last day of February) and (Date2 is the last day of February), then change D2 to 30.
 				if (startMonth == 2 && startDay == nDaysInFeb && endMonth == 2 && endDay == nDaysInFeb)
 				{
-					//endDay = 30;
 					endDay = (isZeroCase) ? 31 : 30;
 				}
 				// If the investment is EOM and (Date1 is the last day of February), then change D1 to 30.
 				if (startMonth == 2 && startDay == nDaysInFeb)
 				{
-					//startDay = 30;
 					startDay = (isZeroCase) ? 31 : 30;
 				}
 				// If D2 is 31 and D1 is 30 or 31, then change D2 to 30 unless first argument is null (because Excel adds a day in this case).
 				if (endDay == 31 && (startDay == 30 || startDay == 31) && arguments.First().Value != null)
 				{
-					//endDay = 30;
 					endDay = (isZeroCase) ? 31 : 30;
 				}
 				// If D1 is 31, then change D1 to 30.
 				if (startDay == 31)
 				{
-					//startDay = 30;
 					startDay = (isZeroCase) ? 31 : 30;
 				}
 			}
