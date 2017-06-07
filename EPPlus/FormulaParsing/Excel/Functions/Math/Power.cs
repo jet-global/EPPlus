@@ -50,7 +50,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The first argument raised to the power of the second argument.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var number = 0.0;
 			var power = 1.0;
