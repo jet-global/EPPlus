@@ -141,6 +141,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\FloorTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\DegreesTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\RadiansTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SumIfsTests.cs" />
