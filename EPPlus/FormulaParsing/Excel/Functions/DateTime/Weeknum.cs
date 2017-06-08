@@ -46,94 +46,103 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>The week number out of 52 based on the date given.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-
 			var serialNumberCandidate = arguments.ElementAt(0).Value;
-
-			if (serialNumberCandidate is null)
+			if (serialNumberCandidate == null)
 				return new CompileResult(eErrorType.NA);
-			else if (serialNumberCandidate is string)
-			{
-				var isDateString = ConvertUtil.TryParseDateString(serialNumberCandidate.ToString(), out System.DateTime date1);
-				if (!isDateString)
-					return new CompileResult(eErrorType.Value);
-			}
-
-			var dateSerial = ArgToDecimal(arguments, 0);
-
-			if(dateSerial < 0)
-				return new CompileResult(eErrorType.Num);
-
-			var date = System.DateTime.FromOADate(dateSerial);
-
-			var calendarType = CalendarWeekRule.FirstDay;
-
-			var startDay = DayOfWeek.Sunday;
+			var returnType = 1;
 			if (arguments.Count() > 1)
 			{
-				var returnType = arguments.ElementAt(1).Value;
-
-				if (returnType is null)
+				if (arguments.ElementAt(1).Value == null)
 					return new CompileResult(eErrorType.Num);
-				else if(returnType is string)
-				{
-					var isValidReturnType = ConvertUtil.TryParseNumericString(returnType.ToString(), out double date2);
-					if (!isValidReturnType)
-						return new CompileResult(eErrorType.Value);
-				}
-
-				var argStartDay = ArgToInt(arguments, 1);
-				switch (argStartDay)
-				{
-					case 1:
-						startDay = DayOfWeek.Sunday;
-						break;
-					case 2:
-						startDay = DayOfWeek.Monday;
-						break;
-					case 11:
-						startDay = DayOfWeek.Monday;
-						break;
-					case 12:
-						startDay = DayOfWeek.Tuesday;
-						break;
-					case 13:
-						startDay = DayOfWeek.Wednesday;
-						break;
-					case 14:
-						startDay = DayOfWeek.Thursday;
-						break;
-					case 15:
-						startDay = DayOfWeek.Friday;
-						break;
-					case 16:
-						startDay = DayOfWeek.Saturday;
-						break;
-					case 17:
-						startDay = DayOfWeek.Sunday;
-						break;
-					case 21:
-						startDay = DayOfWeek.Thursday;
-						calendarType = CalendarWeekRule.FirstFullWeek;
-						break;
-					default:
-						// Not supported return type
-						return new CompileResult(eErrorType.Num);
-				}
+				else if (!this.TryGetArgAsInt(arguments, 1, out returnType))
+					return new CompileResult(eErrorType.Value);
 			}
-
+			// Excel treats 0 and fractional dates as special dates and require special output.
+			if (ConvertUtil.TryParseDateObjectToOADate(serialNumberCandidate, out double serialNumber) && serialNumber < 1 && serialNumber >= 0)
+				return this.getZeroWeek(returnType);
+			var isValidDate = ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error);
+			if (!isValidDate)
+				return new CompileResult(error.Value);
+			var calendarType = CalendarWeekRule.FirstDay;
+			var startDay = DayOfWeek.Sunday;
+			switch (returnType)
+			{
+				case 1:
+					startDay = DayOfWeek.Sunday;
+					break;
+				case 2:
+					startDay = DayOfWeek.Monday;
+					break;
+				case 11:
+					startDay = DayOfWeek.Monday;
+					break;
+				case 12:
+					startDay = DayOfWeek.Tuesday;
+					break;
+				case 13:
+					startDay = DayOfWeek.Wednesday;
+					break;
+				case 14:
+					startDay = DayOfWeek.Thursday;
+					break;
+				case 15:
+					startDay = DayOfWeek.Friday;
+					break;
+				case 16:
+					startDay = DayOfWeek.Saturday;
+					break;
+				case 17:
+					startDay = DayOfWeek.Sunday;
+					break;
+				case 21:
+					startDay = DayOfWeek.Thursday;
+					calendarType = CalendarWeekRule.FirstFullWeek;
+					break;
+				default:
+					return new CompileResult(eErrorType.Num);
+			}
 			if (DateTimeFormatInfo.CurrentInfo == null)
 			{
 				throw new InvalidOperationException(
 					 "Could not execute Weeknum function because DateTimeFormatInfo.CurrentInfo was null");
 			}
-
 			var week = DateTimeFormatInfo.CurrentInfo.Calendar.GetWeekOfYear(date, calendarType, startDay);
-			if (serialNumberCandidate is int)
-				if (dateSerial == 0)
-					week = 0;
 			return this.CreateResult(week, DataType.Integer);
+		}
+
+		/// <summary>
+		/// This method handles the output for the special case where the OADate given for the
+		/// WEEKNUM function is zero or a fraction.
+		/// </summary>
+		/// <param name="returnType">The value determining on which day the week begins.</param>
+		/// <returns>Returns the <see cref="CompileResult"/> for handling the date-zero case.</returns>
+		private CompileResult getZeroWeek(int returnType)
+		{
+			var zeroWeek = 0;
+			switch (returnType)
+			{
+				case 1:
+				case 17:
+					zeroWeek = 0;
+					break;
+				case 2:
+				case 11:
+				case 12:
+				case 13:
+				case 14:
+				case 15:
+				case 16:
+					zeroWeek = 1;
+					break;
+				case 21:
+					zeroWeek = 52;
+					break;
+				default:
+					 return new CompileResult(eErrorType.Num);
+			}
+			return this.CreateResult(zeroWeek, DataType.Integer);
 		}
 	}
 }

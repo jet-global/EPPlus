@@ -42,7 +42,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 			if (Regex.IsMatch(val, @"^[\d]{1,2}" + timeSeparator + @"[\d]{2}(" + timeSeparator + @"[\d]{2})?$"))
 			{
 				var timeResult = _timeValueFunc.Execute(val);
-				if (timeResult.DataType == DataType.Date)
+				if (timeResult.DataType != DataType.ExcelError)
 				{
 					return timeResult;
 				}

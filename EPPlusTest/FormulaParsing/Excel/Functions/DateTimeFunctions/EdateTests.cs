@@ -150,6 +150,26 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void EdateWithFractionAsFirstParameterReturnsZero()
+		{
+			// Fraction input is a special case and requires special output.
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs(0.5, 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.0, result.Result);
+		}
+
+		[TestMethod]
+		public void EdateWithZeroAsStringAsFirstParameterReturnsZero()
+		{
+			// Zero is a special case and requires special output.
+			var func = new Edate();
+			var args = FunctionsHelper.CreateArgs("0", 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.0, result.Result);
+		}
+
+		[TestMethod]
 		public void EdateWithFractionAsStringAsFirstParameterReturnsZero()
 		{
 			// Fraction input is a special case and requires special output.

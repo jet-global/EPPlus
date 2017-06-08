@@ -152,6 +152,33 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void WorkdayWithFractionInputReturnsCorrectValue()
+		{
+			var function = new Workday();
+			var input = 0.5;
+			var result = function.Execute(FunctionsHelper.CreateArgs(input, 15), this.ParsingContext);
+			Assert.AreEqual(20.00, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithZeroAsStringInputReturnsCorrectValue()
+		{
+			var function = new Workday();
+			var input = "0";
+			var result = function.Execute(FunctionsHelper.CreateArgs(input, 15), this.ParsingContext);
+			Assert.AreEqual(20.00, result.Result);
+		}
+
+		[TestMethod]
+		public void WorkdayWithFractionAsStringInputReturnsCorrectValue()
+		{
+			var function = new Workday();
+			var input = "0.5";
+			var result = function.Execute(FunctionsHelper.CreateArgs(input, 15), this.ParsingContext);
+			Assert.AreEqual(20.00, result.Result);
+		}
+
+		[TestMethod]
 		public void WorkdayWithNullFirstParamReturnsPoundNum()
 		{
 			var function = new Workday();
