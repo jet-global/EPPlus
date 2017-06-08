@@ -74,6 +74,59 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(0.22184875d, (double)ws.Cells["B1"].Value, 0.000001);
 			}
 		}
+
+		[TestMethod]
+		public void Log10WithDateFunctionAsInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "LOG10(DATE(2017,6,5))";
+				ws.Calculate();
+				Assert.AreEqual(4.632366172d, (double)ws.Cells["B1"].Value, 0.000001);
+			}
+		}
+
+		[TestMethod]
+		public void Log10WithDateAsStringInputReturnsCorrectValue()
+		{
+			var function = new Log10();
+			var result = function.Execute(FunctionsHelper.CreateArgs("6/5/2017"), this.ParsingContext);
+			Assert.AreEqual(4.632366172d, (double)result.Result, 0.000001);
+		}
+
+		[TestMethod]
+		public void Log10WithNumericStringInputReturnsCorrectValue()
+		{
+			var function = new Log10();
+			var result = function.Execute(FunctionsHelper.CreateArgs("100"), this.ParsingContext);
+			Assert.AreEqual(2d, result.Result);
+		}
+
+		[TestMethod]
+		public void Log10WithGeneralStringInputReturnsPoundValue()
+		{
+			var function = new Log10();
+			var result = function.Execute(FunctionsHelper.CreateArgs("string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void Log10WithNoArgumentsReturnsPoundValue()
+		{
+			var function = new Log10();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void Log10WithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Log10();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 		#endregion
 	}
 }

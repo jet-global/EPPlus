@@ -184,6 +184,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(0.301029996d, (double)result.Result, 0.000001);
 		}
+
+		[TestMethod]
+		public void LogWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Log();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 		#endregion
 
 	}
