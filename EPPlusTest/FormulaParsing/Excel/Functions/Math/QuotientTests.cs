@@ -145,6 +145,35 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = function.Execute(FunctionsHelper.CreateArgs("10", "5"), this.ParsingContext);
 			Assert.AreEqual(2, result.Result);
 		}
+
+		[TestMethod]
+		public void QuotientShouldReturnCorrectResult()
+		{
+			var func = new Quotient();
+			var args = FunctionsHelper.CreateArgs(5, 2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2, result.Result);
+		}
+
+		[TestMethod]
+		public void QuotientShouldPoundDivZeroWhenDenomIs0()
+		{
+			var func = new Quotient();
+			var args = FunctionsHelper.CreateArgs(1, 0);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)(result.Result)).Type);
+		}
+
+		[TestMethod]
+		public void QuotientWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Quotient();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
 		#endregion
 	}
 }

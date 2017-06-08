@@ -504,53 +504,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void ProductShouldPoundValueWhenThereAreTooFewArguments()
-		{
-			var func = new Product();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void ProductShouldMultiplyArguments()
-		{
-			var func = new Product();
-			var args = FunctionsHelper.CreateArgs(2d, 2d, 4d);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(16d, result.Result);
-		}
-
-		[TestMethod]
-		public void ProductShouldHandleEnumerable()
-		{
-			var func = new Product();
-			var args = FunctionsHelper.CreateArgs(2d, 2d, FunctionsHelper.CreateArgs(4d, 2d));
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(32d, result.Result);
-		}
-
-		[TestMethod]
-		public void ProductShouldIgnoreHiddenValuesIfIgnoreHiddenIsTrue()
-		{
-			var func = new Product();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(2d, 2d, FunctionsHelper.CreateArgs(4d, 2d));
-			args.ElementAt(1).SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(16d, result.Result);
-		}
-
-		[TestMethod]
-		public void ProductShouldHandleFirstItemIsEnumerable()
-		{
-			var func = new Product();
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4d, 2d), 2d, 2d);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(32d, result.Result);
-		}
-
-		[TestMethod]
 		public void VarShouldReturnCorrectResult()
 		{
 			var func = new Var();
@@ -710,35 +663,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void LogShouldReturnCorrectResult()
-		{
-			var func = new Log();
-			var args = FunctionsHelper.CreateArgs(2);
-			var result = func.Execute(args, _parsingContext);
-			var roundedResult = Math.Round((double)result.Result, 9);
-			Assert.AreEqual(0.301029996d, roundedResult);
-		}
-
-		[TestMethod]
-		public void LogShouldReturnCorrectResultWithBase()
-		{
-			var func = new Log();
-			var args = FunctionsHelper.CreateArgs(2, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void Log10ShouldReturnCorrectResult()
-		{
-			var func = new Log10();
-			var args = FunctionsHelper.CreateArgs(2);
-			var result = func.Execute(args, _parsingContext);
-			var roundedResult = Math.Round((double)result.Result, 9);
-			Assert.AreEqual(0.301029996d, roundedResult);
-		}
-
-		[TestMethod]
 		public void LnShouldReturnCorrectResult()
 		{
 			var func = new Ln();
@@ -874,25 +798,6 @@ namespace EPPlusTest.Excel.Functions
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
 			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)(result.Result)).Type);
-		}
-
-		[TestMethod]
-		public void QuotientShouldReturnCorrectResult()
-		{
-			var func = new Quotient();
-			var args = FunctionsHelper.CreateArgs(5, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2, result.Result);
-		}
-
-		[TestMethod]
-		public void QuotientShouldPoundDivZeroWhenDenomIs0()
-		{
-			var func = new Quotient();
-			var args = FunctionsHelper.CreateArgs(1, 0);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
-			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)(result.Result)).Type);
 		}
 
 		[TestMethod]
@@ -1369,26 +1274,6 @@ namespace EPPlusTest.Excel.Functions
 		public void ModWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Mod();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void PowerWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Power();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void QuotientWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Quotient();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);

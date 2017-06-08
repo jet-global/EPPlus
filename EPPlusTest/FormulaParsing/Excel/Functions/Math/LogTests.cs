@@ -35,6 +35,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class LogTests : MathFunctionsTestBase
 	{
+		#region Log Function (Execute) Tests
 		[TestMethod]
 		public void LogWithTwoPositiveIntegersReturnsCorrectValue()
 		{
@@ -156,5 +157,34 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = function.Execute(FunctionsHelper.CreateArgs(10, null), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void LogShouldReturnCorrectResult()
+		{
+			var func = new Log();
+			var args = FunctionsHelper.CreateArgs(2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.301029996d, (double)result.Result, 0.000001);
+		}
+
+		[TestMethod]
+		public void LogShouldReturnCorrectResultWithBase()
+		{
+			var func = new Log();
+			var args = FunctionsHelper.CreateArgs(2, 2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1d, result.Result);
+		}
+
+		[TestMethod]
+		public void Log10ShouldReturnCorrectResult()
+		{
+			var func = new Log10();
+			var args = FunctionsHelper.CreateArgs(2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(0.301029996d, (double)result.Result, 0.000001);
+		}
+		#endregion
+
 	}
 }

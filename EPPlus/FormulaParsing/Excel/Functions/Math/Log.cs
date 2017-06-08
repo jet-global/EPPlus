@@ -55,7 +55,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 			if (arguments.Count() == 1)
 			{
-				return CreateResult(System.Math.Log(number, 10d), DataType.Decimal);
+				return this.CreateResult(System.Math.Log(number, 10d), DataType.Decimal);
 			}
 
 			var baseCandidate = arguments.ElementAt(1).Value;
