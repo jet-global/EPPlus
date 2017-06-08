@@ -1,17 +1,58 @@
-﻿using System.Collections.Generic;
+﻿/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2017 Jan Källman, Matt Delaney, and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+* For code change notes, see the source control history.
+*******************************************************************************/
+using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Converts radians into degrees.
+	/// </summary>
 	public class Degrees : ExcelFunction
 	{
+		/// <summary>
+		/// Returns the value in degrees of the given radian value.
+		/// </summary>
+		/// <param name="arguments">The radian value.</param>
+		/// <param name="context">Unused in the method.</param>
+		/// <returns>Returns the given radian value converted to degrees.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var angle = ArgToDecimal(arguments, 0);
+			var angleObj = arguments.ElementAt(0).Value;
+			// The method TryParseDateObjectToOADate attempts to parse the given object as a double.
+			// That double is only used as an OADate if the given object represented a date.
+			if (!ConvertUtil.TryParseDateObjectToOADate(angleObj, out double angle))
+				return new CompileResult(eErrorType.Value);
 			var result = (angle * 180) / System.Math.PI;
-			return CreateResult(result, DataType.Decimal);
+			return this.CreateResult(result, DataType.Decimal);
 		}
 	}
 }
