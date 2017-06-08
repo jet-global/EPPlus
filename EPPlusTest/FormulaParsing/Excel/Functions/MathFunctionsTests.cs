@@ -1211,26 +1211,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void LogWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Log();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void Log10WithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Log10();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
 		public void MaxWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Max();
