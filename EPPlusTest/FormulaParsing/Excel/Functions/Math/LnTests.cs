@@ -168,6 +168,24 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(234d, ws.Cells["B1"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void LnShouldReturnCorrectResult()
+		{
+			var func = new Ln();
+			var args = FunctionsHelper.CreateArgs(5);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1.60944d, (double)result.Result, 0.00001);
+		}
+
+		[TestMethod]
+		public void LnWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Ln();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 		#endregion
 	}
 }

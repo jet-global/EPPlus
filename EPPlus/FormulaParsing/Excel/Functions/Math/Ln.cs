@@ -25,18 +25,39 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class contains the formula for calculating the natural log of a given input.
+	/// </summary>
 	public class Ln : ExcelFunction
 	{
+		/// <summary>
+		/// Takes the natural log of the user specified argument. 
+		/// </summary>
+		/// <param name="arguments">The user specified argument to take the natural log of.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The natural log of the given input.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var arg = ArgToDecimal(arguments, 0);
-			return CreateResult(System.Math.Log(arg, System.Math.E), DataType.Decimal);
+			var numberCandidate = arguments.ElementAt(0).Value;
+
+			if (arguments.ElementAt(0).ValueIsExcelError)
+				return new CompileResult(eErrorType.Num);
+	
+			if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
+				if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
+					return new CompileResult(eErrorType.Value);
+			var number = this.ArgToDecimal(arguments, 0);
+			if (number <= 0)
+				return new CompileResult(eErrorType.Num);
+			return this.CreateResult(System.Math.Log(number, System.Math.E), DataType.Decimal);
 		}
 	}
 }
