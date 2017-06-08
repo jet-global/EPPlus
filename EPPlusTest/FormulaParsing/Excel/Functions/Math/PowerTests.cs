@@ -227,6 +227,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void PowerWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Power();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 		#endregion
 	}
 }
