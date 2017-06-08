@@ -25,21 +25,49 @@
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class contains the formula for calculating standard logarithms.
+	/// </summary>
 	public class Log : ExcelFunction
 	{
+		/// <summary>
+		/// Takes two arguments and computes the logarithm of the first argument with the second argument as the base. 
+		/// </summary>
+		/// <param name="arguments">The user specified arguments, with the first being the number and the second the base.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The log of the first argument with the second argument as the base.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
+
+			var numberCandidate = arguments.ElementAt(0).Value;
+			if (numberCandidate == null)
+				return new CompileResult(eErrorType.Num);
+			if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
+				if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
+					return new CompileResult(eErrorType.Value);
 			var number = ArgToDecimal(arguments, 0);
+
 			if (arguments.Count() == 1)
 			{
 				return CreateResult(System.Math.Log(number, 10d), DataType.Decimal);
 			}
+
+			var baseCandidate = arguments.ElementAt(1).Value;
+			if (baseCandidate == null)
+				return new CompileResult(eErrorType.Num);
+			if (!ConvertUtil.TryParseNumericString(baseCandidate, out _))
+				if (!ConvertUtil.TryParseDateString(baseCandidate, out _))
+					return new CompileResult(eErrorType.Value);
+
 			var newBase = ArgToDecimal(arguments, 1);
+			if (number < 0 || newBase < 0)
+				return new CompileResult(eErrorType.Num);
 			return CreateResult(System.Math.Log(number, newBase), DataType.Decimal);
 		}
 	}

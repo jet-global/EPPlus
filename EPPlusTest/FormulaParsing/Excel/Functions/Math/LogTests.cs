@@ -35,6 +35,126 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class LogTests : MathFunctionsTestBase
 	{
+		[TestMethod]
+		public void LogWithTwoPositiveIntegersReturnsCorrectValue()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs(4, 2), this.ParsingContext);
+			Assert.AreEqual(2d, result.Result);
+		}
 
+		[TestMethod]
+		public void LogWithNegativeIntegerAsSecondArgumentReturnsPoundNum()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs(4, -2), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LogWithNegativeIntegerAsFirstArugmentReturnsPoundNum()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-4, 2), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LogWithNegativeIntegersReturnsPoundNum()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-4, -2), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LogWithDoublesReturnsCorrectValue()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs(6.5, 1.3), this.ParsingContext);
+			Assert.AreEqual(7.134364052d, (double)result.Result, 0.000001);
+		}
+
+		[TestMethod]
+		public void LogWithFractionsInExcelWorksheetReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "LOG((1/15),(1/5))";
+				ws.Calculate();
+				Assert.AreEqual(1.682606194d, (double)ws.Cells["B1"].Value, 0.000001);
+			}
+		}
+
+		[TestMethod]
+		public void LogWithDateFunctionArgumentsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "LOG(DATE(2017,5,1), DATE(2017,6,15))";
+				ws.Calculate();
+				Assert.AreEqual(0.999901611d, (double)ws.Cells["B1"].Value, 0.000001);
+			}
+		}
+
+		[TestMethod]
+		public void LogWithDateAsStringInputReturnsCorrectValue()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs("5/1/2017", "6/15/2017"), this.ParsingContext);
+			Assert.AreEqual(0.999901611d, (double)result.Result, 0.0000001);
+		}
+
+		[TestMethod]
+		public void LogWithNumericStringsReturnsCorrectValue()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs("4", "2"), this.ParsingContext);
+			Assert.AreEqual(2d, result.Result);
+		}
+
+		[TestMethod]
+		public void LogWithGeneralStringAsArgumentReturnsCorrectValue()
+		{
+			var function = new Log();
+			var resultWithStringFirstArg = function.Execute(FunctionsHelper.CreateArgs("string", 4), this.ParsingContext);
+			var resultWithStringSecondArg = function.Execute(FunctionsHelper.CreateArgs(4, "string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)resultWithStringFirstArg.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)resultWithStringSecondArg.Result).Type);
+		}
+
+		[TestMethod]
+		public void LogWithNoBaseArgumentReturnsCorrectValue()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs(10), this.ParsingContext);
+			Assert.AreEqual(1d, result.Result);
+		}
+
+		[TestMethod]
+		public void LogWithNoArgumentsReturnsPoundValue()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LogWithNullFirstArgumentRetursnPoundNum()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs(null, 4), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LogWithNullSecondArgumentReturnsPoundNum()
+		{
+			var function = new Log();
+			var result = function.Execute(FunctionsHelper.CreateArgs(10, null), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
 	}
 }
