@@ -52,7 +52,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The log of the argument with a base of 10.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var numberCandidate = arguments.ElementAt(0).Value;
 
@@ -60,10 +60,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
 					return new CompileResult(eErrorType.Value);
 
-			var number = ArgToDecimal(arguments, 0);
+			var number = this.ArgToDecimal(arguments, 0);
 			if (number < 0)
 				return new CompileResult(eErrorType.Num);
-			return CreateResult(System.Math.Log10(number), DataType.Decimal);
+			return this.CreateResult(System.Math.Log10(number), DataType.Decimal);
 		}
 	}
 }
