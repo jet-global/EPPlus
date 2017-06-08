@@ -155,6 +155,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				ws.Calculate();
 				Assert.AreEqual(1d, ws.Cells["B1"].Value);
 			}
+
+			var function = new Ln();
+			var result = function.Execute(FunctionsHelper.CreateArgs(System.Math.E), this.ParsingContext);
+			Assert.AreEqual(1d, result.Result);
 		}
 
 		[TestMethod]

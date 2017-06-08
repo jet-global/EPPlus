@@ -47,13 +47,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var numberCandidate = arguments.ElementAt(0).Value;
-
+		
 			if (arguments.ElementAt(0).ValueIsExcelError)
 				return new CompileResult(eErrorType.Num);
-	
 			if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
 				if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
 					return new CompileResult(eErrorType.Value);
+
 			var number = this.ArgToDecimal(arguments, 0);
 			if (number <= 0)
 				return new CompileResult(eErrorType.Num);
