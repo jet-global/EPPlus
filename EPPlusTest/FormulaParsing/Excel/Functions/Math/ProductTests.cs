@@ -29,6 +29,8 @@ using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml;
+using System.Linq;
+using OfficeOpenXml.FormulaParsing.Excel;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
@@ -236,6 +238,53 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				ws.Calculate();
 				Assert.AreEqual(System.Math.Pow(2, 255), ws.Cells["C1"].Value);
 			}
+		}
+
+		[TestMethod]
+		public void ProductShouldPoundValueWhenThereAreTooFewArguments()
+		{
+			var func = new Product();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void ProductShouldMultiplyArguments()
+		{
+			var func = new Product();
+			var args = FunctionsHelper.CreateArgs(2d, 2d, 4d);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(16d, result.Result);
+		}
+
+		[TestMethod]
+		public void ProductShouldHandleEnumerable()
+		{
+			var func = new Product();
+			var args = FunctionsHelper.CreateArgs(2d, 2d, FunctionsHelper.CreateArgs(4d, 2d));
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(32d, result.Result);
+		}
+
+		[TestMethod]
+		public void ProductShouldIgnoreHiddenValuesIfIgnoreHiddenIsTrue()
+		{
+			var func = new Product();
+			func.IgnoreHiddenValues = true;
+			var args = FunctionsHelper.CreateArgs(2d, 2d, FunctionsHelper.CreateArgs(4d, 2d));
+			args.ElementAt(1).SetExcelStateFlag(ExcelCellState.HiddenCell);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(16d, result.Result);
+		}
+
+		[TestMethod]
+		public void ProductShouldHandleFirstItemIsEnumerable()
+		{
+			var func = new Product();
+			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4d, 2d), 2d, 2d);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(32d, result.Result);
 		}
 		#endregion
 	}
