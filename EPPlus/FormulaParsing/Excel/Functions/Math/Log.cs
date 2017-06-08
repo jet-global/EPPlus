@@ -42,7 +42,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The log of the first argument with the second argument as the base.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 
 			var numberCandidate = arguments.ElementAt(0).Value;
@@ -51,7 +51,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
 				if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
 					return new CompileResult(eErrorType.Value);
-			var number = ArgToDecimal(arguments, 0);
+			var number = this.ArgToDecimal(arguments, 0);
 
 			if (arguments.Count() == 1)
 			{
@@ -65,10 +65,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				if (!ConvertUtil.TryParseDateString(baseCandidate, out _))
 					return new CompileResult(eErrorType.Value);
 
-			var newBase = ArgToDecimal(arguments, 1);
+			var newBase = this.ArgToDecimal(arguments, 1);
 			if (number < 0 || newBase < 0)
 				return new CompileResult(eErrorType.Num);
-			return CreateResult(System.Math.Log(number, newBase), DataType.Decimal);
+			return this.CreateResult(System.Math.Log(number, newBase), DataType.Decimal);
 		}
 	}
 }
