@@ -46,6 +46,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(eErrorType.Value);
 
 			var numberCandidate = arguments.ElementAt(0).Value;
+			if (arguments.ElementAt(0).ValueIsExcelError)
+				return new CompileResult(eErrorType.Num);
 			if (numberCandidate == null)
 				return new CompileResult(eErrorType.Num);
 			if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
@@ -55,10 +57,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 			if (arguments.Count() == 1)
 			{
+				if (number <= 0)
+					return new CompileResult(eErrorType.Num);
 				return this.CreateResult(System.Math.Log(number, 10d), DataType.Decimal);
 			}
 
 			var baseCandidate = arguments.ElementAt(1).Value;
+			if (arguments.ElementAt(1).ValueIsExcelError)
+				return new CompileResult(eErrorType.Num);
 			if (baseCandidate == null)
 				return new CompileResult(eErrorType.Num);
 			if (!ConvertUtil.TryParseNumericString(baseCandidate, out _))
@@ -66,7 +72,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return new CompileResult(eErrorType.Value);
 
 			var newBase = this.ArgToDecimal(arguments, 1);
-			if (number < 0 || newBase < 0)
+			if (number <= 0 || newBase <= 0)
 				return new CompileResult(eErrorType.Num);
 			return this.CreateResult(System.Math.Log(number, newBase), DataType.Decimal);
 		}
