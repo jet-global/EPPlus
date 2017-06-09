@@ -24,7 +24,6 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
@@ -171,6 +170,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				ws.Calculate();
 				Assert.AreEqual(234d, ws.Cells["B1"].Value);
 			}
+
+			var function = new Ln();
+			var result = function.Execute(FunctionsHelper.CreateArgs(System.Math.Pow(System.Math.E, 234)), this.ParsingContext);
+			Assert.AreEqual(234d, result.Result);
 		}
 
 		[TestMethod]
