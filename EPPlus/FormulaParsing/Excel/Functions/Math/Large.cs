@@ -27,16 +27,30 @@
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class calculates the nth largest number in a list of numbers.
+	/// </summary>
 	public class Large : ExcelFunction
 	{
+		/// <summary>
+		/// Returns the nth largest number in a list based on user input.
+		/// </summary>
+		/// <param name="arguments">The user specified list and largest number to look up.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The nth largest number as a decimal based on user input.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 2) == false)
+			if (this.ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
 			var args = arguments.ElementAt(0);
+			if(args.Value is string)
+				if (!ConvertUtil.TryParseNumericString(args.Value, out _))
+					if(!ConvertUtil.TryParseDateString(args.Value, out _))
+						return new CompileResult(eErrorType.Value);
 			var index = ArgToInt(arguments, 1) - 1;
 			var values = ArgsToDoubleEnumerable(new List<FunctionArgument> { args }, context);
 			if (index < 0 || index >= values.Count())

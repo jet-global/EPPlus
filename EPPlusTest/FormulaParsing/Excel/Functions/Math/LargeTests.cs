@@ -117,6 +117,21 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void LargeWithSecondInputAsStringReturnsPoundValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["A2"].Value = 6;
+				ws.Cells["A3"].Value = 67;
+				ws.Cells["A4"].Value = 44;
+				ws.Cells["B1"].Formula = "LARGE(A2:A4,\"string\")";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+			}
+		}
+
+		[TestMethod]
 		public void LargeWithArrayOfStringsReturnsPoundNum()
 		{
 			using (var package = new ExcelPackage())
@@ -144,6 +159,65 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				ws.Calculate();
 				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
 			}
+		}
+
+		[TestMethod]
+		public void LargeWithGeneralStringInputsReturnsPoundValue()
+		{
+			var function = new Large();
+			var result = function.Execute(FunctionsHelper.CreateArgs("string", "string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LargeWithDatesFromDateFunctionInputsReturnsPoundNum()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "LARGE(DATE(2017,6,15), DATE(2017,6,20))";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void LargeWithSecondInputAsDateFromDateFunctionReturnsPoundNum()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["A2"].Value = 56;
+				ws.Cells["A3"].Value = 34;
+				ws.Cells["A4"].Value = 3;
+				ws.Cells["B1"].Formula = "LARGE(A2:A4, DATE(2017,6,15))";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void LargeWithNoInputsReturnsPoundValue()
+		{
+			var function = new Large();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LargeWithDatesAsStringsInputsReturnsPoundNum()
+		{
+			var function = new Large();
+			var result = function.Execute(FunctionsHelper.CreateArgs("5/15/2017", 6), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void LargeWithNumericStringInputReturnsPoundNum()
+		{
+			var function = new Large();
+			var result = function.Execute(FunctionsHelper.CreateArgs("3", "56"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
 	}
