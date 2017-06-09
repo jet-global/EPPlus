@@ -3276,6 +3276,30 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void InsertRowUpdatesPivotTableSourceRangeCrossSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
+				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet1.InsertRow(1, 1);
+
+				Assert.AreEqual("'sheet1'!C4:D5", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet2.InsertRow(1, 1);
+
+				Assert.AreEqual("'sheet1'!C4:D5", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E6:E8", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+
+		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
 		public void InsertRowUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
 		{
@@ -3442,6 +3466,30 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void InsertColumnUpdatesPivotTableSourceRangeCrossSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
+				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet1.InsertColumn(1, 1);
+
+				Assert.AreEqual("'sheet1'!D3:E4", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet2.InsertColumn(1, 1);
+
+				Assert.AreEqual("'sheet1'!D3:E4", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!F5:F7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+
+		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
 		public void InsertColumnUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
 		{
@@ -3509,6 +3557,46 @@ namespace EPPlusTest
 
 		#region DeleteRow Tests
 		[TestMethod]
+		public void DeleteRowUpdatesCrossSheetFunctions()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+
+				sheet1.Cells["C3"].Formula = "SUM(sheet2!C3:C5)";
+
+				sheet2.DeleteRow(4, 1);
+
+				Assert.AreEqual("SUM('SHEET2'!C3:C4)", sheet1.Cells["C3"].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowUpdatesPivotTableSourceRangeCrossSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
+				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet1.DeleteRow(1, 1);
+
+				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet2.DeleteRow(1, 1);
+
+				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E4:E6", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+
+		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
 		public void DeleteRowUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
 		{
@@ -3550,6 +3638,46 @@ namespace EPPlusTest
 		#endregion
 
 		#region DeleteColumn Tests
+		[TestMethod]
+		public void DeleteColumnUpdatesCrossSheetFunctions()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+
+				sheet1.Cells["C3"].Formula = "SUM(sheet2!C3:E3)";
+
+				sheet2.DeleteColumn(4, 1);
+
+				Assert.AreEqual("SUM('SHEET2'!C3:D3)", sheet1.Cells["C3"].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnUpdatesPivotTableSourceRangeCrossSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
+				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet1.DeleteColumn(1, 1);
+
+				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet2.DeleteColumn(1, 1);
+
+				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!D5:D7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
 		public void DeleteColumnUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
