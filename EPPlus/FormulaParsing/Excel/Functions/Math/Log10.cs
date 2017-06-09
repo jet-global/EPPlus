@@ -56,12 +56,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(eErrorType.Value);
 			var numberCandidate = arguments.ElementAt(0).Value;
 
+			if (arguments.ElementAt(0).ValueIsExcelError)
+				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
+		
 			if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
 				if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
 					return new CompileResult(eErrorType.Value);
 
 			var number = this.ArgToDecimal(arguments, 0);
-			if (number < 0)
+			if (number <= 0)
 				return new CompileResult(eErrorType.Num);
 			return this.CreateResult(System.Math.Log10(number), DataType.Decimal);
 		}

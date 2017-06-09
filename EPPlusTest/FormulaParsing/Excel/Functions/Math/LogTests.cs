@@ -193,6 +193,28 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void LogWithZeroInputReturnsPoundNum()
+		{
+			var function = new Log();
+			var resultWithOneInput = function.Execute(FunctionsHelper.CreateArgs(0), this.ParsingContext);
+			var resultWithTwoInputs = function.Execute(FunctionsHelper.CreateArgs(0, 0), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)resultWithOneInput.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)resultWithTwoInputs.Result).Type);	
+		}
+
+		[TestMethod]
+		public void LogWithNonRealInputReturnsPoundNum()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "LOG(SQRT(-1))";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+			}
+		}
 		#endregion
 
 	}

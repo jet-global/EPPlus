@@ -127,6 +127,26 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void Log10WithZeroReturnsPoundNum()
+		{
+			var function = new Log10();
+			var result = function.Execute(FunctionsHelper.CreateArgs(0), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void Log10WithNonRealInputReturnsPoundNum()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "LOG10(SQRT(-1))";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+			}
+		}
 		#endregion
 	}
 }
