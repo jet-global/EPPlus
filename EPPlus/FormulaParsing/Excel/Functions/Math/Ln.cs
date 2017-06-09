@@ -37,11 +37,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	public class Ln : ExcelFunction
 	{
 		/// <summary>
-		/// Takes the natural log of the user specified argument. 
+		/// Takes the natural log of a user specified argument. 
 		/// </summary>
 		/// <param name="arguments">The user specified argument to take the natural log of.</param>
 		/// <param name="context">Not used, but needed to override the method.</param>
-		/// <returns>The natural log of the given input.</returns>
+		/// <returns>The natural log of the given input as a double value.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
@@ -49,7 +49,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var numberCandidate = arguments.ElementAt(0).Value;
 		
 			if (arguments.ElementAt(0).ValueIsExcelError)
-				return new CompileResult(eErrorType.Num);
+				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
 			if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
 				if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
 					return new CompileResult(eErrorType.Value);

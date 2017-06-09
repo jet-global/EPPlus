@@ -47,7 +47,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 			var numberCandidate = arguments.ElementAt(0).Value;
 			if (arguments.ElementAt(0).ValueIsExcelError)
-				return new CompileResult(eErrorType.Num);
+				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
 			if (numberCandidate == null)
 				return new CompileResult(eErrorType.Num);
 			if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
@@ -64,7 +64,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 			var baseCandidate = arguments.ElementAt(1).Value;
 			if (arguments.ElementAt(1).ValueIsExcelError)
-				return new CompileResult(eErrorType.Num);
+				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
 			if (baseCandidate == null)
 				return new CompileResult(eErrorType.Num);
 			if (!ConvertUtil.TryParseNumericString(baseCandidate, out _))

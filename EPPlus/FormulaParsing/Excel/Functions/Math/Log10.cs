@@ -57,7 +57,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var numberCandidate = arguments.ElementAt(0).Value;
 
 			if (arguments.ElementAt(0).ValueIsExcelError)
-				return new CompileResult(eErrorType.Num);
+				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
 		
 			if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
 				if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
