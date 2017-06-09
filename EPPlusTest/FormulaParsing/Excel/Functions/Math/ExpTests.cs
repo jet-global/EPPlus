@@ -55,21 +55,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void ExpWithValueNearMaxValidValueReturnsCorrectResult()
-		{
-			var func = new Exp();
-			var args = FunctionsHelper.CreateArgs(709);
-			var result = func.Execute(args, this.ParsingContext);
-			var expectedValue = 8.21840746155497 * System.Math.Pow(10, 307);
-			var actualValue = (double)result.Result / System.Math.Pow(10, 307);
-			var roundedResult = System.Math.Round(actualValue, 14);
-			roundedResult = roundedResult * System.Math.Pow(10, 307);
-			//actualValue = System.Math.Truncate(actualValue);
-			//Assert.AreEqual(821840746155497, actualValue);
-			Assert.AreEqual(expectedValue, roundedResult);
-		}
-
-		[TestMethod]
 		public void ExpWithPositiveIntegerReturnsCorrectResult()
 		{
 			var func = new Exp();
@@ -206,16 +191,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var resultDiv0 = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)resultDiv0.Result).Type);
 		}
-
-		//[TestMethod]
-		//public void Exp()
-		//{
-		//	var func = new Exp();
-		//	var args = FunctionsHelper.CreateArgs();
-		//	var result = func.Execute(args, this.ParsingContext);
-		//	var roundedResult = System.Math.Round((double)result.Result, );
-		//	Assert.AreEqual(, result.Result);
-		//}
 		#endregion
 	}
 }
