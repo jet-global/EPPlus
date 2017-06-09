@@ -53,6 +53,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			}
 			catch// (Exception e)
 			{
+				
 				throw new ExcelErrorValueException(ExcelErrorValue.Create(eErrorType.Value));
 			}
 		}
