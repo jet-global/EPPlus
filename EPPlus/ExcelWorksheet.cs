@@ -1415,8 +1415,10 @@ namespace OfficeOpenXml
 				}
 				foreach (var ptbl in PivotTables)
 				{
-					ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
-					ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
+					if (rowFrom <= ptbl.Address.End.Row)
+						ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
+					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
+						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
 				}
 			}
 			this.UpdateCharts(rows, 0, rowFrom, 0);
@@ -1599,17 +1601,9 @@ namespace OfficeOpenXml
 			foreach (var ptbl in PivotTables)
 			{
 				if (columnFrom <= ptbl.Address.End.Column)
-				{
 					ptbl.Address = ptbl.Address.AddColumn(columnFrom, columns);
-				}
-				if (columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
-				{
-					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet)
-					{
-						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
-					}
-				}
-
+				if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
+					ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
 			}
 			this.UpdateCharts(0, columns, 0, columnFrom);
 			// Update cross-sheet references.
@@ -1661,10 +1655,10 @@ namespace OfficeOpenXml
 				}
 				foreach (var ptbl in PivotTables)
 				{
-					if (ptbl.Address.Start.Row > rowFrom + rows)
-					{
+					if (rowFrom <= ptbl.Address.End.Row)
 						ptbl.Address = ptbl.Address.DeleteRow(rowFrom, rows);
-					}
+					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
+						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows).Address;
 				}
 			}
 		}
@@ -1750,18 +1744,13 @@ namespace OfficeOpenXml
 					}
 
 					tbl.Address = tbl.Address.DeleteColumn(columnFrom, columns);
-
-					foreach (var ptbl in PivotTables)
-					{
-						if (ptbl.Address.Start.Column > columnFrom + columns)
-						{
-							ptbl.Address = ptbl.Address.DeleteColumn(columnFrom, columns);
-						}
-						if (ptbl.CacheDefinition.SourceRange.Start.Column > columnFrom + columns)
-						{
-							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns).Address;
-						}
-					}
+				}
+				foreach (var ptbl in PivotTables)
+				{
+					if (columnFrom <= ptbl.Address.End.Column)
+						ptbl.Address = ptbl.Address.DeleteColumn(columnFrom, columns);
+					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
+						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns).Address;
 				}
 			}
 		}

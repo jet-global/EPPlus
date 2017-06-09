@@ -3275,6 +3275,45 @@ namespace EPPlusTest
 			}
 		}
 
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void InsertRowUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("I10:K27", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("C3:C5", pivotTable.CacheDefinition.SourceRange.Address);
+
+				worksheet.InsertRow(1, 1);
+
+				Assert.AreEqual("I11:K28", pivotTable.Address.Address);
+				Assert.AreEqual("C4:C6", pivotTable.CacheDefinition.SourceRange.Address);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeExternal.xlsx")]
+		public void InsertRowUpdatesPivotTableSourceRangeHandlesExternalDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeExternal.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("G6:I23", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.External, pivotTable.CacheDefinition.CacheSource);
+
+				worksheet.InsertRow(1, 1);
+
+				Assert.AreEqual("G7:I24", pivotTable.Address.Address);
+			}
+		}
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
@@ -3403,6 +3442,46 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void InsertColumnUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("I10:K27", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("C3:C5", pivotTable.CacheDefinition.SourceRange.Address);
+
+				worksheet.InsertColumn(1, 1);
+
+				Assert.AreEqual("J10:L27", pivotTable.Address.Address);
+				Assert.AreEqual("D3:D5", pivotTable.CacheDefinition.SourceRange.Address);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeExternal.xlsx")]
+		public void InsertColumnUpdatesPivotTableSourceRangeHandlesExternalDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeExternal.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("G6:I23", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.External, pivotTable.CacheDefinition.CacheSource);
+
+				worksheet.InsertColumn(1, 1);
+
+				Assert.AreEqual("H6:J23", pivotTable.Address.Address);
+			}
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void InsertColumnsTooManyTotalColumnsThrowsException()
 		{
@@ -3424,6 +3503,90 @@ namespace EPPlusTest
 				sheet.Cells[1, 1].Value = "Not close to the end of the worksheet";
 				sheet.Cells[2, ExcelPackage.MaxColumns - 1].Formula = "3 + 4";
 				sheet.InsertColumn(2, 2);
+			}
+		}
+		#endregion
+
+		#region DeleteRow Tests
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void DeleteRowUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("I10:K27", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("C3:C5", pivotTable.CacheDefinition.SourceRange.Address);
+
+				worksheet.DeleteRow(1, 1);
+
+				Assert.AreEqual("I9:K26", pivotTable.Address.Address);
+				Assert.AreEqual("C2:C4", pivotTable.CacheDefinition.SourceRange.Address);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeExternal.xlsx")]
+		public void DeleteRowUpdatesPivotTableSourceRangeHandlesExternalDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeExternal.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("G6:I23", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.External, pivotTable.CacheDefinition.CacheSource);
+
+				worksheet.DeleteRow(1, 1);
+
+				Assert.AreEqual("G5:I22", pivotTable.Address.Address);
+			}
+		}
+		#endregion
+
+		#region DeleteColumn Tests
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void DeleteColumnUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("I10:K27", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("C3:C5", pivotTable.CacheDefinition.SourceRange.Address);
+
+				worksheet.DeleteColumn(1, 1);
+
+				Assert.AreEqual("H10:J27", pivotTable.Address.Address);
+				Assert.AreEqual("B3:B5", pivotTable.CacheDefinition.SourceRange.Address);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeExternal.xlsx")]
+		public void DeleteColumnUpdatesPivotTableSourceRangeHandlesExternalDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeExternal.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("G6:I23", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.External, pivotTable.CacheDefinition.CacheSource);
+
+				worksheet.DeleteColumn(1, 1);
+
+				Assert.AreEqual("F6:H23", pivotTable.Address.Address);
 			}
 		}
 		#endregion
