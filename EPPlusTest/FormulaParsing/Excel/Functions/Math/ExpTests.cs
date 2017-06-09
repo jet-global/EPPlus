@@ -24,7 +24,6 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
@@ -71,22 +70,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void ExpWithValueOverMaxValidValueReturnsPoundNum()
-		{
-			var func = new Exp();
-			var args = FunctionsHelper.CreateArgs(710);
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
 		public void ExpWithPositiveIntegerReturnsCorrectResult()
 		{
 			var func = new Exp();
 			var args = FunctionsHelper.CreateArgs(1);
 			var result = func.Execute(args, this.ParsingContext);
-			var roundedResult = System.Math.Round((double)result.Result, 14);
-			Assert.AreEqual(2.71828182845905, roundedResult);
+			var roundedResult = System.Math.Round((double)result.Result, 13);
+			Assert.AreEqual(2.718281828459, roundedResult);
 		}
 
 		[TestMethod]
@@ -105,7 +95,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var func = new Exp();
 			var args = FunctionsHelper.CreateArgs(0);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.0, result.Result);
+			Assert.AreEqual(1.0, result.Result);
 		}
 
 		[TestMethod]
@@ -115,7 +105,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var args = FunctionsHelper.CreateArgs(-1);
 			var result = func.Execute(args, this.ParsingContext);
 			var roundedResult = System.Math.Round((double)result.Result, 15);
-			Assert.AreEqual(0.3678979441171442, roundedResult);
+			Assert.AreEqual(0.367879441171442, roundedResult);
 		}
 
 		[TestMethod]
@@ -134,8 +124,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var func = new Exp();
 			var args = FunctionsHelper.CreateArgs("1");
 			var result = func.Execute(args, this.ParsingContext);
-			var roundedResult = System.Math.Round((double)result.Result, 14);
-			Assert.AreEqual(2.71828182845905, roundedResult);
+			var roundedResult = System.Math.Round((double)result.Result, 13);
+			Assert.AreEqual(2.718281828459, roundedResult);
 		}
 
 		[TestMethod]
@@ -154,7 +144,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var func = new Exp();
 			var args = FunctionsHelper.CreateArgs("0");
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(0.0, result.Result);
+			Assert.AreEqual(1.0, result.Result);
 		}
 
 		[TestMethod]
@@ -203,6 +193,18 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = func.Execute(args, this.ParsingContext);
 			var expectedValue = 3.10429793570192 * System.Math.Pow(10, 26);
 			Assert.AreEqual(expectedValue, result.Result);
+		}
+
+		[TestMethod]
+		public void ExpWithErrorValueInputReturnsThatErrorValue()
+		{
+			var func = new Exp();
+			var args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA));
+			var resultNA = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)resultNA.Result).Type);
+			args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0));
+			var resultDiv0 = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)resultDiv0.Result).Type);
 		}
 
 		//[TestMethod]
