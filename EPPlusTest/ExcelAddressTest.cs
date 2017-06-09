@@ -206,12 +206,13 @@ namespace EPPlusTest
 		}
 		#endregion
 
-		#region AddRow Tests some other thing
+		#region AddRow Tests
 		[TestMethod]
 		public void AddRowBeforeFromRow()
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.AddRow(2, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(6, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(8, newAddress.End.Row);
@@ -223,6 +224,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.AddRow(4, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(8, newAddress.End.Row);
@@ -234,6 +236,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.AddRow(6, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -245,6 +248,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddRow(2, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(6, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(8, newAddress.End.Row);
@@ -256,6 +260,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddRow(4, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(8, newAddress.End.Row);
@@ -267,6 +272,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddRow(6, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -278,6 +284,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddRow(2, 3, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -289,6 +296,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddRow(4, 3, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -300,6 +308,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddRow(4, 3, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -601,6 +610,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.DeleteRow(6, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -612,6 +622,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.DeleteRow(1, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(1, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(3, newAddress.End.Row);
@@ -631,6 +642,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.DeleteRow(2, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(2, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(3, newAddress.End.Row);
@@ -642,6 +654,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.DeleteRow(4, 1);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(4, newAddress.End.Row);
@@ -653,6 +666,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.DeleteRow(4, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(3, newAddress.End.Row);
@@ -664,6 +678,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteRow(6, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -675,6 +690,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteRow(1, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(1, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(3, newAddress.End.Row);
@@ -694,6 +710,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteRow(2, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(2, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(3, newAddress.End.Row);
@@ -705,6 +722,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteRow(4, 1);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(4, newAddress.End.Row);
@@ -716,6 +734,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteRow(4, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(3, newAddress.End.Row);
@@ -727,6 +746,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteRow(6, 3, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -738,6 +758,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteRow(1, 2, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -757,6 +778,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteRow(2, 2, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(2, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -768,6 +790,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteRow(4, 1, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -779,6 +802,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteRow(4, 2, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -792,6 +816,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.AddColumn(6, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -803,6 +828,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.AddColumn(2, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(6, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -814,6 +840,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.AddColumn(4, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -825,6 +852,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddColumn(6, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -836,6 +864,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddColumn(2, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(6, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -847,6 +876,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddColumn(4, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -858,6 +888,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddColumn(6, 3, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -869,6 +900,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddColumn(2, 3, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -880,6 +912,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddColumn(4, 3, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -893,6 +926,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.DeleteColumn(6, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -904,6 +938,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.DeleteColumn(1, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(1, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -923,6 +958,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.DeleteColumn(2, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(2, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -934,6 +970,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.DeleteColumn(4, 1);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -945,6 +982,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5);
 			var newAddress = excelAddress.DeleteColumn(4, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -956,6 +994,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteColumn(6, 3);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -967,6 +1006,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteColumn(1, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(1, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -986,6 +1026,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteColumn(2, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(2, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -997,6 +1038,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteColumn(4, 1);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -1008,6 +1050,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteColumn(4, 2);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -1019,6 +1062,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteColumn(6, 3, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -1030,6 +1074,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteColumn(1, 2, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -1049,6 +1094,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteColumn(2, 2, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(2, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -1060,6 +1106,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteColumn(4, 1, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
@@ -1071,6 +1118,7 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.DeleteColumn(4, 2, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
