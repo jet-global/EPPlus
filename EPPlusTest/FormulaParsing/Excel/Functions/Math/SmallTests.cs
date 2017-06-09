@@ -144,7 +144,79 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			}
 		}
 
+		[TestMethod]
+		public void SmallWithNumericStringArrayReturnsPoundNum()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["A2"].Value = "2";
+				ws.Cells["A3"].Value = "34";
+				ws.Cells["A4"].Value = "89";
+				ws.Cells["B1"].Formula = "SMALL(A2:A4, 2)";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+			}
+		}
 
+		[TestMethod]
+		public void SmallWithStringInputsReturnsPoundValue()
+		{
+			var function = new Small();
+			var result = function.Execute(FunctionsHelper.CreateArgs("string", "string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, result.Result);
+		}
+
+		[TestMethod]
+		public void SmallWithDateFunctionInputsReturnsPoundNum()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["B1"].Formula = "SMALL(DATE(2017,6,15), DATE(2017,6,20))";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void SmallWithNoInputsReturnsPoundValue()
+		{
+			var function = new Small();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SmallWithDateFunctionInputAsSecondInputReturnsPoundNum()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				ws.Cells["A2"].Value = "2";
+				ws.Cells["A3"].Value = "34";
+				ws.Cells["A4"].Value = "89";
+				ws.Cells["B1"].Formula = "SMALL(A2:A4, DATE(2017,6,15))";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void SmallWithDateAsStringInputReturnsPoundNum()
+		{
+			var function = new Small();
+			var result = function.Execute(FunctionsHelper.CreateArgs("5/5/2017", "6/1/2017"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SmallWithNumericStringInputReturnsPoundNum()
+		{
+			var function = new Small();
+			var result = function.Execute(FunctionsHelper.CreateArgs("5", "56"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
 	}
 		#endregion
 }
