@@ -51,12 +51,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				if (!ConvertUtil.TryParseNumericString(args.Value, out _))
 					if(!ConvertUtil.TryParseDateString(args.Value, out _))
 						return new CompileResult(eErrorType.Value);
-			var index = ArgToInt(arguments, 1) - 1;
-			var values = ArgsToDoubleEnumerable(new List<FunctionArgument> { args }, context);
+			var index = this.ArgToInt(arguments, 1) - 1;
+			var values = this.ArgsToDoubleEnumerable(new List<FunctionArgument> { args }, context);
 			if (index < 0 || index >= values.Count())
 				return new CompileResult(eErrorType.Num);
 			var result = values.OrderByDescending(x => x).ElementAt(index);
-			return CreateResult(result, DataType.Decimal);
+			return this.CreateResult(result, DataType.Decimal);
 		}
 	}
 }
