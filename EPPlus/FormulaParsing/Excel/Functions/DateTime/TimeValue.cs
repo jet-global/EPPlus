@@ -62,7 +62,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				 CreateResult(resultDecimalsOnly, DataType.Decimal) :
 				 CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 		}
-		private bool TryParseDateStringToDouble(string dateString, out double result )
+		public bool TryParseDateStringToDouble(string dateString, out double result )
 		{
 			var parser = new TimeStringParser();
 			if (parser.Parse(dateString) == -1)

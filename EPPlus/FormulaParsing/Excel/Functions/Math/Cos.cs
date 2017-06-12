@@ -26,6 +26,8 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using System;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -35,18 +37,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-
 			var argument = arguments.First().Value;
-			if (argument is string)
-			if (!ConvertUtil.TryParseNumericString(argument, out double result))
+			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate (argument, out double result))
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			
-			
-
-			var arg = ArgToDecimal(arguments, 0);
-			return CreateResult(System.Math.Cos(arg), DataType.Decimal);
+			return CreateResult(System.Math.Cos(result), DataType.Decimal);
 		}
 	}
 }

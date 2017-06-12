@@ -1,4 +1,28 @@
-﻿using System;
+﻿
+/* Copyright (C) 2011  Jan Källman
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * See the GNU Lesser General Public License for more details.
+ *
+ * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+ * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+ *
+ * All code and executables are provided "as is" with no warranty either express or implied. 
+ * The author accepts no liability for any damage or loss of business that this product may cause.
+ *
+ * Code change notes:
+ * 
+ * Author							Change						Date
+ *******************************************************************************
+ * Mats Alm   		                Added		                2013-12-03
+ *******************************************************************************/using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -94,21 +118,33 @@ namespace OfficeOpenXml.Utils
 			else if (dateCandidate is string dateString)
 			{
 				var doubleParsingStyle = NumberStyles.Float | NumberStyles.AllowDecimalPoint;
+				var dateParsingStyle = DateTimeStyles.NoCurrentDateDefault;
 				if (double.TryParse(dateString, doubleParsingStyle, CultureInfo.CurrentCulture, out double dateDouble))
 				{
 					OADate = dateDouble;
 					return true;
 				}
-				else if (DateTime.TryParse(dateString, out DateTime dateFromString))
+				var timeStringParsed = DateTime.TryParse(dateString, CultureInfo.CurrentCulture.DateTimeFormat, dateParsingStyle, out DateTime timeDate);
+				var dateStringParsed = DateTime.TryParse(dateString, out DateTime timeDateFromInput);
+				if(timeStringParsed && dateStringParsed)
 				{
-					OADate = dateFromString.ToOADate();
-					// Note: This if statement is to account for an error from Lotus 1-2-3
-					// that Excel implemented which incorrectly includes 2/29/1900 as a valid date;
-					// that day does not actually exist: See link for more information.
-					// https://support.microsoft.com/en-us/help/214058/days-of-the-week-before-march-1,-1900-are-incorrect-in-excel
-					if (OADate < 61)
-						OADate--;
-					return true;
+					if (timeDate.Equals(timeDateFromInput))
+					{
+						OADate = timeDate.ToOADate();
+						// Note: This if statement is to account for an error from Lotus 1-2-3
+						// that Excel implemented which incorrectly includes 2/29/1900 as a valid date;
+						// that day does not actually exist: See link for more information.
+						// https://support.microsoft.com/en-us/help/214058/days-of-the-week-before-march-1,-1900-are-incorrect-in-excel
+						if (OADate < 61 )
+							OADate--;
+						return true;
+
+					}
+					else
+					{
+						OADate = timeDate.ToOADate();
+						return true;
+					}
 				}
 				else
 					return false;
