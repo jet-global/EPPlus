@@ -34,7 +34,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class FactTests : MathFunctionsTestBase
 	{
-		#region
+		#region Fact Tests
 		[TestMethod]
 		public void FactFunctionWithPositiveIntegerReturnsCorrectResult()
 		{

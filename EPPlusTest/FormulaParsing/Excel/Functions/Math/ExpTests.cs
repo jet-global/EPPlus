@@ -34,7 +34,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class ExpTests : MathFunctionsTestBase
 	{
-		#region
+		#region Exp Tests
 		[TestMethod]
 		public void ExpWithTooFewArgumentsReturnsPoundValue()
 		{
