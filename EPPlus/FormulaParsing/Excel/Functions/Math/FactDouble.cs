@@ -32,12 +32,22 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// Returns the mathematical double factorial of a number (not the double data type).
+	/// Returns the double factorial of a number.
+	/// The double factorial is defined as such:
+	/// Given a number n,
+	///		if n is even, the double factorial of n is equal to n*(n-2)*(n-4)*...*(4)*(2).
+	///		if n is odd, the double factorial of n is equal to n*(n-2)*(n-4)*...*(3)*(1).
+	///		
+	/// Excel documentation:
+	///		https://support.office.com/en-us/article/FACTDOUBLE-function-e67697ac-d214-48eb-b7b7-cce2589ecac8
+	///	
+	/// More information on the double factorial:
+	///		https://en.wikipedia.org/wiki/Double_factorial
 	/// </summary>
 	public class FactDouble : ExcelFunction
 	{
 		/// <summary>
-		/// Returns the mathematical double factorial of a number (not the double data type).
+		/// Returns the double factorial of a number.
 		/// </summary>
 		/// <param name="arguments">Contains the number to perform the double factorial operation on.</param>
 		/// <param name="context">Unused in the method.</param>
@@ -48,9 +58,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(eErrorType.Value);
 			if (arguments.ElementAt(0).ValueIsExcelError)
 				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
-			// Despite its name, this method just turns objects into numbers. Its original purpose was for parsing
-			// any object as if it represented a date, but it's basically the same as ArgToInt, except that it can
-			// parse dates as well.
 			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double parsedDouble))
 				return new CompileResult(eErrorType.Value);
 			if (parsedDouble < -1)

@@ -48,9 +48,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(eErrorType.Value);
 			if (arguments.ElementAt(0).ValueIsExcelError)
 				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
-			// Despite its name, this method just turns objects into numbers. Its original purpose was for parsing
-			// any object as if it represented a date, but it's basically the same as ArgToInt, except that it can
-			// parse dates as well.
 			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double parsedNumberAsDouble))
 				return new CompileResult(eErrorType.Value);
 			var number = (int)parsedNumberAsDouble;
