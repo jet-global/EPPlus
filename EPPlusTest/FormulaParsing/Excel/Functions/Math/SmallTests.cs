@@ -217,6 +217,43 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = function.Execute(FunctionsHelper.CreateArgs("5", "56"), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void SmallShouldReturnTheSmallestNumberIf1()
+		{
+			var func = new Small();
+			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(1, 2, 3), 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1d, result.Result);
+		}
+
+		[TestMethod]
+		public void SmallShouldReturnTheSecondSmallestNumberIf2()
+		{
+			var func = new Small();
+			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2d, result.Result);
+		}
+
+		[TestMethod]
+		public void SmallShouldPoundNumIfIndexOutOfBounds()
+		{
+			var func = new Small();
+			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 6);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
+		}
+
+		[TestMethod]
+		public void SmallWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Small();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 	}
-		#endregion
+	#endregion
 }

@@ -51,6 +51,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				if (!ConvertUtil.TryParseNumericString(args.Value, out _))
 					if(!ConvertUtil.TryParseDateString(args.Value, out _))
 						return new CompileResult(eErrorType.Value);
+
 			var index = this.ArgToInt(arguments, 1) - 1;
 			var values = this.ArgsToDoubleEnumerable(new List<FunctionArgument> { args }, context);
 			if (index < 0 || index >= values.Count())

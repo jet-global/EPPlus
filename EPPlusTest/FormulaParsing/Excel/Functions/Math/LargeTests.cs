@@ -219,6 +219,44 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = function.Execute(FunctionsHelper.CreateArgs("3", "56"), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
+
+
+		[TestMethod]
+		public void LargeShouldReturnTheLargestNumberIf1()
+		{
+			var func = new Large();
+			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(1, 2, 3), 1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void LargeShouldReturnTheSecondLargestNumberIf2()
+		{
+			var func = new Large();
+			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void LargeShouldPoundNumIfIndexOutOfBounds()
+		{
+			var func = new Large();
+			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 6);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
+		}
+
+		[TestMethod]
+		public void LargeWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Large();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 		#endregion
 	}
 }
