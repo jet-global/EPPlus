@@ -24,43 +24,42 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Returns the mathematical double factorial of a number (not the double data type).
+	/// </summary>
 	public class FactDouble : ExcelFunction
 	{
+		/// <summary>
+		/// Returns the mathematical double factorial of a number (not the double data type).
+		/// </summary>
+		/// <param name="arguments">Contains the number to perform the double factorial operation on.</param>
+		/// <param name="context">Unused in the method.</param>
+		/// <returns>Returns the double factorial of the given number, or an <see cref="ExcelErrorValue"/> if the input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			if (arguments.ElementAt(0).ValueIsExcelError)
 				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
+			// Despite its name, this method just turns objects into numbers. Its original purpose was for parsing
+			// any object as if it represented a date, but it's basically the same as ArgToInt, except that it can
+			// parse dates as well.
 			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double parsedDouble))
 				return new CompileResult(eErrorType.Value);
 			if (parsedDouble < -1)
 				return new CompileResult(eErrorType.Num);
 			var number = (int)parsedDouble;
 			var result = 1d;
-			if (number % 2 == 0)
+			for (var i = (2 - number % 2); i <= number; i += 2)
 			{
-				for (var i = 2; i <= number; i += 2)
-				{
-					result *= i;
-				}
-			}
-			else
-			{
-				for (var i = 1; i <= number; i += 2)
-				{
-					result *= i;
-				}
+				result *= i;
 			}
 			return this.CreateResult(result, DataType.Integer);
 		}
