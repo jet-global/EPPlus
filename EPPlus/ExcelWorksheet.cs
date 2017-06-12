@@ -1415,8 +1415,10 @@ namespace OfficeOpenXml
 				}
 				foreach (var ptbl in PivotTables)
 				{
-					ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
-					ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
+					if (rowFrom <= ptbl.Address.End.Row)
+						ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
+					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && ptbl.CacheDefinition.SourceRange.Worksheet == this && rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
+						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
 				}
 			}
 			this.UpdateCharts(rows, 0, rowFrom, 0);
@@ -1424,6 +1426,11 @@ namespace OfficeOpenXml
 			foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
 			{
 				sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
+				foreach (var ptbl in sheet.PivotTables)
+				{
+					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && ptbl.CacheDefinition.SourceRange.Worksheet == this && rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
+						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
+				}
 			}
 			this.UpdateDataValidationRanges(rowFrom, rows, 0, 0);
 		}
@@ -1599,23 +1606,20 @@ namespace OfficeOpenXml
 			foreach (var ptbl in PivotTables)
 			{
 				if (columnFrom <= ptbl.Address.End.Column)
-				{
 					ptbl.Address = ptbl.Address.AddColumn(columnFrom, columns);
-				}
-				if (columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
-				{
-					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet)
-					{
-						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
-					}
-				}
-
+				if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && ptbl.CacheDefinition.SourceRange.Worksheet == this && columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
+					ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
 			}
 			this.UpdateCharts(0, columns, 0, columnFrom);
 			// Update cross-sheet references.
 			foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
 			{
 				sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
+				foreach (var ptbl in sheet.PivotTables)
+				{
+					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && ptbl.CacheDefinition.SourceRange.Worksheet == this && columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
+						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
+				}
 			}
 			this.UpdateDataValidationRanges(0, 0, columnFrom, columns);
 		}
@@ -1661,9 +1665,18 @@ namespace OfficeOpenXml
 				}
 				foreach (var ptbl in PivotTables)
 				{
-					if (ptbl.Address.Start.Row > rowFrom + rows)
-					{
+					if (rowFrom <= ptbl.Address.End.Row)
 						ptbl.Address = ptbl.Address.DeleteRow(rowFrom, rows);
+					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && ptbl.CacheDefinition.SourceRange.Worksheet == this && rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
+						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows).Address;
+				}
+				foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+				{
+					sheet.UpdateCrossSheetReferences(this.Name, rowFrom, -rows, 0, 0);
+					foreach (var ptbl in sheet.PivotTables)
+					{
+						if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && ptbl.CacheDefinition.SourceRange.Worksheet == this && rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
+							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows).Address;
 					}
 				}
 			}
@@ -1750,17 +1763,21 @@ namespace OfficeOpenXml
 					}
 
 					tbl.Address = tbl.Address.DeleteColumn(columnFrom, columns);
-
-					foreach (var ptbl in PivotTables)
+				}
+				foreach (var ptbl in PivotTables)
+				{
+					if (columnFrom <= ptbl.Address.End.Column)
+						ptbl.Address = ptbl.Address.DeleteColumn(columnFrom, columns);
+					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && ptbl.CacheDefinition.SourceRange.Worksheet == this && columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
+						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns).Address;
+				}
+				foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+				{
+					sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, -columns);
+					foreach (var ptbl in sheet.PivotTables)
 					{
-						if (ptbl.Address.Start.Column > columnFrom + columns)
-						{
-							ptbl.Address = ptbl.Address.DeleteColumn(columnFrom, columns);
-						}
-						if (ptbl.CacheDefinition.SourceRange.Start.Column > columnFrom + columns)
-						{
+						if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && ptbl.CacheDefinition.SourceRange.Worksheet == this && columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
 							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns).Address;
-						}
 					}
 				}
 			}
