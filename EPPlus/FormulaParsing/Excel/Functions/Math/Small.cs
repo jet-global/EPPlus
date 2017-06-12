@@ -32,19 +32,19 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// 
+	/// Tis class calculates the nth smallest number in a list of numbers.
 	/// </summary>
 	public class Small : ExcelFunction
 	{
 		/// <summary>
-		/// 
+		/// Returns the nth smallest number based on user input.
 		/// </summary>
-		/// <param name="arguments"></param>
-		/// <param name="context"></param>
-		/// <returns></returns>
+		/// <param name="arguments">The user specified list and nth smallest number to look up.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The nth smallest number as specified by the user.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 2) == false)
+			if (this.ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
 			var args = arguments.ElementAt(0);
 			if (args.Value is string)
@@ -54,12 +54,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					else
 						return new CompileResult(eErrorType.Num);
 
-			var index = ArgToInt(arguments, 1) - 1;
-			var values = ArgsToDoubleEnumerable(new List<FunctionArgument> { args }, context);
+			var index = this.ArgToInt(arguments, 1) - 1;
+			var values = this.ArgsToDoubleEnumerable(new List<FunctionArgument> { args }, context);
 			if (index < 0 || index >= values.Count())
 				return new CompileResult(eErrorType.Num);
 			var result = values.OrderBy(x => x).ElementAt(index);
-			return CreateResult(result, DataType.Decimal);
+			return this.CreateResult(result, DataType.Decimal);
 		}
 	}
 }

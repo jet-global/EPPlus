@@ -39,7 +39,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <summary>
 		/// Returns the nth largest number in a list based on user input.
 		/// </summary>
-		/// <param name="arguments">The user specified list and largest number to look up.</param>
+		/// <param name="arguments">The user specified list and nth largest number to look up.</param>
 		/// <param name="context">Not used, but needed to override the method.</param>
 		/// <returns>The nth largest number as a decimal based on user input.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
