@@ -132,14 +132,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		public void CosHandlesMilitaryTime()
 		{
 			var function = new Cos();
-			var val = new Value();
-
 
 			var input1 = "00:00";
 			var input2 = "00:01";
 			var input4 = "23:59:59";
-
-
 
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
@@ -174,7 +170,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var input2 = "1/17/2011 2:00 AM";
 			var input3 = "17/1/2011 2:00 AM";
 			var input4 = "17/Jan/2011 2:00 AM";
-	
+
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
@@ -214,8 +210,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(0.856850597, System.Math.Round(result6.ResultNumeric, 9));
 			Assert.AreEqual(0.998800647, System.Math.Round(result8.ResultNumeric, 9));
 			Assert.AreEqual(0.793329861, System.Math.Round(result9.ResultNumeric, 9));
-
-
 		}
 
 		[TestMethod]
@@ -306,7 +300,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 
 			Assert.AreEqual(0.276637268, System.Math.Round(result1.ResultNumeric, 9));
 			Assert.AreEqual(0.276637268, System.Math.Round(result4.ResultNumeric, 9));
-
 		}
 		#endregion
 	}

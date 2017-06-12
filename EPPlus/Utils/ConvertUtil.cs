@@ -22,7 +22,8 @@
  * Author							Change						Date
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
- *******************************************************************************/using System;
+ *******************************************************************************/
+using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -138,10 +139,10 @@ namespace OfficeOpenXml.Utils
 						if (OADate < 61 )
 							OADate--;
 						return true;
-
 					}
 					else
 					{
+						//Note: This if statement is to account for when a pure time string is the input.
 						OADate = timeDate.ToOADate();
 						return true;
 					}

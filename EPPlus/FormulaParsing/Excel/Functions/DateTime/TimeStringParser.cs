@@ -95,7 +95,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			return GetSerialNumber(hour, minute, second);
 		}
 
-		public void GetValuesFromString(string input, out int hour, out int minute, out int second)
+		private void GetValuesFromString(string input, out int hour, out int minute, out int second)
 		{
 			hour = 0;
 			minute = 0;
