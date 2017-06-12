@@ -122,6 +122,23 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 				return !this.TooFewArgs(arguments, minLength);
 		}
 
+		protected bool ValidateArguments(IEnumerable<FunctionArgument> arguments, int minLength, out eErrorType error)
+		{
+			error = eErrorType.Value;
+			foreach (var argument in arguments)
+			{
+				if (argument.ValueIsExcelError)
+				{
+					error = argument.ValueAsExcelErrorValue.Type;
+					return false;
+				}
+			}
+			if (arguments == null)
+				return false;
+			else
+				return !this.TooFewArgs(arguments, minLength);
+		}
+
 		private bool TooFewArgs(IEnumerable<FunctionArgument> arguments, int minLength)
 		{
 			{
