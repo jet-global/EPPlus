@@ -33,9 +33,125 @@ using OfficeOpenXml;
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 	[TestClass]
-	public class MedianTests: MathFunctionsTestBase
+	public class MedianTests : MathFunctionsTestBase
 	{
 		#region Median Function (Execute) Tests
+
+		[TestMethod]
+		public void MedianWithNoArgumentsReturnsPoundValue()
+		{
+			var function = new Median();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MedianWithMaxArgumentsReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithOneInputReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithNumericInputsReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithGenericStringInputReturnsPoundValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithNumericStringInputReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithReferenceToNumbersReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithReferencesTypedOutReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithReferenceToNumericStringsReturnsPoundNum()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithReferencesToGeneralStringsReturnsPoundNum()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithLogicInputsReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithReferenceToLogicInputsReturnsPoundNum()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithReferenceToCellsWithZeroReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithReferenceToEmptyCellsReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithReferenceToStringsAndNumbersReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithDateObjectAsInputReturnsCorrectValue()
+		{
+
+		}
+		
+		[TestMethod]
+		public void MedianWithDateAsStringReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithDoubleInputsReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void MedianWithFractionInputReturnsCorrectValue()
+		{
+
+		}
 		#endregion
 	}
 }
