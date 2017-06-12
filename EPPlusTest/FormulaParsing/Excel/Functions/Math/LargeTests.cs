@@ -48,7 +48,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["A5"].Value = 3;
 				worksheet.Cells["B1"].Formula = "LARGE(A2:A5, 2)";
 				worksheet.Calculate();
-				Assert.AreEqual(45d, worksheet.Cells["B1"].Value);
+				Assert.AreEqual(45, worksheet.Cells["B1"].Value);
 			}
 		}
 
@@ -130,7 +130,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["A5"].Value = 3;
 				worksheet.Cells["B1"].Formula = "LARGE(A2:A5, \"3\")";
 				worksheet.Calculate();
-				Assert.AreEqual(3d, worksheet.Cells["B1"].Value);
+				Assert.AreEqual(3, worksheet.Cells["B1"].Value);
 			}
 		}
 
@@ -245,7 +245,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var func = new Large();
 			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(1, 2, 3), 1);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(3d, result.Result);
+			Assert.AreEqual(3, result.Result);
 		}
 
 		[TestMethod]
@@ -254,7 +254,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var func = new Large();
 			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 2);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(3d, result.Result);
+			Assert.AreEqual(3, result.Result);
 		}
 
 		[TestMethod]
@@ -294,8 +294,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Formula = "LARGE({TRUE, 67, \"1000\"}, 2)";
-				worksheet.Cells["B2"].Formula = "LARGE({TRUE, 99, \"345\"}, 3)";
+				worksheet.Cells["B1"].Formula = "LARGE({TRUE, 67, \"1000\"}, 1)";
+				worksheet.Cells["B2"].Formula = "LARGE({TRUE, 99, \"345\"}, 2)";
 				worksheet.Calculate();
 				Assert.AreEqual(67d, worksheet.Cells["B1"].Value);
 				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);

@@ -48,7 +48,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["A5"].Value = 3;
 				worksheet.Cells["B1"].Formula = "SMALL(A2:A5, 2)";
 				worksheet.Calculate();
-				Assert.AreEqual(3d, worksheet.Cells["B1"].Value);
+				Assert.AreEqual(3, worksheet.Cells["B1"].Value);
 			}
 		}
 
@@ -126,7 +126,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["A5"].Value = 3;
 				worksheet.Cells["B1"].Formula = "SMALL(A2:A5, \"3\")";
 				worksheet.Calculate();
-				Assert.AreEqual(45d, worksheet.Cells["B1"].Value);
+				Assert.AreEqual(45, worksheet.Cells["B1"].Value);
 			}
 		}
 
@@ -240,7 +240,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var func = new Small();
 			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(1, 2, 3), 1);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(1d, result.Result);
+			Assert.AreEqual(1, result.Result);
 		}
 
 		[TestMethod]
@@ -249,7 +249,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var func = new Small();
 			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 2);
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(2d, result.Result);
+			Assert.AreEqual(2, result.Result);
 		}
 
 		[TestMethod]
