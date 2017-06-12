@@ -301,6 +301,24 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
 			}
 		}
+
+		[TestMethod]
+		public void LargeWithDoubleInputsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 45.6;
+				worksheet.Cells["B2"].Value = 12.2;
+				worksheet.Cells["B3"].Value = 13.5;
+				worksheet.Cells["B4"].Value = 158.2;
+				worksheet.Cells["B10"].Formula = "LARGE(B1:B4, 2)";
+				worksheet.Cells["B11"].Formula = "LARGE(B1:B4, \"2\")";
+				worksheet.Calculate();
+				Assert.AreEqual(45.6d, worksheet.Cells["B10"].Value);
+				Assert.AreEqual(45.6d, worksheet.Cells["B11"].Value);
+			}
+		}
 		#endregion
 	}
 }

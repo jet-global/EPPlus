@@ -290,10 +290,28 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Formula = "SMALL({TRUE, 67, \"1000\"}, 1)";
-				//worksheet.Cells["B2"].Formula = "SMALL({TRUE, 99, \"345\"}, 3)";
+				worksheet.Cells["B2"].Formula = "SMALL({TRUE, 99, \"345\"}, 3)";
 				worksheet.Calculate();
 				Assert.AreEqual(67d, worksheet.Cells["B1"].Value);
-				//Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void SmallWithDoubleInputsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 45.6;
+				worksheet.Cells["B2"].Value = 12.2;
+				worksheet.Cells["B3"].Value = 13.5;
+				worksheet.Cells["B4"].Value = 158.2;
+				worksheet.Cells["B10"].Formula = "SMALL(B1:B4, 2)";
+				worksheet.Cells["B11"].Formula = "SMALL(B1:B4, \"2\")";
+				worksheet.Calculate();
+				Assert.AreEqual(13.5d, worksheet.Cells["B10"].Value);
+				Assert.AreEqual(13.5d, worksheet.Cells["B11"].Value);
 			}
 		}
 	}

@@ -58,11 +58,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 			var index = this.ArgToInt(arguments, 1) - 1;
 			var argsAsEnum = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
-			var values = argsAsEnum.Where(arg => arg.GetType().IsPrimitive && false == arg is bool).Select(arg => arg);
+			var values = argsAsEnum.Where(arg => arg.GetType().IsPrimitive && (arg is bool == false));
 			if (index < 0 || index >= values.Count())
 				return new CompileResult(eErrorType.Num);
 			var result = values.OrderBy(x => x).ElementAt(index);
-			return this.CreateResult(result, DataType.Integer);
+			return this.CreateResult(result, DataType.Decimal);
 		}
 	}
 }
