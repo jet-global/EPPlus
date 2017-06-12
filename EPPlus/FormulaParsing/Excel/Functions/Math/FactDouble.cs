@@ -30,6 +30,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -37,7 +38,31 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			return new CompileResult(eErrorType.Value);
+			if (this.ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			if (arguments.ElementAt(0).ValueIsExcelError)
+				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
+			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double parsedDouble))
+				return new CompileResult(eErrorType.Value);
+			if (parsedDouble < -1)
+				return new CompileResult(eErrorType.Num);
+			var number = (int)parsedDouble;
+			var result = 1d;
+			if (number % 2 == 0)
+			{
+				for (var i = 2; i <= number; i += 2)
+				{
+					result *= i;
+				}
+			}
+			else
+			{
+				for (var i = 1; i <= number; i += 2)
+				{
+					result *= i;
+				}
+			}
+			return this.CreateResult(result, DataType.Integer);
 		}
 	}
 }

@@ -152,14 +152,17 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(1d, result.Result);
 		}
 
-		//[TestMethod]
-		//public void FactFunction()
-		//{
-		//	var func = new Fact();
-		//	var args = FunctionsHelper.CreateArgs();
-		//	var result = func.Execute(args, this.ParsingContext);
-		//	Assert.AreEqual(, result.Result);
-		//}
+		[TestMethod]
+		public void FactWithErrorValueInputReturnsThatErrorValue()
+		{
+			var func = new Fact();
+			var args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA));
+			var resultNA = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)resultNA.Result).Type);
+			args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0));
+			var resultDiv0 = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)resultDiv0.Result).Type);
+		}
 		#endregion
 	}
 }
