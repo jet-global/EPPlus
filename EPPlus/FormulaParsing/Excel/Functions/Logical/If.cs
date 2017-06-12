@@ -32,7 +32,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Logical
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 3) == false)
+			if (this.ValidateArguments(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
 			var condition = ArgToBool(arguments, 0);
 			var firstStatement = arguments.ElementAt(1).Value;

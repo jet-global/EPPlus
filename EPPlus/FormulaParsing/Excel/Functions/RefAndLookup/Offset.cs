@@ -33,7 +33,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			if (ValidateArguments(functionArguments, 3) == false)
+			if (this.ValidateArguments(functionArguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
 			var startRange = ArgToString(functionArguments, 0);
 			var rowOffset = ArgToInt(functionArguments, 1);

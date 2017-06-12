@@ -46,7 +46,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Database
 
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 3) == false)
+			if (this.ValidateArguments(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
 			var dbAddress = arguments.ElementAt(0).ValueAsRangeInfo.Address.Address;
 			var field = ArgToString(arguments, 1).ToLower(CultureInfo.InvariantCulture);

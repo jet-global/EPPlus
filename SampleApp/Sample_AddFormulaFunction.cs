@@ -73,7 +73,7 @@ namespace EPPlusSamples
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			// Sanity check, will set excel VALUE error if min length is not met
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 
 			// Helper method that converts function arguments to an enumerable of doubles
@@ -95,7 +95,7 @@ namespace EPPlusSamples
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			// Sanity check, will set excel VALUE error if min length is not met
-			if (ValidateArguments(arguments, 2) == false)
+			if (this.ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
 
 			//Replace swedish year format with invariant for parameter 2.
@@ -117,7 +117,7 @@ namespace EPPlusSamples
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			// Sanity check, will set excel VALUE error if min length is not met
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			// Get the first arg
 			var input = ArgToString(arguments, 0);

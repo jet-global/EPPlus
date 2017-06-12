@@ -33,7 +33,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			if (ValidateArguments(arguments, 3) == false)
+			if (this.ValidateArguments(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
 			var sumRange = ArgsToDoubleEnumerable(true, new List<FunctionArgument> { functionArguments[0] }, context).ToList();
 			var argRanges = new List<ExcelDataProvider.IRangeInfo>();
