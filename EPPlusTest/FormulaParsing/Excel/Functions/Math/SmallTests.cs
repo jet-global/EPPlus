@@ -164,7 +164,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			var function = new Small();
 			var result = function.Execute(FunctionsHelper.CreateArgs("string", "string"), this.ParsingContext);
-			Assert.AreEqual(eErrorType.Value, result.Result);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
