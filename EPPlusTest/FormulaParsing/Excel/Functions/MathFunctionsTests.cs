@@ -781,13 +781,13 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void FactShouldReturnPoundNaWhenNegativeNumber()
+		public void FactShouldReturnPoundNumWhenNegativeNumber()
 		{
 			var func = new Fact();
 			var args = FunctionsHelper.CreateArgs(-1);
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
-			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)(result.Result)).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
 		}
 
 		[TestMethod]
