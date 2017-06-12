@@ -41,14 +41,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["A2"].Value = 45;
-				ws.Cells["A3"].Value = 2;
-				ws.Cells["A4"].Value = 789;
-				ws.Cells["A5"].Value = 3;
-				ws.Cells["B1"].Formula = "SMALL(A2:A5, 2)";
-				ws.Calculate();
-				Assert.AreEqual(3d, ws.Cells["B1"].Value);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Value = 45;
+				worksheet.Cells["A3"].Value = 2;
+				worksheet.Cells["A4"].Value = 789;
+				worksheet.Cells["A5"].Value = 3;
+				worksheet.Cells["B1"].Formula = "SMALL(A2:A5, 2)";
+				worksheet.Calculate();
+				Assert.AreEqual(3d, worksheet.Cells["B1"].Value);
 			}
 		}
 
@@ -58,6 +58,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var function = new Small();
 			var result = function.Execute(FunctionsHelper.CreateArgs(null, 5), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SMALL(, 5)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
+			}
 		}
 
 		[TestMethod]
@@ -66,6 +74,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var function = new Small();
 			var result = function.Execute(FunctionsHelper.CreateArgs(5, null), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SMALL(5, )";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
+			}
 		}
 
 		[TestMethod]
@@ -73,13 +89,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["A2"].Value = 45;
-				ws.Cells["A3"].Value = 2;
-				ws.Cells["A4"].Value = 789;
-				ws.Cells["B1"].Formula = "SMALL(A2:A4, -78)";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Value = 45;
+				worksheet.Cells["A3"].Value = 2;
+				worksheet.Cells["A4"].Value = 789;
+				worksheet.Cells["B1"].Formula = "SMALL(A2:A4, -78)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
 			}
 		}
 
@@ -88,13 +104,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["A2"].Value = 45;
-				ws.Cells["A3"].Value = 2;
-				ws.Cells["A4"].Value = 789;
-				ws.Cells["B1"].Formula = "SMALL(A2:A4, 67)";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Value = 45;
+				worksheet.Cells["A3"].Value = 2;
+				worksheet.Cells["A4"].Value = 789;
+				worksheet.Cells["B1"].Formula = "SMALL(A2:A4, 67)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
 			}
 		}
 
@@ -103,14 +119,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["A2"].Value = 45;
-				ws.Cells["A3"].Value = 2;
-				ws.Cells["A4"].Value = 789;
-				ws.Cells["A5"].Value = 3;
-				ws.Cells["B1"].Formula = "SMALL(A2:A5, \"3\")";
-				ws.Calculate();
-				Assert.AreEqual(45d, ws.Cells["B1"].Value);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Value = 45;
+				worksheet.Cells["A3"].Value = 2;
+				worksheet.Cells["A4"].Value = 789;
+				worksheet.Cells["A5"].Value = 3;
+				worksheet.Cells["B1"].Formula = "SMALL(A2:A5, \"3\")";
+				worksheet.Calculate();
+				Assert.AreEqual(45d, worksheet.Cells["B1"].Value);
 			}
 		}
 
@@ -119,14 +135,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["A2"].Value = 45;
-				ws.Cells["A3"].Value = 2;
-				ws.Cells["A4"].Value = 789;
-				ws.Cells["A5"].Value = 3;
-				ws.Cells["B1"].Formula = "SMALL(A2:A5, \"string\")";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Value = 45;
+				worksheet.Cells["A3"].Value = 2;
+				worksheet.Cells["A4"].Value = 789;
+				worksheet.Cells["A5"].Value = 3;
+				worksheet.Cells["B1"].Formula = "SMALL(A2:A5, \"string\")";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
 			}
 		}
 
@@ -135,12 +151,12 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["A2"].Value = "string";
-				ws.Cells["A3"].Value = "string";
-				ws.Cells["B1"].Formula = "SMALL(A2:A3, 2)";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Value = "string";
+				worksheet.Cells["A3"].Value = "string";
+				worksheet.Cells["B1"].Formula = "SMALL(A2:A3, 2)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
 			}
 		}
 
@@ -149,13 +165,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["A2"].Value = "2";
-				ws.Cells["A3"].Value = "34";
-				ws.Cells["A4"].Value = "89";
-				ws.Cells["B1"].Formula = "SMALL(A2:A4, 2)";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Value = "2";
+				worksheet.Cells["A3"].Value = "34";
+				worksheet.Cells["A4"].Value = "89";
+				worksheet.Cells["B1"].Formula = "SMALL(A2:A4, 2)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
 			}
 		}
 
@@ -172,10 +188,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B1"].Formula = "SMALL(DATE(2017,6,15), DATE(2017,6,20))";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SMALL(DATE(2017,6,15), DATE(2017,6,20))";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
 			}
 		}
 
@@ -192,13 +208,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["A2"].Value = "2";
-				ws.Cells["A3"].Value = "34";
-				ws.Cells["A4"].Value = "89";
-				ws.Cells["B1"].Formula = "SMALL(A2:A4, DATE(2017,6,15))";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B1"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Value = "2";
+				worksheet.Cells["A3"].Value = "34";
+				worksheet.Cells["A4"].Value = "89";
+				worksheet.Cells["B1"].Formula = "SMALL(A2:A4, DATE(2017,6,15))";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
 			}
 		}
 
@@ -253,6 +269,32 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SmallWithSomeValidSomeInvalidInputsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "Small({1,2,3,\"Cats\"}, 1)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SmallWithMixedNumbersAndLogicReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SMALL({TRUE, 67, \"1000\"}, 1)";
+				//worksheet.Cells["B2"].Formula = "SMALL({TRUE, 99, \"345\"}, 3)";
+				worksheet.Calculate();
+				Assert.AreEqual(67d, worksheet.Cells["B1"].Value);
+				//Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
+			}
 		}
 	}
 	#endregion

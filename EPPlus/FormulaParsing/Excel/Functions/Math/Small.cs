@@ -55,6 +55,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						return new CompileResult(eErrorType.Num);
 
 			var index = this.ArgToInt(arguments, 1) - 1;
+
 			var values = this.ArgsToDoubleEnumerable(new List<FunctionArgument> { args }, context);
 			if (index < 0 || index >= values.Count())
 				return new CompileResult(eErrorType.Num);
