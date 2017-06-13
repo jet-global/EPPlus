@@ -132,6 +132,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\YearTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\FunctionRepositoryTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\CountIfsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\AcosTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageATests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageTests.cs" />

@@ -34,31 +34,34 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 	[TestClass]
-	public class CosTests : MathFunctionsTestBase
+	public class AcosTests : MathFunctionsTestBase
 	{
 		#region TimeValue Function(Execute) Tests
 		[TestMethod]
-		public void CosIsGivenAStringAsInput()
+		public void AcosIsGivenAStringAsInput()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
 			var input1 = "string";
 			var input2 = "0";
 			var input3 = "1";
+			var input4 = "1.5";
 
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
+			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
-			Assert.AreEqual(1, result2.ResultNumeric);
-			Assert.AreEqual(0.540302306, System.Math.Round(result3.ResultNumeric, 9));
+			Assert.AreEqual(1.570796327, result2.ResultNumeric, .00001);
+			Assert.AreEqual(0, result3.ResultNumeric, .00001);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
 		}
 
 		[TestMethod]
-		public void CosIsGivenValuesRanginFromNegative10to10()
+		public void AcosIsGivenValuesRanginFromNegative10to10()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
 			var input1 = -10;
 			var input2 = -1;
@@ -72,17 +75,17 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 			var result5 = function.Execute(FunctionsHelper.CreateArgs(input5), this.ParsingContext);
 
-			Assert.AreEqual(-0.839071529, System.Math.Round(result1.ResultNumeric, 9));
-			Assert.AreEqual(0.540302306, System.Math.Round(result2.ResultNumeric, 9));
-			Assert.AreEqual(1, result3.ResultNumeric);
-			Assert.AreEqual(0.540302306, System.Math.Round(result4.ResultNumeric, 9));
-			Assert.AreEqual(-0.839071529, System.Math.Round(result5.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(3.141592654, System.Math.Round(result2.ResultNumeric, 9));
+			Assert.AreEqual(1.570796327, result3.ResultNumeric, .00001);
+			Assert.AreEqual(0, result4.ResultNumeric);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result5.Result).Type);
 		}
 
 		[TestMethod]
-		public void CosIntAndDoublesAsInputs()
+		public void AcosIntAndDoublesAsInputs()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
 			var input1 = 20;
 			var input2 = 100;
@@ -98,73 +101,73 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result5 = function.Execute(FunctionsHelper.CreateArgs(input5), this.ParsingContext);
 			var result6 = function.Execute(FunctionsHelper.CreateArgs(input6), this.ParsingContext);
 
-			Assert.AreEqual(0.408082062, System.Math.Round(result1.ResultNumeric, 9));
-			Assert.AreEqual(0.862318872, System.Math.Round(result2.ResultNumeric, 9));
-			Assert.AreEqual(0.540302306, System.Math.Round(result3.ResultNumeric, 9));
-			Assert.AreEqual(0.540302306, System.Math.Round(result4.ResultNumeric, 9));
-			Assert.AreEqual(0.070737202, System.Math.Round(result5.ResultNumeric, 9));
-			Assert.AreEqual(0.562379076, System.Math.Round(result6.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
+			Assert.AreEqual(0, System.Math.Round(result3.ResultNumeric, 9));
+			Assert.AreEqual(0, System.Math.Round(result4.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result5.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result6.Result).Type);
 		}
 
 		[TestMethod]
-		public void CosHandlesPi()
+		public void AcosHandlesPi()
 		{
-			var function = new Cos();
+			var function = new Acos();
 			var Pi = System.Math.PI;
 
 			var input1 = Pi;
-			var input2 = Pi/2;
-			var input3 = 2*Pi;
-			var input4 = 60*Pi/180;
+			var input2 = Pi / 2;
+			var input3 = 2 * Pi;
+			var input4 = 60 * Pi / 180;
 
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(-1, result1.ResultNumeric);
-			Assert.AreEqual(6.12303176911189E-17, result2.ResultNumeric,0.000001);//Neither Excel or EPPlus return 0.
-			Assert.AreEqual(1, result3.ResultNumeric);
-			Assert.AreEqual(0.5, result4.ResultNumeric, .000001);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
 		}
 
 		[TestMethod]
-		public void CosHandlesMilitaryTime()
+		public void AcosHandlesMilitaryTime()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
 			var input1 = "00:00";
 			var input2 = "00:01";
-			var input4 = "23:59:59";
+			var input3 = "23:59:59";
 
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
-			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
+			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 
-			Assert.AreEqual(1, result1.ResultNumeric);
-			Assert.AreEqual(0.999999759, System.Math.Round(result2.ResultNumeric, 9));
-			Assert.AreEqual(0.540312045, System.Math.Round(result4.ResultNumeric, 9));
+			Assert.AreEqual(1.570796327, result1.ResultNumeric, .000001);
+			Assert.AreEqual(1.570101882, System.Math.Round(result2.ResultNumeric, 9));
+			Assert.AreEqual(0.004811257, System.Math.Round(result3.ResultNumeric, 9));
 		}
 
 		[TestMethod]
-		public void CosHandlesMilitaryTimesPast2400()
+		public void AcosHandlesMilitaryTimesPast2400()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
-			var input2 = "01:00";
-			var input4 = "02:00";
+			var input1 = "01:00";
+			var input2 = "02:00";
 
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
-			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(0.99913207, System.Math.Round(result2.ResultNumeric, 9));
-			Assert.AreEqual(0.996529787, System.Math.Round(result4.ResultNumeric, 9));
+			Assert.AreEqual(1.529117594, System.Math.Round(result1.ResultNumeric, 9));
+			Assert.AreEqual(1.48736624, System.Math.Round(result2.ResultNumeric, 9));
 		}
 
 		[TestMethod]
-		public void CosHandlesDateTimeInputs()
+		public void AcosHandlesDateTimeInputs()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
 			var input1 = "1/17/2011 2:00";
 			var input2 = "1/17/2011 2:00 AM";
@@ -176,16 +179,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(-0.523862501, System.Math.Round(result1.ResultNumeric, 9));
-			Assert.AreEqual(-0.523862501, System.Math.Round(result2.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result3.Result).Type);
-			Assert.AreEqual(-0.523862501, System.Math.Round(result4.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
 		}
 
 		[TestMethod]
-		public void CosHandlesNormal12HourClockInputs()
+		public void AcosHandlesNormal12HourClockInputs()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
 			var input1 = "00:00:00 AM";
 			var input2 = "00:01:32 AM";
@@ -203,19 +206,19 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result8 = function.Execute(FunctionsHelper.CreateArgs(input8), this.ParsingContext);
 			var result9 = function.Execute(FunctionsHelper.CreateArgs(input9), this.ParsingContext);
 
-			Assert.AreEqual(1, result1.ResultNumeric);
-			Assert.AreEqual(0.999999433, System.Math.Round(result2.ResultNumeric, 9));
-			Assert.AreEqual(0.877582562, result3.ResultNumeric, .00001);
-			Assert.AreEqual(1, result4.ResultNumeric);
-			Assert.AreEqual(0.856850597, System.Math.Round(result6.ResultNumeric, 9));
-			Assert.AreEqual(0.998800647, System.Math.Round(result8.ResultNumeric, 9));
-			Assert.AreEqual(0.793329861, System.Math.Round(result9.ResultNumeric, 9));
+			Assert.AreEqual(1.570796327, result1.ResultNumeric, .00001);
+			Assert.AreEqual(1.569731512, System.Math.Round(result2.ResultNumeric, 9));
+			Assert.AreEqual(1.047197551, result3.ResultNumeric, .00001);
+			Assert.AreEqual(1.570796327, result4.ResultNumeric, .00001);
+			Assert.AreEqual(0.998377755, System.Math.Round(result6.ResultNumeric, 9));
+			Assert.AreEqual(1.521795238, System.Math.Round(result8.ResultNumeric, 9));
+			Assert.AreEqual(0.857226229, System.Math.Round(result9.ResultNumeric, 9));
 		}
 
 		[TestMethod]
-		public void CosTestMilitaryTimeAndNormalTimeComparisions()
+		public void AcosTestMilitaryTimeAndNormalTimeComparisions()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
 			var input1 = "16:30";
 			var input2 = "04:30 pm";
@@ -227,16 +230,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(0.772834946, System.Math.Round(result1.ResultNumeric, 9));
-			Assert.AreEqual(0.772834946, System.Math.Round(result2.ResultNumeric, 9));
-			Assert.AreEqual(0.994579557, System.Math.Round(result3.ResultNumeric, 9));
-			Assert.AreEqual(0.994579557, System.Math.Round(result4.ResultNumeric, 9));
+			Assert.AreEqual(0.812755561, System.Math.Round(result1.ResultNumeric, 9));
+			Assert.AreEqual(0.812755561, System.Math.Round(result2.ResultNumeric, 9));
+			Assert.AreEqual(1.466440354, System.Math.Round(result3.ResultNumeric, 9));
+			Assert.AreEqual(1.466440354, System.Math.Round(result4.ResultNumeric, 9));
 		}
 
 		[TestMethod]
-		public void CosTestInputsWithDatesThatHaveSlashesInThem()
+		public void AcosTestInputsWithDatesThatHaveSlashesInThem()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
 			var input1 = "1/17/2011 2:00 am";
 			var input2 = "17/01/2011 2:00 AM";
@@ -256,20 +259,20 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result7 = function.Execute(FunctionsHelper.CreateArgs(input7), this.ParsingContext);
 			var result8 = function.Execute(FunctionsHelper.CreateArgs(input8), this.ParsingContext);
 
-			Assert.AreEqual(-0.523862501, System.Math.Round(result1.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result2.Result).Type);
-			Assert.AreEqual(-0.523862501, System.Math.Round(result3.ResultNumeric, 9));
-			Assert.AreEqual(-0.523862501, System.Math.Round(result4.ResultNumeric, 9));
-			Assert.AreEqual(-0.523862501, System.Math.Round(result5.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result5.Result).Type);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result6.Result).Type);
-			Assert.AreEqual(-0.523862501, System.Math.Round(result7.ResultNumeric, 9));
-			Assert.AreEqual(-0.523862501, System.Math.Round(result8.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result7.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result8.Result).Type);
 		}
 
 		[TestMethod]
-		public void CosHandlesInputsWithDatesInTheFormMonthDateCommaYearTime()
+		public void AcosHandlesInputsWithDatesInTheFormMonthDateCommaYearTime()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
 			var input1 = "Jan 17, 2011 2:00 am";
 			var input2 = "June 5, 2017 11:00 pm";
@@ -281,25 +284,49 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(-0.523862501, System.Math.Round(result1.ResultNumeric, 9));
-			Assert.AreEqual(-0.978822933, System.Math.Round(result2.ResultNumeric, 9));
-			Assert.AreEqual(-0.523862501, System.Math.Round(result3.ResultNumeric, 9));
-			Assert.AreEqual(-0.978822933, System.Math.Round(result4.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
 		}
 
 		[TestMethod]
-		public void CosHandlesInputDatesAreSeperatedByDashes()
+		public void AcosHandlesInputDatesAreSeperatedByDashes()
 		{
-			var function = new Cos();
+			var function = new Acos();
 
 			var input1 = "1-17-2017 2:00";
-			var input4 = "1-17-2017 2:00 am";
+			var input2 = "1-17-2017 2:00 am";
 
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
-			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
 
-			Assert.AreEqual(0.276637268, System.Math.Round(result1.ResultNumeric, 9));
-			Assert.AreEqual(0.276637268, System.Math.Round(result4.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
+		}
+
+		[TestMethod]
+		public void AcosHandlesDoublesCorrectly()
+		{
+			var function = new Acos();
+
+			var input1 = 0.5;
+			var input2 = 0.25;
+			var input3 = 0.9;
+			var input4 = -0.9;
+			var input5 = ".5";
+
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
+			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
+			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
+			var result5 = function.Execute(FunctionsHelper.CreateArgs(input5), this.ParsingContext);
+
+			Assert.AreEqual(1.047197551, System.Math.Round(result1.ResultNumeric, 9));
+			Assert.AreEqual(1.318116072, System.Math.Round(result2.ResultNumeric, 9));
+			Assert.AreEqual(0.451026812, System.Math.Round(result3.ResultNumeric, 9));
+			Assert.AreEqual(2.690565842, System.Math.Round(result4.ResultNumeric, 9));
+			Assert.AreEqual(1.047197551, System.Math.Round(result5.ResultNumeric, 9));
 		}
 		#endregion
 	}

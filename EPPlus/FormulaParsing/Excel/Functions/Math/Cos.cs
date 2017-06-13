@@ -26,8 +26,6 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using System;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {

@@ -22,6 +22,7 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-26
  *******************************************************************************/
+using System;
 using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.Utils;
 
@@ -29,6 +30,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
 	public class DecimalCompileResultValidator : CompileResultValidator
 	{
+		public override bool tryValidate(object obj, out eErrorType error)
+		{
+			var num = ConvertUtil.GetValueDouble(obj);
+			if (double.IsNaN(num) || double.IsInfinity(num))
+			{
+				error = eErrorType.Num;
+				return false;
+			}
+			//If this returns true ignore the out eError
+			error = eErrorType.Null;
+			return true;
+		}
+
 		public override void Validate(object obj)
 		{
 			var num = ConvertUtil.GetValueDouble(obj);
@@ -37,5 +51,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 				throw new ExcelErrorValueException(eErrorType.Num);
 			}
 		}
+
 	}
 }
