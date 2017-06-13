@@ -36,7 +36,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	public class MedianTests : MathFunctionsTestBase
 	{
 		#region Median Function (Execute) Tests
-
 		[TestMethod]
 		public void MedianWithNoArgumentsReturnsPoundValue()
 		{
@@ -88,13 +87,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B1"].Value = 16;
-				ws.Cells["B2"].Value = 6;
-				ws.Cells["B3"].Value = 5;
-				ws.Cells["B10"].Formula = "MEDIAN(B1:B3)";
-				ws.Calculate();
-				Assert.AreEqual(6d, ws.Cells["B10"].Value);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 16;
+				worksheet.Cells["B2"].Value = 6;
+				worksheet.Cells["B3"].Value = 5;
+				worksheet.Cells["B10"].Formula = "MEDIAN(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(6d, worksheet.Cells["B10"].Value);
 			}
 		}
 
@@ -103,13 +102,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B1"].Value = 16;
-				ws.Cells["B2"].Value = 6;
-				ws.Cells["B3"].Value = 5;
-				ws.Cells["B10"].Formula = "MEDIAN(B1,B2,B3)";
-				ws.Calculate();
-				Assert.AreEqual(6d, ws.Cells["B10"].Value);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 16;
+				worksheet.Cells["B2"].Value = 6;
+				worksheet.Cells["B3"].Value = 5;
+				worksheet.Cells["B10"].Formula = "MEDIAN(B1,B2,B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(6d, worksheet.Cells["B10"].Value);
 			}
 		}
 
@@ -118,13 +117,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B1"].Value = "5";
-				ws.Cells["B2"].Value = "45";
-				ws.Cells["B3"].Value = "76";
-				ws.Cells["B10"].Formula = "MEDIAN(B1:B3)";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B10"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "5";
+				worksheet.Cells["B2"].Value = "45";
+				worksheet.Cells["B3"].Value = "76";
+				worksheet.Cells["B10"].Formula = "MEDIAN(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B10"].Value).Type);
 			}
 		}
 
@@ -133,13 +132,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B1"].Value = "string!";
-				ws.Cells["B2"].Value = "string";
-				ws.Cells["B3"].Value = "string";
-				ws.Cells["B10"].Formula = "MEDIAN(B1:B3)";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B10"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "string!";
+				worksheet.Cells["B2"].Value = "string";
+				worksheet.Cells["B3"].Value = "string";
+				worksheet.Cells["B10"].Formula = "MEDIAN(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B10"].Value).Type);
 			}
 		}
 
@@ -156,12 +155,12 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B1"].Value = "TRUE";
-				ws.Cells["B2"].Value = "FALSE";
-				ws.Cells["B10"].Formula = "MEDIAN(B1:B2)";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)ws.Cells["B10"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "TRUE";
+				worksheet.Cells["B2"].Value = "FALSE";
+				worksheet.Cells["B10"].Formula = "MEDIAN(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B10"].Value).Type);
 			}
 		}
 
@@ -170,14 +169,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B1"].Value = 0;
-				ws.Cells["B2"].Value = 16;
-				ws.Cells["B3"].Value = 6;
-				ws.Cells["B4"].Value = 5;
-				ws.Cells["B10"].Formula = "MEDIAN(B1:B4)";
-				ws.Calculate();
-				Assert.AreEqual(5.5d, ws.Cells["B10"].Value);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 0;
+				worksheet.Cells["B2"].Value = 16;
+				worksheet.Cells["B3"].Value = 6;
+				worksheet.Cells["B4"].Value = 5;
+				worksheet.Cells["B10"].Formula = "MEDIAN(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(5.5d, worksheet.Cells["B10"].Value);
 			}
 		}
 
@@ -186,13 +185,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B1"].Value = 99;
-				ws.Cells["B2"].Value = 6;
-				ws.Cells["B3"].Formula = "MEDIAN(\"strings\")";
-				ws.Cells["B10"].Formula = "MEDIAN(B1:B3)";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)ws.Cells["B10"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 99;
+				worksheet.Cells["B2"].Value = 6;
+				worksheet.Cells["B3"].Formula = "MEDIAN(\"strings\")";
+				worksheet.Cells["B10"].Formula = "MEDIAN(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B10"].Value).Type);
 			}
 		}
 
@@ -201,13 +200,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B1"].Value = 16;
-				ws.Cells["B2"].Value = 5;
-				ws.Cells["B3"].Value = 6;
-				ws.Cells["B10"].Formula = "MEDIAN(B1:B4)";
-				ws.Calculate();
-				Assert.AreEqual(6d, ws.Cells["B10"].Value);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 16;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 6;
+				worksheet.Cells["B10"].Formula = "MEDIAN(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(6d, worksheet.Cells["B10"].Value);
 			}
 		}
 
@@ -216,27 +215,39 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
-				ws.Cells["B1"].Value = 5;
-				ws.Cells["B2"].Value = 64;
-				ws.Cells["B3"].Value = 0;
-				ws.Cells["B4"].Value = "string";
-				ws.Cells["B10"].Formula = "MEDIAN(B1:B4)";
-				ws.Calculate();
-				Assert.AreEqual(5d, ws.Cells["B10"].Value);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 5;
+				worksheet.Cells["B2"].Value = 64;
+				worksheet.Cells["B3"].Value = 0;
+				worksheet.Cells["B4"].Value = "string";
+				worksheet.Cells["B10"].Formula = "MEDIAN(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(5d, worksheet.Cells["B10"].Value);
 			}
 		}
 
 		[TestMethod]
 		public void MedianWithDateObjectAsInputReturnsCorrectValue()
 		{
-
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MEDIAN(DATE(2017, 6, 12))";
+				worksheet.Calculate();
+				Assert.AreEqual(42898d, worksheet.Cells["B1"].Value);
+			}
 		}
 		
 		[TestMethod]
 		public void MedianWithDateAsStringReturnsCorrectValue()
 		{
-
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MEDIAN(\"6/12/2017\", \"5/4/2016\")";
+				worksheet.Calculate();
+				Assert.AreEqual(42696d, worksheet.Cells["B1"].Value);
+			}
 		}
 
 		[TestMethod]
@@ -252,7 +263,62 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var ws = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MEDIAN((2/3),(5/8),(99/5))";
+				worksheet.Calculate();
+				Assert.AreEqual(0.666666d, (double)worksheet.Cells["B1"].Value, 0.000001);
+			}
+		}
+
+		[TestMethod]
+		public void MedianWithMixedTypesReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MEDIAN(4, TRUE, \"78\")";
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MedianWithCommaButNoArgsReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MEDIAN(,)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MedianWithSecondArgOnlyReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MEDIAN(, 5, , , , )";
+				worksheet.Cells["B2"].Formula = "MEDIAN()";
+				worksheet.Calculate();
+				Assert.AreEqual(2.5d, worksheet.Cells["B1"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MedianWithOnlyFirstArgReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MEDIAN(1, )";
+				worksheet.Cells["B2"].Formula = "MEDIAN(1, , , ,)";
+				worksheet.Calculate();
+				Assert.AreEqual(0.5d, worksheet.Cells["B1"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
 			}
 		}
 		#endregion
