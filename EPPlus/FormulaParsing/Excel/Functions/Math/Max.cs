@@ -41,6 +41,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var values = ArgsToDoubleEnumerable(IgnoreHiddenValues, false, arguments, context);
+			if (values.Count() > 255)
+				return new CompileResult(eErrorType.NA);
 			return CreateResult(values.Max(), DataType.Decimal);
 		}
 	}

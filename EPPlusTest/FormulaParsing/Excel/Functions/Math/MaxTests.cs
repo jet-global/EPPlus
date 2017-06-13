@@ -283,7 +283,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Calculate();
 				Assert.AreEqual(4d, worksheet.Cells["C1"].Value);
 				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["C2"].Value).Type);
-
 			}
 		}
 		#endregion
