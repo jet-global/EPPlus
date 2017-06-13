@@ -47,8 +47,26 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MedianWithMaxArgumentsReturnsCorrectValue()
 		{
-
-		}
+			// This functionality is different from that of Excel's. Normally when too many arguments are entered
+			// into a function it won't let you calculate the function, however in EPPlus it will return a pound
+			// NA error instead. 
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				for(int i = 1; i < 270; i++)
+				{
+					for (int j = 1; j < 2; j++)
+					{
+						worksheet.Cells[i, j].Value = 3;
+					}
+				}
+				worksheet.Cells["B3"].Formula = "MEDIAN(A1:A255)";
+				worksheet.Cells["B4"].Formula = "MEDIAN(A1:A270)";
+				worksheet.Calculate();
+				Assert.AreEqual(3d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}	
 
 		[TestMethod]
 		public void MedianWithOneInputReturnsCorrectValue()

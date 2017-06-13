@@ -44,6 +44,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			Array.Sort(arr);
 			if (arr.Length == 0)
 				return new CompileResult(eErrorType.Num);
+			if (arr.Length > 255)
+				return new CompileResult(eErrorType.NA);
 			double result;
 			if (arr.Length % 2 == 1)
 			{
