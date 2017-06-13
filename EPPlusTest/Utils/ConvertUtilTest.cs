@@ -231,6 +231,13 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
+		public void TryParseDateObjectToOADateParsesMilitaryTime()
+		{
+			Assert.IsTrue(ConvertUtil.TryParseDateObjectToOADate("23:59", out double oaDate));
+			Assert.AreEqual(0.99, oaDate, 0.01);
+		}
+
+		[TestMethod]
 		public void TryParseDateObjectToOADateParsesStringsCorrectly()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;

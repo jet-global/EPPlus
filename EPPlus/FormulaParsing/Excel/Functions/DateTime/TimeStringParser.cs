@@ -75,7 +75,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var match = Regex.Match(input, RegEx24);
 			if (match.Success)
 			{
-				
 				return this.Parse24HourTimeString(match.Value);
 			}
 			System.DateTime dateTime;
@@ -92,7 +91,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			int minute;
 			int second;
 			this.GetValuesFromString(input, out hour, out minute, out second);
-
 			this.ValidateValues(hour, minute, second);
 			return GetSerialNumber(hour, minute, second);
 		}

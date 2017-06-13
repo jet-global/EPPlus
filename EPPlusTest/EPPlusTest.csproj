@@ -135,6 +135,8 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageATests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\CosTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\LargeTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LnTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Log10Tests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LogTests.cs" />
@@ -145,9 +147,13 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\FloorTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\QuotientTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\SmallTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\DegreesTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RadiansTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\ExpTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\FactTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\FactDoubleTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SumIfsTests.cs" />
