@@ -31,8 +31,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var address = ArgToString(arguments, 0);
 			var adr = new ExcelAddress(address);
 			var ws = adr.WorkSheet;

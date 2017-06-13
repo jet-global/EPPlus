@@ -73,8 +73,8 @@ namespace EPPlusSamples
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			// Sanity check, will set excel VALUE error if min length is not met
-			if (this.ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 
 			// Helper method that converts function arguments to an enumerable of doubles
 			var numbers = ArgsToDoubleEnumerable(arguments, context);
@@ -95,8 +95,8 @@ namespace EPPlusSamples
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			// Sanity check, will set excel VALUE error if min length is not met
-			if (this.ValidateArguments(arguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 
 			//Replace swedish year format with invariant for parameter 2.
 			var format = arguments.ElementAt(1).Value.ToString().Replace("åååå", "yyyy");
@@ -117,8 +117,8 @@ namespace EPPlusSamples
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			// Sanity check, will set excel VALUE error if min length is not met
-			if (this.ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			// Get the first arg
 			var input = ArgToString(arguments, 0);
 

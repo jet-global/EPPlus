@@ -34,8 +34,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var items = new List<object>();
 			for (int x = 0; x < arguments.Count(); x++)
 			{

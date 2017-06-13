@@ -31,8 +31,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 3) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 3, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var lookupArgs = new LookupArguments(arguments, context);
 			if (lookupArgs.LookupIndex < 1)
 				return new CompileResult(eErrorType.Value);

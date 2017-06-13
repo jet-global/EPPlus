@@ -44,8 +44,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns the factorial of the given number, or an <see cref="ExcelErrorValue"/> if the given input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			if (arguments.ElementAt(0).ValueIsExcelError)
 				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
 			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double parsedNumberAsDouble))

@@ -32,8 +32,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Information
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			if (arguments.Count() == 1 && arguments.ElementAt(0).Value != null)
 			{
 				return CreateResult((GetFirstValue(arguments) is string), DataType.Boolean);

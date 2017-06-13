@@ -53,8 +53,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var minute = 0;
 			var second = 0;
 
-			if (this.ValidateArguments(arguments, 3) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 3, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 
 			if (this.TryGetArgAsInt(arguments, 0, out value))
 				hour = value;

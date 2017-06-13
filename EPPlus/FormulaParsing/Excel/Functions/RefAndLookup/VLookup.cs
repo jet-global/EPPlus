@@ -38,8 +38,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				sw = new Stopwatch();
 				sw.Start();
 			}
-			if (this.ValidateArguments(arguments, 3) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 3, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var lookupArgs = new LookupArguments(arguments, context);
 			var navigator = LookupNavigatorFactory.Create(LookupDirection.Vertical, lookupArgs, context);
 			var result = Lookup(navigator, lookupArgs);
