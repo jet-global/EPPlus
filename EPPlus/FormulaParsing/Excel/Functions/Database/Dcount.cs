@@ -47,8 +47,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Database
 
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var dbAddress = arguments.ElementAt(0).ValueAsRangeInfo.Address.Address;
 			string field = null;
 			string criteriaRange = null;

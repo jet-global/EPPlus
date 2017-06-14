@@ -33,8 +33,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			if (ValidateArguments(functionArguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(functionArguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var search = ArgToString(functionArguments, 0);
 			var searchIn = ArgToString(functionArguments, 1);
 			var startIndex = 0;

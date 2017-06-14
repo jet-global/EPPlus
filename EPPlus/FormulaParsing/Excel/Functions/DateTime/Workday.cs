@@ -49,8 +49,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			System.DateTime output;
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
 
-			if (ValidateArguments(arguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 
 			var serialNumberCandidate = arguments.ElementAt(0).Value;
 			var workDaysCandidate = arguments.ElementAt(1).Value;
