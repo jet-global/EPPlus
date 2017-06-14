@@ -25,6 +25,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -34,7 +35,44 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var values = ArgsToDoubleEnumerable(IgnoreHiddenValues, false, arguments, context);
+			var args = arguments.ElementAt(0);
+			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
+			var values = argumentValueList.Where(arg => ((arg.GetType().IsPrimitive && (arg is bool == false)) || arg is System.DateTime));
+			if (arguments.ElementAt(0).Type.Name.Equals("List`1"))
+			{
+				if (values.Count() > 255)
+					return new CompileResult(eErrorType.NA);
+				return CreateResult(values.Min(), DataType.Decimal);
+			}
+			else if (!arguments.ElementAt(0).IsExcelRange)
+			{
+				var tvalues = new List<double> { };
+				foreach (var item in arguments)
+				{
+					if (item.ExcelStateFlagIsSet(ExcelCellState.HiddenCell))
+						continue;
+					if (item.Value is string)
+					{
+						if (ConvertUtil.TryParseNumericString(item.Value, out double result))
+							tvalues.Add(result);
+						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime res))
+						{
+							var temp = res.ToOADate();
+							tvalues.Add(temp);
+						}
+					}
+					else
+						tvalues.Add(ArgToDecimal(item.Value));
+				}
+				if (tvalues.Count() == 0)
+					return new CompileResult(eErrorType.Value);
+				if (tvalues.Count() > 255)
+					return new CompileResult(eErrorType.NA);
+				return CreateResult(tvalues.Min(), DataType.Decimal);
+			}
+
+			if (values.Count() > 255)
+				return new CompileResult(eErrorType.NA);
 			return CreateResult(values.Min(), DataType.Decimal);
 		}
 	}

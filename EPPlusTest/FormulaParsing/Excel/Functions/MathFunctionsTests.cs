@@ -259,26 +259,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void MinShouldCalculateCorrectResult()
-		{
-			var func = new Min();
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2d, result.Result);
-		}
-
-		[TestMethod]
-		public void MinShouldIgnoreHiddenValuesIfIgnoreHiddenValuesIsTrue()
-		{
-			var func = new Min();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 3);
-			args.ElementAt(1).SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(3d, result.Result);
-		}
-
-		[TestMethod]
 		public void AverageShouldCalculateCorrectResult()
 		{
 			var expectedResult = (4d + 2d + 5d + 2d) / 4d;
@@ -1108,16 +1088,6 @@ namespace EPPlusTest.Excel.Functions
 		public void MaxaWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Maxa();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void MinWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Min();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);

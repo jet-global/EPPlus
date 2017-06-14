@@ -67,7 +67,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B3"].Value = "TRUE";
 				worksheet.Cells["B4"].Formula = "MIN(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(2, worksheet.Cells["B4"].Value);
 			}
 		}
 
@@ -82,7 +82,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B3"].Value = 5;
 				worksheet.Cells["B4"].Formula = "MIN(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(2, worksheet.Cells["B4"].Value);
 			}
 		}
 
@@ -92,7 +92,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Formula = "MIN(5, 6, TRUE, 2)";
+				worksheet.Cells["B1"].Formula = "MIN({5, 6, TRUE, 2})";
 				worksheet.Calculate();
 				Assert.AreEqual(2d, worksheet.Cells["B1"].Value);
 			}
@@ -104,7 +104,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Formula = "MIN(5, 6, \"2\")";
+				worksheet.Cells["B1"].Formula = "MIN({5, 6, \"2\"})";
 				worksheet.Calculate();
 				Assert.AreEqual(5d, worksheet.Cells["B1"].Value);
 			}
@@ -129,7 +129,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["C1"].Formula = "MIN(A1:A255)";
 				worksheet.Cells["C2"].Formula = "MIN(A1:A270)";
 				worksheet.Calculate();
-				Assert.AreEqual(4d, worksheet.Cells["C1"].Value);
+				Assert.AreEqual(4, worksheet.Cells["C1"].Value);
 				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["C2"].Value).Type);
 			}
 		}
@@ -237,8 +237,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Formula = "MIN((9/8), (2/9), (2/55))";
-				Assert.AreEqual(0.36363636d, (double)worksheet.Cells["B1"].Value);
+				worksheet.Cells["B1"].Formula = "MIN((9/8), (7/9), (1/3))";
+				worksheet.Calculate();
+				Assert.AreEqual(0.33333333, (double)worksheet.Cells["B1"].Value, 0.00000001);
 			}
 		}
 
@@ -280,7 +281,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B4"].Value = 3;
 				worksheet.Cells["B5"].Formula = "MIN(B1:B4)";
 				worksheet.Calculate();
-				Assert.AreEqual(3d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(3, worksheet.Cells["B5"].Value);
 			}
 		}
 
@@ -291,5 +292,35 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = function.Execute(FunctionsHelper.CreateArgs(true, 5, 66, 8), this.ParsingContext);
 			Assert.AreEqual(1d, result.Result);
 		}
+
+		[TestMethod]
+		public void MinShouldCalculateCorrectResult()
+		{
+			var func = new Min();
+			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2d, result.Result);
+		}
+
+		[TestMethod]
+		public void MinShouldIgnoreHiddenValuesIfIgnoreHiddenValuesIsTrue()
+		{
+			var func = new Min();
+			func.IgnoreHiddenValues = true;
+			var args = FunctionsHelper.CreateArgs(4, 2, 5, 3);
+			args.ElementAt(1).SetExcelStateFlag(ExcelCellState.HiddenCell);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void MinWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Min();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
 	}
 }
