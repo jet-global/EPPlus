@@ -70,5 +70,98 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void MinWithReferenceToCellWithNumericStringReturnsCorrectResult()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "1";
+				worksheet.Cells["B2"].Value = 2;
+				worksheet.Cells["B3"].Value = 5;
+				worksheet.Cells["B4"].Formula = "MIN(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MinWithArrayWithLogicalValueReturnsCorrectResult()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MIN(5, 6, TRUE, 2)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MinWithArrayWithNumericStringReturnsCorrectResult()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MIN(5, 6, \"2\")";
+				worksheet.Calculate();
+				Assert.AreEqual(5d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MinWithMaxArgumentsReturnsCorrectValue()
+		{
+			// This functionality is different from that of Excel's. Normally when too many arguments are entered
+			// into a function it won't let you calculate the function, however in EPPlus it will return a pound
+			// NA error instead. 
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				for (int i = 1; i < 270; i++)
+				{
+					for (int j = 1; j < 2; j++)
+					{
+						worksheet.Cells[i, j].Value = 4;
+					}
+				}
+				worksheet.Cells["C1"].Formula = "MIN(A1:A255)";
+				worksheet.Cells["C2"].Formula = "MIN(A1:A270)";
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["C1"].Value);
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["C2"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void  MinWithReferenceToCellsWithStringsReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "string";
+				worksheet.Cells["B2"].Value = "string";
+				worksheet.Cells["B3"].Value = "string";
+				worksheet.Cells["B4"].Formula = "MIN(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MinWithReferenceToDateObjectsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "DATE(2017, 5, 12)";
+				worksheet.Cells["B2"].Formula = "DATE(2017, 6, 2)";
+				worksheet.Cells["B3"].Formula = "DATE(2017, 5, 15)";
+				worksheet.Cells["B4"].Formula = "MIN(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(42867d, worksheet.Cells["B4"].Value);
+			}
+		}
 	}
 }
