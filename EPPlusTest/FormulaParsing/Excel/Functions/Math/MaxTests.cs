@@ -257,9 +257,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B4"].Value = 8;
 				worksheet.Cells["B5"].Formula = "MAX(B1:B4)";
 				worksheet.Cells["B6"].Formula = "MAX({TRUE, \"string\", 3, 5, 8})";
+				worksheet.Cells["B7"].Formula = "MAX(TRUE, 0.6, 0.7)";
 				worksheet.Calculate();
 				Assert.AreEqual(8, worksheet.Cells["B5"].Value);
 				Assert.AreEqual(8d, worksheet.Cells["B6"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B7"].Value);
 			}
 		}
 
@@ -315,7 +317,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
-
 		#endregion
 	}
 }
