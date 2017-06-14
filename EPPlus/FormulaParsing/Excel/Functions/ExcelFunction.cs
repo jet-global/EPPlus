@@ -106,6 +106,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 				return arg == null ? null : arg.Value;
 			}
 		}
+
 		/// <summary>
 		/// This functions validates that the supplied <paramref name="arguments"/> contains at least
 		/// (the value of) <paramref name="minLength"/> elements. If one of the arguments is an
@@ -115,26 +116,25 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// </summary>
 		/// <param name="arguments">The arguments to validate.</param>
 		/// <param name="minLength">The expected minimum number of elements in <paramref name="arguments"/>.</param>
-		/// <param name="argumentError">The <see cref="eErrorType"/> contained in the first <see cref="ExcelErrorValue"/> encountered
+		/// <param name="errorValue">The <see cref="eErrorType"/> contained in the first <see cref="ExcelErrorValue"/> encountered
 		///								if this method returns false. The default value is the value given for <paramref name="errorOnInvalidCount"/>.</param>
 		/// <param name="errorOnInvalidCount">The desired <see cref="eErrorType"/> to receive if this method returns false.</param>
 		/// <returns>Returns true if there are at least the <paramref name="minLength"/> number of arguments present 
 		///			 and none of the arguments contain an <see cref="ExcelErrorValue"/>, and returns false if otherwise.</returns>
-		protected bool ArgumentsAreValid(IEnumerable<FunctionArgument> arguments, int minLength, out eErrorType argumentError, eErrorType errorOnInvalidCount = eErrorType.Value)
+		protected bool ArgumentsAreValid(IEnumerable<FunctionArgument> arguments, int minLength, out eErrorType errorValue, eErrorType errorOnInvalidCount = eErrorType.Value)
 		{
-			argumentError = errorOnInvalidCount;
+			errorValue = errorOnInvalidCount;
 			if (!this.ArgumentCountIsValid(arguments, minLength))
 				return false;
-			foreach (var argument in arguments)
+			var argumentContainingError = arguments.FirstOrDefault(arg => arg.ValueIsExcelError);
+			if (argumentContainingError != null)
 			{
-				if (argument.ValueIsExcelError)
-				{
-					argumentError = argument.ValueAsExcelErrorValue.Type;
-					return false;
-				}
+				errorValue = argumentContainingError.ValueAsExcelErrorValue.Type;
+				return false;
 			}
 			return true;
 		}
+
 		/// <summary>
 		/// This functions validates that the supplied <paramref name="arguments"/> contains at least
 		/// (the value of) <paramref name="minLength"/> elements. If one of the arguments is an

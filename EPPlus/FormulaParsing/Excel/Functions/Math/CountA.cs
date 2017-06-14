@@ -31,8 +31,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
-				return new CompileResult(argumentError);
+			if (this.ArgumentCountIsValid(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
 			var nItems = 0d;
 			Calculate(arguments, context, ref nItems);
 			return CreateResult(nItems, DataType.Integer);

@@ -174,6 +174,29 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
+		[TestMethod]
+		public void QuotientFunctionWithErrorValuesAsInputReturnsTheInputErrorValue()
+		{
+			var func = new Quotient();
+			var argNA = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA),0);
+			var argNAME = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name),0);
+			var argVALUE = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value),0);
+			var argNUM = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Num),0);
+			var argDIV0 = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0),0);
+			var argREF = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Ref),0);
+			var resultNA = func.Execute(argNA, this.ParsingContext);
+			var resultNAME = func.Execute(argNAME, this.ParsingContext);
+			var resultVALUE = func.Execute(argVALUE, this.ParsingContext);
+			var resultNUM = func.Execute(argNUM, this.ParsingContext);
+			var resultDIV0 = func.Execute(argDIV0, this.ParsingContext);
+			var resultREF = func.Execute(argREF, this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)resultNA.Result).Type);
+			Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)resultNAME.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)resultVALUE.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)resultNUM.Result).Type);
+			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)resultDIV0.Result).Type);
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)resultREF.Result).Type);
+		}
 		#endregion
 	}
 }

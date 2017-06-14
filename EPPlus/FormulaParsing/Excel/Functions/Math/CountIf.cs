@@ -41,8 +41,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
-				return new CompileResult(argumentError);
+			if (this.ArgumentCountIsValid(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
 			var range = functionArguments.ElementAt(0);
 			var criteria = GetFirstArgument(functionArguments.ElementAt(1)).ValueFirst != null ? GetFirstArgument(functionArguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
 			double result = 0d;

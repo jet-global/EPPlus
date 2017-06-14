@@ -34,8 +34,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
-				return new CompileResult(argumentError);
+			if (this.ArgumentCountIsValid(arguments, 2) == false)
+				return new CompileResult(eErrorType.Value);
 			var argRanges = new List<ExcelDataProvider.IRangeInfo>();
 			var criterias = new List<string>();
 			for (var ix = 0; ix < 30; ix += 2)

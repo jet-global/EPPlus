@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
@@ -9,7 +10,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 	[TestClass]
-	public class AverageATests
+	public class AverageATests : MathFunctionsTestBase
 	{
 		[TestMethod]
 		public void AverageALiterals()
@@ -125,6 +126,30 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			}, ParsingContext.Create());
 			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)(result.Result)).Type);
+		}
+
+		[TestMethod]
+		public void AverageAFunctionWithErrorValuesAsInputReturnsTheInputErrorValue()
+		{
+			var func = new AverageA();
+			var argNA = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA),1,1,1,1);
+			var argNAME = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name),1,1,1,1);
+			var argVALUE = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value),1,1,1,1);
+			var argNUM = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Num),1,1,1,1);
+			var argDIV0 = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0),1,1,1,1);
+			var argREF = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Ref),1,1,1,1);
+			var resultNA = func.Execute(argNA, this.ParsingContext);
+			var resultNAME = func.Execute(argNAME, this.ParsingContext);
+			var resultVALUE = func.Execute(argVALUE, this.ParsingContext);
+			var resultNUM = func.Execute(argNUM, this.ParsingContext);
+			var resultDIV0 = func.Execute(argDIV0, this.ParsingContext);
+			var resultREF = func.Execute(argREF, this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)resultNA.Result).Type);
+			Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)resultNAME.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)resultVALUE.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)resultNUM.Result).Type);
+			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)resultDIV0.Result).Type);
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)resultREF.Result).Type);
 		}
 	}
 }
