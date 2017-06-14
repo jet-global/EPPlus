@@ -3719,6 +3719,43 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region PivotTable Tests
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\NAV001 - Top Customer Overview Design Mode.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\NAV001 - Top Customer Overview Report Mode.xlsx")]
+		public void InsertAndDeleteOperationsWorkAsExpectedOnWorkbooksWithPivotTablesAndNormalTables()
+		{
+			var files = new[]
+			{
+				new FileInfo(@"NAV001 - Top Customer Overview Design Mode.xlsx"),
+				new FileInfo(@"NAV001 - Top Customer Overview Report Mode.xlsx"),
+			};
+			foreach (var file in files)
+			{
+				Assert.IsTrue(file.Exists);
+				var temp = new FileInfo(Path.GetTempFileName());
+				temp.Delete();
+				file.CopyTo(temp.ToString());
+
+				try
+				{
+					using (var package = new ExcelPackage(temp))
+					{
+						var sheet = package.Workbook.Worksheets["Report"];
+						sheet.DeleteRow(1);
+						sheet.DeleteColumn(1);
+						sheet.InsertRow(1, 1);
+						sheet.InsertColumn(1, 1);
+					}
+				}
+				finally
+				{
+					temp.Delete();
+				}
+			}
+		}
+		#endregion
+
 		#region RenameWorksheet Tests
 		[TestMethod]
 		public void RenameWorksheetUpdatesScatterChartSeries()
