@@ -39,6 +39,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
+			var test = ArgsToObjectEnumerable(false, arguments, context);
+
+
+
 			var nums = ArgsToDoubleEnumerable(arguments, context);
 			var arr = nums.ToArray();
 			Array.Sort(arr);

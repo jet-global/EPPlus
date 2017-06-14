@@ -232,26 +232,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void MaxShouldCalculateCorrectResult()
-		{
-			var func = new Max();
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(5d, result.Result);
-		}
-
-		[TestMethod]
-		public void MaxShouldIgnoreHiddenValuesIfIgnoreHiddenValuesIsTrue()
-		{
-			var func = new Max();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
-			args.ElementAt(2).SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(4d, result.Result);
-		}
-
-		[TestMethod]
 		public void MaxaShouldCalculateCorrectResult()
 		{
 			var func = new Maxa();
@@ -1118,16 +1098,6 @@ namespace EPPlusTest.Excel.Functions
 		public void FloorWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Floor();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void MaxWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Max();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);

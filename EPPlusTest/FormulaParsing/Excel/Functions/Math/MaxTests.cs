@@ -29,7 +29,8 @@ using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml;
-
+using OfficeOpenXml.FormulaParsing.Excel;
+using System.Linq;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
@@ -191,18 +192,17 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = "DATE(2017, 5, 12)";
-				worksheet.Cells["B2"].Value = "DATE(2017, 6, 2)";
-				worksheet.Cells["B3"].Value = "DATE(2017, 5, 15)";
+				worksheet.Cells["B1"].Formula = "DATE(2017, 5, 12)";
+				worksheet.Cells["B2"].Formula = "DATE(2017, 6, 2)";
+				worksheet.Cells["B3"].Formula = "DATE(2017, 5, 15)";
 				worksheet.Cells["B4"].Value = 42867;
 				worksheet.Cells["B5"].Value = 42888;
 				worksheet.Cells["B6"].Value = 42870;
 				worksheet.Cells["B7"].Formula = "MAX(B1:B3)";
-				//worksheet.Cells["B8"].Formula = "MAX(B4:B6)";
+				worksheet.Cells["B8"].Formula = "MAX(B4:B6)";
 				worksheet.Calculate();
 				Assert.AreEqual(42888d, worksheet.Cells["B7"].Value);
-				//This test is okay, the one above doesn't pass becuase of the date objects.
-				//Assert.AreEqual(42888, worksheet.Cells["B8"].Value);
+				Assert.AreEqual(42888, worksheet.Cells["B8"].Value);
 			}
 		}
 
@@ -286,6 +286,36 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["C2"].Value).Type);
 			}
 		}
+
+		[TestMethod]
+		public void MaxShouldCalculateCorrectResult()
+		{
+			var func = new Max();
+			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(5d, result.Result);
+		}
+
+		[TestMethod]
+		public void MaxShouldIgnoreHiddenValuesIfIgnoreHiddenValuesIsTrue()
+		{
+			var func = new Max();
+			func.IgnoreHiddenValues = true;
+			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
+			args.ElementAt(2).SetExcelStateFlag(ExcelCellState.HiddenCell);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(4d, result.Result);
+		}
+
+		[TestMethod]
+		public void MaxWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Max();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
 		#endregion
 	}
 }

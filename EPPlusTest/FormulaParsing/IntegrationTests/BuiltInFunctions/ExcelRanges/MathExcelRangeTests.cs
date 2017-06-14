@@ -73,15 +73,6 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions.ExcelRange
 		}
 
 		[TestMethod]
-		public void MaxShouldReturn6()
-		{
-			_worksheet.Cells["A4"].Formula = "Max(A1:A3)";
-			_worksheet.Calculate();
-			var result = _worksheet.Cells["A4"].Value;
-			Assert.AreEqual(6d, result);
-		}
-
-		[TestMethod]
 		public void MinShouldReturn1()
 		{
 			_worksheet.Cells["A4"].Formula = "Min(A1:A3)";
