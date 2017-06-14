@@ -160,6 +160,13 @@ namespace OfficeOpenXml.Utils
 				OADate = dateDouble;
 				return true;
 			}
+			else if(dateCandidate is bool dateBool)
+			{
+
+
+				OADate = dateBool ? 1 : 0 ;
+				return true;
+			}
 			return false;
 		}
 		/// <summary>

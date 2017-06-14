@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-/* Copyright (C) 2011  Jan Källman
+﻿/* Copyright (C) 2011  Jan Källman
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +22,10 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-01-11
  *******************************************************************************/
+using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using System.Linq;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -31,10 +33,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var arg = ArgToDecimal(arguments, 0);
-			return CreateResult(System.Math.Asin(arg), DataType.Decimal);
+			var argument = arguments.First().Value;
+			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			{
+				return new CompileResult(eErrorType.Value);
+			}
+			return this.CreateResult(System.Math.Asin(result), DataType.Decimal);
 		}
 	}
+
 }

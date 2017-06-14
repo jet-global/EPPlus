@@ -29,7 +29,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
 	public abstract class CompileResultValidator
 	{
-		public abstract bool tryValidate(object obj, out eErrorType error);
+		public abstract bool TryGetValidationError(object obj, out eErrorType error);
 
 		private static CompileResultValidator _empty;
 		public static CompileResultValidator Empty
@@ -48,7 +48,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			// empty validator - do nothing
 		}
 
-		public override bool tryValidate(object obj, out eErrorType error)
+		public override bool TryGetValidationError(object obj, out eErrorType error)
 		{	
 			error = eErrorType.Null;
 			return true;

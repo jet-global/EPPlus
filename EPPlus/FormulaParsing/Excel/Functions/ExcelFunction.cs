@@ -377,14 +377,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		{
 			var validator = _compileResultValidators.GetValidator(dataType);
 
-			if(!validator.tryValidate(result, out eErrorType error))
-			{
+			if(!validator.TryGetValidationError(result, out eErrorType error))
 				return new CompileResult(error);
-			}
 			else
-			{
 				validator.Validate(result);
-			}
 
 			return new CompileResult(result, dataType);
 		}

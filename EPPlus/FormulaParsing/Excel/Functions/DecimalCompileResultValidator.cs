@@ -30,7 +30,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
 	public class DecimalCompileResultValidator : CompileResultValidator
 	{
-		public override bool tryValidate(object obj, out eErrorType error)
+		public override bool TryGetValidationError(object obj, out eErrorType error)
 		{
 			var num = ConvertUtil.GetValueDouble(obj);
 			if (double.IsNaN(num) || double.IsInfinity(num))

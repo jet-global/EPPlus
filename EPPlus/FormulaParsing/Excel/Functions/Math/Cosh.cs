@@ -20,10 +20,12 @@
  * 
  * Author							Change						Date
  *******************************************************************************
- * Mats Alm   		                Added		                2013-12-03
+ * Mats Alm   		                Added		                2015-01-11
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -31,10 +33,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var arg = ArgToDecimal(arguments, 0);
-			return CreateResult(System.Math.Cosh(arg), DataType.Decimal);
+			var argument = arguments.First().Value;
+			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			{
+				return new CompileResult(eErrorType.Value);
+			}
+			return this.CreateResult(System.Math.Cosh(result), DataType.Decimal);
 		}
 	}
 }

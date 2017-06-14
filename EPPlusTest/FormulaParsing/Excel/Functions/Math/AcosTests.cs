@@ -24,12 +24,10 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
@@ -328,6 +326,22 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(2.690565842, System.Math.Round(result4.ResultNumeric, 9));
 			Assert.AreEqual(1.047197551, System.Math.Round(result5.ResultNumeric, 9));
 		}
+		
+		[TestMethod]
+		public void AcosHandlesTrueOrFalse()
+		{
+			var function = new Acos();
+
+			var input1 = true;
+			var input2 = false;
+
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
+
+			Assert.AreEqual(0, System.Math.Round(result1.ResultNumeric, 9));
+			Assert.AreEqual(1.570796327, System.Math.Round(result2.ResultNumeric, 9));
+		}
+
 		#endregion
 	}
 }
