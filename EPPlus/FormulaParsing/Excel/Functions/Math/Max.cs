@@ -40,7 +40,25 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var values = ArgsToDoubleEnumerable(IgnoreHiddenValues, false, arguments, context);
+			var args = arguments.ElementAt(0);
+			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
+			var values = argumentValueList.Where(arg => arg.GetType().IsPrimitive && (arg is bool == false));
+			if (arguments.ElementAt(0).Type.Name.Equals("List`1"))
+			{
+				if (values.Count() > 255)
+					return new CompileResult(eErrorType.NA);
+				return CreateResult(values.Max(), DataType.Decimal);
+			}
+			else if (!arguments.ElementAt(0).IsExcelRange)
+			{
+				var tvalues = ArgsToDoubleEnumerable(IgnoreHiddenValues, false, arguments, context);
+				if (tvalues.Count() == 0)
+					return new CompileResult(eErrorType.Value);
+				if (tvalues.Count() > 255)
+					return new CompileResult(eErrorType.NA);
+				return CreateResult(tvalues.Max(), DataType.Decimal);
+			}
+
 			if (values.Count() > 255)
 				return new CompileResult(eErrorType.NA);
 			return CreateResult(values.Max(), DataType.Decimal);

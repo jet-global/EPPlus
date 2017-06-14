@@ -46,6 +46,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(eErrorType.Num);
 			if (arr.Length > 255)
 				return new CompileResult(eErrorType.NA);
+
+
+
+
 			double result;
 			if (arr.Length % 2 == 1)
 			{
