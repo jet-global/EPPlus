@@ -135,7 +135,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void  MinWithReferenceToCellsWithStringsReturnsZero()
+		public void MinWithReferenceToCellsWithStringsReturnsZero()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -152,6 +152,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MinWithReferenceToDateObjectsReturnsCorrectValue()
 		{
+			//EPPlus currently returns the OADate format of the date, while Excel returns the Date in date format.
+			//Will look into this as it could be an issue.
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -162,6 +164,132 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Calculate();
 				Assert.AreEqual(42867d, worksheet.Cells["B4"].Value);
 			}
+		}
+
+		[TestMethod]
+		public void MinWithReferenceToCellWithDateObjectAsOADate()
+		{
+			var function = new Min();
+			var dateObject1 = new DateTime(2017, 5, 12).ToOADate();
+			var dateObject2 = new DateTime(2017, 6, 2).ToOADate();
+			var dateObject3 = new DateTime(2017, 5, 15).ToOADate();
+			var result = function.Execute(FunctionsHelper.CreateArgs(dateObject1, dateObject2, dateObject3), this.ParsingContext);
+			Assert.AreEqual(42867d, result.Result);
+		}
+
+		[TestMethod]
+		public void MinWithReferenceToCellsWithDatesAsStringsReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "5/2/2017";
+				worksheet.Cells["B2"].Value = "6/10/2017";
+				worksheet.Cells["B3"].Formula = "MIN(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MinWithArrayWithStringsReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MIN({\"string\", \"string\"})";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MinWithArrayWithDatesAsStringsReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MIN({\"5/2/2017\", \"6/10/2017\"})";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MinWithIntegerInputReturnsCorrectValue()
+		{
+			var function = new Min();
+			var result = function.Execute(FunctionsHelper.CreateArgs(5, 9, 66, 13), this.ParsingContext);
+			Assert.AreEqual(5d, result.Result);
+		}
+
+		[TestMethod]
+		public void MinWithDoublesInputReturnsCorrectValue()
+		{
+			var function = new Min();
+			var result = function.Execute(FunctionsHelper.CreateArgs(5.6, 23.89, 11.5, 2.6), this.ParsingContext);
+			Assert.AreEqual(2.6d, result.Result);
+		}
+
+		[TestMethod]
+		public void MinWithFractionsInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MIN((9/8), (2/9), (2/55))";
+				Assert.AreEqual(0.36363636d, (double)worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MinWithStringsInputReturnsPoundValue()
+		{
+			var function = new Min();
+			var result = function.Execute(FunctionsHelper.CreateArgs("string", "string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MinWithDateObjectsInputReturnsCorrectValue()
+		{
+			var function = new Min();
+			var dateObject1 = new DateTime(2017, 6, 15);
+			var dateObject2 = new DateTime(2017, 5, 18);
+			var result = function.Execute(FunctionsHelper.CreateArgs(dateObject1, dateObject2), this.ParsingContext);
+			Assert.AreEqual(42873d, result.Result);
+		}
+
+		[TestMethod]
+		public void MinWithDatesAsStringsInputReturnsCorrectValue()
+		{
+			var function = new Min();
+			var result = function.Execute(FunctionsHelper.CreateArgs("5/2/2017", "6/25/2017"), this.ParsingContext);
+			Assert.AreEqual(42857d, result.Result);
+		}
+
+		[TestMethod]
+		public void MinWithMixTypesReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "TRUE";
+				worksheet.Cells["B2"].Value = "string";
+				worksheet.Cells["B3"].Value = 5;
+				worksheet.Cells["B4"].Value = 3;
+				worksheet.Cells["B5"].Formula = "MIN(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(3d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MinWithLogicalValInArgumentListReturnsCorrectValue()
+		{
+			var function = new Min();
+			var result = function.Execute(FunctionsHelper.CreateArgs(true, 5, 66, 8), this.ParsingContext);
+			Assert.AreEqual(1d, result.Result);
 		}
 	}
 }
