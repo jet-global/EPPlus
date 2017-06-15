@@ -58,11 +58,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (!arguments.ElementAt(0).IsExcelRange)
 			{
 				if (arguments.Count() == 1)
-				{
-					if (values.Count() > 255)
-						return new CompileResult(eErrorType.NA);
 					return CreateResult(values.Max(), DataType.Decimal);
-				}
+
 				var doublesList = new List<double> { };
 				foreach (var item in arguments)
 				{
