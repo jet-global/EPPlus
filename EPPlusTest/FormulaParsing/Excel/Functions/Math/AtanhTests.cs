@@ -51,10 +51,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
-			Assert.AreEqual(0, result3.ResultNumeric, .00001);
-			Assert.AreEqual(0.96242365, result4.ResultNumeric, .00001);
-
+			Assert.AreEqual(0, result2.ResultNumeric, .00001);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
 		}
 
 		[TestMethod]
@@ -76,9 +75,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
-			Assert.AreEqual(0, result4.ResultNumeric, .00001);
-			Assert.AreEqual(2.993222846, result5.ResultNumeric, .00001);
+			Assert.AreEqual(0, result3.ResultNumeric, .00001);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result5.Result).Type);
 		}
 
 		[TestMethod]
@@ -100,12 +99,12 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result5 = function.Execute(FunctionsHelper.CreateArgs(input5), this.ParsingContext);
 			var result6 = function.Execute(FunctionsHelper.CreateArgs(input6), this.ParsingContext);
 
-			Assert.AreEqual(3.688253867, System.Math.Round(result1.ResultNumeric, 9));
-			Assert.AreEqual(5.298292366, System.Math.Round(result2.ResultNumeric, 9));
-			Assert.AreEqual(0, System.Math.Round(result3.ResultNumeric, 9));
-			Assert.AreEqual(0, System.Math.Round(result4.ResultNumeric, 9));
-			Assert.AreEqual(0.96242365, System.Math.Round(result5.ResultNumeric, 9));
-			Assert.AreEqual(7.60090221, System.Math.Round(result6.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result5.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result6.Result).Type);
 		}
 
 		[TestMethod]
@@ -124,10 +123,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(1.811526272, System.Math.Round(result1.ResultNumeric, 9));
-			Assert.AreEqual(1.023227479, System.Math.Round(result2.ResultNumeric, 9));
-			Assert.AreEqual(2.52463066, System.Math.Round(result3.ResultNumeric, 9));
-			Assert.AreEqual(0.306042109, System.Math.Round(result4.ResultNumeric, 9));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
 		}
 
 		[TestMethod]
@@ -143,9 +142,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(0, result1.ResultNumeric, .00001);
+			Assert.AreEqual(0.000694445, result2.ResultNumeric, .00001);
+			Assert.AreEqual(6.029942174, result3.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
@@ -159,8 +158,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
 
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
+			Assert.AreEqual(0.041690804, result1.ResultNumeric, .00001);
+			Assert.AreEqual(0.083527042, result2.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
@@ -178,10 +177,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(11.30368687, System.Math.Round(result1.ResultNumeric, 8));
-			Assert.AreEqual(11.30368687, System.Math.Round(result1.ResultNumeric, 8));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result3.Result).Type);
-			Assert.AreEqual(11.30368687, System.Math.Round(result1.ResultNumeric, 8));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
 		}
 
 		[TestMethod]
@@ -205,13 +204,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result6 = function.Execute(FunctionsHelper.CreateArgs(input6), this.ParsingContext);
 			var result7 = function.Execute(FunctionsHelper.CreateArgs(input7), this.ParsingContext);
 
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result5.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result6.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result7.Result).Type);
+			Assert.AreEqual(0, result1.ResultNumeric, .00001);
+			Assert.AreEqual(0.001064815, result2.ResultNumeric, .00001);
+			Assert.AreEqual(0.549306144, result3.ResultNumeric, .00001);
+			Assert.AreEqual(0, result4.ResultNumeric, .00001);
+			Assert.AreEqual(0.60651132, result5.ResultNumeric, .00001);
+			Assert.AreEqual(0.04902071, result6.ResultNumeric, .00001);
+			Assert.AreEqual(0.783195537, result7.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
@@ -229,10 +228,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
+			Assert.AreEqual(0.843199477, result1.ResultNumeric, .00001);
+			Assert.AreEqual(0.843199477, result2.ResultNumeric, .00001);
+			Assert.AreEqual(0.104545899, result3.ResultNumeric, .00001);
+			Assert.AreEqual(0.104545899, result4.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
@@ -258,14 +257,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result7 = function.Execute(FunctionsHelper.CreateArgs(input7), this.ParsingContext);
 			var result8 = function.Execute(FunctionsHelper.CreateArgs(input8), this.ParsingContext);
 
-			Assert.AreEqual(11.30368687, System.Math.Round(result1.ResultNumeric, 8));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result2.Result).Type);
-			Assert.AreEqual(11.30368687, System.Math.Round(result3.ResultNumeric, 8));
-			Assert.AreEqual(11.30368687, System.Math.Round(result4.ResultNumeric, 8));
-			Assert.AreEqual(11.30368687, System.Math.Round(result5.ResultNumeric, 8));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result5.Result).Type);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result6.Result).Type);
-			Assert.AreEqual(11.30368687, System.Math.Round(result7.ResultNumeric, 8));
-			Assert.AreEqual(11.30368687, System.Math.Round(result8.ResultNumeric, 8));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result7.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result8.Result).Type);
 		}
 
 		[TestMethod]
@@ -283,10 +282,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			Assert.AreEqual(11.30368687, System.Math.Round(result1.ResultNumeric, 8));
-			Assert.AreEqual(11.35958682, System.Math.Round(result2.ResultNumeric, 8));
-			Assert.AreEqual(11.30368687, System.Math.Round(result3.ResultNumeric, 8));
-			Assert.AreEqual(11.35958682, System.Math.Round(result4.ResultNumeric, 8));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
 		}
 
 		[TestMethod]
@@ -300,8 +299,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
 
-			Assert.AreEqual(11.35632039, System.Math.Round(result1.ResultNumeric, 8));
-			Assert.AreEqual(11.35632039, System.Math.Round(result2.ResultNumeric, 8));
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
 		}
 
 		[TestMethod]
@@ -321,11 +320,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 			var result5 = function.Execute(FunctionsHelper.CreateArgs(input5), this.ParsingContext);
 
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result3.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result4.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result5.Result).Type);
+			Assert.AreEqual(0.549306144, System.Math.Round(result1.ResultNumeric, 9));
+			Assert.AreEqual(0.255412812, System.Math.Round(result2.ResultNumeric, 9));
+			Assert.AreEqual(1.47221949, System.Math.Round(result3.ResultNumeric, 9));
+			Assert.AreEqual(-1.47221949, System.Math.Round(result4.ResultNumeric, 9));
+			Assert.AreEqual(0.549306144, System.Math.Round(result5.ResultNumeric, 9));
 		}
 
 		[TestMethod]
@@ -339,8 +338,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
 
-			Assert.AreEqual(0, System.Math.Round(result1.ResultNumeric, 9));
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result2.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result1.Result).Type);
+			Assert.AreEqual(0, System.Math.Round(result2.ResultNumeric, 9));
 		}
 
 		#endregion

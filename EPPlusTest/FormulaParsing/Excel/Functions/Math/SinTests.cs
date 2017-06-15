@@ -124,7 +124,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
-			//Note: sin(pi) and sin(2*pi) have to have a delta becuase of a rounding error that occurs with Pi in both excel and EPPlus
+			//Note: Neither Excel or EPPlus handle Pi perfectly. Both seem to have a small rounding issue that is not a problem if you are aware of it.
 			Assert.AreEqual(1.22515E-16, System.Math.Round(result1.ResultNumeric, 9), .00001);
 			Assert.AreEqual(1, System.Math.Round(result2.ResultNumeric, 9));
 			Assert.AreEqual(-2.4503E-16, System.Math.Round(result3.ResultNumeric, 9), .00001);
