@@ -30,8 +30,20 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Logical
 {
+	/// <summary>
+	/// Returns the specified value if the given formula or value evaluates to an error. 
+	/// Otherwise, returns the result of the given formula or value.
+	/// </summary>
 	public class IfError : ExcelFunction
 	{
+		/// <summary>
+		/// Returns the second argument if the first argument evaluates to an error.
+		/// Otherwise, returns the result of the first argument.
+		/// </summary>
+		/// <param name="arguments">The arguments being checked.</param>
+		/// <param name="context">Unused in the method.</param>
+		/// <returns>Returns the second argument if the first argument evaluates as an <see cref="ExcelErrorValue"/>,
+		///				and returns the first argument otherwise.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
@@ -39,9 +51,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Logical
 			var firstArgValue = (arguments.ElementAt(0).Value == null) ? 0 : arguments.ElementAt(0).Value;
 			var lastArgValue = (arguments.ElementAt(1).Value == null) ? 0 : arguments.ElementAt(1).Value;
 			if (arguments.ElementAt(0).ValueIsExcelError)
-				return GetResultByObject(lastArgValue);
+				return this.GetResultByObject(lastArgValue);
 			else
-				return GetResultByObject(firstArgValue);
+				return this.GetResultByObject(firstArgValue);
 		}
 	}
 }
