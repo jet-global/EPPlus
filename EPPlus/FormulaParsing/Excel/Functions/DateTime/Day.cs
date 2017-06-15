@@ -48,8 +48,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>Returns the numeric day of the month for the given date, or an ExcelErrorValue, depending on if the input is valid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var serialNumberCandidate = arguments.ElementAt(0).Value;
 			if (ConvertUtil.TryParseDateObjectToOADate(serialNumberCandidate, out double serialNumber) &&
 				serialNumber < 1 && serialNumber >= 0) // Zero and fractions are special cases and require specific output.

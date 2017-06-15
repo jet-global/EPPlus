@@ -31,8 +31,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var arg1 = ArgToDecimal(arguments, 0);
 			var arg2 = ArgToDecimal(arguments, 1);
 			// Had to switch order of the arguments to get the same result as in excel /MA

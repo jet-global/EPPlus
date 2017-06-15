@@ -48,9 +48,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>Returns the Excel OADate of the calculated date, or an <see cref="ExcelErrorValue"/> if either input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (!this.ValidateArguments(arguments, 2))
-				return new CompileResult(eErrorType.Value);
-			//var dateObj = arguments.ElementAt(0).Value;
+			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var dateObj = this.GetFirstValue(arguments);
 			var monthsObj = arguments.ElementAt(1).Value;
 			if (dateObj == null || monthsObj== null)

@@ -325,6 +325,29 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(0.208333333, System.Math.Round(result3.ResultNumeric, 9));
 		}
 
+		[TestMethod]
+		public void TimeValueFunctionWithErrorValuesAsInputReturnsTheInputErrorValue()
+		{
+			var func = new TimeValue();
+			var argNA = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA));
+			var argNAME = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name));
+			var argVALUE = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value));
+			var argNUM = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Num));
+			var argDIV0 = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0));
+			var argREF = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Ref));
+			var resultNA = func.Execute(argNA, this.ParsingContext);
+			var resultNAME = func.Execute(argNAME, this.ParsingContext);
+			var resultVALUE = func.Execute(argVALUE, this.ParsingContext);
+			var resultNUM = func.Execute(argNUM, this.ParsingContext);
+			var resultDIV0 = func.Execute(argDIV0, this.ParsingContext);
+			var resultREF = func.Execute(argREF, this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)resultNA.Result).Type);
+			Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)resultNAME.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)resultVALUE.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)resultNUM.Result).Type);
+			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)resultDIV0.Result).Type);
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)resultREF.Result).Type);
+		}
 		#endregion
 	}
 }

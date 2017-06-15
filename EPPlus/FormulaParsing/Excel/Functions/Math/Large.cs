@@ -44,8 +44,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The nth largest number as a decimal based on user input.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var args = arguments.ElementAt(0);
 			if (args.Value == null)
 				return new CompileResult(eErrorType.Num);

@@ -46,8 +46,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>The week number based on the given date.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			if (arguments.Count() > 1)
 				return new CompileResult(eErrorType.NA);
 

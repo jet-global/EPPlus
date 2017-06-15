@@ -31,8 +31,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var str = ArgToString(arguments, 0);
 			var length = ArgToInt(arguments, 1);
 			var startIx = str.Length - length;

@@ -44,8 +44,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The first argument divided by the second argument as an integer value.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var numeratorCandidate = arguments.ElementAt(0).Value;
 			var denominatorCandidate = arguments.ElementAt(1).Value;
 			double candidateAsDouble;
