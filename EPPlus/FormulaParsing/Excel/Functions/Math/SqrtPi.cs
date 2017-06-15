@@ -35,8 +35,17 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Multiplies the given number with Pi, then returns the square root of the product.
+	/// </summary>
 	public class SqrtPi : ExcelFunction
 	{
+		/// <summary>
+		/// Multiplies the given number with Pi, then returns the square root of the product.
+		/// </summary>
+		/// <param name="arguments">The given number.</param>
+		/// <param name="context">Unused in the method.</param>
+		/// <returns>Returns the square root of the given number multiplied with Pi, or an <see cref="ExcelErrorValue"/> if the input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
