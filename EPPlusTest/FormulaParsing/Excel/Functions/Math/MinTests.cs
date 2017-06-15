@@ -296,29 +296,29 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MinShouldCalculateCorrectResult()
 		{
-			var func = new Min();
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Min();
+			var arguments = FunctionsHelper.CreateArgs(4, 2, 5, 2);
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(2d, result.Result);
 		}
 
 		[TestMethod]
 		public void MinShouldIgnoreHiddenValuesIfIgnoreHiddenValuesIsTrue()
 		{
-			var func = new Min();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 3);
-			args.ElementAt(1).SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Min();
+			function.IgnoreHiddenValues = true;
+			var arguments = FunctionsHelper.CreateArgs(4, 2, 5, 3);
+			arguments.ElementAt(1).SetExcelStateFlag(ExcelCellState.HiddenCell);
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(3d, result.Result);
 		}
 
 		[TestMethod]
 		public void MinWithInvalidArgumentReturnsPoundValue()
 		{
-			var func = new Min();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Min();
+			var arguments = FunctionsHelper.CreateArgs();
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 

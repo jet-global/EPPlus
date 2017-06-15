@@ -341,9 +341,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MedianShouldPoundNumIfNoArgs()
 		{
-			var func = new Median();
-			var args = FunctionsHelper.Empty();
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Median();
+			var arguments = FunctionsHelper.Empty();
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
 		}
@@ -351,27 +351,27 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MedianShouldCalculateCorrectlyWithOneMember()
 		{
-			var func = new Median();
-			var args = FunctionsHelper.CreateArgs(1);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Median();
+			var arguments = FunctionsHelper.CreateArgs(1);
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(1d, result.Result);
 		}
 
 		[TestMethod]
 		public void MedianShouldCalculateCorrectlyWithOddMembers()
 		{
-			var func = new Median();
-			var args = FunctionsHelper.CreateArgs(3, 5, 1, 4, 2);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Median();
+			var arguments = FunctionsHelper.CreateArgs(3, 5, 1, 4, 2);
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(3d, result.Result);
 		}
 
 		[TestMethod]
 		public void MedianShouldCalculateCorrectlyWithEvenMembers()
 		{
-			var func = new Median();
-			var args = FunctionsHelper.CreateArgs(1, 2, 3, 4);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Median();
+			var arguments = FunctionsHelper.CreateArgs(1, 2, 3, 4);
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(2.5d, result.Result);
 		}
 		#endregion

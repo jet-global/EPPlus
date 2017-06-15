@@ -313,9 +313,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MaxWithInvalidArgumentReturnsPoundValue()
 		{
-			var func = new Max();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Max();
+			var arguments = FunctionsHelper.CreateArgs();
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
