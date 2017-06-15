@@ -52,7 +52,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (!arguments.ElementAt(0).IsExcelRange)
 			{
 				if(arguments.Count() == 1)
-					return CreateResult(values.Min(), DataType.Decimal);
+					return this.CreateResult(values.Min(), DataType.Decimal);
 
 				var doublesList = new List<double> { };
 				foreach (var item in arguments)
@@ -73,7 +73,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return new CompileResult(eErrorType.Value);
 				if (doublesList.Count() > 255)
 					return new CompileResult(eErrorType.NA);
-				return CreateResult(doublesList.Min(), DataType.Decimal);
+				return this.CreateResult(doublesList.Min(), DataType.Decimal);
 			}
 
 			if (values.Count() > 255)
