@@ -29,8 +29,17 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Returns the square root of the given number.
+	/// </summary>
 	public class Sqrt : ExcelFunction
 	{
+		/// <summary>
+		/// Returns the square root of the given number.
+		/// </summary>
+		/// <param name="arguments">The number to take the square root of.</param>
+		/// <param name="context">Unused in the method.</param>
+		/// <returns>Returns the square root of the given number, or an <see cref="ExcelErrorValue"/> if the input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
