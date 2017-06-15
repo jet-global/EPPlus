@@ -142,6 +142,9 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Log10Tests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LogTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\MathFunctionsTestBase.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\MaxTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\MedianTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\MinTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\PowerTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\ProductTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountIfTests.cs" />
