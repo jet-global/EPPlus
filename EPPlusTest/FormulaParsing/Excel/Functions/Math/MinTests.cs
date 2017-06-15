@@ -37,6 +37,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class MinTests : MathFunctionsTestBase
 	{
+		#region Min Function (Execute) Tests
 		[TestMethod]
 		public void MinWithNoArgumentsReturnsPoundValue()
 		{
@@ -327,5 +328,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = function.Execute(FunctionsHelper.CreateArgs(10), this.ParsingContext);
 			Assert.AreEqual(10, result.Result);
 		}
+		#endregion
 	}
 }

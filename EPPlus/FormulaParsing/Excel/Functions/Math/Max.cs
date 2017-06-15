@@ -53,6 +53,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var args = arguments.ElementAt(0);
 			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
 			var values = argumentValueList.Where(arg => ((arg.GetType().IsPrimitive && (arg is bool == false)) || arg is System.DateTime));
+			foreach (var item in argumentValueList)
+			{
+				if (item is ExcelErrorValue)
+					return new CompileResult((ExcelErrorValue)item);
+			}
 			//If the input to the Max Function is not an excel range logical values and string representations of numbers
 			//are allowed, even though they are not counted in a cell reference.
 			if (!arguments.ElementAt(0).IsExcelRange)
