@@ -48,7 +48,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The maximum item of the user specified arguments.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ArgumentCountIsValid(arguments, 1) == false)
+			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var args = arguments.ElementAt(0);
 			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
@@ -61,7 +61,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			else if (!arguments.ElementAt(0).IsExcelRange)
 			{
-				var tvalues = new List<double> { };
+				var doublesList = new List<double> { };
 				foreach (var item in arguments)
 				{
 					if (item.ExcelStateFlagIsSet(ExcelCellState.HiddenCell))
@@ -69,26 +69,25 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					if (item.Value is string)
 					{
 						if (ConvertUtil.TryParseNumericString(item.Value, out double result))
-							tvalues.Add(result);
-						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime res))
+							doublesList.Add(result);
+						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime dateResult))
 						{
-							var temp = res.ToOADate();
-							tvalues.Add(temp);
+							doublesList.Add(dateResult.ToOADate());
 						}
 					}
 					else
-						tvalues.Add(ArgToDecimal(item.Value));
+						doublesList.Add(this.ArgToDecimal(item.Value));
 				}
-				if (tvalues.Count() == 0)
+				if (doublesList.Count() == 0)
 					return new CompileResult(eErrorType.Value);
-				if (tvalues.Count() > 255)
+				if (doublesList.Count() > 255)
 					return new CompileResult(eErrorType.NA);
-				return CreateResult(tvalues.Max(), DataType.Decimal);
+				return CreateResult(doublesList.Max(), DataType.Decimal);
 			}
 
 			if (values.Count() > 255)
 				return new CompileResult(eErrorType.NA);
-			return CreateResult(values.Max(), DataType.Decimal);
+			return this.CreateResult(values.Max(), DataType.Decimal);
 		}
 	}
 }

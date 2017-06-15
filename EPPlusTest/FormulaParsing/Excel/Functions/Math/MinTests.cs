@@ -152,8 +152,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MinWithReferenceToDateObjectsReturnsCorrectValue()
 		{
-			//EPPlus currently returns the OADate format of the date, while Excel returns the Date in date format.
-			//Will look into this as it could be an issue.
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");

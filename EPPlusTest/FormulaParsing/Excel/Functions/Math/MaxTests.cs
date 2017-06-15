@@ -188,8 +188,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MaxWithReferenceToCellsWithDateObjectsReturnsCorrectValue()
 		{
-			//Excel returns the date here in a date format, not in an OADate format. This could be a potential
-			//issue.
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");

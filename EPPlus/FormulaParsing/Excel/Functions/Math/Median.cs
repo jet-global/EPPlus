@@ -36,102 +36,85 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class contains the fomula for calculating the median of a set of data. 
+	/// </summary>
 	public class Median : ExcelFunction
 	{
+		/// <summary>
+		/// Takes the user specified arguments and returns the median of the data. 
+		/// </summary>
+		/// <param name="arguments">The user specified list, array, or cell reference.</param>
+		/// <param name="context">The context in which the method is being called.</param>
+		/// <returns></returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ArgumentCountIsValid(arguments, 1) == false)
+			double[] numberArray;
+			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			if (arguments.ElementAt(0).Value == null && arguments.Count() == 1)
 				return new CompileResult(eErrorType.Num);
-			var args = arguments.ElementAt(0);
-			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
-			//var nums = argumentValueList.Where(arg => ((arg.GetType().IsPrimitive && (arg is bool == false))));
-
-			var nums = ArgsToDoubleEnumerable(arguments, context);
-			var arr = nums.ToArray();
-
-			if (!arguments.ElementAt(0).IsExcelRange)
-			{
-				var tvalues = new List<double> { };
-				foreach (var item in arguments)
-				{
-					if (item.ExcelStateFlagIsSet(ExcelCellState.HiddenCell))
-						continue;
-					if (item.Value is string)
-					{
-						if (ConvertUtil.TryParseNumericString(item.Value, out double relt))
-							tvalues.Add(relt);
-						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime res))
-						{
-							var temp = res.ToOADate();
-							tvalues.Add(temp);
-						}
-						else if (ConvertUtil.TryParseBooleanString(item.Value, out bool r))
-						{
-							tvalues.Add(ArgToDecimal(r));
-						}
-						else if (item.ValueIsExcelError)
-							return new CompileResult(item.ValueAsExcelErrorValue);
-						else
-							return new CompileResult(eErrorType.Value);
-					}
-					else if(item.Type == null)
-					{
-						tvalues.Add(0.0);
-					}
-					else
-						tvalues.Add(ArgToDecimal(item.Value));
-				}
-				
-				foreach(var item in argumentValueList)
-				{
-					if (item is ExcelErrorValue)
-						return new CompileResult((ExcelErrorValue)item);
-				}
-
-				var tes = tvalues.ToArray();
-				Array.Sort(tes);
-
-				double reult;
-				if (tes.Length % 2 == 1)
-				{
-					reult = tes[tes.Length / 2];
-				}
-				else
-				{
-					var startIndex = tes.Length / 2 - 1;
-					reult = (tes[startIndex] + tes[startIndex + 1]) / 2d;
-				}
-				return CreateResult(reult, DataType.Decimal);
-			}
-
+			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { arguments.ElementAt(0) }, context);
 			foreach (var item in argumentValueList)
 			{
 				if (item is ExcelErrorValue)
 					return new CompileResult((ExcelErrorValue)item);
 			}
 
-			Array.Sort(arr);
-			if (arr.Length == 0)
+			if (!arguments.ElementAt(0).IsExcelRange)
+			{
+				var doubleList = new List<double> { };
+				foreach (var item in arguments)
+				{
+					if (item.ExcelStateFlagIsSet(ExcelCellState.HiddenCell))
+						continue;
+					if (item.Value is string)
+					{
+						if (ConvertUtil.TryParseNumericString(item.Value, out double decimalResult))
+							doubleList.Add(decimalResult);
+						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime dateResult))
+							doubleList.Add(dateResult.ToOADate());
+						else
+							return new CompileResult(eErrorType.Value);
+					}
+					else if(item.Type == null)
+						doubleList.Add(0.0);
+					else
+						doubleList.Add(this.ArgToDecimal(item.Value));
+				}
+				numberArray = doubleList.ToArray();
+			}
+			else
+				numberArray = ArgsToDoubleEnumerable(arguments, context).ToArray();
+		
+			if (numberArray.Length == 0)
 				return new CompileResult(eErrorType.Num);
-			if (arr.Length > 255)
+			if (numberArray.Length > 255)
 				return new CompileResult(eErrorType.NA);
 
+			return this.CreateResult(this.getMedian(numberArray), DataType.Decimal);
+		}
 
-
+		/// <summary>
+		/// Returns the median of an array of numbers.
+		/// </summary>
+		/// <param name="array">The user specified array of doubles.</param>
+		/// <returns>The number which is the median.</returns>
+		private double getMedian(double[] array)
+		{
+			Array.Sort(array);
 
 			double result;
-			if (arr.Length % 2 == 1)
+			if (array.Length % 2 == 1)
 			{
-				result = (double)arr[arr.Length / 2];
+				result = array[array.Length / 2];
 			}
 			else
 			{
-				var startIndex = arr.Length / 2 - 1;
-				result = ((double)arr[startIndex] + (double)arr[startIndex + 1]) / 2d;
+				var startIndex = array.Length / 2 - 1;
+				result = (array[startIndex] + array[startIndex + 1]) / 2d;
 			}
-			return CreateResult(result, DataType.Decimal);
+			return result;
 		}
 	}
 }

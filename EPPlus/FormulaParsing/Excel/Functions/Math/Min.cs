@@ -29,11 +29,20 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class contains the formula for calculating the minimum value in a set of arguments. 
+	/// </summary>
 	public class Min : HiddenValuesHandlingFunction
 	{
+		/// <summary>
+		/// Takes the user specified arguments and returns the minimum value.
+		/// </summary>
+		/// <param name="arguments">The user specified arguments, which can be a list, array, or cell referece.</param>
+		/// <param name="context">The context in which the method is being called.</param>
+		/// <returns>The minimum item in the user specified argument list.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ArgumentCountIsValid(arguments, 1) == false)
+			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var args = arguments.ElementAt(0);
 			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
@@ -46,7 +55,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			else if (!arguments.ElementAt(0).IsExcelRange)
 			{
-				var tvalues = new List<double> { };
+				var doublesList = new List<double> { };
 				foreach (var item in arguments)
 				{
 					if (item.ExcelStateFlagIsSet(ExcelCellState.HiddenCell))
@@ -54,26 +63,25 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					if (item.Value is string)
 					{
 						if (ConvertUtil.TryParseNumericString(item.Value, out double result))
-							tvalues.Add(result);
-						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime res))
+							doublesList.Add(result);
+						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime dateResult))
 						{
-							var temp = res.ToOADate();
-							tvalues.Add(temp);
+							doublesList.Add(dateResult.ToOADate());
 						}
 					}
 					else
-						tvalues.Add(ArgToDecimal(item.Value));
+						doublesList.Add(this.ArgToDecimal(item.Value));
 				}
-				if (tvalues.Count() == 0)
+				if (doublesList.Count() == 0)
 					return new CompileResult(eErrorType.Value);
-				if (tvalues.Count() > 255)
+				if (doublesList.Count() > 255)
 					return new CompileResult(eErrorType.NA);
-				return CreateResult(tvalues.Min(), DataType.Decimal);
+				return CreateResult(doublesList.Min(), DataType.Decimal);
 			}
 
 			if (values.Count() > 255)
 				return new CompileResult(eErrorType.NA);
-			return CreateResult(values.Min(), DataType.Decimal);
+			return this.CreateResult(values.Min(), DataType.Decimal);
 		}
 	}
 }
