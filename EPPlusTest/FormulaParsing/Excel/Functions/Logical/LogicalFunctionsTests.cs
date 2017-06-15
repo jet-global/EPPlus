@@ -232,42 +232,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void IfErrorWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new IfError();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void IfErrorFunctionWithErrorValuesAsInputReturnsCorrectResults()
-		{
-			Assert.Fail("This test will fail until the IfError function is fixed. As of 6/14/2017 the IfError function behaves completely different from the Excel function.");
-			var func = new IfError();
-			var parsingContext = ParsingContext.Create();
-			var argNA = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA),1);
-			var argNAME = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name),1);
-			var argVALUE = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value),1);
-			var argNUM = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Num),1);
-			var argDIV0 = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0),1);
-			var argREF = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Ref),1);
-			var resultNA = func.Execute(argNA, parsingContext);
-			var resultNAME = func.Execute(argNAME, parsingContext);
-			var resultVALUE = func.Execute(argVALUE, parsingContext);
-			var resultNUM = func.Execute(argNUM, parsingContext);
-			var resultDIV0 = func.Execute(argDIV0, parsingContext);
-			var resultREF = func.Execute(argREF, parsingContext);
-			Assert.AreEqual(1, resultNA.Result);
-			Assert.AreEqual(1, resultNAME.Result);
-			Assert.AreEqual(1, resultVALUE.Result);
-			Assert.AreEqual(1, resultNUM.Result);
-			Assert.AreEqual(1, resultDIV0.Result);
-			Assert.AreEqual(1, resultREF.Result);
-		}
-
-		[TestMethod]
 		public void IfNaWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new IfNa();

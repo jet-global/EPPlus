@@ -38,127 +38,151 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Logical
 		[TestMethod]
 		public void IfErrorWithTooFewArgumentsReturnsPoundValue()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs();
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
 		public void IfErrorWithNoErrorReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(1, "word");
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(1, "word");
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(1, result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithErrorAndIntegerReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA), 1);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA), 1);
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(1, result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithErrorAndDoubleReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value), 1.5);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value), 1.5);
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(1.5, result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithErrorAndStringReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Num), "word");
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Num), "word");
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual("word", result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithErrorAndEmptyStringReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0), string.Empty);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0), string.Empty);
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(string.Empty, result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithErrorAndNullArgumentReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name), null);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name), null);
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(0, result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithIntegerAndErrorReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(1, ExcelErrorValue.Create(eErrorType.NA));
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(1, ExcelErrorValue.Create(eErrorType.NA));
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(1, result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithDoubleAndErrorReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(1.5, ExcelErrorValue.Create(eErrorType.Value));
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(1.5, ExcelErrorValue.Create(eErrorType.Value));
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(1.5, result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithStringAndErrorReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs("word", ExcelErrorValue.Create(eErrorType.Num));
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs("word", ExcelErrorValue.Create(eErrorType.Num));
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual("word", result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithEmptyStringAndErrorReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(string.Empty, ExcelErrorValue.Create(eErrorType.Div0));
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(string.Empty, ExcelErrorValue.Create(eErrorType.Div0));
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(string.Empty, result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithNullArgumentAndErrorReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(null, ExcelErrorValue.Create(eErrorType.Name));
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(null, ExcelErrorValue.Create(eErrorType.Name));
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(0, result.Result);
 		}
 
 		[TestMethod]
 		public void IfErrorWithNAErrorAndNameErrorReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA), ExcelErrorValue.Create(eErrorType.Name));
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA), ExcelErrorValue.Create(eErrorType.Name));
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
 		public void IfErrorWithNameErrorAndNAErrorReturnsCorrectResult()
 		{
-			var func = new IfError();
-			var args = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name), ExcelErrorValue.Create(eErrorType.NA));
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new IfError();
+			var arguments = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name), ExcelErrorValue.Create(eErrorType.NA));
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IfErrorWithErrorValuesAsInputReturnsCorrectResults()
+		{
+			var function = new IfError();
+			var argumentsNA = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA), 1);
+			var argumentsNAME = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name), 1);
+			var argumentsVALUE = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value), 1);
+			var argumentsNUM = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Num), 1);
+			var argumentsDIV0 = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0), 1);
+			var argumentsREF = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Ref), 1);
+			var resultNA = function.Execute(argumentsNA, this.ParsingContext);
+			var resultNAME = function.Execute(argumentsNAME, this.ParsingContext);
+			var resultVALUE = function.Execute(argumentsVALUE, this.ParsingContext);
+			var resultNUM = function.Execute(argumentsNUM, this.ParsingContext);
+			var resultDIV0 = function.Execute(argumentsDIV0, this.ParsingContext);
+			var resultREF = function.Execute(argumentsREF, this.ParsingContext);
+			Assert.AreEqual(1, resultNA.Result);
+			Assert.AreEqual(1, resultNAME.Result);
+			Assert.AreEqual(1, resultVALUE.Result);
+			Assert.AreEqual(1, resultNUM.Result);
+			Assert.AreEqual(1, resultDIV0.Result);
+			Assert.AreEqual(1, resultREF.Result);
 		}
 
 		[TestMethod]
@@ -166,11 +190,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Logical
 		{
 			using (var package = new ExcelPackage())
 			{
-				var s1 = package.Workbook.Worksheets.Add("Sheet1");
-				s1.Cells["A1"].Formula = "IFERROR(A2, \"hello\")";
-				s1.Cells["A2"].Value = "word";
-				s1.Calculate();
-				Assert.AreEqual("word", s1.Cells["A1"].Value);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A1"].Formula = "IFERROR(A2, \"hello\")";
+				worksheet.Cells["A2"].Value = "word";
+				worksheet.Calculate();
+				Assert.AreEqual("word", worksheet.Cells["A1"].Value);
 			}
 		}
 
@@ -179,10 +203,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Logical
 		{
 			using (var package = new ExcelPackage())
 			{
-				var s1 = package.Workbook.Worksheets.Add("test");
-				s1.Cells["A1"].Formula = "IFERROR(\"hello\", 1/0)";
-				s1.Calculate();
-				Assert.AreEqual("hello", s1.Cells["A1"].Value);
+				var worksheet = package.Workbook.Worksheets.Add("test");
+				worksheet.Cells["A1"].Formula = "IFERROR(\"hello\", 1/0)";
+				worksheet.Calculate();
+				Assert.AreEqual("hello", worksheet.Cells["A1"].Value);
 			}
 		}
 
@@ -191,11 +215,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Logical
 		{
 			using (var package = new ExcelPackage())
 			{
-				var s1 = package.Workbook.Worksheets.Add("test");
-				s1.Cells["A1"].Formula = "IFERROR(A2, \"hello\")";
-				s1.Cells["A2"].Formula = "1/0";
-				s1.Calculate();
-				Assert.AreEqual("hello", s1.Cells["A1"].Value);
+				var worksheet = package.Workbook.Worksheets.Add("test");
+				worksheet.Cells["A1"].Formula = "IFERROR(A2, \"hello\")";
+				worksheet.Cells["A2"].Formula = "1/0";
+				worksheet.Calculate();
+				Assert.AreEqual("hello", worksheet.Cells["A1"].Value);
 			}
 		}
 
@@ -204,11 +228,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Logical
 		{
 			using (var package = new ExcelPackage())
 			{
-				var s1 = package.Workbook.Worksheets.Add("Sheet1");
-				s1.Cells["A1"].Formula = "IFERROR(1/0, A2)";
-				s1.Cells["A2"].Formula= "invalidFormulaToCreateNameError";
-				s1.Calculate();
-				Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)s1.Cells["A1"].Value).Type);
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A1"].Formula = "IFERROR(1/0, A2)";
+				worksheet.Cells["A2"].Formula= "invalidFormulaToCreateNameError";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)worksheet.Cells["A1"].Value).Type);
 			}
 		}
 		#endregion
