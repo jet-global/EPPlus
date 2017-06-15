@@ -2508,6 +2508,23 @@ namespace EPPlusTest
 			}
 		}
 
+		[TestMethod]
+		public void DeleteWorksheetWithImageWithHyperlink()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var ws1 = package.Workbook.Worksheets.Add("sheet1");
+				var ws2 = package.Workbook.Worksheets.Add("sheet2");
+				Bitmap image = new Bitmap(2, 2);
+				image.SetPixel(1, 1, Color.Black);
+				ws1.Drawings.AddPicture("Test", image, new Uri("http://wwww.jetreports.com"));
+				package.Save();
+				Assert.AreEqual(2, package.Workbook.Worksheets.Count);
+				package.Workbook.Worksheets.Delete(ws1);
+				Assert.AreEqual(1, package.Workbook.Worksheets.Count);
+			}
+		}
+
 		[TestMethod, Ignore]
 		public void Issue15207()
 		{

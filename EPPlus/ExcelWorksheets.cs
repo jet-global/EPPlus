@@ -1237,10 +1237,9 @@ namespace OfficeOpenXml
 			for (int i = 0; i < rels.Count; i++)
 			{
 				var rel = rels[i];
-				if (rel.RelationshipType != ExcelPackage.schemaImage)
-				{
-					this.DeleteRelationsAndParts(this.Package.Package.GetPart(UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri)));
-				}
+				if (rel.RelationshipType != ExcelPackage.schemaImage &&
+						this.Package.Package.TryGetPart(UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri), out Packaging.ZipPackagePart relPart))
+					this.DeleteRelationsAndParts(relPart);
 				part.DeleteRelationship(rel.Id);
 			}
 			this.Package.Package.DeletePart(part.Uri);
