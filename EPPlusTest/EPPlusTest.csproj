@@ -132,6 +132,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\YearTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\FunctionRepositoryTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\CountIfsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTestBase.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageATests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageTests.cs" />
@@ -156,6 +157,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SumIfsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Logical\IfErrorTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultFactoryTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\FunctionCompilerFactoryTests.cs" />
@@ -201,7 +203,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\ExcelFunctionTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\FunctionArgumentTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\InformationFunctionsTests.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\LogicalFunctionsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\MathFunctionsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\NumberFunctionsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\ChooseTests.cs" />

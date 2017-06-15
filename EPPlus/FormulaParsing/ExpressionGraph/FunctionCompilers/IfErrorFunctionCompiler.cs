@@ -23,23 +23,26 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 			Function.BeforeInvoke(context);
 			var firstChild = children.First();
 			var lastChild = children.ElementAt(1);
-			try
-			{
-				var result = firstChild.Compile();
-				if (result.DataType == DataType.ExcelError)
-				{
-					args.Add(new FunctionArgument(lastChild.Compile().Result));
-				}
-				else
-				{
-					args.Add(new FunctionArgument(result.Result));
-				}
+			//try
+			//{
+			//	var result = firstChild.Compile();
+			//	if (result.DataType == DataType.ExcelError)
+			//	{
+			//		args.Add(new FunctionArgument(lastChild.Compile().Result));
+			//	}
+			//	else
+			//	{
+			//		args.Add(new FunctionArgument(result.Result));
+			//	}
 
-			}
-			catch (ExcelErrorValueException)
-			{
-				args.Add(new FunctionArgument(lastChild.Compile().Result));
-			}
+			//}
+			//catch (ExcelErrorValueException)
+			//{
+			//	args.Add(new FunctionArgument(lastChild.Compile().Result));
+			//}
+
+			args.Add(new FunctionArgument(firstChild.Compile().Result));
+			args.Add(new FunctionArgument(lastChild.Compile().Result));
 			return Function.Execute(args, context);
 		}
 	}
