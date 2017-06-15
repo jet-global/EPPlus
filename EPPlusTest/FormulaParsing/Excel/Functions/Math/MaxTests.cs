@@ -93,7 +93,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(dateObject1, dateObject2), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(dateObjectAsOADate1, dateObjectAsOADate2), this.ParsingContext);
-
 			Assert.AreEqual(42901d, result1.Result);
 			Assert.AreEqual(42901d, result2.Result);
 		}
@@ -189,6 +188,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MaxWithReferenceToCellsWithDateObjectsReturnsCorrectValue()
 		{
+			//Excel returns the date here in a date format, not in an OADate format. This could be a potential
+			//issue.
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -292,20 +293,20 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MaxShouldCalculateCorrectResult()
 		{
-			var func = new Max();
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Max();
+			var arguments = FunctionsHelper.CreateArgs(4, 2, 5, 2);
+			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(5d, result.Result);
 		}
 
 		[TestMethod]
 		public void MaxShouldIgnoreHiddenValuesIfIgnoreHiddenValuesIsTrue()
 		{
-			var func = new Max();
-			func.IgnoreHiddenValues = true;
+			var function = new Max();
+			function.IgnoreHiddenValues = true;
 			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
 			args.ElementAt(2).SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, this.ParsingContext);
+			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(4d, result.Result);
 		}
 
