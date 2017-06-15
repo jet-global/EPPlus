@@ -32,139 +32,139 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 	[TestClass]
-	public class SqrtTests : MathFunctionsTestBase
+	public class SqrtPiTests : MathFunctionsTestBase
 	{
-		#region Sqrt Tests
+		#region SqrtPi Tests
 		[TestMethod]
-		public void SqrtFunctionWithTooFewArgumentsReturnsPoundValue()
+		public void SqrtPiWithTooFewArgumentsReturnsPoundValue()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs();
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithPositiveIntegerReturnsCorrectResult()
+		public void SqrtPiWithPositiveIntegerReturnsCorrectResult()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs(4);
 			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(2d, result.Result);
+			Assert.AreEqual(3.54490770181103, (double)result.Result, 0.00000000000001);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithPositiveDoubleReturnsCorrectResult()
+		public void SqrtPiWithPositiveDoubleReturnsCorrectResult()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs(6.25);
 			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(2.5, result.Result);
+			Assert.AreEqual(4.43113462726379, (double)result.Result, 0.00000000000001);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithZeroReturnsCorrectResult()
+		public void SqrtPiWithZeroReturnsCorrectResult()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs(0);
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(0d, result.Result);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithNegativeIntegerReturnsPoundNum()
+		public void SqrtPiWithNegativeIntegerReturnsPoundNum()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs(-1);
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithNegativeDoubleReturnsPoundNum()
+		public void SqrtPiWithNegativeDoubleReturnsPoundNum()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs(-1.5);
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithPositiveIntegerInStringReturnsCorrectResult()
+		public void SqrtPiWithPositiveIntegerInStringReturnsCorrectResult()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs("4");
 			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(2d, result.Result);
+			Assert.AreEqual(3.54490770181103, (double)result.Result, 0.00000000000001);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithPositiveDoubleInStringReturnsCorrectResult()
+		public void SqrtPiWithPositiveDoubleInStringReturnsCorrectResult()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs("6.25");
 			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(2.5, result.Result);
+			Assert.AreEqual(4.43113462726379, (double)result.Result, 0.00000000000001);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithZeroInStringReturnsCorrectResult()
+		public void SqrtPiWithZeroInStringReturnsCorrectResult()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs("0");
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(0d, result.Result);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithNegativeIntegerInStringReturnsPoundNum()
+		public void SqrtPiWithNegativeIntegerInStringReturnsPoundNum()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs("-1");
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithNegativeDoubleInStringReturnsPoundNum()
+		public void SqrtPiWithNegativeDoubleInStringReturnsPoundNum()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs("-1.5");
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithNonNumericsStringReturnsPoundValue()
+		public void SqrtPiWithNonNumericStringReturnsPoundValue()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs("word");
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithEmptyStringReturnsPoundValue()
+		public void SqrtPiWithEmptyStringReturnsPoundValue()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs(string.Empty);
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithDateInStringReturnsCorrectResult()
+		public void SqrtPiWithDateInStringReturnsCorrectResult()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var arguments = FunctionsHelper.CreateArgs("3/4/1900");
 			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(8d, result.Result);
+			Assert.AreEqual(14.1796308072441, (double)result.Result, 0.0000000000001);
 		}
 
 		[TestMethod]
-		public void SqrtFunctionWithErrorValuesAsInputReturnsTheInputErrorValue()
+		public void SqrtPiFunctionWithErrorValuesAsInputReturnsTheInputErrorValue()
 		{
-			var function = new Sqrt();
+			var function = new SqrtPi();
 			var argumentNA = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA));
 			var argumentNAME = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name));
 			var argumentVALUE = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value));
