@@ -48,19 +48,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The maximum item of the user specified arguments.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ArgumentCountIsValid(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType errorValue) == false)
+				return new CompileResult(errorValue);
 			var args = arguments.ElementAt(0);
 			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
 			var values = argumentValueList.Where(arg => ((arg.GetType().IsPrimitive && (arg is bool == false)) || arg is System.DateTime));
-			if (arguments.ElementAt(0).Type.Name.Equals("List`1"))
+			//If the input to the Max Function is not an excel range logical values and string representations of numbers
+			//are allowed, even though they are not counted in a cell reference.
+			if (!arguments.ElementAt(0).IsExcelRange)
 			{
-				if (values.Count() > 255)
-					return new CompileResult(eErrorType.NA);
-				return CreateResult(values.Max(), DataType.Decimal);
-			}
-			else if (!arguments.ElementAt(0).IsExcelRange)
-			{
+				if (arguments.Count() == 1)
+				{
+					if (values.Count() > 255)
+						return new CompileResult(eErrorType.NA);
+					return CreateResult(values.Max(), DataType.Decimal);
+				}
 				var doublesList = new List<double> { };
 				foreach (var item in arguments)
 				{
@@ -71,9 +73,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						if (ConvertUtil.TryParseNumericString(item.Value, out double result))
 							doublesList.Add(result);
 						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime dateResult))
-						{
 							doublesList.Add(dateResult.ToOADate());
-						}
 					}
 					else
 						doublesList.Add(this.ArgToDecimal(item.Value));

@@ -50,8 +50,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			double[] numberArray;
-			if (this.ArgumentCountIsValid(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType errorValue) == false)
+				return new CompileResult(errorValue);
 			if (arguments.ElementAt(0).Value == null && arguments.Count() == 1)
 				return new CompileResult(eErrorType.Num);
 			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { arguments.ElementAt(0) }, context);
@@ -60,7 +60,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				if (item is ExcelErrorValue)
 					return new CompileResult((ExcelErrorValue)item);
 			}
-
+			//If the input to the Median Function is not an excel range logical values and string representations of numbers
+			//are allowed, even though they are not counted in a cell reference.
 			if (!arguments.ElementAt(0).IsExcelRange)
 			{
 				var doubleList = new List<double> { };
@@ -77,7 +78,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						else
 							return new CompileResult(eErrorType.Value);
 					}
-					else if(item.Type == null)
+					else if (item.Type == null)
 						doubleList.Add(0.0);
 					else
 						doubleList.Add(this.ArgToDecimal(item.Value));
@@ -92,15 +93,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (numberArray.Length > 255)
 				return new CompileResult(eErrorType.NA);
 
-			return this.CreateResult(this.getMedian(numberArray), DataType.Decimal);
+			return this.CreateResult(this.GetMedian(numberArray), DataType.Decimal);
 		}
 
+		#region Private Methods
 		/// <summary>
 		/// Returns the median of an array of numbers.
 		/// </summary>
 		/// <param name="array">The user specified array of doubles.</param>
 		/// <returns>The number which is the median.</returns>
-		private double getMedian(double[] array)
+		private double GetMedian(double[] array)
 		{
 			Array.Sort(array);
 
@@ -116,5 +118,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			return result;
 		}
+		#endregion
 	}
 }

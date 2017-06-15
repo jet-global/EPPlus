@@ -320,5 +320,12 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
+		[TestMethod]
+		public void MinWithOneArgumentReturnsCorrectValue()
+		{
+			var function = new Min();
+			var result = function.Execute(FunctionsHelper.CreateArgs(10), this.ParsingContext);
+			Assert.AreEqual(10, result.Result);
+		}
 	}
 }
