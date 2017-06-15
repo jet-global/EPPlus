@@ -41,7 +41,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			var function = new Median();
 			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
@@ -206,10 +206,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = 99;
 				worksheet.Cells["B2"].Value = 6;
-				worksheet.Cells["B3"].Formula = "MEDIAN(\"strings\")";
+				worksheet.Cells["B3"].Formula = "SQRT(-1)";
 				worksheet.Cells["B10"].Formula = "MEDIAN(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B10"].Value).Type);
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B10"].Value).Type);
 			}
 		}
 
@@ -284,7 +284,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Formula = "MEDIAN((2/3),(5/8),(99/5))";
 				worksheet.Calculate();
-				Assert.AreEqual(0.666666d, (double)worksheet.Cells["B1"].Value, 0.000001);
+				Assert.AreEqual(0.66666666666667d, (double)worksheet.Cells["B1"].Value, 0.000001);
 			}
 		}
 
@@ -318,11 +318,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Formula = "MEDIAN(, 5, , , , )";
-				worksheet.Cells["B2"].Formula = "MEDIAN()";
+				worksheet.Cells["B1"].Formula = "MEDIAN(, 5)";
 				worksheet.Calculate();
 				Assert.AreEqual(2.5d, worksheet.Cells["B1"].Value);
-				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
 			}
 		}
 
@@ -338,6 +336,43 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(0.5d, worksheet.Cells["B1"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
 			}
+		}
+
+		[TestMethod]
+		public void MedianShouldPoundNumIfNoArgs()
+		{
+			var func = new Median();
+			var args = FunctionsHelper.Empty();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
+		}
+
+		[TestMethod]
+		public void MedianShouldCalculateCorrectlyWithOneMember()
+		{
+			var func = new Median();
+			var args = FunctionsHelper.CreateArgs(1);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(1d, result.Result);
+		}
+
+		[TestMethod]
+		public void MedianShouldCalculateCorrectlyWithOddMembers()
+		{
+			var func = new Median();
+			var args = FunctionsHelper.CreateArgs(3, 5, 1, 4, 2);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void MedianShouldCalculateCorrectlyWithEvenMembers()
+		{
+			var func = new Median();
+			var args = FunctionsHelper.CreateArgs(1, 2, 3, 4);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2.5d, result.Result);
 		}
 		#endregion
 	}

@@ -751,43 +751,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void MedianShouldPoundNumIfNoArgs()
-		{
-			var func = new Median();
-			var args = FunctionsHelper.Empty();
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
-		}
-
-		[TestMethod]
-		public void MedianShouldCalculateCorrectlyWithOneMember()
-		{
-			var func = new Median();
-			var args = FunctionsHelper.CreateArgs(1);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void MedianShouldCalculateCorrectlyWithOddMembers()
-		{
-			var func = new Median();
-			var args = FunctionsHelper.CreateArgs(3, 5, 1, 4, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(3d, result.Result);
-		}
-
-		[TestMethod]
-		public void MedianShouldCalculateCorrectlyWithEvenMembers()
-		{
-			var func = new Median();
-			var args = FunctionsHelper.CreateArgs(1, 2, 3, 4);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2.5d, result.Result);
-		}
-
-		[TestMethod]
 		public void CountIfShouldHandleNegativeCriteria()
 		{
 			using (var package = new ExcelPackage())

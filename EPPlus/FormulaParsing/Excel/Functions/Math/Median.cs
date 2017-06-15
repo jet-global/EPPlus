@@ -32,6 +32,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -39,12 +40,78 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			var test = ArgsToObjectEnumerable(false, arguments, context);
-
-
+			if (ValidateArguments(arguments, 1) == false)
+				return new CompileResult(eErrorType.Value);
+			if (arguments.ElementAt(0).Value == null && arguments.Count() == 1)
+				return new CompileResult(eErrorType.Num);
+			var args = arguments.ElementAt(0);
+			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
+			//var nums = argumentValueList.Where(arg => ((arg.GetType().IsPrimitive && (arg is bool == false))));
 
 			var nums = ArgsToDoubleEnumerable(arguments, context);
 			var arr = nums.ToArray();
+
+			if (!arguments.ElementAt(0).IsExcelRange)
+			{
+				var tvalues = new List<double> { };
+				foreach (var item in arguments)
+				{
+					if (item.ExcelStateFlagIsSet(ExcelCellState.HiddenCell))
+						continue;
+					if (item.Value is string)
+					{
+						if (ConvertUtil.TryParseNumericString(item.Value, out double relt))
+							tvalues.Add(relt);
+						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime res))
+						{
+							var temp = res.ToOADate();
+							tvalues.Add(temp);
+						}
+						else if (ConvertUtil.TryParseBooleanString(item.Value, out bool r))
+						{
+							tvalues.Add(ArgToDecimal(r));
+						}
+						else if (item.ValueIsExcelError)
+							return new CompileResult(item.ValueAsExcelErrorValue);
+						else
+							return new CompileResult(eErrorType.Value);
+					}
+					else if(item.Type == null)
+					{
+						tvalues.Add(0.0);
+					}
+					else
+						tvalues.Add(ArgToDecimal(item.Value));
+				}
+				
+				foreach(var item in argumentValueList)
+				{
+					if (item is ExcelErrorValue)
+						return new CompileResult((ExcelErrorValue)item);
+				}
+
+				var tes = tvalues.ToArray();
+				Array.Sort(tes);
+
+				double reult;
+				if (tes.Length % 2 == 1)
+				{
+					reult = tes[tes.Length / 2];
+				}
+				else
+				{
+					var startIndex = tes.Length / 2 - 1;
+					reult = (tes[startIndex] + tes[startIndex + 1]) / 2d;
+				}
+				return CreateResult(reult, DataType.Decimal);
+			}
+
+			foreach (var item in argumentValueList)
+			{
+				if (item is ExcelErrorValue)
+					return new CompileResult((ExcelErrorValue)item);
+			}
+
 			Array.Sort(arr);
 			if (arr.Length == 0)
 				return new CompileResult(eErrorType.Num);
@@ -57,12 +124,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			double result;
 			if (arr.Length % 2 == 1)
 			{
-				result = arr[arr.Length / 2];
+				result = (double)arr[arr.Length / 2];
 			}
 			else
 			{
 				var startIndex = arr.Length / 2 - 1;
-				result = (arr[startIndex] + arr[startIndex + 1]) / 2d;
+				result = ((double)arr[startIndex] + (double)arr[startIndex + 1]) / 2d;
 			}
 			return CreateResult(result, DataType.Decimal);
 		}
