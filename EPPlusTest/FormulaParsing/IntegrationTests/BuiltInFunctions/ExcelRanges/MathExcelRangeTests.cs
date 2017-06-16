@@ -78,7 +78,7 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions.ExcelRange
 			_worksheet.Cells["A4"].Formula = "Min(A1:A3)";
 			_worksheet.Calculate();
 			var result = _worksheet.Cells["A4"].Value;
-			Assert.AreEqual(1, result);
+			Assert.AreEqual(1d, result);
 		}
 
 		[TestMethod]

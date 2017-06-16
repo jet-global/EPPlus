@@ -22,6 +22,7 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
@@ -46,7 +47,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(errorValue);
 			var args = arguments.ElementAt(0);
 			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
-			var values = argumentValueList.Where(arg => ((arg.GetType().IsPrimitive && (arg is bool == false)) || arg is System.DateTime));
+			var values = argumentValueList.Where(arg => ((arg.GetType().IsPrimitive && (arg is bool == false))));
 			foreach (var item in argumentValueList)
 			{
 				if (item is ExcelErrorValue)
@@ -57,7 +58,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (!arguments.ElementAt(0).IsExcelRange)
 			{
 				if(arguments.Count() == 1)
-					return this.CreateResult(values.Min(), DataType.Decimal);
+					return this.CreateResult(Convert.ToDouble(values.Min()), DataType.Decimal);
 
 				var doublesList = new List<double> { };
 				foreach (var item in arguments)
@@ -70,6 +71,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 							doublesList.Add(result);
 						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime dateResult))
 							doublesList.Add(dateResult.ToOADate());
+						else
+							return new CompileResult(eErrorType.Value);
 					}
 					else
 						doublesList.Add(this.ArgToDecimal(item.Value));
@@ -80,10 +83,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return new CompileResult(eErrorType.NA);
 				return this.CreateResult(doublesList.Min(), DataType.Decimal);
 			}
-
-			if (values.Count() > 255)
+				if (values.Count() > 255)
 				return new CompileResult(eErrorType.NA);
-			return this.CreateResult(values.Min(), DataType.Decimal);
+			return this.CreateResult(Convert.ToDouble(values.Min()), DataType.Decimal);
 		}
 	}
 }
