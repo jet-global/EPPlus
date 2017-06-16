@@ -22,33 +22,88 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.FormulaParsing.Utilities;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class contains the formula for calculating the minimum item in a list, array, or reference of arguments
+	/// </summary>
 	public class Mina : ExcelFunction
 	{
 		private readonly DoubleEnumerableArgConverter _argConverter;
-
+		/// <summary>
+		/// 
+		/// </summary>
 		public Mina()
-			 : this(new DoubleEnumerableArgConverter())
+			: this(new DoubleEnumerableArgConverter())
 		{
 
 		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="argConverter"></param>
 		public Mina(DoubleEnumerableArgConverter argConverter)
 		{
-			Require.That(argConverter).Named("argConverter").IsNotNull();
+			Utilities.Require.That(argConverter).Named("argConverter").IsNotNull();
 			_argConverter = argConverter;
 		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="arguments"></param>
+		/// <param name="context"></param>
+		/// <returns>The minimum </returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
-				return new CompileResult(argumentError);
-			var values = _argConverter.ConvertArgsIncludingOtherTypes(arguments);
-			return CreateResult(values.Min(), DataType.Decimal);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType errorValue) == false)
+				return new CompileResult(errorValue);
+			var args = arguments.ElementAt(0);
+			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
+			var values = argumentValueList.Where(arg => ((arg.GetType().IsPrimitive && (arg is bool == false)) || arg is System.DateTime));
+			foreach (var item in argumentValueList)
+			{
+				if (item is ExcelErrorValue)
+					return new CompileResult((ExcelErrorValue)item);
+			}
+			//If the input to the Min Function is not an excel range logical values and string representations of numbers
+			//are allowed, even though they are not counted in a cell reference.
+			if (!arguments.ElementAt(0).IsExcelRange)
+			{
+				if (arguments.Count() == 1)
+					return this.CreateResult(Convert.ToDouble(values.Min()), DataType.Decimal);
+
+				var doublesList = new List<double> { };
+				foreach (var item in arguments)
+				{
+					if (item.ExcelStateFlagIsSet(ExcelCellState.HiddenCell))
+						continue;
+					if (item.Value is string)
+					{
+						if (ConvertUtil.TryParseNumericString(item.Value, out double result))
+							doublesList.Add(result);
+						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime dateResult))
+							doublesList.Add(dateResult.ToOADate());
+					}
+					else
+						doublesList.Add(this.ArgToDecimal(item.Value));
+				}
+				if (doublesList.Count() == 0)
+					return new CompileResult(eErrorType.Value);
+				if (doublesList.Count() > 255)
+					return new CompileResult(eErrorType.NA);
+				return this.CreateResult(doublesList.Min(), DataType.Decimal);
+			}
+
+			if (values.Count() > 255)
+				return new CompileResult(eErrorType.NA);
+			return this.CreateResult(Convert.ToDouble(values.Min()), DataType.Decimal);
 		}
 	}
 }

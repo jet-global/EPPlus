@@ -54,7 +54,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				for (int i = 1; i < 260; i++)
 				{
-					for (int j = 0; j < 1; j++)
+					for (int j = 1; j < 2; j++)
 					{
 						worksheet.Cells[i, j].Value = 5;
 					}
@@ -195,7 +195,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B3"].Value = 2;
 				worksheet.Cells["C1"].Formula = "MINA(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(2, worksheet.Cells["C1"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["C1"].Value);
 			}
 		}
 
@@ -281,7 +281,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["C1"].Value = "MINA({5, 10, 4})";
+				worksheet.Cells["C1"].Formula = "MINA({5, 10, 4})";
 				worksheet.Calculate();
 				Assert.AreEqual(4d, worksheet.Cells["C1"].Value);
 			}
