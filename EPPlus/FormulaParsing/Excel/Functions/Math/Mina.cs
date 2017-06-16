@@ -90,6 +90,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 							doublesList.Add(result);
 						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime dateResult))
 							doublesList.Add(dateResult.ToOADate());
+						else
+							return new CompileResult(eErrorType.Value);
 					}
 					else
 						doublesList.Add(this.ArgToDecimal(item.Value));
@@ -101,9 +103,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return this.CreateResult(doublesList.Min(), DataType.Decimal);
 			}
 
-			if (values.Count() > 255)
+			var vvalues = _argConverter.ConvertArgsIncludingOtherTypes(arguments);
+
+			if (vvalues.Count() > 255)
 				return new CompileResult(eErrorType.NA);
-			return this.CreateResult(Convert.ToDouble(values.Min()), DataType.Decimal);
+			return this.CreateResult(Convert.ToDouble(vvalues.Min()), DataType.Decimal);
+
+
+			
 		}
 	}
 }
