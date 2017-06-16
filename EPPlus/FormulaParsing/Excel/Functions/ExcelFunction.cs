@@ -112,7 +112,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// (the value of) <paramref name="minLength"/> elements. If one of the arguments is an
 		/// <see cref="ExcelDataProvider.IRangeInfo">Excel range</see> the number of cells in
 		/// that range will be counted as well. Additionally, if any of the given arguments are an
-		/// <see cref="ExcelErrorValue"/>, that error value will be passed back in <paramref name="argumentError"/>.
+		/// <see cref="ExcelErrorValue"/>, that error value will be passed back in <paramref name="errorValue"/>.
 		/// </summary>
 		/// <param name="arguments">The arguments to validate.</param>
 		/// <param name="minLength">The expected minimum number of elements in <paramref name="arguments"/>.</param>
