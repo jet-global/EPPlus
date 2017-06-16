@@ -270,9 +270,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Formula = "MAXA(TRUE, 5, , 8, \"16\")";
+				worksheet.Cells["B1"].Formula = "MAXA(\"0.5\", TRUE, 5)";
 				worksheet.Calculate();
-				Assert.AreEqual(16d, worksheet.Cells["B1"].Value);
+				Assert.AreEqual(0.5d, worksheet.Cells["B1"].Value);
 			}
 		}
 
