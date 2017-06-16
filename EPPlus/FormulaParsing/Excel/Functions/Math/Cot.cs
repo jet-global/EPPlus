@@ -40,6 +40,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
+			if (MathHelper.Cosec(result) == -2)
+				return new CompileResult(eErrorType.Div0);
 			return CreateResult(MathHelper.Cotan(result), DataType.Decimal);
 		}
 	}

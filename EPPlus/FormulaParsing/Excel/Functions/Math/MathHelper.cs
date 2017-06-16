@@ -40,62 +40,23 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		// Cosecant
 		public static double Cosec(double x)
 		{
+			if (MathObj.Sin(x) == 0)
+				return -2;
 			return 1 / MathObj.Sin(x);
 		}
 
 		// Cotangent 
 		public static double Cotan(double x)
 		{
+			if (MathObj.Tan(x) == 0)
+				return -2;
 			return 1 / MathObj.Tan(x);
-		}
-
-		// Inverse Sine 
-		public static double Arcsin(double x)
-		{
-			return MathObj.Atan(x / MathObj.Sqrt(-x * x + 1));
-		}
-
-		// Inverse Cosine 
-		public static double Arccos(double x)
-		{
-			return MathObj.Atan(-x / MathObj.Sqrt(-x * x + 1)) + 2 * MathObj.Atan(1);
-		}
-
-
-		// Inverse Secant 
-		public static double Arcsec(double x)
-		{
-			return 2 * MathObj.Atan(1) - MathObj.Atan(MathObj.Sign(x) / MathObj.Sqrt(x * x - 1));
-		}
-
-		// Inverse Cosecant 
-		public static double Arccosec(double x)
-		{
-			return MathObj.Atan(MathObj.Sign(x) / MathObj.Sqrt(x * x - 1));
 		}
 
 		// Inverse Cotangent 
 		public static double Arccotan(double x)
 		{
 			return 2 * MathObj.Atan(1) - MathObj.Atan(x);
-		}
-
-		// Hyperbolic Sine 
-		public static double HSin(double x)
-		{
-			return (MathObj.Exp(x) - MathObj.Exp(-x)) / 2;
-		}
-
-		// Hyperbolic Cosine 
-		public static double HCos(double x)
-		{
-			return (MathObj.Exp(x) + MathObj.Exp(-x)) / 2;
-		}
-
-		// Hyperbolic Tangent 
-		public static double HTan(double x)
-		{
-			return (MathObj.Exp(x) - MathObj.Exp(-x)) / (MathObj.Exp(x) + MathObj.Exp(-x));
 		}
 
 		// Hyperbolic Secant 
@@ -107,12 +68,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		// Hyperbolic Cosecant 
 		public static double HCosec(double x)
 		{
+			if ((MathObj.Exp(x) - MathObj.Exp(-x)) == 0)
+				return -2;
 			return 2 / (MathObj.Exp(x) - MathObj.Exp(-x));
 		}
 
 		// Hyperbolic Cotangent 
 		public static double HCotan(double x)
 		{
+			if ((MathObj.Exp(x) - MathObj.Exp(-x) == 0))
+				return -2;
+			var NaNChecker = (MathObj.Exp(x) + MathObj.Exp(-x)) / (MathObj.Exp(x) - MathObj.Exp(-x));
+			if (NaNChecker.Equals(double.NaN))
+				return 1;
+
 			return (MathObj.Exp(x) + MathObj.Exp(-x)) / (MathObj.Exp(x) - MathObj.Exp(-x));
 		}
 
@@ -134,28 +103,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return MathObj.Log((1 + x) / (1 - x)) / 2;
 		}
 
-		// Inverse Hyperbolic Secant 
-		public static double HArcsec(double x)
-		{
-			return MathObj.Log((MathObj.Sqrt(-x * x + 1) + 1) / x);
-		}
-
-		// Inverse Hyperbolic Cosecant 
-		public static double HArccosec(double x)
-		{
-			return MathObj.Log((MathObj.Sign(x) * MathObj.Sqrt(x * x + 1) + 1) / x);
-		}
-
-		// Inverse Hyperbolic Cotangent 
 		public static double HArccotan(double x)
 		{
 			return MathObj.Log((x + 1) / (x - 1)) / 2;
-		}
-
-		// Logarithm to base N 
-		public static double LogN(double x, double n)
-		{
-			return MathObj.Log(x) / MathObj.Log(n);
 		}
 	}
 }

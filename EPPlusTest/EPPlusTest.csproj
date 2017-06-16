@@ -138,6 +138,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\AcotTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AsinhTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AsinTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Atan2Tests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AtanhTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AtanTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageATests.cs" />

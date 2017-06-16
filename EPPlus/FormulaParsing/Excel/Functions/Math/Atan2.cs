@@ -20,10 +20,13 @@
  * 
  * Author							Change						Date
  *******************************************************************************
- * Mats Alm   		                Added		                2013-12-03
+ * Mats Alm   		                Added		                2015-01-11
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
+using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -33,10 +36,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (ValidateArguments(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
+
+			var argument = arguments.First().Value;
+			var argument2 = arguments.ElementAt(1).Value;
+
+			if ((argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result)) || ( argument2 is string & !ConvertUtil.TryParseDateObjectToOADate(argument2, out double result2)))
+				return new CompileResult(eErrorType.Value);
+
+			if(result ==0 & result2 ==0)
+				return new CompileResult(eErrorType.Div0);
+
 			var arg1 = ArgToDecimal(arguments, 0);
 			var arg2 = ArgToDecimal(arguments, 1);
-			// Had to switch order of the arguments to get the same result as in excel /MA
-			return CreateResult(System.Math.Atan2(arg2, arg1), DataType.Decimal);
+
+			return this.CreateResult(System.Math.Atan2(arg2, arg1), DataType.Decimal);
 		}
 	}
 }

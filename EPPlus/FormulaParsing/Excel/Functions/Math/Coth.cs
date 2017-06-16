@@ -36,11 +36,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (ValidateArguments(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
-			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double resultOfTryParseDateObjectToOADate))
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return CreateResult(MathHelper.HCotan(result), DataType.Decimal);
+			if (MathHelper.Cosec(resultOfTryParseDateObjectToOADate) == -2)
+				return new CompileResult(eErrorType.Div0);
+			return CreateResult(MathHelper.HCotan(resultOfTryParseDateObjectToOADate), DataType.Decimal);
 		}
 	}
 }
