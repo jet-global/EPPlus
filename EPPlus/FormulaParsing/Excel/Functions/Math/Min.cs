@@ -71,6 +71,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 							doublesList.Add(result);
 						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime dateResult))
 							doublesList.Add(dateResult.ToOADate());
+						else
+							return new CompileResult(eErrorType.Value);
 					}
 					else
 						doublesList.Add(this.ArgToDecimal(item.Value));
