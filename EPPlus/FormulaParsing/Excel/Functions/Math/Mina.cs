@@ -104,13 +104,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 
 			var vvalues = _argConverter.ConvertArgsIncludingOtherTypes(arguments);
-
 			if (vvalues.Count() > 255)
 				return new CompileResult(eErrorType.NA);
-			return this.CreateResult(Convert.ToDouble(vvalues.Min()), DataType.Decimal);
-
-
-			
+			return this.CreateResult(Convert.ToDouble(vvalues.Min()), DataType.Decimal);			
 		}
 	}
 }
