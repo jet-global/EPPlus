@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
+using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -40,9 +41,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			if (MathHelper.Cosec(resultOfTryParseDateObjectToOADate) == -2)
+			if (Cosecant(resultOfTryParseDateObjectToOADate) == -2)
 				return new CompileResult(eErrorType.Div0);
-			return CreateResult(MathHelper.HCotan(resultOfTryParseDateObjectToOADate), DataType.Decimal);
+			return CreateResult(HyperbolicCotangent(resultOfTryParseDateObjectToOADate), DataType.Decimal);
+		}
+
+		private static double HyperbolicCotangent(double x)
+		{
+			if ((MathObj.Exp(x) - MathObj.Exp(-x) == 0))
+				return -2;
+			var NaNChecker = (MathObj.Exp(x) + MathObj.Exp(-x)) / (MathObj.Exp(x) - MathObj.Exp(-x));
+			if (NaNChecker.Equals(double.NaN))
+				return 1;
+
+			return (MathObj.Exp(x) + MathObj.Exp(-x)) / (MathObj.Exp(x) - MathObj.Exp(-x));
+		}
+
+		private static double Cosecant(double x)
+		{
+			if (MathObj.Sin(x) == 0)
+				return -2;
+			return 1 / MathObj.Sin(x);
 		}
 	}
 }

@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
+using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -40,7 +41,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return CreateResult(MathHelper.HSec(result), DataType.Decimal);
+			return CreateResult(HyperbolicSecant(result), DataType.Decimal);
+		}
+
+		// Hyperbolic Secant 
+		private static double HyperbolicSecant(double x)
+		{
+			return 2 / (MathObj.Exp(x) + MathObj.Exp(-x));
 		}
 	}
 }

@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System.Linq;
 using OfficeOpenXml.Utils;
+using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -40,8 +41,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return this.CreateResult(MathHelper.HArctan (result), DataType.Decimal);
+			return this.CreateResult(InverseHyperbolicTangent(result), DataType.Decimal);
+		}
+
+		private static double InverseHyperbolicTangent(double x)
+		{
+			return MathObj.Log((1 + x) / (1 - x)) / 2;
 		}
 	}
-
 }

@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System.Linq;
 using OfficeOpenXml.Utils;
+using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -40,7 +41,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return this.CreateResult(MathHelper.HArcsin(result), DataType.Decimal);
+			return this.CreateResult(InverseHyperbolicSine(result), DataType.Decimal);
+		}
+
+
+		// Inverse Hyperbolic Sine 
+		private static double InverseHyperbolicSine(double x)
+		{
+			return MathObj.Log(x + MathObj.Sqrt(x * x + 1));
 		}
 	}
 

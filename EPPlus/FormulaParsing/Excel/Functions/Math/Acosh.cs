@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System.Linq;
 using OfficeOpenXml.Utils;
+using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -40,7 +41,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return this.CreateResult(MathHelper.HArccos(result), DataType.Decimal);
+			return this.CreateResult(InverseHyperbolicCosine(result), DataType.Decimal);
+		}
+
+		private static double InverseHyperbolicCosine(double x)
+		{
+			return MathObj.Log(x + MathObj.Sqrt(x * x - 1));
 		}
 	}
 

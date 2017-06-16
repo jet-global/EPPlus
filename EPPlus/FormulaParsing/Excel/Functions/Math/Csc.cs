@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
+using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -40,9 +41,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			if(MathHelper.Cosec(result)==-2)
+			if(Cosecant(result)==-2)
 				return new CompileResult(eErrorType.Div0);
-			return CreateResult(MathHelper.Cosec(result), DataType.Decimal);
+			return CreateResult(Cosecant(result), DataType.Decimal);
 		}
+
+		private static double Cosecant(double x)
+		{
+			if (MathObj.Sin(x) == 0)
+				return -2;
+			return 1 / MathObj.Sin(x);
+		}
+
 	}
 }

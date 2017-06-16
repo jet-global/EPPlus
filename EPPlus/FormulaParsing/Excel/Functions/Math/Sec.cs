@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
+using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -40,7 +41,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return CreateResult(MathHelper.Sec(result), DataType.Decimal);
+			return CreateResult(Secant(result), DataType.Decimal);
+		}
+
+		private static double Secant(double x)
+		{
+			return 1 / MathObj.Cos(x);
 		}
 	}
 }

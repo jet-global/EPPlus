@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System.Linq;
 using OfficeOpenXml.Utils;
+using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -40,8 +41,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return this.CreateResult(MathHelper.HArccotan (result), DataType.Decimal);
+			return this.CreateResult(InverseHyperbolicCotangent(result), DataType.Decimal);
+		}
+
+		private static double InverseHyperbolicCotangent(double x)
+		{
+			return MathObj.Log((x + 1) / (x - 1)) / 2;
 		}
 	}
-
 }

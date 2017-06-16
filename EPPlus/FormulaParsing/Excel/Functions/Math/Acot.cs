@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
+using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -40,8 +41,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return this.CreateResult(MathHelper.Arccotan(result), DataType.Decimal);
+			return this.CreateResult(InverseCotangent(result), DataType.Decimal);
 		}
-	}
+
+
+		// Inverse Cotangent 
+		private static double InverseCotangent(double x)
+		{
+			return 2 * MathObj.Atan(1) - MathObj.Atan(x);
+		}
+	}	
 }
 
