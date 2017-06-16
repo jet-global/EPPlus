@@ -68,7 +68,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B3"].Value = "TRUE";
 				worksheet.Cells["B4"].Formula = "MIN(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(2, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
 			}
 		}
 
@@ -83,7 +83,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B3"].Value = 5;
 				worksheet.Cells["B4"].Formula = "MIN(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(2, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
 			}
 		}
 
@@ -130,7 +130,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["C1"].Formula = "MIN(A1:A255)";
 				worksheet.Cells["C2"].Formula = "MIN(A1:A270)";
 				worksheet.Calculate();
-				Assert.AreEqual(4, worksheet.Cells["C1"].Value);
+				Assert.AreEqual(4d, worksheet.Cells["C1"].Value);
 				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["C2"].Value).Type);
 			}
 		}
@@ -238,7 +238,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Formula = "MIN((9/8), (7/9), (1/3))";
 				worksheet.Calculate();
-				Assert.AreEqual(0.33333333, (double)worksheet.Cells["B1"].Value, 0.00000001);
+				Assert.AreEqual(0.33333333d, (double)worksheet.Cells["B1"].Value, 0.00000001);
 			}
 		}
 
@@ -279,8 +279,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B3"].Value = 5;
 				worksheet.Cells["B4"].Value = 3;
 				worksheet.Cells["B5"].Formula = "MIN(B1:B4)";
+				worksheet.Cells["B6"].Formula = "MIN(TRUE, \"STRING\", 5, 3)";
 				worksheet.Calculate();
-				Assert.AreEqual(3, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(3d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
 			}
 		}
 
@@ -326,7 +328,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			var function = new Min();
 			var result = function.Execute(FunctionsHelper.CreateArgs(10), this.ParsingContext);
-			Assert.AreEqual(10, result.Result);
+			Assert.AreEqual(10d, result.Result);
 		}
 		#endregion
 	}

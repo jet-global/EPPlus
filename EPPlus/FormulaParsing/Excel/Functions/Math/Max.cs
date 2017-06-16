@@ -28,6 +28,7 @@
 * *******************************************************************************
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
@@ -63,7 +64,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (!arguments.ElementAt(0).IsExcelRange)
 			{
 				if (arguments.Count() == 1)
-					return this.CreateResult(values.Max(), DataType.Decimal);
+					return this.CreateResult(Convert.ToDouble(values.Max()), DataType.Decimal);
 
 				var doublesList = new List<double> { };
 				foreach (var item in arguments)
@@ -76,6 +77,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 							doublesList.Add(result);
 						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime dateResult))
 							doublesList.Add(dateResult.ToOADate());
+						else
+							return new CompileResult(eErrorType.Value);
 					}
 					else
 						doublesList.Add(this.ArgToDecimal(item.Value));
@@ -89,7 +92,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 			if (values.Count() > 255)
 				return new CompileResult(eErrorType.NA);
-			return this.CreateResult(values.Max(), DataType.Decimal);
+			return this.CreateResult(Convert.ToDouble(values.Max()), DataType.Decimal);
 		}
 	}
 }
