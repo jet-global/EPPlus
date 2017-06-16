@@ -1058,16 +1058,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void MinaWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Mina();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
 		public void ModWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Mod();
