@@ -81,7 +81,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B3"].Value = "67";
 				worksheet.Cells["B4"].Formula = "MAXA(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(5d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(5d, worksheet.Cells["B4"].Value);
 			}
 		}
 
@@ -142,7 +142,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B3"].Formula = "DATE(2017, 5, 15)";
 				worksheet.Cells["B4"].Formula = "MAXA(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(42888d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(42888d, worksheet.Cells["B4"].Value);
 			}
 		}
 
@@ -157,7 +157,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B3"].Value = 42870;
 				worksheet.Cells["B4"].Formula = "MAXA(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(4288d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(42888d, worksheet.Cells["B4"].Value);
 			}
 		}
 
@@ -170,7 +170,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B1"].Value = "5/5/2017";
 				worksheet.Cells["B2"].Value = "6/2/2017";
 				worksheet.Cells["B3"].Value = "5/15/2017";
-				worksheet.Cells["B4"].Value = "MINA(B1:B3)";
+				worksheet.Cells["B4"].Formula = "MINA(B1:B3)";
 				worksheet.Calculate();
 				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
 			}
@@ -238,6 +238,58 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var function = new Maxa();
 			var result = function.Execute(FunctionsHelper.CreateArgs("string", "string"), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void MaxaWithDateObjectInputsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MAXA(DATE(2017, 6, 15), DATE(2017, 5, 18))";
+				worksheet.Calculate();
+				Assert.AreEqual(42901d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MaxaWithDatesAsStringsInputsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MAXA(\"5/2/2017\", \"6/25/2017\")";
+				worksheet.Calculate();
+				Assert.AreEqual(42911d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MaxaWithMixedTypesReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MAXA(TRUE, 5, , 8, \"16\")";
+				worksheet.Calculate();
+				Assert.AreEqual(16d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MaxaWithLogicValueInListOfArgumentsReturnsCorrectValue()
+		{
+			var function = new Maxa();
+			var result = function.Execute(FunctionsHelper.CreateArgs(0.5, "TRUE", 0.6), this.ParsingContext);
+			Assert.AreEqual(1d, result.Result);
+
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "MAXA(TRUE, 0.5, 0.6)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B1"].Value);
+			}
 		}
 		#endregion
 	}
