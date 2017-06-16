@@ -44,8 +44,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns the given radian value converted to degrees.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var angleObj = arguments.ElementAt(0).Value;
 			// The method TryParseDateObjectToOADate attempts to parse the given object as a double.
 			// That double is only used as an OADate if the given object represented a date.

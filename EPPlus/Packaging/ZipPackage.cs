@@ -202,18 +202,30 @@ namespace OfficeOpenXml.Packaging
 			Parts.Add(GetUriKey(part.Uri.OriginalString), part);
 			return part;
 		}
+		/// <summary>
+		/// Gets the part with the specified <paramref name="partUri"/>.
+		/// </summary>
+		/// <param name="partUri">The URI of the part to get.</param>
+		/// <returns>The part with the specified <paramref name="partUri"/>.</returns>
+		/// <exception cref="InvalidOperationException">Thrown when a part with the specified <paramref name="partUri"/> does not exist.</exception>
 		internal ZipPackagePart GetPart(Uri partUri)
 		{
-			if (PartExists(partUri))
-			{
-				return Parts.Single(x => x.Key.Equals(GetUriKey(partUri.OriginalString), StringComparison.InvariantCultureIgnoreCase)).Value;
-			}
-			else
-			{
-				throw (new InvalidOperationException("Part does not exist."));
-			}
+			if (this.TryGetPart(partUri, out ZipPackagePart part))
+				return part;
+			throw (new InvalidOperationException("Part does not exist."));
 		}
-
+		/// <summary>
+		/// Tries to get the part with the specified <paramref name="partUri"/>.
+		/// </summary>
+		/// <param name="partUri">The URI of the part to get.</param>
+		/// <param name="part">The part with the specified <paramref name="partUri"/> if it exists; otherwise, null.</param>
+		/// <returns>true if a part with the specified <paramref name="partUri"/> exists; otherwise, false.</returns>
+		internal bool TryGetPart(Uri partUri, out ZipPackagePart part)
+		{
+			var partExists = this.PartExists(partUri);
+			part = partExists ? Parts.Single(x => x.Key.Equals(GetUriKey(partUri.OriginalString), StringComparison.InvariantCultureIgnoreCase)).Value : null;
+			return partExists;
+		}
 		internal string GetUriKey(string uri)
 		{
 			string ret = uri;

@@ -23,19 +23,33 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Returns the square root of the given number.
+	/// </summary>
 	public class Sqrt : ExcelFunction
 	{
+		/// <summary>
+		/// Returns the square root of the given number.
+		/// </summary>
+		/// <param name="arguments">The number to take the square root of.</param>
+		/// <param name="context">Unused in the method.</param>
+		/// <returns>Returns the square root of the given number, or an <see cref="ExcelErrorValue"/> if the input is invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ValidateArguments(arguments, 1) == false)
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
+			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double number))
 				return new CompileResult(eErrorType.Value);
-			var arg = ArgToDecimal(arguments, 0);
-			var result = System.Math.Sqrt((double)arg);
-			return CreateResult((double)result, DataType.Decimal);
+			if (number < 0)
+				return new CompileResult(eErrorType.Num);
+			var result = System.Math.Sqrt(number);
+			return this.CreateResult(result, DataType.Decimal);
 		}
 	}
 }

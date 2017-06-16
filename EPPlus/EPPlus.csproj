@@ -455,6 +455,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Degrees.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Exp.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Fact.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\FactDouble.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Floor.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Large.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Ln.cs" />

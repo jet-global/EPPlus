@@ -2508,6 +2508,23 @@ namespace EPPlusTest
 			}
 		}
 
+		[TestMethod]
+		public void DeleteWorksheetWithImageWithHyperlink()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var ws1 = package.Workbook.Worksheets.Add("sheet1");
+				var ws2 = package.Workbook.Worksheets.Add("sheet2");
+				Bitmap image = new Bitmap(2, 2);
+				image.SetPixel(1, 1, Color.Black);
+				ws1.Drawings.AddPicture("Test", image, new Uri("http://wwww.jetreports.com"));
+				package.Save();
+				Assert.AreEqual(2, package.Workbook.Worksheets.Count);
+				package.Workbook.Worksheets.Delete(ws1);
+				Assert.AreEqual(1, package.Workbook.Worksheets.Count);
+			}
+		}
+
 		[TestMethod, Ignore]
 		public void Issue15207()
 		{
@@ -3715,6 +3732,43 @@ namespace EPPlusTest
 				worksheet.DeleteColumn(1, 1);
 
 				Assert.AreEqual("F6:H23", pivotTable.Address.Address);
+			}
+		}
+		#endregion
+
+		#region PivotTable Tests
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\NAV001 - Top Customer Overview Design Mode.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\NAV001 - Top Customer Overview Report Mode.xlsx")]
+		public void InsertAndDeleteOperationsWorkAsExpectedOnWorkbooksWithPivotTablesAndNormalTables()
+		{
+			var files = new[]
+			{
+				new FileInfo(@"NAV001 - Top Customer Overview Design Mode.xlsx"),
+				new FileInfo(@"NAV001 - Top Customer Overview Report Mode.xlsx"),
+			};
+			foreach (var file in files)
+			{
+				Assert.IsTrue(file.Exists);
+				var temp = new FileInfo(Path.GetTempFileName());
+				temp.Delete();
+				file.CopyTo(temp.ToString());
+
+				try
+				{
+					using (var package = new ExcelPackage(temp))
+					{
+						var sheet = package.Workbook.Worksheets["Report"];
+						sheet.DeleteRow(1);
+						sheet.DeleteColumn(1);
+						sheet.InsertRow(1, 1);
+						sheet.InsertColumn(1, 1);
+					}
+				}
+				finally
+				{
+					temp.Delete();
+				}
 			}
 		}
 		#endregion

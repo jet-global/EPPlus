@@ -232,26 +232,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void MaxShouldCalculateCorrectResult()
-		{
-			var func = new Max();
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(5d, result.Result);
-		}
-
-		[TestMethod]
-		public void MaxShouldIgnoreHiddenValuesIfIgnoreHiddenValuesIsTrue()
-		{
-			var func = new Max();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
-			args.ElementAt(2).SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(4d, result.Result);
-		}
-
-		[TestMethod]
 		public void MaxaShouldCalculateCorrectResult()
 		{
 			var func = new Maxa();
@@ -276,26 +256,6 @@ namespace EPPlusTest.Excel.Functions
 			var args = FunctionsHelper.CreateArgs(-1, "test");
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(0d, result.Result);
-		}
-
-		[TestMethod]
-		public void MinShouldCalculateCorrectResult()
-		{
-			var func = new Min();
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2d, result.Result);
-		}
-
-		[TestMethod]
-		public void MinShouldIgnoreHiddenValuesIfIgnoreHiddenValuesIsTrue()
-		{
-			var func = new Min();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(4, 2, 5, 3);
-			args.ElementAt(1).SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(3d, result.Result);
 		}
 
 		[TestMethod]
@@ -781,106 +741,13 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void FactShouldReturnPoundNaWhenNegativeNumber()
+		public void FactShouldReturnPoundNumWhenNegativeNumber()
 		{
 			var func = new Fact();
 			var args = FunctionsHelper.CreateArgs(-1);
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
-			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)(result.Result)).Type);
-		}
-
-		[TestMethod]
-		public void LargeShouldReturnTheLargestNumberIf1()
-		{
-			var func = new Large();
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(1, 2, 3), 1);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(3d, result.Result);
-		}
-
-		[TestMethod]
-		public void LargeShouldReturnTheSecondLargestNumberIf2()
-		{
-			var func = new Large();
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(3d, result.Result);
-		}
-
-		[TestMethod]
-		public void LargeShouldPoundNumIfIndexOutOfBounds()
-		{
-			var func = new Large();
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 6);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
-		}
-
-		[TestMethod]
-		public void SmallShouldReturnTheSmallestNumberIf1()
-		{
-			var func = new Small();
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(1, 2, 3), 1);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void SmallShouldReturnTheSecondSmallestNumberIf2()
-		{
-			var func = new Small();
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2d, result.Result);
-		}
-
-		[TestMethod]
-		public void SmallShouldPoundNumIfIndexOutOfBounds()
-		{
-			var func = new Small();
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4, 1, 2, 3), 6);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
-		}
-
-		[TestMethod]
-		public void MedianShouldPoundNumIfNoArgs()
-		{
-			var func = new Median();
-			var args = FunctionsHelper.Empty();
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
-		}
-
-		[TestMethod]
-		public void MedianShouldCalculateCorrectlyWithOneMember()
-		{
-			var func = new Median();
-			var args = FunctionsHelper.CreateArgs(1);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void MedianShouldCalculateCorrectlyWithOddMembers()
-		{
-			var func = new Median();
-			var args = FunctionsHelper.CreateArgs(3, 5, 1, 4, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(3d, result.Result);
-		}
-
-		[TestMethod]
-		public void MedianShouldCalculateCorrectlyWithEvenMembers()
-		{
-			var func = new Median();
-			var args = FunctionsHelper.CreateArgs(1, 2, 3, 4);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2.5d, result.Result);
 		}
 
 		[TestMethod]
@@ -1181,39 +1048,9 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void LargeWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Large();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void MaxWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Max();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
 		public void MaxaWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Maxa();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void MinWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Min();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);
@@ -1314,16 +1151,6 @@ namespace EPPlusTest.Excel.Functions
 		public void SinhWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Sinh();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void SmallWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Small();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);

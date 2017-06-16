@@ -50,8 +50,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>Returns the correct weekday number or an ExcelErrorValue, depending on if the input is valid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ValidateArguments(arguments, 1) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var serialNumberCandidate = arguments.ElementAt(0).Value;
 			var returnType = 1;
 			if (arguments.Count() > 1 && !this.TryParseObjectAsInt(arguments.ElementAt(1).Value, out returnType, out eErrorType? returnTypeError))

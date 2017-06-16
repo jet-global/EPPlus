@@ -47,8 +47,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			if (this.ValidateArguments(functionArguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
+			if (this.ArgumentsAreValid(functionArguments, 2, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var basis = 0;
 			if (functionArguments.Count() > 2)
 			{

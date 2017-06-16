@@ -21,25 +21,10 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 				return new CompileResult(eErrorType.Value);
 			var args = new List<FunctionArgument>();
 			Function.BeforeInvoke(context);
-			var firstChild = children.First();
+			var firstChild = children.ElementAt(0);
 			var lastChild = children.ElementAt(1);
-			try
-			{
-				var result = firstChild.Compile();
-				if (result.DataType == DataType.ExcelError)
-				{
-					args.Add(new FunctionArgument(lastChild.Compile().Result));
-				}
-				else
-				{
-					args.Add(new FunctionArgument(result.Result));
-				}
-
-			}
-			catch (ExcelErrorValueException)
-			{
-				args.Add(new FunctionArgument(lastChild.Compile().Result));
-			}
+			args.Add(new FunctionArgument(firstChild.Compile().Result));
+			args.Add(new FunctionArgument(lastChild.Compile().Result));
 			return Function.Execute(args, context);
 		}
 	}
