@@ -121,7 +121,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// </summary>
 		/// <param name="numberCandidate">The given object to convert to a double.</param>
 		/// <param name="isInArray">Indicates whether <paramref name="numberCandidate"/> should be handled as if it came from an array.</param>
-		/// <returns>Return the double value represented by <paramref name="numberCandidate"/>.</returns>
+		/// <returns>Return the double value represented by <paramref name="numberCandidate"/>, 
+		///			 otherwise returns the default value for a nullable double.</returns>
 		private double? GetNumericValue(object numberCandidate, bool isInArray)
 		{
 			if (this.IsNumeric(numberCandidate) && !(numberCandidate is bool))
