@@ -147,6 +147,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\MedianTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\MinaTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\MinTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\ModTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\PowerTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\ProductTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountIfTests.cs" />
