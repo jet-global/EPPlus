@@ -26,28 +26,31 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the SECH function.
+	/// </summary>
 	public class Sech : ExcelFunction
 	{
+		/// <summary>
+		/// Get the hyperbolic secant of an input.
+		/// </summary>
+		/// <param name="arguments">Input to have its hyperbolic secant calculated.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>Returns the hyperbolic secant of an angle.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ArgumentCountIsValid(arguments, 1) == false)
+			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
-			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return CreateResult(HyperbolicSecant(result), DataType.Decimal);
+			return this.CreateResult(AdvancedTrigonometry.HyperbolicSecant(result), DataType.Decimal);
 		}
 
-		// Hyperbolic Secant 
-		private static double HyperbolicSecant(double x)
-		{
-			return 2 / (MathObj.Exp(x) + MathObj.Exp(-x));
-		}
 	}
 }

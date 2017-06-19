@@ -22,7 +22,6 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-26
  *******************************************************************************/
-using System;
 using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.Utils;
 
@@ -30,6 +29,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
 	public class DecimalCompileResultValidator : CompileResultValidator
 	{
+		/// <summary>
+		/// Checks for a #Num Excel error.
+		/// </summary>
+		/// <param name="obj">The excel object to check for a num error.</param>
+		/// <param name="error">Sends out the Error type.</param>
+		/// <returns>Returns true or false.</returns>
 		public override bool TryGetValidationError(object obj, out eErrorType error)
 		{
 			var num = ConvertUtil.GetValueDouble(obj);
@@ -42,7 +47,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			error = eErrorType.Null;
 			return true;
 		}
-
+		/// <summary>
+		/// Throws a #Num exception.
+		/// </summary>
+		/// <param name="obj">The excel object to check for a num error.</param>
 		public override void Validate(object obj)
 		{
 			var num = ConvertUtil.GetValueDouble(obj);

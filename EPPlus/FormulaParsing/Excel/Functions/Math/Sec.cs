@@ -26,27 +26,31 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the SEC function.
+	/// </summary>
 	public class Sec : ExcelFunction
 	{
+		/// <summary>
+		/// Get the secant of an input.
+		/// </summary>
+		/// <param name="arguments">Input to have its secant calculated.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>Returns the secant of an angle.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ArgumentCountIsValid(arguments, 1) == false)
+			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
-			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return CreateResult(Secant(result), DataType.Decimal);
+			return this.CreateResult(AdvancedTrigonometry.Secant(result), DataType.Decimal);
 		}
 
-		private static double Secant(double x)
-		{
-			return 1 / MathObj.Cos(x);
-		}
 	}
 }

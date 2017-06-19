@@ -34,7 +34,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class AsinTests : MathFunctionsTestBase
 	{
-		#region TimeValue Function(Execute) Tests
+		#region AsinTests Function(Execute) Tests
 		[TestMethod]
 		public void AsinIsGivenAStringAsInput()
 		{

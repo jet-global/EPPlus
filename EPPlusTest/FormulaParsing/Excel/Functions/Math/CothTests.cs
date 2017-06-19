@@ -34,7 +34,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class CothTests : MathFunctionsTestBase
 	{
-		#region TimeValue Function(Execute) Tests
+		#region CothTests Function(Execute) Tests
 		[TestMethod]
 		public void CothIsGivenAStringAsInput()
 		{

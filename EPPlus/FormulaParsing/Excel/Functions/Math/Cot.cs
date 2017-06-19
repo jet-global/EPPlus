@@ -26,39 +26,32 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using MathObj = System.Math;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the COT function.
+	/// </summary>
 	public class Cot : ExcelFunction
 	{
+		/// <summary>
+		/// Calculate the cotangent of a given input.
+		/// </summary>
+		/// <param name="arguments">Input to have its cotangent calculated.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>Returns the cotangent of an angle.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (ArgumentCountIsValid(arguments, 1) == false)
+			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
-			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			if (Cosecant(result) == -2)
+			if (AdvancedTrigonometry.TryCheckIfCosecantWillHaveADivideByZeroError(result, out double cosecant))
 				return new CompileResult(eErrorType.Div0);
-			return CreateResult(Cotangent(result), DataType.Decimal);
-		}
-
-		private static double Cotangent(double x)
-		{
-			if (MathObj.Tan(x) == 0)
-				return -2;
-			return 1 / MathObj.Tan(x);
-		}
-
-		private static double Cosecant(double x)
-		{
-			if (MathObj.Sin(x) == 0)
-				return -2;
-			return 1 / MathObj.Sin(x);
+			return this.CreateResult(AdvancedTrigonometry.Cotangent(result), DataType.Decimal);
 		}
 	}
 }

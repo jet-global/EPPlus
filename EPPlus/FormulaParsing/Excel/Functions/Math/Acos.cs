@@ -24,21 +24,29 @@
  *******************************************************************************/
 using System.Collections.Generic;
 using System.Linq;
-using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the ACOS function.
+	/// </summary>
 	public class Acos : ExcelFunction
 	{
+		/// <summary>
+		/// Calculate the Arccosine of a given input.
+		/// </summary>
+		/// <param name="arguments">Input to have its Arccosine calculated.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>Returns the Arccosine of a number.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 
 			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
-			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
 			{
 				return new CompileResult(eErrorType.Value);
 			}

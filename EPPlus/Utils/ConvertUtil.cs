@@ -163,7 +163,6 @@ namespace OfficeOpenXml.Utils
 			else if(dateCandidate is bool dateBool)
 			{
 
-
 				OADate = dateBool ? 1 : 0 ;
 				return true;
 			}

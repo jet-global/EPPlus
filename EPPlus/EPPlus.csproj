@@ -461,6 +461,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Ln.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Log.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Log10.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\AdvancedTrigonometry.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Max.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Maxa.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Median.cs" />

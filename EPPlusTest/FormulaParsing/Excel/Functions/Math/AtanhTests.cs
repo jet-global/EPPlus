@@ -34,7 +34,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class AtanhTests : MathFunctionsTestBase
 	{
-		#region TimeValue Function(Execute) Tests
+		#region AtanhTests Function(Execute) Tests
 		[TestMethod]
 		public void AtanhIsGivenAStringAsInput()
 		{

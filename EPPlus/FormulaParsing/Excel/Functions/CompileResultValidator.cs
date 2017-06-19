@@ -23,23 +23,29 @@
  * Mats Alm   		                Added		                2013-12-26
  *******************************************************************************/
 
-using System;
-
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
+	#region CompileResultValidator Abstract Methods
 	public abstract class CompileResultValidator
 	{
+		/// <summary>
+		/// Validates the answer as an excel format.
+		/// </summary>
+		public abstract void Validate(object obj);
+
+		/// <summary>
+		/// Checks for a validation error.
+		/// </summary>
 		public abstract bool TryGetValidationError(object obj, out eErrorType error);
 
 		private static CompileResultValidator _empty;
+
 		public static CompileResultValidator Empty
 		{
 			get { return _empty ?? (_empty = new EmptyCompileResultValidator()); }
 		}
-
-		public abstract void Validate(object obj);
-
 	}
+	#endregion
 
 	internal class EmptyCompileResultValidator : CompileResultValidator
 	{
@@ -49,9 +55,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		}
 
 		public override bool TryGetValidationError(object obj, out eErrorType error)
-		{	
+		{
 			error = eErrorType.Null;
 			return true;
 		}
 	}
+
 }

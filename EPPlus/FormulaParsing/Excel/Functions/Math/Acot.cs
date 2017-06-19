@@ -26,30 +26,32 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the ACOT function.
+	/// </summary>
 	public class Acot : ExcelFunction
 	{
+		/// <summary>
+		/// Calculate the arccotangent of a given input.
+		/// </summary>
+		/// <param name="arguments">Input to have its arccotangent calculated.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>Returns the arccotangent of a number.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
-			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return this.CreateResult(InverseCotangent(result), DataType.Decimal);
+			return this.CreateResult(AdvancedTrigonometry.InverseCotangent(result), DataType.Decimal);
 		}
 
-
-		// Inverse Cotangent 
-		private static double InverseCotangent(double x)
-		{
-			return 2 * MathObj.Atan(1) - MathObj.Atan(x);
-		}
 	}	
 }
 

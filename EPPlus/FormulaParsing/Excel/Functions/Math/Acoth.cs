@@ -23,30 +23,34 @@
  * Mats Alm   		                Added		                2015-01-11
  *******************************************************************************/
 using System.Collections.Generic;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System.Linq;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the ACOTH function.
+	/// </summary>
 	public class Acoth : ExcelFunction
 	{
+		/// <summary>
+		/// Calculate the hyperbolic arccotangent of a given input.
+		/// </summary>
+		/// <param name="arguments">Input to have its hyperbolic arccotangent calculated.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>Returns the hyperbolic arccotangent of a number </returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
-			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return this.CreateResult(InverseHyperbolicCotangent(result), DataType.Decimal);
+			return this.CreateResult(AdvancedTrigonometry.InverseHyperbolicCotangent(result), DataType.Decimal);
 		}
 
-		private static double InverseHyperbolicCotangent(double x)
-		{
-			return MathObj.Log((x + 1) / (x - 1)) / 2;
-		}
 	}
 }

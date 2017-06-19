@@ -23,31 +23,35 @@
  * Mats Alm   		                Added		                2015-01-11
  *******************************************************************************/
 using System.Collections.Generic;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System.Linq;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the ACOSH function.
+	/// </summary>
 	public class Acosh : ExcelFunction
 	{
+		/// <summary>
+		/// Calculate the inverse hyperbolic cosine of a given input.
+		/// </summary>
+		/// <param name="arguments">Input to have its inverse hyperbolic cosine calculated.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>Returns the inverse hyperbolic cosine of a number.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
-			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return this.CreateResult(InverseHyperbolicCosine(result), DataType.Decimal);
+			return this.CreateResult(AdvancedTrigonometry.InverseHyperbolicCosine(result), DataType.Decimal);
 		}
 
-		private static double InverseHyperbolicCosine(double x)
-		{
-			return MathObj.Log(x + MathObj.Sqrt(x * x - 1));
-		}
 	}
 
 }

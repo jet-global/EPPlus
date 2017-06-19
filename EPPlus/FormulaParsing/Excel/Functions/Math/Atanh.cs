@@ -23,30 +23,34 @@
  * Mats Alm   		                Added		                2015-01-11
  *******************************************************************************/
 using System.Collections.Generic;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System.Linq;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the ATANH function.
+	/// </summary>
 	public class Atanh : ExcelFunction
 	{
+		/// <summary>
+		/// Get the Inverse Hyperbolic Tangent of an input.
+		/// </summary>
+		/// <param name="arguments">Input to have its Inverse Hyperbolic Tangent calculated.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>Returns the Inverse Hyperbolic Tangent of a given number</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
-			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
+			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
 			{
 				return new CompileResult(eErrorType.Value);
 			}
-			return this.CreateResult(InverseHyperbolicTangent(result), DataType.Decimal);
+			return this.CreateResult(AdvancedTrigonometry.InverseHyperbolicTangent(result), DataType.Decimal);
 		}
 
-		private static double InverseHyperbolicTangent(double x)
-		{
-			return MathObj.Log((1 + x) / (1 - x)) / 2;
-		}
 	}
 }
