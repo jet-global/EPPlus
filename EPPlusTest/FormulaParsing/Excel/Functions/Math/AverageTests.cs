@@ -140,28 +140,28 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				//worksheet.Cells["C2"].Value = "2";
-				//worksheet.Cells["C3"].Value = "2.5";
-				worksheet.Cells["C4"].Value = "2";
-				//worksheet.Cells["C5"].Value = "\"word\"";
-				//worksheet.Cells["C6"].Value = "\"6/16/2017\"";
-				//worksheet.Cells["C7"].Value = "TRUE";
-				//worksheet.Cells["C8"].Value = "";
-				//worksheet.Cells["B2"].Formula = "AVERAGE(C2)";
-				//worksheet.Cells["B3"].Formula = "AVERAGE(C3)";
+				worksheet.Cells["C2"].Value = "2";
+				worksheet.Cells["C3"].Value = "2.5";
+				worksheet.Cells["C4"].Value = "\"2\"";
+				worksheet.Cells["C5"].Value = "\"word\"";
+				worksheet.Cells["C6"].Value = "\"6/16/2017\"";
+				worksheet.Cells["C7"].Value = "TRUE";
+				worksheet.Cells["C8"].Value = "";
+				worksheet.Cells["B2"].Formula = "AVERAGE(C2)";
+				worksheet.Cells["B3"].Formula = "AVERAGE(C3)";
 				worksheet.Cells["B4"].Formula = "AVERAGE(C4)";
-				//worksheet.Cells["B5"].Formula = "AVERAGE(C5)";
-				//worksheet.Cells["B6"].Formula = "AVERAGE(C6)";
-				//worksheet.Cells["B7"].Formula = "AVERAGE(C7)";
-				//worksheet.Cells["B8"].Formula = "AVERAGE(C8)";
+				worksheet.Cells["B5"].Formula = "AVERAGE(C5)";
+				worksheet.Cells["B6"].Formula = "AVERAGE(C6)";
+				worksheet.Cells["B7"].Formula = "AVERAGE(C7)";
+				worksheet.Cells["B8"].Formula = "AVERAGE(C8)";
 				worksheet.Calculate();
-				//Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
-				//Assert.AreEqual(2.5, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(2.5, worksheet.Cells["B3"].Value);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
-				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
-				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B7"].Value).Type);
-				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B8"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B7"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B8"].Value).Type);
 			}
 		}
 
@@ -315,14 +315,21 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			}
 		}
 
-		//[TestMethod]
-		//public void AverageWith()
-		//{
-		//	var function = new Average();
-		//	var arguments = FunctionsHelper.CreateArgs();
-		//	var result = function.Execute(arguments, this.ParsingContext);
-		//	Assert.AreEqual(, result.Result);
-		//}
+		[TestMethod]
+		public void AverageInWorksheetWithArraysWorksAsExpected()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "AVERAGE({\"1\",\"2\",\"3\"})";
+				worksheet.Cells["B3"].Formula = "AVERAGE(\"1\",\"2\",\"3\")";
+				worksheet.Cells["B4"].Formula = "AVERAGE({1,2,3})";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
+				Assert.AreEqual(2d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
+			}
+		}
 
 		[TestMethod]
 		public void AverageLiterals()
@@ -347,43 +354,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				new FunctionArgument(date2.ToString("d"))
 			}, ParsingContext.Create());
 			Assert.AreEqual((value1 + value2 + value3 + value4 + value5 + value6) / 6, result.Result);
-		}
-
-		[TestMethod]
-		public void AverageCellReferences()
-		{
-			// In the case of cell references, Average DOES NOT parse and include numeric strings, date strings, bools, unparsable strings, etc.
-			ExcelPackage package = new ExcelPackage();
-			var worksheet = package.Workbook.Worksheets.Add("Test");
-			ExcelRange range1 = worksheet.Cells[1, 1];
-			range1.Formula = "\"1000\"";
-			range1.Calculate();
-			var range2 = worksheet.Cells[1, 2];
-			range2.Value = 2000;
-			var range3 = worksheet.Cells[1, 3];
-			range3.Formula = $"\"{new DateTime(2013, 1, 5).ToString("d")}\"";
-			range3.Calculate();
-			var range4 = worksheet.Cells[1, 4];
-			range4.Value = true;
-			var range5 = worksheet.Cells[1, 5];
-			range5.Value = new DateTime(2013, 1, 5);
-			var range6 = worksheet.Cells[1, 6];
-			range6.Value = "Test";
-			Average average = new Average();
-			var rangeInfo1 = new EpplusExcelDataProvider.RangeInfo(worksheet, 1, 1, 1, 3);
-			var rangeInfo2 = new EpplusExcelDataProvider.RangeInfo(worksheet, 1, 4, 1, 4);
-			var rangeInfo3 = new EpplusExcelDataProvider.RangeInfo(worksheet, 1, 5, 1, 6);
-			var context = ParsingContext.Create();
-			var address = new OfficeOpenXml.FormulaParsing.ExcelUtilities.RangeAddress();
-			address.FromRow = address.ToRow = address.FromCol = address.ToCol = 2;
-			context.Scopes.NewScope(address);
-			var result = average.Execute(new FunctionArgument[]
-			{
-				new FunctionArgument(rangeInfo1),
-				new FunctionArgument(rangeInfo2),
-				new FunctionArgument(rangeInfo3)
-			}, context);
-			Assert.AreEqual((2000 + new DateTime(2013, 1, 5).ToOADate()) / 2, result.Result);
 		}
 
 		[TestMethod]

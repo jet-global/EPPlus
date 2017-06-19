@@ -22,6 +22,7 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
@@ -46,6 +47,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 		private eErrorType? Calculate(FunctionArgument arg, ParsingContext context, ref double retVal, ref double nValues, bool isInArray = false)
 		{
+			if (arg.Value == null)
+				arg = new FunctionArgument(0);
 			if (ShouldIgnore(arg))
 			{
 				return null;
@@ -63,11 +66,22 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				foreach (var c in arg.ValueAsRangeInfo)
 				{
-					if (ShouldIgnore(c, context)) continue;
+					if (ShouldIgnore(c, context))
+						continue;
 					CheckForAndHandleExcelError(c);
-					if (!IsNumeric(c.Value) || c.Value is bool) continue;
-					nValues++;
-					retVal += c.ValueDouble;
+					//if (!IsNumeric(c.Value) || c.Value is bool || 
+					//	)
+					//	continue;
+					if (IsNumeric(c.Value) && !(c.Value is bool))
+					{
+						nValues++;
+						retVal += c.ValueDouble;
+					}
+					else if (c.Value is string cString && Double.TryParse(cString, out double parsedValue))
+					{
+						nValues++;
+						retVal += parsedValue;
+					}
 				}
 			}
 			else
