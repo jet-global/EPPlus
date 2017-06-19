@@ -42,24 +42,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// </summary>
 	public class Mina : ExcelFunction
 	{
-		private readonly DoubleEnumerableArgConverter _argConverter;
-		/// <summary>
-		/// 
-		/// </summary>
-		public Mina()
-			: this(new DoubleEnumerableArgConverter())
-		{
+		private DoubleEnumerableArgConverter _argConverter { get; } = new DoubleEnumerableArgConverter();
 
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="argConverter"></param>
-		public Mina(DoubleEnumerableArgConverter argConverter)
-		{
-			Utilities.Require.That(argConverter).Named("argConverter").IsNotNull();
-			_argConverter = argConverter;
-		}
 		/// <summary>
 		/// Takes the user specified arguments and returns the minimum value. 
 		/// </summary>

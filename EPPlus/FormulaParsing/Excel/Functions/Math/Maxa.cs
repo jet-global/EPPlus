@@ -39,29 +39,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
 	/// This class contains the formula for computing the maximum item in a list, array, or cell reference. It includes
-	/// logical values adnd text representations of numbers. 
+	/// logical values and text representations of numbers. 
 	/// </summary>
 	public class Maxa : ExcelFunction
 	{
-		/// <summary>
-		/// 
-		/// </summary>
-		private readonly DoubleEnumerableArgConverter _argConverter;
+		private DoubleEnumerableArgConverter _argConverter { get; } = new DoubleEnumerableArgConverter();
 
-		public Maxa()
-			 : this(new DoubleEnumerableArgConverter())
-		{
-
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="argConverter"></param>
-		public Maxa(DoubleEnumerableArgConverter argConverter)
-		{
-			Utilities.Require.That(argConverter).Named("argConverter").IsNotNull();
-			_argConverter = argConverter;
-		}
 		/// <summary>
 		/// Takes the user specified arguments and returns the maximum value. 
 		/// </summary>

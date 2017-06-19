@@ -274,15 +274,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = "TRUE";
+				worksheet.Cells["B1"].Value = true;
 				worksheet.Cells["B2"].Value = "string";
 				worksheet.Cells["B3"].Value = 5;
 				worksheet.Cells["B4"].Value = 3;
 				worksheet.Cells["B5"].Formula = "MIN(B1:B4)";
-				//worksheet.Cells["B6"].Formula = "MIN(TRUE, \"STRING\", 5, 3)";
+				worksheet.Cells["B6"].Formula = "MIN(TRUE, \"STRING\", 5, 3)";
 				worksheet.Calculate();
 				Assert.AreEqual(3d, worksheet.Cells["B5"].Value);
-				//Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
 			}
 		}
 
