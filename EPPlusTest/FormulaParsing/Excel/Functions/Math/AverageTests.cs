@@ -24,12 +24,9 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing;
-using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math

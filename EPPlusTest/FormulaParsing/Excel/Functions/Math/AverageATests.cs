@@ -12,6 +12,25 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class AverageATests : MathFunctionsTestBase
 	{
+		#region AverageA Function Tests
+		[TestMethod]
+		public void AverageAWithFourNumbersReturnsCorrectResult()
+		{
+			var function = new AverageA();
+			var arguments = FunctionsHelper.CreateArgs(1.5,2,3.5,7);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual((1.5 + 2 + 3.5 + 7)/4, result.Result);
+		}
+
+		[TestMethod]
+		public void AverageAWith()
+		{
+			var function = new AverageA();
+			var arguments = FunctionsHelper.CreateArgs();
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(, result.Result);
+		}
+
 		[TestMethod]
 		public void AverageALiterals()
 		{
@@ -151,5 +170,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)resultDIV0.Result).Type);
 			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)resultREF.Result).Type);
 		}
+		#endregion
 	}
 }
