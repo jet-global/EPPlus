@@ -52,26 +52,26 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 
-			var temp1 = arguments.ElementAt(0).Value;
-			var temp2 = arguments.ElementAt(1).Value;
+			var firstArgument = arguments.ElementAt(0).Value;
+			var secondArgument = arguments.ElementAt(1).Value;
 
-			if (!ConvertUtil.TryParseNumericString(temp1, out _))
-				if (!ConvertUtil.TryParseDateString(temp1, out _))
-					if (!ConvertUtil.TryParseBooleanString(temp1, out _))
+			if (!ConvertUtil.TryParseNumericString(firstArgument, out _))
+				if (!ConvertUtil.TryParseDateString(firstArgument, out _))
+					if (!ConvertUtil.TryParseBooleanString(firstArgument, out _))
 						return new CompileResult(eErrorType.Value);
 
 
-			if (!ConvertUtil.TryParseNumericString(temp2, out _))
-				if (!ConvertUtil.TryParseDateString(temp2, out _))
-					if (!ConvertUtil.TryParseBooleanString(temp2, out _))
+			if (!ConvertUtil.TryParseNumericString(secondArgument, out _))
+				if (!ConvertUtil.TryParseDateString(secondArgument, out _))
+					if (!ConvertUtil.TryParseBooleanString(secondArgument, out _))
 						return new CompileResult(eErrorType.Value);
 
-			var n1 = ArgToDecimal(arguments, 0);
-			var n2 = ArgToDecimal(arguments, 1);
-			if (n2 == 0)
+			var number = ArgToDecimal(arguments, 0);
+			var divisor = ArgToDecimal(arguments, 1);
+			if (divisor == 0)
 				return new CompileResult(eErrorType.Div0);
 
-			var remainder = n1 - n2*(System.Math.Floor(n1 / n2));
+			var remainder = number - divisor*(System.Math.Floor(number / divisor));
 
 			return new CompileResult(remainder, DataType.Decimal);
 		}
