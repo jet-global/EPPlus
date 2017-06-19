@@ -23,6 +23,146 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void AverageAWithFourNegativeNumbersReturnsCorrectResult()
+		{
+			var function = new AverageA();
+			var arguments = FunctionsHelper.CreateArgs(-1.5,-2,-3.5,-7);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual((-1.5 + -2 + -3.5 + -7) / 4, result.Result);
+		}
+
+		[TestMethod]
+		public void AverageAWithOneIntegerReturnsCorrectResult()
+		{
+			var function = new AverageA();
+			var arguments = FunctionsHelper.CreateArgs(2);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(2d, result.Result);
+		}
+
+		[TestMethod]
+		public void AverageAWithOneDoubleReturnsCorrectResult()
+		{
+			var function = new AverageA();
+			var arguments = FunctionsHelper.CreateArgs(2.5);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(2.5, result.Result);
+		}
+
+		[TestMethod]
+		public void AverageAWithOneNumericStringReturnsCorrectResult()
+		{
+			var function = new AverageA();
+			var arguments = FunctionsHelper.CreateArgs("2");
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(2d, result.Result);
+		}
+
+		[TestMethod]
+		public void AverageAWithOneNonNumericStringReturnsPoundValue()
+		{
+			var function = new AverageA();
+			var arguments = FunctionsHelper.CreateArgs("word");
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void AverageAWithOneDateInStringReturnsCorrectResult()
+		{
+			var function = new AverageA();
+			var arguments = FunctionsHelper.CreateArgs("6/16/2017");
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(42902d, result.Result);
+		}
+
+		[TestMethod]
+		public void AverageAWithOneBooleanValueReturnsCorrectResult()
+		{
+			var function = new AverageA();
+			var arguments = FunctionsHelper.CreateArgs(true);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(1d, result.Result);
+		}
+
+		[TestMethod]
+		public void AverageAFunctionWithErrorValuesAsInputReturnsTheInputErrorValue()
+		{
+			var func = new AverageA();
+			var argNA = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA), 1, 1, 1, 1);
+			var argNAME = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name), 1, 1, 1, 1);
+			var argVALUE = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value), 1, 1, 1, 1);
+			var argNUM = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Num), 1, 1, 1, 1);
+			var argDIV0 = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0), 1, 1, 1, 1);
+			var argREF = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Ref), 1, 1, 1, 1);
+			var resultNA = func.Execute(argNA, this.ParsingContext);
+			var resultNAME = func.Execute(argNAME, this.ParsingContext);
+			var resultVALUE = func.Execute(argVALUE, this.ParsingContext);
+			var resultNUM = func.Execute(argNUM, this.ParsingContext);
+			var resultDIV0 = func.Execute(argDIV0, this.ParsingContext);
+			var resultREF = func.Execute(argREF, this.ParsingContext);
+			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)resultNA.Result).Type);
+			Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)resultNAME.Result).Type);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)resultVALUE.Result).Type);
+			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)resultNUM.Result).Type);
+			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)resultDIV0.Result).Type);
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)resultREF.Result).Type);
+		}
+
+		[TestMethod]
+		public void AverageAInWorksheetWithSingleInputsWorksAsExpected()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "AVERAGEA(2)";
+				worksheet.Cells["B3"].Formula = "AVERAGEA(2.5)";
+				worksheet.Cells["B4"].Formula = "AVERAGEA(\"2\")";
+				worksheet.Cells["B5"].Formula = "AVERAGEA(\"word\")";
+				worksheet.Cells["B6"].Formula = "AVERAGEA(\"6/16/2017\")";
+				worksheet.Cells["B7"].Formula = "AVERAGEA(TRUE)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(2.5, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
+				Assert.AreEqual(42902d, worksheet.Cells["B6"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B7"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void AverageAInWorksheetWithSingleInputsInCellReferencesWorksAsExpected()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["C2"].Value = "2";
+				worksheet.Cells["C3"].Value = "2.5";
+				worksheet.Cells["C4"].Value = "\"2\"";
+				worksheet.Cells["C5"].Value = "\"word\"";
+				worksheet.Cells["C6"].Value = "\"6/16/2017\"";
+				worksheet.Cells["C7"].Value = "TRUE";
+				worksheet.Cells["C8"].Value = "";
+				worksheet.Cells["B2"].Formula = "AVERAGEA(C2)";
+				worksheet.Cells["B3"].Formula = "AVERAGEA(C3)";
+				worksheet.Cells["B4"].Formula = "AVERAGEA(C4)";
+				worksheet.Cells["B5"].Formula = "AVERAGEA(C5)";
+				worksheet.Cells["B6"].Formula = "AVERAGEA(C6)";
+				worksheet.Cells["B7"].Formula = "AVERAGEA(C7)";
+				worksheet.Cells["B8"].Formula = "AVERAGEA(C8)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(2.5, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(0, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(0, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(0, worksheet.Cells["B6"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B7"].Value);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B8"].Value).Type);
+			}
+		}
+
+		[TestMethod]
 		public void AverageAWith()
 		{
 			var function = new AverageA();
@@ -145,30 +285,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			}, ParsingContext.Create());
 			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)(result.Result)).Type);
-		}
-
-		[TestMethod]
-		public void AverageAFunctionWithErrorValuesAsInputReturnsTheInputErrorValue()
-		{
-			var func = new AverageA();
-			var argNA = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA),1,1,1,1);
-			var argNAME = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name),1,1,1,1);
-			var argVALUE = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value),1,1,1,1);
-			var argNUM = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Num),1,1,1,1);
-			var argDIV0 = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0),1,1,1,1);
-			var argREF = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Ref),1,1,1,1);
-			var resultNA = func.Execute(argNA, this.ParsingContext);
-			var resultNAME = func.Execute(argNAME, this.ParsingContext);
-			var resultVALUE = func.Execute(argVALUE, this.ParsingContext);
-			var resultNUM = func.Execute(argNUM, this.ParsingContext);
-			var resultDIV0 = func.Execute(argDIV0, this.ParsingContext);
-			var resultREF = func.Execute(argREF, this.ParsingContext);
-			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)resultNA.Result).Type);
-			Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)resultNAME.Result).Type);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)resultVALUE.Result).Type);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)resultNUM.Result).Type);
-			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)resultDIV0.Result).Type);
-			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)resultREF.Result).Type);
 		}
 		#endregion
 	}
