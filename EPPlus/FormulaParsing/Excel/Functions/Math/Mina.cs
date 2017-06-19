@@ -102,7 +102,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return new CompileResult(eErrorType.NA);
 				return this.CreateResult(doublesList.Min(), DataType.Decimal);
 			}
-
+			if (argumentValueList.Count() == 0)
+				return this.CreateResult(0d, DataType.Decimal);
 			var vvalues = _argConverter.ConvertArgsIncludingOtherTypes(arguments);
 			if (vvalues.Count() > 255)
 				return new CompileResult(eErrorType.NA);

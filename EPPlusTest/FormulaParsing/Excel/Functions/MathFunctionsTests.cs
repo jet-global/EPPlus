@@ -232,33 +232,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void MaxaShouldCalculateCorrectResult()
-		{
-			var func = new Maxa();
-			var args = FunctionsHelper.CreateArgs(-1, 0, 1);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void MaxaShouldCalculateCorrectResultUsingBool()
-		{
-			var func = new Maxa();
-			var args = FunctionsHelper.CreateArgs(-1, 0, true);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void MaxaShouldCalculateCorrectResultUsingString()
-		{
-			var func = new Maxa();
-			var args = FunctionsHelper.CreateArgs(-1, "test");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(0d, result.Result);
-		}
-
-		[TestMethod]
 		public void AverageShouldCalculateCorrectResult()
 		{
 			var expectedResult = (4d + 2d + 5d + 2d) / 4d;
@@ -1041,16 +1014,6 @@ namespace EPPlusTest.Excel.Functions
 		public void FloorWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Floor();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void MaxaWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Maxa();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);

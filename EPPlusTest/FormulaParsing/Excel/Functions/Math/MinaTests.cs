@@ -86,12 +86,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = "TRUE";
-				worksheet.Cells["B2"].Value = "FALSE";
-				worksheet.Cells["B3"].Value = 0.5;
-				worksheet.Cells["C1"].Formula = "MINA(B1:B3)";
+				worksheet.Cells["B1"].Value = true;
+				worksheet.Cells["B2"].Value = 0.5;
+				worksheet.Cells["C1"].Formula = "MINA(B1:B2)";
 				worksheet.Calculate();
-				Assert.AreEqual(0d, worksheet.Cells["C1"].Value);
+				Assert.AreEqual(0.5d, worksheet.Cells["C1"].Value);
 			}
 		}
 
@@ -155,18 +154,17 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void MinaWithReferenceToMixedTypesReturnsCorrectValue()
 		{
-			//The commented out lines pass. 
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = "TRUE";
-				worksheet.Cells["B2"].Value = 0.5;
+				worksheet.Cells["B1"].Value = true;
+				worksheet.Cells["B2"].Value = 5;
 				worksheet.Cells["B3"].Value = "string";
 				worksheet.Cells["C1"].Formula = "MINA(B1:B2)";
-				//worksheet.Cells["C2"].Formula = "MINA(B1:B3)";
+				worksheet.Cells["C2"].Formula = "MINA(B1:B3)";
 				worksheet.Calculate();
 				Assert.AreEqual(1d, worksheet.Cells["C1"].Value);
-				//Assert.AreEqual(0d, worksheet.Cells["C2"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["C2"].Value);
 			}
 		}
 
