@@ -255,7 +255,7 @@ namespace OfficeOpenXml
 			range._worksheet.SetValueInner(row, col, value);
 		}
 
-		private static void Set_Formula(ExcelRangeBase range, object value, int row, int col, bool clearValue = true)
+		private static void SetFormula(ExcelRangeBase range, object value, int row, int col, bool clearValue = true)
 		{
 			var formulaValue = range._worksheet._formulas.GetValue(row, col);
 			if (formulaValue is int && (int)formulaValue >= 0)
@@ -273,7 +273,8 @@ namespace OfficeOpenXml
 		/// <param name="value">The  formula</param>
 		/// <param name="address">The address of the formula</param>
 		/// <param name="IsArray">If the forumla is an array formula.</param>
-		private static void Set_SharedFormula(ExcelRangeBase range, string value, ExcelAddress address, bool IsArray, bool clearValue = true)
+		/// <param name="clearValue">Whether or not setting the formula is allowed to clear the cell's value.</param>
+		private static void SetSharedFormula(ExcelRangeBase range, string value, ExcelAddress address, bool IsArray, bool clearValue = true)
 		{
 			if (range._fromRow == 1 && range._fromCol == 1 && range._toRow == ExcelPackage.MaxRows && range._toCol == ExcelPackage.MaxColumns)  //Full sheet (ex ws.Cells.Value=0). Set value for A1 only to avoid hanging 
 			{
@@ -281,8 +282,8 @@ namespace OfficeOpenXml
 			}
 			else if (address.Start.Row == address.End.Row && address.Start.Column == address.End.Column && !IsArray)             //is it really a shared formula? Arrayformulas can be one cell only
 			{
-				//Nope, single cell. Set the formula
-				Set_Formula(range, value, address.Start.Row, address.Start.Column, clearValue);
+				// Single cells get individual formulas.
+				SetFormula(range, value, address.Start.Row, address.Start.Column, clearValue);
 				return;
 			}
 			range.CheckAndSplitSharedFormula(address);
@@ -1152,14 +1153,14 @@ namespace OfficeOpenXml
 				}
 				else if (Addresses == null)
 				{
-					Set_SharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, _fromRow, _fromCol), this, false);
+					SetSharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, _fromRow, _fromCol), this, false);
 				}
 				else
 				{
-					Set_SharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, _fromRow, _fromCol), new ExcelAddress(base.WorkSheet, FirstAddress), false);
+					SetSharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, _fromRow, _fromCol), new ExcelAddress(base.WorkSheet, FirstAddress), false);
 					foreach (var address in Addresses)
 					{
-						Set_SharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, address.Start.Row, address.Start.Column), address, false);
+						SetSharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, address.Start.Row, address.Start.Column), address, false);
 					}
 				}
 			}
@@ -2228,15 +2229,15 @@ namespace OfficeOpenXml
 				if ((formula == null || formula.Trim() == string.Empty) && clearValue)
 					this.Value = null;
 				else if (this._fromRow == this._toRow && this._fromCol == this._toCol)
-					Set_Formula(this, formula, this._fromRow, this._fromCol, clearValue);
+					SetFormula(this, formula, this._fromRow, this._fromCol, clearValue);
 				else
 				{
-					Set_SharedFormula(this, formula, this, false, clearValue);
+					SetSharedFormula(this, formula, this, false, clearValue);
 					if (this.Addresses != null)
 					{
 						foreach (var address in this.Addresses)
 						{
-							Set_SharedFormula(this, formula, address, false, clearValue);
+							SetSharedFormula(this, formula, address, false, clearValue);
 						}
 					}
 				}
@@ -2498,7 +2499,7 @@ namespace OfficeOpenXml
 			{
 				throw (new Exception("An Arrayformula can not have more than one address"));
 			}
-			Set_SharedFormula(this, ArrayFormula, this, true);
+			SetSharedFormula(this, ArrayFormula, this, true);
 		}
 		//private void Clear(ExcelAddressBase Range)
 		//{
