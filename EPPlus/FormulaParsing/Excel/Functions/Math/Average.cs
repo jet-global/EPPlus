@@ -29,100 +29,111 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Returns the average of the given arguments.
+	/// </summary>
 	public class Average : HiddenValuesHandlingFunction
 	{
+		/// <summary>
+		/// Returns the average of the given arguments.
+		/// See https://support.office.com/en-us/article/AVERAGE-function-047bac88-d466-426c-a32b-8f33eb960cf6
+		/// for the documentation on what the AVERAGE function accepts as valid arguments.
+		/// </summary>
+		/// <param name="arguments">The given arguments to average.</param>
+		/// <param name="context">The context for the function.</param>
+		/// <returns>Returns the average of the given arguments, or an <see cref="ExcelErrorValue"/> if any of the given arguments are invalid.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError, eErrorType.Div0) == false)
 				return new CompileResult(argumentError);
-			double nValues = 0d, result = 0d;
-			foreach (var arg in arguments)
+			double numberOfValues = 0d, sumOfAllValues = 0d;
+			foreach (var argument in arguments)
 			{
-				var error = Calculate(arg, context, ref result, ref nValues);
-				if (error != null)
-					return new CompileResult(error.Value);
+				var errorFromArgument = this.CalculateComponentsOfAverage(argument, context, ref sumOfAllValues, ref numberOfValues);
+				if (errorFromArgument != null)
+					return new CompileResult(errorFromArgument.Value);
 			}
-			return CreateResult(Divide(result, nValues), DataType.Decimal);
+			return this.CreateResult(this.Divide(sumOfAllValues, numberOfValues), DataType.Decimal);
 		}
 
-		private eErrorType? Calculate(FunctionArgument arg, ParsingContext context, ref double retVal, ref double nValues, bool isInArray = false)
+		/// <summary>
+		/// Recursively calculates the sum of all valid cells and the total number of valid cells for the given argument.
+		/// </summary>
+		/// <param name="argument">The argument to check for a valid numeric value.</param>
+		/// <param name="context">The context for this method.</param>
+		/// <param name="sumOfAllValues">The running sum of all numeric values processed.</param>
+		/// <param name="numberOfValues">The running total number of numeric values processed.</param>
+		/// <param name="isInArray">Indicates whether <paramref name="argument"/> is from an array.</param>
+		/// <returns>Returns an <see cref="eErrorType"/> if <paramref name="argument"/> is invalid, otherwise returns null.</returns>
+		private eErrorType? CalculateComponentsOfAverage(FunctionArgument argument, ParsingContext context, ref double sumOfAllValues, ref double numberOfValues, bool isInArray = false)
 		{
-			if (arg.Value == null)
-				arg = new FunctionArgument(0);
-			if (ShouldIgnore(arg))
-			{
+			if (argument.Value == null)
+				argument = new FunctionArgument(0);
+			if (this.ShouldIgnore(argument))
 				return null;
-			}
-			if (arg.Value is IEnumerable<FunctionArgument>)
+			if (argument.Value is IEnumerable<FunctionArgument>)
 			{
-				foreach (var item in (IEnumerable<FunctionArgument>)arg.Value)
+				foreach (var subArgument in (IEnumerable<FunctionArgument>)argument.Value)
 				{
-					var error = Calculate(item, context, ref retVal, ref nValues, true);
-					if (error != null)
-						return error;
+					var errorFromSubArgument = CalculateComponentsOfAverage(subArgument, context, ref sumOfAllValues, ref numberOfValues, true);
+					if (errorFromSubArgument != null)
+						return errorFromSubArgument;
 				}
 			}
-			else if (arg.IsExcelRange)
+			else if (argument.IsExcelRange)
 			{
-				foreach (var c in arg.ValueAsRangeInfo)
+				foreach (var cellInfo in argument.ValueAsRangeInfo)
 				{
-					if (ShouldIgnore(c, context))
+					if (this.ShouldIgnore(cellInfo, context))
 						continue;
-					CheckForAndHandleExcelError(c);
-					//if (!IsNumeric(c.Value) || c.Value is bool || 
-					//	)
-					//	continue;
-					if (IsNumeric(c.Value) && !(c.Value is bool))
+					this.CheckForAndHandleExcelError(cellInfo);
+					if (this.IsNumeric(cellInfo.Value) && !(cellInfo.Value is bool))
 					{
-						nValues++;
-						retVal += c.ValueDouble;
+						numberOfValues++;
+						sumOfAllValues += cellInfo.ValueDouble;
 					}
-					else if (c.Value is string cString && Double.TryParse(cString, out double parsedValue))
+					else if (cellInfo.Value is string cString && Double.TryParse(cString, out double parsedValue))
 					{
-						nValues++;
-						retVal += parsedValue;
+						numberOfValues++;
+						sumOfAllValues += parsedValue;
 					}
 				}
 			}
 			else
 			{
-				var numericValue = GetNumericValue(arg.Value, isInArray);
+				var numericValue = this.GetNumericValue(argument.Value, isInArray);
 				if (numericValue.HasValue)
 				{
-					nValues++;
-					retVal += numericValue.Value;
+					numberOfValues++;
+					sumOfAllValues += numericValue.Value;
 				}
-				else if (arg.Value is string && !isInArray)
+				else if (argument.Value is string && !isInArray)
 				{
 					return eErrorType.Value;
 				}
 			}
-			CheckForAndHandleExcelError(arg);
+			this.CheckForAndHandleExcelError(argument);
 			return null;
 		}
 
-		private double? GetNumericValue(object obj, bool isInArray)
+		/// <summary>
+		/// Converts the given object to its numeric value if possible.
+		/// </summary>
+		/// <param name="numberCandidate">The given object to convert to a double.</param>
+		/// <param name="isInArray">Indicates whether <paramref name="numberCandidate"/> should be handled as if it came from an array.</param>
+		/// <returns>Return the double value represented by <paramref name="numberCandidate"/>.</returns>
+		private double? GetNumericValue(object numberCandidate, bool isInArray)
 		{
-			if (IsNumeric(obj) && !(obj is bool))
+			if (this.IsNumeric(numberCandidate) && !(numberCandidate is bool))
+				return ConvertUtil.GetValueDouble(numberCandidate);
+			else if (!isInArray)
 			{
-				return ConvertUtil.GetValueDouble(obj);
-			}
-			if (!isInArray)
-			{
-				double number;
-				System.DateTime date;
-				if (obj is bool)
-				{
-					return ConvertUtil.GetValueDouble(obj);
-				}
-				else if (ConvertUtil.TryParseNumericString(obj, out number))
-				{
+				if (numberCandidate is bool)
+					return ConvertUtil.GetValueDouble(numberCandidate);
+				else if (ConvertUtil.TryParseNumericString(numberCandidate, out double number))
 					return number;
-				}
-				else if (ConvertUtil.TryParseDateString(obj, out date))
-				{
+				else if (ConvertUtil.TryParseDateString(numberCandidate, out System.DateTime date))
 					return date.ToOADate();
-				}
 			}
 			return default(double?);
 		}

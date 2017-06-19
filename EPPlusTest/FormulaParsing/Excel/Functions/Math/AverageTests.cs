@@ -1,4 +1,30 @@
-﻿using System;
+﻿/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2017 Jan Källman, Matt Delaney, and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+* For code change notes, see the source control history.
+*******************************************************************************/
+using System;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
@@ -299,12 +325,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["D5"].Value = "TRUE";
 				worksheet.Cells["D6"].Value = "TRUE";
 				worksheet.Cells["D7"].Value = "\"2\"";
+				worksheet.Cells["D8"].Formula = "YEARFRAC(,)";
 				worksheet.Cells["B2"].Formula = "AVERAGE(C2:D2)";
 				worksheet.Cells["B3"].Formula = "AVERAGE(C3:D3)";
 				worksheet.Cells["B4"].Formula = "AVERAGE(C4:D4)";
 				worksheet.Cells["B5"].Formula = "AVERAGE(C5:D5)";
 				worksheet.Cells["B6"].Formula = "AVERAGE(C6:D6)";
 				worksheet.Cells["B7"].Formula = "AVERAGE(C7:D7)";
+				worksheet.Cells["B8"].Formula = "AVERAGE(D8)";
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
@@ -312,6 +340,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B7"].Value).Type);
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B8"].Value).Type);
 			}
 		}
 
@@ -393,8 +422,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)(result.Result)).Type);
 		}
-
-		
 		#endregion
 	}
 }
