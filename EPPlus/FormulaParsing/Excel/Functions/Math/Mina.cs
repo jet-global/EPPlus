@@ -32,7 +32,7 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// This class contains the formula for calculating the minimum item in a list, array, or reference of arguments
+	/// This class contains the formula for calculating the minimum item in a list, array, or reference of arguments.
 	/// </summary>
 	public class Mina : ExcelFunction
 	{
@@ -55,11 +55,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			_argConverter = argConverter;
 		}
 		/// <summary>
-		/// 
+		/// Takes the user specified arguments and returns the minimum value. 
 		/// </summary>
-		/// <param name="arguments"></param>
-		/// <param name="context"></param>
-		/// <returns>The minimum </returns>
+		/// <param name="arguments">The user specified list, array, or cell reference of arguments.</param>
+		/// <param name="context">The context in which the method is being called.</param>
+		/// <returns>The minimum value out of the items in the list, array, or cell reference as a double value.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType errorValue) == false)
@@ -102,12 +102,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return new CompileResult(eErrorType.NA);
 				return this.CreateResult(doublesList.Min(), DataType.Decimal);
 			}
+
 			if (argumentValueList.Count() == 0)
 				return this.CreateResult(0d, DataType.Decimal);
-			var vvalues = _argConverter.ConvertArgsIncludingOtherTypes(arguments);
-			if (vvalues.Count() > 255)
+			var argumentValues = _argConverter.ConvertArgsIncludingOtherTypes(arguments);
+			if (argumentValues.Count() > 255)
 				return new CompileResult(eErrorType.NA);
-			return this.CreateResult(Convert.ToDouble(vvalues.Min()), DataType.Decimal);			
+			return this.CreateResult(Convert.ToDouble(argumentValues.Min()), DataType.Decimal);			
 		}
 	}
 }
