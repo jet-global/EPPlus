@@ -150,6 +150,8 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\FloorTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\QuotientTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\RandBetweenTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\RandTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SmallTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\DegreesTests.cs" />
