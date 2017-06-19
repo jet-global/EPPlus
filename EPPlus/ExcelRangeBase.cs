@@ -118,7 +118,7 @@ namespace OfficeOpenXml
 			SetDelegate();
 		}
 		#endregion
-		#region Set Value Delegates        
+		#region Set Value Delegates
 		private static _changeProp _setUnknownProp = SetUnknown;
 		private static _changeProp _setSingleProp = SetSingle;
 		private static _changeProp _setRangeProp = SetRange;
@@ -254,22 +254,18 @@ namespace OfficeOpenXml
 			if (sfi != null) range._worksheet._formulas.SetValue(row, col, string.Empty);
 			range._worksheet.SetValueInner(row, col, value);
 		}
-		private static void Set_Formula(ExcelRangeBase range, object value, int row, int col)
-		{
-			var f = range._worksheet._formulas.GetValue(row, col);
-			if (f is int && (int)f >= 0) range.UpdateSharedFormulaAnchors(range._worksheet.Cells[row, col]);
 
+		private static void SetFormula(ExcelRangeBase range, object value, int row, int col, bool clearValue = true)
+		{
+			var formulaValue = range._worksheet._formulas.GetValue(row, col);
+			if (formulaValue is int && (int)formulaValue >= 0)
+				range.UpdateSharedFormulaAnchors(range._worksheet.Cells[row, col]);
 			string formula = (value == null ? string.Empty : value.ToString());
-			if (formula == string.Empty)
-			{
-				range._worksheet._formulas.SetValue(row, col, string.Empty);
-			}
-			else
-			{
-				range._worksheet._formulas.SetValue(row, col, formula);
+			range._worksheet._formulas.SetValue(row, col, formula);
+			if (formula != string.Empty && clearValue)
 				range._worksheet.SetValueInner(row, col, null);
-			}
 		}
+
 		/// <summary>
 		/// Handles shared formulas
 		/// </summary>
@@ -277,7 +273,8 @@ namespace OfficeOpenXml
 		/// <param name="value">The  formula</param>
 		/// <param name="address">The address of the formula</param>
 		/// <param name="IsArray">If the forumla is an array formula.</param>
-		private static void Set_SharedFormula(ExcelRangeBase range, string value, ExcelAddress address, bool IsArray)
+		/// <param name="clearValue">Whether or not setting the formula is allowed to clear the cell's value.</param>
+		private static void SetSharedFormula(ExcelRangeBase range, string value, ExcelAddress address, bool IsArray, bool clearValue = true)
 		{
 			if (range._fromRow == 1 && range._fromCol == 1 && range._toRow == ExcelPackage.MaxRows && range._toCol == ExcelPackage.MaxColumns)  //Full sheet (ex ws.Cells.Value=0). Set value for A1 only to avoid hanging 
 			{
@@ -285,8 +282,8 @@ namespace OfficeOpenXml
 			}
 			else if (address.Start.Row == address.End.Row && address.Start.Column == address.End.Column && !IsArray)             //is it really a shared formula? Arrayformulas can be one cell only
 			{
-				//Nope, single cell. Set the formula
-				Set_Formula(range, value, address.Start.Row, address.Start.Column);
+				// Single cells get individual formulas.
+				SetFormula(range, value, address.Start.Row, address.Start.Column, clearValue);
 				return;
 			}
 			range.CheckAndSplitSharedFormula(address);
@@ -1119,60 +1116,19 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				if (IsName)
+				if (this.IsName)
 				{
-					if (_worksheet == null)
-					{
-						return _workbook.Names[_address].NameFormula;
-					}
+					if (this._worksheet == null)
+						return this._workbook.Names[this._address].NameFormula;
 					else
-					{
-						return _worksheet.Names[_address].NameFormula;
-					}
+						return this._worksheet.Names[this._address].NameFormula;
 				}
 				else
-				{
-					return _worksheet.GetFormula(_fromRow, _fromCol);
-				}
+					return this._worksheet.GetFormula(this._fromRow, this._fromCol);
 			}
 			set
 			{
-				if (!string.IsNullOrEmpty(value) && value[0] == '=')
-					value = value.Substring(1);
-				if (IsName)
-				{
-					if (_worksheet == null)
-					{
-						_workbook.Names[_address].NameFormula = value;
-					}
-					else
-					{
-						_worksheet.Names[_address].NameFormula = value;
-					}
-				}
-				else
-				{
-					if (value == null || value.Trim() == "")
-					{
-						//Set the cells to null
-						Value = null;
-					}
-					else if (_fromRow == _toRow && _fromCol == _toCol)
-					{
-						Set_Formula(this, value, _fromRow, _fromCol);
-					}
-					else
-					{
-						Set_SharedFormula(this, value, this, false);
-						if (Addresses != null)
-						{
-							foreach (var address in Addresses)
-							{
-								Set_SharedFormula(this, value, address, false);
-							}
-						}
-					}
-				}
+				this.SetFormula(value, true);
 			}
 		}
 		/// <summary>
@@ -1197,14 +1153,14 @@ namespace OfficeOpenXml
 				}
 				else if (Addresses == null)
 				{
-					Set_SharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, _fromRow, _fromCol), this, false);
+					SetSharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, _fromRow, _fromCol), this, false);
 				}
 				else
 				{
-					Set_SharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, _fromRow, _fromCol), new ExcelAddress(base.WorkSheet, FirstAddress), false);
+					SetSharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, _fromRow, _fromCol), new ExcelAddress(base.WorkSheet, FirstAddress), false);
 					foreach (var address in Addresses)
 					{
-						Set_SharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, address.Start.Row, address.Start.Column), address, false);
+						SetSharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, address.Start.Row, address.Start.Column), address, false);
 					}
 				}
 			}
@@ -2252,6 +2208,43 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
+		/// Sets the formula of the cell to the given formula, only allowing the value of the cell
+		/// to be cleared if specified.
+		/// </summary>
+		/// <param name="formula">The formula to set.</param>
+		/// <param name="clearValue">The formula to set.</param>
+		public void SetFormula(string formula, bool clearValue)
+		{
+			if (!string.IsNullOrEmpty(formula) && formula[0] == '=')
+				formula = formula.Substring(1);
+			if (this.IsName)
+			{
+				if (this._worksheet == null)
+					this._workbook.Names[this._address].NameFormula = formula;
+				else
+					this._worksheet.Names[this._address].NameFormula = formula;
+			}
+			else
+			{
+				if ((formula == null || formula.Trim() == string.Empty) && clearValue)
+					this.Value = null;
+				else if (this._fromRow == this._toRow && this._fromCol == this._toCol)
+					SetFormula(this, formula, this._fromRow, this._fromCol, clearValue);
+				else
+				{
+					SetSharedFormula(this, formula, this, false, clearValue);
+					if (this.Addresses != null)
+					{
+						foreach (var address in this.Addresses)
+						{
+							SetSharedFormula(this, formula, address, false, clearValue);
+						}
+					}
+				}
+			}
+		}
+
+		/// <summary>
 		/// Copies the range of cells to an other range
 		/// </summary>
 		/// <param name="Destination">The start cell where the range will be copied.</param>
@@ -2506,7 +2499,7 @@ namespace OfficeOpenXml
 			{
 				throw (new Exception("An Arrayformula can not have more than one address"));
 			}
-			Set_SharedFormula(this, ArrayFormula, this, true);
+			SetSharedFormula(this, ArrayFormula, this, true);
 		}
 		//private void Clear(ExcelAddressBase Range)
 		//{
