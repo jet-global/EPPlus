@@ -308,8 +308,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B6"].Formula = "AVERAGEA(C6:D6)";
 				worksheet.Cells["B7"].Formula = "AVERAGEA(C7:D7)";
 				worksheet.Calculate();
-				Assert.AreEqual(0, worksheet.Cells["B2"].Value);
-				Assert.AreEqual(0, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
 				Assert.AreEqual(0.5, worksheet.Cells["B4"].Value);
 				Assert.AreEqual(0.5, worksheet.Cells["B5"].Value);
 				Assert.AreEqual(0.5, worksheet.Cells["B6"].Value);
@@ -323,27 +323,54 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["G2"].Value = "7";
-				worksheet.Cells["G3"].Value = "7";
-				worksheet.Cells["G4"].Value = "7";
-				worksheet.Cells["G5"].Value = "7";
-				worksheet.Cells["G6"].Value = "7";
-				worksheet.Cells["F2"].Value = "3.5";
-				worksheet.Cells["F3"].Value = "3.5";
-				worksheet.Cells["F4"].Value = "3.5";
-				worksheet.Cells["F5"].Value = "3.5";
-				worksheet.Cells["F6"].Value = "3.5";
-				worksheet.Cells["F"].Value = "";
+				worksheet.Cells["F2"].Value = "7";
+				worksheet.Cells["F3"].Value = "7";
+				worksheet.Cells["F4"].Value = "7";
+				worksheet.Cells["F5"].Value = "7";
+				worksheet.Cells["F6"].Value = "7";
+				worksheet.Cells["E2"].Value = "3.5";
+				worksheet.Cells["E3"].Value = "3.5";
+				worksheet.Cells["E4"].Value = "3.5";
+				worksheet.Cells["E5"].Value = "3.5";
+				worksheet.Cells["E6"].Value = "3.5";
+				worksheet.Cells["D2"].Value = "2";
+				worksheet.Cells["D3"].Value = "\"2\"";
+				worksheet.Cells["D4"].Value = "\"word\"";
+				worksheet.Cells["D5"].Value = "TRUE";
+				worksheet.Cells["D6"].Value = "";
+				worksheet.Cells["C2"].Value = "1.5";
+				worksheet.Cells["C3"].Value = "1.5";
+				worksheet.Cells["C4"].Value = "1.5";
+				worksheet.Cells["C5"].Value = "1.5";
+				worksheet.Cells["C6"].Value = "1.5";
+				worksheet.Cells["B2"].Formula = "AVERAGEA(C2:F2)";
+				worksheet.Cells["B3"].Formula = "AVERAGEA(C3:F3)";
+				worksheet.Cells["B4"].Formula = "AVERAGEA(C4:F4)";
+				worksheet.Cells["B5"].Formula = "AVERAGEA(C5:F5)";
+				worksheet.Cells["B6"].Formula = "AVERAGEA(C6:F6)";
+				worksheet.Calculate();
+				Assert.AreEqual(3.5, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(3d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(3d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(3.25, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(4d, worksheet.Cells["B6"].Value);
 			}
 		}
 
 		[TestMethod]
-		public void AverageAWith()
+		public void AverageAInWorksheetWithArraysWorksAsExpected()
 		{
-			var function = new AverageA();
-			var arguments = FunctionsHelper.CreateArgs();
-			var result = function.Execute(arguments, this.ParsingContext);
-			Assert.AreEqual(, result.Result);
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "AVERAGEA({\"1\",\"2\",\"3\"})";
+				worksheet.Cells["B3"].Formula = "AVERAGEA(\"1\",\"2\",\"3\")";
+				worksheet.Cells["B4"].Formula = "AVERAGEA({1,2,3})";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
+			}
 		}
 
 		[TestMethod]
