@@ -54,10 +54,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 			if (numberCandidate == null)
 				return this.CreateResult(0d, DataType.Decimal);
-			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out _))
+			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double doubleArg))
 				return new CompileResult(eErrorType.Value);
 
-			var numberValue = this.ArgToDecimal(arguments, 0);
+			var numberValue = doubleArg;
 
 			if (numberValue < 0)
 				numberValue *= -1;
