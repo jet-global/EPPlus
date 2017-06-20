@@ -154,6 +154,11 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Log10Tests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LogTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\MathFunctionsTestBase.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\MaxaTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\MaxTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\MedianTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\MinaTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\MinTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\PowerTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\ProductTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountIfTests.cs" />
@@ -171,6 +176,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SumIfsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Logical\IfErrorTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultFactoryTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\FunctionCompilerFactoryTests.cs" />
