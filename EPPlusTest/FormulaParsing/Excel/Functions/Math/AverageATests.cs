@@ -379,19 +379,31 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["C2"].Value = "\"2\"";
-				worksheet.Cells["C3"].Formula = "\"2\"";
-				worksheet.Cells["C4"].Formula = "2";
-				worksheet.Cells["C5"].Formula = "VALUE(\"2\")";
+				worksheet.Cells["C2"].Value = "2";
+				worksheet.Cells["C3"].Formula = "2";
+				worksheet.Cells["C4"].Value = "\"2\"";
+				worksheet.Cells["C5"].Formula = "\"2\"";
+				worksheet.Cells["C6"].Value = "TRUE";
+				worksheet.Cells["C7"].Formula = "TRUE";
+				worksheet.Cells["C8"].Value = "\"6/20/2017\"";
+				worksheet.Cells["C9"].Formula = "\"6/20/2017\"";
 				worksheet.Cells["B2"].Formula = "AVERAGEA(C2)";
 				worksheet.Cells["B3"].Formula = "AVERAGEA(C3)";
 				worksheet.Cells["B4"].Formula = "AVERAGEA(C4)";
 				worksheet.Cells["B5"].Formula = "AVERAGEA(C5)";
+				worksheet.Cells["B6"].Formula = "AVERAGEA(C6)";
+				worksheet.Cells["B7"].Formula = "AVERAGEA(C7)";
+				worksheet.Cells["B8"].Formula = "AVERAGEA(C8)";
+				worksheet.Cells["B9"].Formula = "AVERAGEA(C9)";
 				worksheet.Calculate();
-				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
-				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
-				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
-				Assert.AreEqual(2d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B6"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B7"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B8"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B9"].Value);
 			}
 		}
 

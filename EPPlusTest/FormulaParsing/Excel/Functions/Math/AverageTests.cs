@@ -371,19 +371,31 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["C2"].Value = "\"2\"";
-				worksheet.Cells["C3"].Formula = "\"2\"";
-				worksheet.Cells["C4"].Formula = "2";
-				worksheet.Cells["C5"].Formula = "VALUE(\"2\")";
+				worksheet.Cells["C2"].Value = "2";
+				worksheet.Cells["C3"].Formula = "2";
+				worksheet.Cells["C4"].Value = "\"2\"";
+				worksheet.Cells["C5"].Formula = "\"2\"";
+				worksheet.Cells["C6"].Value = "TRUE";
+				worksheet.Cells["C7"].Formula = "TRUE";
+				worksheet.Cells["C8"].Value = "\"6/20/2017\"";
+				worksheet.Cells["C9"].Formula = "\"6/20/2017\"";
 				worksheet.Cells["B2"].Formula = "AVERAGE(C2)";
 				worksheet.Cells["B3"].Formula = "AVERAGE(C3)";
 				worksheet.Cells["B4"].Formula = "AVERAGE(C4)";
 				worksheet.Cells["B5"].Formula = "AVERAGE(C5)";
+				worksheet.Cells["B6"].Formula = "AVERAGE(C6)";
+				worksheet.Cells["B7"].Formula = "AVERAGE(C7)";
+				worksheet.Cells["B8"].Formula = "AVERAGE(C8)";
+				worksheet.Cells["B9"].Formula = "AVERAGE(C9)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
-				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
-				Assert.AreEqual(2d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B7"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B8"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B9"].Value).Type);
 			}
 		}
 

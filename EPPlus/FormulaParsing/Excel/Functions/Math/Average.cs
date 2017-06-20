@@ -46,12 +46,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError, eErrorType.Div0) == false)
 				return new CompileResult(argumentError);
-			double numberOfValues = 0d, sumOfAllValues = 0d;
+			double sumOfAllValues = 0d, numberOfValues = 0d;
 			foreach (var argument in arguments)
 			{
-				var errorFromArgument = this.CalculateComponentsOfAverage(argument, context, ref sumOfAllValues, ref numberOfValues);
-				if (errorFromArgument != null)
-					return new CompileResult(errorFromArgument.Value);
+				var calculationError = this.CalculateComponentsOfAverage(argument, context, ref sumOfAllValues, ref numberOfValues);
+				if (calculationError != null)
+					return new CompileResult(calculationError.Value);
 			}
 			return this.CreateResult(this.Divide(sumOfAllValues, numberOfValues), DataType.Decimal);
 		}
@@ -93,7 +93,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						numberOfValues++;
 						sumOfAllValues += cellInfo.ValueDouble;
 					}
-					else if (!handleAsFormula && cellInfo.Value is string cString && Double.TryParse(cString, out double parsedValue))
+					else if (!handleAsFormula && cellInfo.Value is string cellAsString && 
+						Double.TryParse(cellAsString, out double parsedValue))
 					{
 						numberOfValues++;
 						sumOfAllValues += parsedValue;

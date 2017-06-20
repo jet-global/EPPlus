@@ -35,79 +35,77 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError, eErrorType.Div0) == false)
 				return new CompileResult(argumentError);
-			double nValues = 0d, result = 0d;
-			foreach (var arg in arguments)
+			double sumOfAllValues = 0d, numberOfValues = 0d;
+			foreach (var argument in arguments)
 			{
-				var error = Calculate(arg, context, ref result, ref nValues);
-				if (error != null)
-					return new CompileResult(error.Value);
+				var calculationError = this.CalculateComponentsOfAverageA(argument, context, ref sumOfAllValues, ref numberOfValues);
+				if (calculationError != null)
+					return new CompileResult(calculationError.Value);
 			}
-			return CreateResult(Divide(result, nValues), DataType.Decimal);
+			return this.CreateResult(this.Divide(sumOfAllValues, numberOfValues), DataType.Decimal);
 		}
 
-		private eErrorType? Calculate(FunctionArgument arg, ParsingContext context, ref double retVal, ref double nValues, bool isInArray = false)
+		private eErrorType? CalculateComponentsOfAverageA(FunctionArgument argument, ParsingContext context, ref double sumOfAllValues, ref double numberOfValues, bool isInArray = false)
 		{
-			if (arg.Value == null)
-				arg = new FunctionArgument(0);
-			if (ShouldIgnore(arg))
+			if (argument.Value == null)
+				argument = new FunctionArgument(0);
+			if (this.ShouldIgnore(argument))
 			{
 				return null;
 			}
-			if (arg.Value is IEnumerable<FunctionArgument>)
+			if (argument.Value is IEnumerable<FunctionArgument>)
 			{
-				foreach (var item in (IEnumerable<FunctionArgument>)arg.Value)
+				foreach (var subArgument in (IEnumerable<FunctionArgument>)argument.Value)
 				{
-					var error = Calculate(item, context, ref retVal, ref nValues, true);
-					if (error != null)
-						return error;
+					var calculationError = this.CalculateComponentsOfAverageA(subArgument, context, ref sumOfAllValues, ref numberOfValues, true);
+					if (calculationError != null)
+						return calculationError;
 				}
 			}
-			else if (arg.IsExcelRange)
+			else if (argument.IsExcelRange)
 			{
-				foreach (var c in arg.ValueAsRangeInfo)
+				foreach (var cellInfo in argument.ValueAsRangeInfo)
 				{
-					bool handleAsFormula = (!c.Formula.Equals(string.Empty));
-					if (ShouldIgnore(c, context))
+					bool handleAsFormula = (!cellInfo.Formula.Equals(string.Empty));
+					if (this.ShouldIgnore(cellInfo, context))
 						continue;
-					CheckForAndHandleExcelError(c);
-					if (IsNumeric(c.Value) && !(c.Value is bool))
+					this.CheckForAndHandleExcelError(cellInfo);
+					if (this.IsNumeric(cellInfo.Value) && !(cellInfo.Value is bool))
 					{
-						nValues++;
-						retVal += c.ValueDouble;
+						numberOfValues++;
+						sumOfAllValues += cellInfo.ValueDouble;
 					}
-					else if (c.Value is bool)
+					else if (cellInfo.Value is bool)
 					{
-						nValues++;
-						retVal += (bool)c.Value ? 1 : 0;
+						numberOfValues++;
+						sumOfAllValues += (bool)cellInfo.Value ? 1 : 0;
 					}
-					else if (c.Value is string cString)
+					else if (cellInfo.Value is string cellValueAsString)
 					{
-						if (!cString.Equals(string.Empty))
-							nValues++;
-						else
+						bool cellIsNull = cellValueAsString.Equals(string.Empty);
+						numberOfValues += (cellIsNull) ? 0 : 1;
+						if (handleAsFormula || cellIsNull)
 							continue;
-						if (handleAsFormula)
-							continue;
-						if (Boolean.TryParse(cString, out bool valueAsBool))
-							retVal += (valueAsBool) ? 1 : 0;
-						else if (Double.TryParse(cString, out double valueAsDouble))
-							retVal += valueAsDouble;
+						if (Boolean.TryParse(cellValueAsString, out bool cellValueAsBool))
+							sumOfAllValues += (cellValueAsBool) ? 1 : 0;
+						else if (Double.TryParse(cellValueAsString, out double cellValueAsDouble))
+							sumOfAllValues += cellValueAsDouble;
 					}
 				}
 			}
 			else
 			{
-				var numericValue = GetNumericValue(arg.Value, isInArray);
+				var numericValue = this.GetNumericValue(argument.Value, isInArray);
 				if (numericValue.HasValue)
 				{
-					nValues++;
-					retVal += numericValue.Value;
+					numberOfValues++;
+					sumOfAllValues += numericValue.Value;
 				}
-				else if ((arg.Value is string))
+				else if ((argument.Value is string))
 				{
 					if (isInArray)
 					{
-						nValues++;
+						numberOfValues++;
 					}
 					else
 					{
@@ -115,7 +113,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					}
 				}
 			}
-			CheckForAndHandleExcelError(arg);
+			this.CheckForAndHandleExcelError(argument);
 			return null;
 		}
 
