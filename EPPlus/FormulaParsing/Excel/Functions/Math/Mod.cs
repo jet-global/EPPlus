@@ -65,8 +65,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					if (!ConvertUtil.TryParseBooleanString(secondArgument, out _))
 						return new CompileResult(eErrorType.Value);
 
-			var number = ArgToDecimal(arguments, 0);
-			var divisor = ArgToDecimal(arguments, 1);
+			var number = this.ArgToDecimal(arguments, 0);
+			var divisor = this.ArgToDecimal(arguments, 1);
 			if (divisor == 0)
 				return new CompileResult(eErrorType.Div0);
 			var remainder = number - divisor * (System.Math.Floor(number / divisor));
