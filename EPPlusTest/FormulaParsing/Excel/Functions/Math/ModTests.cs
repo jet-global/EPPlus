@@ -78,6 +78,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void ModWithLargeNumbersTwoReturnsCorrectValue()
+		{
+			var function = new Mod();
+			var result = function.Execute(FunctionsHelper.CreateArgs(100000, -6), this.ParsingContext);
+			Assert.AreEqual(-2d, result.Result);
+		}
+
+		[TestMethod]
 		public void ModWithNegativeIntegersReturnsCorrectValue()
 		{
 			var function = new Mod();

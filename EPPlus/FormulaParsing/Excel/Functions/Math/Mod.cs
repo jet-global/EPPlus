@@ -1,5 +1,5 @@
 ﻿/* Copyright (C) 2011  Jan Källman
-/*******************************************************************************
+/******************************************************************************
 * You may amend and distribute as you like, but don't remove this header!
 *
 * EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
@@ -24,9 +24,9 @@
 * The author accepts no liability for any damage or loss of business that this product may cause.
 *
 *  * Author							Change						Date
-* *******************************************************************************
+* *****************************************************************************
 * * Mats Alm   		                Added		                2013-12-03
-* *******************************************************************************
+* *****************************************************************************
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System.Collections.Generic;
@@ -42,7 +42,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	public class Mod : ExcelFunction
 	{
 		/// <summary>
-		/// Takes the user 
+		/// Takes the first specified argument to the modulus of the second specified argument.
 		/// </summary>
 		/// <param name="arguments">The user specified arguments to modulo.</param>
 		/// <param name="context">Not used, but needed to override the method.</param>
@@ -60,7 +60,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					if (!ConvertUtil.TryParseBooleanString(firstArgument, out _))
 						return new CompileResult(eErrorType.Value);
 
-
 			if (!ConvertUtil.TryParseNumericString(secondArgument, out _))
 				if (!ConvertUtil.TryParseDateString(secondArgument, out _))
 					if (!ConvertUtil.TryParseBooleanString(secondArgument, out _))
@@ -70,9 +69,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var divisor = ArgToDecimal(arguments, 1);
 			if (divisor == 0)
 				return new CompileResult(eErrorType.Div0);
-
 			var remainder = number - divisor*(System.Math.Floor(number / divisor));
-
 			return new CompileResult(remainder, DataType.Decimal);
 		}
 	}
