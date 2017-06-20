@@ -69,7 +69,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var divisor = ArgToDecimal(arguments, 1);
 			if (divisor == 0)
 				return new CompileResult(eErrorType.Div0);
-			var remainder = number - divisor*(System.Math.Floor(number / divisor));
+			var remainder = number - divisor * (System.Math.Floor(number / divisor));
 			return new CompileResult(remainder, DataType.Decimal);
 		}
 	}
