@@ -36,7 +36,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <summary>
 		/// Checks for a validation error.
 		/// </summary>
-		public abstract bool TryGetValidationError(object obj, out eErrorType error);
+		public abstract bool TryValidateObjValueIsNotNaNOrinfinity(object obj, out eErrorType error);
 
 		private static CompileResultValidator _empty;
 
@@ -54,7 +54,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			// empty validator - do nothing
 		}
 
-		public override bool TryGetValidationError(object obj, out eErrorType error)
+		public override bool TryValidateObjValueIsNotNaNOrinfinity(object obj, out eErrorType error)
 		{
 			error = eErrorType.Null;
 			return true;

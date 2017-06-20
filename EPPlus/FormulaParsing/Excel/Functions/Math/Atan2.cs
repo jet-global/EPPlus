@@ -51,7 +51,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if ((!ConvertUtil.TryParseDateObjectToOADate(argument, out double result)) || ( argument2 is string & !ConvertUtil.TryParseDateObjectToOADate(argument2, out double result2)))
 				return new CompileResult(eErrorType.Value);
 
-			if(result ==0 && result2 ==0)
+			if(result == 0 && result2 == 0)
 				return new CompileResult(eErrorType.Div0);
 
 			var arg1 = ArgToDecimal(arguments, 0);

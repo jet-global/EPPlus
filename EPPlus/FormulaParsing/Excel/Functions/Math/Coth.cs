@@ -46,9 +46,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
 			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double resultOfTryParseDateObjectToOADate))
-			{
 				return new CompileResult(eErrorType.Value);
-			}
 
 			if (AdvancedTrigonometry.TryCheckIfCosecantWillHaveADivideByZeroError(resultOfTryParseDateObjectToOADate, out double cosecant))
 				return new CompileResult(eErrorType.Div0);

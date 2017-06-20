@@ -407,7 +407,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		{
 			var validator = _compileResultValidators.GetValidator(dataType);
 
-			if(!validator.TryGetValidationError(result, out eErrorType error))
+			if(!validator.TryValidateObjValueIsNotNaNOrinfinity(result, out eErrorType error))
 				return new CompileResult(error);
 			else
 				validator.Validate(result);

@@ -46,10 +46,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
 			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
-			{
 				return new CompileResult(eErrorType.Value);
-			}
-			return this.CreateResult(System.Math.Tan(result), DataType.Decimal);
+				return this.CreateResult(System.Math.Tan(result), DataType.Decimal);
 		}
 	}
 

@@ -31,41 +31,81 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// </summary>
 	public static class AdvancedTrigonometry
 	{
+		/// <summary>
+		/// Handles the calculation for Hyperbolic Secant.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Returns the hyperbolic secant of an angle.</returns>
 		public static double HyperbolicSecant(double x)
 		{
 			return 2 / (MathObj.Exp(x) + MathObj.Exp(-x));
 		}
 
+		/// <summary>
+		/// Handles the calculation for Secant.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Returns the secant of an angle.</returns>
 		public static double Secant(double x)
 		{
 			return 1 / MathObj.Cos(x);
 		}
-		
+
+		/// <summary>
+		/// Handles the calculation for Inverse Hyperbolic Tangent.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Returns the inverse hyperbolic tangent of a number.</returns>
 		public static double InverseHyperbolicTangent(double x)
 		{
 			return MathObj.Log((1 + x) / (1 - x)) / 2;
 		}
 
+		/// <summary>
+		/// Handles the calculation for inverse hyperbolic sine.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Returns the inverse hyperbolic sine of a number. </returns>
 		public static double InverseHyperbolicSine(double x)
 		{
 			return MathObj.Log(x + MathObj.Sqrt(x * x + 1.0));
 		}
 
+		/// <summary>
+		/// Handles the calculation for inverse hyperbolic cotangent.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Returns the inverse hyperbolic cotangent of a number.</returns>
 		public static double InverseHyperbolicCotangent(double x)
 		{
 			return MathObj.Log((x + 1.0) / (x - 1.0)) / 2.0;
 		}
 
+		/// <summary>
+		/// Handles the calculation for inverse cotangent.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Returns the principal value of the arccotangent, or inverse cotangent, of a number.</returns>
 		public static double InverseCotangent(double x)
 		{
 			return 2.0 * MathObj.Atan(1) - MathObj.Atan(x);
 		}
 
+		/// <summary>
+		/// Handles the calculation for inverse hyperbolic cosine.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Returns the inverse hyperbolic cosine of a number.</returns>
 		public static double InverseHyperbolicCosine(double x)
 		{
 			return MathObj.Log(x + MathObj.Sqrt(x * x - 1));
 		}
 
+		/// <summary>
+		/// Handles the calculation for hyperbolic cosecant.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Return the hyperbolic cosecant of an angle specified in radians.</returns>
 		public static double HyperbolicCosecant(double x)
 		{
 			if ((MathObj.Exp(x) - MathObj.Exp(-x)) == 0)
@@ -73,6 +113,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return 2 / (MathObj.Exp(x) - MathObj.Exp(-x));
 		}
 
+		/// <summary>
+		/// Handles the calculation for cotangent.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Return the cotangent of an angle specified in radians.</returns>
 		public static double Cotangent(double x)
 		{
 			if (MathObj.Tan(x) == 0)
@@ -80,6 +125,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return 1 / MathObj.Tan(x);
 		}
 
+		/// <summary>
+		/// Handles the calculation for hyperbolic cotangent.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Return the hyperbolic cotangent of a hyperbolic angle.</returns>
 		public static double HyperbolicCotangent(double x)
 		{
 			//This is to handle a rounding diffrence between excel and EPPlus. 
@@ -90,19 +140,30 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return (MathObj.Exp(x) + MathObj.Exp(-x)) / (MathObj.Exp(x) - MathObj.Exp(-x));
 		}
 
+		/// <summary>
+		/// Handles the calculation for cosecant.
+		/// </summary>
+		/// <param name="x">A double to be evaluated.</param>
+		/// <returns>Returns the cosecant of an angle specified in radians.</returns>
 		public static double Cosecant(double x)
 		{
 			return 1 / MathObj.Sin(x);
 		}
 
-		public static bool TryCheckIfCosecantWillHaveADivideByZeroError(double x, out double Cotangent)
+		/// <summary>
+		/// This is used as a check to make sure a divide by zero error is caught.
+		/// </summary>
+		/// <param name="x">The double to be evaluated.</param>
+		/// <param name="SinValue">This is a out value. if true = -2 else it is Sin(x)</param>
+		/// <returns>This returns true or false.</returns>
+		public static bool TryCheckIfCosecantWillHaveADivideByZeroError(double x, out double SinValue)
 		{
 			if(MathObj.Sin(x) == 0)
 			{
-				Cotangent = -2;
+				SinValue = -2;
 				return true;
 			}
-			Cotangent = MathObj.Sin(x);
+			SinValue = MathObj.Sin(x);
 			return false;
 		}
 

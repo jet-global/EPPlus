@@ -39,16 +39,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// </summary>
 		/// <param name="arguments">Input to have its hyperbolic cosecant calculated.</param>
 		/// <param name="context">Unused, this is information about where the function is being executed.</param>
-		/// <returns>Returns the hyperbolic cosecant of an angle</returns>
+		/// <returns>Returns the hyperbolic cosecant of an angle.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
 			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
-			{
 				return new CompileResult(eErrorType.Value);
-			}
 			if (AdvancedTrigonometry.TryCheckIfCosecantWillHaveADivideByZeroError(result, out double cosecant))
 				return new CompileResult(eErrorType.Div0);
 			return this.CreateResult(AdvancedTrigonometry.HyperbolicCosecant(result), DataType.Decimal);
