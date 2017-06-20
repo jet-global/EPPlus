@@ -24,7 +24,6 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;

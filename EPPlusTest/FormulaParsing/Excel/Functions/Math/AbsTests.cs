@@ -29,8 +29,6 @@ using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml;
-using System.Linq;
-using OfficeOpenXml.FormulaParsing.Excel;
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 	[TestClass]
@@ -141,7 +139,34 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = -78;
+				worksheet.Cells["B2"].Formula = "ABS(B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(78d, worksheet.Cells["B2"].Value);
+			}
+		}
 
+		[TestMethod]
+		public void AbsWithEmptyCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "ABS(A2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void AbsWithDivisionByZeroReturnsPoundDivZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "ABS(5/0)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
 			}
 		}
 		#endregion
