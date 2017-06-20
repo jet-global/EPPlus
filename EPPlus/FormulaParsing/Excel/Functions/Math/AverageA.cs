@@ -47,6 +47,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 		private eErrorType? Calculate(FunctionArgument arg, ParsingContext context, ref double retVal, ref double nValues, bool isInArray = false)
 		{
+			if (arg.Value == null)
+				arg = new FunctionArgument(0);
 			if (ShouldIgnore(arg))
 			{
 				return null;
@@ -64,7 +66,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				foreach (var c in arg.ValueAsRangeInfo)
 				{
-					if (ShouldIgnore(c, context)) continue;
+					bool handleAsFormula = (!c.Formula.Equals(string.Empty));
+					if (ShouldIgnore(c, context))
+						continue;
 					CheckForAndHandleExcelError(c);
 					if (IsNumeric(c.Value) && !(c.Value is bool))
 					{
@@ -80,6 +84,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					{
 						if (!cString.Equals(string.Empty))
 							nValues++;
+						else
+							continue;
+						if (handleAsFormula)
+							continue;
 						if (Boolean.TryParse(cString, out bool valueAsBool))
 							retVal += (valueAsBool) ? 1 : 0;
 						else if (Double.TryParse(cString, out double valueAsDouble))
