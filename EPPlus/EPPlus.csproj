@@ -494,7 +494,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Var.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarMethods.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarP.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\Numeric\CInt.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Numeric\IntFunction.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\ObjectEnumerableArgConverter.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\Address.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\ArrayLookupNavigator.cs" />

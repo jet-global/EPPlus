@@ -23,17 +23,41 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// 
+	/// </summary>
 	public class Sign : ExcelFunction
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="arguments"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var result = 0d;
+
+			var test = arguments.ElementAt(0);
+			if (test.Value is string)
+			{
+				if (!ConvertUtil.TryParseNumericString(test.Value, out _))
+					if (!ConvertUtil.TryParseDateString(test.Value, out _))
+						if (!ConvertUtil.TryParseBooleanString(test.Value, out _))
+							return new CompileResult(eErrorType.Value);
+			}
+			else if (test.Value == null)
+			{
+				return CreateResult(0d, DataType.Decimal);
+			}
 			var val = ArgToDecimal(arguments, 0);
 			if (val < 0)
 			{

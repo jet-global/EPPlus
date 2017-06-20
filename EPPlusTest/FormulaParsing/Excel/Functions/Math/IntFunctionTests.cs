@@ -33,49 +33,49 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Numeric;
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 	[TestClass]
-	public class CIntTests : MathFunctionsTestBase
+	public class IntFunctionTests : MathFunctionsTestBase
 	{
-		#region CInt Function (Execute) Tests
+		#region IntFunction Function (Execute) Tests
 		[TestMethod]
-		public void CIntShouldConvertTextToInteger()
+		public void IntFunctionShouldConvertTextToInteger()
 		{
-			var func = new CInt();
+			var func = new IntFunction();
 			var args = FunctionsHelper.CreateArgs("2");
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(2, result.Result);
 		}
 
 		[TestMethod]
-		public void CIntithInvalidArgumentReturnsPoundValue()
+		public void IntFunctionWithInvalidArgumentReturnsPoundValue()
 		{
-			var func = new CInt();
+			var func = new IntFunction();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
-		public void CIntShouldConvertDecimalToInteger()
+		public void IntFunctionShouldConvertDecimalToInteger()
 		{
-			var func = new CInt();
+			var func = new IntFunction();
 			var args = FunctionsHelper.CreateArgs(2.88m);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(2, result.Result);
 		}
 
 		[TestMethod]
-		public void CIntShouldConvertNegativeDecimalToInteger()
+		public void IntFunctionShouldConvertNegativeDecimalToInteger()
 		{
-			var func = new CInt();
+			var func = new IntFunction();
 			var args = FunctionsHelper.CreateArgs(-2.88m);
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(-3, result.Result);
 		}
 
 		[TestMethod]
-		public void CIntShouldConvertStringToInteger()
+		public void IntFunctionShouldConvertStringToInteger()
 		{
-			var func = new CInt();
+			var func = new IntFunction();
 			var args = FunctionsHelper.CreateArgs("-2.88");
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(-3, result.Result);

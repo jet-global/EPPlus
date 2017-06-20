@@ -59,7 +59,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			Functions["hyperlink"] = new Hyperlink();
 			Functions["value"] = new Value();
 			// Numbers
-			Functions["int"] = new CInt();
+			Functions["int"] = new IntFunction();
 			// Math
 			Functions["abs"] = new Abs();
 			Functions["asin"] = new Asin();
