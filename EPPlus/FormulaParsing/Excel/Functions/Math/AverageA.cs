@@ -22,6 +22,7 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2014-01-06
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
@@ -75,9 +76,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						nValues++;
 						retVal += (bool)c.Value ? 1 : 0;
 					}
-					else if (c.Value is string)
+					else if (c.Value is string cString)
 					{
-						nValues++;
+						if (!cString.Equals(string.Empty))
+							nValues++;
+						if (Boolean.TryParse(cString, out bool valueAsBool))
+							retVal += (valueAsBool) ? 1 : 0;
+						else if (Double.TryParse(cString, out double valueAsDouble))
+							retVal += valueAsDouble;
 					}
 				}
 			}

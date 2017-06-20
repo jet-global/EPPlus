@@ -154,9 +154,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Calculate();
 				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
 				Assert.AreEqual(2.5, worksheet.Cells["B3"].Value);
-				Assert.AreEqual(0, worksheet.Cells["B4"].Value);
-				Assert.AreEqual(0, worksheet.Cells["B5"].Value);
-				Assert.AreEqual(0, worksheet.Cells["B6"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B6"].Value);
 				Assert.AreEqual(1d, worksheet.Cells["B7"].Value);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B8"].Value).Type);
 			}
@@ -166,7 +166,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		public void AverageAWithOneIntegerAndNumericStringReturnsCorrectResult()
 		{
 			var function = new AverageA();
-			var arguments = FunctionsHelper.CreateArgs(1, "3");
+			var arguments = FunctionsHelper.CreateArgs(2, "3");
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(2.5, result.Result);
 		}
@@ -211,13 +211,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["C6"].Formula = "YEARFRAC(,)"; // Evaluates to #NA
 				worksheet.Cells["C7"].Formula = "invalidFormulaName"; // Evaluates to #NAME
 				worksheet.Cells["C8"].Formula = "EDATE(-1,0)"; // Evaluates to #NUM
-				worksheet.Cells["B2"].Formula = "AVERAGEA(C2)";
-				worksheet.Cells["B3"].Formula = "AVERAGEA(C3)";
-				worksheet.Cells["B4"].Formula = "AVERAGEA(C4)";
-				worksheet.Cells["B5"].Formula = "AVERAGEA(C5)";
-				worksheet.Cells["B6"].Formula = "AVERAGEA(C6)";
-				worksheet.Cells["B7"].Formula = "AVERAGEA(C7)";
-				worksheet.Cells["B8"].Formula = "AVERAGEA(C8)";
+				worksheet.Cells["B2"].Formula = "AVERAGEA(1,C2)";
+				worksheet.Cells["B3"].Formula = "AVERAGEA(1,C3)";
+				worksheet.Cells["B4"].Formula = "AVERAGEA(1,C4)";
+				worksheet.Cells["B5"].Formula = "AVERAGEA(1,C5)";
+				worksheet.Cells["B6"].Formula = "AVERAGEA(1,C6)";
+				worksheet.Cells["B7"].Formula = "AVERAGEA(1,C7)";
+				worksheet.Cells["B8"].Formula = "AVERAGEA(1,C8)";
 				worksheet.Calculate();
 				Assert.AreEqual(0.5, worksheet.Cells["B2"].Value);
 				Assert.AreEqual(0.5, worksheet.Cells["B3"].Value);
