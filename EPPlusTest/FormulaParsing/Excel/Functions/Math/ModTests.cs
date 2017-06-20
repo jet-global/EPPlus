@@ -205,18 +205,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void ModShouldReturnCorrectResult()
 		{
-			var func = new Mod();
-			var args = FunctionsHelper.CreateArgs(5, 2);
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Mod();
+			var result = function.Execute(FunctionsHelper.CreateArgs(5, 2), this.ParsingContext);
 			Assert.AreEqual(1d, result.Result);
 		}
 
 		[TestMethod]
 		public void ModWithInvalidArgumentReturnsPoundValue()
 		{
-			var func = new Mod();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
+			var function = new Mod();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
