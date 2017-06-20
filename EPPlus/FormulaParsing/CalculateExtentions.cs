@@ -113,11 +113,11 @@ namespace OfficeOpenXml
 		/// <param name="options">Settings for this calculation.</param>
 		public static void Calculate(this ExcelRangeBase range, ExcelCalculationOption options)
 		{
-			Init(range._workbook);
-			var parser = range._workbook.FormulaParser;
+			Init(range.myWorkbook);
+			var parser = range.myWorkbook.FormulaParser;
 			parser.InitNewCalc();
 			var dc = DependencyChainFactory.Create(range, options);
-			CalcChain(range._workbook, parser, dc);
+			CalcChain(range.myWorkbook, parser, dc);
 		}
 
 		/// <summary>
