@@ -30,7 +30,7 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// Returns the average of the given arguments.
+	/// Returns the average (arithmetic mean) of the given arguments.
 	/// </summary>
 	public class Average : HiddenValuesHandlingFunction
 	{
@@ -59,7 +59,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <summary>
 		/// Recursively calculates the sum of all valid cells and the total number of valid cells for the given argument.
 		/// </summary>
-		/// <param name="argument">The argument to check for a valid numeric value.</param>
+		/// <param name="argument">The <see cref="FunctionArgument"/> to calculate the sum of values and count of its cells.</param>
 		/// <param name="context">The context for this method.</param>
 		/// <param name="sumOfAllValues">The running sum of all numeric values processed.</param>
 		/// <param name="numberOfValues">The running total number of numeric values processed.</param>
