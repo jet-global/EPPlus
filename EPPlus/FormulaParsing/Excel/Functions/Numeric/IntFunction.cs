@@ -52,13 +52,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Numeric
 				return new CompileResult(argumentError);
 
 			var numberCandidate = arguments.ElementAt(0).Value;
-			if (numberCandidate is string)
-			{
-				if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
-					if (!ConvertUtil.TryParseBooleanString(numberCandidate, out _))
-						if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
-							return new CompileResult(eErrorType.Value);
-			}
+
+			if (numberCandidate == null)
+				return this.CreateResult(0, DataType.Integer);
+
+			if (!ConvertUtil.TryParseNumericString(numberCandidate, out _) && !ConvertUtil.TryParseBooleanString(numberCandidate, out _) && !ConvertUtil.TryParseDateString(numberCandidate, out _))
+				return new CompileResult(eErrorType.Value);
 
 			var numberValue = this.ArgToDecimal(arguments, 0);
 			return this.CreateResult((int)System.Math.Floor(numberValue), DataType.Integer);

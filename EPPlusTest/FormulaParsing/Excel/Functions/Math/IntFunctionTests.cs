@@ -127,7 +127,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Formula = "INT(A2:A4)";
+				worksheet.Cells["B1"].Formula = "INT(A2)";
 				worksheet.Calculate();
 				Assert.AreEqual(0, worksheet.Cells["B1"].Value);
 			}

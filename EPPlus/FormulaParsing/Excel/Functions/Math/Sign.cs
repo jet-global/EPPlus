@@ -50,29 +50,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var result = 0d;
-
 			var numberCandidate = arguments.ElementAt(0).Value;
-			if (numberCandidate is string)
-			{
-				if (!ConvertUtil.TryParseNumericString(numberCandidate, out _))
-					if (!ConvertUtil.TryParseDateString(numberCandidate, out _))
-						if (!ConvertUtil.TryParseBooleanString(numberCandidate, out _))
-							return new CompileResult(eErrorType.Value);
-			}
-			else if (numberCandidate == null)
-			{
+
+			if (numberCandidate == null)
 				return this.CreateResult(0d, DataType.Decimal);
-			}
+
+			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out _))
+				return new CompileResult(eErrorType.Value);
 
 			var numberValue = this.ArgToDecimal(arguments, 0);
 			if (numberValue < 0)
-			{
 				result = -1;
-			}
 			else if (numberValue > 0)
-			{
 				result = 1;
-			}
 			return this.CreateResult(result, DataType.Decimal);
 		}
 	}
