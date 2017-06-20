@@ -29,6 +29,29 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
 	public class DecimalCompileResultValidator : CompileResultValidator
 	{
+		/// <summary>
+		/// Checks for a #Num Excel error. 
+		/// </summary>
+		/// <param name="obj">The excel object to check for a num error.</param>
+		/// <param name="error">Sends out the eErrorType type.</param>
+		/// <returns>Returns false if the value of obj is either Nan or Infinity. Otherwise It returns true and the program continues like normal.</returns>
+		public override bool TryValidateObjValueIsNotNaNOrinfinity(object obj, out eErrorType error)
+		{
+			var num = ConvertUtil.GetValueDouble(obj);
+			if (double.IsNaN(num) || double.IsInfinity(num))
+			{
+				error = eErrorType.Num;
+				return false;
+			}
+			//If this returns true ignore the out eError
+			error = eErrorType.Null;
+			return true;
+		}
+
+		/// <summary>
+		/// Throws a #Num exception.
+		/// </summary>
+		/// <param name="obj"> Checks the specified <paramref name="obj"/> for invalid (non-double) values and throws a #NUM! error exception if any are found.</param>
 		public override void Validate(object obj)
 		{
 			var num = ConvertUtil.GetValueDouble(obj);
@@ -37,5 +60,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 				throw new ExcelErrorValueException(eErrorType.Num);
 			}
 		}
+
 	}
 }
