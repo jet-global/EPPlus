@@ -104,6 +104,9 @@
     <Compile Include="ExcelNamedRangeTest.cs" />
     <Compile Include="ExcelPackageTest.cs" />
     <Compile Include="ExcelWorksheetTests.cs" />
+    <Compile Include="ExpTests.cs" />
+    <Compile Include="FactDoubleTests.cs" />
+    <Compile Include="FactTests.cs" />
     <Compile Include="FormulaManagerTest.cs" />
     <Compile Include="ExcelStyleTest.cs" />
     <Compile Include="FormulaParsing\CalculationExtensionsTest.cs" />
@@ -181,6 +184,12 @@
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\FunctionCompilerFactoryTests.cs" />
     <Compile Include="FormulaParsing\FormulaParserManagerTests.cs" />
+    <Compile Include="LargeTests.cs" />
+    <Compile Include="LogicalFunctionsTestBase.cs" />
+    <Compile Include="LogicalFunctionsTests.cs" />
+    <Compile Include="SmallTests.cs" />
+    <Compile Include="SqrtPiTests.cs" />
+    <Compile Include="SqrtTests.cs" />
     <Compile Include="Style\Dxf\ExcelDxfStyleTest.cs" />
     <Compile Include="Style\XmlAccess\ExcelFontXmlTest.cs" />
     <Compile Include="Utils\ConvertUtilTest.cs" />
