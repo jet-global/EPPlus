@@ -84,6 +84,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				foreach (var cellInfo in argument.ValueAsRangeInfo)
 				{
+					bool handleAsFormula = (!cellInfo.Formula.Equals(string.Empty));
 					if (this.ShouldIgnore(cellInfo, context))
 						continue;
 					this.CheckForAndHandleExcelError(cellInfo);
@@ -92,7 +93,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						numberOfValues++;
 						sumOfAllValues += cellInfo.ValueDouble;
 					}
-					else if (cellInfo.Value is string cString && Double.TryParse(cString, out double parsedValue))
+					else if (!handleAsFormula && cellInfo.Value is string cString && Double.TryParse(cString, out double parsedValue))
 					{
 						numberOfValues++;
 						sumOfAllValues += parsedValue;
