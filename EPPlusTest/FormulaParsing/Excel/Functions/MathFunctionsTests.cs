@@ -35,16 +35,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void AbsShouldReturnCorrectResult()
-		{
-			var expectedValue = 3d;
-			var func = new Abs();
-			var args = FunctionsHelper.CreateArgs(-3d);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(expectedValue, result.Result);
-		}
-
-		[TestMethod]
 		public void AsinShouldReturnCorrectResult()
 		{
 			const double expectedValue = 1.5708;
@@ -771,16 +761,6 @@ namespace EPPlusTest.Excel.Functions
 				Assert.AreEqual(w.GetValue(5, 4), 5.5D);
 				Assert.AreEqual(w.GetValue(5, 5), 1.5D);
 			}
-		}
-
-		[TestMethod]
-		public void AbsWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Abs();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]

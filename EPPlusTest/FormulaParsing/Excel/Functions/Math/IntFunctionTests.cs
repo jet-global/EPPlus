@@ -80,6 +80,99 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(-3, result.Result);
 		}
+
+		[TestMethod]
+		public void IntFunctionWithStringInputReturnsPoundValue()
+		{
+			var function = new IntFunction();
+			var result = function.Execute(FunctionsHelper.CreateArgs("string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IntFunctionWithDateFromDateFunctionReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "INT(DATE(2017, 6, 12))";
+				worksheet.Calculate();
+				Assert.AreEqual(42898, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void IntFunctionWithDateAsStringReturnsCorrectValue()
+		{
+			var function = new IntFunction();
+			var result = function.Execute(FunctionsHelper.CreateArgs("5/5/2017"), this.ParsingContext);
+			Assert.AreEqual(42860, result.Result);
+		}
+
+		[TestMethod]
+		public void IntFunctionWithCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 15.9;
+				worksheet.Cells["B2"].Formula = "INT(B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(15, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void IntFunctionWithEmptyCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "INT(A2:A4)";
+				worksheet.Calculate();
+				Assert.AreEqual(0, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void IntFunctionWithTrueBooleanReturnsCorrectValue()
+		{
+			var function = new IntFunction();
+			var result = function.Execute(FunctionsHelper.CreateArgs(true), this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+		}
+
+		[TestMethod]
+		public void IntFunctionWithFalseBooleanReturnsCorrectValue()
+		{
+			var function = new IntFunction();
+			var result = function.Execute(FunctionsHelper.CreateArgs(false), this.ParsingContext);
+			Assert.AreEqual(0, result.Result);
+		}
+
+		[TestMethod]
+		public void IntFunctionWithPositiveFractionReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "INT((2/3))";
+				worksheet.Calculate();
+				Assert.AreEqual(0, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void IntFunctionWithNegativeFractionReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "INT((-2/3))";
+				worksheet.Calculate();
+				Assert.AreEqual(-1, worksheet.Cells["B1"].Value);
+			}
+		}
 		#endregion
 	}
 }

@@ -23,18 +23,40 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Numeric
 {
+	/// <summary>
+	/// This class contains the formula for converting an argument to an integer value.
+	/// Was formerly the CInt Class.
+	/// </summary>
 	public class IntFunction : ExcelFunction
 	{
+		/// <summary>
+		/// Takes a user specified argument and converts it into an integer value.
+		/// </summary>
+		/// <param name="arguments">The user specified argument.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The user specified argument as an integer value.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
-			return new CompileResult(argumentError);
-			var num = ArgToDecimal(arguments, 0);
-			return CreateResult((int)System.Math.Floor(num), DataType.Integer);
+				return new CompileResult(argumentError);
+
+			var test = arguments.ElementAt(0).Value;
+			if (test is string)
+			{
+				if (!ConvertUtil.TryParseNumericString(test, out _))
+					if (!ConvertUtil.TryParseBooleanString(test, out _))
+						if (!ConvertUtil.TryParseDateString(test, out _))
+							return new CompileResult(eErrorType.Value);
+			}
+
+			var num = this.ArgToDecimal(arguments, 0);
+			return this.CreateResult((int)System.Math.Floor(num), DataType.Integer);
 		}
 	}
 }
