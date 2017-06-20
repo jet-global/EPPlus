@@ -25,16 +25,27 @@
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
+	#region CompileResultValidator Abstract Methods
 	public abstract class CompileResultValidator
 	{
+		/// <summary>
+		/// Validates the answer as an excel format.
+		/// </summary>
 		public abstract void Validate(object obj);
 
+		/// <summary>
+		/// Checks for a validation error.
+		/// </summary>
+		public abstract bool TryValidateObjValueIsNotNaNOrinfinity(object obj, out eErrorType error);
+
 		private static CompileResultValidator _empty;
+
 		public static CompileResultValidator Empty
 		{
 			get { return _empty ?? (_empty = new EmptyCompileResultValidator()); }
 		}
 	}
+	#endregion
 
 	internal class EmptyCompileResultValidator : CompileResultValidator
 	{
@@ -42,5 +53,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		{
 			// empty validator - do nothing
 		}
+
+		public override bool TryValidateObjValueIsNotNaNOrinfinity(object obj, out eErrorType error)
+		{
+			error = eErrorType.Null;
+			return true;
+		}
 	}
+
 }
