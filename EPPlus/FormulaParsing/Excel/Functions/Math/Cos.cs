@@ -26,23 +26,28 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using System;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the COS function.
+	/// </summary>
 	public class Cos : ExcelFunction
 	{
+		/// <summary>
+		/// Calculate the cosine of a given input.
+		/// </summary>
+		/// <param name="arguments">Input to have its cosine calculated.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>Returns the Cosine of a given angle.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var argument = arguments.First().Value;
-			if (argument is string & !ConvertUtil.TryParseDateObjectToOADate (argument, out double result))
-			{
+			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double result))
 				return new CompileResult(eErrorType.Value);
-			}
-			return CreateResult(System.Math.Cos(result), DataType.Decimal);
+			return this.CreateResult(System.Math.Cos(result), DataType.Decimal);
 		}
 	}
 }

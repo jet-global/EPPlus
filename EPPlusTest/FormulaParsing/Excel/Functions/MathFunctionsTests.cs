@@ -477,15 +477,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void ModShouldReturnCorrectResult()
-		{
-			var func = new Mod();
-			var args = FunctionsHelper.CreateArgs(5, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
 		public void CosShouldReturnCorrectResult()
 		{
 			var func = new Cos();
@@ -996,16 +987,6 @@ namespace EPPlusTest.Excel.Functions
 		public void FloorWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Floor();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void ModWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Mod();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);

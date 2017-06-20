@@ -406,7 +406,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		protected CompileResult CreateResult(object result, DataType dataType)
 		{
 			var validator = _compileResultValidators.GetValidator(dataType);
-			validator.Validate(result);
+
+			if(!validator.TryValidateObjValueIsNotNaNOrinfinity(result, out eErrorType error))
+				return new CompileResult(error);
+			else
+				validator.Validate(result);
+
 			return new CompileResult(result, dataType);
 		}
 
