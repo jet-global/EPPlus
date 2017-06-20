@@ -31,10 +31,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Numeric
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
-				return new CompileResult(argumentError);
-			var num = ArgToDecimal(arguments, 0);
-			return CreateResult((int)System.Math.Floor(num), DataType.Integer);
+			//if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+			//return new CompileResult(argumentError);
+			//var num = ArgToDecimal(arguments, 0);
+			//return CreateResult((int)System.Math.Floor(num), DataType.Integer);
+			return new CompileResult(eErrorType.NA);
 		}
 	}
 }

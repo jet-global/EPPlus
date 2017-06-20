@@ -136,6 +136,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageATests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\CIntTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CosTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LargeTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LnTests.cs" />
@@ -152,6 +153,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\FloorTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\QuotientTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\SignTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SmallTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\DegreesTests.cs" />

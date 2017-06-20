@@ -606,24 +606,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void SignShouldReturnMinus1IfArgIsNegative()
-		{
-			var func = new Sign();
-			var args = FunctionsHelper.CreateArgs(-2);
-			var result = func.Execute(args, _parsingContext).Result;
-			Assert.AreEqual(-1d, result);
-		}
-
-		[TestMethod]
-		public void SignShouldReturn1IfArgIsPositive()
-		{
-			var func = new Sign();
-			var args = FunctionsHelper.CreateArgs(2);
-			var result = func.Execute(args, _parsingContext).Result;
-			Assert.AreEqual(1d, result);
-		}
-
-		[TestMethod]
 		public void RounddownShouldReturnCorrectResultWithPositiveNumber()
 		{
 			var func = new Rounddown();
@@ -1074,16 +1056,6 @@ namespace EPPlusTest.Excel.Functions
 		public void RoundupWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Roundup();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void SignWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Sign();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);
