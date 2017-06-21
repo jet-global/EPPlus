@@ -250,6 +250,42 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(worksheet.Cells["B1"].Value, worksheet.Cells["B2"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void RoundWithNegativeDoubleAndPositiveSecondInput()
+		{
+			var function = new Round();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-682.3255, 3), this.ParsingContext);
+			Assert.AreEqual(-682.326d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundWithNegativeDoubleAndNegativeSecondInput()
+		{
+			var function = new Round();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-95.3255, -2), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(-30.454, -2), this.ParsingContext);
+			Assert.AreEqual(-100d, result.Result);
+			Assert.AreEqual(0d, result2.Result);
+		}
+
+		[TestMethod]
+		public void RoundShouldReturnCorrectResult()
+		{
+			var function = new Round();
+			var args = FunctionsHelper.CreateArgs(2.3433, 3);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(2.343d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundShouldReturnCorrectResultWhenNbrOfDecimalsIsNegative()
+		{
+			var function = new Round();
+			var args = FunctionsHelper.CreateArgs(9333, -3);
+			var result = function.Execute(args, this.ParsingContext);
+			Assert.AreEqual(9000d, result.Result);
+		}
 		#endregion
 	}
 }

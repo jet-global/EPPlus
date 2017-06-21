@@ -311,24 +311,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void RoundShouldReturnCorrectResult()
-		{
-			var func = new Round();
-			var args = FunctionsHelper.CreateArgs(2.3433, 3);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2.343d, result.Result);
-		}
-
-		[TestMethod]
-		public void RoundShouldReturnCorrectResultWhenNbrOfDecimalsIsNegative()
-		{
-			var func = new Round();
-			var args = FunctionsHelper.CreateArgs(9333, -3);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(9000d, result.Result);
-		}
-
-		[TestMethod]
 		public void RandShouldReturnAValueBetween0and1()
 		{
 			var func = new Rand();
@@ -987,16 +969,6 @@ namespace EPPlusTest.Excel.Functions
 		public void RankWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Rank();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void RoundWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Round();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);
