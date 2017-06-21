@@ -59,15 +59,18 @@ namespace OfficeOpenXml
 	/// </summary>
 	public class ExcelRangeBase : ExcelAddress, IExcelCell, IDisposable, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
 	{
+		#region Class Variables
 		/// <summary>
-		/// Reference to the worksheet
+		/// Reference to the worksheet.
 		/// </summary>
 		protected ExcelWorksheet myWorksheet;
+		protected ExcelRichTextCollection myExcelRichTextCollection = null;
 		internal ExcelWorkbook myWorkbook = null;
 		private delegate void _changeProp(ExcelRangeBase range, _setValue method, object value);
 		private delegate void _setValue(ExcelRangeBase range, object value, int row, int col);
 		private _changeProp myChangePropMethod;
 		private int myStyleId;
+		#endregion
 
 		#region Nested Classes
 		private class CopiedCell
@@ -237,127 +240,6 @@ namespace OfficeOpenXml
 					}
 				}
 			}
-		}
-		#endregion
-
-		#region Set Property Methods
-		private static _setValue _setStyleIdDelegate = Set_StyleID;
-		private static _setValue _setValueDelegate = Set_Value;
-		private static _setValue _setHyperLinkDelegate = Set_HyperLink;
-		private static _setValue _setIsRichTextDelegate = Set_IsRichText;
-		private static _setValue _setExistsCommentDelegate = Exists_Comment;
-		private static _setValue _setCommentDelegate = Set_Comment;
-
-		private static void Set_StyleID(ExcelRangeBase range, object value, int row, int col)
-		{
-			range.myWorksheet.SetStyleInner(row, col, (int)value);
-		}
-
-		private static void Set_StyleName(ExcelRangeBase range, object value, int row, int col)
-		{
-			range.myWorksheet.SetStyleInner(row, col, range.myStyleId);
-		}
-
-		private static void Set_Value(ExcelRangeBase range, object value, int row, int col)
-		{
-			var sfi = range.myWorksheet._formulas.GetValue(row, col);
-			if (sfi is int)
-				range.UpdateSharedFormulaAnchors(range.myWorksheet.Cells[row, col]);
-			if (sfi != null)
-				range.myWorksheet._formulas.SetValue(row, col, string.Empty);
-			range.myWorksheet.SetValueInner(row, col, value);
-		}
-
-		private static void SetFormula(ExcelRangeBase range, object value, int row, int col, bool clearValue = true)
-		{
-			var formulaValue = range.myWorksheet._formulas.GetValue(row, col);
-			if (formulaValue is int && (int)formulaValue >= 0)
-				range.UpdateSharedFormulaAnchors(range.myWorksheet.Cells[row, col]);
-			string formula = (value == null ? string.Empty : value.ToString());
-			range.myWorksheet._formulas.SetValue(row, col, formula);
-			if (formula != string.Empty && clearValue)
-				range.myWorksheet.SetValueInner(row, col, null);
-		}
-
-		/// <summary>
-		/// Handles shared formulas
-		/// </summary>
-		/// <param name="range">The range</param>
-		/// <param name="value">The  formula</param>
-		/// <param name="address">The address of the formula</param>
-		/// <param name="IsArray">If the forumla is an array formula.</param>
-		/// <param name="clearValue">Whether or not setting the formula is allowed to clear the cell's value.</param>
-		private static void SetSharedFormula(ExcelRangeBase range, string value, ExcelAddress address, bool IsArray, bool clearValue = true)
-		{
-			if (range._fromRow == 1 && range._fromCol == 1 && range._toRow == ExcelPackage.MaxRows && range._toCol == ExcelPackage.MaxColumns)  //Full sheet (ex ws.Cells.Value=0). Set value for A1 only to avoid hanging 
-			{
-				throw (new InvalidOperationException("Can't set a formula for the entire worksheet"));
-			}
-			else if (address.Start.Row == address.End.Row && address.Start.Column == address.End.Column && !IsArray)             //is it really a shared formula? Arrayformulas can be one cell only
-			{
-				// Single cells get individual formulas.
-				SetFormula(range, value, address.Start.Row, address.Start.Column, clearValue);
-				return;
-			}
-			range.CheckAndSplitSharedFormula(address);
-			ExcelWorksheet.Formulas formulas = new ExcelWorksheet.Formulas(SourceCodeTokenizer.Default)
-			{
-				Formula = value,
-				Index = range.myWorksheet.GetMaxShareFunctionIndex(IsArray),
-				Address = address.FirstAddress,
-				StartCol = address.Start.Column,
-				StartRow = address.Start.Row,
-				IsArray = IsArray
-			};
-			range.myWorksheet._sharedFormulas.Add(formulas.Index, formulas);
-
-			for (int col = address.Start.Column; col <= address.End.Column; col++)
-			{
-				for (int row = address.Start.Row; row <= address.End.Row; row++)
-				{
-					range.myWorksheet._formulas.SetValue(row, col, formulas.Index);
-					range.myWorksheet.SetValueInner(row, col, null);
-				}
-			}
-		}
-
-		private static void Set_HyperLink(ExcelRangeBase range, object value, int row, int col)
-		{
-			if (value is Uri)
-			{
-				range.myWorksheet._hyperLinks.SetValue(row, col, (Uri)value);
-
-				if (value is ExcelHyperLink)
-					range.myWorksheet.SetValueInner(row, col, ((ExcelHyperLink)value).Display);
-				else
-				{
-					var v = range.myWorksheet.GetValueInner(row, col);
-					if (v == null || v.ToString() == string.Empty)
-						range.myWorksheet.SetValueInner(row, col, ((Uri)value).OriginalString);
-				}
-			}
-			else
-			{
-				range.myWorksheet._hyperLinks.SetValue(row, col, (Uri)null);
-				range.myWorksheet.SetValueInner(row, col, (Uri)null);
-			}
-		}
-
-		private static void Set_IsRichText(ExcelRangeBase range, object value, int row, int col)
-		{
-			range.myWorksheet._flags.SetFlagValue(row, col, (bool)value, CellFlags.RichText);
-		}
-
-		private static void Exists_Comment(ExcelRangeBase range, object value, int row, int col)
-		{
-			if (range.myWorksheet._commentsStore.Exists(row, col))
-				throw (new InvalidOperationException(string.Format("Cell {0} already contain a comment.", new ExcelCellAddress(row, col).Address)));
-		}
-
-		private static void Set_Comment(ExcelRangeBase range, object value, int row, int col)
-		{
-			string[] v = (string[])value;
-			range.myWorksheet.Comments.Add(new ExcelRangeBase(range.myWorksheet, GetAddress(range._fromRow, range._fromCol)), v[0], v[1]);
 		}
 		#endregion
 
@@ -714,6 +596,7 @@ namespace OfficeOpenXml
 				}
 			}
 		}
+
 		/// <summary>
 		/// Set an autofilter for the range
 		/// </summary>
@@ -755,6 +638,7 @@ namespace OfficeOpenXml
 					this.myWorksheet.AutoFilterAddress = null;
 			}
 		}
+
 		/// <summary>
 		/// If the value is in richtext format.
 		/// </summary>
@@ -770,6 +654,7 @@ namespace OfficeOpenXml
 				this.myChangePropMethod(this, _setIsRichTextDelegate, value);
 			}
 		}
+
 		/// <summary>
 		/// Is the range a part of an Arrayformula
 		/// </summary>
@@ -782,8 +667,6 @@ namespace OfficeOpenXml
 			}
 		}
 
-		protected ExcelRichTextCollection myExcelRichTextCollection = null;
-		
 		/// <summary>
 		/// Cell value is richtext formatted. 
 		/// Richtext-property only apply to the left-top cell of the range.
@@ -872,6 +755,127 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Private Methods
+		#region Set Property Methods
+		private static _setValue _setStyleIdDelegate = Set_StyleID;
+		private static _setValue _setValueDelegate = Set_Value;
+		private static _setValue _setHyperLinkDelegate = Set_HyperLink;
+		private static _setValue _setIsRichTextDelegate = Set_IsRichText;
+		private static _setValue _setExistsCommentDelegate = Exists_Comment;
+		private static _setValue _setCommentDelegate = Set_Comment;
+
+		private static void Set_StyleID(ExcelRangeBase range, object value, int row, int col)
+		{
+			range.myWorksheet.SetStyleInner(row, col, (int)value);
+		}
+
+		private static void Set_StyleName(ExcelRangeBase range, object value, int row, int col)
+		{
+			range.myWorksheet.SetStyleInner(row, col, range.myStyleId);
+		}
+
+		private static void Set_Value(ExcelRangeBase range, object value, int row, int col)
+		{
+			var sfi = range.myWorksheet._formulas.GetValue(row, col);
+			if (sfi is int)
+				range.UpdateSharedFormulaAnchors(range.myWorksheet.Cells[row, col]);
+			if (sfi != null)
+				range.myWorksheet._formulas.SetValue(row, col, string.Empty);
+			range.myWorksheet.SetValueInner(row, col, value);
+		}
+
+		private static void SetFormula(ExcelRangeBase range, object value, int row, int col, bool clearValue = true)
+		{
+			var formulaValue = range.myWorksheet._formulas.GetValue(row, col);
+			if (formulaValue is int && (int)formulaValue >= 0)
+				range.UpdateSharedFormulaAnchors(range.myWorksheet.Cells[row, col]);
+			string formula = (value == null ? string.Empty : value.ToString());
+			range.myWorksheet._formulas.SetValue(row, col, formula);
+			if (formula != string.Empty && clearValue)
+				range.myWorksheet.SetValueInner(row, col, null);
+		}
+
+		/// <summary>
+		/// Handles shared formulas
+		/// </summary>
+		/// <param name="range">The range</param>
+		/// <param name="value">The  formula</param>
+		/// <param name="address">The address of the formula</param>
+		/// <param name="IsArray">If the forumla is an array formula.</param>
+		/// <param name="clearValue">Whether or not setting the formula is allowed to clear the cell's value.</param>
+		private static void SetSharedFormula(ExcelRangeBase range, string value, ExcelAddress address, bool IsArray, bool clearValue = true)
+		{
+			if (range._fromRow == 1 && range._fromCol == 1 && range._toRow == ExcelPackage.MaxRows && range._toCol == ExcelPackage.MaxColumns)  //Full sheet (ex ws.Cells.Value=0). Set value for A1 only to avoid hanging 
+			{
+				throw (new InvalidOperationException("Can't set a formula for the entire worksheet"));
+			}
+			else if (address.Start.Row == address.End.Row && address.Start.Column == address.End.Column && !IsArray)             //is it really a shared formula? Arrayformulas can be one cell only
+			{
+				// Single cells get individual formulas.
+				SetFormula(range, value, address.Start.Row, address.Start.Column, clearValue);
+				return;
+			}
+			range.CheckAndSplitSharedFormula(address);
+			ExcelWorksheet.Formulas formulas = new ExcelWorksheet.Formulas(SourceCodeTokenizer.Default)
+			{
+				Formula = value,
+				Index = range.myWorksheet.GetMaxShareFunctionIndex(IsArray),
+				Address = address.FirstAddress,
+				StartCol = address.Start.Column,
+				StartRow = address.Start.Row,
+				IsArray = IsArray
+			};
+			range.myWorksheet._sharedFormulas.Add(formulas.Index, formulas);
+
+			for (int col = address.Start.Column; col <= address.End.Column; col++)
+			{
+				for (int row = address.Start.Row; row <= address.End.Row; row++)
+				{
+					range.myWorksheet._formulas.SetValue(row, col, formulas.Index);
+					range.myWorksheet.SetValueInner(row, col, null);
+				}
+			}
+		}
+
+		private static void Set_HyperLink(ExcelRangeBase range, object value, int row, int col)
+		{
+			if (value is Uri)
+			{
+				range.myWorksheet._hyperLinks.SetValue(row, col, (Uri)value);
+
+				if (value is ExcelHyperLink)
+					range.myWorksheet.SetValueInner(row, col, ((ExcelHyperLink)value).Display);
+				else
+				{
+					var v = range.myWorksheet.GetValueInner(row, col);
+					if (v == null || v.ToString() == string.Empty)
+						range.myWorksheet.SetValueInner(row, col, ((Uri)value).OriginalString);
+				}
+			}
+			else
+			{
+				range.myWorksheet._hyperLinks.SetValue(row, col, (Uri)null);
+				range.myWorksheet.SetValueInner(row, col, (Uri)null);
+			}
+		}
+
+		private static void Set_IsRichText(ExcelRangeBase range, object value, int row, int col)
+		{
+			range.myWorksheet._flags.SetFlagValue(row, col, (bool)value, CellFlags.RichText);
+		}
+
+		private static void Exists_Comment(ExcelRangeBase range, object value, int row, int col)
+		{
+			if (range.myWorksheet._commentsStore.Exists(row, col))
+				throw (new InvalidOperationException(string.Format("Cell {0} already contain a comment.", new ExcelCellAddress(row, col).Address)));
+		}
+
+		private static void Set_Comment(ExcelRangeBase range, object value, int row, int col)
+		{
+			string[] v = (string[])value;
+			range.myWorksheet.Comments.Add(new ExcelRangeBase(range.myWorksheet, GetAddress(range._fromRow, range._fromCol)), v[0], v[1]);
+		}
+		#endregion
+		
 		/// <summary>
 		/// Set the value without altering the richtext property
 		/// </summary>
