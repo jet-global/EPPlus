@@ -120,14 +120,14 @@ namespace OfficeOpenXml.FormulaParsing
 					f.Tokens = lexer.Tokenize(f.Formula, (ws == null ? null : ws.Name)).ToList();
 					if (ws == null)
 					{
-						name._workbook.FormulaTokens.SetValue(name.Index, 0, f.Tokens);
+						name.myWorkbook.FormulaTokens.SetValue(name.Index, 0, f.Tokens);
 					}
 					else
 					{
 						ws._formulaTokens.SetValue(name.Index, 0, f.Tokens);
 					}
 					depChain.Add(f);
-					FollowChain(depChain, lexer, name._workbook, ws, f, options);
+					FollowChain(depChain, lexer, name.myWorkbook, ws, f, options);
 				}
 			}
 		}
