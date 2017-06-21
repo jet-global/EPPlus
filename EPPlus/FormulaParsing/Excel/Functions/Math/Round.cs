@@ -29,8 +29,17 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// 
+	/// </summary>
 	public class Round : ExcelFunction
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="arguments"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
@@ -42,17 +51,25 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double result))
 				return new CompileResult(eErrorType.Value);
 
+			var number = result;
+
+			if (arguments.ElementAt(1).Value == null)
+				return CreateResult(System.Math.Round(number, 0), DataType.Decimal);
+
 			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(1).Value, out double result2))
 				return new CompileResult(eErrorType.Value);
 
-			var number = result;
 			var nDigits = (int)result2;
 			if (nDigits > 15)
 				nDigits = 15;
 			if (nDigits < 0)
 			{
 				nDigits *= -1;
-				return CreateResult(number - (number % (System.Math.Pow(10, nDigits))), DataType.Integer);
+				if(number < (System.Math.Pow(10, nDigits))/2)
+				{
+					return CreateResult(number - (number % (System.Math.Pow(10, nDigits))), DataType.Integer);
+				}
+				return CreateResult(System.Math.Pow(10, nDigits), DataType.Integer);
 			}
 			return CreateResult(System.Math.Round(number, nDigits), DataType.Decimal);
 		}

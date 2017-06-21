@@ -49,7 +49,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Formula = "ROUND(10, )";
+				worksheet.Cells["B1"].Formula = "ROUND(10.235, )";
 				worksheet.Calculate();
 				Assert.AreEqual(10d, worksheet.Cells["B1"].Value);
 			}
@@ -172,6 +172,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var function = new Round();
 			var result = function.Execute(FunctionsHelper.CreateArgs(12, 5), this.ParsingContext);
 			Assert.AreEqual(12d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundWithIntegerAndNegativeSecondArgReturnsCorrectValue()
+		{
+			var function = new Round();
+			var result = function.Execute(FunctionsHelper.CreateArgs(45.2, -3), this.ParsingContext);
+			Assert.AreEqual(0d, result.Result);
 		}
 
 		[TestMethod]
