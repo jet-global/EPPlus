@@ -246,7 +246,33 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void RoundDownWithNegativeDoublePositiveSecondArgReturnsCorrectValue()
 		{
+			var function = new Rounddown();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-5.326571, 3), this.ParsingContext);
+			Assert.AreEqual(-5.326d, result.Result);
+		}
 
+		[TestMethod]
+		public void RoundDownWithNegativeDoubleNegativeSecondArgReturnsCorrectValue()
+		{
+			var function = new Rounddown();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-3451, -2), this.ParsingContext);
+			Assert.AreEqual(-3400d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundDownWithNegativeIntegerPositiveSecondArgReturnsCorrectValue()
+		{
+			var function = new Rounddown();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-985, 2), this.ParsingContext);
+			Assert.AreEqual(-985d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundDownWithNegativeIntegerNegativeSecondArgReturnsCorrectValue()
+		{
+			var function = new Rounddown();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-98, -2), this.ParsingContext);
+			Assert.AreEqual(0d, result.Result);
 		}
 		#endregion	
 	}
