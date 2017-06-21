@@ -59,7 +59,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			Functions["hyperlink"] = new Hyperlink();
 			Functions["value"] = new Value();
 			// Numbers
-			Functions["int"] = new CInt();
+			Functions["int"] = new IntFunction();
 			// Math
 			Functions["abs"] = new Abs();
 			Functions["asin"] = new Asin();
@@ -130,6 +130,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			Functions["small"] = new Small();
 			Functions["degrees"] = new Degrees();
 			Functions["radians"] = new Radians();
+			Functions["sec"] = new Sec();
+			Functions["sech"] = new Sech();
+			Functions["csc"] = new Csc();
+			Functions["csch"] = new Csch();
+			Functions["cot"] = new Cot();
+			Functions["coth"] = new Coth();
+			Functions["acot"] = new Acot();
+			Functions["acoth"] = new Acoth();
 			// Information
 			Functions["isblank"] = new IsBlank();
 			Functions["isnumber"] = new IsNumber();

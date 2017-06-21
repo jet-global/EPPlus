@@ -429,6 +429,8 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Abs.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Acos.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Acosh.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Acot.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Acoth.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Asin.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Asinh.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Atan.cs" />
@@ -441,11 +443,15 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Ceiling.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Cos.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Cosh.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Cot.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Coth.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Count.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountA.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountBlank.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountIf.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountIfs.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Csc.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Csch.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Degrees.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Exp.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Fact.cs" />
@@ -455,7 +461,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Ln.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Log.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Log10.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\Math\MathHelper.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\AdvancedTrigonometry.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Max.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Maxa.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Median.cs" />
@@ -474,6 +480,8 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Round.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Rounddown.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Roundup.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Sec.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Sech.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Sign.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Sin.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Sinh.cs" />
@@ -494,7 +502,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Var.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarMethods.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarP.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\Numeric\CInt.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Numeric\IntFunction.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\ObjectEnumerableArgConverter.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\Address.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\ArrayLookupNavigator.cs" />
