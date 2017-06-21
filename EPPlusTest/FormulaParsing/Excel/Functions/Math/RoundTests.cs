@@ -221,9 +221,25 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void RoundWithSecondArgumentAsDateObjectReturnsCorrectValue()
 		{
-			using (var pacakge = new ExcelPackage())
+			using (var package = new ExcelPackage())
 			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "ROUND(12.5, DATE(2013, 6, 2))";
+				worksheet.Calculate();
+				Assert.AreEqual(12.5d, worksheet.Cells["B2"].Value);
+			}
+		}
 
+		[TestMethod]
+		public void RoundWithFirstArgumentAsDateObjectReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "DATE(2017, 5, 2)";
+				worksheet.Cells["B2"].Formula = "ROUND(DATE(2017, 5, 2), 3)";
+				worksheet.Calculate();
+				Assert.AreEqual(worksheet.Cells["B1"].Value, worksheet.Cells["B2"].Value);
 			}
 		}
 		#endregion

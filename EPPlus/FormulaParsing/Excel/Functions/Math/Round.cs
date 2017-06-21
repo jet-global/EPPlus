@@ -23,7 +23,9 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -33,8 +35,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var number = ArgToDecimal(arguments, 0);
-			var nDigits = ArgToInt(arguments, 1);
+
+			if (arguments.ElementAt(0).Value == null)
+				return CreateResult(0d, DataType.Decimal);
+
+			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double result))
+				return new CompileResult(eErrorType.Value);
+
+			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(1).Value, out double result2))
+				return new CompileResult(eErrorType.Value);
+
+			var number = result;
+			var nDigits = (int)result2;
+			if (nDigits > 15)
+				nDigits = 15;
 			if (nDigits < 0)
 			{
 				nDigits *= -1;
