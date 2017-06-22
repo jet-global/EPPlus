@@ -64,23 +64,19 @@ namespace OfficeOpenXml.ConditionalFormatting
 	/// </code>
 	/// </remarks>
 	public class ExcelConditionalFormattingCollection
-	  : XmlHelper,
-	  IEnumerable<IExcelConditionalFormattingRule>
+		: XmlHelper,
+		IEnumerable<IExcelConditionalFormattingRule>
 	{
-		/****************************************************************************************/
-
-		#region Private Properties
-		private List<IExcelConditionalFormattingRule> _rules = new List<IExcelConditionalFormattingRule>();
-		private ExcelWorksheet _worksheet = null;
-		#endregion Private Properties
-
-		/****************************************************************************************/
+		#region Properties 
+		private List<IExcelConditionalFormattingRule> ConditionalFormattingRules { get; }
+		private ExcelWorksheet ExcelWorksheet { get; }
+		#endregion
 
 		#region Constructors
 		/// <summary>
 		/// Initialize the <see cref="ExcelConditionalFormattingCollection"/>
 		/// </summary>
-		/// <param name="worksheet"></param>
+		/// <param name="worksheet">The worksheet from which to construct the ConditionalFormattings.</param>
 		internal ExcelConditionalFormattingCollection(
 		  ExcelWorksheet worksheet)
 		  : base(
@@ -89,55 +85,42 @@ namespace OfficeOpenXml.ConditionalFormatting
 		{
 			Require.Argument(worksheet).IsNotNull("worksheet");
 
-			_worksheet = worksheet;
-			SchemaNodeOrder = _worksheet.SchemaNodeOrder;
+			this.ExcelWorksheet = worksheet;
+			this.SchemaNodeOrder = this.ExcelWorksheet.SchemaNodeOrder;
+			this.ConditionalFormattingRules = new List<IExcelConditionalFormattingRule>();
 
-			// Look for all the <conditionalFormatting>
-			var conditionalFormattingNodes = TopNode.SelectNodes(
+			// Look for all the <conditionalFormatting> nodes.
+			var conditionalFormattingNodes = this.TopNode.SelectNodes(
 			  "//" + ExcelConditionalFormattingConstants.Paths.ConditionalFormatting,
-			  _worksheet.NameSpaceManager);
+				this.ExcelWorksheet.NameSpaceManager);
 
-			// Check if we found at least 1 node
-			if ((conditionalFormattingNodes != null)
-			  && (conditionalFormattingNodes.Count > 0))
+			if ((conditionalFormattingNodes != null) && (conditionalFormattingNodes.Count > 0))
 			{
-				// Foreach <conditionalFormatting>
 				foreach (XmlNode conditionalFormattingNode in conditionalFormattingNodes)
 				{
-					// Check if @sqref attribute exists
-					if (conditionalFormattingNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref] == null)
-					{
-						throw new Exception(
-						  ExcelConditionalFormattingConstants.Errors.MissingSqrefAttribute);
-					}
+					// Try to get the @sqref attribute. If it is missing, do not add a cf rule for this node.
+					string sqref = conditionalFormattingNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref]?.Value;
+					if (string.IsNullOrEmpty(sqref))
+						continue;
+					ExcelAddress address = new ExcelAddress(sqref);
 
-					// Get the @sqref attribute
-					ExcelAddress address = new ExcelAddress(
-					  conditionalFormattingNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value);
-
-					// Check for all the <cfRules> nodes and load them
+					// Check for all the <cfRules> nodes and load them.
 					var cfRuleNodes = conditionalFormattingNode.SelectNodes(
 					  ExcelConditionalFormattingConstants.Paths.CfRule,
-					  _worksheet.NameSpaceManager);
+						this.ExcelWorksheet.NameSpaceManager);
 
-					// Foreach <cfRule> inside the current <conditionalFormatting>
+					// Foreach <cfRule> inside the current <conditionalFormatting>.
 					foreach (XmlNode cfRuleNode in cfRuleNodes)
 					{
-						// Check if @type attribute exists
+						// Check if @type attribute exists.
 						if (cfRuleNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Type] == null)
-						{
-							throw new Exception(
-							  ExcelConditionalFormattingConstants.Errors.MissingTypeAttribute);
-						}
+							throw new Exception(ExcelConditionalFormattingConstants.Errors.MissingTypeAttribute);
 
-						// Check if @priority attribute exists
+						// Check if @priority attribute exists.
 						if (cfRuleNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Priority] == null)
-						{
-							throw new Exception(
-							  ExcelConditionalFormattingConstants.Errors.MissingPriorityAttribute);
-						}
+							throw new Exception(ExcelConditionalFormattingConstants.Errors.MissingPriorityAttribute);
 
-						// Get the <cfRule> main attributes
+						// Get the <cfRule> main attributes.
 						string typeAttribute = ExcelConditionalFormattingHelper.GetAttributeString(
 						  cfRuleNode,
 						  ExcelConditionalFormattingConstants.Attributes.Type);
@@ -146,130 +129,114 @@ namespace OfficeOpenXml.ConditionalFormatting
 						  cfRuleNode,
 						  ExcelConditionalFormattingConstants.Attributes.Priority);
 
-						// Transform the @type attribute to EPPlus Rule Type (slighty diferente)
+						// Transform the @type attribute to EPPlus Rule Type (slighty different).
 						var type = ExcelConditionalFormattingRuleType.GetTypeByAttrbiute(
 						  typeAttribute,
 						  cfRuleNode,
-						  _worksheet.NameSpaceManager);
+							this.ExcelWorksheet.NameSpaceManager);
 
-						// Create the Rule according to the correct type, address and priority
 						var cfRule = ExcelConditionalFormattingRuleFactory.Create(
 						  type,
 						  address,
 						  priority,
-						  _worksheet,
+							this.ExcelWorksheet,
 						  cfRuleNode);
 
-						// Add the new rule to the list
 						if (cfRule != null)
-							_rules.Add(cfRule);
+							this.ConditionalFormattingRules.Add(cfRule);
 					}
 				}
 			}
 		}
 		#endregion Constructors
 
-		/****************************************************************************************/
-
-		#region Methods
+		#region Private Methods
 		/// <summary>
-		/// 
+		/// Throws an exception if the &lt;worksheet&gt; node is missing.
 		/// </summary>
 		private void EnsureRootElementExists()
 		{
 			// Find the <worksheet> node
-			if (_worksheet.WorksheetXml.DocumentElement == null)
-			{
-				throw new Exception(
-				  ExcelConditionalFormattingConstants.Errors.MissingWorksheetNode);
-			}
+			if (this.ExcelWorksheet.WorksheetXml.DocumentElement == null)
+				throw new Exception(ExcelConditionalFormattingConstants.Errors.MissingWorksheetNode);
 		}
 
 		/// <summary>
-		/// GetRootNode
+		/// Gets the root node.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Returns an <see cref="XmlNode"/> of the root node.</returns>
 		private XmlNode GetRootNode()
 		{
 			EnsureRootElementExists();
-			return _worksheet.WorksheetXml.DocumentElement;
+			return this.ExcelWorksheet.WorksheetXml.DocumentElement;
 		}
 
 		/// <summary>
-		/// Validates address - not empty (collisions are allowded)
+		/// Validates address that the given address is not null.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		private ExcelAddress ValidateAddress(
-		  ExcelAddress address)
+		/// <param name="address">The address to validate.</param>
+		/// <returns>Returns the given <see cref="ExcelAddress"/> if it is valid.</returns>
+		private ExcelAddress ValidateAddress(ExcelAddress address)
 		{
 			Require.Argument(address).IsNotNull("address");
-
 			//TODO: Are there any other validation we need to do?
 			return address;
 		}
 
 		/// <summary>
-		/// Get the next priority sequencial number
+		/// Gets the next priority sequential number.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Returns the next priority sequential integer.</returns>
 		private int GetNextPriority()
 		{
-			// Consider zero as the last priority when we have no CF rules
+			// Consider zero as the last priority when we have no CF rules.
 			int lastPriority = 0;
-
-			// Search for the last priority
-			foreach (var cfRule in _rules)
+			foreach (var cfRule in this.ConditionalFormattingRules)
 			{
 				if (cfRule.Priority > lastPriority)
-				{
 					lastPriority = cfRule.Priority;
-				}
 			}
-
-			// Our next priority is the last plus one
 			return lastPriority + 1;
 		}
-		#endregion Methods
-
-		/****************************************************************************************/
+		#endregion
 
 		#region IEnumerable<IExcelConditionalFormatting>
 		/// <summary>
-		/// Number of validations
+		/// Counts the number of validations.
 		/// </summary>
+		/// <returns>Returns the number of validations in the collection.</returns>
 		public int Count
 		{
-			get { return _rules.Count; }
+			get { return this.ConditionalFormattingRules.Count; }
 		}
 
 		/// <summary>
-		/// Index operator, returns by 0-based index
+		/// Index operator, returns by 0-based index.
 		/// </summary>
 		/// <param name="index"></param>
-		/// <returns></returns>
+		/// <returns>Returns the <see cref="IExcelConditionalFormattingRule"/> at the given index.</returns>
 		public IExcelConditionalFormattingRule this[int index]
 		{
-			get { return _rules[index]; }
-			set { _rules[index] = value; }
+			get { return this.ConditionalFormattingRules[index]; }
+			set { this.ConditionalFormattingRules[index] = value; }
 		}
 
 		/// <summary>
-		/// Get the 'cfRule' enumerator
+		/// Gets the 'cfRule' enumerator.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Returns an IEnumerator object that can be used to iterate through the collection.</returns>
 		IEnumerator<IExcelConditionalFormattingRule> IEnumerable<IExcelConditionalFormattingRule>.GetEnumerator()
 		{
-			return _rules.GetEnumerator();
+			return this.ConditionalFormattingRules.GetEnumerator();
 		}
 
 		/// <summary>
-		/// Get the 'cfRule' enumerator
+		/// Get the 'cfRule' enumerator.
 		/// </summary>
 		/// <returns></returns>
 		IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		{
-			return _rules.GetEnumerator();
+			return this.ConditionalFormattingRules.GetEnumerator();
 		}
 
 		/// <summary>
@@ -281,9 +248,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		public void RemoveAll()
 		{
 			// Look for all the <conditionalFormatting> nodes
-			var conditionalFormattingNodes = TopNode.SelectNodes(
+			var conditionalFormattingNodes = this.TopNode.SelectNodes(
 			  "//" + ExcelConditionalFormattingConstants.Paths.ConditionalFormatting,
-			  _worksheet.NameSpaceManager);
+				this.ExcelWorksheet.NameSpaceManager);
 
 			// Remove all the <conditionalFormatting> nodes one by one
 			foreach (XmlNode conditionalFormattingNode in conditionalFormattingNodes)
@@ -292,122 +259,95 @@ namespace OfficeOpenXml.ConditionalFormatting
 			}
 
 			// Clear the <cfRule> item list
-			_rules.Clear();
+			this.ConditionalFormattingRules.Clear();
 		}
 
 		/// <summary>
-		/// Remove a Conditional Formatting Rule by its object
+		/// Remove a Conditional Formatting Rule by its object.
 		/// </summary>
-		/// <param name="item"></param>
-		public void Remove(
-		  IExcelConditionalFormattingRule item)
+		/// <param name="item">The item to remove.</param>
+		public void Remove(IExcelConditionalFormattingRule item)
 		{
 			Require.Argument(item).IsNotNull("item");
-
 			try
 			{
 				// Point to the parent node
 				var oldParentNode = item.Node.ParentNode;
-
 				// Remove the <cfRule> from the old <conditionalFormatting> parent node
 				oldParentNode.RemoveChild(item.Node);
-
 				// Check if the old <conditionalFormatting> parent node has <cfRule> node inside it
 				if (!oldParentNode.HasChildNodes)
-				{
-					// Remove the old parent node
 					oldParentNode.ParentNode.RemoveChild(oldParentNode);
-				}
-
-				_rules.Remove(item);
+				this.ConditionalFormattingRules.Remove(item);
 			}
 			catch
 			{
-				throw new Exception(
-				  ExcelConditionalFormattingConstants.Errors.InvalidRemoveRuleOperation);
+				throw new Exception(ExcelConditionalFormattingConstants.Errors.InvalidRemoveRuleOperation);
 			}
 		}
 
 		/// <summary>
-		/// Remove a Conditional Formatting Rule by its 0-based index
+		/// Remove a Conditional Formatting Rule by its 0-based index.
 		/// </summary>
-		/// <param name="index"></param>
-		public void RemoveAt(
-		  int index)
+		/// <param name="index">The index of the item to remove.</param>
+		public void RemoveAt(int index)
 		{
 			Require.Argument(index).IsInRange(0, this.Count - 1, "index");
-
 			Remove(this[index]);
 		}
 
 		/// <summary>
-		/// Remove a Conditional Formatting Rule by its priority
+		/// Remove a Conditional Formatting Rule by its priority.
 		/// </summary>
-		/// <param name="priority"></param>
-		public void RemoveByPriority(
-		  int priority)
+		/// <param name="priority">The priority of the rules to be removed.</param>
+		public void RemoveByPriority(int priority)
 		{
 			try
 			{
 				Remove(RulesByPriority(priority));
 			}
-			catch
-			{
-			}
+			catch { }
 		}
 
 		/// <summary>
-		/// Get a rule by its priority
+		/// Get a rule by its priority.
 		/// </summary>
-		/// <param name="priority"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingRule RulesByPriority(
-		  int priority)
+		/// <param name="priority">The priority of the rule to get.</param>
+		/// <returns>Returns the <see cref="IExcelConditionalFormattingRule"/> with the given priority.</returns>
+		public IExcelConditionalFormattingRule RulesByPriority(int priority)
 		{
-			return _rules.Find(x => x.Priority == priority);
+			return this.ConditionalFormattingRules.Find(x => x.Priority == priority);
 		}
 		#endregion IEnumerable<IExcelConditionalFormatting>
 
-		/****************************************************************************************/
-
-		#region Conditional Formatting Rules
+		#region Conditional Formatting Rule Methods
 		/// <summary>
 		/// Add rule (internal)
 		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="address"></param>
-		/// <returns></returns>F
-		internal IExcelConditionalFormattingRule AddRule(
-		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddress address)
+		/// <param name="type">The <see cref="eExcelConditionalFormattingRuleType"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added to the collection.</returns>
+		internal IExcelConditionalFormattingRule AddRule(eExcelConditionalFormattingRuleType type, ExcelAddress address)
 		{
 			Require.Argument(address).IsNotNull("address");
-
 			address = ValidateAddress(address);
 			EnsureRootElementExists();
-
-			// Create the Rule according to the correct type, address and priority
 			IExcelConditionalFormattingRule cfRule = ExcelConditionalFormattingRuleFactory.Create(
 			  type,
 			  address,
 			  GetNextPriority(),
-			  _worksheet,
+				this.ExcelWorksheet,
 			  null);
-
-			// Add the newly created rule to the list
-			_rules.Add(cfRule);
-
-			// Return the newly created rule
+			this.ConditionalFormattingRules.Add(cfRule);
 			return cfRule;
 		}
 
 		/// <summary>
-		/// Add AboveAverage Rule
+		/// Add AboveAverage Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingAverageGroup AddAboveAverage(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingAverageGroup AddAboveAverage(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingAverageGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.AboveAverage,
@@ -415,10 +355,10 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add AboveOrEqualAverage Rule
+		/// Add AboveOrEqualAverage Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
 		public IExcelConditionalFormattingAverageGroup AddAboveOrEqualAverage(
 		  ExcelAddress address)
 		{
@@ -428,12 +368,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add BelowAverage Rule
+		/// Add BelowAverage Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingAverageGroup AddBelowAverage(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingAverageGroup AddBelowAverage(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingAverageGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.BelowAverage,
@@ -441,12 +380,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add BelowOrEqualAverage Rule
+		/// Add BelowOrEqualAverage Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingAverageGroup AddBelowOrEqualAverage(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingAverageGroup AddBelowOrEqualAverage(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingAverageGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.BelowOrEqualAverage,
@@ -454,12 +392,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add AboveStdDev Rule
+		/// Add AboveStdDev Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingStdDevGroup AddAboveStdDev(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingStdDevGroup AddAboveStdDev(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingStdDevGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.AboveStdDev,
@@ -467,12 +404,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add BelowStdDev Rule
+		/// Add BelowStdDev Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingStdDevGroup AddBelowStdDev(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingStdDevGroup AddBelowStdDev(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingStdDevGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.BelowStdDev,
@@ -480,12 +416,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add Bottom Rule
+		/// Add Bottom Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTopBottomGroup AddBottom(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTopBottomGroup AddBottom(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTopBottomGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Bottom,
@@ -493,12 +428,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add BottomPercent Rule
+		/// Add BottomPercent Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTopBottomGroup AddBottomPercent(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTopBottomGroup AddBottomPercent(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTopBottomGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.BottomPercent,
@@ -508,10 +442,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Top Rule
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTopBottomGroup AddTop(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTopBottomGroup AddTop(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTopBottomGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Top,
@@ -519,12 +452,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add TopPercent Rule
+		/// Add TopPercent Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTopBottomGroup AddTopPercent(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTopBottomGroup AddTopPercent(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTopBottomGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.TopPercent,
@@ -532,12 +464,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add Last7Days Rule
+		/// Add Last7Days Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddLast7Days(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTimePeriodGroup AddLast7Days(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Last7Days,
@@ -545,12 +476,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add LastMonth Rule
+		/// Add LastMonth Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddLastMonth(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTimePeriodGroup AddLastMonth(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.LastMonth,
@@ -558,12 +488,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add LastWeek Rule
+		/// Add LastWeek Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddLastWeek(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTimePeriodGroup AddLastWeek(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.LastWeek,
@@ -571,12 +500,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add NextMonth Rule
+		/// Add NextMonth Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddNextMonth(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTimePeriodGroup AddNextMonth(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.NextMonth,
@@ -584,12 +512,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add NextWeek Rule
+		/// Add NextWeek Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddNextWeek(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTimePeriodGroup AddNextWeek(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.NextWeek,
@@ -597,12 +524,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add ThisMonth Rule
+		/// Add ThisMonth Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddThisMonth(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTimePeriodGroup AddThisMonth(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.ThisMonth,
@@ -610,12 +536,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add ThisWeek Rule
+		/// Add ThisWeek Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddThisWeek(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTimePeriodGroup AddThisWeek(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.ThisWeek,
@@ -623,12 +548,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add Today Rule
+		/// Add Today Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddToday(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTimePeriodGroup AddToday(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Today,
@@ -636,12 +560,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add Tomorrow Rule
+		/// Add Tomorrow Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddTomorrow(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTimePeriodGroup AddTomorrow(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Tomorrow,
@@ -649,12 +572,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add Yesterday Rule
+		/// Add Yesterday Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddYesterday(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTimePeriodGroup AddYesterday(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Yesterday,
@@ -662,12 +584,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add BeginsWith Rule
+		/// Add BeginsWith Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingBeginsWith AddBeginsWith(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingBeginsWith AddBeginsWith(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingBeginsWith)AddRule(
 			  eExcelConditionalFormattingRuleType.BeginsWith,
@@ -675,12 +596,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add Between Rule
+		/// Add Between Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingBetween AddBetween(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingBetween AddBetween(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingBetween)AddRule(
 			  eExcelConditionalFormattingRuleType.Between,
@@ -688,12 +608,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add ContainsBlanks Rule
+		/// Add ContainsBlanks Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingContainsBlanks AddContainsBlanks(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingContainsBlanks AddContainsBlanks(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingContainsBlanks)AddRule(
 			  eExcelConditionalFormattingRuleType.ContainsBlanks,
@@ -701,12 +620,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add ContainsErrors Rule
+		/// Add ContainsErrors Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingContainsErrors AddContainsErrors(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingContainsErrors AddContainsErrors(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingContainsErrors)AddRule(
 			  eExcelConditionalFormattingRuleType.ContainsErrors,
@@ -714,12 +632,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add ContainsText Rule
+		/// Add ContainsText Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingContainsText AddContainsText(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingContainsText AddContainsText(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingContainsText)AddRule(
 			  eExcelConditionalFormattingRuleType.ContainsText,
@@ -727,12 +644,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add DuplicateValues Rule
+		/// Add DuplicateValues Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingDuplicateValues AddDuplicateValues(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingDuplicateValues AddDuplicateValues(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingDuplicateValues)AddRule(
 			  eExcelConditionalFormattingRuleType.DuplicateValues,
@@ -740,12 +656,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add EndsWith Rule
+		/// Add EndsWith Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingEndsWith AddEndsWith(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingEndsWith AddEndsWith(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingEndsWith)AddRule(
 			  eExcelConditionalFormattingRuleType.EndsWith,
@@ -753,12 +668,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add Equal Rule
+		/// Add Equal Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingEqual AddEqual(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingEqual AddEqual(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingEqual)AddRule(
 			  eExcelConditionalFormattingRuleType.Equal,
@@ -766,12 +680,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add Expression Rule
+		/// Add Expression Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingExpression AddExpression(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingExpression AddExpression(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingExpression)AddRule(
 			  eExcelConditionalFormattingRuleType.Expression,
@@ -779,12 +692,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add GreaterThan Rule
+		/// Add GreaterThan Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingGreaterThan AddGreaterThan(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingGreaterThan AddGreaterThan(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingGreaterThan)AddRule(
 			  eExcelConditionalFormattingRuleType.GreaterThan,
@@ -792,12 +704,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add GreaterThanOrEqual Rule
+		/// Add GreaterThanOrEqual Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingGreaterThanOrEqual AddGreaterThanOrEqual(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingGreaterThanOrEqual AddGreaterThanOrEqual(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingGreaterThanOrEqual)AddRule(
 			  eExcelConditionalFormattingRuleType.GreaterThanOrEqual,
@@ -805,12 +716,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add LessThan Rule
+		/// Add LessThan Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingLessThan AddLessThan(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingLessThan AddLessThan(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingLessThan)AddRule(
 			  eExcelConditionalFormattingRuleType.LessThan,
@@ -818,12 +728,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add LessThanOrEqual Rule
+		/// Add LessThanOrEqual Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingLessThanOrEqual AddLessThanOrEqual(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingLessThanOrEqual AddLessThanOrEqual(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingLessThanOrEqual)AddRule(
 			  eExcelConditionalFormattingRuleType.LessThanOrEqual,
@@ -831,12 +740,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add NotBetween Rule
+		/// Add NotBetween Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingNotBetween AddNotBetween(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingNotBetween AddNotBetween(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingNotBetween)AddRule(
 			  eExcelConditionalFormattingRuleType.NotBetween,
@@ -844,12 +752,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add NotContainsBlanks Rule
+		/// Add NotContainsBlanks Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingNotContainsBlanks AddNotContainsBlanks(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingNotContainsBlanks AddNotContainsBlanks(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingNotContainsBlanks)AddRule(
 			  eExcelConditionalFormattingRuleType.NotContainsBlanks,
@@ -857,12 +764,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add NotContainsErrors Rule
+		/// Add NotContainsErrors Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingNotContainsErrors AddNotContainsErrors(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingNotContainsErrors AddNotContainsErrors(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingNotContainsErrors)AddRule(
 			  eExcelConditionalFormattingRuleType.NotContainsErrors,
@@ -870,12 +776,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add NotContainsText Rule
+		/// Add NotContainsText Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingNotContainsText AddNotContainsText(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingNotContainsText AddNotContainsText(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingNotContainsText)AddRule(
 			  eExcelConditionalFormattingRuleType.NotContainsText,
@@ -883,12 +788,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add NotEqual Rule
+		/// Add NotEqual Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingNotEqual AddNotEqual(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingNotEqual AddNotEqual(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingNotEqual)AddRule(
 			  eExcelConditionalFormattingRuleType.NotEqual,
@@ -896,12 +800,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add Unique Rule
+		/// Add Unique Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingUniqueValues AddUniqueValues(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingUniqueValues AddUniqueValues(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingUniqueValues)AddRule(
 			  eExcelConditionalFormattingRuleType.UniqueValues,
@@ -909,12 +812,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add ThreeColorScale Rule
+		/// Add ThreeColorScale Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingThreeColorScale AddThreeColorScale(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingThreeColorScale AddThreeColorScale(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingThreeColorScale)AddRule(
 			  eExcelConditionalFormattingRuleType.ThreeColorScale,
@@ -922,12 +824,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add TwoColorScale Rule
+		/// Add TwoColorScale Rule.
 		/// </summary>
-		/// <param name="address"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingTwoColorScale AddTwoColorScale(
-		  ExcelAddress address)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingTwoColorScale AddTwoColorScale(ExcelAddress address)
 		{
 			return (IExcelConditionalFormattingTwoColorScale)AddRule(
 			  eExcelConditionalFormattingRuleType.TwoColorScale,
@@ -935,62 +836,64 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Add ThreeIconSet Rule
+		/// Add ThreeIconSet Rule.
 		/// </summary>
-		/// <param name="Address">The address</param>
-		/// <param name="IconSet">Type of iconset</param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingThreeIconSet<eExcelconditionalFormatting3IconsSetType> AddThreeIconSet(ExcelAddress Address, eExcelconditionalFormatting3IconsSetType IconSet)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="iconSet">Type of iconset</param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingThreeIconSet<eExcelconditionalFormatting3IconsSetType> AddThreeIconSet(ExcelAddress address, eExcelconditionalFormatting3IconsSetType iconSet)
 		{
 			var icon = (IExcelConditionalFormattingThreeIconSet<eExcelconditionalFormatting3IconsSetType>)AddRule(
 				 eExcelConditionalFormattingRuleType.ThreeIconSet,
-				 Address);
-			icon.IconSet = IconSet;
+				 address);
+			icon.IconSet = iconSet;
 			return icon;
 		}
+
 		/// <summary>
-		/// Adds a FourIconSet rule
+		/// Adds a FourIconSet rule.
 		/// </summary>
-		/// <param name="Address"></param>
-		/// <param name="IconSet"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingFourIconSet<eExcelconditionalFormatting4IconsSetType> AddFourIconSet(ExcelAddress Address, eExcelconditionalFormatting4IconsSetType IconSet)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="iconSet"></param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingFourIconSet<eExcelconditionalFormatting4IconsSetType> AddFourIconSet(ExcelAddress address, eExcelconditionalFormatting4IconsSetType iconSet)
 		{
 			var icon = (IExcelConditionalFormattingFourIconSet<eExcelconditionalFormatting4IconsSetType>)AddRule(
 				 eExcelConditionalFormattingRuleType.FourIconSet,
-				 Address);
-			icon.IconSet = IconSet;
+				 address);
+			icon.IconSet = iconSet;
 			return icon;
 		}
+
 		/// <summary>
-		/// Adds a FiveIconSet rule
+		/// Adds a FiveIconSet rule.
 		/// </summary>
-		/// <param name="Address"></param>
-		/// <param name="IconSet"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingFiveIconSet AddFiveIconSet(ExcelAddress Address, eExcelconditionalFormatting5IconsSetType IconSet)
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="iconSet"></param>
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingFiveIconSet AddFiveIconSet(ExcelAddress address, eExcelconditionalFormatting5IconsSetType iconSet)
 		{
 			var icon = (IExcelConditionalFormattingFiveIconSet)AddRule(
 				 eExcelConditionalFormattingRuleType.FiveIconSet,
-				 Address);
-			icon.IconSet = IconSet;
+				 address);
+			icon.IconSet = iconSet;
 			return icon;
 		}
+
 		/// <summary>
-		/// Adds a databar rule
+		/// Adds a databar rule.
 		/// </summary>
-		/// <param name="Address"></param>
+		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
 		/// <param name="color"></param>
-		/// <returns></returns>
-		public IExcelConditionalFormattingDataBarGroup AddDatabar(ExcelAddress Address, Color color)
+		/// <returns>Returns the rule added.</returns>
+		public IExcelConditionalFormattingDataBarGroup AddDatabar(ExcelAddress address, Color color)
 		{
 			var dataBar = (IExcelConditionalFormattingDataBarGroup)AddRule(
 				 eExcelConditionalFormattingRuleType.DataBar,
-				 Address);
+				 address);
 			dataBar.Color = color;
 			return dataBar;
 		}
 		#endregion Conditional Formatting Rules
-
 	}
 }

@@ -27,7 +27,8 @@ namespace OfficeOpenXml.ConditionalFormatting
 			foreach (XmlNode node in nodes)
 			{
 				var x14Rule = new X14CondtionalFormattingRule(node, worksheet.NameSpaceManager);
-				this.X14Rules.Add(x14Rule);
+				if (!string.IsNullOrEmpty(x14Rule.Address))
+					this.X14Rules.Add(x14Rule);
 			}
 		}
 		#endregion
