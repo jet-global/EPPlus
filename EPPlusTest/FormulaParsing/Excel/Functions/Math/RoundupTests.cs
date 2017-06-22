@@ -284,5 +284,32 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(2.4d, booleanTrue.Result);
 			Assert.AreEqual(3d, booleanFalse.Result);
 		}
+
+		[TestMethod]
+		public void RoundupShouldReturnCorrectResultWithPositiveNumber()
+		{
+			var func = new Roundup();
+			var args = FunctionsHelper.CreateArgs(9.9911, 3);
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(9.992, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupShouldHandleNegativeNumDigits()
+		{
+			var func = new Roundup();
+			var args = FunctionsHelper.CreateArgs(99123, -2);
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(99200d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupShouldHandleZeroNumDigits()
+		{
+			var func = new Roundup();
+			var args = FunctionsHelper.CreateArgs(999.999, 0);
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(1000d, result.Result);
+		}
 	}
 }
