@@ -44,7 +44,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void RoundDownWithNoSecondInputReturnsPoundValue()
+		public void RoundDownWithNoSecondInputReturnsCorrectValue()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -56,7 +56,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void RoundDownWithNoFirstInputReturnsPoundValue()
+		public void RoundDownWithNoFirstInputReturnsZero()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -273,6 +273,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var function = new Rounddown();
 			var result = function.Execute(FunctionsHelper.CreateArgs(-98, -2), this.ParsingContext);
 			Assert.AreEqual(0d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundDownWithBooleanSecondInputReturnsCorrectValue()
+		{
+			var function = new Rounddown();
+			var booleanTrue = function.Execute(FunctionsHelper.CreateArgs(12.345, true), this.ParsingContext);
+			var booleanFalse = function.Execute(FunctionsHelper.CreateArgs(12.345, false), this.ParsingContext);
+			Assert.AreEqual(12.3d, booleanTrue.Result);
+			Assert.AreEqual(12d, booleanFalse.Result);
 		}
 		#endregion	
 	}
