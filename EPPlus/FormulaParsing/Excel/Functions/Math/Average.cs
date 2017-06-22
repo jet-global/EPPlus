@@ -93,12 +93,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						numberOfValues++;
 						sumOfAllValues += cellInfo.ValueDouble;
 					}
-					else if (!handleAsFormula && cellInfo.Value is string cellAsString && 
-						Double.TryParse(cellAsString, out double parsedValue))
-					{
-						numberOfValues++;
-						sumOfAllValues += parsedValue;
-					}
 				}
 			}
 			else
