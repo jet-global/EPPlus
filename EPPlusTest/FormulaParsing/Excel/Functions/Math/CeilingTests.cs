@@ -119,6 +119,42 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = function.Execute(FunctionsHelper.CreateArgs("5/5/2017", 4), this.ParsingContext);
 			Assert.AreEqual(42860d, result.Result);
 		}
+
+		[TestMethod]
+		public void CeilingWithBooleanFirstInputsReturnsCorrectValue()
+		{
+			var function = new Ceiling();
+			var booleanTrue = function.Execute(FunctionsHelper.CreateArgs(true, 3), this.ParsingContext);
+			var booleanFalse = function.Execute(FunctionsHelper.CreateArgs(false, 2), this.ParsingContext);
+			Assert.AreEqual(3d, booleanTrue.Result);
+			Assert.AreEqual(0d, booleanFalse.Result);
+		}
+
+		[TestMethod]
+		public void CeilingWithCellReferenceFirstInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 15.26;
+				worksheet.Cells["B2"].Formula = "CEILING(B1, 3)";
+				worksheet.Calculate();
+				Assert.AreEqual(18d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void CeilingWithErrorValueInputReturnsRespectiveError()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SQRT(-1)";
+				worksheet.Cells["B2"].Formula = "CEILING(B1, 3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
+			}
+		}
 		#endregion
 	}
 }
