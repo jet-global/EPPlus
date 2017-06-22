@@ -290,7 +290,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			var func = new Roundup();
 			var args = FunctionsHelper.CreateArgs(9.9911, 3);
-			var result = func.Execute(args, _parsingContext);
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(9.992, result.Result);
 		}
 
@@ -299,7 +299,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			var func = new Roundup();
 			var args = FunctionsHelper.CreateArgs(99123, -2);
-			var result = func.Execute(args, _parsingContext);
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(99200d, result.Result);
 		}
 
@@ -308,7 +308,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			var func = new Roundup();
 			var args = FunctionsHelper.CreateArgs(999.999, 0);
-			var result = func.Execute(args, _parsingContext);
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(1000d, result.Result);
 		}
 	}
