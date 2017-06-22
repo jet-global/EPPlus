@@ -189,8 +189,6 @@
     <Compile Include="FormulaParsing\FormulaParserManagerTests.cs" />
     <Compile Include="LargeTests.cs" />
     <Compile Include="LogicalFunctionsTestBase.cs" />
-    <Compile Include="LogicalFunctionsTests.cs" />
-    <Compile Include="SmallTests.cs" />
     <Compile Include="SqrtPiTests.cs" />
     <Compile Include="SqrtTests.cs" />
     <Compile Include="Style\Dxf\ExcelDxfStyleTest.cs" />

@@ -28,10 +28,19 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the RAND function.
+	/// </summary>
 	public class Rand : ExcelFunction
 	{
 		private static Random Random { get; } = new Random();
 
+		/// <summary>
+		/// Get a random number between 0 and 1.
+		/// </summary>
+		/// <param name="arguments">RAND takes no inputs.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>Rand returns a random number between 0 and 1.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var val = Random.NextDouble();

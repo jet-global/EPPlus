@@ -24,36 +24,167 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using EPPlusTest.Excel.Functions.DateTimeFunctions;
+using System.Collections.Generic;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 	[TestClass]
 	public class RandBetweenTests : MathFunctionsTestBase
 	{
-		#region TimeValue Function(Execute) Tests
+
+		#region RandBetweenTests Function(Execute) Tests
 		[TestMethod]
-		public void CosIsGivenAStringAsInput()
+		public void RandBetweenIsChecked1000TimesToMakeSureItStaysBetween0And10()
 		{
 			var function = new RandBetween();
 
-			var input1 = "string";
-			var input2 = "0";
-			var input3 = "1";
+			var input1 = 0;
+			var input2 = 10;
 
-			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
-			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
-			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
-
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
-			Assert.AreEqual(1, result2.ResultNumeric);
-			Assert.AreEqual(0.540302306, System.Math.Round(result3.ResultNumeric, 9));
+			for (int i = 0; i < 1000; i++)
+			{
+				var result = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
+				if ((double)result.ResultValue < 0 || (double)result.ResultValue > 10)
+					Assert.Fail("RAND returned a number outside of the range 0 and 10.");
+			}
 		}
+
+		[TestMethod]
+		public void RandBetweenIsChecked1000TimesToMakeSureItStaysBetweenNegative10And10()
+		{
+			var function = new RandBetween();
+
+			var input1 = -10;
+			var input2 = 10;
+
+			for (int i = 0; i < 1000; i++)
+			{
+				var result = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
+				if ((double) result.ResultValue < -10 || (double) result.ResultValue > 10)
+					Assert.Fail("RAND returned a number outside of the range 0 and 10.");
+			}
+		}
+
+		[TestMethod]
+		public void RandBetweenIsGivenABooleanAsAnInputShouldReturnPoundValue()
+		{
+			var function = new RandBetween();
+			var input1 = true;
+			var input2 = false;
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, input1), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
+			var result3 = function.Execute(FunctionsHelper.CreateArgs(input2, input1), this.ParsingContext);
+			var result4 = function.Execute(FunctionsHelper.CreateArgs(input2, input2), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, result1.Result);
+			Assert.AreEqual(eErrorType.Value, result2.Result);
+			Assert.AreEqual(eErrorType.Value, result3.Result);
+			Assert.AreEqual(eErrorType.Value, result4.Result);
+		}
+
+		[TestMethod]
+		public void RandBetweenIsGivenARangeOfDatesSeperatedByDashes()
+		{
+			var function = new RandBetween();
+			var input1 = "1-1-2017 00:00";
+			var input2 = "12-31-2017 11:59";
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
+
+			if ((double) result1.ResultValue < 42736 || (double) result1.ResultValue > 43100.49931)
+				Assert.Fail("A value outside of the given range was returned.");
+		}
+
+		[TestMethod]
+		public void RandBetweenIsGivenARangeOfDatesSeperatedByslashes()
+		{
+			var function = new RandBetween();
+			var input1 = "1/11/2011 11:00 am";
+			var input2 = "12/11/2011 11:00 am";
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
+
+			if ((double)result1.ResultValue < 40554.45833 || (double)result1.ResultValue > 40888.45833)
+				Assert.Fail("A value outside of the given range was returned.");
+		}
+
+		[TestMethod]
+		public void RandBetweenIsGivenMidnightTwice()
+		{
+			var function = new RandBetween();
+			var input1 = "12:00 am";
+			var input2 = "12:00 am";
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
+
+			Assert.AreEqual(0, result1.ResultNumeric);
+		}
+
+		[TestMethod]
+		public void RandBetweenIsGivenSixAmAndSixPm()
+		{
+			var function = new RandBetween();
+			var input1 = "6:00 am";
+			var input2 = "6:00 pm";
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
+
+			Assert.AreEqual(1, result1.ResultNumeric);
+		}
+
+		[TestMethod]
+		public void RandBetweenIsGivenSixPmAndSixAm()
+		{
+			var function = new RandBetween();
+			var input1 = "6:00 pm";
+			var input2 = "6:00 am";
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, result1.Result);
+		}
+
+		[TestMethod]
+		public void RandBetweenIsGivenARangeOf12HourTimes()
+		{
+			var function = new RandBetween();
+			var input1 = "00:01 am";
+			var input2 = "11:59 pm";
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
+
+			Assert.AreEqual(1, result1.ResultNumeric);
+		}
+
+		#region RandBetweenTests from the MathFunctionTests.cs
+
+		[TestMethod]
+		public void RandBetweenShouldReturnAnIntegerValueBetweenSuppliedValues()
+		{
+			var func = new RandBetween();
+			var args = FunctionsHelper.CreateArgs(1, 5);
+			var result = func.Execute(args, ParsingContext);
+			CollectionAssert.Contains(new List<double> { 1d, 2d, 3d, 4d, 5d }, result.Result);
+		}
+
+		[TestMethod]
+		public void RandBetweenShouldReturnAnIntegerValueBetweenSuppliedValuesWhenLowIsNegative()
+		{
+			var func = new RandBetween();
+			var args = FunctionsHelper.CreateArgs(-5, 0);
+			var result = func.Execute(args, ParsingContext);
+			CollectionAssert.Contains(new List<double> { 0d, -1d, -2d, -3d, -4d, -5d }, result.Result);
+		}
+
+		[TestMethod]
+		public void RandBetweenWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new RandBetween();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+#endregion
 		#endregion
 	}
 }

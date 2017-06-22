@@ -54,7 +54,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(0, result2.ResultNumeric, .00001);
 			Assert.AreEqual(0.841470985, result3.ResultNumeric, .00001);
 			Assert.AreEqual(0.997494987, result4.ResultNumeric, .00001);
-
 		}
 
 		[TestMethod]

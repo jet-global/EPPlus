@@ -25,36 +25,27 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System.Collections.Generic;
-using EPPlusTest.Excel.Functions.DateTimeFunctions;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 	[TestClass]
 	public class RandTests : MathFunctionsTestBase
 	{
-		#region TimeValue Function(Execute) Tests
+		#region RandTests Function(Execute) Tests
 		[TestMethod]
-		public void RandIsChecked25001Times()
-		{
+		public void RandIsChecked50000TimesToMakeSureItStaysBetween0And1()
+		{ 
 			var function = new Rand();
-
 			HashSet<double> randomNumberTestHash = new HashSet<double>();
-
-			for (int i = 0; i < 25001; i++)
+			for (int i = 0; i < 50000; i++)
 			{
-				double j = 0;
-				j = j.Rand();
-
-				randomNumberTestHash.Add(j);
+				var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+				if ((double)result.ResultValue < 0 || (double)result.ResultValue > 1)
+					Assert.Fail("RAND returned a number outside of the range 0 and 1.");
 			}
-
-//			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
-
 		}
 		#endregion
 	}

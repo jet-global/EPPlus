@@ -23,21 +23,48 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	///Implements the RANDBETWEEN function. 
+	/// </summary>
 	public class RandBetween : ExcelFunction
 	{
+		/// <summary>
+		/// Get a random number between two given inputs.
+		/// </summary>
+		/// <param name="arguments">This contains upper and lower bounds the user defined.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>A random number between the defined upper and lower limits.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var low = ArgToDecimal(arguments, 0);
 			var high = ArgToDecimal(arguments, 1);
+			if(low>high)
+				return CreateResult(eErrorType.Value, DataType.ExcelError);
 			var rand = new Rand().Execute(new FunctionArgument[0], context).Result;
-			var randPart = (CalulateDiff(high, low) * (double)rand) + 1;
+			var randPart = (this.CalulateDiff(high, low) * (double)rand) + 1;
 			randPart = System.Math.Floor(randPart);
+			var theNumbersBeforeTheDecimalInTheOADate = System.Math.Truncate(low);
+			var todaysOADate = System.Math.Truncate(System.DateTime.Today.ToOADate());
+			if (theNumbersBeforeTheDecimalInTheOADate == todaysOADate)
+			{
+				low = low - System.Math.Truncate(low);
+				if (low == 0)
+					return CreateResult(0, DataType.Integer);
+				else
+					return CreateResult(1, DataType.Integer);
+			}
+			var firstArgument = arguments.First();
+			var secondArgument = arguments.ElementAt(1);
+			if (firstArgument.Value is bool || secondArgument.Value is bool)
+				return CreateResult(eErrorType.Value, DataType.ExcelError);
+
 			return CreateResult(low + randPart, DataType.Integer);
 		}
 
@@ -53,5 +80,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			return high - low;
 		}
+
 	}
 }
