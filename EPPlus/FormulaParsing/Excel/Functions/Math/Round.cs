@@ -52,14 +52,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(argumentError);
 
 			if (arguments.ElementAt(0).Value == null)
-				return CreateResult(0d, DataType.Decimal);
+				return this.CreateResult(0d, DataType.Decimal);
 
 			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double numberDecimal))
 				return new CompileResult(eErrorType.Value);
 			var number = numberDecimal;
 
 			if (arguments.ElementAt(1).Value == null)
-				return CreateResult(System.Math.Round(number, 0), DataType.Decimal);
+				return this.CreateResult(System.Math.Round(number, 0), DataType.Decimal);
 
 			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(1).Value, out double nDigitsDecimal))
 				return new CompileResult(eErrorType.Value);
@@ -73,9 +73,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				nDigits *= -1;
 				var roundedNumber = System.Math.Round(number / System.Math.Pow(10, nDigits));
 				var result = (System.Math.Pow(10, nDigits))*(roundedNumber);
-				return CreateResult(result, DataType.Integer);
+				return this.CreateResult(result, DataType.Integer);
 			}
-			return CreateResult(System.Math.Round(number, nDigits), DataType.Decimal);
+			return this.CreateResult(System.Math.Round(number, nDigits), DataType.Decimal);
 		}
 	}
 }

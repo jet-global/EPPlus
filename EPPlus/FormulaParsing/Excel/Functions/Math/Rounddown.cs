@@ -55,14 +55,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var nDecimalsCandidate = arguments.ElementAt(1).Value;
 
 			if (numberCandidate == null)
-				return CreateResult(0d, DataType.Decimal);
+				return this.CreateResult(0d, DataType.Decimal);
 
 			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double numberDecimal))
 				return new CompileResult(eErrorType.Value);
 			var number = numberDecimal;
 
 			if (nDecimalsCandidate == null)
-				return CreateResult(number, DataType.Decimal);
+				return this.CreateResult(number, DataType.Decimal);
 
 			if (!ConvertUtil.TryParseDateObjectToOADate(nDecimalsCandidate, out double nDecimalsDouble))
 				return new CompileResult(eErrorType.Value);
@@ -82,7 +82,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				result = (int)System.Math.Floor(number);
 				result = result - (result % System.Math.Pow(10, (nDecimals * -1)));
 			}
-			return CreateResult(result * nFactor, DataType.Decimal);
+			return this.CreateResult(result * nFactor, DataType.Decimal);
 		}
 
 		/// <summary>
