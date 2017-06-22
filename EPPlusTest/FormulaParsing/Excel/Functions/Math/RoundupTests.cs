@@ -169,7 +169,120 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void RoundupWithNumberAsCellReferenceReturnsCorrectValue()
 		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 12.32568;
+				worksheet.Cells["B2"].Formula = "ROUNDUP(B1, 2)";
+				worksheet.Calculate();
+				Assert.AreEqual(12.33d, worksheet.Cells["B2"].Value);
+			}
+		}
 
+		[TestMethod]
+		public void RoundupWithIntegerAndPositiveSecondInputReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(25, 2), this.ParsingContext);
+			Assert.AreEqual(25d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithDoubleAndPositiveSecondInputReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(25.364, 2), this.ParsingContext);
+			Assert.AreEqual(25.37d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithFractionReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "ROUNDUP((2/3), 3)";
+				worksheet.Calculate();
+				Assert.AreEqual(0.667d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RoundupWithNumbericStringReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs("23.25623665", 3), this.ParsingContext);
+			Assert.AreEqual(23.257d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithGeneralStringAsFirstInputReturnsPoundValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs("String", 3), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void RoundupWithNumberAsDateFunctionReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "ROUNDUP(DATE(2017, 6, 5), 3)";
+				worksheet.Calculate();
+				Assert.AreEqual(42891d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RoundupWithNumberAsDateAsStringReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs("5/5/2017", 2), this.ParsingContext);
+			Assert.AreEqual(42860d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithNegativeDoubleAndPositiveSecondInputReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-12.345, 2), this.ParsingContext);
+			Assert.AreEqual(-12.35d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithNegativeDoubleAndNegativeSecondInputReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-1315.26, -2), this.ParsingContext);
+			Assert.AreEqual(-1400d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithNegativeIntegerAndPositiveSecondInputReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-56, 3), this.ParsingContext);
+			Assert.AreEqual(-56d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithNegativeIntegerAndNegativeSecondInputReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-45, -2), this.ParsingContext);
+			Assert.AreEqual(-100d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithBooleanArgumentsReturnCorrectValues()
+		{
+			var function = new Roundup();
+			var booleanTrue = function.Execute(FunctionsHelper.CreateArgs(2.35, true), this.ParsingContext);
+			var booleanFalse = function.Execute(FunctionsHelper.CreateArgs(2.56, false), this.ParsingContext);
+			Assert.AreEqual(2.4d, booleanTrue.Result);
+			Assert.AreEqual(3d, booleanFalse.Result);
 		}
 	}
 }
