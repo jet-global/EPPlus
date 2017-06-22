@@ -93,7 +93,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				foreach (var cellInfo in argument.ValueAsRangeInfo)
 				{
-					bool handleAsFormula = (!cellInfo.Formula.Equals(string.Empty));
 					if (this.ShouldIgnore(cellInfo, context))
 						continue;
 					this.CheckForAndHandleExcelError(cellInfo);
