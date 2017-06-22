@@ -109,14 +109,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					}
 					else if (cellInfo.Value is string cellValueAsString)
 					{
-						bool cellIsNull = cellValueAsString.Equals(string.Empty);
-						numberOfValues += (cellIsNull) ? 0 : 1;
-						if (handleAsFormula || cellIsNull)
-							continue;
-						if (Boolean.TryParse(cellValueAsString, out bool cellValueAsBool))
-							sumOfAllValues += (cellValueAsBool) ? 1 : 0;
-						else if (Double.TryParse(cellValueAsString, out double cellValueAsDouble))
-							sumOfAllValues += cellValueAsDouble;
+						numberOfValues++;
 					}
 				}
 			}
