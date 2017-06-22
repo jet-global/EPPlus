@@ -34,6 +34,142 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class RoundupTests : MathFunctionsTestBase
 	{
-		
+		[TestMethod]
+		public void RoundupWithNoArgsReturnsPoundValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void RoundupWithNoSecondInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "ROUNDUP(12.2, )";
+				worksheet.Calculate();
+				Assert.AreEqual(13d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RoundupWithNoFirstInputReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "ROUNDUP(, 1)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RoundupWithSecondInputGreaterThanZeroReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(12.23256853, 4), this.ParsingContext);
+			Assert.AreEqual(12.2326d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithSecondInputLessThanZeroReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(114512, -3), this.ParsingContext);
+			Assert.AreEqual(115000d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithSecondInputAsZeroReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(12.568, 0), this.ParsingContext);
+			Assert.AreEqual(13d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithSecondInputAsNumericStringReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(25.364, "2"), this.ParsingContext);
+			Assert.AreEqual(25.37d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithSecondInputAsGeneralStringReturnsPoundValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(45.6, "string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void RoundupWithSecondInputAsDateFunctionResultReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "ROUNDUP(12.3654, DATE(2017, 6, 7))";
+				worksheet.Calculate();
+				Assert.AreEqual(12.3654d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RoundupWithSecondInputAsDateAsStringReturnsCorrectValue()
+		{
+			var function = new Roundup();
+			var result = function.Execute(FunctionsHelper.CreateArgs(12.3546, "5/5/2017"), this.ParsingContext);
+			Assert.AreEqual(12.3546d, result.Result);
+		}
+
+		[TestMethod]
+		public void RoundupWithSecondInputAsCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 2;
+				worksheet.Cells["B2"].Formula = "ROUNDUP(26.32568, B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(26.33d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RoundupWithEmptyCellReferenceReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "ROUNDUP(A2,A3)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RoundupWithInputsAsErrorValueReturnsRespectiveError()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Formula = "SQRT(-1)";
+				worksheet.Cells["B1"].Formula = "ROUNDUP(A2, 2)";
+				worksheet.Cells["B2"].Formula = "ROUNDUP(34.45, A2)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
+				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void RoundupWithNumberAsCellReferenceReturnsCorrectValue()
+		{
+
+		}
 	}
 }
