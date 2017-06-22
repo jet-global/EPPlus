@@ -328,22 +328,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(999d, result.Result);
 		}
-
-		[TestMethod]
-		public void testtest()
-		{
-			using (var package = new ExcelPackage())
-			{
-				var worksheet = package.Workbook.Worksheets.Add("sHET21");
-				worksheet.Cells["B1"].Formula = "=9223372036854775807";
-				worksheet.Cells["B3"].Value = "9223372036854775807";
-				worksheet.Cells["B2"].Formula = "ROUND(B1, -18)";
-				worksheet.Cells["B4"].Formula = "ROUND(B3, -18)";
-				worksheet.Cells["B5"].Formula = "ROUND(9223372036854775807, -18)";
-				worksheet.Calculate();
-				Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
-			}	
-		}
 		#endregion
 	}
 }
