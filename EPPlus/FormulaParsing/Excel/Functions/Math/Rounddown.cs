@@ -57,9 +57,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (numberCandidate == null)
 				return this.CreateResult(0d, DataType.Decimal);
 
-			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double numberDecimal))
+			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
 				return new CompileResult(eErrorType.Value);
-			var number = numberDecimal;
 
 			if (nDecimalsCandidate == null)
 				return this.CreateResult(number, DataType.Decimal);

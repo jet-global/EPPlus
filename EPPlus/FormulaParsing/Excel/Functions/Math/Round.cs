@@ -54,9 +54,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (arguments.ElementAt(0).Value == null)
 				return this.CreateResult(0d, DataType.Decimal);
 
-			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double numberDecimal))
+			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double number))
 				return new CompileResult(eErrorType.Value);
-			var number = numberDecimal;
 
 			if (arguments.ElementAt(1).Value == null)
 				return this.CreateResult(System.Math.Round(number, 0), DataType.Decimal);
