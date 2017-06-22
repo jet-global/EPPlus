@@ -48,7 +48,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Formula = "ROUNDDOWN(15, )";
+				worksheet.Cells["B1"].Formula = "ROUNDDOWN(15.32568, )";
 				worksheet.Calculate();
 				Assert.AreEqual(15d, worksheet.Cells["B1"].Value);
 			}
