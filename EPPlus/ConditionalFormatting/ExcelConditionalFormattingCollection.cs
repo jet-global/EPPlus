@@ -64,13 +64,13 @@ namespace OfficeOpenXml.ConditionalFormatting
 	/// </code>
 	/// </remarks>
 	public class ExcelConditionalFormattingCollection
-	  : XmlHelper,
-	  IEnumerable<IExcelConditionalFormattingRule>
+		: XmlHelper,
+		IEnumerable<IExcelConditionalFormattingRule>
 	{
-		#region Class Variables
-		private List<IExcelConditionalFormattingRule> myRules = new List<IExcelConditionalFormattingRule>();
-		private ExcelWorksheet myWorksheet = null;
-		#endregion 
+		#region Properties 
+		private List<IExcelConditionalFormattingRule> ConditionalFormattingRules { get; }
+		private ExcelWorksheet ExcelWorksheet { get; }
+		#endregion
 
 		#region Constructors
 		/// <summary>
@@ -85,13 +85,14 @@ namespace OfficeOpenXml.ConditionalFormatting
 		{
 			Require.Argument(worksheet).IsNotNull("worksheet");
 
-			this.myWorksheet = worksheet;
-			this.SchemaNodeOrder = this.myWorksheet.SchemaNodeOrder;
+			this.ExcelWorksheet = worksheet;
+			this.SchemaNodeOrder = this.ExcelWorksheet.SchemaNodeOrder;
+			this.ConditionalFormattingRules = new List<IExcelConditionalFormattingRule>();
 
 			// Look for all the <conditionalFormatting> nodes.
 			var conditionalFormattingNodes = this.TopNode.SelectNodes(
 			  "//" + ExcelConditionalFormattingConstants.Paths.ConditionalFormatting,
-				this.myWorksheet.NameSpaceManager);
+				this.ExcelWorksheet.NameSpaceManager);
 
 			if ((conditionalFormattingNodes != null) && (conditionalFormattingNodes.Count > 0))
 			{
@@ -106,7 +107,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 					// Check for all the <cfRules> nodes and load them.
 					var cfRuleNodes = conditionalFormattingNode.SelectNodes(
 					  ExcelConditionalFormattingConstants.Paths.CfRule,
-						this.myWorksheet.NameSpaceManager);
+						this.ExcelWorksheet.NameSpaceManager);
 
 					// Foreach <cfRule> inside the current <conditionalFormatting>.
 					foreach (XmlNode cfRuleNode in cfRuleNodes)
@@ -132,17 +133,17 @@ namespace OfficeOpenXml.ConditionalFormatting
 						var type = ExcelConditionalFormattingRuleType.GetTypeByAttrbiute(
 						  typeAttribute,
 						  cfRuleNode,
-							this.myWorksheet.NameSpaceManager);
+							this.ExcelWorksheet.NameSpaceManager);
 
 						var cfRule = ExcelConditionalFormattingRuleFactory.Create(
 						  type,
 						  address,
 						  priority,
-							this.myWorksheet,
+							this.ExcelWorksheet,
 						  cfRuleNode);
 
 						if (cfRule != null)
-							this.myRules.Add(cfRule);
+							this.ConditionalFormattingRules.Add(cfRule);
 					}
 				}
 			}
@@ -156,7 +157,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		private void EnsureRootElementExists()
 		{
 			// Find the <worksheet> node
-			if (this.myWorksheet.WorksheetXml.DocumentElement == null)
+			if (this.ExcelWorksheet.WorksheetXml.DocumentElement == null)
 				throw new Exception(ExcelConditionalFormattingConstants.Errors.MissingWorksheetNode);
 		}
 
@@ -167,7 +168,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		private XmlNode GetRootNode()
 		{
 			EnsureRootElementExists();
-			return this.myWorksheet.WorksheetXml.DocumentElement;
+			return this.ExcelWorksheet.WorksheetXml.DocumentElement;
 		}
 
 		/// <summary>
@@ -190,7 +191,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		{
 			// Consider zero as the last priority when we have no CF rules.
 			int lastPriority = 0;
-			foreach (var cfRule in this.myRules)
+			foreach (var cfRule in this.ConditionalFormattingRules)
 			{
 				if (cfRule.Priority > lastPriority)
 					lastPriority = cfRule.Priority;
@@ -206,7 +207,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <returns>Returns the number of validations in the collection.</returns>
 		public int Count
 		{
-			get { return this.myRules.Count; }
+			get { return this.ConditionalFormattingRules.Count; }
 		}
 
 		/// <summary>
@@ -216,8 +217,8 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <returns>Returns the <see cref="IExcelConditionalFormattingRule"/> at the given index.</returns>
 		public IExcelConditionalFormattingRule this[int index]
 		{
-			get { return this.myRules[index]; }
-			set { this.myRules[index] = value; }
+			get { return this.ConditionalFormattingRules[index]; }
+			set { this.ConditionalFormattingRules[index] = value; }
 		}
 
 		/// <summary>
@@ -226,7 +227,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <returns>Returns an IEnumerator object that can be used to iterate through the collection.</returns>
 		IEnumerator<IExcelConditionalFormattingRule> IEnumerable<IExcelConditionalFormattingRule>.GetEnumerator()
 		{
-			return this.myRules.GetEnumerator();
+			return this.ConditionalFormattingRules.GetEnumerator();
 		}
 
 		/// <summary>
@@ -235,7 +236,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <returns></returns>
 		IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		{
-			return this.myRules.GetEnumerator();
+			return this.ConditionalFormattingRules.GetEnumerator();
 		}
 
 		/// <summary>
@@ -249,7 +250,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 			// Look for all the <conditionalFormatting> nodes
 			var conditionalFormattingNodes = this.TopNode.SelectNodes(
 			  "//" + ExcelConditionalFormattingConstants.Paths.ConditionalFormatting,
-				this.myWorksheet.NameSpaceManager);
+				this.ExcelWorksheet.NameSpaceManager);
 
 			// Remove all the <conditionalFormatting> nodes one by one
 			foreach (XmlNode conditionalFormattingNode in conditionalFormattingNodes)
@@ -258,7 +259,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 			}
 
 			// Clear the <cfRule> item list
-			this.myRules.Clear();
+			this.ConditionalFormattingRules.Clear();
 		}
 
 		/// <summary>
@@ -277,7 +278,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 				// Check if the old <conditionalFormatting> parent node has <cfRule> node inside it
 				if (!oldParentNode.HasChildNodes)
 					oldParentNode.ParentNode.RemoveChild(oldParentNode);
-				this.myRules.Remove(item);
+				this.ConditionalFormattingRules.Remove(item);
 			}
 			catch
 			{
@@ -315,7 +316,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <returns>Returns the <see cref="IExcelConditionalFormattingRule"/> with the given priority.</returns>
 		public IExcelConditionalFormattingRule RulesByPriority(int priority)
 		{
-			return this.myRules.Find(x => x.Priority == priority);
+			return this.ConditionalFormattingRules.Find(x => x.Priority == priority);
 		}
 		#endregion IEnumerable<IExcelConditionalFormatting>
 
@@ -335,9 +336,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 			  type,
 			  address,
 			  GetNextPriority(),
-				this.myWorksheet,
+				this.ExcelWorksheet,
 			  null);
-			this.myRules.Add(cfRule);
+			this.ConditionalFormattingRules.Add(cfRule);
 			return cfRule;
 		}
 

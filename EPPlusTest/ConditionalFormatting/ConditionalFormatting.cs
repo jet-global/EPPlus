@@ -10,13 +10,13 @@ using OfficeOpenXml.ConditionalFormatting.Contracts;
 namespace EPPlusTest
 {
 	/// <summary>
-	/// Test the Conditional Formatting feature
+	/// Tests the Conditional Formatting feature.
 	/// </summary>
 	[TestClass]
 	public class ConditionalFormattingTest
 	{
-		#region Class Variables
-		private static ExcelPackage myExcelPackage;
+		#region Properties
+		private static ExcelPackage ExcelPackage { get; set; }
 		#endregion
 
 		#region Setup
@@ -27,21 +27,22 @@ namespace EPPlusTest
 		{
 			if (!Directory.Exists("Test"))
 				Directory.CreateDirectory(string.Format("Test"));
-			myExcelPackage = new ExcelPackage(new FileInfo(@"Test\ConditionalFormatting.xlsx"));
+			ExcelPackage = new ExcelPackage(new FileInfo(@"Test\ConditionalFormatting.xlsx"));
 		}
 
 		// Use ClassCleanup to run code after all tests in a class have run
 		[ClassCleanup()]
 		public static void MyClassCleanup()
 		{
-			myExcelPackage = null;
+			ExcelPackage = null;
 		}
 		#endregion
 
+		#region Tests Methods
 		[TestMethod]
 		public void TwoColorScale()
 		{
-			var ws = myExcelPackage.Workbook.Worksheets.Add("ColorScale");
+			var ws = ExcelPackage.Workbook.Worksheets.Add("ColorScale");
 			ws.ConditionalFormatting.AddTwoColorScale(ws.Cells["A1:A5"]);
 			ws.SetValue(1, 1, 1);
 			ws.SetValue(2, 1, 2);
@@ -51,33 +52,9 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		[Ignore]
-		public void ReadConditionalFormatting()
-		{
-			var pck = new ExcelPackage(new FileInfo(@"c:\temp\cf.xlsx"));
-			var ws = pck.Workbook.Worksheets[1];
-			Assert.IsTrue(ws.ConditionalFormatting.Count == 6);
-			Assert.IsTrue(ws.ConditionalFormatting[0].Type == eExcelConditionalFormattingRuleType.DataBar);
-			var cf1 = ws.ConditionalFormatting.AddEqual(ws.Cells["C3"]);
-			//cf1.Formula = "TRUE";
-			var cf2 = ws.Cells["C8:C12"].ConditionalFormatting.AddExpression();
-			var cf3 = ws.Cells["d12:D22,H12:H22"].ConditionalFormatting.AddFourIconSet(eExcelconditionalFormatting4IconsSetType.RedToBlack);
-			pck.SaveAs(new FileInfo(@"c:\temp\cf2.xlsx"));
-		}
-
-		[TestMethod]
-		[Ignore]
-		public void ReadConditionalFormattingError()
-		{
-			var pck = new ExcelPackage(new FileInfo(@"c:\temp\CofCTemplate.xlsx"));
-			var ws = pck.Workbook.Worksheets[1];
-			pck.SaveAs(new FileInfo(@"c:\temp\cf2.xlsx"));
-		}
-
-		[TestMethod]
 		public void TwoBackColor()
 		{
-			var ws = myExcelPackage.Workbook.Worksheets.Add("TwoBackColor");
+			var ws = ExcelPackage.Workbook.Worksheets.Add("TwoBackColor");
 			IExcelConditionalFormattingEqual condition1 = ws.ConditionalFormatting.AddEqual(ws.Cells["A1"]);
 			condition1.StopIfTrue = true;
 			condition1.Priority = 1;
@@ -93,7 +70,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void Databar()
 		{
-			var ws = myExcelPackage.Workbook.Worksheets.Add("Databar");
+			var ws = ExcelPackage.Workbook.Worksheets.Add("Databar");
 			var cf = ws.ConditionalFormatting.AddDatabar(ws.Cells["A1:A5"], Color.BlueViolet);
 			ws.SetValue(1, 1, 1);
 			ws.SetValue(2, 1, 2);
@@ -105,7 +82,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void DatabarChangingAddressAddsConditionalFormatNodeInSchemaOrder()
 		{
-			var ws = myExcelPackage.Workbook.Worksheets.Add("DatabarAddressing");
+			var ws = ExcelPackage.Workbook.Worksheets.Add("DatabarAddressing");
 			// Ensure there is at least one element that always exists below ConditionalFormatting nodes.   
 			ws.HeaderFooter.AlignWithMargins = true;
 			var cf = ws.ConditionalFormatting.AddDatabar(ws.Cells["A1:A5"], Color.BlueViolet);
@@ -119,7 +96,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void IconSet()
 		{
-			var ws = myExcelPackage.Workbook.Worksheets.Add("IconSet");
+			var ws = ExcelPackage.Workbook.Worksheets.Add("IconSet");
 			var cf = ws.ConditionalFormatting.AddThreeIconSet(ws.Cells["A1:A3"], eExcelconditionalFormatting3IconsSetType.Symbols);
 			ws.SetValue(1, 1, 1);
 			ws.SetValue(2, 1, 2);
@@ -200,5 +177,6 @@ namespace EPPlusTest
 				Assert.IsTrue(sheet.X14ConditionalFormatting.X14Rules.All(cfr => !string.IsNullOrEmpty(cfr.Address.ToString())));
 			}
 		}
+		#endregion
 	}
 }
