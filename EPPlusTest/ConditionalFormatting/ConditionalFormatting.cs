@@ -13,68 +13,35 @@ namespace EPPlusTest
 	/// Test the Conditional Formatting feature
 	/// </summary>
 	[TestClass]
-	public class ConditionalFormatting
+	public class ConditionalFormattingTest
 	{
-		private TestContext testContextInstance;
-		private static ExcelPackage _pck;
+		#region Class Variables
+		private static ExcelPackage myExcelPackage;
+		#endregion
 
-		/// <summary>
-		///Gets or sets the test context which provides
-		///information about and functionality for the current test run.
-		///</summary>
-		public TestContext TestContext
-		{
-			get
-			{
-				return testContextInstance;
-			}
-			set
-			{
-				testContextInstance = value;
-			}
-		}
-
-		#region Additional test attributes
+		#region Setup
 		// You can use the following additional attributes as you write your tests:
 		// Use ClassInitialize to run code before running the first test in the class
 		[ClassInitialize()]
 		public static void MyClassInitialize(TestContext testContext)
 		{
 			if (!Directory.Exists("Test"))
-			{
 				Directory.CreateDirectory(string.Format("Test"));
-			}
-
-			_pck = new ExcelPackage(new FileInfo(@"Test\ConditionalFormatting.xlsx"));
+			myExcelPackage = new ExcelPackage(new FileInfo(@"Test\ConditionalFormatting.xlsx"));
 		}
 
 		// Use ClassCleanup to run code after all tests in a class have run
 		[ClassCleanup()]
 		public static void MyClassCleanup()
 		{
-			_pck = null;
+			myExcelPackage = null;
 		}
-
-		// //Use TestInitialize to run code before running each test 
-		// [TestInitialize()]
-		// public void MyTestInitialize() 
-		// {
-		// }
-
-		//// Use TestCleanup to run code after each test has run
-		// [TestCleanup()]
-		// public void MyTestCleanup() 
-		// {
-		// }
 		#endregion
 
-		/// <summary>
-		/// 
-		/// </summary>
 		[TestMethod]
 		public void TwoColorScale()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("ColorScale");
+			var ws = myExcelPackage.Workbook.Worksheets.Add("ColorScale");
 			ws.ConditionalFormatting.AddTwoColorScale(ws.Cells["A1:A5"]);
 			ws.SetValue(1, 1, 1);
 			ws.SetValue(2, 1, 2);
@@ -83,44 +50,34 @@ namespace EPPlusTest
 			ws.SetValue(5, 1, 5);
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
 		[TestMethod]
 		[Ignore]
 		public void ReadConditionalFormatting()
 		{
 			var pck = new ExcelPackage(new FileInfo(@"c:\temp\cf.xlsx"));
-
 			var ws = pck.Workbook.Worksheets[1];
 			Assert.IsTrue(ws.ConditionalFormatting.Count == 6);
 			Assert.IsTrue(ws.ConditionalFormatting[0].Type == eExcelConditionalFormattingRuleType.DataBar);
-
 			var cf1 = ws.ConditionalFormatting.AddEqual(ws.Cells["C3"]);
 			//cf1.Formula = "TRUE";
 			var cf2 = ws.Cells["C8:C12"].ConditionalFormatting.AddExpression();
 			var cf3 = ws.Cells["d12:D22,H12:H22"].ConditionalFormatting.AddFourIconSet(eExcelconditionalFormatting4IconsSetType.RedToBlack);
 			pck.SaveAs(new FileInfo(@"c:\temp\cf2.xlsx"));
 		}
-		/// <summary>
-		/// 
-		/// </summary>
+
 		[TestMethod]
 		[Ignore]
 		public void ReadConditionalFormattingError()
 		{
 			var pck = new ExcelPackage(new FileInfo(@"c:\temp\CofCTemplate.xlsx"));
-
 			var ws = pck.Workbook.Worksheets[1];
 			pck.SaveAs(new FileInfo(@"c:\temp\cf2.xlsx"));
 		}
-		/// <summary>
-		/// 
-		/// </summary>
+
 		[TestMethod]
 		public void TwoBackColor()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("TwoBackColor");
+			var ws = myExcelPackage.Workbook.Worksheets.Add("TwoBackColor");
 			IExcelConditionalFormattingEqual condition1 = ws.ConditionalFormatting.AddEqual(ws.Cells["A1"]);
 			condition1.StopIfTrue = true;
 			condition1.Priority = 1;
@@ -132,10 +89,11 @@ namespace EPPlusTest
 			condition2.Formula = "FALSE";
 			condition2.Style.Fill.BackgroundColor.Color = Color.Red;
 		}
+
 		[TestMethod]
 		public void Databar()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Databar");
+			var ws = myExcelPackage.Workbook.Worksheets.Add("Databar");
 			var cf = ws.ConditionalFormatting.AddDatabar(ws.Cells["A1:A5"], Color.BlueViolet);
 			ws.SetValue(1, 1, 1);
 			ws.SetValue(2, 1, 2);
@@ -143,10 +101,11 @@ namespace EPPlusTest
 			ws.SetValue(4, 1, 4);
 			ws.SetValue(5, 1, 5);
 		}
+
 		[TestMethod]
 		public void DatabarChangingAddressAddsConditionalFormatNodeInSchemaOrder()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("DatabarAddressing");
+			var ws = myExcelPackage.Workbook.Worksheets.Add("DatabarAddressing");
 			// Ensure there is at least one element that always exists below ConditionalFormatting nodes.   
 			ws.HeaderFooter.AlignWithMargins = true;
 			var cf = ws.ConditionalFormatting.AddDatabar(ws.Cells["A1:A5"], Color.BlueViolet);
@@ -156,10 +115,11 @@ namespace EPPlusTest
 			Assert.AreEqual("sheetData", cf.Node.ParentNode.PreviousSibling.LocalName);
 			Assert.AreEqual("headerFooter", cf.Node.ParentNode.NextSibling.LocalName);
 		}
+
 		[TestMethod]
 		public void IconSet()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("IconSet");
+			var ws = myExcelPackage.Workbook.Worksheets.Add("IconSet");
 			var cf = ws.ConditionalFormatting.AddThreeIconSet(ws.Cells["A1:A3"], eExcelconditionalFormatting3IconsSetType.Symbols);
 			ws.SetValue(1, 1, 1);
 			ws.SetValue(2, 1, 2);
@@ -225,5 +185,20 @@ namespace EPPlusTest
 			}
 		}
 
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\NAV024 - Item Sales and Profit.xlsx")]
+		public void ConditionalFormattingsAndRulesWithoutSqrefsAreIgnored()
+		{
+			var file = new FileInfo(@"NAV024 - Item Sales and Profit.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(3, sheet.ConditionalFormatting.Count);
+				Assert.IsTrue(sheet.ConditionalFormatting.All(cf => !string.IsNullOrEmpty(cf.Address.ToString())));
+				Assert.AreEqual(2, sheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsTrue(sheet.X14ConditionalFormatting.X14Rules.All(cfr => !string.IsNullOrEmpty(cfr.Address.ToString())));
+			}
+		}
 	}
 }
