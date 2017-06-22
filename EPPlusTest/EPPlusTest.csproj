@@ -172,6 +172,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\QuotientTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RoundDownTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RoundTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\RoundupTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SechTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SecTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SinhTests.cs" />

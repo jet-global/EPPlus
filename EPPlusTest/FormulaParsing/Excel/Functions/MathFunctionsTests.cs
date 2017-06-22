@@ -569,51 +569,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void RounddownShouldReturnCorrectResultWithPositiveNumber()
-		{
-			var func = new Rounddown();
-			var args = FunctionsHelper.CreateArgs(9.999, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(9.99, result.Result);
-		}
-
-		[TestMethod]
-		public void RounddownShouldHandleNegativeNumber()
-		{
-			var func = new Rounddown();
-			var args = FunctionsHelper.CreateArgs(-9.999, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(-9.99, result.Result);
-		}
-
-		[TestMethod]
-		public void RounddownShouldHandleNegativeNumDigits()
-		{
-			var func = new Rounddown();
-			var args = FunctionsHelper.CreateArgs(999.999, -2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(900d, result.Result);
-		}
-
-		[TestMethod]
-		public void RounddownShouldReturn0IfNegativeNumDigitsIsTooLarge()
-		{
-			var func = new Rounddown();
-			var args = FunctionsHelper.CreateArgs(999.999, -4);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(0d, result.Result);
-		}
-
-		[TestMethod]
-		public void RounddownShouldHandleZeroNumDigits()
-		{
-			var func = new Rounddown();
-			var args = FunctionsHelper.CreateArgs(999.999, 0);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(999d, result.Result);
-		}
-
-		[TestMethod]
 		public void RoundupShouldReturnCorrectResultWithPositiveNumber()
 		{
 			var func = new Roundup();
@@ -969,16 +924,6 @@ namespace EPPlusTest.Excel.Functions
 		public void RankWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Rank();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void RounddownWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Rounddown();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);
