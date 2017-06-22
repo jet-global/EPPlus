@@ -105,6 +105,7 @@
     <Compile Include="ExcelPackageTest.cs" />
     <Compile Include="ExcelWorksheetTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AbsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\ExpTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\FactDoubleTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\FactTests.cs" />
