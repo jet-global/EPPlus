@@ -57,66 +57,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void CeilingShouldRoundUpAccordingToParamsSignificanceLowerThan0()
-		{
-			var expectedValue = 22.36d;
-			var func = new Ceiling();
-			var args = FunctionsHelper.CreateArgs(22.35d, 0.01);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(expectedValue, result.Result);
-		}
-
-		[TestMethod]
-		public void CeilingShouldRoundTowardsZeroIfSignificanceAndNumberIsMinus0point1()
-		{
-			var expectedValue = -22.4d;
-			var func = new Ceiling();
-			var args = FunctionsHelper.CreateArgs(-22.35d, -0.1);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(expectedValue, System.Math.Round((double)result.Result, 2));
-		}
-
-		[TestMethod]
-		public void CeilingShouldRoundUpAccordingToParamsSignificanceIs1()
-		{
-			var expectedValue = 23d;
-			var func = new Ceiling();
-			var args = FunctionsHelper.CreateArgs(22.35d, 1);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(expectedValue, result.Result);
-		}
-
-		[TestMethod]
-		public void CeilingShouldRoundUpAccordingToParamsSignificanceIs10()
-		{
-			var expectedValue = 30d;
-			var func = new Ceiling();
-			var args = FunctionsHelper.CreateArgs(22.35d, 10);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(expectedValue, result.Result);
-		}
-
-		[TestMethod]
-		public void CeilingShouldRoundTowardsZeroIfSignificanceAndNumberIsNegative()
-		{
-			var expectedValue = -30d;
-			var func = new Ceiling();
-			var args = FunctionsHelper.CreateArgs(-22.35d, -10);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(expectedValue, result.Result);
-		}
-
-		[TestMethod, ExpectedException(typeof(InvalidOperationException))]
-		public void CeilingShouldThrowExceptionIfNumberIsPositiveAndSignificanceIsNegative()
-		{
-			var expectedValue = 30d;
-			var func = new Ceiling();
-			var args = FunctionsHelper.CreateArgs(22.35d, -1);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(expectedValue, result.Result);
-		}
-
-		[TestMethod]
 		public void SumShouldCalculate2Plus3AndReturn5()
 		{
 			var func = new Sum();
@@ -757,16 +697,6 @@ namespace EPPlusTest.Excel.Functions
 		public void AverageIfsWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new AverageIfs();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void CeilingWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Ceiling();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);

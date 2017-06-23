@@ -28,8 +28,17 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// 
+	/// </summary>
 	public class Ceiling : ExcelFunction
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="arguments"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)

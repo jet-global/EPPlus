@@ -155,6 +155,142 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
 			}
 		}
+
+		[TestMethod]
+		public void CeilingWithSecondInputAsIntegerReturnsCorrectValue()
+		{
+			var function = new Ceiling();
+			var result = function.Execute(FunctionsHelper.CreateArgs(6, 5), this.ParsingContext);
+			Assert.AreEqual(10d, result.Result);
+		}
+
+		[TestMethod]
+		public void CeilingWithDoubleSecondInputReturnsCorrectValue()
+		{
+			var function = new Ceiling();
+			var result = function.Execute(FunctionsHelper.CreateArgs(45, 6.7), this.ParsingContext);
+			Assert.AreEqual(46.9d, (double)result.Result, 0.000001);
+		}
+
+		[TestMethod]
+		public void CeilingWithGeneralStringSecondInputReturnsPoundValue()
+		{
+			var function = new Ceiling();
+			var result = function.Execute(FunctionsHelper.CreateArgs(34, "string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void CeilingWithNumericStringSecondInputReturnsCorrectValue()
+		{
+			var function = new Ceiling();
+			var result = function.Execute(FunctionsHelper.CreateArgs(5, "2"), this.ParsingContext);
+			Assert.AreEqual(6d, result.Result);
+		}
+
+		[TestMethod]
+		public void CeilingWithDateFunctionSecondInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "CEILING(124.2, DATE(2017, 6, 15))";
+				worksheet.Calculate();
+				Assert.AreEqual(42901d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void CeilingWithDateAsStringSecondInputReturnsCorrectValue()
+		{
+			var function = new Ceiling();
+			var result = function.Execute(FunctionsHelper.CreateArgs(12.3, "5/5/2017"), this.ParsingContext);
+			Assert.AreEqual(42860d, result.Result);
+		}
+
+		[TestMethod]
+		public void CeilingWithBooleanSecondInputReturnsCorrectValue()
+		{
+			var function = new Ceiling();
+			var booleanTrue = function.Execute(FunctionsHelper.CreateArgs(56.672, true), this.ParsingContext);
+			var booleanFalse = function.Execute(FunctionsHelper.CreateArgs(45.6, false), this.ParsingContext);
+			Assert.AreEqual(57d, booleanTrue.Result);
+			Assert.AreEqual(0d, booleanFalse.Result);
+		}
+
+		[TestMethod]
+		public void CeilingWithCellReferenceSecondInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 15;
+				worksheet.Cells["B2"].Formula = "CEILING(44, B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(45d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		//Below are the tests from EPPlus.
+		[TestMethod]
+		public void CeilingShouldRoundUpAccordingToParamsSignificanceLowerThan0()
+		{
+			var expectedValue = 22.36d;
+			var func = new Ceiling();
+			var args = FunctionsHelper.CreateArgs(22.35d, 0.01);
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(expectedValue, result.Result);
+		}
+
+		[TestMethod]
+		public void CeilingShouldRoundTowardsZeroIfSignificanceAndNumberIsMinus0point1()
+		{
+			var expectedValue = -22.4d;
+			var func = new Ceiling();
+			var args = FunctionsHelper.CreateArgs(-22.35d, -0.1);
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(expectedValue, System.Math.Round((double)result.Result, 2));
+		}
+
+		[TestMethod]
+		public void CeilingShouldRoundUpAccordingToParamsSignificanceIs1()
+		{
+			var expectedValue = 23d;
+			var func = new Ceiling();
+			var args = FunctionsHelper.CreateArgs(22.35d, 1);
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(expectedValue, result.Result);
+		}
+
+		[TestMethod]
+		public void CeilingShouldRoundUpAccordingToParamsSignificanceIs10()
+		{
+			var expectedValue = 30d;
+			var func = new Ceiling();
+			var args = FunctionsHelper.CreateArgs(22.35d, 10);
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(expectedValue, result.Result);
+		}
+
+		[TestMethod]
+		public void CeilingShouldRoundTowardsZeroIfSignificanceAndNumberIsNegative()
+		{
+			var expectedValue = -30d;
+			var func = new Ceiling();
+			var args = FunctionsHelper.CreateArgs(-22.35d, -10);
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(expectedValue, result.Result);
+		}
+
+		[TestMethod, ExpectedException(typeof(InvalidOperationException))]
+		public void CeilingShouldThrowExceptionIfNumberIsPositiveAndSignificanceIsNegative()
+		{
+			var expectedValue = 30d;
+			var func = new Ceiling();
+			var args = FunctionsHelper.CreateArgs(22.35d, -1);
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(expectedValue, result.Result);
+		}
 		#endregion
 	}
 }
