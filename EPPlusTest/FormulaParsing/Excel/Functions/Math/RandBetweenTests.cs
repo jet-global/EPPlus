@@ -36,16 +36,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class RandBetweenTests : MathFunctionsTestBase
 	{
-
 		#region RandBetweenTests Function(Execute) Tests
 		[TestMethod]
 		public void RandBetweenIsChecked1000TimesToMakeSureItStaysBetween0And10()
 		{
 			var function = new RandBetween();
-
 			var input1 = 0;
 			var input2 = 10;
-
 			for (int i = 0; i < 1000; i++)
 			{
 				var result = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
@@ -58,10 +55,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		public void RandBetweenIsChecked1000TimesToMakeSureItStaysBetweenNegative10And10()
 		{
 			var function = new RandBetween();
-
 			var input1 = -10;
 			var input2 = 10;
-
 			for (int i = 0; i < 1000; i++)
 			{
 				var result = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
@@ -74,12 +69,12 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		public void RandBetweenIsGivenABooleanAsAnInputShouldReturnPoundValue()
 		{
 			var function = new RandBetween();
-			var input1 = true;
-			var input2 = false;
-			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, input1), this.ParsingContext);
-			var result2 = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
-			var result3 = function.Execute(FunctionsHelper.CreateArgs(input2, input1), this.ParsingContext);
-			var result4 = function.Execute(FunctionsHelper.CreateArgs(input2, input2), this.ParsingContext);
+			var booleanInputTrue = true;
+			var booleanInputFalse = false;
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(booleanInputTrue, booleanInputTrue), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(booleanInputTrue, booleanInputFalse), this.ParsingContext);
+			var result3 = function.Execute(FunctionsHelper.CreateArgs(booleanInputFalse, booleanInputTrue), this.ParsingContext);
+			var result4 = function.Execute(FunctionsHelper.CreateArgs(booleanInputFalse, booleanInputFalse), this.ParsingContext);
 
 			Assert.AreEqual(eErrorType.Value, result1.Result);
 			Assert.AreEqual(eErrorType.Value, result2.Result);
@@ -100,7 +95,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void RandBetweenIsGivenARangeOfDatesSeperatedByslashes()
+		public void RandBetweenIsGivenARangeOfDatesSeperatedBySlashes()
 		{
 			var function = new RandBetween();
 			var input1 = "1/11/2011 11:00 am";

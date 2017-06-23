@@ -25,6 +25,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -34,7 +35,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	public class RandBetween : ExcelFunction
 	{
 		/// <summary>
-		/// Get a random number between two given inputs.
+		/// Get a random number between two given inputs. Both inputs are inclusive.
 		/// </summary>
 		/// <param name="arguments">This contains upper and lower bounds the user defined.</param>
 		/// <param name="context">Unused, this is information about where the function is being executed.</param>
@@ -43,25 +44,33 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var low = ArgToDecimal(arguments, 0);
-			var high = ArgToDecimal(arguments, 1);
-			if(low>high)
+
+			var fullOADateOfTheLowInput = ArgToDecimal(arguments, 0);
+
+			var firstArgument = arguments.First();
+			var secondArgument = arguments.ElementAt(1);
+
+			ConvertUtil.TryParseDateObjectToOADate(firstArgument.Value, out double low);
+			ConvertUtil.TryParseDateObjectToOADate(secondArgument.Value, out double high);
+
+			if (low > high)
 				return CreateResult(eErrorType.Value, DataType.ExcelError);
-			var rand = new Rand().Execute(new FunctionArgument[0], context).Result;
-			var randPart = (this.CalulateDiff(high, low) * (double)rand) + 1;
+
+			var rand = Random.NextDouble();
+			var randPart = (this.CalulateDiff(high, low) * rand) + 1;
 			randPart = System.Math.Floor(randPart);
-			var theNumbersBeforeTheDecimalInTheOADate = System.Math.Truncate(low);
+
+			var thisRepresentsTheDateAsAnOADate = System.Math.Truncate(fullOADateOfTheLowInput);
 			var todaysOADate = System.Math.Truncate(System.DateTime.Today.ToOADate());
-			if (theNumbersBeforeTheDecimalInTheOADate == todaysOADate)
+
+			if (thisRepresentsTheDateAsAnOADate == todaysOADate)
 			{
-				low = low - System.Math.Truncate(low);
 				if (low == 0)
 					return CreateResult(0, DataType.Integer);
 				else
 					return CreateResult(1, DataType.Integer);
 			}
-			var firstArgument = arguments.First();
-			var secondArgument = arguments.ElementAt(1);
+
 			if (firstArgument.Value is bool || secondArgument.Value is bool)
 				return CreateResult(eErrorType.Value, DataType.ExcelError);
 
@@ -81,5 +90,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return high - low;
 		}
 
+		private static System.Random Random { get; } = new System.Random();
 	}
 }

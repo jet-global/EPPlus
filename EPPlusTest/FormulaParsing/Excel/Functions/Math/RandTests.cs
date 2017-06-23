@@ -34,7 +34,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class RandTests : MathFunctionsTestBase
 	{
-		#region RandTests Function(Execute) Tests
+		#region Rand Function (Execute) Tests
 		[TestMethod]
 		public void RandIsChecked50000TimesToMakeSureItStaysBetween0And1()
 		{ 
