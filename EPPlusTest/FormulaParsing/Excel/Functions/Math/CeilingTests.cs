@@ -148,7 +148,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		public void CeilingWithDateAsStringFirstInuptReturnsCorrectValue()
 		{
 			var function = new Ceiling();
-			var result = function.Execute(FunctionsHelper.CreateArgs("5/5/2017", 4), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs("5/5/2017", 2), this.ParsingContext);
 			Assert.AreEqual(42860d, result.Result);
 		}
 
