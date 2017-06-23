@@ -169,9 +169,18 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		public void FloorShouldReturnCorrectResultWhenSignificanceIs1()
 		{
 			var func = new Floor();
-			var args = FunctionsHelper.CreateArgs(26.75d, 1);
+			var args = FunctionsHelper.CreateArgs(-26.75d, -1);
 			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(26d, result.Result);
+			Assert.AreEqual(-26d, result.Result);
+		}
+
+		[TestMethod]
+		public void FloorWithNegativeInputsReturnsCorrectValue()
+		{
+			var func = new Floor();
+			var args = FunctionsHelper.CreateArgs(-26.75d, -5);
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual(-25d, result.Result);
 		}
 
 		[TestMethod]

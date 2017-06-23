@@ -71,27 +71,69 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 			significance = ree;
 
-
-			var modeCandidate = arguments.ElementAt(2).Value;
-
-			if(modeCandidate == null)
+			if(arguments.Count() > 2)
 			{
-				double divisionResult = number / significance;
-				int multiple = (int)divisionResult;
-				bool exactChange = divisionResult == multiple;
-				if (exactChange)
-					return this.CreateResult(number, DataType.Decimal);
-				else if (significance > 0 && number < 0)
-					return this.CreateResult((multiple - 1) * significance, DataType.Decimal);
-				else
-					return this.CreateResult(multiple * significance, DataType.Decimal);
-			}
+				var modeCandidate = arguments.ElementAt(2).Value;
 
-			if (!ConvertUtil.TryParseDateObjectToOADate(modeCandidate, out double reee))
-				return new CompileResult(eErrorType.Value);
-			mode = ree;
+				if(modeCandidate == null)
+				{
+					double divisionResult1 = number / significance;
+					int multiple1 = (int)divisionResult1;
+					bool exactChange1 = divisionResult1 == multiple1;
+					if (exactChange1)
+						return this.CreateResult(number, DataType.Decimal);
+					else if (significance > 0 && number < 0)
+						return this.CreateResult((multiple1 - 1) * significance, DataType.Decimal);
+					else
+						return this.CreateResult(multiple1 * significance, DataType.Decimal);
+					}
+
+				if (!ConvertUtil.TryParseDateObjectToOADate(modeCandidate, out double reee))
+					return new CompileResult(eErrorType.Value);
+				mode = reee;
+
+				if (mode > 0 || mode < 0)
+				{
+					var divisionResult3 = number / significance;
+					var multiple3 = (int)divisionResult3;
+					var exactChange3 = divisionResult3 == multiple3;
+					if (exactChange3)
+						return this.CreateResult(number, DataType.Decimal);
+
+
+					else
+						return this.CreateResult(multiple3 * significance, DataType.Decimal);
+				}
+				else
+				{
+					var divisionResult2 = number / significance;
+					var multiple2 = (int)divisionResult2;
+					var exactChange2 = divisionResult2 == multiple2;
+					if (exactChange2)
+						return this.CreateResult(number, DataType.Decimal);
+					else if (significance > 0 && number < 0)
+						return this.CreateResult((multiple2 - 1) * significance, DataType.Decimal);
+					else if (number < 0)
+						return this.CreateResult((multiple2 + 1) * significance, DataType.Decimal);
+					else
+						return this.CreateResult(multiple2 * significance, DataType.Decimal);
+				}
+
+
+			}
 			
-			return new CompileResult(eErrorType.Div0);
+
+			var divisionResult = number / significance;
+			var multiple = (int)divisionResult;
+			var exactChange = divisionResult == multiple;
+			if (exactChange)
+				return this.CreateResult(number, DataType.Decimal);
+			else if (significance > 0 && number < 0)
+				return this.CreateResult((multiple - 1) * significance, DataType.Decimal);
+			else if (number < 0)
+				return this.CreateResult((multiple + 1) * significance, DataType.Decimal);
+			else
+				return this.CreateResult(multiple * significance, DataType.Decimal);
 		}
 	}
 }

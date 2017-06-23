@@ -88,8 +88,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		public void FloorMathWithNegativeNumberNegativeSigReturnsCorrectValue()
 		{
 			var function = new FloorMath();
-			var result = function.Execute(FunctionsHelper.CreateArgs(-15.6, -1), this.ParsingContext);
-			Assert.AreEqual(-16d, result.Result);
+			var result = function.Execute(FunctionsHelper.CreateArgs(-15.6, -7), this.ParsingContext);
+			Assert.AreEqual(-21d, result.Result);
 		}
 
 		[TestMethod]
@@ -121,7 +121,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			var function = new FloorMath();
 			var result = function.Execute(FunctionsHelper.CreateArgs(45.67, 2.34), this.ParsingContext);
-			Assert.AreEqual(44.46d, result.Result);
+			Assert.AreEqual(44.46d, (double)result.Result, 0.000001);
 		}
 
 		[TestMethod]
@@ -154,7 +154,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Formula = "FLOOR.MATH(DATE(2017, 6, 14) 4)";
+				worksheet.Cells["B1"].Formula = "FLOOR.MATH(DATE(2017, 6, 14), 4)";
 				worksheet.Calculate();
 				Assert.AreEqual(42900d, worksheet.Cells["B1"].Value);
 			}
@@ -279,7 +279,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			var function = new FloorMath();
 			var result = function.Execute(FunctionsHelper.CreateArgs(-45.7, 4, "2"), this.ParsingContext);
-			Assert.AreEqual(-45d, result.Result);
+			Assert.AreEqual(-44d, result.Result);
 		}
 
 		[TestMethod]
