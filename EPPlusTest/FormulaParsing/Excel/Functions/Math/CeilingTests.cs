@@ -45,6 +45,30 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void CeilingWithNoSecondInputReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "CEILING(10, )";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void CeilingWithNoFirstInputReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "CEILING(, 1000)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void CeilingWithPositiveInputsReturnsCorrectValue()
 		{
 			var function = new Ceiling();
@@ -61,11 +85,19 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void CeilingWithPositiveAndNegativeInputReturnsPoundNum()
+		public void CeilingWithPositiveFirstInputAndNegativeSecondInputReturnsPoundNum()
 		{
 			var function = new Ceiling();
 			var result = function.Execute(FunctionsHelper.CreateArgs(52.3, -9), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void CeilingWithFirstInputNegativeSecondInputPositiveReturnsCorrectValue()
+		{
+			var function = new Ceiling();
+			var result = function.Execute(FunctionsHelper.CreateArgs(-15, 4), this.ParsingContext);
+			Assert.AreEqual(-12d, result.Result);
 		}
 
 		[TestMethod]
@@ -238,7 +270,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var expectedValue = 22.36d;
 			var func = new Ceiling();
 			var args = FunctionsHelper.CreateArgs(22.35d, 0.01);
-			var result = func.Execute(args, _parsingContext);
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(expectedValue, result.Result);
 		}
 
@@ -248,7 +280,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var expectedValue = -22.4d;
 			var func = new Ceiling();
 			var args = FunctionsHelper.CreateArgs(-22.35d, -0.1);
-			var result = func.Execute(args, _parsingContext);
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(expectedValue, System.Math.Round((double)result.Result, 2));
 		}
 
@@ -258,7 +290,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var expectedValue = 23d;
 			var func = new Ceiling();
 			var args = FunctionsHelper.CreateArgs(22.35d, 1);
-			var result = func.Execute(args, _parsingContext);
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(expectedValue, result.Result);
 		}
 
@@ -268,7 +300,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var expectedValue = 30d;
 			var func = new Ceiling();
 			var args = FunctionsHelper.CreateArgs(22.35d, 10);
-			var result = func.Execute(args, _parsingContext);
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(expectedValue, result.Result);
 		}
 
@@ -278,17 +310,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var expectedValue = -30d;
 			var func = new Ceiling();
 			var args = FunctionsHelper.CreateArgs(-22.35d, -10);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(expectedValue, result.Result);
-		}
-
-		[TestMethod, ExpectedException(typeof(InvalidOperationException))]
-		public void CeilingShouldThrowExceptionIfNumberIsPositiveAndSignificanceIsNegative()
-		{
-			var expectedValue = 30d;
-			var func = new Ceiling();
-			var args = FunctionsHelper.CreateArgs(22.35d, -1);
-			var result = func.Execute(args, _parsingContext);
+			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(expectedValue, result.Result);
 		}
 		#endregion

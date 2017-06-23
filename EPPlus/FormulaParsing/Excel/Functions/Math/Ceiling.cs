@@ -24,7 +24,9 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -43,9 +45,23 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var number = ArgToDecimal(arguments, 0);
-			var significance = ArgToDecimal(arguments, 1);
-			ValidateNumberAndSign(number, significance);
+
+			var numberCandidate = arguments.ElementAt(0).Value;
+			var significanceCandidate = arguments.ElementAt(1).Value;
+
+			if (numberCandidate == null || significanceCandidate == null)
+				return CreateResult(0d, DataType.Decimal);
+
+			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
+				return new CompileResult(eErrorType.Value);
+
+			if (!ConvertUtil.TryParseDateObjectToOADate(significanceCandidate, out double significance))
+				return new CompileResult(eErrorType.Value);
+
+
+			if (number > 0 && significance < 0)
+				return new CompileResult(eErrorType.Num);
+			
 			if (significance < 1 && significance > 0)
 			{
 				var floor = System.Math.Floor(number);
@@ -61,15 +77,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				var result = number - (number % significance) + significance;
 				return CreateResult(result, DataType.Decimal);
-			}
-		}
-
-		private void ValidateNumberAndSign(double number, double sign)
-		{
-			if (number > 0d && sign < 0)
-			{
-				var values = string.Format("num: {0}, sign: {1}", number, sign);
-				throw new InvalidOperationException("Ceiling cannot handle a negative significance when the number is positive" + values);
 			}
 		}
 	}
