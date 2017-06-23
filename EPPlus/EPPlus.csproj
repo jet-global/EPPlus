@@ -441,6 +441,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIf.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfs.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Ceiling.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingMath.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Cos.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Cosh.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Cot.cs" />

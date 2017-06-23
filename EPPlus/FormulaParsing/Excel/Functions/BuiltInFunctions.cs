@@ -61,7 +61,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			// Numbers
 			this.Functions["int"] = new IntFunction();
 			// Math
-			this.Functions["floor.math"] = new FloorMath();
 			this.Functions["abs"] = new Abs();
 			this.Functions["asin"] = new Asin();
 			this.Functions["asinh"] = new Asinh();
@@ -74,6 +73,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["pi"] = new Pi();
 			this.Functions["product"] = new Product();
 			this.Functions["ceiling"] = new Ceiling();
+			this.Functions["ceiling.math"] = new CeilingMath();
 			this.Functions["count"] = new Count();
 			this.Functions["counta"] = new CountA();
 			this.Functions["countblank"] = new CountBlank();
@@ -82,6 +82,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["fact"] = new Fact();
 			this.Functions["factdouble"] = new FactDouble();
 			this.Functions["floor"] = new Floor();
+			this.Functions["floor.math"] = new FloorMath();
 			this.Functions["sin"] = new Sin();
 			this.Functions["sinh"] = new Sinh();
 			this.Functions["sum"] = new Sum();
