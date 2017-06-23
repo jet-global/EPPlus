@@ -23,15 +23,31 @@
 * The author accepts no liability for any damage or loss of business that this product may cause.
 *
 * For code change notes, see the source control history.
-*******************************************************************************/using System;
+*******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-	public class CeilingMath
+	/// <summary>
+	/// This class contains the formula for the CEILING.MATH Excel Function. 
+	/// </summary>
+	public class CeilingMath : ExcelFunction
 	{
+		/// <summary>
+		/// Takes the first user argument and rounds it up based on the optional second and third arguments.
+		/// </summary>
+		/// <param name="arguments">The user specified arguments.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The first argument rounded up based on the specifications of the second and third 
+		/// optional user arguments.</returns>
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

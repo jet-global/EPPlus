@@ -40,11 +40,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	public class FloorMath : ExcelFunction
 	{
 		/// <summary>
-		/// 
+		/// Takes the user specified argument and rounds the first argument down with respect to the other two 
+		/// optional arguments.
 		/// </summary>
-		/// <param name="arguments"></param>
-		/// <param name="context"></param>
-		/// <returns></returns>
+		/// <param name="arguments">The user specified arguments.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The first argument rounded down by the specifications of the other two optional arguments.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			double number = 0;

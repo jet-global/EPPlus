@@ -24,15 +24,23 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Numeric;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 	[TestClass]
 	public class CeilingMathTests : MathFunctionsTestBase
 	{
+		[TestMethod]
+		public void CeilingMathWithNoInputsReturnsCorrectValue()
+		{
+			var function = new CeilingMath();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 	}
 }
