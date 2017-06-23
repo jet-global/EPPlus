@@ -67,22 +67,22 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				if (_worksheet.Names.ContainsKey(Address))
+				if (myWorksheet.Names.ContainsKey(Address))
 				{
-					if (_worksheet.Names[Address].IsName)
+					if (myWorksheet.Names[Address].IsName)
 					{
 						return null;
 					}
 					else
 					{
-						base.Address = _worksheet.Names[Address].Address;
+						base.Address = myWorksheet.Names[Address].Address;
 					}
 				}
 				else
 				{
 					base.Address = Address;
 				}
-				_rtc = null;
+				myExcelRichTextCollection = null;
 				return this;
 			}
 		}
@@ -120,7 +120,7 @@ namespace OfficeOpenXml
 				_fromRow = Row;
 				_toCol = Col;
 				_toRow = Row;
-				_rtc = null;
+				myExcelRichTextCollection = null;
 				// avoid address re-calculation
 				//base.Address = GetAddress(_fromRow, _fromCol);
 				_start = null;
@@ -150,7 +150,7 @@ namespace OfficeOpenXml
 				_fromRow = FromRow;
 				_toCol = ToCol;
 				_toRow = ToRow;
-				_rtc = null;
+				myExcelRichTextCollection = null;
 				// avoid address re-calculation
 				//base.Address = GetAddress(_fromRow, _fromCol, _toRow, _toCol);
 				_start = null;

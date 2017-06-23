@@ -35,16 +35,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void AbsShouldReturnCorrectResult()
-		{
-			var expectedValue = 3d;
-			var func = new Abs();
-			var args = FunctionsHelper.CreateArgs(-3d);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(expectedValue, result.Result);
-		}
-
-		[TestMethod]
 		public void AsinShouldReturnCorrectResult()
 		{
 			const double expectedValue = 1.5708;
@@ -321,24 +311,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void RoundShouldReturnCorrectResult()
-		{
-			var func = new Round();
-			var args = FunctionsHelper.CreateArgs(2.3433, 3);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2.343d, result.Result);
-		}
-
-		[TestMethod]
-		public void RoundShouldReturnCorrectResultWhenNbrOfDecimalsIsNegative()
-		{
-			var func = new Round();
-			var args = FunctionsHelper.CreateArgs(9333, -3);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(9000d, result.Result);
-		}
-
-		[TestMethod]
 		public void RandShouldReturnAValueBetween0and1()
 		{
 			var func = new Rand();
@@ -477,15 +449,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void ModShouldReturnCorrectResult()
-		{
-			var func = new Mod();
-			var args = FunctionsHelper.CreateArgs(5, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
 		public void CosShouldReturnCorrectResult()
 		{
 			var func = new Cos();
@@ -606,96 +569,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void SignShouldReturnMinus1IfArgIsNegative()
-		{
-			var func = new Sign();
-			var args = FunctionsHelper.CreateArgs(-2);
-			var result = func.Execute(args, _parsingContext).Result;
-			Assert.AreEqual(-1d, result);
-		}
-
-		[TestMethod]
-		public void SignShouldReturn1IfArgIsPositive()
-		{
-			var func = new Sign();
-			var args = FunctionsHelper.CreateArgs(2);
-			var result = func.Execute(args, _parsingContext).Result;
-			Assert.AreEqual(1d, result);
-		}
-
-		[TestMethod]
-		public void RounddownShouldReturnCorrectResultWithPositiveNumber()
-		{
-			var func = new Rounddown();
-			var args = FunctionsHelper.CreateArgs(9.999, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(9.99, result.Result);
-		}
-
-		[TestMethod]
-		public void RounddownShouldHandleNegativeNumber()
-		{
-			var func = new Rounddown();
-			var args = FunctionsHelper.CreateArgs(-9.999, 2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(-9.99, result.Result);
-		}
-
-		[TestMethod]
-		public void RounddownShouldHandleNegativeNumDigits()
-		{
-			var func = new Rounddown();
-			var args = FunctionsHelper.CreateArgs(999.999, -2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(900d, result.Result);
-		}
-
-		[TestMethod]
-		public void RounddownShouldReturn0IfNegativeNumDigitsIsTooLarge()
-		{
-			var func = new Rounddown();
-			var args = FunctionsHelper.CreateArgs(999.999, -4);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(0d, result.Result);
-		}
-
-		[TestMethod]
-		public void RounddownShouldHandleZeroNumDigits()
-		{
-			var func = new Rounddown();
-			var args = FunctionsHelper.CreateArgs(999.999, 0);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(999d, result.Result);
-		}
-
-		[TestMethod]
-		public void RoundupShouldReturnCorrectResultWithPositiveNumber()
-		{
-			var func = new Roundup();
-			var args = FunctionsHelper.CreateArgs(9.9911, 3);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(9.992, result.Result);
-		}
-
-		[TestMethod]
-		public void RoundupShouldHandleNegativeNumDigits()
-		{
-			var func = new Roundup();
-			var args = FunctionsHelper.CreateArgs(99123, -2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(99200d, result.Result);
-		}
-
-		[TestMethod]
-		public void RoundupShouldHandleZeroNumDigits()
-		{
-			var func = new Roundup();
-			var args = FunctionsHelper.CreateArgs(999.999, 0);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1000d, result.Result);
-		}
-
-		[TestMethod]
 		public void TruncShouldReturnCorrectResult()
 		{
 			var func = new Trunc();
@@ -798,16 +671,6 @@ namespace EPPlusTest.Excel.Functions
 				Assert.AreEqual(w.GetValue(5, 4), 5.5D);
 				Assert.AreEqual(w.GetValue(5, 5), 1.5D);
 			}
-		}
-
-		[TestMethod]
-		public void AbsWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Abs();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
@@ -1021,16 +884,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void ModWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Mod();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
 		public void RandBetweenWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new RandBetween();
@@ -1044,46 +897,6 @@ namespace EPPlusTest.Excel.Functions
 		public void RankWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Rank();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void RoundWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Round();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void RounddownWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Rounddown();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void RoundupWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Roundup();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void SignWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Sign();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);
