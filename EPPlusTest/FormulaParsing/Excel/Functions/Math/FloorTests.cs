@@ -206,5 +206,155 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)resultDIV0.Result).Type);
 			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)resultREF.Result).Type);
 		}
+
+		[TestMethod]
+		public void FloorWithNoInputsReturnsPoundValue()
+		{
+			var function = new Floor();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void FloorWithGeneralSringFirstInputReturnsPoundValue()
+		{
+			var function = new Floor();
+			var result = function.Execute(FunctionsHelper.CreateArgs("string", 2), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void FloorWithNumericStringFirstInputReturnsCorrectValue()
+		{
+			var function = new Floor();
+			var result = function.Execute(FunctionsHelper.CreateArgs("15", 2), this.ParsingContext);
+			Assert.AreEqual(14d, result.Result);
+		}
+
+		[TestMethod]
+		public void FloorWithDateFunctionFirstInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "FLOOR(DATE(2017, 6, 14), 6)";
+				worksheet.Calculate();
+				Assert.AreEqual(42900d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void FloorWithDateAsStringFirstInputReturnsCorrectValue()
+		{
+			var function = new Floor();
+			var result = function.Execute(FunctionsHelper.CreateArgs("5/5/2017", 4), this.ParsingContext);
+			Assert.AreEqual(42860d, result.Result);
+		}
+
+		[TestMethod]
+		public void FloorWithBooleanFirstInputReturnsCorrectValue()
+		{
+			var function = new Floor();
+			var booleanTrue = function.Execute(FunctionsHelper.CreateArgs(true, 5), this.ParsingContext);
+			var booleanFalse = function.Execute(FunctionsHelper.CreateArgs(false, 3), this.ParsingContext);
+			Assert.AreEqual(0d, booleanTrue.Result);
+			Assert.AreEqual(0d, booleanFalse.Result);
+		}
+
+		[TestMethod]
+		public void FloorWithCellReferenceFirstInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 16;
+				worksheet.Cells["B2"].Formula = "FLOOR(B1, 7)";
+				worksheet.Calculate();
+				Assert.AreEqual(14d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void FloorWithGeneralStringSecondInputReturnsPoundValue()
+		{
+			var function = new Floor();
+			var result = function.Execute(FunctionsHelper.CreateArgs(15, "string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void FloorWithNumericStringSecondInputReturnsCorrectValue()
+		{
+			var function = new Floor();
+			var result = function.Execute(FunctionsHelper.CreateArgs(15, "7"), this.ParsingContext);
+			Assert.AreEqual(14d, result.Result);
+		}
+
+		[TestMethod]
+		public void FloorWithDateFunctionSecondInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "FLOOR(DATE(2017, 6, 14), 6)";
+				worksheet.Calculate();
+				Assert.AreEqual(42900d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void FloorWithDateAsStringSecondInputReturnsCorrectValue()
+		{
+			var function = new Floor();
+			var result = function.Execute(FunctionsHelper.CreateArgs(15, "5/5/2017"), this.ParsingContext);
+			Assert.AreEqual(0d, result.Result);
+		}
+
+		[TestMethod]
+		public void FloorWithBooleanSecondInputsReturnsCorrectValue()
+		{
+			var function = new Floor();
+			var booleanTrue = function.Execute(FunctionsHelper.CreateArgs(5, true), this.ParsingContext);
+			var booleanFalse = function.Execute(FunctionsHelper.CreateArgs(15, false), this.ParsingContext);
+			Assert.AreEqual(5d, booleanTrue.Result);
+			Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)booleanFalse.Result).Type);
+		}
+
+		[TestMethod]
+		public void FloorWithCellReferenceSecondInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Formula = "FLOOR(67, B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(64d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void FloorWithNoSecondInputReturnsDivZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "FLOOR(15, )";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void FloorWithNoFirstInputReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "FLOOR(, 6)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
 	}
 }

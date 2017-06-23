@@ -804,16 +804,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void FloorWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Floor();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
 		public void RandBetweenWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new RandBetween();

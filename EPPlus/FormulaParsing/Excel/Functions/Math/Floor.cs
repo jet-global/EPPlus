@@ -23,35 +23,56 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class contains the formula for the FLOOR function in Excel.
+	/// </summary>
 	public class Floor : ExcelFunction
 	{
+		/// <summary>
+		/// Takes the first user specified argument and rounds it down to the nearest multiple of the second argument.
+		/// </summary>
+		/// <param name="arguments">The user specified arguments.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The first arugment rounded down to the nearest multiple of the second argument.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var number = ArgToDecimal(arguments, 0);
-			var significance = ArgToDecimal(arguments, 1);
+			var numberCandidate = arguments.ElementAt(0).Value;
+			var significanceCandidate = arguments.ElementAt(1).Value;
+
+			if (numberCandidate == null)
+				return CreateResult(0d, DataType.Decimal);
+			if (significanceCandidate == null)
+				return new CompileResult(eErrorType.Div0);
+
+			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
+				return new CompileResult(eErrorType.Value);
+			if (!ConvertUtil.TryParseDateObjectToOADate(significanceCandidate, out double significance))
+				return new CompileResult(eErrorType.Value);
+
 			if ((number > 0d && significance < 0))
 				return new CompileResult(eErrorType.Num);
 			if (significance == 0.0)
 				return new CompileResult(eErrorType.Div0);
-
+		
 			if (number == 0.0)
-				return base.CreateResult(0.0, DataType.Decimal);
+				return this.CreateResult(0.0, DataType.Decimal);
 			double divisionResult = number / significance;
 			int multiple = (int)divisionResult;
 			bool exactChange = divisionResult == multiple;
 			if (exactChange)
-				return base.CreateResult(number, DataType.Decimal);
+				return this.CreateResult(number, DataType.Decimal);
 			else if (significance > 0 && number < 0)
-				return base.CreateResult((multiple - 1) * significance, DataType.Decimal);
+				return this.CreateResult((multiple - 1) * significance, DataType.Decimal);
 			else
-				return base.CreateResult(multiple * significance, DataType.Decimal);
-
+				return this.CreateResult(multiple * significance, DataType.Decimal);
 		}
 	}
 }
