@@ -48,9 +48,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The first argument rounded down by the specifications of the other two optional arguments.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			double number = 0;
-			double significance = 0;
-			double mode = 0;
+			double divisionResult;
+			int multiple;
+			bool exactChange;
+
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 
@@ -58,19 +59,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var significanceCandidate = arguments.ElementAt(1).Value;
 
 			if (numberCandidate == null)
-				return CreateResult(0d, DataType.Decimal);
+				return this.CreateResult(0d, DataType.Decimal);
 
-			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double re))
+			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
 				return new CompileResult(eErrorType.Value);
-			number = re;
 
 			if (significanceCandidate == null)
-				return CreateResult(System.Math.Floor(number), DataType.Decimal);
+				return this.CreateResult(System.Math.Floor(number), DataType.Decimal);
 
-			if (!ConvertUtil.TryParseDateObjectToOADate(significanceCandidate, out double ree))
+			if (!ConvertUtil.TryParseDateObjectToOADate(significanceCandidate, out double significance))
 				return new CompileResult(eErrorType.Value);
-
-			significance = ree;
 
 			if(arguments.Count() > 2)
 			{
@@ -78,55 +76,49 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 				if(modeCandidate == null)
 				{
-					double divisionResult1 = number / significance;
-					int multiple1 = (int)divisionResult1;
-					bool exactChange1 = divisionResult1 == multiple1;
-					if (exactChange1)
+					divisionResult = number / significance;
+					multiple = (int)divisionResult;
+					exactChange = divisionResult == multiple;
+					if (exactChange)
 						return this.CreateResult(number, DataType.Decimal);
 					else if (significance > 0 && number < 0)
-						return this.CreateResult((multiple1 - 1) * significance, DataType.Decimal);
+						return this.CreateResult((multiple - 1) * significance, DataType.Decimal);
 					else
-						return this.CreateResult(multiple1 * significance, DataType.Decimal);
+						return this.CreateResult(multiple * significance, DataType.Decimal);
 					}
 
-				if (!ConvertUtil.TryParseDateObjectToOADate(modeCandidate, out double reee))
+				if (!ConvertUtil.TryParseDateObjectToOADate(modeCandidate, out double mode))
 					return new CompileResult(eErrorType.Value);
-				mode = reee;
 
-				if (mode > 0 || mode < 0)
+				if (mode != 0)
 				{
-					var divisionResult3 = number / significance;
-					var multiple3 = (int)divisionResult3;
-					var exactChange3 = divisionResult3 == multiple3;
-					if (exactChange3)
+					divisionResult = number / significance;
+					multiple = (int)divisionResult;
+					exactChange = divisionResult == multiple;
+					if (exactChange)
 						return this.CreateResult(number, DataType.Decimal);
-
-
 					else
-						return this.CreateResult(multiple3 * significance, DataType.Decimal);
+						return this.CreateResult(multiple * significance, DataType.Decimal);
 				}
 				else
 				{
-					var divisionResult2 = number / significance;
-					var multiple2 = (int)divisionResult2;
-					var exactChange2 = divisionResult2 == multiple2;
-					if (exactChange2)
+					divisionResult = number / significance;
+					multiple = (int)divisionResult;
+					exactChange = divisionResult == multiple;
+					if (exactChange)
 						return this.CreateResult(number, DataType.Decimal);
 					else if (significance > 0 && number < 0)
-						return this.CreateResult((multiple2 - 1) * significance, DataType.Decimal);
+						return this.CreateResult((multiple - 1) * significance, DataType.Decimal);
 					else if (number < 0)
-						return this.CreateResult((multiple2 + 1) * significance, DataType.Decimal);
+						return this.CreateResult((multiple + 1) * significance, DataType.Decimal);
 					else
-						return this.CreateResult(multiple2 * significance, DataType.Decimal);
+						return this.CreateResult(multiple * significance, DataType.Decimal);
 				}
-
-
 			}
-			
 
-			var divisionResult = number / significance;
-			var multiple = (int)divisionResult;
-			var exactChange = divisionResult == multiple;
+			divisionResult = number / significance;
+			multiple = (int)divisionResult;
+			exactChange = divisionResult == multiple;
 			if (exactChange)
 				return this.CreateResult(number, DataType.Decimal);
 			else if (significance > 0 && number < 0)
