@@ -67,9 +67,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				significance = -1 * significance;
 			if (arguments.Count() > 2)
 			{
-				var modeCandidate = arguments.ElementAt(2).Value;
-				if (modeCandidate == null)
-					modeCandidate = 0;
+				var modeCandidate = arguments.ElementAt(2).Value ?? 0;
 				if (!ConvertUtil.TryParseDateObjectToOADate(modeCandidate, out double mode))
 					return new CompileResult(eErrorType.Value);
 				if (mode == 0 || number > 0)
