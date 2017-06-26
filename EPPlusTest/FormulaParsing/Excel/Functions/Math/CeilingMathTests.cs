@@ -42,5 +42,65 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void CeilingMathWithFirstInputOnlyReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "CEILING.MATH(10.5, , )";
+				worksheet.Calculate();
+				Assert.AreEqual(11d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void CeilingMathWithFirstTwoInputsOnlyReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "CEILING.MATH(10.5, 2, )";
+				worksheet.Calculate();
+				Assert.AreEqual(12d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void CeilingMathWithAllThreeInputsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "CEILING.MATH(10.5, 2, 1)";
+				worksheet.Calculate();
+				Assert.AreEqual(12d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void CeilingMathWithSecondAndThirdInputsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "CEILING.MATH(, 2, 2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void CeilingMathWithFirstAndThirdInputsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "CEILING.MATH(10.5, , 3)";
+				worksheet.Calculate();
+				Assert.AreEqual(11d, worksheet.Cells["B1"].Value);
+			}
+		}
 	}
 }
