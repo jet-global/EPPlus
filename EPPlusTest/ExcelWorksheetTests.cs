@@ -3120,8 +3120,7 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
 				worksheet1.InsertRow(10, 10);
-				string workbook, worksheet, address;
-				ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$36", address);
 				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$Z$36", address);
@@ -3395,9 +3394,8 @@ namespace EPPlusTest
 				var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
-				string workbook, worksheet, address;
 				worksheet2.InsertColumn(10, 10);
-				ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$26", address);
 				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$AJ$26", address);
@@ -3695,8 +3693,7 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
 				worksheet1.DeleteRow(10, 10);
-				string worksheet, address;
-				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$16", address);
 				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$Z$16", address);
@@ -3919,7 +3916,7 @@ namespace EPPlusTest
 				chart.To.Row = 12;
 				sheet.DeleteColumn(1, 6);
 				Assert.AreEqual(4, chart.From.Column);
-				Assert.AreEqual(10, chart.To.Column);
+				Assert.AreEqual(6, chart.To.Column);
 			}
 		}
 
@@ -3939,6 +3936,7 @@ namespace EPPlusTest
 				Assert.AreEqual(8, chart.To.Column);
 			}
 		}
+
 		[TestMethod]
 		public void DeleteColumnsUpdatesExcel2016ChartSeries()
 		{
@@ -3951,15 +3949,33 @@ namespace EPPlusTest
 				var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
-				string workbook, worksheet, address;
 				worksheet2.DeleteColumn(10, 10);
-				ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$26", address);
 				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
-				Assert.AreEqual("$A$1:$O$26", address);
+				Assert.AreEqual("$A$1:$P$26", address);
 				address = null;
 				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
-				Assert.AreEqual("$A$1:$O$26", address);
+				Assert.AreEqual("$A$1:$P$26", address);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsUpdatesNamedRanges()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+				var range0 = worksheet2.Names.Add("myNamedRange", new ExcelRangeBase(worksheet1, "$A$1:$Z$26"));
+				var range1 = package.Workbook.Names.Add("workbookNamedRange", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
+
+				worksheet2.DeleteColumn(10, 10);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				Assert.AreEqual("$A$1:$P$26", address);
+				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$1:$P$26", address);
 			}
 		}
 
@@ -4278,9 +4294,8 @@ namespace EPPlusTest
 				var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet1!A1:Z26"));
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
 
-				string workbook, worksheet, address;
 				worksheet1.Name = "Work Sheet One";
-				ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("Work Sheet One", worksheet);
 				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
 				Assert.AreEqual("Work Sheet One", worksheet);
