@@ -105,6 +105,7 @@
     <Compile Include="ExcelPackageTest.cs" />
     <Compile Include="ExcelWorksheetTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AbsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingMathTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\ExpTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\FactDoubleTests.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageATests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\FloorMathTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\IntFunctionTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CoshTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CosTests.cs" />
@@ -196,7 +198,7 @@
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\FunctionCompilerFactoryTests.cs" />
     <Compile Include="FormulaParsing\FormulaParserManagerTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LargeTests.cs" />
-	<Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTestBase.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTestBase.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SqrtPiTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SqrtTests.cs" />
     <Compile Include="Style\Dxf\ExcelDxfStyleTest.cs" />
