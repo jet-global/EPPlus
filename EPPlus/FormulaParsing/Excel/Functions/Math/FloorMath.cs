@@ -24,11 +24,8 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
 
@@ -54,19 +51,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-
 			var numberCandidate = arguments.ElementAt(0).Value;
 			var significanceCandidate = arguments.ElementAt(1).Value;
-
 			if (numberCandidate == null)
 				return this.CreateResult(0d, DataType.Decimal);
-
 			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
 				return new CompileResult(eErrorType.Value);
-
 			if (significanceCandidate == null)
 				return this.CreateResult(System.Math.Floor(number), DataType.Decimal);
-
 			if (!ConvertUtil.TryParseDateObjectToOADate(significanceCandidate, out double significance))
 				return new CompileResult(eErrorType.Value);
 
@@ -85,7 +77,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						return this.CreateResult((multiple - 1) * significance, DataType.Decimal);
 					else
 						return this.CreateResult(multiple * significance, DataType.Decimal);
-					}
+				}
 
 				if (!ConvertUtil.TryParseDateObjectToOADate(modeCandidate, out double mode))
 					return new CompileResult(eErrorType.Value);

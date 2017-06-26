@@ -39,7 +39,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <summary>
 		/// Takes the first user argument and rounds it up based on the optional second and third arguments.
 		/// </summary>
-		/// <param name="arguments">The user specified arguments.</param>
+		/// <param name="arguments">The first argument is the number to be rounded up, the second is the significance value to round the
+		/// number to, and the third argument is the mode that determines if the number is rounded closer to zero or not (for negative 
+		/// numbers only).</param>
 		/// <param name="context">Not used, but needed to override the method.</param>
 		/// <returns>The first argument rounded up based on the specifications of the second and third 
 		/// optional user arguments.</returns>
@@ -58,7 +60,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return this.CreateResult(0d, DataType.Decimal);
 			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
 				return new CompileResult(eErrorType.Value);
-
 			if (significanceCandidate == null)
 				return this.CreateResult(System.Math.Ceiling(number), DataType.Decimal);
 			if (!ConvertUtil.TryParseDateObjectToOADate(significanceCandidate, out double significance))
@@ -70,21 +71,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				var modeCandidate = arguments.ElementAt(2).Value;
 				if (modeCandidate == null)
-				{
-					divisionResult = number / significance;
-					multiple = (int)divisionResult;
-					exactChange = divisionResult == multiple;
-					if (exactChange)
-						return this.CreateResult(number, DataType.Decimal);
-					else if (significance > 0 && number < 0)
-						return this.CreateResult((multiple + 1) * significance, DataType.Decimal);
-					else
-						return this.CreateResult((multiple + 1) * significance, DataType.Decimal);
-				}
-
+					modeCandidate = 0;
 				if (!ConvertUtil.TryParseDateObjectToOADate(modeCandidate, out double mode))
 					return new CompileResult(eErrorType.Value);
-
 				if (mode == 0 || number > 0)
 				{
 					if (significance < 1 && significance > 0)
@@ -123,24 +112,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				else
 					return this.CreateResult(multiple * significance, DataType.Decimal);
 			}
-			else if (significance < 1 && significance > 0)
-			{
-				var floor = System.Math.Floor(number);
-				var rest = number - floor;
-				var nSign = (int)(rest / significance) + 1;
-				return this.CreateResult(floor + (nSign * significance), DataType.Decimal);
-			}
+
 			else if (significance == 1)
 				return this.CreateResult(System.Math.Ceiling(number), DataType.Decimal);
 			else if (significance == 0 || number == 0)
 				return this.CreateResult(0d, DataType.Decimal);
 			else if (number % significance == 0)
 				return this.CreateResult(number, DataType.Decimal);
-			else if (number < 0 && significance > 0)
-			{
-				var modNum = -1 * (number % significance);
-				return this.CreateResult((number + modNum), DataType.Decimal);
-			}
 			else
 			{
 				var result = number - (number % significance) + significance;
