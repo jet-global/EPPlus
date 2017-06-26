@@ -30,6 +30,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -47,7 +48,129 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// optional user arguments.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			throw new NotImplementedException();
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
+
+			var numberCandidate = arguments.ElementAt(0).Value;
+			var significanceCandidate = arguments.ElementAt(1).Value;
+
+			if (numberCandidate == null)
+				return CreateResult(0d, DataType.Decimal);
+
+			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
+				return new CompileResult(eErrorType.Value);
+
+
+			if (significanceCandidate == null)
+				return CreateResult(System.Math.Ceiling(number), DataType.Decimal);
+
+			if (!ConvertUtil.TryParseDateObjectToOADate(significanceCandidate, out double significance))
+				return new CompileResult(eErrorType.Value);
+
+			if (arguments.Count() > 2)
+			{
+				var modeCandidate = arguments.ElementAt(2).Value;
+
+				if (modeCandidate == null)
+				{
+					double divisionResult1 = number / significance;
+					int multiple1 = (int)divisionResult1;
+					bool exactChange1 = divisionResult1 == multiple1;
+					if (exactChange1)
+						return this.CreateResult(number, DataType.Decimal);
+					else if (significance > 0 && number < 0)
+						return this.CreateResult((multiple1 + 1) * significance, DataType.Decimal);
+					else
+						return this.CreateResult((multiple1 + 1) * significance, DataType.Decimal);
+				}
+
+				if (!ConvertUtil.TryParseDateObjectToOADate(modeCandidate, out double mode))
+					return new CompileResult(eErrorType.Value);
+
+				if (number > 0)
+				{
+					if (significance < 0)
+						significance = significance * -1;
+
+					double divisionResult1 = number / significance;
+					int multiple1 = (int)divisionResult1;
+					bool exactChange1 = divisionResult1 == multiple1;
+					if (exactChange1)
+						return this.CreateResult(number, DataType.Decimal);
+					else if (significance > 0 && number < 0)
+						return this.CreateResult((multiple1 + 1) * significance, DataType.Decimal);
+					else
+						return this.CreateResult((multiple1 + 1) * significance, DataType.Decimal);
+				}
+				else if (mode != 0)
+				{
+					var divisionResult2 = number / significance;
+					var multiple2 = (int)divisionResult2;
+					var exactChange2 = divisionResult2 == multiple2;
+					if (exactChange2)
+						return this.CreateResult(number, DataType.Decimal);
+					else if (significance > 0 && number < 0)
+						return this.CreateResult((multiple2 - 1) * significance, DataType.Decimal);
+					else if (number < 0)
+						return this.CreateResult((multiple2 + 1) * significance, DataType.Decimal);
+					else
+						return this.CreateResult(multiple2 * significance, DataType.Decimal);
+				}
+				else
+				{
+					if (significance < 1 && significance > 0)
+					{
+						var floor = System.Math.Floor(number);
+						var rest = number - floor;
+						var nSign = (int)(rest / significance) + 1;
+						return this.CreateResult(floor + (nSign * significance), DataType.Decimal);
+					}
+					else if (significance == 1)
+						return this.CreateResult(System.Math.Ceiling(number), DataType.Decimal);
+					else if (significance == 0 || number == 0)
+						return this.CreateResult(0d, DataType.Decimal);
+					else if (number % significance == 0)
+						return this.CreateResult(number, DataType.Decimal);
+					else if (number < 0 && significance > 0)
+					{
+						var modNum = -1 * (number % significance);
+						var result = number + modNum;
+						return this.CreateResult(result, DataType.Decimal);
+					}
+					else
+					{
+						var result = number - (number % significance) + significance;
+						return this.CreateResult(result, DataType.Decimal);
+					}
+				}
+			}
+
+			if (number > 0 && significance < 0)
+				return new CompileResult(eErrorType.Num);
+			else if (significance < 1 && significance > 0)
+			{
+				var floor = System.Math.Floor(number);
+				var rest = number - floor;
+				var nSign = (int)(rest / significance) + 1;
+				return this.CreateResult(floor + (nSign * significance), DataType.Decimal);
+			}
+			else if (significance == 1)
+				return this.CreateResult(System.Math.Ceiling(number), DataType.Decimal);
+			else if (significance == 0 || number == 0)
+				return this.CreateResult(0d, DataType.Decimal);
+			else if (number % significance == 0)
+				return this.CreateResult(number, DataType.Decimal);
+			else if (number < 0 && significance > 0)
+			{
+				var modNum = -1 * (number % significance);
+				var result = number + modNum;
+				return this.CreateResult(result, DataType.Decimal);
+			}
+			else
+			{
+				var result = number - (number % significance) + significance;
+				return this.CreateResult(result, DataType.Decimal);
+			}
 		}
 	}
 }

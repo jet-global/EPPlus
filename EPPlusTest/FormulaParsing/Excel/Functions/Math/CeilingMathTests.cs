@@ -285,7 +285,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Formula = "CEILING.MATH(10.6, (2/3))";
 				worksheet.Calculate();
-				Assert.AreEqual(10.66667d, (double)worksheet.Cells["B1"].Value, 0.000001);
+				Assert.AreEqual(10.6666666667d, (double)worksheet.Cells["B1"].Value, 0.000001);
 			}
 		}
 
