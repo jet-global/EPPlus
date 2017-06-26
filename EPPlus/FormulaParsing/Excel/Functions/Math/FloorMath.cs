@@ -61,11 +61,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return this.CreateResult(System.Math.Floor(number), DataType.Decimal);
 			if (!ConvertUtil.TryParseDateObjectToOADate(significanceCandidate, out double significance))
 				return new CompileResult(eErrorType.Value);
-
 			if(arguments.Count() > 2)
 			{
 				var modeCandidate = arguments.ElementAt(2).Value;
-
 				if(modeCandidate == null)
 				{
 					divisionResult = number / significance;
@@ -78,10 +76,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					else
 						return this.CreateResult(multiple * significance, DataType.Decimal);
 				}
-
 				if (!ConvertUtil.TryParseDateObjectToOADate(modeCandidate, out double mode))
 					return new CompileResult(eErrorType.Value);
-
 				if (mode != 0)
 				{
 					divisionResult = number / significance;
@@ -107,7 +103,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						return this.CreateResult(multiple * significance, DataType.Decimal);
 				}
 			}
-
 			divisionResult = number / significance;
 			multiple = (int)divisionResult;
 			exactChange = divisionResult == multiple;
