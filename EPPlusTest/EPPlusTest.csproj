@@ -173,6 +173,9 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\FloorTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\QuotientTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\RankAvgTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\RankEqTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\RankTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RoundDownTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RoundTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RoundupTests.cs" />

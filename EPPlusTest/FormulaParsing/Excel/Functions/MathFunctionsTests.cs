@@ -814,16 +814,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void RankWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Rank();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
 		public void SinWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Sin();
