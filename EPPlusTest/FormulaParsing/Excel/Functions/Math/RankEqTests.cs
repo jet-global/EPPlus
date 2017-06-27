@@ -390,5 +390,22 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
+
+		[TestMethod]
+		public void RankEqWithDuplicateValuesReturnsCorrectResult()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 5;
+				worksheet.Cells["B4"].Value = 7;
+				worksheet.Cells["B5"].Formula = "RANK.EQ(5, B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B5"].Value);
+
+			}
+		}
 	}
 }
