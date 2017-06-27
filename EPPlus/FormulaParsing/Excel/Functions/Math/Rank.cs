@@ -21,11 +21,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			_isAvg = isAvg;
 		}
 		/// <summary>
-		/// 
+		/// Takse the user specified arguments and returns the rank of the first argument; the position of the first argument
+		/// in relation to the other numbers in a list. 
 		/// </summary>
-		/// <param name="arguments"></param>
-		/// <param name="context"></param>
-		/// <returns></returns>
+		/// <param name="arguments">The user specified arguments, the first being the number whos rank is to be found and
+		/// the second is the list of numbers as a cell reference.</param>
+		/// <param name="context">Not used, but needed to override the method.</param>
+		/// <returns>The rank of the given number.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
@@ -34,54 +36,55 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(eErrorType.NA);
 
 			var number = ArgToDecimal(arguments, 0);
-			var refer = arguments.ElementAt(1);
-			bool asc = false;
+			var reference = arguments.ElementAt(1);
+			bool ascendingOrder = false;
+
 			if (arguments.Count() > 2)
 			{
 				if (arguments.ElementAt(2).Value is string)
 					return new CompileResult(eErrorType.Value);
-				asc = base.ArgToBool(arguments, 2);
+				ascendingOrder = base.ArgToBool(arguments, 2);
 			}
-			var l = new List<double>();
 
-			foreach (var c in refer.ValueAsRangeInfo)
+			var numberList = new List<double>();
+			foreach (var cell in reference.ValueAsRangeInfo)
 			{
-				var v = Utils.ConvertUtil.GetValueDouble(c.Value, false, true);
-				if (c.Value is bool)
+				if (cell.Value is bool)
 					continue;
-				if (!double.IsNaN(v))
-					l.Add(v);
+				var valAsDouble = Utils.ConvertUtil.GetValueDouble(cell.Value, false, true);
+				if (!double.IsNaN(valAsDouble))
+					numberList.Add(valAsDouble);
 			}
-			l.Sort();
-			double ix;
-			if (asc)
+			numberList.Sort();
+			double rankResult;
+			if (ascendingOrder)
 			{
-				ix = l.IndexOf(number) + 1;
+				rankResult = numberList.IndexOf(number) + 1;
 				if (_isAvg)
 				{
-					int st = Convert.ToInt32(ix);
-					while (l.Count > st && l[st] == number) st++;
-					if (st > ix) ix = ix + ((st - ix) / 2D);
+					int st = Convert.ToInt32(rankResult);
+					while (numberList.Count > st && numberList[st] == number) st++;
+					if (st > rankResult) rankResult = rankResult + ((st - rankResult) / 2D);
 				}
 			}
 			else
 			{
-				ix = l.LastIndexOf(number);
+				rankResult = numberList.LastIndexOf(number);
 				if (_isAvg)
 				{
-					int st = Convert.ToInt32(ix) - 1;
-					while (0 <= st && l[st] == number) st--;
-					if (st + 1 < ix) ix = ix - ((ix - st - 1) / 2D);
+					int intRank = Convert.ToInt32(rankResult) - 1;
+					while (0 <= intRank && numberList[intRank] == number) intRank--;
+					if (intRank + 1 < rankResult) rankResult = rankResult - ((rankResult - intRank - 1) / 2D);
 				}
-				ix = l.Count - ix;
+				rankResult = numberList.Count - rankResult;
 			}
-			if (ix <= 0 || ix > l.Count)
+			if (rankResult <= 0 || rankResult > numberList.Count)
 			{
 				return new CompileResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
 			}
 			else
 			{
-				return CreateResult(ix, DataType.Decimal);
+				return CreateResult(rankResult, DataType.Decimal);
 			}
 		}
 	}
