@@ -16,11 +16,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
+			if (arguments.ElementAt(0).ValueFirst == null)
+				return new CompileResult(eErrorType.NA);
+
 			var number = ArgToDecimal(arguments, 0);
 			var refer = arguments.ElementAt(1);
 			bool asc = false;
 			if (arguments.Count() > 2)
 			{
+				if (arguments.ElementAt(2).Value is string)
+					return new CompileResult(eErrorType.Value);
 				asc = base.ArgToBool(arguments, 2);
 			}
 			var l = new List<double>();
@@ -28,10 +33,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			foreach (var c in refer.ValueAsRangeInfo)
 			{
 				var v = Utils.ConvertUtil.GetValueDouble(c.Value, false, true);
+				if (c.Value is bool)
+					continue;
 				if (!double.IsNaN(v))
-				{
 					l.Add(v);
-				}
 			}
 			l.Sort();
 			double ix;
