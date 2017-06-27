@@ -57,15 +57,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
 			var rangeArgument = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
-			var criteriaArgument = arguments.ElementAt(1).Value.ToString();
+			//var criteriaArgument = (arguments.ElementAt(1).Value.ToString()).ToUpper();
+			string criteriaString = null;
+			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange && criteriaRange.IsMulti)
+				criteriaString = null;
+			else
+				criteriaString = (GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString()).ToUpper();
+
 			if (arguments.Count() > 2)
 			{
 				var averageRangeArgument = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
-				return calculateAverageUsingAverageRange(rangeArgument, criteriaArgument, averageRangeArgument);
+				return calculateAverageUsingAverageRange(rangeArgument, criteriaString, averageRangeArgument);
 			}
 			else
 			{
-				return calculateAverageUsingRange(rangeArgument, criteriaArgument);
+				return calculateAverageUsingRange(rangeArgument, criteriaString);
 			}
 		}
 
@@ -77,14 +83,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				if (comparisonCriteria != null && objectMatchesCriteria(GetFirstArgument(cell.Value), comparisonCriteria))
 				{
-					var or = cell.Row - cellsToCompare.Address._fromRow;
-					var oc = cell.Column - cellsToCompare.Address._fromCol;
+					var normalizedRow = cell.Row - cellsToCompare.Address._fromRow;
+					var normalizedColumn = cell.Column - cellsToCompare.Address._fromCol;
 					var avgRangeFromRow = potentialCellsToAverage.Address._fromRow;
 					var avgRangeFromCol = potentialCellsToAverage.Address._fromCol;
-					if (potentialCellsToAverage.Address._fromRow + or <= potentialCellsToAverage.Address._toRow &&
-						potentialCellsToAverage.Address._fromCol + oc <= potentialCellsToAverage.Address._toCol)
+					if (potentialCellsToAverage.Address._fromRow + normalizedRow <= potentialCellsToAverage.Address._toRow &&
+						potentialCellsToAverage.Address._fromCol + normalizedColumn <= potentialCellsToAverage.Address._toCol)
 					{
-						var v = potentialCellsToAverage.GetOffset(or, oc);
+						var v = potentialCellsToAverage.GetOffset(normalizedRow, normalizedColumn);
+						if (v is ExcelErrorValue cellError)
+							return new CompileResult(cellError.Type);
+
+						if (v is string || v is bool || v == null)
+							continue;
 						numberOfValidValues++;
 						sumOfValidValues += ConvertUtil.GetValueDouble(v, true);
 					}
@@ -120,7 +131,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private bool IsNumericForAverageIf(object value)
 		{
 			// AverageIf does not consider booleans as valid numbers, whereas the normal IsNumeric method does.
-			// Ensure that any boolean values that would be passed to this.IsNumeric() are caught instead.
+			// Ensure that any boolean values that would be passed to IsNumeric() are caught instead.
 			if (value is bool)
 				return false;
 			else
@@ -131,42 +142,58 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			// given are the cell's value and the criteria parameter as a string.
 
+			//if (criteria == null) possibly can delete this if condition
+			//	return false;
 			if (criteria.Equals(string.Empty))
 				return (objectToCompare == null || objectToCompare.Equals(string.Empty));
 
 			string operationFromCriteria = null;
-			if (Regex.IsMatch(criteria, @"^[^a-zA-Z0-9]{2}"))
+			if (Regex.IsMatch(criteria, @"^(<>|>=|<=){1}"))
 				operationFromCriteria = criteria.Substring(0, 2);
-			else if (Regex.IsMatch(criteria, @"^[^a-zA-Z0-9]{1}"))
+			else if (Regex.IsMatch(criteria, @"^(=|<|>){1}"))
 				operationFromCriteria = criteria.Substring(0, 1);
 			else
-				return compareAsValue(objectToCompare, criteria);
+				return isMatch(objectToCompare, criteria);
+
+			//if (Regex.IsMatch(criteria, @"^[^a-zA-Z0-9\+\-\*\/\^\&]{2}"))
+			//	operationFromCriteria = criteria.Substring(0, 2);
+			//else if (Regex.IsMatch(criteria, @"^[^a-zA-Z0-9\+\-\*\/\^\&]{1}"))
+			//	operationFromCriteria = criteria.Substring(0, 1);
+			//else
+			//	return isMatch(objectToCompare, criteria);
 
 			// Criteria is an expression.
 			var criteriaString = criteria.Replace(operationFromCriteria, string.Empty);
-			IOperator operation;
-			if (criteriaString.Equals(string.Empty)) // The condition being checked is incorrect and requires tweaking.
+			if (criteriaString.Equals(string.Empty))
 				return (objectToCompare == null);
-
-			//else if (OperatorsDict.Instance.TryGetValue(operationFromCriteria, out operation) && !operationFromCriteria.Equals("-"))
-			else if (OperatorsDict.Instance.TryGetValue(operationFromCriteria, out operation))
+			//else if (objectToCompare == null)
+			//	return false;
+			IOperator operation;
+			if (OperatorsDict.Instance.TryGetValue(operationFromCriteria, out operation))
 			{
 				// left check - objectToCompare
 				// constant check - criteriaString
 				// operator - operation.Operator
+				if (objectToCompare == null && !(operation.Operator == OperatorType.Equals || operation.Operator == OperatorType.NotEqualTo))
+					return false;
 				switch (operation.Operator)
 				{
 					case OperatorType.Equals:
-						return ((objectToCompare.ToString()).Equals(criteriaString));
+						if (objectToCompare.ToString().Equals(string.Empty) && criteriaString.Equals(string.Empty))
+							return false;
+						else
+							return this.isMatch(objectToCompare, criteriaString);
 					case OperatorType.NotEqualTo:
-						return (!(objectToCompare).Equals(criteriaString));
+						// PROBLEM: This is not returning true when comparing a numeric string with a number of the same value.
+						// i.e. does not work correctly for different objects.
+						return (!(criteriaString.Equals(objectToCompare)));
 					case OperatorType.GreaterThan:
 					case OperatorType.GreaterThanOrEqual:
 					case OperatorType.LessThan:
 					case OperatorType.LessThanOrEqual:
 						return this.compareAsInequalityExpression(objectToCompare, criteriaString, operation.Operator);
 					default:
-						return false;
+						return this.isMatch(objectToCompare, criteriaString);
 				}
 			}
 
@@ -175,23 +202,43 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 		// criteria is either a number, boolean, or string. The string can contain a date/time, or 
 		// text string that may require wildcard Regex.
-		private bool compareAsValue(object objectToCompare, string criteria)
+		private bool isMatch(object objectToCompare, string criteria)
 		{
 			string objectAsString = null;
+			var handleAsBool = (criteria.Equals(Boolean.TrueString.ToUpper()) || criteria.Equals(Boolean.FalseString.ToUpper()));
+			var handleAsDate = ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaAsOADate);
+			if (handleAsBool)
+			{
+				if (objectToCompare is bool objectBool)
+				{
+					return (criteria.Equals(objectBool.ToString().ToUpper()));
+				}
+				else
+					return false;
+			}
+			if (handleAsDate)
+			{
+				criteria = criteriaAsOADate.ToString();
+			}
 			if (objectToCompare is bool objectAsBool)
-				objectAsString = (objectAsBool.ToString()).ToUpper();
+				objectAsString = objectAsBool.ToString();
+			else if (ConvertUtil.TryParseDateObjectToOADate(objectToCompare, out double objectAsOADate))
+				objectAsString = objectAsOADate.ToString();
 			else if (objectToCompare is System.DateTime objectAsDate)
 				objectAsString = (objectAsDate.ToOADate()).ToString();
 			else
 				objectAsString = objectToCompare.ToString();
-			// LEFT OFF HERE
-			// need to check if the wildcard characters have been escaped "~?" or "~*"
+
+			objectAsString = objectAsString.ToUpper();
+
 			if (criteria.Contains("*") || criteria.Contains("?"))
 			{
 				var regexPattern = Regex.Escape(criteria);
 				regexPattern = string.Format("^{0}$", regexPattern);
 				regexPattern = regexPattern.Replace(@"\*", ".*");
+				regexPattern = regexPattern.Replace("~.*", "\\*");
 				regexPattern = regexPattern.Replace(@"\?", ".");
+				regexPattern = regexPattern.Replace("~.", "\\?");
 				if (Regex.IsMatch(objectAsString, regexPattern))
 				{
 					return true;
@@ -202,10 +249,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 		private bool compareAsInequalityExpression(object objectToCompare, string criteria, OperatorType comparisonOperator)
 		{
+			var handleAsBool = (criteria.Equals(Boolean.TrueString.ToUpper()) || criteria.Equals(Boolean.FalseString.ToUpper()));
 			if (ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaNumber))
 			{
-				if (ConvertUtil.TryParseDateObjectToOADate(objectToCompare, out double numberToCompare))
+				if (IsNumericForAverageIf(objectToCompare))
 				{
+					var numberToCompare = ConvertUtil.GetValueDouble(objectToCompare);
 					switch (comparisonOperator)
 					{
 						case OperatorType.LessThan:
@@ -223,9 +272,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			else
 			{
-				if (IsNumeric(objectToCompare))
+				//if (IsNumericForAverageIf(objectToCompare))
+				//	return false;
+				var comparisonResult = (objectToCompare.ToString().ToUpper()).CompareTo(criteria);
+				if (handleAsBool)
+				{
+					if (objectToCompare is bool objectBool)
+						comparisonResult = (objectToCompare.ToString().ToUpper()).CompareTo(criteria);
+					else
+						return false;
+				}
+				else if (IsNumeric(objectToCompare))
 					return false;
-				var comparisonResult = (objectToCompare.ToString()).CompareTo(criteria);
+				
 				switch (comparisonOperator)
 				{
 					case OperatorType.LessThan:

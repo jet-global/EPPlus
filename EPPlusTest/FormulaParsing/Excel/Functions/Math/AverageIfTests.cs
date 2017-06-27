@@ -142,9 +142,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void DeleteThisLater()
 		{
-			string testString1 = "a";
-			string testString2 = "aa";
-			string testString3 = "b";
+			string testString1 = "1";
+			string testString2 = "2";
+			string testString3 = "3";
 			Assert.AreEqual(-1, testString1.CompareTo(testString2));
 			Assert.AreEqual(1, testString3.CompareTo(testString2));
 		}
@@ -165,9 +165,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["J2"].Value = 3.5;
 				worksheet.Cells["K2"].Value = 6;
 				worksheet.Cells["L2"].Value = 1;
-				worksheet.Cells["M2"].Value = 5;
+				worksheet.Cells["M2"].Value = "5";
 				worksheet.Cells["N2"].Value = true;
-				worksheet.Cells["O2"].Value = true;
+				worksheet.Cells["O2"].Value = "True";
 				worksheet.Cells["P2"].Value = false;
 				worksheet.Cells["Q2"].Value = (new System.DateTime(2017, 6, 22)).ToOADate();
 				worksheet.Cells["R2"].Value = (new System.DateTime(2017, 6, 23)).ToOADate();
@@ -207,24 +207,30 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["H11"].Value = 3;
 
 				worksheet.Cells["B2"].Formula = "AVERAGEIF(C2:W2,5,C3:W3)";
-				worksheet.Cells["B3"].Formula = "AVERAGEIF(C2:W2,3.5,C3:W3)";
-				worksheet.Cells["B4"].Formula = "AVERAGEIF(C2:W2,TRUE,C3:W3)";
-				worksheet.Cells["B5"].Formula = "AVERAGEIF(C2:W2,true,C3:W3)";
-				worksheet.Cells["B6"].Formula = "AVERAGEIF(C2:W2,\"6/23/2017\",C3:W3)";
-				worksheet.Cells["B7"].Formula = "AVERAGEIF(C2:W2,\"6:00 PM\",C3:W3)";
-				worksheet.Cells["B8"].Formula = "AVERAGEIF(C2:W2,\"T*sday\",C3:W3)";
-				worksheet.Cells["B9"].Formula = "AVERAGEIF(C2:W2,\">=1\",C3:W3)";
-				worksheet.Cells["B10"].Formula = "AVERAGEIF(C2:W2,\">6/22/2017\",C3:W3)";
-				worksheet.Cells["B11"].Formula = "AVERAGEIF(C11:E11,1,F11:H11)";
+				worksheet.Cells["B3"].Formula = "AVERAGEIF(C2:W2,\"5\",C3:W3)";
+				worksheet.Cells["B4"].Formula = "AVERAGEIF(C2:W2,\"=5\",C3:W3)";
+				worksheet.Cells["B5"].Formula = "AVERAGEIF(C2:W2,3.5,C3:W3)";
+				worksheet.Cells["B6"].Formula = "AVERAGEIF(C2:W2,TRUE,C3:W3)";
+				worksheet.Cells["B7"].Formula = "AVERAGEIF(C2:W2,\"TRUE\",C3:W3)";
+				worksheet.Cells["B8"].Formula = "AVERAGEIF(C2:W2,\"6/23/2017\",C3:W3)";
+				worksheet.Cells["B9"].Formula = "AVERAGEIF(C2:W2,\"6:00 PM\",C3:W3)";
+				worksheet.Cells["B10"].Formula = "AVERAGEIF(C2:W2,\"T*sday\",C3:W3)";
+				worksheet.Cells["B11"].Formula = "AVERAGEIF(C2:W2,\">=1\",C3:W3)";
+				worksheet.Cells["B12"].Formula = "AVERAGEIF(C2:W2,\">6/22/2017\",C3:W3)";
+				worksheet.Cells["B13"].Formula = "AVERAGEIF(C11:E11,1,F11:H11)";
 				worksheet.Calculate();
 				Assert.AreEqual(8.5, worksheet.Cells["B2"].Value);
-				Assert.AreEqual(8d, worksheet.Cells["B3"].Value);
-				Assert.AreEqual(12.5, worksheet.Cells["B4"].Value);
-				Assert.AreEqual(16d, worksheet.Cells["B5"].Value);
-				Assert.AreEqual(21d, worksheet.Cells["B6"].Value);
-				Assert.AreEqual(4d, worksheet.Cells["B7"].Value);
-				Assert.AreEqual(4d, worksheet.Cells["B8"].Value);
-				Assert.AreEqual(16.5, worksheet.Cells["B9"].Value);
+				Assert.AreEqual(8.5, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(8.5, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(8d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(12d, worksheet.Cells["B6"].Value);
+				Assert.AreEqual(12d, worksheet.Cells["B7"].Value);
+				Assert.AreEqual(16d, worksheet.Cells["B8"].Value);
+				Assert.AreEqual(21d, worksheet.Cells["B9"].Value);
+				Assert.AreEqual(4d, worksheet.Cells["B10"].Value);
+				Assert.AreEqual(11d, worksheet.Cells["B11"].Value);
+				Assert.AreEqual(16.5, worksheet.Cells["B12"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B13"].Value);
 			}
 		}
 
@@ -296,23 +302,23 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				//worksheet.Cells["B2"].Formula = "AVERAGEIF(C2:D2,E2)";
-				//worksheet.Cells["C2"].Value = 3;
-				//worksheet.Cells["D2"].Value = 1;
-				//worksheet.Cells["E2"].Value = ">0";
+				worksheet.Cells["B2"].Formula = "AVERAGEIF(C2:D2,E2)";
+				worksheet.Cells["C2"].Value = 3;
+				worksheet.Cells["D2"].Value = 1;
+				worksheet.Cells["E2"].Value = ">0";
 				worksheet.Cells["B3"].Formula = "AVERAGEIF(C3:D3,G3,E3:F3)";
 				worksheet.Cells["C3"].Value = "aa";
 				worksheet.Cells["D3"].Value = "ab";
 				worksheet.Cells["E3"].Value = 3;
 				worksheet.Cells["F3"].Value = 1;
 				worksheet.Cells["G3"].Value = "*b";
-				//worksheet.Cells["B4"].Formula = "AVERAGEIF(C2:D2,C2:D2)";
-				//worksheet.Cells["B5"].Formula = "AVERAGEIF(C3:D3,C3:D3,C2:D2)";
+				worksheet.Cells["B4"].Formula = "AVERAGEIF(C2:D2,C2:D2)";
+				worksheet.Cells["B5"].Formula = "AVERAGEIF(C3:D3,C3:D3,C2:D2)";
 				worksheet.Calculate();
-				//Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
 				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
-				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
 			}
 		}
 
@@ -353,8 +359,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
 			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
 			var args = FunctionsHelper.CreateArgs(range1, "<a", range2);
+			var args2 = FunctionsHelper.CreateArgs(range1, string.Empty, range2);
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(3d, result.Result);
+			result = func.Execute(args2, _parsingContext);
+			Assert.AreEqual(2d, result.Result);
 		}
 
 		[TestMethod]
@@ -439,6 +448,32 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void AverageIfWithTextComparisonsWithEscapedWildcardCharacterWorksAsExpected()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["C2"].Value = "Mon?ay";
+				worksheet.Cells["D2"].Value = 1;
+				worksheet.Cells["C3"].Value = "Monday";
+				worksheet.Cells["D3"].Value = 3;
+				worksheet.Cells["C4"].Value = "Mon*ay";
+				worksheet.Cells["D4"].Value = 5;
+				worksheet.Cells["C5"].Value = "Monddday";
+				worksheet.Cells["D5"].Value = 7;
+				worksheet.Cells["B2"].Formula = "AVERAGEIF(C2:C3,\"Mon?ay\",D2:D3)";
+				worksheet.Cells["B3"].Formula = "AVERAGEIF(C2:C3,\"Mon~?ay\",D2:D3)";
+				worksheet.Cells["B4"].Formula = "AVERAGEIF(C4:C5,\"Mon*ay\",D4:D5)";
+				worksheet.Cells["B5"].Formula = "AVERAGEIF(C:C,\"Mon~*ay\",D:D)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(6d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(5d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void AverageIfWithStringInequalityCriteriaWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
@@ -476,6 +511,44 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(1d, worksheet.Cells["B11"].Value);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B12"].Value).Type);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B13"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void AverageIfWithVariedExpressionCharactersWorksAsExpected()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["C2"].Value = 1;
+				//worksheet.Cells["C8"].Value = ">1";
+				//worksheet.Cells["C9"].Value = "<1";
+				//worksheet.Cells["C10"].Value = "=1";
+				//worksheet.Cells["B2"].Formula = "AVERAGEIF(C2,\"=1\",C2)";
+				//worksheet.Cells["B3"].Formula = "AVERAGEIF(C2,\">1\",C2)";
+				//worksheet.Cells["B4"].Formula = "AVERAGEIF(C2,\"<1\",C2)";
+				//worksheet.Cells["B5"].Formula = "AVERAGEIF(C2,\">=1\",C2)";
+				//worksheet.Cells["B6"].Formula = "AVERAGEIF(C2,\"<=1\",C2)";
+				worksheet.Cells["B7"].Formula = "AVERAGEIF(C2,\"<>1\",C2)";
+				//worksheet.Cells["B8"].Formula = "AVERAGEIF(C8,\"=>1\",C2)";
+				//worksheet.Cells["B9"].Formula = "AVERAGEIF(C9,\"=<1\",C2)";
+				//worksheet.Cells["B10"].Formula = "AVERAGEIF(C10,\"==1\",C2)";
+				//worksheet.Cells["B11"].Formula = "AVERAGEIF(C2,\">>1\",C2)";
+				//worksheet.Cells["B12"].Formula = "AVERAGEIF(C2,\"><1\",C2)";
+				//worksheet.Cells["B13"].Formula = "AVERAGEIF(C2,\"<<1\",C2)";
+				worksheet.Calculate();
+				//Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
+				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				//Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
+				//Assert.AreEqual(1d, worksheet.Cells["B6"].Value);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B7"].Value).Type);
+				//Assert.AreEqual(1d, worksheet.Cells["B8"].Value);
+				//Assert.AreEqual(1d, worksheet.Cells["B9"].Value);
+				//Assert.AreEqual(1d, worksheet.Cells["B10"].Value);
+				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B11"].Value).Type);
+				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B12"].Value).Type);
+				//Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B13"].Value).Type);
 			}
 		}
 
