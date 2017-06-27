@@ -182,6 +182,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\SmallTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RandBetweenTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RandTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\StdevPTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\DegreesTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RadiansTests.cs" />
@@ -196,7 +197,7 @@
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\FunctionCompilerFactoryTests.cs" />
     <Compile Include="FormulaParsing\FormulaParserManagerTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LargeTests.cs" />
-	<Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTestBase.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTestBase.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SqrtPiTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SqrtTests.cs" />
     <Compile Include="Style\Dxf\ExcelDxfStyleTest.cs" />
