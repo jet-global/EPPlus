@@ -5,13 +5,27 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class contains the formulas for the RANK, RANK.EQ, and RANK.AVG Excel Functions. Based on what is passed into the 
+	/// constructor is the function that is executed (Specifically RANK and RANK.EQ v.s. RANK.AVG).
+	/// </summary>
 	public class Rank : ExcelFunction
 	{
 		bool _isAvg;
+		/// <summary>
+		/// If the RANK.AVG Function is to be executed then true will be passed into the constructor. 
+		/// </summary>
+		/// <param name="isAvg"></param>
 		public Rank(bool isAvg = false)
 		{
 			_isAvg = isAvg;
 		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="arguments"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)

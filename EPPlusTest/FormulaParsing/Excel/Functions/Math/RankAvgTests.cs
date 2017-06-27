@@ -101,5 +101,268 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(2.5d, worksheet.Cells["B5"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void RankAvgWithNumberNotInArrayReturnsPoundNA()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 2;
+				worksheet.Cells["B3"].Formula = "RANK.AVG(4, B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithDateFunctionNumberInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 5;
+				worksheet.Cells["B2"].Value = 7;
+				worksheet.Cells["B3"].Value = 42901;
+				worksheet.Cells["B4"].Formula = "RANK.AVG(DATE(2017, 6, 15), B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithNumberInputAsDateAsStringReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 5;
+				worksheet.Cells["B2"].Value = 7;
+				worksheet.Cells["B3"].Value = 42901;
+				worksheet.Cells["B4"].Formula = "RANK.AVG(\"6/15/2017\", B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithBooleanNumberInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 0;
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "RANK.AVG(TRUE, B1:B2)";
+				worksheet.Cells["B4"].Formula = "RANK.AVG(FALSE, B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithIntegerCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Value = 2;
+				worksheet.Cells["B5"].Formula = "RANK.AVG(5, B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithDoubleCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4.5;
+				worksheet.Cells["B2"].Value = 6.78;
+				worksheet.Cells["B3"].Value = 3.14;
+				worksheet.Cells["B4"].Value = 3.14;
+				worksheet.Cells["B5"].Formula = "RANK.AVG(3.14, B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(3.5d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithBooleanCellReferenceReturnsPoundNA()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = true;
+				worksheet.Cells["B2"].Value = false;
+				worksheet.Cells["B3"].Value = true;
+				worksheet.Cells["B4"].Formula = "RANK(TRUE, B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithGeneralStringCellReferenceReturnsPoundNA()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "string";
+				worksheet.Cells["B2"].Value = "string";
+				worksheet.Cells["B3"].Value = "string";
+				worksheet.Cells["B4"].Formula = "RANK.AVG(5, B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithNumericStringCellReferenceReturnsPoundNA()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "9";
+				worksheet.Cells["B2"].Value = "8";
+				worksheet.Cells["B3"].Value = "6";
+				worksheet.Cells["B4"].Formula = "RANK.AVG(9, B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithMixedTypesCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = false;
+				worksheet.Cells["B2"].Value = 5.67;
+				worksheet.Cells["B3"].Value = "Cat";
+				worksheet.Cells["B4"].Value = 3;
+				worksheet.Cells["B5"].Formula = "RANK.AVG(3, B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithEmptyCellReferenceReturnsPoundNA()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "RANK.AVG(4, A2:A4)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithZeroOrderInputReturnsCorrectValue()
+		{
+			using (var packge = new ExcelPackage())
+			{
+				var worksheet = packge.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Value = 2;
+				worksheet.Cells["B5"].Formula = "RANK.AVG(5, B1:B4, 0)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithNonZeroOrderInputReturnsCorrectValue()
+		{
+			using (var packge = new ExcelPackage())
+			{
+				var worksheet = packge.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Value = 2;
+				worksheet.Cells["B5"].Formula = "RANK.AVG(5, B1:B4, 450)";
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithNumericStringOrderReturnsPoundValue()
+		{
+			using (var packge = new ExcelPackage())
+			{
+				var worksheet = packge.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Value = 2;
+				worksheet.Cells["B5"].Formula = "RANK.AVG(5, B1:B4, \"4\")";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithGeneralStringOrderReturnsPoundValue()
+		{
+			using (var packge = new ExcelPackage())
+			{
+				var worksheet = packge.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Value = 2;
+				worksheet.Cells["B5"].Formula = "RANK.AVG(5, B1:B4, \"string\")";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithDateAsStringOrderReturnsPoundValue()
+		{
+			using (var packge = new ExcelPackage())
+			{
+				var worksheet = packge.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Value = 2;
+				worksheet.Cells["B5"].Formula = "RANK.AVG(5, B1:B4, \"5/5/2017\")";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void RankAvgWithBooleanOrderReturnsCorrectValues()
+		{
+			using (var packge = new ExcelPackage())
+			{
+				var worksheet = packge.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Value = 2;
+				worksheet.Cells["B5"].Formula = "RANK.AVG(5, B1:B4, TRUE)";
+				worksheet.Cells["B6"].Formula = "RANK.AVG(5, B1:B4, FALSE)";
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B6"].Value);
+			}
+		}
 	}
 }

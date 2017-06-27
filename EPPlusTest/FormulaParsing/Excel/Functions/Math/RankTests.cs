@@ -370,6 +370,20 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void RankWithDateObjectCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "DATE(2017, 5, 5)";
+				worksheet.Cells["B2"].Formula = "DATE(2017, 6, 15)";
+				worksheet.Cells["B3"].Formula = "RANK(42901, B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void RankWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Rank();
