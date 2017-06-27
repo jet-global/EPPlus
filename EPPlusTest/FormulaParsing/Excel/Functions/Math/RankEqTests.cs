@@ -35,364 +35,360 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class RankEqTests : MathFunctionsTestBase
 	{
-		[TestClass]
-		public class RankTests : MathFunctionsTestBase
+		[TestMethod]
+		public void RankEqWithNoInputsReturnsPoundValue()
 		{
-			[TestMethod]
-			public void RankWithNoInputsReturnsPoundValue()
-			{
-				var function = new Rank();
-				var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
-				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-			}
+			var function = new Rank();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
 
-			[TestMethod]
-			public void RankWithTwoInputsReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithTwoInputsReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 5;
-					worksheet.Cells["B2"].Value = 6;
-					worksheet.Cells["B3"].Value = 7;
-					worksheet.Cells["B4"].Value = 42901;
-					worksheet.Cells["B5"].Formula = "RANK.EQ(5, B1:B4)";
-					worksheet.Calculate();
-					Assert.AreEqual(4d, worksheet.Cells["B5"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 5;
+				worksheet.Cells["B2"].Value = 6;
+				worksheet.Cells["B3"].Value = 7;
+				worksheet.Cells["B4"].Value = 42901;
+				worksheet.Cells["B5"].Formula = "RANK.EQ(5, B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["B5"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithGeneralStringFirstInputReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithGeneralStringFirstInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 4;
-					worksheet.Cells["B2"].Value = 3;
-					worksheet.Cells["B3"].Value = 2;
-					worksheet.Cells["B4"].Formula = "RANK.EQ(\"string\", B1:B3)";
-					worksheet.Calculate();
-					Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 3;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "RANK.EQ(\"string\", B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithMissingFirstInputReturnsPoundNA()
+		[TestMethod]
+		public void RankEqWithMissingFirstInputReturnsPoundNA()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 4;
-					worksheet.Cells["B2"].Value = 3;
-					worksheet.Cells["B3"].Value = 2;
-					worksheet.Cells["B4"].Formula = "RANK.EQ( , B1:B3)";
-					worksheet.Calculate();
-					Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 3;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "RANK.EQ( , B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithNumericStringFirstInputReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithNumericStringFirstInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 5;
-					worksheet.Cells["B2"].Value = 6;
-					worksheet.Cells["B3"].Value = 7;
-					worksheet.Cells["B4"].Value = 42901;
-					worksheet.Cells["B5"].Formula = "RANK.EQ(\"5\", B1:B4)";
-					worksheet.Calculate();
-					Assert.AreEqual(4d, worksheet.Cells["B5"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 5;
+				worksheet.Cells["B2"].Value = 6;
+				worksheet.Cells["B3"].Value = 7;
+				worksheet.Cells["B4"].Value = 42901;
+				worksheet.Cells["B5"].Formula = "RANK.EQ(\"5\", B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["B5"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithNumberNotInArrayReturnsPoundNA()
+		[TestMethod]
+		public void RankEqWithNumberNotInArrayReturnsPoundNA()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 2;
-					worksheet.Cells["B2"].Value = 5;
-					worksheet.Cells["B3"].Formula = "RANK.EQ(3, B1:B2)";
-					worksheet.Calculate();
-					Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 2;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Formula = "RANK.EQ(3, B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithNumberAsDateFunctionReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithNumberAsDateFunctionReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 5;
-					worksheet.Cells["B2"].Value = 6;
-					worksheet.Cells["B3"].Value = 7;
-					worksheet.Cells["B4"].Value = 42901;
-					worksheet.Cells["B5"].Formula = "RANK.EQ(DATE(2017, 6, 15), B1:B4)";
-					worksheet.Calculate();
-					Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 5;
+				worksheet.Cells["B2"].Value = 6;
+				worksheet.Cells["B3"].Value = 7;
+				worksheet.Cells["B4"].Value = 42901;
+				worksheet.Cells["B5"].Formula = "RANK.EQ(DATE(2017, 6, 15), B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithNumberAsDateAsStringReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithNumberAsDateAsStringReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 5;
-					worksheet.Cells["B2"].Value = 6;
-					worksheet.Cells["B3"].Value = 7;
-					worksheet.Cells["B4"].Value = 42901;
-					worksheet.Cells["B5"].Formula = "RANK.EQ(\"6/15/2017\", B1:B4)";
-					worksheet.Calculate();
-					Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 5;
+				worksheet.Cells["B2"].Value = 6;
+				worksheet.Cells["B3"].Value = 7;
+				worksheet.Cells["B4"].Value = 42901;
+				worksheet.Cells["B5"].Formula = "RANK.EQ(\"6/15/2017\", B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithBooleanNumberInputsReturnCorrectValue()
+		[TestMethod]
+		public void RankEqWithBooleanNumberInputsReturnCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 0;
-					worksheet.Cells["B2"].Value = 1;
-					worksheet.Cells["B3"].Value = 7;
-					worksheet.Cells["B10"].Formula = "RANK.EQ(TRUE, B1:B3)";
-					worksheet.Cells["B11"].Formula = "RANK.EQ(FALSE, B1:B3)";
-					worksheet.Calculate();
-					Assert.AreEqual(2d, worksheet.Cells["B10"].Value);
-					Assert.AreEqual(3d, worksheet.Cells["B11"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 0;
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Value = 7;
+				worksheet.Cells["B10"].Formula = "RANK.EQ(TRUE, B1:B3)";
+				worksheet.Cells["B11"].Formula = "RANK.EQ(FALSE, B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B10"].Value);
+				Assert.AreEqual(3d, worksheet.Cells["B11"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithIntegerCellReferenceReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithIntegerCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 4;
-					worksheet.Cells["B2"].Value = 5;
-					worksheet.Cells["B3"].Value = 2;
-					worksheet.Cells["B4"].Value = 4;
-					worksheet.Cells["B5"].Value = 6;
-					worksheet.Cells["C1"].Formula = "RANK.EQ(5, B1:B5)";
-					worksheet.Calculate();
-					Assert.AreEqual(2d, worksheet.Cells["C1"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Value = 4;
+				worksheet.Cells["B5"].Value = 6;
+				worksheet.Cells["C1"].Formula = "RANK.EQ(5, B1:B5)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["C1"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithDoubleCellReferenceReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithDoubleCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 4.5;
-					worksheet.Cells["B2"].Value = 6.78;
-					worksheet.Cells["B3"].Value = 3.14;
-					worksheet.Cells["B4"].Value = 9.006;
-					worksheet.Cells["B5"].Formula = "RANK.EQ(3.14, B1:B4)";
-					worksheet.Calculate();
-					Assert.AreEqual(4d, worksheet.Cells["B5"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4.5;
+				worksheet.Cells["B2"].Value = 6.78;
+				worksheet.Cells["B3"].Value = 3.14;
+				worksheet.Cells["B4"].Value = 9.006;
+				worksheet.Cells["B5"].Formula = "RANK.EQ(3.14, B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["B5"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithBooleanCellReferenceReturnsPoundNA()
+		[TestMethod]
+		public void RankEqWithBooleanCellReferenceReturnsPoundNA()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = true;
-					worksheet.Cells["B2"].Value = false;
-					worksheet.Cells["B3"].Value = true;
-					worksheet.Cells["B4"].Formula = "RANK.EQ(TRUE, B1:B3)";
-					worksheet.Calculate();
-					Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = true;
+				worksheet.Cells["B2"].Value = false;
+				worksheet.Cells["B3"].Value = true;
+				worksheet.Cells["B4"].Formula = "RANK.EQ(TRUE, B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithStringCellReferenceReturnsPoundNA()
+		[TestMethod]
+		public void RankEqWithStringCellReferenceReturnsPoundNA()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = "String";
-					worksheet.Cells["B2"].Value = "String";
-					worksheet.Cells["B3"].Value = "String";
-					worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3)";
-					worksheet.Calculate();
-					Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "String";
+				worksheet.Cells["B2"].Value = "String";
+				worksheet.Cells["B3"].Value = "String";
+				worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithNumericStringCellReferenceReturnsPoundNA()
+		[TestMethod]
+		public void RankEqWithNumericStringCellReferenceReturnsPoundNA()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["A2"].Value = "8";
-					worksheet.Cells["A3"].Value = "9";
-					worksheet.Cells["A4"].Value = "5";
-					worksheet.Cells["A5"].Value = "6";
-					worksheet.Cells["B1"].Formula = "RANK.EQ(9, A2:A5)";
-					worksheet.Calculate();
-					Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Value = "8";
+				worksheet.Cells["A3"].Value = "9";
+				worksheet.Cells["A4"].Value = "5";
+				worksheet.Cells["A5"].Value = "6";
+				worksheet.Cells["B1"].Formula = "RANK.EQ(9, A2:A5)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithMixedTypesReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithMixedTypesReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["A2"].Value = 6;
-					worksheet.Cells["A3"].Value = false;
-					worksheet.Cells["A4"].Value = 5.67;
-					worksheet.Cells["A5"].Value = "cat";
-					worksheet.Cells["A6"].Value = 3;
-					worksheet.Cells["B1"].Formula = "RANK.EQ(3, A2:A6)";
-					worksheet.Calculate();
-					Assert.AreEqual(3d, worksheet.Cells["B1"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A2"].Value = 6;
+				worksheet.Cells["A3"].Value = false;
+				worksheet.Cells["A4"].Value = 5.67;
+				worksheet.Cells["A5"].Value = "cat";
+				worksheet.Cells["A6"].Value = 3;
+				worksheet.Cells["B1"].Formula = "RANK.EQ(3, A2:A6)";
+				worksheet.Calculate();
+				Assert.AreEqual(3d, worksheet.Cells["B1"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithEmptyCellReferenceReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithEmptyCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Formula = "RANK.EQ(A2:A4)";
-					worksheet.Calculate();
-					Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "RANK.EQ(A2:A4)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B1"].Value).Type);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithOrderAsZeroReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithOrderAsZeroReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 4;
-					worksheet.Cells["B2"].Value = 5;
-					worksheet.Cells["B3"].Value = 2;
-					worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, 0)";
-					worksheet.Calculate();
-					Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, 0)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithNonZeroOrderReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithNonZeroOrderReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 4;
-					worksheet.Cells["B2"].Value = 5;
-					worksheet.Cells["B3"].Value = 2;
-					worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, 450)";
-					worksheet.Calculate();
-					Assert.AreEqual(3d, worksheet.Cells["B4"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, 450)";
+				worksheet.Calculate();
+				Assert.AreEqual(3d, worksheet.Cells["B4"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithNumericStringReturnsPoundValue()
+		[TestMethod]
+		public void RankEqWithNumericStringReturnsPoundValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 4;
-					worksheet.Cells["B2"].Value = 5;
-					worksheet.Cells["B3"].Value = 2;
-					worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, \"3\")";
-					worksheet.Calculate();
-					Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, \"3\")";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithGeneralStringReturnsPoundValue()
+		[TestMethod]
+		public void RankEqWithGeneralStringReturnsPoundValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 4;
-					worksheet.Cells["B2"].Value = 5;
-					worksheet.Cells["B3"].Value = 2;
-					worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, \"string\")";
-					worksheet.Calculate();
-					Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, \"string\")";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithOrderAsDateAsStringReturnsPoundValue()
+		[TestMethod]
+		public void RankEqWithOrderAsDateAsStringReturnsPoundValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 4;
-					worksheet.Cells["B2"].Value = 5;
-					worksheet.Cells["B3"].Value = 2;
-					worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, \"5/5/2017\")";
-					worksheet.Calculate();
-					Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, \"5/5/2017\")";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithBooleanOrderInputReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithBooleanOrderInputReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Value = 4;
-					worksheet.Cells["B2"].Value = 5;
-					worksheet.Cells["B3"].Value = 2;
-					worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, TRUE)";
-					worksheet.Cells["B5"].Formula = "RANK.EQ(5, B1:B3, FALSE)";
-					worksheet.Calculate();
-					Assert.AreEqual(3d, worksheet.Cells["B4"].Value);
-					Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "RANK.EQ(5, B1:B3, TRUE)";
+				worksheet.Cells["B5"].Formula = "RANK.EQ(5, B1:B3, FALSE)";
+				worksheet.Calculate();
+				Assert.AreEqual(3d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithDateObjectCellReferenceReturnsCorrectValue()
+		[TestMethod]
+		public void RankEqWithDateObjectCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
 			{
-				using (var package = new ExcelPackage())
-				{
-					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-					worksheet.Cells["B1"].Formula = "DATE(2017, 5, 5)";
-					worksheet.Cells["B2"].Formula = "DATE(2017, 6, 15)";
-					worksheet.Cells["B3"].Formula = "RANK.EQ(42901, B1:B2)";
-					worksheet.Calculate();
-					Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
-				}
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "DATE(2017, 5, 5)";
+				worksheet.Cells["B2"].Formula = "DATE(2017, 6, 15)";
+				worksheet.Cells["B3"].Formula = "RANK.EQ(42901, B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
 			}
+		}
 
-			[TestMethod]
-			public void RankWithInvalidArgumentReturnsPoundValue()
-			{
-				var func = new Rank();
-				var args = FunctionsHelper.CreateArgs();
-				var result = func.Execute(args, this.ParsingContext);
-				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-			}
+		[TestMethod]
+		public void RankEqWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Rank();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 	}
 }
