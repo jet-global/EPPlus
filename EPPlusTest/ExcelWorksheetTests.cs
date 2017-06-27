@@ -3204,7 +3204,7 @@ namespace EPPlusTest
 				validation.Formula.ExcelFormula = "=$B$2:$B$3";
 
 				//expand the range
-				sheet.InsertRow(3,2);
+				sheet.InsertRow(3, 2);
 
 				//validate that the Data Validation range has also expanded
 				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
@@ -3571,6 +3571,7 @@ namespace EPPlusTest
 		#endregion
 
 		#region DeleteRow Tests
+		#region Delete Rows in the middle of a range. 
 		[TestMethod]
 		public void DeleteRowsUpdatesScatterChartSeries()
 		{
@@ -3862,6 +3863,49 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\Sparkline Demos.xlsx")]
+		public void DeleteRowUpdatesSparklines()
+		{
+			var file = new FileInfo("Sparkline Demos.xlsx");
+			Assert.IsTrue(file.Exists);
+			var temp = Path.GetTempFileName();
+			File.Delete(temp);
+			var copy = file.CopyTo(temp);
+			try
+			{
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(6, sparklines.Count);
+					sheet.DeleteRow(7);
+					Assert.AreEqual(5, sparklines.Count);
+					Assert.AreEqual("'Sheet1'!D6:F6", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D7:F7", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D6:D7", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!E6:E7", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!F6:F7", sparklines[0].Sparklines[0].Formula.Address);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(5, sparklines.Count);
+					Assert.AreEqual("'Sheet1'!D6:F6", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D7:F7", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D6:D7", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!E6:E7", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!F6:F7", sparklines[0].Sparklines[0].Formula.Address);
+				}
+			}
+			finally
+			{
+				copy.Delete();
+			}
+		}
+
+		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
 		public void DeleteRowUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
 		{
@@ -3901,8 +3945,10 @@ namespace EPPlusTest
 			}
 		}
 		#endregion
+		#endregion
 
 		#region DeleteColumn Tests
+		#region Delete columns in the middle of a range.
 		[TestMethod]
 		public void DeleteColumnsAboveChartUpdatesChartPosition()
 		{
@@ -4147,6 +4193,49 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\Sparkline Demos.xlsx")]
+		public void DeleteColumnUpdatesSparklines()
+		{
+			var file = new FileInfo("Sparkline Demos.xlsx");
+			Assert.IsTrue(file.Exists);
+			var temp = Path.GetTempFileName();
+			File.Delete(temp);
+			var copy = file.CopyTo(temp);
+			try
+			{
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(6, sparklines.Count);
+					sheet.DeleteColumn(5);
+					Assert.AreEqual(5, sparklines.Count);
+					Assert.AreEqual("'Sheet1'!D6:E6", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D7:E7", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D8:E8", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D6:D8", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!E6:E8", sparklines[0].Sparklines[0].Formula.Address);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(5, sparklines.Count);
+					Assert.AreEqual("'Sheet1'!D6:E6", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D7:E7", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D8:E8", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D6:D8", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!E6:E8", sparklines[0].Sparklines[0].Formula.Address);
+				}
+			}
+			finally
+			{
+				copy.Delete();
+			}
+		}
+
+		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
 		public void DeleteColumnUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
 		{
@@ -4185,6 +4274,7 @@ namespace EPPlusTest
 				Assert.AreEqual("F6:H23", pivotTable.Address.Address);
 			}
 		}
+		#endregion
 		#endregion
 
 		#region PivotTable Tests

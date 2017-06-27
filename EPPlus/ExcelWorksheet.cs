@@ -1408,7 +1408,7 @@ namespace OfficeOpenXml
 						this.Row(rowFrom + r).OutlineLevel = newOutlineLevel;
 					}
 				}
-				this.UpdateSparkLineReferences(rows, rowFrom, 0, 0);
+				this.UpdateSparkLines(rows, rowFrom, 0, 0);
 				foreach (var tbl in Tables)
 				{
 					tbl.Address = tbl.Address.AddRow(rowFrom, rows);
@@ -1597,7 +1597,7 @@ namespace OfficeOpenXml
 						this.Column(columnFrom + c).OutlineLevel = newOutlineLevel;
 					}
 				}
-				this.UpdateSparkLineReferences(0, 0, columns, columnFrom);
+				this.UpdateSparkLines(0, 0, columns, columnFrom);
 				//Adjust tables
 				foreach (var tbl in Tables)
 				{
@@ -1699,7 +1699,7 @@ namespace OfficeOpenXml
 							pivotTable.CacheDefinition.SourceRange.Address = pivotTable.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows).Address;
 					}
 				}
-				this.UpdateSparkLineReferences(-rows, rowFrom, 0, 0);
+				this.UpdateSparkLines(-rows, rowFrom, 0, 0);
 				this.UpdateCharts(-rows, 0, rowFrom, 0);
 				this.UpdateDataValidationRanges(rowFrom, -rows, 0, 0);
 			}
@@ -1810,7 +1810,7 @@ namespace OfficeOpenXml
 					}
 				}
 				this.UpdateCharts(0, -columns, 0, columnFrom);
-				this.UpdateSparkLineReferences(0, 0, -columns, columnFrom);
+				this.UpdateSparkLines(0, 0, -columns, columnFrom);
 				this.UpdateDataValidationRanges(0, 0, columnFrom, -columns);
 			}
 		}
@@ -4819,6 +4819,39 @@ namespace OfficeOpenXml
 					}
 				}
 			}
+		}
+
+		private void UpdateSparkLines(int rows, int rowFrom, int columns, int columnFrom)
+		{
+			this.RemoveDeletedSparklines(rows, rowFrom, columns, columnFrom);
+			this.UpdateSparkLineReferences(rows, rowFrom, columns, columnFrom);
+		}
+
+		private void RemoveDeletedSparklines(int rows, int rowFrom, int columns, int columnFrom)
+		{
+			// Only delete sparklines if rows or columns are being deleted.
+			if (rows >= 0 && columns >= 0)
+				return;
+
+			foreach (var group in this.SparklineGroups.SparklineGroups)
+			{
+				group.Sparklines.RemoveAll(sparkline => ExcelWorksheet.IsInRange(sparkline.HostCell, -rows, rowFrom, -columns, columnFrom));
+			}
+			var groupsToDelete = this.SparklineGroups.SparklineGroups.Where(sparklineGroup => sparklineGroup.Sparklines.Count == 0).ToArray();
+			foreach (var sparklineGroup in groupsToDelete)
+			{
+				this.SparklineGroups.TopNode.RemoveChild(sparklineGroup.TopNode);
+				this.SparklineGroups.SparklineGroups.Remove(sparklineGroup);
+			}
+		}
+
+		private static bool IsInRange(ExcelAddress address, int rows, int rowFrom, int columns, int columnFrom)
+		{
+			if (rows != 0 && address.Start.Row >= rowFrom && address.Start.Row <= rows - 1 + rowFrom)
+				return true;
+			else if (columns != 0 && address.Start.Column >= columnFrom && address.Start.Column <= columns - 1 + columnFrom)
+				return true;
+			return false;
 		}
 
 		private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)
