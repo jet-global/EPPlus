@@ -276,85 +276,117 @@ namespace OfficeOpenXml.Drawing.Vml
 		/// <summary>
 		/// Width of the border
 		/// </summary>
-		public Single LineWidth
+		public float LineWidth
 		{
 			get
 			{
 				string wt = GetXmlNodeString(LINEWIDTH_PATH);
-				if (wt == "") return (Single).75;
-				if (wt.EndsWith("pt")) wt = wt.Substring(0, wt.Length - 2);
-
-				Single ret;
-				if (Single.TryParse(wt, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out ret))
-				{
+				if (wt == "")
+					return (float).75;
+				if (wt.EndsWith("pt"))
+					wt = wt.Substring(0, wt.Length - 2);
+				float ret;
+				if (float.TryParse(wt, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out ret))
 					return ret;
-				}
 				else
-				{
 					return 0;
-				}
 			}
 			set
 			{
 				SetXmlNodeString(LINEWIDTH_PATH, value.ToString(CultureInfo.InvariantCulture) + "pt");
 			}
 		}
-		///// <summary>
-		///// Width of the Comment 
-		///// </summary>
-		//public Single Width
-		//{
-		//    get
-		//    {
-		//        string v;
-		//        GetStyle("width", out v);
-		//        if(v.EndsWith("pt"))
-		//        {
-		//            v = v.Substring(0, v.Length - 2);
-		//        }
-		//        short ret;
-		//        if (short.TryParse(v,System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out ret))
-		//        {
-		//            return ret;
-		//        }
-		//        else
-		//        {
-		//            return 0;
-		//        }
-		//    }
-		//    set
-		//    {
-		//        SetStyle("width", value.ToString("N2",CultureInfo.InvariantCulture) + "pt");
-		//    }
-		//}
-		///// <summary>
-		///// Height of the Comment 
-		///// </summary>
-		//public Single Height
-		//{
-		//    get
-		//    {
-		//        string v;
-		//        GetStyle("height", out v);
-		//        if (v.EndsWith("pt"))
-		//        {
-		//            v = v.Substring(0, v.Length - 2);
-		//        }
-		//        short ret;
-		//        if (short.TryParse(v, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out ret))
-		//        {
-		//            return ret;
-		//        }
-		//        else
-		//        {
-		//            return 0;
-		//        }
-		//    }
-		//    set
-		//    {
-		//        SetStyle("height", value.ToString("N2", CultureInfo.InvariantCulture) + "pt");
-		//    }
-		//}
+		const string SHAPE_STYLE_PATH = "@style";
+		/// <summary>
+		/// Width of the Comment 
+		/// </summary>
+		public float Width
+		{
+			get
+			{
+				string v;
+				GetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "width", out v);
+				if (v.EndsWith("pt"))
+					v = v.Substring(0, v.Length - 2);
+				float ret;
+				if (float.TryParse(v, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out ret))
+					return ret;
+				else
+					return 0;
+			}
+			set
+			{
+				SetXmlNodeString(SHAPE_STYLE_PATH, SetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "width", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
+			}
+		}
+		/// <summary>
+		/// Height of the Comment 
+		/// </summary>
+		public float Height
+		{
+			get
+			{
+				string v;
+				GetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "height", out v);
+				if (v.EndsWith("pt"))
+					v = v.Substring(0, v.Length - 2);
+				float ret;
+				if (float.TryParse(v, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out ret))
+					return ret;
+				else
+					return 0;
+			}
+			set
+			{
+				SetXmlNodeString(SHAPE_STYLE_PATH, SetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "height", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
+			}
+		}
+		/// <summary>
+		/// Top Margin of the Comment 
+		/// </summary>
+		public float MarginTop
+		{
+			get
+			{
+				string v;
+				GetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "margin-top", out v);
+				if (v.EndsWith("pt"))
+				{
+					v = v.Substring(0, v.Length - 2);
+				}
+				float ret;
+				if (float.TryParse(v, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out ret))
+					return ret;
+				else
+					return 0;
+			}
+			set
+			{
+				SetXmlNodeString(SHAPE_STYLE_PATH, SetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "margin-top", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
+			}
+		}
+		/// <summary>
+		/// Left Margin of the Comment 
+		/// </summary>
+		public float MarginLeft
+		{
+			get
+			{
+				string v;
+				GetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "margin-left", out v);
+				if (v.EndsWith("pt"))
+					v = v.Substring(0, v.Length - 2);
+				float ret;
+				if (float.TryParse(v, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out ret))
+					return ret;
+				else
+					return 0;
+			}
+			set
+			{
+				SetXmlNodeString(SHAPE_STYLE_PATH, SetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "margin-left", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
+			}
+		}
 		const string TEXTBOX_STYLE_PATH = "v:textbox/@style";
 		/// <summary>
 		/// Autofits the drawingobject 

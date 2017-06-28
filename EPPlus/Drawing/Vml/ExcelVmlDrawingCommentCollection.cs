@@ -93,35 +93,26 @@ namespace OfficeOpenXml.Drawing.Vml
 
 			return vml;
 		}
-		internal ExcelVmlDrawingComment Add(ExcelRangeBase cell)
+		internal ExcelVmlDrawingComment Add(ExcelRangeBase cell, XmlNode drawingNode = null)
 		{
-			XmlNode node = AddDrawing(cell);
-			var draw = new ExcelVmlDrawingComment(node, cell, NameSpaceManager);
+			if (drawingNode == null)
+				drawingNode = CreateDrawing(cell);
+			else
+				this.AddDrawing(drawingNode, cell);
+			var draw = new ExcelVmlDrawingComment(drawingNode, cell, NameSpaceManager);
 			_drawings.Add(draw);
 			return draw;
 		}
-		private XmlNode AddDrawing(ExcelRangeBase cell)
+		private XmlNode CreateDrawing(ExcelRangeBase cell)
 		{
 			int row = cell.Start.Row, col = cell.Start.Column;
 			var node = VmlDrawingXml.CreateElement("v", "shape", ExcelPackage.schemaMicrosoftVml);
 
-			var id = ExcelCellBase.GetCellID(cell.Worksheet.SheetID, cell._fromRow, cell._fromCol);
-			var ix = _drawings.IndexOf(id);
-			if (ix < 0 && (~ix < _drawings.Count))
-			{
-				ix = ~ix;
-				var prevDraw = _drawings[ix] as ExcelVmlDrawingBase;
-				prevDraw.TopNode.ParentNode.InsertBefore(node, prevDraw.TopNode);
-			}
-			else
-			{
-				VmlDrawingXml.DocumentElement.AppendChild(node);
-			}
+			this.InsertDrawingNode(cell, node);
 
 			node.SetAttribute("id", GetNewId());
 			node.SetAttribute("type", "#_x0000_t202");
 			node.SetAttribute("style", "position:absolute;z-index:1; visibility:hidden");
-			//node.SetAttribute("style", "position:absolute; margin-left:59.25pt;margin-top:1.5pt;width:108pt;height:59.25pt;z-index:1; visibility:hidden"); 
 			node.SetAttribute("fillcolor", "#ffffe1");
 			node.SetAttribute("insetmode", ExcelPackage.schemaMicrosoftOffice, "auto");
 
@@ -143,32 +134,47 @@ namespace OfficeOpenXml.Drawing.Vml
 			node.InnerXml = vml;
 			return node;
 		}
-		int _nextID = 0;
+		private void AddDrawing(XmlNode node, ExcelRangeBase cell)
+		{
+			node.Attributes["id"].Value = this.GetNewId();
+			node = VmlDrawingXml.ImportNode(node, true);
+			this.InsertDrawingNode(cell, node);
+		}
+		private void InsertDrawingNode(ExcelRangeBase cell, XmlNode node)
+		{
+			var id = ExcelCellBase.GetCellID(cell.Worksheet.SheetID, cell._fromRow, cell._fromCol);
+			var ix = _drawings.IndexOf(id);
+			if (ix < 0 && (~ix < _drawings.Count))
+			{
+				ix = ~ix;
+				var prevDraw = _drawings[ix] as ExcelVmlDrawingBase;
+				prevDraw.TopNode.ParentNode.InsertBefore(node, prevDraw.TopNode);
+			}
+			else
+				VmlDrawingXml.DocumentElement.AppendChild(node);
+		}
+		int _nextID = 1024;
 		/// <summary>
 		/// returns the next drawing id.
 		/// </summary>
 		/// <returns></returns>
 		internal string GetNewId()
 		{
-			if (_nextID == 0)
+			const string idFormat = "_x0000_s";
+			if (_nextID == 1024)
 			{
 				foreach (ExcelVmlDrawingComment draw in this)
 				{
-					if (draw.Id.Length > 3 && draw.Id.StartsWith("vml"))
+					if (draw.Id.Length >= 11 && draw.Id.StartsWith(idFormat))
 					{
 						int id;
-						if (int.TryParse(draw.Id.Substring(3, draw.Id.Length - 3), out id))
-						{
-							if (id > _nextID)
-							{
-								_nextID = id;
-							}
-						}
+						if (int.TryParse(draw.Id.Substring(draw.Id.Length - 4, 4), out id) && id > _nextID)
+							_nextID = id;
 					}
 				}
 			}
 			_nextID++;
-			return "vml" + _nextID.ToString();
+			return idFormat + _nextID.ToString();
 		}
 		internal ExcelVmlDrawingBase this[ulong rangeID]
 		{
