@@ -148,26 +148,23 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return (objectToCompare == null || objectToCompare.Equals(string.Empty));
 
 			string operationFromCriteria = null;
+			var replaceIndex = -1;
 			if (Regex.IsMatch(criteria, @"^(<>|>=|<=){1}"))
+			{
 				operationFromCriteria = criteria.Substring(0, 2);
+				replaceIndex = 2;
+			}
 			else if (Regex.IsMatch(criteria, @"^(=|<|>){1}"))
+			{
 				operationFromCriteria = criteria.Substring(0, 1);
+				replaceIndex = 1;
+			}
 			else
 				return isMatch(objectToCompare, criteria);
 
-			//if (Regex.IsMatch(criteria, @"^[^a-zA-Z0-9\+\-\*\/\^\&]{2}"))
-			//	operationFromCriteria = criteria.Substring(0, 2);
-			//else if (Regex.IsMatch(criteria, @"^[^a-zA-Z0-9\+\-\*\/\^\&]{1}"))
-			//	operationFromCriteria = criteria.Substring(0, 1);
-			//else
-			//	return isMatch(objectToCompare, criteria);
-
-			// Criteria is an expression.
-			var criteriaString = criteria.Replace(operationFromCriteria, string.Empty);
-			if (criteriaString.Equals(string.Empty))
-				return (objectToCompare == null);
-			//else if (objectToCompare == null)
-			//	return false;
+			var criteriaString = criteria.Substring(replaceIndex);
+			//if (criteriaString.Equals(string.Empty))
+			//	return (objectToCompare == null);
 			IOperator operation;
 			if (OperatorsDict.Instance.TryGetValue(operationFromCriteria, out operation))
 			{
@@ -179,14 +176,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				switch (operation.Operator)
 				{
 					case OperatorType.Equals:
-						if (objectToCompare.ToString().Equals(string.Empty) && criteriaString.Equals(string.Empty))
-							return false;
-						else
-							return this.isMatch(objectToCompare, criteriaString);
+						return this.isMatch(objectToCompare, criteriaString);
 					case OperatorType.NotEqualTo:
-						// PROBLEM: This is not returning true when comparing a numeric string with a number of the same value.
-						// i.e. does not work correctly for different objects.
-						return (!(criteriaString.Equals(objectToCompare)));
+
+						return (!isMatch(objectToCompare, criteriaString));
+						//return (!(criteriaString.Equals(objectToCompare)));
 					case OperatorType.GreaterThan:
 					case OperatorType.GreaterThanOrEqual:
 					case OperatorType.LessThan:
@@ -204,6 +198,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		// text string that may require wildcard Regex.
 		private bool isMatch(object objectToCompare, string criteria)
 		{
+			if (criteria == null || criteria.Equals(string.Empty))
+			{
+				return (objectToCompare == null);
+			}
 			string objectAsString = null;
 			var handleAsBool = (criteria.Equals(Boolean.TrueString.ToUpper()) || criteria.Equals(Boolean.FalseString.ToUpper()));
 			var handleAsDate = ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaAsOADate);
@@ -220,7 +218,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				criteria = criteriaAsOADate.ToString();
 			}
-			if (objectToCompare is bool objectAsBool)
+			if (objectToCompare == null)
+				return false;
+			else if (objectToCompare is bool objectAsBool)
 				objectAsString = objectAsBool.ToString();
 			else if (ConvertUtil.TryParseDateObjectToOADate(objectToCompare, out double objectAsOADate))
 				objectAsString = objectAsOADate.ToString();
