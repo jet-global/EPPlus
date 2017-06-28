@@ -147,7 +147,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				var ws = package.Workbook.Worksheets.Add("s");
 				ws.Cells["B2"].Value = true;
 				ws.Cells["C2"].Value = 1;
-				ws.Cells["A2"].Formula = "AVERAGEIF(B2,\"tr?e\",C2)";
+				ws.Cells["A2"].Formula = "AVERAGEIF(B2,\">a\",C2)";
 				ws.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)ws.Cells["A2"].Value).Type);
 			}

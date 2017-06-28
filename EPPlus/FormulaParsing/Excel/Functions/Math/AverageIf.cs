@@ -28,7 +28,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using OfficeOpenXml.FormulaParsing.Excel.Operators;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
-using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.FormulaParsing.Utilities;
 using OfficeOpenXml.Utils;
@@ -61,17 +60,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange && criteriaRange.IsMulti)
 				return new CompileResult(eErrorType.Div0);
 			else
-				criteriaString = (GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString()).ToUpper();
-
+				criteriaString = this.GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString().ToUpper();
 			if (arguments.Count() > 2)
 			{
 				var averageRangeArgument = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
-				return calculateAverageUsingAverageRange(rangeArgument, criteriaString, averageRangeArgument);
+				return this.calculateAverageUsingAverageRange(rangeArgument, criteriaString, averageRangeArgument);
 			}
 			else
-			{
-				return calculateAverageUsingRange(rangeArgument, criteriaString);
-			}
+				return this.calculateAverageUsingRange(rangeArgument, criteriaString);
 		}
 
 		private CompileResult calculateAverageUsingAverageRange(ExcelDataProvider.IRangeInfo cellsToCompare, string comparisonCriteria, ExcelDataProvider.IRangeInfo potentialCellsToAverage)
@@ -80,23 +76,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var numberOfValidValues = 0;
 			foreach (var cell in cellsToCompare)
 			{
-				if (comparisonCriteria != null && objectMatchesCriteria(GetFirstArgument(cell.Value), comparisonCriteria))
+				if (comparisonCriteria != null && this.objectMatchesCriteria(this.GetFirstArgument(cell.Value), comparisonCriteria))
 				{
-					var normalizedRow = cell.Row - cellsToCompare.Address._fromRow;
-					var normalizedColumn = cell.Column - cellsToCompare.Address._fromCol;
-					var avgRangeFromRow = potentialCellsToAverage.Address._fromRow;
-					var avgRangeFromCol = potentialCellsToAverage.Address._fromCol;
-					if (potentialCellsToAverage.Address._fromRow + normalizedRow <= potentialCellsToAverage.Address._toRow &&
-						potentialCellsToAverage.Address._fromCol + normalizedColumn <= potentialCellsToAverage.Address._toCol)
+					var relativeRow = cell.Row - cellsToCompare.Address._fromRow;
+					var relativeColumn = cell.Column - cellsToCompare.Address._fromCol;
+					if (potentialCellsToAverage.Address._fromRow + relativeRow <= potentialCellsToAverage.Address._toRow &&
+						potentialCellsToAverage.Address._fromCol + relativeColumn <= potentialCellsToAverage.Address._toCol)
 					{
-						var v = potentialCellsToAverage.GetOffset(normalizedRow, normalizedColumn);
-						if (v is ExcelErrorValue cellError)
+						var valueOfCellToAverage = potentialCellsToAverage.GetOffset(relativeRow, relativeColumn);
+						if (valueOfCellToAverage is ExcelErrorValue cellError)
 							return new CompileResult(cellError.Type);
-
-						if (v is string || v is bool || v == null)
+						if (valueOfCellToAverage is string || valueOfCellToAverage is bool || valueOfCellToAverage == null)
 							continue;
+						sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToAverage, true);
 						numberOfValidValues++;
-						sumOfValidValues += ConvertUtil.GetValueDouble(v, true);
 					}
 				}
 			}
@@ -112,8 +105,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var numberOfValidValues = 0;
 			foreach (var cell in potentialCellsToAverage)
 			{
-				if (comparisonCriteria != null && IsNumericForAverageIf(cell.Value) &&
-						objectMatchesCriteria(cell.Value, comparisonCriteria))
+				if (comparisonCriteria != null && this.IsNumericForAverageIf(this.GetFirstArgument(cell.Value)) &&
+						this.objectMatchesCriteria(this.GetFirstArgument(cell.Value), comparisonCriteria))
 				{
 					sumOfValidValues += cell.ValueDouble;
 					numberOfValidValues++;
@@ -140,21 +133,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		// This method should be abstracted out of the AVERAGEIF function.
 		private bool objectMatchesCriteria(object objectToCompare, string criteria)
 		{
-			var operationIndex = -1;
+			var operatorIndex = -1;
 			// Check if the criteria is an expression; i.e. begins with the operators <>, =, >, >=, <, or <=
 			if (Regex.IsMatch(criteria, @"^(<>|>=|<=){1}"))
-				operationIndex = 2;
+				operatorIndex = 2;
 			else if (Regex.IsMatch(criteria, @"^(=|<|>){1}"))
-				operationIndex = 1;
-			// If the criteria is an expression, evaluate as such
-			if (operationIndex != -1)
+				operatorIndex = 1;
+			// If the criteria is an expression, evaluate as such.
+			if (operatorIndex != -1)
 			{
-				var operationFromCriteria = criteria.Substring(0, operationIndex);
-				var criteriaString = criteria.Substring(operationIndex);
-				IOperator operation;
-				if (OperatorsDict.Instance.TryGetValue(operationFromCriteria, out operation))
+				var expressionOperatorString = criteria.Substring(0, operatorIndex);
+				var criteriaString = criteria.Substring(operatorIndex);
+				IOperator expressionOperator;
+				if (OperatorsDict.Instance.TryGetValue(expressionOperatorString, out expressionOperator))
 				{
-					switch (operation.Operator)
+					switch (expressionOperator.Operator)
 					{
 						case OperatorType.Equals:
 							return this.isMatch(objectToCompare, criteriaString, true);
@@ -164,10 +157,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						case OperatorType.GreaterThanOrEqual:
 						case OperatorType.LessThan:
 						case OperatorType.LessThanOrEqual:
-							if (objectToCompare == null)
-								return false;
-							else
-								return this.compareAsInequalityExpression(objectToCompare, criteriaString, operation.Operator);
+							return this.compareAsInequalityExpression(objectToCompare, criteriaString, expressionOperator.Operator);
 						default:
 							return this.isMatch(objectToCompare, criteriaString);
 					}
@@ -222,55 +212,43 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 		private bool compareAsInequalityExpression(object objectToCompare, string criteria, OperatorType comparisonOperator)
 		{
-			var handleAsBool = (criteria.Equals(Boolean.TrueString.ToUpper()) || criteria.Equals(Boolean.FalseString.ToUpper()));
-			if (ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaNumber))
+			if (objectToCompare == null)
+				return false;
+			var comparisonResult = int.MinValue;
+			if (ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaNumber)) // Handle the criteria as a number/date.
 			{
-				if (IsNumericForAverageIf(objectToCompare))
+				if (this.IsNumericForAverageIf(objectToCompare))
 				{
 					var numberToCompare = ConvertUtil.GetValueDouble(objectToCompare);
-					switch (comparisonOperator)
-					{
-						case OperatorType.LessThan:
-							return (numberToCompare < criteriaNumber);
-						case OperatorType.LessThanOrEqual:
-							return (numberToCompare <= criteriaNumber);
-						case OperatorType.GreaterThan:
-							return (numberToCompare > criteriaNumber);
-						case OperatorType.GreaterThanOrEqual:
-							return (numberToCompare >= criteriaNumber);
-					}
+					comparisonResult = numberToCompare.CompareTo(criteriaNumber);
 				}
 				else
 					return false;
 			}
-			else
+			else // Handle the criteria as a non-numeric, non-date text value.
 			{
-				var comparisonResult = (objectToCompare.ToString().ToUpper()).CompareTo(criteria);
-				if (handleAsBool)
+				if (criteria.Equals(Boolean.TrueString.ToUpper()) || criteria.Equals(Boolean.FalseString.ToUpper()))
 				{
-					if (objectToCompare is bool objectBool)
-						comparisonResult = (objectToCompare.ToString().ToUpper()).CompareTo(criteria);
-					else
+					if (!(objectToCompare is bool objectBool))
 						return false;
 				}
-				else if (IsNumeric(objectToCompare))
+				else if (this.IsNumeric(objectToCompare))
 					return false;
-				
-				switch (comparisonOperator)
-				{
-					case OperatorType.LessThan:
-						return (comparisonResult == -1);
-					case OperatorType.LessThanOrEqual:
-						return (comparisonResult == -1 || comparisonResult == 0);
-					case OperatorType.GreaterThan:
-						return (comparisonResult == 1);
-					case OperatorType.GreaterThanOrEqual:
-						return (comparisonResult == 1 || comparisonResult == 0);
-					default:
-						return false;
-				}
+				comparisonResult = (objectToCompare.ToString().ToUpper()).CompareTo(criteria);
 			}
-			return false;
+			switch (comparisonOperator)
+			{
+				case OperatorType.LessThan:
+					return (comparisonResult == -1);
+				case OperatorType.LessThanOrEqual:
+					return (comparisonResult == -1 || comparisonResult == 0);
+				case OperatorType.GreaterThan:
+					return (comparisonResult == 1);
+				case OperatorType.GreaterThanOrEqual:
+					return (comparisonResult == 1 || comparisonResult == 0);
+				default:
+					return false;
+			}
 		}
 	}
 }
