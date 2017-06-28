@@ -53,6 +53,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 						 {
 							 argList.Add(ConvertUtil.GetValueDouble(arg.Value));
 						 }
+						 if(arg.Value is string)
+						 {
+							 ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double result);
+							 argList.Add(result);
+						 }
 					 }
 				 });
 		}

@@ -88,12 +88,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			Functions["sumifs"] = new SumIfs();
 			Functions["sumproduct"] = new SumProduct();
 			Functions["sumsq"] = new Sumsq();
-
 			Functions["stdev"] = new Stdev();
 			Functions["stdevp"] = new StdevP();
-			Functions["stdev.s"] = new Stdev();
+			Functions["stdev.s"] = new StdevS();
 			Functions["stdev.p"] = new StdevP();
-
 			Functions["subtotal"] = new Subtotal();
 			Functions["exp"] = new Exp();
 			Functions["log"] = new Log();

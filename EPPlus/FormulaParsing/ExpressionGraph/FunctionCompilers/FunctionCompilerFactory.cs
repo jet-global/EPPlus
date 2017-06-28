@@ -32,6 +32,7 @@ using System;
 using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
@@ -44,6 +45,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 			_specialCompilers.Add(typeof(If), new IfFunctionCompiler(repository.GetFunction("if")));
 			_specialCompilers.Add(typeof(IfError), new IfErrorFunctionCompiler(repository.GetFunction("iferror")));
 			_specialCompilers.Add(typeof(IfNa), new IfNaFunctionCompiler(repository.GetFunction("ifna")));
+			_specialCompilers.Add(typeof(StdevP), new ResolveCellReferencesAsRangeFunctionCompiler(repository.GetFunction("stdev.p")));
+			_specialCompilers.Add(typeof(StdevS), new ResolveCellReferencesAsRangeFunctionCompiler(repository.GetFunction("stdev.s")));
 			foreach (var key in repository.CustomCompilers.Keys)
 			{
 				_specialCompilers.Add(key, repository.CustomCompilers[key]);

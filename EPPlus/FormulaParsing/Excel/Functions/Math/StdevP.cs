@@ -25,22 +25,56 @@
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Calculates standard deviation based on the entire population given as arguments (ignores logical values and text).
+	/// </summary>
 	public class StdevP : HiddenValuesHandlingFunction
 	{
+		/// <summary>
+		/// The standard deviation is a measure of how widely values are dispersed from the average value (the mean).
+		/// Logical values and text representations of numbers that you type directly into the list of arguments are counted.
+		/// If an argument is an array or reference, only numbers in that array or reference are counted.Empty cells, logical values, text, or error values in the array or reference are ignored.
+		/// </summary>
+		/// <param name="arguments">Up too 254 individual arguments.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>The standard deviation based on the entire population.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var args = ArgsToDoubleEnumerable(IgnoreHiddenValues, false, arguments, context);
-			return CreateResult(StandardDeviation(args), DataType.Decimal);
+			foreach (var item in arguments)
+			{
+				if (item.IsExcelRange)
+				{
+					if(item.ValueFirst is double || item.ValueFirst is int)
+						continue;
+					return new CompileResult(eErrorType.Div0);
+				}
+			}
+			if(!TryStandardDeviationEntirePopulation(args, arguments, out double StanderedDeviation))
+				return new CompileResult(eErrorType.Value);
+			return CreateResult(StanderedDeviation, DataType.Decimal);
 		}
 
-		private static double StandardDeviation(IEnumerable<double> values)
+		private static bool TryStandardDeviationEntirePopulation(IEnumerable<double> values, IEnumerable<FunctionArgument> arguments, out double StanderedDeviation)
 		{
-			double avg = values.Average();
-			return MathObj.Sqrt(values.Average(v => MathObj.Pow(v - avg, 2)));
+			List<double> listOfValues = new List<double>();
+			foreach (var item in values)
+			{
+				StanderedDeviation = 0.0;
+				var checkThis = ConvertUtil.TryParseDateObjectToOADate(item, out double result12);
+				if (!ConvertUtil.TryParseDateObjectToOADate(item, out double result))
+					return false;
+				listOfValues.Add(result);
+			}
+			StanderedDeviation = MathObj.Sqrt(values.Average(v => MathObj.Pow(v - listOfValues.Average(), 2)));
+			if (StanderedDeviation == 0 && listOfValues.All(x => x == listOfValues.First()))
+				return false;
+			return true;
 		}
 	}
 }
