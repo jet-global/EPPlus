@@ -57,10 +57,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
 			var rangeArgument = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
-			//var criteriaArgument = (arguments.ElementAt(1).Value.ToString()).ToUpper();
 			string criteriaString = null;
 			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange && criteriaRange.IsMulti)
-				criteriaString = null;
+				return new CompileResult(eErrorType.Div0);
 			else
 				criteriaString = (GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString()).ToUpper();
 
@@ -138,99 +137,75 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return this.IsNumeric(value);
 		}
 
+		// This method should be abstracted out of the AVERAGEIF function.
 		private bool objectMatchesCriteria(object objectToCompare, string criteria)
 		{
-			// given are the cell's value and the criteria parameter as a string.
-
-			//if (criteria == null) possibly can delete this if condition
-			//	return false;
-			if (criteria.Equals(string.Empty))
-				return (objectToCompare == null || objectToCompare.Equals(string.Empty));
-
-			string operationFromCriteria = null;
-			var replaceIndex = -1;
+			var operationIndex = -1;
+			// Check if the criteria is an expression; i.e. begins with the operators <>, =, >, >=, <, or <=
 			if (Regex.IsMatch(criteria, @"^(<>|>=|<=){1}"))
-			{
-				operationFromCriteria = criteria.Substring(0, 2);
-				replaceIndex = 2;
-			}
+				operationIndex = 2;
 			else if (Regex.IsMatch(criteria, @"^(=|<|>){1}"))
+				operationIndex = 1;
+			// If the criteria is an expression, evaluate as such
+			if (operationIndex != -1)
 			{
-				operationFromCriteria = criteria.Substring(0, 1);
-				replaceIndex = 1;
-			}
-			else
-				return isMatch(objectToCompare, criteria);
-
-			var criteriaString = criteria.Substring(replaceIndex);
-			//if (criteriaString.Equals(string.Empty))
-			//	return (objectToCompare == null);
-			IOperator operation;
-			if (OperatorsDict.Instance.TryGetValue(operationFromCriteria, out operation))
-			{
-				// left check - objectToCompare
-				// constant check - criteriaString
-				// operator - operation.Operator
-				if (objectToCompare == null && !(operation.Operator == OperatorType.Equals || operation.Operator == OperatorType.NotEqualTo))
-					return false;
-				switch (operation.Operator)
+				var operationFromCriteria = criteria.Substring(0, operationIndex);
+				var criteriaString = criteria.Substring(operationIndex);
+				IOperator operation;
+				if (OperatorsDict.Instance.TryGetValue(operationFromCriteria, out operation))
 				{
-					case OperatorType.Equals:
-						return this.isMatch(objectToCompare, criteriaString);
-					case OperatorType.NotEqualTo:
-
-						return (!isMatch(objectToCompare, criteriaString));
-						//return (!(criteriaString.Equals(objectToCompare)));
-					case OperatorType.GreaterThan:
-					case OperatorType.GreaterThanOrEqual:
-					case OperatorType.LessThan:
-					case OperatorType.LessThanOrEqual:
-						return this.compareAsInequalityExpression(objectToCompare, criteriaString, operation.Operator);
-					default:
-						return this.isMatch(objectToCompare, criteriaString);
-				}
-			}
-
-			return false;
-		}
-
-		// criteria is either a number, boolean, or string. The string can contain a date/time, or 
-		// text string that may require wildcard Regex.
-		private bool isMatch(object objectToCompare, string criteria)
-		{
-			if (criteria == null || criteria.Equals(string.Empty))
-			{
-				return (objectToCompare == null);
-			}
-			string objectAsString = null;
-			var handleAsBool = (criteria.Equals(Boolean.TrueString.ToUpper()) || criteria.Equals(Boolean.FalseString.ToUpper()));
-			var handleAsDate = ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaAsOADate);
-			if (handleAsBool)
-			{
-				if (objectToCompare is bool objectBool)
-				{
-					return (criteria.Equals(objectBool.ToString().ToUpper()));
+					switch (operation.Operator)
+					{
+						case OperatorType.Equals:
+							return this.isMatch(objectToCompare, criteriaString, true);
+						case OperatorType.NotEqualTo:
+							return !this.isMatch(objectToCompare, criteriaString, true);
+						case OperatorType.GreaterThan:
+						case OperatorType.GreaterThanOrEqual:
+						case OperatorType.LessThan:
+						case OperatorType.LessThanOrEqual:
+							if (objectToCompare == null)
+								return false;
+							else
+								return this.compareAsInequalityExpression(objectToCompare, criteriaString, operation.Operator);
+						default:
+							return this.isMatch(objectToCompare, criteriaString);
+					}
 				}
 				else
 					return false;
 			}
-			if (handleAsDate)
-			{
+			else
+				return this.isMatch(objectToCompare, criteria);
+		}
+
+		/// <summary>
+		/// criteria is either a number, boolean, or string. The string can contain a date/time, or
+		/// text string that may require wildcard Regex.
+		/// </summary>
+		/// <param name="objectToCompare"></param>
+		/// <param name="criteria"></param>
+		/// <param name="matchAsEqualityExpression"></param>
+		/// <returns></returns>
+		private bool isMatch(object objectToCompare, string criteria, bool matchAsEqualityExpression = false)
+		{
+			// Equality related expression evaluation (= or <>) only considers empty cells as equal to empty string criteria.
+			if (criteria.Equals(string.Empty))
+				return ((matchAsEqualityExpression) ? objectToCompare == null : objectToCompare == null || objectToCompare.Equals(string.Empty));
+			var criteriaIsBool = criteria.Equals(Boolean.TrueString.ToUpper()) || criteria.Equals(Boolean.FalseString.ToUpper());
+			if (ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaAsOADate))
 				criteria = criteriaAsOADate.ToString();
-			}
+			string objectAsString = null;
 			if (objectToCompare == null)
 				return false;
-			else if (objectToCompare is bool objectAsBool)
-				objectAsString = objectAsBool.ToString();
+			else if (objectToCompare is bool && criteriaIsBool)
+				return criteria.Equals(objectToCompare.ToString().ToUpper());
+			else if (objectToCompare is bool ^ criteriaIsBool)
+				return false;
 			else if (ConvertUtil.TryParseDateObjectToOADate(objectToCompare, out double objectAsOADate))
 				objectAsString = objectAsOADate.ToString();
-			else if (objectToCompare is System.DateTime objectAsDate)
-				objectAsString = (objectAsDate.ToOADate()).ToString();
 			else
-				objectAsString = objectToCompare.ToString();
-
-			objectAsString = objectAsString.ToUpper();
-
+				objectAsString = objectToCompare.ToString().ToUpper();
 			if (criteria.Contains("*") || criteria.Contains("?"))
 			{
 				var regexPattern = Regex.Escape(criteria);
@@ -239,12 +214,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				regexPattern = regexPattern.Replace("~.*", "\\*");
 				regexPattern = regexPattern.Replace(@"\?", ".");
 				regexPattern = regexPattern.Replace("~.", "\\?");
-				if (Regex.IsMatch(objectAsString, regexPattern))
-				{
-					return true;
-				}
+				return Regex.IsMatch(objectAsString, regexPattern);
 			}
-			return (criteria.CompareTo(objectAsString) == 0);
+			else
+				return (criteria.CompareTo(objectAsString) == 0);
 		}
 
 		private bool compareAsInequalityExpression(object objectToCompare, string criteria, OperatorType comparisonOperator)
@@ -272,8 +245,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			else
 			{
-				//if (IsNumericForAverageIf(objectToCompare))
-				//	return false;
 				var comparisonResult = (objectToCompare.ToString().ToUpper()).CompareTo(criteria);
 				if (handleAsBool)
 				{
@@ -300,110 +271,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 			}
 			return false;
-		}
-
-		public CompileResult aExecute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-		{
-			if (this.ArgumentCountIsValid(arguments, 2) == false)
-				return new CompileResult(eErrorType.Value);
-			var args = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
-			//var criteriaCandidate = arguments.ElementAt(1).Value;
-			var criteria = GetFirstArgument(arguments.ElementAt(1)).ValueFirst != null ? GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
-			//var criteria = criteriaCandidate != null ? criteriaCandidate.ToString() : string.Empty;
-			var retVal = 0d;
-			if (args == null)
-			{
-				var val = GetFirstArgument(arguments.ElementAt(0)).Value;
-				if (criteria != null && Evaluate(val, criteria))
-				{
-					if (arguments.Count() > 2)
-					{
-						var averageVal = arguments.ElementAt(2).Value;
-						var averageRange = averageVal as ExcelDataProvider.IRangeInfo;
-						if (averageRange != null)
-						{
-							retVal = averageRange.First().ValueDouble;
-						}
-						else
-						{
-							retVal = ConvertUtil.GetValueDouble(averageVal, true);
-						}
-					}
-					else
-					{
-						retVal = ConvertUtil.GetValueDouble(val, true);
-					}
-				}
-				else
-				{
-					throw new ExcelErrorValueException(eErrorType.Div0);
-				}
-			}
-			else if (arguments.Count() > 2)
-			{
-				var lookupRange = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
-				retVal = CalculateWithAverageRange(args, criteria, lookupRange);
-			}
-			else
-			{
-				retVal = CalculateSingleRange(args, criteria);
-			}
-			return CreateResult(retVal, DataType.Decimal);
-		}
-
-		private double CalculateWithAverageRange(ExcelDataProvider.IRangeInfo range, string criteria, ExcelDataProvider.IRangeInfo sumRange)
-		{
-			var retVal = 0d;
-			var nMatches = 0;
-			foreach (var cell in range)
-			{
-				if (criteria != null && Evaluate(GetFirstArgument(cell.Value), criteria))
-				//if (criteria != null && objectMatchesCriteria(GetFirstArgument(cell.Value), criteria))
-				{
-					var or = cell.Row - range.Address._fromRow;
-					var oc = cell.Column - range.Address._fromCol;
-					var avgRangeFromRow = sumRange.Address._fromRow;
-					var avgRangeFromCol = sumRange.Address._fromCol;
-					if (sumRange.Address._fromRow + or <= sumRange.Address._toRow &&
-						sumRange.Address._fromCol + oc <= sumRange.Address._toCol)
-					{
-						var v = sumRange.GetOffset(or, oc);
-						nMatches++;
-						retVal += ConvertUtil.GetValueDouble(v, true);
-					}
-				}
-			}
-			return Divide(retVal, nMatches);
-		}
-
-		private double CalculateSingleRange(ExcelDataProvider.IRangeInfo range, string expression)
-		{
-			var retVal = 0d;
-			var nMatches = 0;
-			foreach (var candidate in range)
-			{
-				if (expression != null && IsNumericForAverageIf(GetFirstArgument(candidate.Value)) &&
-					Evaluate(GetFirstArgument(candidate.Value), expression))
-				{
-					retVal += candidate.ValueDouble;
-					nMatches++;
-				}
-			}
-			return Divide(retVal, nMatches);
-		}
-
-
-		private bool Evaluate(object obj, string expression)
-		{
-			if (IsNumeric(obj))
-			{
-				double? candidate = ConvertUtil.GetValueDouble(obj);
-				if (candidate.HasValue)
-				{
-					return _expressionEvaluator.Evaluate(candidate.Value, expression);
-				}
-			}
-			return _expressionEvaluator.Evaluate(obj, expression);
 		}
 	}
 }

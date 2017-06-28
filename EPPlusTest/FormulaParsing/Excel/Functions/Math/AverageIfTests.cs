@@ -142,6 +142,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void DeleteThisLater()
 		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("s");
+				ws.Cells["B2"].Value = true;
+				ws.Cells["C2"].Value = 1;
+				ws.Cells["A2"].Formula = "AVERAGEIF(B2,\"tr?e\",C2)";
+				ws.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)ws.Cells["A2"].Value).Type);
+			}
 			string testString1 = "1";
 			string testString2 = "2";
 			string testString3 = "3";
@@ -359,10 +368,24 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
 			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
 			var args = FunctionsHelper.CreateArgs(range1, "<a", range2);
-			var args2 = FunctionsHelper.CreateArgs(range1, string.Empty, range2);
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(3d, result.Result);
-			result = func.Execute(args2, _parsingContext);
+		}
+
+		[TestMethod]
+		public void AverageIfEmptyStringCriteria()
+		{
+			_worksheet.Cells["A1"].Value = null;
+			_worksheet.Cells["A2"].Value = string.Empty;
+			_worksheet.Cells["A3"].Value = "Not Empty";
+			_worksheet.Cells["B1"].Value = 1d;
+			_worksheet.Cells["B2"].Value = 3d;
+			_worksheet.Cells["B3"].Value = 5d;
+			var func = new AverageIf();
+			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
+			var args = FunctionsHelper.CreateArgs(range1, string.Empty, range2);
+			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(2d, result.Result);
 		}
 
@@ -597,23 +620,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var args = FunctionsHelper.CreateArgs(range, 1d);
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void AverageIfEqualToEmptyString()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = "Not Empty";
-			_worksheet.Cells["B1"].Value = 1d;
-			_worksheet.Cells["B2"].Value = 3d;
-			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, "", range2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2d, result.Result);
 		}
 
 		[TestMethod]
