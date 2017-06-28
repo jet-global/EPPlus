@@ -1,4 +1,30 @@
-﻿using EPPlusTest.FormulaParsing.TestHelpers;
+﻿/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2017 Jan Källman, Matt Delaney, and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+* For code change notes, see the source control history.
+*******************************************************************************/
+using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
@@ -137,25 +163,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(3d, worksheet.Cells["B14"].Value);
 				Assert.AreEqual(3d, worksheet.Cells["B15"].Value);
 			}
-		}
-
-		[TestMethod]
-		public void DeleteThisLater()
-		{
-			using (var package = new ExcelPackage())
-			{
-				var ws = package.Workbook.Worksheets.Add("s");
-				ws.Cells["B2"].Value = true;
-				ws.Cells["C2"].Value = 1;
-				ws.Cells["A2"].Formula = "AVERAGEIF(B2,\">a\",C2)";
-				ws.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)ws.Cells["A2"].Value).Type);
-			}
-			string testString1 = "1";
-			string testString2 = "2";
-			string testString3 = "3";
-			Assert.AreEqual(-1, testString1.CompareTo(testString2));
-			Assert.AreEqual(1, testString3.CompareTo(testString2));
 		}
 
 		[TestMethod]
@@ -332,44 +339,35 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithArraySingleCell()
+		public void AverageIfWithRangeAsSingleCellAndCriteriaAsArrayWorksAsExpected()
 		{
-			_worksheet.Cells[2, 2].Value = 1;
-			_worksheet.Cells[2, 3].Formula = "{1,2,3}";
-			_worksheet.Cells[3, 3].Formula = "AVERAGEIF(C2,{1,2,3},B2)";
-			_worksheet.Cells[3, 3].Calculate();
-			Assert.AreEqual(1d, _worksheet.Cells[3, 3].Value);
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["C2"].Formula = "{1,2,3}";
+				worksheet.Cells["C3"].Formula = "AVERAGEIF(C2,{1,2,3},B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["C3"].Value);
+			}
 		}
 
 		[TestMethod]
-		public void AverageIfWithArrayMultiCell()
+		public void AverageIfWithRangeAsCellRangeAndCriteriaAsArrayWorksAsExpected()
 		{
-			_worksheet.Cells[2, 2].Value = 1;
-			_worksheet.Cells[2, 3].Value = 1;
-			_worksheet.Cells[2, 4].Value = 1;
-			_worksheet.Cells[3, 2].Formula = "{1,2,3}";
-			_worksheet.Cells[3, 3].Formula = "{1,2,3}";
-			_worksheet.Cells[3, 4].Formula = "{1,2,3}";
-			_worksheet.Cells[4, 4].Formula = "AVERAGEIF(B3:D3,{1,2,3},B2:D2)";
-			_worksheet.Cells[4, 4].Calculate();
-			Assert.AreEqual(1d, _worksheet.Cells[4, 4].Value);
-		}
-
-		[TestMethod]
-		public void AverageIfLessThanCharacter()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = "Not Empty";
-			_worksheet.Cells["B1"].Value = 1d;
-			_worksheet.Cells["B2"].Value = 3d;
-			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, "<a", range2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(3d, result.Result);
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["C2"].Value = 1;
+				worksheet.Cells["D2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "{1,2,3}";
+				worksheet.Cells["B3"].Formula = "{1,2,3}";
+				worksheet.Cells["B3"].Formula = "{1,2,3}";
+				worksheet.Cells["D4"].Formula = "AVERAGEIF(B3:D3,{1,2,3},B2:D2)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["D4"].Value);
+			}
 		}
 
 		[TestMethod]
@@ -576,7 +574,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfNumeric()
+		public void AverageIfWithNumericRangeAndAverageRangeWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = 1d;
 			_worksheet.Cells["A2"].Value = 2d;
@@ -593,7 +591,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfNonNumeric()
+		public void AverageIfWithNonNumericRangeAndNumericAverageRangeWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = "Monday";
 			_worksheet.Cells["A2"].Value = "Tuesday";
@@ -610,7 +608,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfNumericExpression()
+		public void AverageIfWithCriteriaAsNumberWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = 1d;
@@ -623,7 +621,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfNotEqualToNull()
+		public void AverageIfWithCriteriaAsNotEqualExpressionWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -640,7 +638,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfEqualToZero()
+		public void AverageIfWithCriteriaAsNumberInStringWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -657,7 +655,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfNotEqualToZero()
+		public void AverageIfWithCriteriaAsNotEqualToZeroExpressionWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -674,7 +672,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfGreaterThanZero()
+		public void AverageIfWithCriteriaAsGreaterThanZeroExpressionWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -691,7 +689,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfGreaterThanOrEqualToZero()
+		public void AverageIfWithCriteriaAsGreaterThanOrEqualToZeroExpressionWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -708,7 +706,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfLessThanZero()
+		public void AverageIfWithCriteriaAsLessThanZeroExpressionWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -725,7 +723,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfLessThanOrEqualToZero()
+		public void AverageIfWithCriteriaAsLessThanOrEqualToZeroExpressionWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -737,57 +735,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
 			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
 			var args = FunctionsHelper.CreateArgs(range1, "<=0", range2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(5d, result.Result);
-		}
-
-		[TestMethod]
-		public void AverageIfLessThanOrEqualToCharacter()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = "Not Empty";
-			_worksheet.Cells["B1"].Value = 1d;
-			_worksheet.Cells["B2"].Value = 3d;
-			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, "<=a", range2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(3d, result.Result);
-		}
-
-		[TestMethod]
-		public void AverageIfGreaterThanCharacter()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = "Not Empty";
-			_worksheet.Cells["B1"].Value = 1d;
-			_worksheet.Cells["B2"].Value = 3d;
-			_worksheet.Cells["B3"].Value = 5d;
-			var function = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, ">a", range2);
-			var result = function.Execute(args, _parsingContext);
-			Assert.AreEqual(5d, result.Result);
-		}
-
-		[TestMethod]
-		public void AverageIfGreaterThanOrEqualToCharacter()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = "Not Empty";
-			_worksheet.Cells["B1"].Value = 1d;
-			_worksheet.Cells["B2"].Value = 3d;
-			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, ">=a", range2);
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(5d, result.Result);
 		}
