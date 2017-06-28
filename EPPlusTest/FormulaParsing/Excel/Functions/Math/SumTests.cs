@@ -217,7 +217,443 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			}
 		}
 
+		[TestMethod]
+		public void SumWithIntegerAndNumericStringReturnsCorrectValue()
+		{
+			var function = new Sum();
+			var result = function.Execute(FunctionsHelper.CreateArgs(1, "3"), this.ParsingContext);
+			Assert.AreEqual(4d, result.Result);
+		}
 
+		[TestMethod]
+		public void SumWithIntegerAndNonNumericStringReturnsCorrectValue()
+		{
+			var function = new Sum();
+			var result = function.Execute(FunctionsHelper.CreateArgs(1, "word"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SumWithIntegerAndBooleanReturnsCorrectValue()
+		{
+			var function = new Sum();
+			var result = function.Execute(FunctionsHelper.CreateArgs(3, true), this.ParsingContext);
+			Assert.AreEqual(4d, result.Result);
+		}
+
+		[TestMethod]
+		public void SumWithIntegerAndNullValueReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUM(1, )";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithIntegerAndNumericStringCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "2";
+				worksheet.Cells["B2"].Formula = "SUM(1, B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithIntegerAndNonNumericStringCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "word";
+				worksheet.Cells["B2"].Formula = "SUM(1, B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithIntegerAndBooleanCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = true;
+				worksheet.Cells["B2"].Formula = "SUM(1, B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithIntegerAndEmptyCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUM(2, B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithNumericStringAndNonNumericStringReturnsPoundValue()
+		{
+			var function = new Sum();
+			var result = function.Execute(FunctionsHelper.CreateArgs("2", "Word"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SumWithNonNumericStringAndNumericStringReturnsPoundValue()
+		{
+			var function = new Sum();
+			var result = function.Execute(FunctionsHelper.CreateArgs("word", "2"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SumWithBooleanValueAndNonNumericStringReturnsPoundValue()
+		{
+			var function = new Sum();
+			var result = function.Execute(FunctionsHelper.CreateArgs(true, "word"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SumWthNonNumericStringAndBooleanValueReturnsPoundValue()
+		{
+			var function = new Sum();
+			var result = function.Execute(FunctionsHelper.CreateArgs("word", true), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SumWithNumericStringAndBooleanValueReturnsCorrectValue()
+		{
+			var function = new Sum();
+			var result = function.Execute(FunctionsHelper.CreateArgs("2", true), this.ParsingContext);
+			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void SumWithBooleanValueAndNumericStringReturnsCorrectValue()
+		{
+			var function = new Sum();
+			var result = function.Execute(FunctionsHelper.CreateArgs(true, "2"), this.ParsingContext);
+			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void SumWithNumericStringAndNonNumericStringCellReferenceReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "2";
+				worksheet.Cells["B2"].Value = "word";
+				worksheet.Cells["B3"].Formula = "SUM(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithNonNumericStringAndNumericStringCellReferenceReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "word";
+				worksheet.Cells["B2"].Value = "2";
+				worksheet.Cells["B3"].Formula = "SUM(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithBooleanAndNonNumericStringCellReferenceReturnsZero()
+		{
+			using (var packge = new ExcelPackage())
+			{
+				var worksheet = packge.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = true;
+				worksheet.Cells["B2"].Value = "word";
+				worksheet.Cells["B3"].Formula = "SUM(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithNonNumericStringAndBooleanCellReferenceReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "word";
+				worksheet.Cells["B2"].Value = true;
+				worksheet.Cells["B3"].Formula = "SUM(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithNumericStringAndBooleanValueCellReferenceReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "2";
+				worksheet.Cells["B2"].Value = true;
+				worksheet.Cells["B3"].Formula = "SUM(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithBooleanValueAndNumericStringCellReferenceReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = true;
+				worksheet.Cells["B2"].Value = "2";
+				worksheet.Cells["B3"].Formula = "SUM(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithCellRangeReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Value = 1.5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Value = 3.5;
+				worksheet.Cells["B5"].Value = 7;
+				worksheet.Cells["B6"].Formula = "SUM(B2:B5)";
+				worksheet.Calculate();
+				Assert.AreEqual(14d, worksheet.Cells["B6"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithIntegersAnNumericStringCellReferenceReturnCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1.5;
+				worksheet.Cells["B2"].Value = "2";
+				worksheet.Cells["B3"].Value = 3.5;
+				worksheet.Cells["B4"].Value = 7;
+				worksheet.Cells["B5"].Formula = "SUM(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(12d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithIntegersAndNonNumericStringCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1.5;
+				worksheet.Cells["B2"].Value = "word";
+				worksheet.Cells["B3"].Value = 3.5;
+				worksheet.Cells["B4"].Value = 7;
+				worksheet.Cells["B5"].Formula = "SUM(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(12d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithIntegersAndBooleanValueCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1.5;
+				worksheet.Cells["B2"].Value = true;
+				worksheet.Cells["B3"].Value = 3.5;
+				worksheet.Cells["B4"].Value = 7;
+				worksheet.Cells["B5"].Formula = "SUM(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(12d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithIntegersAndEmptyCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1.5;
+				worksheet.Cells["B3"].Value = 3.5;
+				worksheet.Cells["B4"].Value = 7;
+				worksheet.Cells["B5"].Formula = "SUM(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(12d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithNumericStringInArrayReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUM({\"1\", \"2\", \"3\"})";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithNumericStringsEnteredDirectlyReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUM(\"1\", \"2\", \"3\")";
+				worksheet.Calculate();
+				Assert.AreEqual(6d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithNumbersInArrayReturnsCorectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUM({1, 2, 3})";
+				worksheet.Calculate();
+				Assert.AreEqual(6d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithNumberAsValueReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 2;
+				worksheet.Cells["B2"].Formula = "SUM(B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithNumberAsFormulaReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "2";
+				worksheet.Cells["B2"].Formula = "SUM(B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithStringAsValueReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "2";
+				worksheet.Cells["B2"].Formula = "SUM(B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithStringAsFormulaReturnsZero()
+		{
+			using (var packge = new ExcelPackage())
+			{
+				var worksheet = packge.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "\"2\"";
+				worksheet.Cells["B2"].Formula = "SUM(B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithBooleanAsValueReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = true;
+				worksheet.Cells["B2"].Formula = "SUM(B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithBooleanAsFormulaReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "TRUE";
+				worksheet.Cells["B2"].Formula = "SUM(B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithDateInStringAsValueReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "6/20/2017";
+				worksheet.Cells["B2"].Formula = "SUM(B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumWithDateInStringAsFormulaReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "\"6/20/2017\"";
+				worksheet.Cells["B2"].Formula = "SUM(B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
+			}
+		}
 		#endregion
 	}
 }
