@@ -42,6 +42,9 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		#endregion
 
 		#region Properties
+		/// <summary>
+		/// Gets the current instance of the ExpressionConverter.
+		/// </summary>
 		public static IExpressionConverter Instance
 		{
 			get
