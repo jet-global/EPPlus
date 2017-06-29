@@ -44,29 +44,29 @@ namespace OfficeOpenXml.Drawing.Vml
 		internal ExcelVmlDrawingComment(XmlNode topNode, ExcelRangeBase range, XmlNamespaceManager ns) :
 			 base(topNode, ns)
 		{
-			Range = range;
-			SchemaNodeOrder = new string[] { "fill", "stroke", "shadow", "path", "textbox", "ClientData", "MoveWithCells", "SizeWithCells", "Anchor", "Locked", "AutoFill", "LockText", "TextHAlign", "TextVAlign", "Row", "Column", "Visible" };
+			this.Range = range;
+			this.SchemaNodeOrder = new string[] { "fill", "stroke", "shadow", "path", "textbox", "ClientData", "MoveWithCells", "SizeWithCells", "Anchor", "Locked", "AutoFill", "LockText", "TextHAlign", "TextVAlign", "Row", "Column", "Visible" };
 		}
 		internal ExcelRangeBase Range { get; set; }
 
 		/// <summary>
-		/// Address in the worksheet
+		/// Gets or sets the address in the worksheet.
 		/// </summary>
 		public string Address
 		{
 			get
 			{
-				return Range.Address;
+				return this.Range.Address;
 			}
 			internal set
 			{
-				Range.Address = value;
+				this.Range.Address = value;
 			}
 		}
 
 		const string VERTICAL_ALIGNMENT_PATH = "x:ClientData/x:TextVAlign";
 		/// <summary>
-		/// Vertical alignment for text
+		/// Gets or sets the vertical alignment for text.
 		/// </summary>
 		public eTextAlignVerticalVml VerticalAlignment
 		{
@@ -87,20 +87,20 @@ namespace OfficeOpenXml.Drawing.Vml
 				switch (value)
 				{
 					case eTextAlignVerticalVml.Center:
-						SetXmlNodeString(VERTICAL_ALIGNMENT_PATH, "Center");
+						this.SetXmlNodeString(VERTICAL_ALIGNMENT_PATH, "Center");
 						break;
 					case eTextAlignVerticalVml.Bottom:
-						SetXmlNodeString(VERTICAL_ALIGNMENT_PATH, "Bottom");
+						this.SetXmlNodeString(VERTICAL_ALIGNMENT_PATH, "Bottom");
 						break;
 					default:
-						DeleteNode(VERTICAL_ALIGNMENT_PATH);
+						this.DeleteNode(VERTICAL_ALIGNMENT_PATH);
 						break;
 				}
 			}
 		}
 		const string HORIZONTAL_ALIGNMENT_PATH = "x:ClientData/x:TextHAlign";
 		/// <summary>
-		/// Horizontal alignment for text
+		/// Gets or sets the horizontal alignment for text.
 		/// </summary>
 		public eTextAlignHorizontalVml HorizontalAlignment
 		{
@@ -121,38 +121,38 @@ namespace OfficeOpenXml.Drawing.Vml
 				switch (value)
 				{
 					case eTextAlignHorizontalVml.Center:
-						SetXmlNodeString(HORIZONTAL_ALIGNMENT_PATH, "Center");
+						this.SetXmlNodeString(HORIZONTAL_ALIGNMENT_PATH, "Center");
 						break;
 					case eTextAlignHorizontalVml.Right:
-						SetXmlNodeString(HORIZONTAL_ALIGNMENT_PATH, "Right");
+						this.SetXmlNodeString(HORIZONTAL_ALIGNMENT_PATH, "Right");
 						break;
 					default:
-						DeleteNode(HORIZONTAL_ALIGNMENT_PATH);
+						this.DeleteNode(HORIZONTAL_ALIGNMENT_PATH);
 						break;
 				}
 			}
 		}
 		const string VISIBLE_PATH = "x:ClientData/x:Visible";
 		/// <summary>
-		/// If the drawing object is visible.
+		/// Gets or sets whether the drawing object is visible.
 		/// </summary>
 		public bool Visible
 		{
 			get
 			{
-				return (TopNode.SelectSingleNode(VISIBLE_PATH, NameSpaceManager) != null);
+				return (this.TopNode.SelectSingleNode(VISIBLE_PATH, NameSpaceManager) != null);
 			}
 			set
 			{
 				if (value)
 				{
-					CreateNode(VISIBLE_PATH);
-					Style = SetStyle(Style, "visibility", "visible");
+					this.CreateNode(VISIBLE_PATH);
+					this.Style = this.SetStyle(Style, "visibility", "visible");
 				}
 				else
 				{
-					DeleteNode(VISIBLE_PATH);
-					Style = SetStyle(Style, "visibility", "hidden");
+					this.DeleteNode(VISIBLE_PATH);
+					this.Style = this.SetStyle(Style, "visibility", "hidden");
 				}
 			}
 		}
@@ -160,7 +160,7 @@ namespace OfficeOpenXml.Drawing.Vml
 		const string BACKGROUNDCOLOR_PATH = "@fillcolor";
 		const string BACKGROUNDCOLOR2_PATH = "v:fill/@color2";
 		/// <summary>
-		/// Background color
+		/// Gets or sets the background color.
 		/// </summary>
 		public Color BackgroundColor
 		{
@@ -188,27 +188,26 @@ namespace OfficeOpenXml.Drawing.Vml
 			set
 			{
 				string color = "#" + value.ToArgb().ToString("X").Substring(2, 6);
-				SetXmlNodeString(BACKGROUNDCOLOR_PATH, color);
-				//SetXmlNode(BACKGROUNDCOLOR2_PATH, color);
+				this.SetXmlNodeString(BACKGROUNDCOLOR_PATH, color);
 			}
 		}
 		const string LINESTYLE_PATH = "v:stroke/@dashstyle";
 		const string ENDCAP_PATH = "v:stroke/@endcap";
 		/// <summary>
-		/// Linestyle for border
+		/// Gets or sets the outline style for border.
 		/// </summary>
-		public eLineStyleVml LineStyle
+		public eLineStyleVml OutlineStyle
 		{
 			get
 			{
-				string v = GetXmlNodeString(LINESTYLE_PATH);
-				if (v == "")
+				string v = this.GetXmlNodeString(LINESTYLE_PATH);
+				if (v == string.Empty)
 				{
 					return eLineStyleVml.Solid;
 				}
 				else if (v == "1 1")
 				{
-					v = GetXmlNodeString(ENDCAP_PATH);
+					v = this.GetXmlNodeString(ENDCAP_PATH);
 					return (eLineStyleVml)Enum.Parse(typeof(eLineStyleVml), v, true);
 				}
 				else
@@ -220,34 +219,34 @@ namespace OfficeOpenXml.Drawing.Vml
 			{
 				if (value == eLineStyleVml.Round || value == eLineStyleVml.Square)
 				{
-					SetXmlNodeString(LINESTYLE_PATH, "1 1");
+					this.SetXmlNodeString(LINESTYLE_PATH, "1 1");
 					if (value == eLineStyleVml.Round)
 					{
-						SetXmlNodeString(ENDCAP_PATH, "round");
+						this.SetXmlNodeString(ENDCAP_PATH, "round");
 					}
 					else
 					{
-						DeleteNode(ENDCAP_PATH);
+						this.DeleteNode(ENDCAP_PATH);
 					}
 				}
 				else
 				{
 					string v = value.ToString();
 					v = v.Substring(0, 1).ToLower(CultureInfo.InvariantCulture) + v.Substring(1, v.Length - 1);
-					SetXmlNodeString(LINESTYLE_PATH, v);
-					DeleteNode(ENDCAP_PATH);
+					this.SetXmlNodeString(LINESTYLE_PATH, v);
+					this.DeleteNode(ENDCAP_PATH);
 				}
 			}
 		}
 		const string LINECOLOR_PATH = "@strokecolor";
 		/// <summary>
-		/// Line color 
+		/// Gets or sets the outline color for the border.
 		/// </summary>
-		public Color LineColor
+		public Color OutlineColor
 		{
 			get
 			{
-				string col = GetXmlNodeString(LINECOLOR_PATH);
+				string col = this.GetXmlNodeString(LINECOLOR_PATH);
 				if (col == "")
 				{
 					return Color.Black;
@@ -269,18 +268,18 @@ namespace OfficeOpenXml.Drawing.Vml
 			set
 			{
 				string color = "#" + value.ToArgb().ToString("X").Substring(2, 6);
-				SetXmlNodeString(LINECOLOR_PATH, color);
+				this.SetXmlNodeString(LINECOLOR_PATH, color);
 			}
 		}
 		const string LINEWIDTH_PATH = "@strokeweight";
 		/// <summary>
-		/// Width of the border
+		/// Gets or sets the width of the border in point format.
 		/// </summary>
-		public float LineWidth
+		public float OutlineWidth
 		{
 			get
 			{
-				string wt = GetXmlNodeString(LINEWIDTH_PATH);
+				string wt = this.GetXmlNodeString(LINEWIDTH_PATH);
 				if (wt == "")
 					return (float).75;
 				if (wt.EndsWith("pt"))
@@ -293,19 +292,19 @@ namespace OfficeOpenXml.Drawing.Vml
 			}
 			set
 			{
-				SetXmlNodeString(LINEWIDTH_PATH, value.ToString(CultureInfo.InvariantCulture) + "pt");
+				this.SetXmlNodeString(LINEWIDTH_PATH, value.ToString(CultureInfo.InvariantCulture) + "pt");
 			}
 		}
-		const string SHAPE_STYLE_PATH = "@style";
+		
 		/// <summary>
-		/// Width of the Comment 
+		/// Gets or sets the width of the comment in point format. 
 		/// </summary>
 		public float Width
 		{
 			get
 			{
 				string v;
-				GetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "width", out v);
+				this.GetStyle(GetXmlNodeString(STYLE_PATH), "width", out v);
 				if (v.EndsWith("pt"))
 					v = v.Substring(0, v.Length - 2);
 				float ret;
@@ -316,18 +315,19 @@ namespace OfficeOpenXml.Drawing.Vml
 			}
 			set
 			{
-				SetXmlNodeString(SHAPE_STYLE_PATH, SetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "width", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
+				this.SetXmlNodeString(STYLE_PATH, SetStyle(GetXmlNodeString(STYLE_PATH), "width", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
 			}
 		}
+
 		/// <summary>
-		/// Height of the Comment 
+		/// Gets or sets the height of the comment in point format.
 		/// </summary>
 		public float Height
 		{
 			get
 			{
 				string v;
-				GetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "height", out v);
+				this.GetStyle(GetXmlNodeString(STYLE_PATH), "height", out v);
 				if (v.EndsWith("pt"))
 					v = v.Substring(0, v.Length - 2);
 				float ret;
@@ -338,22 +338,21 @@ namespace OfficeOpenXml.Drawing.Vml
 			}
 			set
 			{
-				SetXmlNodeString(SHAPE_STYLE_PATH, SetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "height", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
+				this.SetXmlNodeString(STYLE_PATH, this.SetStyle(GetXmlNodeString(STYLE_PATH), "height", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
 			}
 		}
+
 		/// <summary>
-		/// Top Margin of the Comment 
+		/// Gets or sets the top margin of the comment in point format.
 		/// </summary>
 		public float MarginTop
 		{
 			get
 			{
 				string v;
-				GetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "margin-top", out v);
+				this.GetStyle(GetXmlNodeString(STYLE_PATH), "margin-top", out v);
 				if (v.EndsWith("pt"))
-				{
 					v = v.Substring(0, v.Length - 2);
-				}
 				float ret;
 				if (float.TryParse(v, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out ret))
 					return ret;
@@ -362,18 +361,19 @@ namespace OfficeOpenXml.Drawing.Vml
 			}
 			set
 			{
-				SetXmlNodeString(SHAPE_STYLE_PATH, SetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "margin-top", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
+				this.SetXmlNodeString(STYLE_PATH, this.SetStyle(GetXmlNodeString(STYLE_PATH), "margin-top", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
 			}
 		}
+
 		/// <summary>
-		/// Left Margin of the Comment 
+		/// Gets or sets the left margin of the comment in point format.
 		/// </summary>
 		public float MarginLeft
 		{
 			get
 			{
 				string v;
-				GetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "margin-left", out v);
+				this.GetStyle(GetXmlNodeString(STYLE_PATH), "margin-left", out v);
 				if (v.EndsWith("pt"))
 					v = v.Substring(0, v.Length - 2);
 				float ret;
@@ -384,142 +384,152 @@ namespace OfficeOpenXml.Drawing.Vml
 			}
 			set
 			{
-				SetXmlNodeString(SHAPE_STYLE_PATH, SetStyle(GetXmlNodeString(SHAPE_STYLE_PATH), "margin-left", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
+				this.SetXmlNodeString(STYLE_PATH, SetStyle(GetXmlNodeString(STYLE_PATH), "margin-left", value.ToString("N2", CultureInfo.InvariantCulture) + "pt"));
 			}
 		}
-		const string TEXTBOX_STYLE_PATH = "v:textbox/@style";
+
 		/// <summary>
-		/// Autofits the drawingobject 
+		/// Gets or sets whether to autofit the comment.
 		/// </summary>
+		const string TEXTBOX_STYLE_PATH = "v:textbox/@style";
 		public bool AutoFit
 		{
 			get
 			{
 				string value;
-				GetStyle(GetXmlNodeString(TEXTBOX_STYLE_PATH), "mso-fit-shape-to-text", out value);
+				this.GetStyle(GetXmlNodeString(TEXTBOX_STYLE_PATH), "mso-fit-shape-to-text", out value);
 				return value == "t";
 			}
 			set
 			{
-				SetXmlNodeString(TEXTBOX_STYLE_PATH, SetStyle(GetXmlNodeString(TEXTBOX_STYLE_PATH), "mso-fit-shape-to-text", value ? "t" : ""));
+				this.SetXmlNodeString(TEXTBOX_STYLE_PATH, SetStyle(GetXmlNodeString(TEXTBOX_STYLE_PATH), "mso-fit-shape-to-text", value ? "t" : ""));
 			}
 		}
-		const string LOCKED_PATH = "x:ClientData/x:Locked";
+
 		/// <summary>
-		/// If the object is locked when the sheet is protected
+		/// Gets or sets whether the object is locked when the sheet is protected.
 		/// </summary>
+		const string LOCKED_PATH = "x:ClientData/x:Locked";
 		public bool Locked
 		{
 			get
 			{
-				return GetXmlNodeBool(LOCKED_PATH, false);
+				return this.GetXmlNodeBool(LOCKED_PATH, false);
 			}
 			set
 			{
-				SetXmlNodeBool(LOCKED_PATH, value, false);
+				this.SetXmlNodeBool(LOCKED_PATH, value, false);
 			}
 		}
-		const string LOCK_TEXT_PATH = "x:ClientData/x:LockText";
+
 		/// <summary>
-		/// Specifies that the object's text is locked
+		/// Gets or sets whether the object's text is locked.
 		/// </summary>
+		const string LOCK_TEXT_PATH = "x:ClientData/x:LockText";
 		public bool LockText
 		{
 			get
 			{
-				return GetXmlNodeBool(LOCK_TEXT_PATH, false);
+				return this.GetXmlNodeBool(LOCK_TEXT_PATH, false);
 			}
 			set
 			{
-				SetXmlNodeBool(LOCK_TEXT_PATH, value, false);
+				this.SetXmlNodeBool(LOCK_TEXT_PATH, value, false);
 			}
 		}
-		ExcelVmlDrawingPosition _from = null;
+
 		/// <summary>
-		/// From position. For comments only when Visible=true.
+		/// Gets or sets the from-position. Only applies when Visible is set to true.
 		/// </summary>
+		ExcelVmlDrawingPosition _from = null;
 		public ExcelVmlDrawingPosition From
 		{
 			get
 			{
 				if (_from == null)
 				{
-					_from = new ExcelVmlDrawingPosition(NameSpaceManager, TopNode.SelectSingleNode("x:ClientData", NameSpaceManager), 0);
+					_from = new ExcelVmlDrawingPosition(this.NameSpaceManager, this.TopNode.SelectSingleNode("x:ClientData", this.NameSpaceManager), 0);
 				}
 				return _from;
 			}
 		}
-		ExcelVmlDrawingPosition _to = null;
+
 		/// <summary>
-		/// To position. For comments only when Visible=true.
+		/// Gets or sets the to-position. Only applies when Visible is set to true.
 		/// </summary>
+		ExcelVmlDrawingPosition _to = null;
 		public ExcelVmlDrawingPosition To
 		{
 			get
 			{
 				if (_to == null)
 				{
-					_to = new ExcelVmlDrawingPosition(NameSpaceManager, TopNode.SelectSingleNode("x:ClientData", NameSpaceManager), 4);
+					_to = new ExcelVmlDrawingPosition(this.NameSpaceManager, this.TopNode.SelectSingleNode("x:ClientData", this.NameSpaceManager), 4);
 				}
 				return _to;
 			}
 		}
-		const string ROW_PATH = "x:ClientData/x:Row";
+
 		/// <summary>
-		/// Row position for a comment
+		/// Gets or sets the row position of the comment.
 		/// </summary>
+		const string ROW_PATH = "x:ClientData/x:Row";
 		internal int Row
 		{
 			get
 			{
-				return GetXmlNodeInt(ROW_PATH);
+				return this.GetXmlNodeInt(ROW_PATH);
 			}
 			set
 			{
-				SetXmlNodeString(ROW_PATH, value.ToString(CultureInfo.InvariantCulture));
+				this.SetXmlNodeString(ROW_PATH, value.ToString(CultureInfo.InvariantCulture));
 			}
 		}
-		const string COLUMN_PATH = "x:ClientData/x:Column";
+
 		/// <summary>
-		/// Column position for a comment
+		/// Gets or sets the column position of the comment.
 		/// </summary>
+		const string COLUMN_PATH = "x:ClientData/x:Column";
 		internal int Column
 		{
 			get
 			{
-				return GetXmlNodeInt(COLUMN_PATH);
+				return this.GetXmlNodeInt(COLUMN_PATH);
 			}
 			set
 			{
-				SetXmlNodeString(COLUMN_PATH, value.ToString(CultureInfo.InvariantCulture));
+				this.SetXmlNodeString(COLUMN_PATH, value.ToString(CultureInfo.InvariantCulture));
 			}
 		}
+
+		/// <summary>
+		/// Gets or sets the style of the comment.
+		/// </summary>
 		const string STYLE_PATH = "@style";
 		internal string Style
 		{
 			get
 			{
-				return GetXmlNodeString(STYLE_PATH);
+				return this.GetXmlNodeString(STYLE_PATH);
 			}
 			set
 			{
-				SetXmlNodeString(STYLE_PATH, value);
+				this.SetXmlNodeString(STYLE_PATH, value);
 			}
 		}
-		#region IRangeID Members
 
+		#region IRangeID Members
 		ulong IRangeID.RangeID
 		{
 			get
 			{
-				return ExcelCellBase.GetCellID(Range.Worksheet.SheetID, Range.Start.Row, Range.Start.Column);
+				return ExcelCellBase.GetCellID(this.Range.Worksheet.SheetID, this.Range.Start.Row, this.Range.Start.Column);
 			}
 			set
 			{
 
 			}
 		}
-
 		#endregion
 	}
 }

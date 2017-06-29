@@ -758,8 +758,6 @@ namespace OfficeOpenXml
 		private static _setValue _setValueDelegate = Set_Value;
 		private static _setValue _setHyperLinkDelegate = Set_HyperLink;
 		private static _setValue _setIsRichTextDelegate = Set_IsRichText;
-		private static _setValue _setExistsCommentDelegate = Exists_Comment;
-		private static _setValue _setCommentDelegate = Set_Comment;
 
 		private static void Set_StyleID(ExcelRangeBase range, object value, int row, int col)
 		{
@@ -859,18 +857,6 @@ namespace OfficeOpenXml
 		private static void Set_IsRichText(ExcelRangeBase range, object value, int row, int col)
 		{
 			range.myWorksheet._flags.SetFlagValue(row, col, (bool)value, CellFlags.RichText);
-		}
-
-		private static void Exists_Comment(ExcelRangeBase range, object value, int row, int col)
-		{
-			if (range.myWorksheet._commentsStore.Exists(row, col))
-				throw (new InvalidOperationException(string.Format("Cell {0} already contain a comment.", new ExcelCellAddress(row, col).Address)));
-		}
-
-		private static void Set_Comment(ExcelRangeBase range, object value, int row, int col)
-		{
-			string[] v = (string[])value;
-			range.myWorksheet.Comments.Add(new ExcelRangeBase(range.myWorksheet, GetAddress(range._fromRow, range._fromCol)), v[0], v[1]);
 		}
 		#endregion
 		
@@ -1981,9 +1967,6 @@ namespace OfficeOpenXml
 				if (this.myWorksheet._hyperLinks.Exists(row, col, out hl))
 					cell.HyperLink = hl;
 
-				// Will just be null if no comment exists.
-				cell.Comment = this.myWorksheet.Cells[cse.Row, cse.Column].Comment;
-
 				if (this.myWorksheet._flags.Exists(row, col, out flag))
 					cell.Flag = flag;
 				copiedValue.Add(cell);
@@ -2024,7 +2007,6 @@ namespace OfficeOpenXml
 				}
 			}
 			var copiedMergedCells = new Dictionary<int, ExcelAddress>();
-			//Merged cells
 			var csem = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.myWorksheet.MergedCells.Cells, this._fromRow, this._fromCol, this._toRow, this._toCol);
 			while (csem.MoveNext())
 			{
@@ -2046,7 +2028,6 @@ namespace OfficeOpenXml
 					}
 				}
 			}
-			// Comment cells
 			var copiedCommentCells = new List<CopiedCell>();
 			var csec = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.myWorksheet._commentsStore, this._fromRow, this._fromCol, this._toRow, this._toCol);
 			while (csec.MoveNext())
@@ -2059,7 +2040,6 @@ namespace OfficeOpenXml
 					Column = column,
 					Value = null
 				};
-
 				// Will just be null if no comment exists.
 				cell.Comment = this.myWorksheet.Cells[csec.Row, csec.Column].Comment;
 				if (cell.Comment != null)
