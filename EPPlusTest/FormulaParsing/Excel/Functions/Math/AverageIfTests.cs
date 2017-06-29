@@ -574,6 +574,30 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void AverageIfWithDifferentRangeSizesWorksAsExpected()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "AVERAGEIF(C2:D4,\">0\",E2)";
+				worksheet.Cells["C2"].Value = 1;
+				worksheet.Cells["C3"].Value = 2;
+				worksheet.Cells["C4"].Value = 3;
+				worksheet.Cells["D2"].Value = 4;
+				worksheet.Cells["D3"].Value = 5;
+				worksheet.Cells["D4"].Value = 6;
+				worksheet.Cells["E2"].Value = 1;
+				worksheet.Cells["E3"].Value = 3;
+				worksheet.Cells["E4"].Value = 5;
+				worksheet.Cells["F2"].Value = 7;
+				worksheet.Cells["F3"].Value = 9;
+				worksheet.Cells["F4"].Value = 11;
+				worksheet.Calculate();
+				Assert.AreEqual(6d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void AverageIfWithNumericRangeAndAverageRangeWorksAsExpected()
 		{
 			_worksheet.Cells["A1"].Value = 1d;
