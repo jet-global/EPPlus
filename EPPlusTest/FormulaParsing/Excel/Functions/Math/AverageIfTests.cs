@@ -606,11 +606,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells["B1"].Value = 1d;
 			_worksheet.Cells["B2"].Value = 3d;
 			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, ">1", range2);
-			var result = func.Execute(args, _parsingContext);
+			IRangeInfo cellsToCompare = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			IRangeInfo cellsToAverage = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
+			var function = new AverageIf();
+			var arguments = FunctionsHelper.CreateArgs(cellsToCompare, ">1", cellsToAverage);
+			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(4d, result.Result);
 		}
 
@@ -623,11 +623,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells["B1"].Value = 1d;
 			_worksheet.Cells["B2"].Value = 3d;
 			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, "T*day", range2);
-			var result = func.Execute(args, _parsingContext);
+			IRangeInfo cellsToCompare = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			IRangeInfo cellsToAverage = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
+			var function = new AverageIf();
+			var arguments = FunctionsHelper.CreateArgs(cellsToCompare, "T*day", cellsToAverage);
+			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(4d, result.Result);
 		}
 
@@ -637,10 +637,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = 1d;
 			_worksheet.Cells["A3"].Value = "Not Empty";
-			var func = new AverageIf();
-			IRangeInfo range = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			var args = FunctionsHelper.CreateArgs(range, 1d);
-			var result = func.Execute(args, _parsingContext);
+			IRangeInfo cellsToCompareAndAverage = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			var function = new AverageIf();
+			var arguments = FunctionsHelper.CreateArgs(cellsToCompareAndAverage, 1d);
+			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(1d, result.Result);
 		}
 
@@ -653,11 +653,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells["B1"].Value = 1d;
 			_worksheet.Cells["B2"].Value = 3d;
 			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, "<>", range2);
-			var result = func.Execute(args, _parsingContext);
+			IRangeInfo cellsToCompare = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			IRangeInfo cellsToAverage = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
+			var function = new AverageIf();
+			var arguments = FunctionsHelper.CreateArgs(cellsToCompare, "<>", cellsToAverage);
+			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(4d, result.Result);
 		}
 
@@ -670,11 +670,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells["B1"].Value = 1d;
 			_worksheet.Cells["B2"].Value = 3d;
 			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, "0", range2);
-			var result = func.Execute(args, _parsingContext);
+			IRangeInfo cellsToCompare = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			IRangeInfo cellsToAverage = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
+			var function = new AverageIf();
+			var arguments = FunctionsHelper.CreateArgs(cellsToCompare, "0", cellsToAverage);
+			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(5d, result.Result);
 		}
 
@@ -687,11 +687,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells["B1"].Value = 1d;
 			_worksheet.Cells["B2"].Value = 3d;
 			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, "<>0", range2);
-			var result = func.Execute(args, _parsingContext);
+			IRangeInfo cellsToCompare = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			IRangeInfo cellsToAverage = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
+			var function = new AverageIf();
+			var arguments = FunctionsHelper.CreateArgs(cellsToCompare, "<>0", cellsToAverage);
+			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(2d, result.Result);
 		}
 
@@ -704,11 +704,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells["B1"].Value = 1d;
 			_worksheet.Cells["B2"].Value = 3d;
 			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, ">0", range2);
-			var result = func.Execute(args, _parsingContext);
+			IRangeInfo cellsToCompare = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			IRangeInfo cellsToAverage = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
+			var function = new AverageIf();
+			var arguments = FunctionsHelper.CreateArgs(cellsToCompare, ">0", cellsToAverage);
+			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(5d, result.Result);
 		}
 
@@ -721,11 +721,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells["B1"].Value = 1d;
 			_worksheet.Cells["B2"].Value = 3d;
 			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, ">=0", range2);
-			var result = func.Execute(args, _parsingContext);
+			IRangeInfo cellsToCompare = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			IRangeInfo cellsToAverage = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
+			var function = new AverageIf();
+			var arguments = FunctionsHelper.CreateArgs(cellsToCompare, ">=0", cellsToAverage);
+			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(5d, result.Result);
 		}
 
@@ -738,11 +738,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells["B1"].Value = 1d;
 			_worksheet.Cells["B2"].Value = 3d;
 			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, "<0", range2);
-			var result = func.Execute(args, _parsingContext);
+			IRangeInfo cellsToCompare = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			IRangeInfo cellsToAverage = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
+			var function = new AverageIf();
+			var arguments = FunctionsHelper.CreateArgs(cellsToCompare, "<0", cellsToAverage);
+			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(5d, result.Result);
 		}
 
@@ -755,11 +755,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells["B1"].Value = 1d;
 			_worksheet.Cells["B2"].Value = 3d;
 			_worksheet.Cells["B3"].Value = 5d;
-			var func = new AverageIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, "<=0", range2);
-			var result = func.Execute(args, _parsingContext);
+			IRangeInfo cellsToCompare = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
+			IRangeInfo cellsToAverage = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
+			var function = new AverageIf();
+			var arguments = FunctionsHelper.CreateArgs(cellsToCompare, "<=0", cellsToAverage);
+			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(5d, result.Result);
 		}
 		#endregion
