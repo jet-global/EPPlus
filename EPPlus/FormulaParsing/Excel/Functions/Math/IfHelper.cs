@@ -1,16 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2017 Jan Källman, Matt Delaney, and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+* For code change notes, see the source control history.
+*******************************************************************************/
+using System;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using OfficeOpenXml.FormulaParsing.Excel.Operators;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class provides a criteria comparison function to use in any Excel functions
+	/// that require comparing cell values against a specific criteria.
+	/// </summary>
 	public static class IfHelper
 	{
+		/// <summary>
+		/// Compares the given <paramref name="objectToCompare"/> against the given <paramref name="criteria"/>.
+		/// This method is expected to be used with any of the -IF or -IFS Excel functions (ex: the AVERAGEIF function).
+		/// </summary>
+		/// <param name="objectToCompare">The object to compare against the given <paramref name="criteria"/>.</param>
+		/// <param name="criteria">The criteria value or expression that dictates whether the given <paramref name="objectToCompare"/> passes or fails.</param>
+		/// <returns>Returns true if <paramref name="objectToCompare"/> matches the <paramref name="criteria"/>.</returns>
 		public static bool objectMatchesCriteria(object objectToCompare, string criteria)
 		{
 			var operatorIndex = -1;
@@ -49,8 +82,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return isMatch(objectToCompare, criteria);
 		}
 
-		/// criteria is either a number, boolean, or string. The string can contain a date/time, or
-		/// text string that may require wildcard Regex.
+		/// <summary>
+		/// Compares the <paramref name="objectToCompare"/> with the given <paramref name="criteria"/>.
+		/// <paramref name="criteria"/> is expected to be either a number, boolean, string, or null. The string
+		/// can contain a date/time, or a text value that may require wildcard Regex.
+		/// The given object is considered a match with the criteria if their content are equivalent in value.
+		/// </summary>
+		/// <param name="objectToCompare">The object to compare against the given <paramref name="criteria"/>.</param>
+		/// <param name="criteria">The criteria value that dictates whether the <paramref name="objectToCompare"/> passes or fails.</param>
+		/// <param name="matchAsEqualityExpression">
+		///		Indicate if the <paramref name="criteria"/> came from an equality related expression,
+		///		which requires slightly different handling.</param>
+		/// <returns>Returns true if <paramref name="objectToCompare"/> matches the <paramref name="criteria"/>.</returns>
 		private static bool isMatch(object objectToCompare, string criteria, bool matchAsEqualityExpression = false)
 		{
 			// Equality related expression evaluation (= or <>) only considers empty cells as equal to empty string criteria.
@@ -85,6 +128,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return (criteria.CompareTo(objectAsString) == 0);
 		}
 
+		/// <summary>
+		/// Compare the given <paramref name="objectToCompare"/> with the given <paramref name="criteria"/> using
+		/// the given <paramref name="comparisonOperator"/>.
+		/// </summary>
+		/// <param name="objectToCompare">The object to compare against the given <paramref name="criteria"/>.</param>
+		/// <param name="criteria">The criteria value that dictates whether the <paramref name="objectToCompare"/> passes or fails.</param>
+		/// <param name="comparisonOperator">
+		///		The inequality operator that dictates how the <paramref name="objectToCompare"/> should
+		///		be compared to the <paramref name="criteria"/>.</param>
+		/// <returns>Returns true if the <paramref name="objectToCompare"/> passes the comparison with <paramref name="criteria"/>.</returns>
 		private static bool compareAsInequalityExpression(object objectToCompare, string criteria, OperatorType comparisonOperator)
 		{
 			if (objectToCompare == null)
@@ -126,13 +179,25 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 		}
 
-		public static bool IsNumeric(object val, bool excludeBool = false)
+		/// <summary>
+		/// Returns true if <paramref name="numericCandidate"/> is numeric.
+		/// </summary>
+		/// <param name="numericCandidate">The object to check for numeric content.</param>
+		/// <param name="excludeBool">
+		///		An optional parameter to exclude boolean values from the data types that are considered numeric.
+		///		This method considers booleans as numeric by default.</param>
+		/// <returns>Returns true if <paramref name="numericCandidate"/> is numeric.</returns>
+		public static bool IsNumeric(object numericCandidate, bool excludeBool = false)
 		{
-			if (val == null)
+			if (numericCandidate == null)
 				return false;
-			if (excludeBool && val is bool)
+			if (excludeBool && numericCandidate is bool)
 				return false;
-			return (val.GetType().IsPrimitive || val is double || val is decimal || val is System.DateTime || val is TimeSpan);
+			return (numericCandidate.GetType().IsPrimitive || 
+				numericCandidate is double || 
+				numericCandidate is decimal || 
+				numericCandidate is System.DateTime || 
+				numericCandidate is TimeSpan);
 		}
 	}
 }
