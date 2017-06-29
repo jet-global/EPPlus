@@ -362,8 +362,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["C2"].Value = 1;
 				worksheet.Cells["D2"].Value = 1;
 				worksheet.Cells["B3"].Formula = "{1,2,3}";
-				worksheet.Cells["B3"].Formula = "{1,2,3}";
-				worksheet.Cells["B3"].Formula = "{1,2,3}";
+				worksheet.Cells["C3"].Formula = "{1,2,3}";
+				worksheet.Cells["D3"].Formula = "{1,2,3}";
 				worksheet.Cells["D4"].Formula = "AVERAGEIF(B3:D3,{1,2,3},B2:D2)";
 				worksheet.Calculate();
 				Assert.AreEqual(1d, worksheet.Cells["D4"].Value);
@@ -485,7 +485,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B2"].Formula = "AVERAGEIF(C2:C3,\"Mon?ay\",D2:D3)";
 				worksheet.Cells["B3"].Formula = "AVERAGEIF(C2:C3,\"Mon~?ay\",D2:D3)";
 				worksheet.Cells["B4"].Formula = "AVERAGEIF(C4:C5,\"Mon*ay\",D4:D5)";
-				worksheet.Cells["B5"].Formula = "AVERAGEIF(C:C,\"Mon~*ay\",D:D)";
+				worksheet.Cells["B5"].Formula = "AVERAGEIF(C4:C5,\"Mon~*ay\",D4:D5)";
 				worksheet.Calculate();
 				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
 				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);

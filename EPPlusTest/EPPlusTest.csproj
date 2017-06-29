@@ -159,6 +159,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\FactDoubleTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SqrtTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SqrtPiTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SumIfsTests.cs" />
