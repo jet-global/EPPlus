@@ -1696,7 +1696,7 @@ namespace OfficeOpenXml
 							pivotTable.CacheDefinition.SourceRange.Worksheet == this &&
 							pivotTable.CacheDefinition.SourceRange.IsName == false &&
 							rowFrom <= pivotTable.CacheDefinition.SourceRange.End.Row)
-							pivotTable.CacheDefinition.SourceRange.Address = pivotTable.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows).Address;
+							pivotTable.CacheDefinition.SourceRange.Address = pivotTable.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows)?.Address ?? ExcelErrorValue.Values.Ref;
 					}
 				}
 				this.UpdateSparkLines(-rows, rowFrom, 0, 0);
@@ -4889,7 +4889,6 @@ namespace OfficeOpenXml
 					sparkline.HostCell._ws = newName;
 				}
 			}
-
 		}
 
 		private static void SetValueInnerUpdate(List<ExcelCoreValue> list, int index, object value)

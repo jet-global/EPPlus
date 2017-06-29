@@ -3945,6 +3945,332 @@ namespace EPPlusTest
 			}
 		}
 		#endregion
+
+		#region Delete Rows over the start of a range. 
+		[TestMethod]
+		public void DeleteRowsFromBeginningOfRangeUpdatesScatterChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+				worksheet.DeleteRow(1, 3);
+				Assert.AreEqual("'Sheet1'!$B$1:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$1:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromBeginningOfRangeUpdatesPieChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Pie) as ExcelPieChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 5);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$8", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$8", chart.Series[0].Series);
+				worksheet.DeleteRow(1, 5);
+				Assert.AreEqual("'Sheet1'!$B$1:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$1:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromStartOfRangeUpdatesBarChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 5);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$8", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$8", chart.Series[0].Series);
+				worksheet.DeleteRow(1, 5);
+				Assert.AreEqual("'Sheet1'!$B$1:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$1:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromStartOfRangeUpdatesBubbleChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				worksheet.Cells[2, 4].Value = 1;
+				worksheet.Cells[3, 4].Value = 2;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "$D$2:$D$3");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$2:$D$6", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+				worksheet.DeleteRow(1, 3);
+				Assert.AreEqual("'Sheet1'!$B$1:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$1:$C$3", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$1:$D$3", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\ComboFromExcel.xlsx")]
+		public void DeleteRowsFromStartOfRangeUpdatesComboChart()
+		{
+			var file = new FileInfo("ComboFromExcel.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[1].Series);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].Series);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+				sheet.DeleteRow(1, 20);
+				Assert.AreEqual("'Sheet1'!$C$1:$C$22", drawing.Series[1].Series);
+				Assert.AreEqual("'Sheet1'!$B$1:$B$22", drawing.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$1:$D$22", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromStartOfRangeUpdatesExcel2016ChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+				var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$2:$Z$26"));
+				var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$9:$Z$26"));
+				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$4:$Z$26"));
+
+				worksheet1.DeleteRow(1, 10);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				Assert.AreEqual("$A$1:$Z$16", address);
+				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$1:$Z$16", address);
+				address = null;
+				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$4:$Z$26", address);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowFromStartOfRangeUpdatesDataValidationRange()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$B$6";
+				validation = sheet.Cells["D6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$B$6";
+
+				sheet.DeleteRow(1, 4);
+
+				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$1:$B$2", validationRange.Formula.ExcelFormula);
+
+				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=$B$1:$B$2", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromBeginningOfRangeUpdatesDataValidationRangeAcrossSheets()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
+				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
+
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
+				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
+
+				sheetTarget.DeleteRow(1, 3);
+
+				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$1:$E$2", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowFromBeginningOfRangeUpdatesCrossSheetFunctions()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+
+				sheet1.Cells["C3"].Formula = "SUM(sheet2!C3:C5)";
+
+				sheet2.DeleteRow(1, 4);
+
+				Assert.AreEqual("SUM('SHEET2'!C1)", sheet1.Cells["C3"].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowFromBeginningOfRangeUpdatesPivotTableSourceRangeCrossSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
+				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet1.DeleteRow(1, 1);
+
+				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet2.DeleteRow(1, 5);
+
+				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E1:E2", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+		#endregion
+
+		#region Delete Rows so that the range references are no longer valid.
+		[TestMethod]
+		public void DeleteRowsAllRowsUpdatesChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+				worksheet.DeleteRow(1, 12);
+				Assert.AreEqual("'Sheet1'!#REF!", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!#REF!", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsOverAllDataUpdatesBubbleChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				worksheet.Cells[2, 4].Value = 1;
+				worksheet.Cells[3, 4].Value = 2;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "$D$2:$D$3");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$2:$D$6", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+				worksheet.DeleteRow(1, 6);
+				Assert.AreEqual("'Sheet1'!#REF!", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!#REF!", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!#REF!", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsCoveringAllValuesUpdatesExcel2016ChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+				var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$2:$Z$26"));
+				var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$9:$Z$26"));
+				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$4:$Z$26"));
+
+				worksheet1.DeleteRow(1, 26);
+				Assert.AreEqual("#REF!", range0.Address);
+				Assert.AreEqual("#REF!", range1.Address);
+				ExcelRangeBase.SplitAddress(range2.Address, out string workbook, out string worksheet, out string address);
+				Assert.AreEqual("$A$4:$Z$26", address);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowEntireDataValidationSourceRangeUpdatesDataValidationRange()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$B$6";
+				validation = sheet.Cells["D6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$B$6";
+
+				sheet.DeleteRow(1, 127);
+
+				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!#REF!", validationRange.Formula.ExcelFormula);
+
+				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=#REF!", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowEntireSourceRangeUpdatesPivotTableSourceRangeCrossSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
+				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet1.DeleteRow(1, 1);
+
+				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet2.DeleteRow(1, 10);
+
+				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!#REF!", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+		#endregion
 		#endregion
 
 		#region DeleteColumn Tests
