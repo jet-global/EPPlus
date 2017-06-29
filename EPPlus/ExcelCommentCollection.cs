@@ -31,6 +31,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Xml;
 using OfficeOpenXml.Utils;
@@ -292,9 +293,22 @@ namespace OfficeOpenXml
 					comment.Reference = address.Address;
 				}
 			}
+			int i = -1;
+			List<int> deletedIndices = new List<int>();
 			foreach (var comment in deletedComments)
 			{
-				this.Remove(comment);
+				if (this.Worksheet._commentsStore.Exists(comment.Range._fromRow, comment.Range._fromCol, out i))
+				{
+					this.Remove(comment);
+					deletedIndices.Add(i);
+				}
+			}
+			this.Worksheet._commentsStore.Delete(fromRow, fromCol, rows, columns);
+			var ci = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.Worksheet._commentsStore);
+			while (ci.MoveNext())
+			{
+				int offset = deletedIndices.Count(di => ci.Value > di);
+				ci.Value -= offset;
 			}
 		}
 
@@ -307,7 +321,6 @@ namespace OfficeOpenXml
 		/// <param name="columns">The number of columns to insert.</param>
 		public void Insert(int fromRow, int fromCol, int rows, int columns)
 		{
-			//List<ExcelComment> commentsToShift = new List<ExcelComment>();
 			foreach (ExcelComment comment in this.Comments)
 			{
 				var address = new ExcelAddressBase(comment.Address);
@@ -320,16 +333,7 @@ namespace OfficeOpenXml
 					comment.Reference = comment.Range.AddColumn(fromCol, columns).Address;
 				}
 			}
-			//foreach (ExcelComment comment in commentsToShift)
-			//{
-			//  Remove(comment);
-			//  var address = new ExcelAddressBase(comment.Address);
-			//  if (address._fromRow >= fromRow)
-			//    address._fromRow += rows;
-			//  if (address._fromCol >= fromCol)
-			//    address._fromCol += columns;
-			//  Add(Worksheet.Cells[address._fromRow, address._fromCol], comment.Text, comment.Author);
-			//}
+			this.Worksheet._commentsStore.Insert(fromRow, fromCol, rows, columns);
 		}
 
 		void IDisposable.Dispose()
