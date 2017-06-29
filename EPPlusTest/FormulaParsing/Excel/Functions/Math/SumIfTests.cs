@@ -1068,6 +1068,247 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			}
 		}
 
+		[TestMethod]
+		public void SumIfWithCriteriaWithExpressionCharacterReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheeet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheeet.Cells["B1"].Value = "=";
+				worksheeet.Cells["B2"].Value = 1;
+				worksheeet.Cells["B3"].Formula = "SUMIF(B1, \"=\", B2)";
+				worksheeet.Calculate();
+				Assert.AreEqual(0d, worksheeet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithExpressionCharAndEmptyStringReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "";
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "SUMIF(B1, \"=\", B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithExpressionCharAndEmptyCellReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "SUMIF(B1, \"=\", B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithStringComparisonsReturnsCorrectValues()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "ay";
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "SUMIF($B$1, \"<axz\", $B$2)";
+				worksheet.Cells["B4"].Formula = "SUMIF($B$1, \"<aya\", $B$2)";
+				worksheet.Cells["B5"].Formula = "SUMIF($B$1, \"<az\", $B$2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithStringComparisonsWithWildcardCharacterReturnCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "ay";
+				worksheet.Cells["B2"].Value = "Modday";
+				worksheet.Cells["B3"].Value = "Monnnnday";
+				worksheet.Cells["B4"].Value = 1;
+				worksheet.Cells["B5"].Value = 3;
+				worksheet.Cells["B6"].Value = 5;
+				worksheet.Cells["B7"].Formula = "SUMIF($B$1:$B$3, \"=Mo*day\", $B$4:$B$6)";
+				worksheet.Cells["B8"].Formula = "SUMIF($B$1:$B$1, \">Mo*day\", $B$4:$B$6)";
+				worksheet.Cells["B9"].Formula = "SUMIF(B$1:$B$3, \"<Mo*day\", $B$4:$B$6)";
+				worksheet.Calculate();
+				Assert.AreEqual(8d, worksheet.Cells["B7"].Value);
+				Assert.AreEqual(8d, worksheet.Cells["B8"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B9"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithStringComparisionsWithEscapedWildcardCharacterReturnCorrectValues()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "Mon?ay";
+				worksheet.Cells["B2"].Value = "Monday";
+				worksheet.Cells["B3"].Value = 1;
+				worksheet.Cells["B4"].Value = 3;
+				worksheet.Cells["C1"].Value = "Mon*ay";
+				worksheet.Cells["C2"].Value = "Monddday";
+				worksheet.Cells["C3"].Value = 5;
+				worksheet.Cells["C4"].Value = 7;
+				worksheet.Cells["D1"].Formula = "SUMIF(B1:B2, \"Mon?ay\", B3:B4)";
+				worksheet.Cells["D2"].Formula = "SUMIF(B1:B2, \"Mon~?ay\", B3:B4)";
+				worksheet.Cells["D3"].Formula = "SUMIF(C1:C2, \"Mon*ay\", C3:C4)";
+				worksheet.Cells["D4"].Formula = "SUMIF(C1:C2, \"Mon~*ay\", C3:C4)";
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["D1"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["D2"].Value);
+				Assert.AreEqual(12d, worksheet.Cells["D3"].Value);
+				Assert.AreEqual(5d, worksheet.Cells["D4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithStringComparisonWithEmptyCellReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "SUMIF(B1, \">a\", B2)";
+				worksheet.Cells["B4"].Formula = "SUMIF(B1, \"<a\", B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithStringComparisonWithEmptyStringReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "";
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "SUMIF(B1, \">a\", B2)";
+				worksheet.Cells["B4"].Formula = "SUMIF(B1, \"<a\", B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithStringComparisonWithStringReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "zzz";
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "SUMIF(B1, \">a\", B2)";
+				worksheet.Cells["B4"].Formula = "SUMIF(B1, \"<a\", B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithStringComparisonWithNumberReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "SUMIF(B1, \">a\", B2)";
+				worksheet.Cells["B4"].Formula = "SUMIF(B1, \"<a\", B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithStringComparisonWithNumberInStringReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "1";
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "SUMIF(B1, \">a\", B2)";
+				worksheet.Cells["B4"].Formula = "SUMIF(B1, \"<a\", B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithStringComparisonWithBooleanValuesReturnsCorrectValues()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = true;
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Formula = "SUMIF(B1, \">a\", B2)";
+				worksheet.Cells["B4"].Formula = "SUMIF(B1, \"<a\", B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+			}
+
+		}
+
+		[TestMethod]
+		public void SumIfWithRegexForExpressionCharactersReturnsCorrectValues()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Value = ">1";
+				worksheet.Cells["B4"].Value = "<1";
+				worksheet.Cells["B5"].Value = "=1";
+				worksheet.Cells["C1"].Formula = "SUMIF(B1, \"=1\", B2)";
+				worksheet.Cells["C2"].Formula = "SUMIF(B1, \">1\", B2)";
+				worksheet.Cells["C3"].Formula = "SUMIF(B1, \"<1\", B2)";
+				worksheet.Cells["C4"].Formula = "SUMIF(B1, \">=1\", B2)";
+				worksheet.Cells["C5"].Formula = "SUMIF(B1, \"<=1\", B2)";
+				worksheet.Cells["C6"].Formula = "SUMIF(B1, \"<>1\", B2)";
+				worksheet.Cells["C7"].Formula = "SUMIF(B3, \"=>1\", B2)";
+				worksheet.Cells["C8"].Formula = "SUMIF(B4, \"=<1\", B2)";
+				worksheet.Cells["C9"].Formula = "SUMIF(B5, \"==1\", B2)";
+				worksheet.Cells["C10"].Formula = "SUMIF(B1, \">>1\", B2)";
+				worksheet.Cells["C11"].Formula = "SUMIF(B1, \"><1\", B2)";
+				worksheet.Cells["C12"].Formula = "SUMIF(B1, \"<<1\", B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["C1"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["C2"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["C3"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["C4"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["C5"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["C6"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["C7"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["C8"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["C9"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["C10"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["C11"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["C12"].Value);
+			}
+		}
 		#endregion
 
 		#region Helper Methods
