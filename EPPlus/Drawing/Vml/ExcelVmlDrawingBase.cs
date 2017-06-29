@@ -110,13 +110,13 @@ namespace OfficeOpenXml.Drawing.Vml
 				if (s.IndexOf(':') > 0)
 				{
 					string[] split = s.Split(':');
-					if (split[0] == key)
+					if (split[0].Trim() == key)
 					{
-						value = split[1];
+						value = split[1].Trim();
 						return true;
 					}
 				}
-				else if (s == key)
+				else if (s.Trim() == key)
 				{
 					value = "";
 					return true;
