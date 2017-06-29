@@ -73,6 +73,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		#endregion
 
 		#region Private Methods
+		/// <summary>
+		/// Takses the given arguments and gathers the criteria into an enumerable list.
+		/// </summary>
+		/// <param name="arguments">The given arguments to be turned into a criteria list.</param>
+		/// <returns>The criteria needed to evaluate the SUMIF Function.</returns>
 		private IEnumerable<Criteria> GetCriteria(FunctionArgument[] arguments)
 		{
 			var criteria = new List<Criteria>();
