@@ -25,10 +25,12 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Linq;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
+using OfficeOpenXml.FormulaParsing.Excel;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
@@ -653,6 +655,35 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Calculate();
 				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
 			}
+		}
+
+		[TestMethod]
+		public void SumShouldCalculate2Plus3AndReturn5()
+		{
+			var func = new Sum();
+			var args = FunctionsHelper.CreateArgs(2, 3);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(5d, result.Result);
+		}
+
+		[TestMethod]
+		public void SumShouldCalculateEnumerableOf2Plus5Plus3AndReturn10()
+		{
+			var func = new Sum();
+			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(2, 5), 3);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(10d, result.Result);
+		}
+
+		[TestMethod]
+		public void SumShouldIgnoreHiddenValuesWhenIgnoreHiddenValuesIsSet()
+		{
+			var func = new Sum();
+			func.IgnoreHiddenValues = true;
+			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(2, 5), 3, 4);
+			args.Last().SetExcelStateFlag(ExcelCellState.HiddenCell);
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(10d, result.Result);
 		}
 		#endregion
 	}

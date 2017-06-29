@@ -57,35 +57,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void SumShouldCalculate2Plus3AndReturn5()
-		{
-			var func = new Sum();
-			var args = FunctionsHelper.CreateArgs(2, 3);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(5d, result.Result);
-		}
-
-		[TestMethod]
-		public void SumShouldCalculateEnumerableOf2Plus5Plus3AndReturn10()
-		{
-			var func = new Sum();
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(2, 5), 3);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(10d, result.Result);
-		}
-
-		[TestMethod]
-		public void SumShouldIgnoreHiddenValuesWhenIgnoreHiddenValuesIsSet()
-		{
-			var func = new Sum();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(2, 5), 3, 4);
-			args.Last().SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(10d, result.Result);
-		}
-
-		[TestMethod]
 		public void SumSqShouldCalculateArray()
 		{
 			var func = new Sumsq();
