@@ -1806,7 +1806,7 @@ namespace OfficeOpenXml
 							ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
 							ptbl.CacheDefinition.SourceRange.IsName == false &&
 							columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
-							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns).Address;
+							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns)?.Address ?? ExcelErrorValue.Values.Ref;
 					}
 				}
 				this.UpdateCharts(0, -columns, 0, columnFrom);
