@@ -585,7 +585,7 @@
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\IfFunctionCompiler.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\IfNaFunctionCompiler.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\LookupFunctionCompiler.cs" />
-    <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\ResolveCellReferencesAsRangeFunctionCompiler.cs" />
+    <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\ResolveCellReferencesAsRangeCompiler.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionExpression.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\GroupExpression.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\IExpressionCompiler.cs" />

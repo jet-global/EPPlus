@@ -48,16 +48,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 					 }
 					 else
 					 {
-						 if (!ignoreErrors && arg.ValueIsExcelError) throw new ExcelErrorValueException(arg.ValueAsExcelErrorValue);
-						 if (ConvertUtil.IsNumeric(arg.Value) && !CellStateHelper.ShouldIgnore(ignoreHidden, arg, context))
-						 {
-							 argList.Add(ConvertUtil.GetValueDouble(arg.Value));
-						 }
-						 if(arg.Value is string)
-						 {
-							 ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double result);
-							 argList.Add(result);
-						 }
+						if (!ignoreErrors && arg.ValueIsExcelError) throw new ExcelErrorValueException(arg.ValueAsExcelErrorValue);
+						if (ConvertUtil.IsNumeric(arg.Value) && !CellStateHelper.ShouldIgnore(ignoreHidden, arg, context))
+						{
+							argList.Add(ConvertUtil.GetValueDouble(arg.Value));
+						}
+						if (arg.Value is string)
+						{
+							ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double result);
+							argList.Add(result);
+						}
+
 					 }
 				 });
 		}

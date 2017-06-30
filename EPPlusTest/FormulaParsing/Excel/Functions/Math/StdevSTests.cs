@@ -170,6 +170,52 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void StdevSIsGivenNumberInputFromCellRefrenceWithEmptyCellsFirst()
+		{
+			var function = new StdevS();
+
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B3"].Value = 66;
+				worksheet.Cells["B4"].Value = 52;
+				worksheet.Cells["B5"].Value = 77;
+				worksheet.Cells["B6"].Value = 71;
+				worksheet.Cells["B7"].Value = 30;
+				worksheet.Cells["B8"].Value = 90;
+				worksheet.Cells["B9"].Value = 26;
+				worksheet.Cells["B10"].Value = 56;
+				worksheet.Cells["B11"].Value = 7;
+				worksheet.Cells["A12"].Formula = "=stdev.s(B1:B11)";
+				worksheet.Calculate();
+				Assert.AreEqual(26.97581221, (double)worksheet.Cells["A12"].Value, .00001);
+			}
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenNumberInputFromCellRefrenceWithEmptyCellsFirstAndAnInvalidCellInTheMiddle()
+		{
+			var function = new StdevS();
+
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B3"].Value = 66;
+				worksheet.Cells["B4"].Value = 52;
+				worksheet.Cells["B5"].Value = 77;
+				worksheet.Cells["B6"].Value = 71;
+				//B7 is an empty cell
+				worksheet.Cells["B8"].Value = 90;
+				worksheet.Cells["B9"].Value = 26;
+				worksheet.Cells["B10"].Value = 56;
+				worksheet.Cells["B11"].Value = 7;
+				worksheet.Cells["A12"].Formula = "=stdev.s(B1:B11)";
+				worksheet.Calculate();
+				Assert.AreEqual(27.35448514, (double)worksheet.Cells["A12"].Value, .00001);
+			}
+		}
+
+		[TestMethod]
 		public void StdevSIsGivenNumbersAsInputs()
 		{
 			var function = new StdevS();
@@ -178,11 +224,39 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void StdevSIsGivenAMixOfInputTypes()
+		{
+			var function = new StdevS();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(1, true, null, "6/17/2011 2:00", "02:00 am"), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(1, true, "6/17/2011 2:00", "02:00 am"), this.ParsingContext);
+			Assert.AreEqual(18206.31704, result1.ResultNumeric, .00001);
+			Assert.AreEqual(20355.19445, result2.ResultNumeric, .00001);
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenAStringInputWithAEmptyCellInTheMiddle()
+		{
+			var function = new StdevS();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(66, 52, 77, 71, 30, 90, 26, 56, 7), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(66, 52, 77, 71,null, 30, 90, 26, 56, 7), this.ParsingContext);
+			Assert.AreEqual(26.97581221, result1.ResultNumeric, .00001);
+			Assert.AreEqual(30.42020527, result2.ResultNumeric, .00001);
+		}
+
+		[TestMethod]
 		public void StdevSIsGivenMilitaryTimesAsInputs()
 		{
 			var function = new StdevS();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("00:00", "02:00", "13:00"), this.ParsingContext);
 			Assert.AreEqual(0.291666667, result1.ResultNumeric, .00001);
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenNumbersAsInputstakeTwo()
+		{
+			var function = new StdevS();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(-1, -1, -1), this.ParsingContext);
+			Assert.AreEqual(0, result1.ResultNumeric, .00001);
 		}
 
 		[TestMethod]

@@ -40,39 +40,39 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// Logical values and text representations of numbers that you type directly into the list of arguments are counted.
 		/// If an argument is an array or reference, only numbers in that array or reference are counted.Empty cells, logical values, text, or error values in the array or reference are ignored.
 		/// </summary>
-		/// <param name="arguments">Up too 254 individual arguments.</param>
+		/// <param name="arguments">Up to 254 individual arguments.</param>
 		/// <param name="context">Unused, this is information about where the function is being executed.</param>
 		/// <returns>The standard deviation based on the entire population.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			var args = ArgsToDoubleEnumerable(IgnoreHiddenValues, false, arguments, context);
+			List<double> listToDoStandardDeviationOn = new List<double>();
+			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in arguments)
 			{
 				if (item.IsExcelRange)
 				{
-					if(item.ValueFirst is double || item.ValueFirst is int)
+					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null)
 						continue;
 					return new CompileResult(eErrorType.Div0);
 				}
+				if (item.ValueFirst == null)
+				{
+					listToDoStandardDeviationOn.Add(0.0);
+				}
 			}
-			if(!TryStandardDeviationEntirePopulation(args, arguments, out double StanderedDeviation))
+			foreach (var item in args)
+			{
+				listToDoStandardDeviationOn.Add(item);
+			}
+			if (!this.TryStandardDeviationEntirePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);
-			return CreateResult(StanderedDeviation, DataType.Decimal);
+			return this.CreateResult(standardDeviation, DataType.Decimal);
 		}
 
-		private static bool TryStandardDeviationEntirePopulation(IEnumerable<double> values, IEnumerable<FunctionArgument> arguments, out double StanderedDeviation)
+		private bool TryStandardDeviationEntirePopulation(IEnumerable<double> values, out double standardDeviation)
 		{
-			List<double> listOfValues = new List<double>();
-			foreach (var item in values)
-			{
-				StanderedDeviation = 0.0;
-				var checkThis = ConvertUtil.TryParseDateObjectToOADate(item, out double result12);
-				if (!ConvertUtil.TryParseDateObjectToOADate(item, out double result))
-					return false;
-				listOfValues.Add(result);
-			}
-			StanderedDeviation = MathObj.Sqrt(values.Average(v => MathObj.Pow(v - listOfValues.Average(), 2)));
-			if (StanderedDeviation == 0 && listOfValues.All(x => x == listOfValues.First()))
+			standardDeviation = MathObj.Sqrt(values.Average(v => MathObj.Pow(v - values.Average(), 2)));
+			if (standardDeviation == 0 && values.All(x => x == values.First()))
 				return false;
 			return true;
 		}

@@ -45,44 +45,43 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The standard deviation based on a sample.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			var args = ArgsToDoubleEnumerable(IgnoreHiddenValues, false, arguments, context);
+			List<double> listToDoStandardDeviationOn = new List<double>();
+			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in arguments)
 			{
 				if (item.IsExcelRange)
 				{
-					if (item.ValueFirst is double || item.ValueFirst is int)
+					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null)
 						continue;
 					return new CompileResult(eErrorType.Div0);
 				}
+				if (item.ValueFirst == null)
+				{
+					listToDoStandardDeviationOn.Add(0.0);
+				}
 			}
-			if (!TryStandardDeviationOnASamplePopulation(args, arguments, out double StanderedDeviation))
+			foreach(var item in args)
+			{
+				listToDoStandardDeviationOn.Add(item);
+			}
+			if (!this.TryStandardDeviationOnASamplePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);
-			return CreateResult(StanderedDeviation, DataType.Decimal);
+			return this.CreateResult(standardDeviation, DataType.Decimal);
 		}
 
-		private static bool TryStandardDeviationOnASamplePopulation(IEnumerable<double> values, IEnumerable<FunctionArgument> arguments, out double StanderedDeviation)
+		private bool TryStandardDeviationOnASamplePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
-			List<double> listOfValues = new List<double>();
-			foreach (var item in values)
-			{
-				StanderedDeviation = 0.0;
-				var checkThis = ConvertUtil.TryParseDateObjectToOADate(item, out double result12);
-				if (!ConvertUtil.TryParseDateObjectToOADate(item, out double result))
-					return false;
-				listOfValues.Add(result);
-			}
-
-			StanderedDeviation = MathObj.Sqrt(Var(listOfValues));
-			if (StanderedDeviation == 0 && listOfValues.All(x => x == listOfValues.First()))
+			standardDeviation = MathObj.Sqrt(this.VarSampleSize(listToDoStandardDeviationOn));
+			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == listToDoStandardDeviationOn.First()))
 				return false;
 			return true;
 		}
 
-		private static double Var(IEnumerable<double> args)
+		private double VarSampleSize(List<double> listOfDoubles)
 		{
-			double avg = args.Average();
-			double d = args.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
-			return (d/ (args.Count() - 1));
+			double avg = listOfDoubles.Average();
+			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
+			return (d / (listOfDoubles.Count() - 1));
 		}
 	}
 }

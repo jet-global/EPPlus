@@ -31,12 +31,10 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
-
 	[TestClass]
 	public class StdevPTests : MathFunctionsTestBase
 	{
 		#region StdevP Function(Execute) Tests
-
 		[TestMethod]
 		public void StdevpIsGivenBooleanInputs()
 		{
@@ -169,11 +167,58 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			}
 		}
 
+
+		[TestMethod]
+		public void StdevPIsGivenNumberInputFromCellRefrenceWithEmptyCellsFirst()
+		{
+			var function = new StdevP();
+
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B3"].Value = 66;
+				worksheet.Cells["B4"].Value = 52;
+				worksheet.Cells["B5"].Value = 77;
+				worksheet.Cells["B6"].Value = 71;
+				worksheet.Cells["B7"].Value = 30;
+				worksheet.Cells["B8"].Value = 90;
+				worksheet.Cells["B9"].Value = 26;
+				worksheet.Cells["B10"].Value = 56;
+				worksheet.Cells["B11"].Value = 7;
+				worksheet.Cells["A12"].Formula = "=stdev.p(B1:B11)";
+				worksheet.Calculate();
+				Assert.AreEqual(25.43303966, (double)worksheet.Cells["A12"].Value, .00001);
+			}
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenNumberInputFromCellRefrenceWithEmptyCellsFirstAndAnInvalidCellInTheMiddle()
+		{
+			var function = new StdevP();
+
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B3"].Value = 66;
+				worksheet.Cells["B4"].Value = 52;
+				worksheet.Cells["B5"].Value = 77;
+				worksheet.Cells["B6"].Value = 71;
+				//B7 is an empty cell
+				worksheet.Cells["B8"].Value = 90;
+				worksheet.Cells["B9"].Value = 26;
+				worksheet.Cells["B10"].Value = 56;
+				worksheet.Cells["B11"].Value = 7;
+				worksheet.Cells["A12"].Formula = "=stdev.p(B1:B11)";
+				worksheet.Calculate();
+				Assert.AreEqual(25.58777784, (double)worksheet.Cells["A12"].Value, .00001);
+			}
+		}
+
 		[TestMethod]
 		public void StdevpIsGivenNumbersAsInputs()
 		{
 			var function = new StdevP();
-			var result1 = function.Execute(FunctionsHelper.CreateArgs(-1,0,1), this.ParsingContext);
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(-1, 0, 1), this.ParsingContext);
 			Assert.AreEqual(0.816496581, result1.ResultNumeric, .00001);
 		}
 
@@ -199,6 +244,26 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenAMixOfInputTypes()
+		{
+			var function = new StdevP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(1, true, null, "6/17/2011 2:00", "02:00 am"), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(1, true, "6/17/2011 2:00", "02:00 am"), this.ParsingContext);
+			Assert.AreEqual(16284.22501, result1.ResultNumeric, .00001);
+			Assert.AreEqual(17628.11549, result2.ResultNumeric, .00001);
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenAStringInputWithAEmptyCellInTheMiddle()
+		{
+			var function = new StdevP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(66, 52, 77, 71, 30, 90, 26, 56, 7), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(66, 52, 77, 71, null, 30, 90, 26, 56, 7), this.ParsingContext);
+			Assert.AreEqual(25.43303966, result1.ResultNumeric, .00001);
+			Assert.AreEqual(28.85914067, result2.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
