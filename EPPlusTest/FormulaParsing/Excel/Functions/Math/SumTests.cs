@@ -223,7 +223,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		public void SumWithIntegerAndNumericStringReturnsCorrectValue()
 		{
 			var function = new Sum();
-			var result = function.Execute(FunctionsHelper.CreateArgs(1, "3"), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs("1", 3), this.ParsingContext);
 			Assert.AreEqual(4d, result.Result);
 		}
 

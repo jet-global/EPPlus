@@ -35,68 +35,87 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// This class contains the formula for the SUM Excel Function.
+	/// Thi class contains the functionality of the SUMSQ Excel Function.
 	/// </summary>
 	public class Sum : HiddenValuesHandlingFunction
 	{
 		/// <summary>
-		/// Takes the user specified arguments and returns their sum or an error value if one of the arguments was invalid.
+		/// Computes the product of the squares of the given arguments.
 		/// </summary>
-		/// <param name="arguments">The arguments to sum.</param>
-		/// <param name="context">The context for the function.</param>
-		/// <returns>The value of the sum of the arguments as a double value.</returns>
+		/// <param name="arguments">The user specified arguments to sum.</param>
+		/// <param name="context">The current context of the function.</param>
+		/// <returns>The sum of the products of the arguments given.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
 			var sum = 0d;
 			if (arguments != null)
 			{
 				foreach (var arg in arguments)
 				{
-					sum += Calculate(arg, context);
+					var valToAdd = this.Calculate(arg, context);
+					sum += valToAdd;
 				}
 			}
-			return CreateResult(sum, DataType.Decimal);
+			return this.CreateResult(sum, DataType.Decimal);
 		}
 
-		#region Private Methods
 		/// <summary>
-		/// Takes the given argument and converts it into a double to add to the sum.
+		/// Takes the specified argument and converts it to a double and then squares it. 
 		/// </summary>
 		/// <param name="arg">The argument to be converted.</param>
-		/// <param name="context">The context for the function.</param>
-		/// <returns>The argument as a double.</returns>
-		private double Calculate(FunctionArgument arg, ParsingContext context)
+		/// <param name="context">The current context of the function.</param>
+		/// <param name="isInArray">A boolean to flag if the argument is an an array.</param>
+		/// <returns>The given argument squared as a double.</returns>
+		private double Calculate(FunctionArgument arg, ParsingContext context, bool isInArray = false)
 		{
-			var retVal = 0d;
+			var calculatedValue = 0d;
 			if (ShouldIgnore(arg))
 			{
-				return retVal;
+				return calculatedValue;
 			}
 			if (arg.Value is IEnumerable<FunctionArgument>)
 			{
 				foreach (var item in (IEnumerable<FunctionArgument>)arg.Value)
 				{
-					retVal += Calculate(item, context);
-				}
-			}
-			else if (arg.Value is ExcelDataProvider.IRangeInfo)
-			{
-				foreach (var c in (ExcelDataProvider.IRangeInfo)arg.Value)
-				{
-					if (ShouldIgnore(c, context) == false)
-					{
-						CheckForAndHandleExcelError(c);
-						retVal += c.ValueDouble;
-					}
+					calculatedValue += this.Calculate(item, context, true);
 				}
 			}
 			else
 			{
-				CheckForAndHandleExcelError(arg);
-				retVal += ConvertUtil.GetValueDouble(arg.Value, true);
+				var rangeVal = arg.Value as ExcelDataProvider.IRangeInfo;
+				if (rangeVal != null)
+				{
+					foreach (var cell in rangeVal)
+					{
+						if (ShouldIgnore(cell, context) == false)
+						{
+							CheckForAndHandleExcelError(cell);
+							calculatedValue += cell.ValueDouble;
+						}
+					}
+				}
+				else
+				{
+					CheckForAndHandleExcelError(arg);
+					if (IsNumericString(arg.Value) && !isInArray)
+					{
+						if (arg.Value is string)
+							return 0;
+						ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double value);
+						return value;
+					}
+					var ignoreBool = isInArray;
+					if (!ignoreBool)
+					{
+						if (arg.Value == null || arg.Value is bool)
+							return 0;
+					}
+					calculatedValue += ConvertUtil.GetValueDouble(arg.Value, ignoreBool);
+				}
 			}
-			return retVal;
+			return calculatedValue;
 		}
-		#endregion
 	}
 }
