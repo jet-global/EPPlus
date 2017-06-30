@@ -71,12 +71,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return this.CreateResult(standardDeviation, DataType.Decimal);
 		}
 
-		private bool TryStandardDeviationEntirePopulation(IEnumerable<double> values, out double standardDeviation)
+		private bool TryStandardDeviationEntirePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
-			standardDeviation = MathObj.Sqrt(values.Average(v => MathObj.Pow(v - values.Average(), 2)));
-			if (standardDeviation == 0 && values.All(x => x == values.First()))
+			standardDeviation = MathObj.Sqrt(this.VarPopulation(listToDoStandardDeviationOn));
+			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
 				return false;
 			return true;
 		}
+
+		private double VarPopulation(List<double> listOfDoubles)
+		{
+			double avg = listOfDoubles.Average();
+			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
+			return (d / (listOfDoubles.Count()));
+		}
 	}
 }
+

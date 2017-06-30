@@ -31,12 +31,14 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
+
 	[TestClass]
 	public class StdevPTests : MathFunctionsTestBase
 	{
 		#region StdevP Function(Execute) Tests
+
 		[TestMethod]
-		public void StdevpIsGivenBooleanInputs()
+		public void StdevPIsGivenBooleanInputs()
 		{
 			var function = new StdevP();
 			var boolInputTrue = true;
@@ -51,7 +53,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenBooleanInputsFromCellRefrence()
+		public void StdevPIsGivenBooleanInputsFromCellRefrence()
 		{
 			var function = new StdevP();
 
@@ -60,9 +62,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = true;
 				worksheet.Cells["B2"].Value = false;
-				worksheet.Cells["B3"].Formula = "=stdev.p(B1,B1,B2)";
-				worksheet.Cells["B4"].Formula = "=stdev.p(B1,B1,B1)";
-				worksheet.Cells["B5"].Formula = "=stdev.p(B1,B2,B2)";
+				worksheet.Cells["B3"].Formula = "=Stdev.p(B1,B1,B2)";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1,B1,B1)";
+				worksheet.Cells["B5"].Formula = "=Stdev.p(B1,B2,B2)";
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
@@ -71,7 +73,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenADateSeperatedByABackslash()
+		public void StdevPIsGivenADateSeperatedByABackslash()
 		{
 			var function = new StdevP();
 			var input1 = "1/17/2011 2:00";
@@ -88,7 +90,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenADateSeperatedByABackslashInputFromCellRefrence()
+		public void StdevPIsGivenADateSeperatedByABackslashInputFromCellRefrence()
 		{
 			var function = new StdevP();
 
@@ -99,9 +101,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B2"].Value = "6/17/2011 2:00";
 				worksheet.Cells["B3"].Value = "1/17/2012 2:00";
 				worksheet.Cells["B4"].Value = "1/17/2013 2:00";
-				worksheet.Cells["B5"].Formula = "=stdev.p(B1,B1,B1)";
-				worksheet.Cells["B6"].Formula = "=stdev.p(B1,B2,B1)";
-				worksheet.Cells["B7"].Formula = "=stdev.p(B1,B3,B4)";
+				worksheet.Cells["B5"].Formula = "=Stdev.p(B1,B1,B1)";
+				worksheet.Cells["B6"].Formula = "=Stdev.p(B1,B2,B1)";
+				worksheet.Cells["B7"].Formula = "=Stdev.p(B1,B3,B4)";
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
@@ -110,7 +112,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenMaxAmountOfInputs254()
+		public void StdevPIsGivenMaxAmountOfInputs254()
 		{
 			var function = new StdevP();
 			var input1 = 1;
@@ -134,13 +136,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1,
 				input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1
 				), this.ParsingContext);
-			
+
 
 			Assert.AreEqual(6.199572434, result1.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenNumberInputFromCellRefrence()
+		public void StdevPIsGivenNumberInputFromCellRefrence()
 		{
 			var function = new StdevP();
 
@@ -156,9 +158,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B7"].Value = 26;
 				worksheet.Cells["B8"].Value = 56;
 				worksheet.Cells["B9"].Value = 7;
-				worksheet.Cells["A10"].Formula = "=stdev.p(B:B)";
-				worksheet.Cells["A11"].Formula = "=stdev.p(B1,B3,B5,B6,B9)";
-				worksheet.Cells["A12"].Formula = "=stdev.p(B1,B3,B5,B6)";
+				worksheet.Cells["A10"].Formula = "=Stdev.p(B:B)";
+				worksheet.Cells["A11"].Formula = "=Stdev.p(B1,B3,B5,B6,B9)";
+				worksheet.Cells["A12"].Formula = "=Stdev.p(B1,B3,B5,B6)";
 				worksheet.Calculate();
 
 				Assert.AreEqual(25.43303966, (double)worksheet.Cells["A10"].Value, .00001);
@@ -166,7 +168,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(22.32011425, (double)worksheet.Cells["A12"].Value, .00001);
 			}
 		}
-
 
 		[TestMethod]
 		public void StdevPIsGivenNumberInputFromCellRefrenceWithEmptyCellsFirst()
@@ -184,8 +185,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B8"].Value = 90;
 				worksheet.Cells["B9"].Value = 26;
 				worksheet.Cells["B10"].Value = 56;
-				worksheet.Cells["B11"].Value = 7;
-				worksheet.Cells["A12"].Formula = "=stdev.p(B1:B11)";
+				worksheet.Cells["B12"].Value = 7;
+				worksheet.Cells["A12"].Formula = "=Stdev.p(B1:B12)";
 				worksheet.Calculate();
 				Assert.AreEqual(25.43303966, (double)worksheet.Cells["A12"].Value, .00001);
 			}
@@ -208,42 +209,18 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B9"].Value = 26;
 				worksheet.Cells["B10"].Value = 56;
 				worksheet.Cells["B11"].Value = 7;
-				worksheet.Cells["A12"].Formula = "=stdev.p(B1:B11)";
+				worksheet.Cells["A12"].Formula = "=Stdev.p(B1:B11)";
 				worksheet.Calculate();
 				Assert.AreEqual(25.58777784, (double)worksheet.Cells["A12"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenNumbersAsInputs()
+		public void StdevPIsGivenNumbersAsInputs()
 		{
 			var function = new StdevP();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(-1, 0, 1), this.ParsingContext);
 			Assert.AreEqual(0.816496581, result1.ResultNumeric, .00001);
-		}
-
-		[TestMethod]
-		public void StdevpIsGivenMilitaryTimesAsInputs()
-		{
-			var function = new StdevP();
-			var result1 = function.Execute(FunctionsHelper.CreateArgs("00:00", "02:00", "13:00"), this.ParsingContext);
-			Assert.AreEqual(0.238144836, result1.ResultNumeric, .00001);
-		}
-
-		[TestMethod]
-		public void StdevpIsGivenMilitaryTimesAsInputsByCellRefrence()
-		{
-			var function = new StdevP();
-			using (var package = new ExcelPackage())
-			{
-				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = "00:00";
-				worksheet.Cells["B2"].Value = "02:00";
-				worksheet.Cells["B3"].Value = "13:00";
-				worksheet.Cells["B4"].Formula = "=stdev.p(B1,B2,B3)";
-				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-			}
 		}
 
 		[TestMethod]
@@ -257,17 +234,191 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void StdevPIsGivenAMixOfInputTypesWithANullInTheCenterByCellRefrenceAndRange()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = true;
+				//empty B3 cell
+				worksheet.Cells["B4"].Value = "6/17/2011 2:00";
+				worksheet.Cells["B5"].Value = "02:00 am";
+				worksheet.Cells["B6"].Formula = "=Stdev.p(B1,B2,B4,B5)";
+				worksheet.Cells["B7"].Formula = "=Stdev.p(B1,B2,B3,B4,B5)";
+				worksheet.Cells["B8"].Formula = "=Stdev.p(B1,B2)";
+				worksheet.Cells["B9"].Formula = "=Stdev.p(B1:B5)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B6"].Value);//is giving :<#DIV/0! (OfficeOpenXml.ExcelErrorValue)
+				Assert.AreEqual(0d, worksheet.Cells["B7"].Value);//is giving :<#DIV/0! (OfficeOpenXml.ExcelErrorValue)
+				Assert.AreEqual(0d, worksheet.Cells["B8"].Value);//is giving :<#DIV/0! (OfficeOpenXml.ExcelErrorValue)
+				Assert.AreEqual(0d, worksheet.Cells["B9"].Value);//is giving value of 0.5 same as stdev.p(1,0)
+			}
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenAMixOfInputTypesByCellRefrenceAndRange()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = true;
+				worksheet.Cells["B3"].Value = "6/17/2011 2:00";
+				worksheet.Cells["B4"].Value = "02:00 am";
+				worksheet.Cells["B6"].Formula = "=Stdev.p(B1,B2,B3,B4)";
+				worksheet.Cells["B8"].Formula = "=Stdev.p(B1,B2)";
+				worksheet.Cells["B9"].Formula = "=Stdev.p(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B6"].Value);//is giving :<#DIV/0! (OfficeOpenXml.ExcelErrorValue)
+				Assert.AreEqual(0d, worksheet.Cells["B8"].Value);//is giving :<#DIV/0! (OfficeOpenXml.ExcelErrorValue)
+				Assert.AreEqual(0d, worksheet.Cells["B9"].Value);//is giving value of 0.5 same as stdev.p(1,0)
+			}
+		}
+
+		[TestMethod]
+		public void StdevPIsTheSameTestsAsGivenAMixOfInputTypesByCellRefrenceExceptTheyAreAllOnes()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 1;
+				//empty B3 cell
+				worksheet.Cells["B4"].Value = 1;
+				worksheet.Cells["B5"].Value = 1;
+				worksheet.Cells["B6"].Formula = "=Stdev.p(B1,B2,B4,B5)";
+				worksheet.Cells["B7"].Formula = "=Stdev.p(B1,B2,B3,B4,B5)";
+				worksheet.Cells["B8"].Formula = "=Stdev.p(B1,B2)";
+				worksheet.Cells["B9"].Formula = "=Stdev.p(B1:B5)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B6"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B7"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B8"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B9"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void StdevPTestingDirectINputVsRangeInput()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B8"].Formula = "=Stdev.p(B1,B2)";
+				worksheet.Cells["B9"].Formula = "=Stdev.p(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B8"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B9"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void StdevPTestingDirectINputVsRangeInputTest2()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 0;
+				worksheet.Cells["B8"].Formula = "=Stdev.p(B1,B2)";
+				worksheet.Cells["B9"].Formula = "=Stdev.p(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0.5, (double)worksheet.Cells["B8"].Value, .00001);
+				Assert.AreEqual(0.5, (double)worksheet.Cells["B9"].Value, .00001);
+			}
+		}
+
+		[TestMethod]
 		public void StdevPIsGivenAStringInputWithAEmptyCellInTheMiddle()
 		{
 			var function = new StdevP();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(66, 52, 77, 71, 30, 90, 26, 56, 7), this.ParsingContext);
-			var result2 = function.Execute(FunctionsHelper.CreateArgs(66, 52, 77, 71, null, 30, 90, 26, 56, 7), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(66, 52, 77, 71,null, 30, 90, 26, 56, 7), this.ParsingContext);
 			Assert.AreEqual(25.43303966, result1.ResultNumeric, .00001);
 			Assert.AreEqual(28.85914067, result2.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void StdevpIsGiven12HourTimesAsInputs()
+		public void StdevPIsGivenAStringInputWithAEmptyCellInTheMiddleByCellRefrence()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B3"].Value = 66;
+				worksheet.Cells["B4"].Value = 52;
+				worksheet.Cells["B5"].Value = 77;
+				worksheet.Cells["B6"].Value = 71;
+				//empty B7 cell
+				worksheet.Cells["B8"].Value = 90;
+				worksheet.Cells["B9"].Value = 26;
+				worksheet.Cells["B10"].Value = 56;
+				worksheet.Cells["B11"].Value = 7;
+				worksheet.Cells["B12"].Value = 30;
+				worksheet.Cells["A12"].Formula = "=Stdev.p(B3:B12)";
+				worksheet.Calculate();
+				Assert.AreEqual(25.43303966, (double)worksheet.Cells["A12"].Value, .00001);
+			}
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenMilitaryTimesAsInputs()
+		{
+			var function = new StdevP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs("00:00", "02:00", "13:00"), this.ParsingContext);
+			Assert.AreEqual(0.238144836, result1.ResultNumeric, .00001);
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenNumbersAsInputstakeTwo()
+		{
+			var function = new StdevP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(-1, -1, -1), this.ParsingContext);
+			Assert.AreEqual(0, result1.ResultNumeric, .00001);
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenMilitaryTimesAsInputsByCellRefrence()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "00:00";
+				worksheet.Cells["B2"].Value = "02:00";
+				worksheet.Cells["B3"].Value = "13:00";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1,B2,B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenMilitaryTimesAsInputsByCellRange()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "00:00";
+				worksheet.Cells["B2"].Value = "02:00";
+				worksheet.Cells["B3"].Value = "13:00";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void StdevPIsGiven12HourTimesAsInputs()
 		{
 			var function = new StdevP();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("12:00 am", "02:00 am", "01:00 pm"), this.ParsingContext);
@@ -275,7 +426,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void StdevpIsGiven12HourTimesAsInputsByCellRefrence()
+		public void StdevPIsGiven12HourTimesAsInputsByCellRefrence()
 		{
 			var function = new StdevP();
 			using (var package = new ExcelPackage())
@@ -284,14 +435,30 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B1"].Value = "12:00 am";
 				worksheet.Cells["B2"].Value = "02:00 am";
 				worksheet.Cells["B3"].Value = "01:00 pm";
-				worksheet.Cells["B4"].Formula = "=stdev.p(B1,B2,B3)";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1,B2,B3)";
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenMonthDayYear12HourTimeAsInputs()
+		public void StdevPIsGiven12HourTimesAsInputsByCellRange()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "12:00 am";
+				worksheet.Cells["B2"].Value = "02:00 am";
+				worksheet.Cells["B3"].Value = "01:00 pm";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenMonthDayYear12HourTimeAsInputs()
 		{
 			var function = new StdevP();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("Jan 17, 2011 2:00 am", "June 5, 2017 11:00 pm", "June 15, 2017 11:00 pm"), this.ParsingContext);
@@ -299,7 +466,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenMonthDayYear12HourTimeAsInputsByCellRefrence()
+		public void StdevPIsGivenMonthDayYear12HourTimeAsInputsByCellRefrence()
 		{
 			var function = new StdevP();
 			using (var package = new ExcelPackage())
@@ -308,14 +475,30 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B1"].Value = "Jan 17, 2011 2:00 am";
 				worksheet.Cells["B2"].Value = "June 5, 2017 11:00 pm";
 				worksheet.Cells["B3"].Value = "June 15, 2017 11:00 pm";
-				worksheet.Cells["B4"].Formula = "=stdev.p(B1,B2,B3)";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1,B2,B3)";
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenDateTimeInputsSeperatedByADashAsInputs()
+		public void StdevPIsGivenMonthDayYear12HourTimeAsInputsByCellRange()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "Jan 17, 2011 2:00 am";
+				worksheet.Cells["B2"].Value = "June 5, 2017 11:00 pm";
+				worksheet.Cells["B3"].Value = "June 15, 2017 11:00 pm";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenDateTimeInputsSeperatedByADashAsInputs()
 		{
 			var function = new StdevP();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("1-17-2017 2:00", "6-17-2017 2:00", "9-17-2017 2:00"), this.ParsingContext);
@@ -323,7 +506,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenDateTimeInputsSeperatedByADashAsInputsByCellRefrence()
+		public void StdevPIsGivenDateTimeInputsSeperatedByADashAsInputsByCellRefrence()
 		{
 			var function = new StdevP();
 			using (var package = new ExcelPackage())
@@ -332,14 +515,30 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B1"].Value = "1-17-2017 2:00";
 				worksheet.Cells["B2"].Value = "6-17-2017 2:00";
 				worksheet.Cells["B3"].Value = "9-17-2017 2:00";
-				worksheet.Cells["B4"].Formula = "=stdev.p(B1,B2,B3)";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1,B2,B3)";
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenStringsAsInputs()
+		public void StdevPIsGivenDateTimeInputsSeperatedByADashAsInputsByCellRange()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "1-17-2017 2:00";
+				worksheet.Cells["B2"].Value = "6-17-2017 2:00";
+				worksheet.Cells["B3"].Value = "9-17-2017 2:00";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenStringsAsInputs()
 		{
 			var function = new StdevP();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("string", "another string", "a third string"), this.ParsingContext);
@@ -347,7 +546,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenStringsAsInputsByCellRefrence()
+		public void StdevPIsGivenStringsAsInputsByCellRefrence()
 		{
 			var function = new StdevP();
 			using (var package = new ExcelPackage())
@@ -356,24 +555,40 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B1"].Value = "string";
 				worksheet.Cells["B2"].Value = "another string";
 				worksheet.Cells["B3"].Value = "a third string";
-				worksheet.Cells["B4"].Formula = "=stdev.p(B1,B2,B3)";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1,B2,B3)";
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenStringNumbersAsInputs()
+		public void StdevPIsGivenStringsAsInputsByCellRange()
 		{
 			var function = new StdevP();
-			var result1 = function.Execute(FunctionsHelper.CreateArgs("5.5", "6.6", "7.7"), this.ParsingContext);
-			var result2 = function.Execute(FunctionsHelper.CreateArgs("5", "6", "7"), this.ParsingContext);
-			Assert.AreEqual(0.898146239, result1.ResultNumeric, .00001);
-			Assert.AreEqual(0.816496581, result2.ResultNumeric, .00001);
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "string";
+				worksheet.Cells["B2"].Value = "another string";
+				worksheet.Cells["B3"].Value = "a third string";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
 		}
 
 		[TestMethod]
-		public void StdevpIsGivenStringNumbersAsInputsByCellRefrence()
+		public void StdevPIsGivenStringNumbersAsInputs()
+		{
+			var function = new StdevP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs("5", "6", "7"), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs("5.5", "6.6", "7.7"), this.ParsingContext);
+			Assert.AreEqual(0.816496581, result1.ResultNumeric, .00001);
+			Assert.AreEqual(0.898146239, result2.ResultNumeric, .00001);
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenStringNumbersAsInputsByCellRefrence()
 		{
 			var function = new StdevP();
 			using (var package = new ExcelPackage())
@@ -385,8 +600,29 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B1"].Value = "5.5";
 				worksheet.Cells["B2"].Value = "6.6";
 				worksheet.Cells["B3"].Value = "7.7";
-				worksheet.Cells["A4"].Formula = "=stdev.p(A1,A2,A3)";
-				worksheet.Cells["B4"].Formula = "=stdev.p(B1,B2,B3)";
+				worksheet.Cells["A4"].Formula = "=Stdev.p(A1,A2,A3)";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1,B2,B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["A4"].Value).Type);
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenStringNumbersAsInputsByCellRange()
+		{
+			var function = new StdevP();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A1"].Value = "5";
+				worksheet.Cells["A2"].Value = "6";
+				worksheet.Cells["A3"].Value = "7";
+				worksheet.Cells["B1"].Value = "5.5";
+				worksheet.Cells["B2"].Value = "6.6";
+				worksheet.Cells["B3"].Value = "7.7";
+				worksheet.Cells["A4"].Formula = "=Stdev.p(A1:A3)";
+				worksheet.Cells["B4"].Formula = "=Stdev.p(B1:B3)";
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["A4"].Value).Type);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);

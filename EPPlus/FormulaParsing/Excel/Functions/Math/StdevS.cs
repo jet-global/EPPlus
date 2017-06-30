@@ -74,7 +74,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private bool TryStandardDeviationOnASamplePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
 			standardDeviation = MathObj.Sqrt(this.VarSampleSize(listToDoStandardDeviationOn));
-			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == listToDoStandardDeviationOn.First()))
+			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
 				return false;
 			return true;
 		}
