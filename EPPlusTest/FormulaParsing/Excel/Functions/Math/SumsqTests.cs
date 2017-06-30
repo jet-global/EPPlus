@@ -115,8 +115,155 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = 0;
+				worksheet.Cells["B1"].Value = 2;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 6;
+				worksheet.Cells["B4"].Formula = "SUMSQ(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(65d, worksheet.Cells["B4"].Value);
 			}
+		}
+
+		[TestMethod]
+		public void SumsqWithDoubleCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 2.5;
+				worksheet.Cells["B2"].Value = 4.2;
+				worksheet.Cells["B3"].Value = 6.4;
+				worksheet.Cells["B4"].Formula = "SUMSQ(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(64.85d, (double)worksheet.Cells["B4"].Value, 0.000001);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithGeneralStringsCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "string";
+				worksheet.Cells["B2"].Value = "string";
+				worksheet.Cells["B3"].Value = "string";
+				worksheet.Cells["B4"].Formula = "SUMSQ(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithNumericStringCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "2";
+				worksheet.Cells["B2"].Value = "3";
+				worksheet.Cells["B3"].Formula = "SUMSQ(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithErrorValueCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["B2"].Formula = "notaformula";
+				worksheet.Cells["B3"].Formula = "SUMSQ(B1:B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithLogicalValueCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = false;
+				worksheet.Cells["B2"].Value = 5;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Value = true;
+				worksheet.Cells["B5"].Formula = "SUMSQ(B1:B3)";
+				worksheet.Cells["B6"].Formula = "SUMSQ(B2:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(29d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(29d, worksheet.Cells["B6"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithEmptyCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUMSQ(B2:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithIntegerArrayReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUMSQ({2, 6, 3})";
+				worksheet.Calculate();
+				Assert.AreEqual(49d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithDoubleArrayReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUMSQ({2.3, 6.3, 4.2})";
+				worksheet.Calculate();
+				Assert.AreEqual(62.62d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithNumericStringArrayReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUMSQ({\"2\", \"3\", \"5\"})";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithGeneralStringArrayReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUMSQ({\"string\", \"string\"})";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["B1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithMixedTypesArrayReturnsCorrectValue()
+		{
+
 		}
 	}
 }
