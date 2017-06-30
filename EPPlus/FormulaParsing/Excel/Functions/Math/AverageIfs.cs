@@ -35,58 +35,32 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentCountIsValid(arguments, 3) == false)
 				return new CompileResult(eErrorType.Div0);
-			
-
-			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			var numberOfArguments = functionArguments.Count();
-			//var sumRange = ArgsToDoubleEnumerable(true, new List<FunctionArgument> { functionArguments[0] }, context).ToList();
-			var sumRange = functionArguments[0].Value as ExcelDataProvider.IRangeInfo;
-			if (sumRange == null)
+			var rangeToAverage = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
+			if (rangeToAverage == null)
 				return new CompileResult(eErrorType.Div0);
-			var sumRangeLength = sumRange.Count();
-			var argRanges = new List<ExcelDataProvider.IRangeInfo>();
-			var criterias = new List<string>();
-			var averageIndicesToIgnore = new List<int>();
+			var indexesToAverage = new List<int>();
 
-			for (var currentArgumentIndex = 1; currentArgumentIndex < numberOfArguments; currentArgumentIndex += 2)
+			for (var argumentIndex = 1; argumentIndex < arguments.Count(); argumentIndex += 2)
 			{
-				var currentRange = functionArguments[currentArgumentIndex].ValueAsRangeInfo;
-				if (currentRange == null)
+				var currentRangeToCompare = arguments.ElementAt(argumentIndex).ValueAsRangeInfo;
+				if (currentRangeToCompare == null || !this.rangesAreTheSameShape(rangeToAverage, currentRangeToCompare))
 					return new CompileResult(eErrorType.Value);
-				if (currentRange.Count() != sumRangeLength)
-					return new CompileResult(eErrorType.Value);
-				string criteria = null;
-				var thing = functionArguments[currentArgumentIndex + 1];
-				if (functionArguments[currentArgumentIndex + 1].Value is ExcelDataProvider.IRangeInfo criteriaRange)
-				{
-					if (criteriaRange.IsMulti)
-						return new CompileResult(eErrorType.Div0);
-					else
-						criteria = this.GetFirstArgument(thing.ValueFirst).ToString().ToUpper();
-				}
-				else
-					criteria = this.GetFirstArgument(functionArguments[currentArgumentIndex + 1]).ValueFirst.ToString().ToUpper();
-				if (criteria == null)
-					return new CompileResult(eErrorType.Div0);
-				for (var currentRangeIndex = 0; currentRangeIndex < currentRange.Count(); currentRangeIndex++)
-				{
-					var currentCell = currentRange.ElementAt(currentRangeIndex);
-					if (!IfHelper.objectMatchesCriteria(this.GetFirstArgument(currentCell.Value), criteria))
-						averageIndicesToIgnore.Add(currentRangeIndex);
-				}
-			}
 
+				var currentCriteriaArgument = arguments.ElementAt(argumentIndex + 1);
+				if (!this.tryGetCriteria(currentCriteriaArgument, out string currentCriteria))
+					return new CompileResult(eErrorType.Div0);
+
+				var passingIndexes = this.getIndexesOfCellsPassingCriteria(currentRangeToCompare, currentCriteria);
+				indexesToAverage = indexesToAverage.Union(passingIndexes).ToList();
+			}
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
-			
-			for (var currentAverageIndex = 0; currentAverageIndex < sumRange.Count(); currentAverageIndex++)
+			foreach (var cellIndex in indexesToAverage)
 			{
-				if (averageIndicesToIgnore.Contains(currentAverageIndex))
-					continue;
-				var currentCellValue = sumRange.ElementAt(currentAverageIndex).Value;
+				var currentCellValue = rangeToAverage.ElementAt(cellIndex).Value;
 				if (currentCellValue is ExcelErrorValue cellError)
 					return new CompileResult(cellError.Type);
-				if (currentCellValue is string || currentCellValue is bool || currentCellValue == null)
+				else if (currentCellValue is string || currentCellValue is bool || currentCellValue == null)
 					continue;
 				sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);
 				numberOfValidValues++;
@@ -96,26 +70,42 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(eErrorType.Div0);
 			else
 				return this.CreateResult(sumOfValidValues / numberOfValidValues, DataType.Decimal);
+		}
 
-			//for (var ix = 1; ix < 31; ix += 2)
-			//{
-			//	if (functionArguments.Length <= ix) break;
-			//	var rangeInfo = functionArguments[ix].ValueAsRangeInfo;
-			//	argRanges.Add(rangeInfo);
-			//	var value = functionArguments[ix + 1].Value != null ? functionArguments[ix + 1].Value.ToString() : null;
-			//	criterias.Add(value);
-			//}
-			//IEnumerable<int> matchIndexes = GetMatchIndexes(argRanges[0], criterias[0]);
-			//var enumerable = matchIndexes as IList<int> ?? matchIndexes.ToList();
-			//for (var ix = 1; ix < argRanges.Count && enumerable.Any(); ix++)
-			//{
-			//	var indexes = GetMatchIndexes(argRanges[ix], criterias[ix]);
-			//	matchIndexes = enumerable.Intersect(indexes);
-			//}
+		private List<int> getIndexesOfCellsPassingCriteria(ExcelDataProvider.IRangeInfo cellsToCompare, string criteria)
+		{
+			var passingIndexes = new List<int>();
+			for (var currentCellIndex = 0; currentCellIndex < cellsToCompare.Count(); currentCellIndex++)
+			{
+				var currentCellValue = cellsToCompare.ElementAt(currentCellIndex).Value;
+				if (IfHelper.objectMatchesCriteria(this.GetFirstArgument(currentCellValue), criteria))
+					passingIndexes.Add(currentCellIndex);
+			}
+			return passingIndexes;
+		}
 
-			//var result = matchIndexes.Average(index => sumRange[index]);
+		private bool tryGetCriteria(FunctionArgument criteriaCandidate, out string criteria)
+		{
+			criteria = null;
+			if (criteriaCandidate.Value is ExcelDataProvider.IRangeInfo criteriaAsRange)
+			{
+				if (criteriaAsRange.IsMulti)
+					return false;
+				else
+					criteria = this.GetFirstArgument(criteriaCandidate.ValueFirst).ToString().ToUpper();
+			}
+			else
+				criteria = this.GetFirstArgument(criteriaCandidate).ValueFirst.ToString().ToUpper();
+			return true;
+		}
 
-			//return CreateResult(result, DataType.Decimal);
+		private bool rangesAreTheSameShape(ExcelDataProvider.IRangeInfo expectedRange, ExcelDataProvider.IRangeInfo actualRange)
+		{
+			var expectedRangeWidth = expectedRange.Address._toCol - expectedRange.Address._fromCol;
+			var expectedRangeHeight = expectedRange.Address._toRow - expectedRange.Address._fromRow;
+			var actualRangeWidth = actualRange.Address._toCol - actualRange.Address._fromCol;
+			var actualRangeHeight = actualRange.Address._toRow - actualRange.Address._fromRow;
+			return (expectedRangeWidth == actualRangeWidth && expectedRangeHeight == actualRangeHeight);
 		}
 	}
 }
