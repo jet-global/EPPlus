@@ -304,11 +304,11 @@ namespace OfficeOpenXml
 				}
 			}
 			this.Worksheet._commentsStore.Delete(fromRow, fromCol, rows, columns);
-			var ci = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.Worksheet._commentsStore);
-			while (ci.MoveNext())
+			var commentEnumerator = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.Worksheet._commentsStore);
+			while (commentEnumerator.MoveNext())
 			{
-				int offset = deletedIndices.Count(di => ci.Value > di);
-				ci.Value -= offset;
+				int offset = deletedIndices.Count(di => commentEnumerator.Value > di);
+				commentEnumerator.Value -= offset;
 			}
 		}
 
