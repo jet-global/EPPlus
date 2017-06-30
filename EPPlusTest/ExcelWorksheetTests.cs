@@ -4723,8 +4723,6 @@ namespace EPPlusTest
 			}
 		}
 
-
-
 		[TestMethod]
 		public void DeleteColumnsFromStartOfRangeUpdatesDataValidationRangeAcrossSheets()
 		{
@@ -4784,66 +4782,6 @@ namespace EPPlusTest
 				Assert.AreEqual("'sheet2'!A5:B7", pivotTable.CacheDefinition.SourceRange.FullAddress);
 			}
 		}
-
-		//[TestMethod]
-		//[DeploymentItem(@"..\..\Workbooks\Sparkline Demos.xlsx")]
-		//public void DeleteColumnAcrossSparklineSourceUpdatesSparklines()
-		//{
-		//	var file = new FileInfo("Sparkline Demos.xlsx");
-		//	Assert.IsTrue(file.Exists);
-		//	var temp = Path.GetTempFileName();
-		//	File.Delete(temp);
-		//	var copy = file.CopyTo(temp);
-		//	try
-		//	{
-		//		using (var package = new ExcelPackage(copy))
-		//		{
-		//			var sheet = package.Workbook.Worksheets.First();
-		//			var sparklines = sheet.SparklineGroups.SparklineGroups;
-		//			Assert.AreEqual(6, sparklines.Count);
-		//			sheet.DeleteColumn(4, 3);
-		//			Assert.AreEqual(3, sparklines.Count);
-		//			Assert.AreEqual("'Sheet1'!#REF!", sparklines[2].Sparklines[0].Formula.Address);
-		//			Assert.AreEqual("'Sheet1'!#REF!", sparklines[1].Sparklines[0].Formula.Address);
-		//			Assert.AreEqual("'Sheet1'!#REF!", sparklines[0].Sparklines[0].Formula.Address);
-		//			package.Save();
-		//		}
-		//		using (var package = new ExcelPackage(copy))
-		//		{
-		//			var sheet = package.Workbook.Worksheets.First();
-		//			var sparklines = sheet.SparklineGroups.SparklineGroups;
-		//			Assert.AreEqual(3, sparklines.Count);
-		//			Assert.AreEqual("'Sheet1'!#REF!", sparklines[2].Sparklines[0].Formula.Address);
-		//			Assert.AreEqual("'Sheet1'!#REF!", sparklines[1].Sparklines[0].Formula.Address);
-		//			Assert.AreEqual("'Sheet1'!#REF!", sparklines[0].Sparklines[0].Formula.Address);
-		//		}
-		//	}
-		//	finally
-		//	{
-		//		copy.Delete();
-		//	}
-		//}
-
-		//[TestMethod]
-		//[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
-		//public void DeleteColumnAcrossPivotTableSourceUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
-		//{
-		//	var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
-		//	Assert.IsTrue(file.Exists);
-		//	using (var package = new ExcelPackage(file))
-		//	{
-		//		var worksheet = package.Workbook.Worksheets.First();
-		//		var pivotTable = worksheet.PivotTables.First();
-		//		Assert.AreEqual("I10:K27", pivotTable.Address.Address);
-		//		Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-		//		Assert.AreEqual("C3:C5", pivotTable.CacheDefinition.SourceRange.Address);
-
-		//		worksheet.DeleteColumn(1, 1);
-
-		//		Assert.AreEqual("H10:J27", pivotTable.Address.Address);
-		//		Assert.AreEqual("B3:B5", pivotTable.CacheDefinition.SourceRange.Address);
-		//	}
-		//}
 		#endregion
 
 		#region Delete columns across an entire source range.
