@@ -45,6 +45,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The standard deviation based on a sample.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
+			//NOTE: This follows the Functionality of excel which is diffrent from the excel documentation.
+			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
 			List<double> listToDoStandardDeviationOn = new List<double>();
 			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in arguments)
