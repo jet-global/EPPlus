@@ -35,7 +35,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	{
 		#region AverageIfs Tests
 		[TestMethod]
-		public void AverageIfWithVariedRangeArgumentsAndCriteriaAndConstantAverageRangeWorksAsExpected()
+		public void AverageIfsWithVariedRangeArgumentsAndCriteriaAndConstantAverageRangeWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -99,7 +99,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithDifferentCriteriaInputsWorksAsExpected()
+		public void AverageIfsWithDifferentCriteriaInputsWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -184,7 +184,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithVariedAverageRangeArgumentsAndConstantRangeAndCriteriaWorksAsExpected()
+		public void AverageIfsWithVariedAverageRangeArgumentsAndConstantRangeAndCriteriaWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -228,7 +228,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithUppercaseAndLowercaseCriteriaWorksAsExpected()
+		public void AverageIfsWithUppercaseAndLowercaseCriteriaWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -246,7 +246,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsCellRangeWorksAsExpected()
+		public void AverageIfsWithCriteriaAsCellRangeWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -265,7 +265,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithRangeAsCellRangeAndCriteriaAsArrayWorksAsExpected()
+		public void AverageIfsWithRangeAsCellRangeAndCriteriaAsArrayWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -285,7 +285,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfEmptyStringCriteria()
+		public void AverageIfsEmptyStringCriteria()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -303,7 +303,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithInequalitiesOnBooleanCriteriaWorksAsExpected()
+		public void AverageIfsWithInequalitiesOnBooleanCriteriaWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -324,7 +324,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsExpressionCharacterWorksAsExpected()
+		public void AverageIfsWithCriteriaAsExpressionCharacterWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -344,7 +344,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithInequalitiesOnStringsWorksAsExpected()
+		public void AverageIfsWithInequalitiesOnStringsWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -362,7 +362,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithTextComparisonsWithWildcardCharacterWorksAsExpected()
+		public void AverageIfsWithTextComparisonsWithWildcardCharacterWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -387,7 +387,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithTextComparisonsWithEscapedWildcardCharacterWorksAsExpected()
+		public void AverageIfsWithTextComparisonsWithEscapedWildcardCharacterWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -413,7 +413,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithStringInequalityCriteriaWorksAsExpected()
+		public void AverageIfsWithStringInequalityCriteriaWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -454,7 +454,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithVariedExpressionCharactersWorksAsExpected()
+		public void AverageIfsWithVariedExpressionCharactersWorksAsExpected()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -495,7 +495,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithDifferentRangeSizesReturnsPoundValue()
+		public void AverageIfsWithDifferentRangeSizesReturnsPoundValue()
 		{
 			using (var package = new ExcelPackage())
 			{
