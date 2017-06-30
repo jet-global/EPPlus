@@ -43,18 +43,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The sum of the products of the arguments given.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			var retVal = 0d;
+			var sum = 0d;
 			if (arguments != null)
 			{
 				foreach (var arg in arguments)
 				{
-					var temp = Calculate(arg, context);
-					if (temp < 0)
+					var valToAdd = this.Calculate(arg, context);
+					if (valToAdd < 0)
 						return new CompileResult(eErrorType.Value);
-					retVal += temp;
+					sum += valToAdd;
 				}
 			}
-			return CreateResult(retVal, DataType.Decimal);
+			return this.CreateResult(sum, DataType.Decimal);
 		}
 
 		/// <summary>
@@ -66,29 +66,29 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The given argument squared as a double.</returns>
 		private double Calculate(FunctionArgument arg, ParsingContext context, bool isInArray = false)
 		{
-			var retVal = 0d;
+			var calculatedValue = 0d;
 			if (ShouldIgnore(arg))
 			{
-				return retVal;
+				return calculatedValue;
 			}
 			if (arg.Value is IEnumerable<FunctionArgument>)
 			{
 				foreach (var item in (IEnumerable<FunctionArgument>)arg.Value)
 				{
-					retVal += Calculate(item, context, true);
+					calculatedValue += this.Calculate(item, context, true);
 				}
 			}
 			else
 			{
-				var cs = arg.Value as ExcelDataProvider.IRangeInfo;
-				if (cs != null)
+				var rangeVal = arg.Value as ExcelDataProvider.IRangeInfo;
+				if (rangeVal != null)
 				{
-					foreach (var c in cs)
+					foreach (var cell in rangeVal)
 					{
-						if (ShouldIgnore(c, context) == false)
+						if (ShouldIgnore(cell, context) == false)
 						{
-							CheckForAndHandleExcelError(c);
-							retVal += System.Math.Pow(c.ValueDouble, 2);
+							CheckForAndHandleExcelError(cell);
+							calculatedValue += System.Math.Pow(cell.ValueDouble, 2);
 						}
 					}
 				}
@@ -108,10 +108,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						if (!ConvertUtil.TryParseDateObjectToOADate(arg.Value, out _))
 							return -1;
 					}
-					retVal += System.Math.Pow(ConvertUtil.GetValueDouble(arg.Value, ignoreBool), 2);
+					calculatedValue += System.Math.Pow(ConvertUtil.GetValueDouble(arg.Value, ignoreBool), 2);
 				}
 			}
-			return retVal;
+			return calculatedValue;
 		}
 	}
 }
