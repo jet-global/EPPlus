@@ -365,8 +365,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["C3"].Formula = "{1,2,3}";
 				worksheet.Cells["D3"].Formula = "{1,2,3}";
 				worksheet.Cells["D4"].Formula = "AVERAGEIF(B3:D3,{1,2,3},B2:D2)";
+				worksheet.Cells["D5"].Formula = "AVERAGEIF(B3:D3,B3,B2:D2)";
 				worksheet.Calculate();
 				Assert.AreEqual(1d, worksheet.Cells["D4"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["D5"].Value);
 			}
 		}
 

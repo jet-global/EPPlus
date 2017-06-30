@@ -166,7 +166,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B10"].Formula = "AVERAGEIFS(C3:W3,C2:W2,\"T*sday\")";
 				worksheet.Cells["B11"].Formula = "AVERAGEIFS(C3:W3,C2:W2,\">=1\")";
 				worksheet.Cells["B12"].Formula = "AVERAGEIFS(C3:W3,C2:W2,\">6/22/2017\")";
-				worksheet.Cells["B13"].Formula = "AVERAGEIFS(F11:H11,C11:E11,C2:W2,1)";
+				worksheet.Cells["B13"].Formula = "AVERAGEIFS(F11:H11,C11:E11,1)";
 				worksheet.Calculate();
 				Assert.AreEqual(8.5, worksheet.Cells["B2"].Value);
 				Assert.AreEqual(8.5, worksheet.Cells["B3"].Value);
@@ -191,9 +191,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["C2"].Value = 3;
 				worksheet.Cells["D2"].Value = 1;
-
-				worksheet.Cells["B"].Formula = "AVERAGEIFS(C:D,C2:D2,\">0\")";
-
 				worksheet.Cells["B3"].Formula = "AVERAGEIFS(C3:D3,C2:D2,\">0\")";
 				worksheet.Cells["C3"].Value = 4;
 				worksheet.Cells["D3"].Value = 2;
@@ -274,16 +271,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B2"].Value = 1;
-				worksheet.Cells["C2"].Value = 1;
-				worksheet.Cells["D2"].Value = 1;
+				worksheet.Cells["C2"].Value = 3;
+				worksheet.Cells["D2"].Value = 5;
 				worksheet.Cells["B3"].Formula = "{1,2,3}";
 				worksheet.Cells["C3"].Formula = "{1,2,3}";
 				worksheet.Cells["D3"].Formula = "{1,2,3}";
 				worksheet.Cells["D4"].Formula = "AVERAGEIFS(B2:D2,B3:D3,{1,2,3})";
 				worksheet.Cells["D5"].Formula = "AVERAGEIFS(B2:D2,B3:D3,B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(1d, worksheet.Cells["D4"].Value);
-				Assert.AreEqual(1d, worksheet.Cells["D5"].Value);
+				Assert.AreEqual(3d, worksheet.Cells["D4"].Value);
+				Assert.AreEqual(3d, worksheet.Cells["D5"].Value);
 			}
 		}
 
@@ -337,8 +334,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["C4"].Value = null;
 				worksheet.Cells["D2"].Value = 1;
 				worksheet.Cells["B2"].Formula = "AVERAGEIFS(D2,C2,\"=\")";
-				worksheet.Cells["B3"].Formula = "AVERAGEIFS(D3,C2,\"=\")";
-				worksheet.Cells["B4"].Formula = "AVERAGEIFS(D4,C2,\"=\")";
+				worksheet.Cells["B3"].Formula = "AVERAGEIFS(D2,C3,\"=\")";
+				worksheet.Cells["B4"].Formula = "AVERAGEIFS(D2,C4,\"=\")";
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);

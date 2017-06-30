@@ -53,9 +53,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (cellRangeToCheck == null)
 				return new CompileResult(eErrorType.Value);
-			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange && criteriaRange.IsMulti)
-				return new CompileResult(eErrorType.Div0);
-			var criteriaString = this.GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString().ToUpper();
+			string criteriaString = null;
+			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
+			{
+				if (criteriaRange.IsMulti)
+					return new CompileResult(eErrorType.Div0);
+				else
+					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
+			}
+			else
+				criteriaString = this.GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString().ToUpper();
 			if (arguments.Count() > 2)
 			{
 				var cellRangeToAverage = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
