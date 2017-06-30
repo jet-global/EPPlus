@@ -263,7 +263,41 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void SumsqWithMixedTypesArrayReturnsCorrectValue()
 		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUMSQ({4, 5.5, \"string\"})";
+				worksheet.Calculate();
+				Assert.AreEqual(46.25d, worksheet.Cells["B1"].Value);
+			}
+		}
 
+		[TestMethod]
+		public void SumsqWithLogicalValuesArrayReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUMSQ({5, FALSE, 4})";
+				worksheet.Cells["B2"].Formula = "SUMSQ({5, TRUE, 4})";
+				worksheet.Calculate();
+				Assert.AreEqual(41d, worksheet.Cells["B1"].Value);
+				Assert.AreEqual(41d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumsqWithMissingInputsReturnCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Formula = "SUMSQ(, 5, 6)";
+				worksheet.Cells["B2"].Formula = "SUMSQ(5, , 7, , , 8)";
+				worksheet.Calculate();
+				Assert.AreEqual(61d, worksheet.Cells["B1"].Value);
+				Assert.AreEqual(138d, worksheet.Cells["B2"].Value);
+			}
 		}
 	}
 }
