@@ -29,8 +29,17 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Returns the average (arithmetic mean_ of all cells that meet multiple criteria.
+	/// </summary>
 	public class AverageIfs : MultipleRangeCriteriasFunction
 	{
+		/// <summary>
+		/// Returns the average (arithmetic mean_ of all cells that meet multiple criteria.
+		/// </summary>
+		/// <param name="arguments">The arguments used to calculate the average.</param>
+		/// <param name="context">The context for the function.</param>
+		/// <returns>Returns the average of all cells in the given range that pass the given criteria(s).</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 3) == false)
@@ -38,8 +47,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var rangeToAverage = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (rangeToAverage == null)
 				return new CompileResult(eErrorType.Div0);
-			var indexesToAverage = new List<int>();
-
+			var indexesOfValidCells = new List<int>();
 			for (var argumentIndex = 1; argumentIndex < arguments.Count(); argumentIndex += 2)
 			{
 				var currentRangeToCompare = arguments.ElementAt(argumentIndex).ValueAsRangeInfo;
@@ -51,11 +59,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return new CompileResult(eErrorType.Div0);
 
 				var passingIndexes = this.getIndexesOfCellsPassingCriteria(currentRangeToCompare, currentCriteria);
-				indexesToAverage = indexesToAverage.Union(passingIndexes).ToList();
+				indexesOfValidCells = indexesOfValidCells.Union(passingIndexes).ToList();
 			}
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
-			foreach (var cellIndex in indexesToAverage)
+			foreach (var cellIndex in indexesOfValidCells)
 			{
 				var currentCellValue = rangeToAverage.ElementAt(cellIndex).Value;
 				if (currentCellValue is ExcelErrorValue cellError)
@@ -65,13 +73,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);
 				numberOfValidValues++;
 			}
-
 			if (numberOfValidValues == 0)
 				return new CompileResult(eErrorType.Div0);
 			else
 				return this.CreateResult(sumOfValidValues / numberOfValidValues, DataType.Decimal);
 		}
 
+		/// <summary>
+		/// Returns a list containing the indexes of the cells in <paramref name="cellsToCompare"/> that satisfy
+		/// the criteria detailed in <paramref name="criteria"/>.
+		/// </summary>
+		/// <param name="cellsToCompare">The <see cref="ExcelDataProvider.IRangeInfo"/> containing the cells to test against the <paramref name="criteria"/>.</param>
+		/// <param name="criteria">The criteria dictating the acceptable contents of a given cell.</param>
+		/// <returns>Returns a list of indexes corresponding to each cell that satisfies the given criteria.</returns>
 		private List<int> getIndexesOfCellsPassingCriteria(ExcelDataProvider.IRangeInfo cellsToCompare, string criteria)
 		{
 			var passingIndexes = new List<int>();
@@ -84,6 +98,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return passingIndexes;
 		}
 
+		/// <summary>
+		/// Ensures that the given <paramref name="criteriaCandidate"/> is of a form
+		/// that can be represented as a valid criteria.
+		/// </summary>
+		/// <param name="criteriaCandidate">The <see cref="FunctionArgument"/> containing the criteria.</param>
+		/// <param name="criteria">The returned string containing a usable representation of the criteria from <paramref name="criteriaCandidate"/>.</param>
+		/// <returns>Returns true if <paramref name="criteriaCandidate"/> contains a valid form of the criteria, and false otherwise.</returns>
 		private bool tryGetCriteria(FunctionArgument criteriaCandidate, out string criteria)
 		{
 			criteria = null;
@@ -99,6 +120,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return true;
 		}
 
+		/// <summary>
+		/// Checks if the <paramref name="expectedRange"/> is the same width and height as the
+		/// <paramref name="actualRange"/>.
+		/// </summary>
+		/// <param name="expectedRange">The <see cref="ExcelDataProvider.IRangeInfo"/> with the desired cell width and height.</param>
+		/// <param name="actualRange">The <see cref="ExcelDataProvider.IRangeInfo"/> with the width and height to be tested.</param>
+		/// <returns>Returns true if <paramref name="expectedRange"/> and <paramref name="actualRange"/> have the same width and height values.</returns>
 		private bool rangesAreTheSameShape(ExcelDataProvider.IRangeInfo expectedRange, ExcelDataProvider.IRangeInfo actualRange)
 		{
 			var expectedRangeWidth = expectedRange.Address._toCol - expectedRange.Address._fromCol;
