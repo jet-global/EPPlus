@@ -54,6 +54,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				foreach (var arg in arguments)
 				{
+					if (arg.Value is string && !ConvertUtil.TryParseDateObjectToOADate(arg.Value, out _))
+						return new CompileResult(eErrorType.Value);
 					var valToAdd = this.Calculate(arg, context);
 					sum += valToAdd;
 				}
@@ -101,15 +103,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					CheckForAndHandleExcelError(arg);
 					if (IsNumericString(arg.Value) && !isInArray)
 					{
-						if (arg.Value is string)
-							return 0;
 						ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double value);
 						return value;
 					}
 					var ignoreBool = isInArray;
 					if (!ignoreBool)
 					{
-						if (arg.Value == null || arg.Value is bool)
+						if (arg.Value == null)
 							return 0;
 					}
 					calculatedValue += ConvertUtil.GetValueDouble(arg.Value, ignoreBool);
