@@ -63,6 +63,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return this.CreateResult(sum, DataType.Decimal);
 		}
 
+		#region Private Methods
 		/// <summary>
 		/// Takes the specified argument and converts it to a double and then squares it. 
 		/// </summary>
@@ -117,5 +118,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			return calculatedValue;
 		}
+		#endregion
 	}
 }
