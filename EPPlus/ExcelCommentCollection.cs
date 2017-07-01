@@ -214,6 +214,8 @@ namespace OfficeOpenXml
 				nextComment._commentHelper.TopNode.ParentNode.InsertBefore(element, nextComment._commentHelper.TopNode);
 			}
 			ExcelComment comment = new ExcelComment(this.NameSpaceManager, element, cell, copyComment.TopNode);
+			comment.RichText = copyComment.RichText;
+			// Copy text styling.
 			comment._commentHelper.TopNode.SelectSingleNode(".//d:text", this.NameSpaceManager).InnerXml = copyComment._commentHelper.TopNode.SelectSingleNode(".//d:text", this.NameSpaceManager).InnerXml;
 			string author = copyComment.Author;
 			if (string.IsNullOrEmpty(author))
