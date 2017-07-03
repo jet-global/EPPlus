@@ -2730,6 +2730,9 @@ namespace OfficeOpenXml
 								// No position arrangement is required.
 								break;
 						}
+						newFromColumn = newFromColumn < 1 ? 1 : newFromColumn;
+						newFromRow = newFromRow < 1 ? 1 : newFromRow;
+
 						drawing.SetPosition(newFromRow, drawing.From.RowOff, newFromColumn, drawing.From.ColumnOff, newToRow, drawing.To.RowOff, newToColumn, drawing.To.ColumnOff);
 					}
 					// The chart Plot Area contains one copy of a chart for each series in that chart.

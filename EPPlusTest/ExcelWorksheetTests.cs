@@ -3948,6 +3948,40 @@ namespace EPPlusTest
 
 		#region Delete Rows over the start of a range. 
 		[TestMethod]
+		public void DeleteRowsAcrossStartOfChartUpdatesChart()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+				chart.From.Column = 4;
+				chart.From.Row = 4;
+				chart.To.Column = 10;
+				chart.To.Row = 10;
+				sheet.DeleteRow(1, 6);
+				Assert.AreEqual(1, chart.From.Row);
+				Assert.AreEqual(4, chart.To.Row);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsAcrossEntireChartSourceUpdatesChart()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+				chart.From.Column = 4;
+				chart.From.Row = 4;
+				chart.To.Column = 10;
+				chart.To.Row = 10;
+				sheet.DeleteRow(1, 12);
+				// In a two-cell-anchor chart, deleting the entire row/column set also deletes the chart.
+				Assert.IsFalse(sheet.Drawings.Any(drawing => drawing.Name.Equals("myChart")));
+			}
+		}
+
+		[TestMethod]
 		public void DeleteRowsFromBeginningOfRangeUpdatesScatterChartSeries()
 		{
 			using (ExcelPackage package = new ExcelPackage())
@@ -4633,7 +4667,7 @@ namespace EPPlusTest
 				chart.To.Row = 10;
 				sheet.DeleteColumn(1, 6);
 				Assert.AreEqual(1, chart.From.Column);
-				Assert.AreEqual(2, chart.To.Column);
+				Assert.AreEqual(4, chart.To.Column);
 			}
 		}
 
