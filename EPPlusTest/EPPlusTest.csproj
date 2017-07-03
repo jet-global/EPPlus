@@ -190,11 +190,14 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\DegreesTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RadiansTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\SumProductTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\SumsqTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\SumTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\TanhTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\TanTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\SumIfsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Logical\IfErrorTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultFactoryTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultTests.cs" />
