@@ -92,28 +92,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				{
 					foreach (var cell in rangeVal)
 					{
-						if (ShouldIgnore(cell, context) == false)
+						if (this.ShouldIgnore(cell, context) == false)
 						{
-							CheckForAndHandleExcelError(cell);
+							this.CheckForAndHandleExcelError(cell);
 							calculatedValue += cell.ValueDouble;
 						}
 					}
 				}
 				else
 				{
-					CheckForAndHandleExcelError(arg);
+					this.CheckForAndHandleExcelError(arg);
 					if (IsNumericString(arg.Value) && !isInArray)
 					{
 						ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double value);
 						return value;
 					}
-					var ignoreBool = isInArray;
-					if (!ignoreBool)
+					if (!isInArray)
 					{
 						if (arg.Value == null)
 							return 0;
 					}
-					calculatedValue += ConvertUtil.GetValueDouble(arg.Value, ignoreBool);
+					calculatedValue += ConvertUtil.GetValueDouble(arg.Value, isInArray);
 				}
 			}
 			return calculatedValue;

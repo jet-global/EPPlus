@@ -70,6 +70,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						{
 							if (r.GetValue(row, col) is bool)
 								this.AddValue(0, currentResult);
+							else if (r.GetValue(row, col) is ExcelErrorValue)
+								return new CompileResult((ExcelErrorValue)r.GetValue(row, col));
 							else
 								this.AddValue(r.GetValue(row, col), currentResult);
 						}
@@ -99,7 +101,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return this.CreateResult(result, DataType.Decimal);
 		}
 
-
 		#region Private Methods
 		/// <summary>
 		/// Converts the given object to a double and then adds it to the given list.
@@ -110,8 +111,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (IsNumeric(convertVal))
 				currentResult.Add(Convert.ToDouble(convertVal));
-			else if (convertVal is ExcelErrorValue)
-				throw (new ExcelErrorValueException((ExcelErrorValue)convertVal));
 			else
 				currentResult.Add(0d);
 		}
