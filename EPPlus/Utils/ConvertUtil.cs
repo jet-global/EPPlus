@@ -36,6 +36,11 @@ namespace OfficeOpenXml.Utils
 	/// </summary>
 	public static class ConvertUtil
 	{
+		internal static bool IsABooloean(object candidate)
+		{
+			if (candidate == null) return false;
+			return (candidate.GetType().IsPrimitive || !(candidate is double) || !(candidate is decimal) || !(candidate is DateTime) || !(candidate is TimeSpan) || !(candidate is long));
+		}
 		internal static bool IsNumeric(object candidate)
 		{
 			if (candidate == null) return false;

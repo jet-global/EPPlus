@@ -53,11 +53,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				if (item.IsExcelRange)
 				{
-					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null)
+					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null || item.ValueFirst is bool || ConvertUtil.TryParseDateString(item.ValueFirst, out System.DateTime result))
 						continue;
 					return new CompileResult(eErrorType.Div0);
 				}
-				if (item.ValueFirst == null)
+				else if (item.ValueFirst == null)
 				{
 					listToDoStandardDeviationOn.Add(0.0);
 				}
