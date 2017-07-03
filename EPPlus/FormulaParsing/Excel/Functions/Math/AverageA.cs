@@ -146,24 +146,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private double? GetNumericValue(object numberCandidate, bool isInArray)
 		{
 			if (this.IsNumeric(numberCandidate) && !(numberCandidate is bool))
-			{
 				return ConvertUtil.GetValueDouble(numberCandidate);
-			}
-			if (!isInArray)
+			else if (!isInArray)
 			{
 				if (numberCandidate is bool)
-				{
-					if (isInArray) return default(double?);
 					return ConvertUtil.GetValueDouble(numberCandidate);
-				}
-				else if (ConvertUtil.TryParseNumericString(numberCandidate, out double number))
-				{
+				else if (ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
 					return number;
-				}
-				else if (ConvertUtil.TryParseDateString(numberCandidate, out System.DateTime date))
-				{
-					return date.ToOADate();
-				}
 			}
 			return default(double?);
 		}

@@ -49,7 +49,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_provider = new EpplusExcelDataProvider(_package);
 			_parsingContext = ParsingContext.Create();
 			_parsingContext.Scopes.NewScope(RangeAddress.Empty);
-			_worksheet = _package.Workbook.Worksheets.Add("testsheet");
+			_worksheet = _package.Workbook.Worksheets.Add("TestSheet");
 		}
 
 		[TestCleanup]
@@ -60,7 +60,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 
 		#region AverageIf Tests
 		[TestMethod]
-		public void AverageIfWithVariedRangeArgumentsAndConstantCriteriaWorksAsExpected()
+		public void AverageIfWithVariedRangeArgumentsAndConstantCriteria()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -102,7 +102,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithVariedRangeArgumentsAndCriteriaAndConstantAverageRangeWorksAsExpected()
+		public void AverageIfWithVariedRangeArgumentsAndCriteriaAndConstantAverageRange()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -166,7 +166,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithDifferentCriteriaInputsWorksAsExpected()
+		public void AverageIfWithDifferentCriteriaInputs()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -251,7 +251,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithVariedAverageRangeArgumentsAndConstantRangeAndCriteriaWorksAsExpected()
+		public void AverageIfWithVariedAverageRangeArgumentsAndConstantRangeAndCriteria()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -295,7 +295,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithUppercaseAndLowercaseCriteriaWorksAsExpected()
+		public void AverageIfIgnoresCase()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -313,7 +313,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsCellRangeWorksAsExpected()
+		public void AverageIfWithCriteriaAsCellRange()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -339,7 +339,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithRangeAsSingleCellAndCriteriaAsArrayWorksAsExpected()
+		public void AverageIfWithRangeAsSingleCellAndCriteriaAsArray()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -353,7 +353,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithRangeAsCellRangeAndCriteriaAsArrayWorksAsExpected()
+		public void AverageIfWithRangeAsCellRangeAndCriteriaAsArray()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -373,7 +373,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfEmptyStringCriteria()
+		public void AverageIfWithEmptyStringCriteria()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -390,7 +390,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithInequalitiesOnBooleanCriteriaWorksAsExpected()
+		public void AverageIfWithInequalitiesOnBooleanCriteria()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -411,7 +411,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsExpressionCharacterWorksAsExpected()
+		public void AverageIfWithCriteriaAsExpressionCharacter()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -431,7 +431,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithInequalitiesOnStringsWorksAsExpected()
+		public void AverageIfWithInequalitiesOnStrings()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -449,7 +449,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithTextComparisonsWithWildcardCharacterWorksAsExpected()
+		public void AverageIfWithTextComparisonsWithWildcardCharacter()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -471,7 +471,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithTextComparisonsWithEscapedWildcardCharacterWorksAsExpected()
+		public void AverageIfWithTextComparisonsWithEscapedWildcardCharacter()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -497,7 +497,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithStringInequalityCriteriaWorksAsExpected()
+		public void AverageIfWithStringInequalityCriteria()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -538,7 +538,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithVariedExpressionCharactersWorksAsExpected()
+		public void AverageIfWithVariedExpressionCharacters()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -576,7 +576,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithDifferentRangeSizesWorksAsExpected()
+		public void AverageIfWithDifferentRangeSizes()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -600,7 +600,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithNumericRangeAndAverageRangeWorksAsExpected()
+		public void AverageIfWithNumericRangeAndAverageRange()
 		{
 			_worksheet.Cells["A1"].Value = 1d;
 			_worksheet.Cells["A2"].Value = 2d;
@@ -617,7 +617,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithNonNumericRangeAndNumericAverageRangeWorksAsExpected()
+		public void AverageIfWithNonNumericRangeAndNumericAverageRange()
 		{
 			_worksheet.Cells["A1"].Value = "Monday";
 			_worksheet.Cells["A2"].Value = "Tuesday";
@@ -634,7 +634,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsNumberWorksAsExpected()
+		public void AverageIfWithCriteriaAsNumber()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = 1d;
@@ -647,7 +647,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsNotEqualExpressionWorksAsExpected()
+		public void AverageIfWithCriteriaAsNotEqualExpression()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -664,7 +664,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsNumberInStringWorksAsExpected()
+		public void AverageIfWithCriteriaAsNumberInString()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -681,7 +681,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsNotEqualToZeroExpressionWorksAsExpected()
+		public void AverageIfWithCriteriaAsNotEqualToZeroExpression()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -698,7 +698,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsGreaterThanZeroExpressionWorksAsExpected()
+		public void AverageIfWithCriteriaAsGreaterThanZeroExpression()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -715,7 +715,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsGreaterThanOrEqualToZeroExpressionWorksAsExpected()
+		public void AverageIfWithCriteriaAsGreaterThanOrEqualToZeroExpression()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -732,7 +732,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsLessThanZeroExpressionWorksAsExpected()
+		public void AverageIfWithCriteriaAsLessThanZeroExpression()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -749,7 +749,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void AverageIfWithCriteriaAsLessThanOrEqualToZeroExpressionWorksAsExpected()
+		public void AverageIfWithCriteriaAsLessThanOrEqualToZeroExpression()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;

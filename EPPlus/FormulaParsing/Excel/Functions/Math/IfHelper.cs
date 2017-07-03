@@ -39,12 +39,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		/// <summary>
 		/// Compares the given <paramref name="objectToCompare"/> against the given <paramref name="criteria"/>.
-		/// This method is expected to be used with any of the -IF or -IFS Excel functions (ex: the AVERAGEIF function).
+		/// This method is expected to be used with any of the *IF or *IFS Excel functions (ex: the AVERAGEIF function).
 		/// </summary>
 		/// <param name="objectToCompare">The object to compare against the given <paramref name="criteria"/>.</param>
 		/// <param name="criteria">The criteria value or expression that dictates whether the given <paramref name="objectToCompare"/> passes or fails.</param>
 		/// <returns>Returns true if <paramref name="objectToCompare"/> matches the <paramref name="criteria"/>.</returns>
-		public static bool objectMatchesCriteria(object objectToCompare, string criteria)
+		public static bool ObjectMatchesCriteria(object objectToCompare, string criteria)
 		{
 			var operatorIndex = -1;
 			// Check if the criteria is an expression; i.e. begins with the operators <>, =, >, >=, <, or <=
@@ -63,23 +63,22 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					switch (expressionOperator.Operator)
 					{
 						case OperatorType.Equals:
-							return isMatch(objectToCompare, criteriaString, true);
+							return IsMatch(objectToCompare, criteriaString, true);
 						case OperatorType.NotEqualTo:
-							return !isMatch(objectToCompare, criteriaString, true);
+							return !IsMatch(objectToCompare, criteriaString, true);
 						case OperatorType.GreaterThan:
 						case OperatorType.GreaterThanOrEqual:
 						case OperatorType.LessThan:
 						case OperatorType.LessThanOrEqual:
-							return compareAsInequalityExpression(objectToCompare, criteriaString, expressionOperator.Operator);
+							return CompareAsInequalityExpression(objectToCompare, criteriaString, expressionOperator.Operator);
 						default:
-							return isMatch(objectToCompare, criteriaString);
+							return IsMatch(objectToCompare, criteriaString);
 					}
 				}
-				else
-					return false;
+				//else
+				//	return false;
 			}
-			else
-				return isMatch(objectToCompare, criteria);
+			return IsMatch(objectToCompare, criteria);
 		}
 
 		/// <summary>
@@ -94,11 +93,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		///		Indicate if the <paramref name="criteria"/> came from an equality related expression,
 		///		which requires slightly different handling.</param>
 		/// <returns>Returns true if <paramref name="objectToCompare"/> matches the <paramref name="criteria"/>.</returns>
-		private static bool isMatch(object objectToCompare, string criteria, bool matchAsEqualityExpression = false)
+		private static bool IsMatch(object objectToCompare, string criteria, bool matchAsEqualityExpression = false)
 		{
 			// Equality related expression evaluation (= or <>) only considers empty cells as equal to empty string criteria.
+			// If the given criteria was not originally preceded by an equality operator, then 
+			// both empty cells and cells containing the empty string are considered as equal to empty string criteria.
 			if (criteria.Equals(string.Empty))
-				return ((matchAsEqualityExpression) ? objectToCompare == null : objectToCompare == null || objectToCompare.Equals(string.Empty));
+				return ((matchAsEqualityExpression) ? (objectToCompare == null) : (objectToCompare == null || objectToCompare.Equals(string.Empty)));
 			var criteriaIsBool = criteria.Equals(Boolean.TrueString.ToUpper()) || criteria.Equals(Boolean.FalseString.ToUpper());
 			if (ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaAsOADate))
 				criteria = criteriaAsOADate.ToString();
@@ -138,7 +139,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		///		The inequality operator that dictates how the <paramref name="objectToCompare"/> should
 		///		be compared to the <paramref name="criteria"/>.</param>
 		/// <returns>Returns true if the <paramref name="objectToCompare"/> passes the comparison with <paramref name="criteria"/>.</returns>
-		private static bool compareAsInequalityExpression(object objectToCompare, string criteria, OperatorType comparisonOperator)
+		private static bool CompareAsInequalityExpression(object objectToCompare, string criteria, OperatorType comparisonOperator)
 		{
 			if (objectToCompare == null)
 				return false;
