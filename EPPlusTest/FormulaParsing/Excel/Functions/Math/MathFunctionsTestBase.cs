@@ -92,7 +92,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			worksheet.Cells["C21"].Value = 21;
 			return package;
 		}
-
 		#endregion
 	}
 }
