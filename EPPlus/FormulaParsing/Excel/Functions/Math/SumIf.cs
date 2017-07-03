@@ -68,93 +68,96 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-			var args = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
-			var criteria = GetFirstArgument(arguments.ElementAt(1)).ValueFirst != null ? GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
-			var retVal = 0d;
-			if (args == null)
+			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
+			if (cellRangeToCheck == null)
+				return new CompileResult(eErrorType.Value);
+			string criteriaString = null;
+			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
 			{
-				var val = GetFirstArgument(arguments.ElementAt(0)).Value;
-				if (criteria != null && _evaluator.Evaluate(val, criteria))
-				{
-					if (arguments.Count() > 2)
-					{
-						var sumVal = arguments.ElementAt(2).Value;
-						var sumRange = sumVal as ExcelDataProvider.IRangeInfo;
-						if (sumRange != null)
-						{
-							retVal = sumRange.First().ValueDouble;
-						}
-						else
-						{
-							retVal = ConvertUtil.GetValueDouble(sumVal, true);
-						}
-					}
-					else
-					{
-						retVal = ConvertUtil.GetValueDouble(val, true);
-					}
-				}
-			}
-			else if (arguments.Count() > 2)
-			{
-				var sumRange = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
-				retVal = CalculateWithSumRange(args, criteria, sumRange, context);
+				if (criteriaRange.IsMulti)
+					return new CompileResult(eErrorType.Div0);
+				else
+					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
 			}
 			else
+				criteriaString = this.GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString().ToUpper();
+			if (arguments.Count() > 2)
 			{
-				retVal = CalculateSingleRange(args, criteria, context);
+				var cellRangeToAverage = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
+				if (cellRangeToAverage == null)
+					return new CompileResult(eErrorType.Value);
+				else
+					return this.CalculateAverageUsingAverageRange(cellRangeToCheck, criteriaString, cellRangeToAverage);
 			}
-			return CreateResult(retVal, DataType.Decimal);
-		}
-
-		#region Private Methods
-		/// <summary>
-		/// Calculates the sum of the given values including a sum range argument.
-		/// </summary>
-		/// <param name="range">The range of the cells to be summed.</param>
-		/// <param name="criteria">The criteria by which to sum the arguments.</param>
-		/// <param name="sumRange">The actual cells to be summed.</param>
-		/// <param name="context">The current context of the function.</param>
-		/// <returns></returns>
-		private double CalculateWithSumRange(ExcelDataProvider.IRangeInfo range, string criteria, ExcelDataProvider.IRangeInfo sumRange, ParsingContext context)
-		{
-			var retVal = 0d;
-			foreach (var cell in range)
-			{
-				if (criteria != null && _evaluator.Evaluate(GetFirstArgument(cell.Value), criteria))
-				{
-					var or = cell.Row - range.Address._fromRow;
-					var oc = cell.Column - range.Address._fromCol;
-					if (sumRange.Address._fromRow + or <= sumRange.Address._toRow &&
-						sumRange.Address._fromCol + oc <= sumRange.Address._toCol)
-					{
-						var v = sumRange.GetOffset(or, oc);
-						retVal += ConvertUtil.GetValueDouble(v, true);
-					}
-				}
-			}
-			return retVal;
+			else
+				return this.CalculateAverageUsingRange(cellRangeToCheck, criteriaString);
 		}
 
 		/// <summary>
-		/// Calculates the sum of the given values with two arguments (no sum range).
+		/// Calculates the average value of all cells that match the given criteria. The sizes/shapes of
+		/// <paramref name="cellsToCompare"/> and <paramref name="potentialCellsToAverage"/> do not have to be the same;
+		/// The size and shape of <paramref name="cellsToCompare"/> is applied to <paramref name="potentialCellsToAverage"/>,
+		/// using the first cell in <paramref name="potentialCellsToAverage"/> as a reference point.
 		/// </summary>
-		/// <param name="range">The values to be summed.</param>
-		/// <param name="expression">The criteria by which to sum the arguments.</param>
-		/// <param name="context">The current context of the function. </param>
-		/// <returns>The sum of the values in the range.</returns>
-		private double CalculateSingleRange(ExcelDataProvider.IRangeInfo range, string expression, ParsingContext context)
+		/// <param name="cellsToCompare">The range of cells to compare against the <paramref name="comparisonCriteria"/>.</param>
+		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the average calculation.</param>
+		/// <param name="potentialCellsToAverage">
+		///		If a cell in <paramref name="cellsToCompare"/> passes the criteria, then its
+		///		corresponding cell in this cell range will be included in the average calculation.</param>
+		/// <returns>Returns the average for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
+		private CompileResult CalculateAverageUsingAverageRange(ExcelDataProvider.IRangeInfo cellsToCompare, string comparisonCriteria, ExcelDataProvider.IRangeInfo potentialCellsToAverage)
 		{
-			var retVal = 0d;
-			foreach (var cell in range)
+			var sumOfValidValues = 0d;
+			var numberOfValidValues = 0;
+			foreach (var cell in cellsToCompare)
 			{
-				if (expression != null && IsNumeric(GetFirstArgument(cell.Value)) && _evaluator.Evaluate(GetFirstArgument(cell.Value), expression))
+				if (comparisonCriteria != null && IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(cell.Value), comparisonCriteria))
 				{
-					retVal += cell.ValueDouble;
+					var relativeRow = cell.Row - cellsToCompare.Address._fromRow;
+					var relativeColumn = cell.Column - cellsToCompare.Address._fromCol;
+					var valueOfCellToAverage = potentialCellsToAverage.GetOffset(relativeRow, relativeColumn);
+					if (valueOfCellToAverage is ExcelErrorValue cellError)
+						return new CompileResult(cellError.Type);
+					if (valueOfCellToAverage is string || valueOfCellToAverage is bool || valueOfCellToAverage == null)
+						continue;
+					sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToAverage, true);
+					numberOfValidValues++;
 				}
 			}
-			return retVal;
+			if (numberOfValidValues == 0)
+				return this.CreateResult(0d, DataType.Decimal);
+			else
+				return this.CreateResult(sumOfValidValues, DataType.Decimal);
 		}
-		#endregion
+
+
+		/// <summary>
+		/// Calculates the average value of all cells that match the given criteria.
+		/// </summary>
+		/// <param name="potentialCellsToAverage">
+		///		The cell range to compare against the given <paramref name="comparisonCriteria"/>
+		///		If a cell passes the criteria, then its value is included in the average calculation.</param>
+		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the average calculation.</param>
+		/// <returns>Returns the average value for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
+		private CompileResult CalculateAverageUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToAverage, string comparisonCriteria)
+		{
+			var sumOfValidValues = 0d;
+			var numberOfValidValues = 0;
+			foreach (var cell in potentialCellsToAverage)
+			{
+				if (comparisonCriteria != null && IfHelper.IsNumeric(this.GetFirstArgument(cell.Value), true) &&
+						IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(cell.Value), comparisonCriteria))
+				{
+					sumOfValidValues += cell.ValueDouble;
+					numberOfValidValues++;
+				}
+				else if (cell.Value is ExcelErrorValue candidateError)
+					return new CompileResult(candidateError.Type);
+			}
+			if (numberOfValidValues == 0)
+				return this.CreateResult(0d, DataType.Decimal);
+			else
+				return this.CreateResult(sumOfValidValues, DataType.Decimal);
+		}
 	}
 }

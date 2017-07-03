@@ -741,13 +741,12 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B1"].Value = 4;
 				worksheet.Cells["B2"].Formula = "notaformula";
 				worksheet.Cells["B3"].Value = 2;
-				worksheet.Cells["B4"].Formula = "SUMIF(B2:B3, \"<>-10\", $B$1)";
+				worksheet.Cells["B4"].Formula = "SUMIF(B1:B3, \"<>-10\", $B$1)";
 				worksheet.Calculate();
 				Assert.AreEqual(6d, worksheet.Cells["B4"].Value);
 			}
 		}
 
-		//Below are the Criteria Tests
 		[TestMethod]
 		public void SumIfCriteriaTestsReturnTheCorrectValue()
 		{
@@ -783,7 +782,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(4d, worksheet.Cells["D12"].Value);
 		}
 
-		//Below are tests for the Average_Range portion of the function. 
 		[TestMethod]
 		public void SumIfAverageRangeWithNumbersReturnsCorrectValue()
 		{
