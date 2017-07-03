@@ -108,23 +108,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void SumIfEqualToEmptyString()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = "Not Empty";
-			_worksheet.Cells["B1"].Value = 1d;
-			_worksheet.Cells["B2"].Value = 3d;
-			_worksheet.Cells["B3"].Value = 5d;
-			var func = new SumIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 1, 2, 3, 2);
-			var args = FunctionsHelper.CreateArgs(range1, "", range2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
 		public void SumIfNotEqualToNull()
 		{
 			_worksheet.Cells["A1"].Value = null;
@@ -476,7 +459,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			{
 				var worksheet = packge.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "4";
-				worksheet.Cells["B2"].Value = "2";
+				worksheet.Cells["B2"].Value = 2;
 				worksheet.Cells["B3"].Formula = "SUMIF(B1:B2, \"<>-10\")";
 				worksheet.Calculate();
 				Assert.AreEqual(2d, worksheet.Cells["B3"].Value);
@@ -559,14 +542,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = 2;
-				worksheet.Cells["B2"].Formula = "SQRT(-1)";
-				worksheet.Cells["B3"].Formula = "SUMIF(B1:B2, \"<>-10\")";
+				worksheet.Cells["C1"].Formula = "notaformula";
+				worksheet.Cells["B3"].Formula = "SUMIF(C1:B1, \"<>-10\")";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
+				Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
 			}
 		}
 
-		//Range Test, 3 Arguments
 		[TestMethod]
 		public void SumIfWithRangeWithOnlyNumbersCriteriaReturnsCorrectValue()
 		{
@@ -605,9 +587,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["C1"].Value = 2;
 				worksheet.Cells["B2"].Value = "\"4\"";
-				worksheet.Cells["B3"].Value = 2;
-				worksheet.Cells["B4"].Formula = "SUMIF(B2:B3, \"<>-10\", $B$1)";
+				worksheet.Cells["C2"].Value = 2;
+				worksheet.Cells["B4"].Formula = "SUMIF(B2:C2, \"<>-10\", B1:C1)";
 				worksheet.Calculate();
 				Assert.AreEqual(6d, worksheet.Cells["B4"].Value);
 			}
@@ -635,11 +618,12 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = 4;
-				worksheet.Cells["B2"].Value = "word";
-				worksheet.Cells["B3"].Value = 2;
-				worksheet.Cells["B4"].Formula = "SUMIF(B2:B3, \"<>-10\", $B$1)";
+				worksheet.Cells["C1"].Value = 2;
+				worksheet.Cells["B4"].Value = "word";
+				worksheet.Cells["C4"].Value = 2;
+				worksheet.Cells["B5"].Formula = "SUMIF(B4:C4,\"<>-10\",B1:C1)";
 				worksheet.Calculate();
-				Assert.AreEqual(6d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(6d, worksheet.Cells["B5"].Value);
 			}
 		}
 
@@ -664,10 +648,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = false;
+				worksheet.Cells["A2"].Value = false;
 				worksheet.Cells["B2"].Value = 2;
 				worksheet.Cells["B3"].Value = 4;
-				worksheet.Cells["B4"].Formula = "SUMIF(B1:B2, \"<>-10\", $B$3)";
+				worksheet.Cells["C3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "SUMIF(A2:B2, \"<>-10\", B3:C3)";
 				worksheet.Calculate();
 				Assert.AreEqual(6d, worksheet.Cells["B4"].Value);
 			}
@@ -680,9 +665,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = 2;
-				worksheet.Cells["B2"].Formula = "DATE(2017, 6, 22)";
+				worksheet.Cells["C1"].Formula = "DATE(2017, 6, 22)";
 				worksheet.Cells["B3"].Value = 4;
-				worksheet.Cells["B4"].Formula = "SUMIF(B1:B2, \"<6/23/2017\", $B$3)";
+				worksheet.Cells["C3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "SUMIF(B1:C1, \"<6/23/2017\", B3:C3)";
 				worksheet.Calculate();
 				Assert.AreEqual(6d, worksheet.Cells["B4"].Value);
 			}
@@ -706,13 +692,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			using (var package = new ExcelPackage())
 			{
-				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet = package.Workbook.Worksheets.Add("Shet1");
 				worksheet.Cells["B1"].Value = 4;
-				worksheet.Cells["B2"].Value = 2;
-				worksheet.Cells["B4"].Formula = "SUMIF(B2:B3, \"\", $B$1)";
+				worksheet.Cells["C1"].Value = 2;
+				worksheet.Cells["A3"].Value = null;
+				worksheet.Cells["B3"].Value = 2;
+				worksheet.Cells["B4"].Formula = "SUMIF(A3:B3, \"\", B1:C1)";
 				worksheet.Calculate();
 				Assert.AreEqual(4d, worksheet.Cells["B4"].Value);
-
 			}
 		}
 
@@ -723,8 +710,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Shet1");
 				worksheet.Cells["B1"].Value = 4;
+				worksheet.Cells["C1"].Value = 2;
+				worksheet.Cells["A3"].Value = null;
 				worksheet.Cells["B3"].Value = 2;
-				worksheet.Cells["B4"].Formula = "SUMIF(B2:B3, \"<>-10\", $B$1)";
+				worksheet.Cells["B4"].Formula = "SUMIF(A3:B3, \"<>-10\", B1:C1)";
 				worksheet.Calculate();
 				Assert.AreEqual(6d, worksheet.Cells["B4"].Value);
 			}
@@ -753,31 +742,31 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var package = this.CreateTestingPackage();
 			var worksheet = package.Workbook.Worksheets["Sheet1"];
 
-			worksheet.Cells["D1"].Formula = "SUMIF($B$1:$B$21, 5, $C$1:$C$21)";
-			worksheet.Cells["D2"].Formula = "SUMIF($B$1:$B$21, \"5\", $C$1:$C$21)";
-			worksheet.Cells["D3"].Formula = "SUMIF($B$1:$B$21, \"=5\", $C$1:$C$21)";
-			worksheet.Cells["D4"].Formula = "SUMIF($B$1:$B$21, 3.5, $C$1:$C$21)";
-			worksheet.Cells["D5"].Formula = "SUMIF($B$1:$B$21, TRUE, $C$1:$C$21)";
-			worksheet.Cells["D6"].Formula = "SUMIF($B$1:$B$21, \"TRUE\", $C$1:$C$21)";
-			worksheet.Cells["D7"].Formula = "SUMIF($B$1:$B$21, \"6/23/2017\", $C1:$C$21)";
-			worksheet.Cells["D8"].Formula = "SUMIF($B$1:$B$21, \"6:00 PM\", $C$1:$C$21)";
-			worksheet.Cells["D9"].Formula = "SUMIF($B$1:$B$21, \"T*sday\", $C$1:$C$21)";
-			worksheet.Cells["D10"].Formula = "SUMIF($B$1:$B$21, \">=1\", $C$1:$C$21)";
-			worksheet.Cells["D11"].Formula = "SUMIF($B$1:$B$21, \">6/22/2017\", $C$1:$C$21)";
-			worksheet.Cells["D12"].Formula = "SUMIF($A$2:$A$4, 1, $A$5:$A$7)";
+			worksheet.Cells["B2"].Formula = "SUMIF(C2:W2,5,C3:W3)";
+			worksheet.Cells["B3"].Formula = "SUMIF(C2:W2,\"5\",C3:W3)";
+			worksheet.Cells["B4"].Formula = "SUMIF(C2:W2,\"=5\",C3:W3)";
+			worksheet.Cells["B5"].Formula = "SUMIF(C2:W2,3.5,C3:W3)";
+			worksheet.Cells["B6"].Formula = "SUMIF(C2:W2,TRUE,C3:W3)";
+			worksheet.Cells["B7"].Formula = "SUMIF(C2:W2,\"TRUE\",C3:W3)";
+			worksheet.Cells["B8"].Formula = "SUMIF(C2:W2,\"6/23/2017\",C3:W3)";
+			worksheet.Cells["B9"].Formula = "SUMIF(C2:W2,\"6:00 PM\",C3:W3)";
+			worksheet.Cells["B10"].Formula = "SUMIF(C2:W2,\"T*sday\",C3:W3)";
+			worksheet.Cells["B11"].Formula = "SUMIF(C2:W2,\">=1\",C3:W3)";
+			worksheet.Cells["B12"].Formula = "SUMIF(C2:W2,\">6/22/2017\",C3:W3)";
+			worksheet.Cells["B13"].Formula = "SUMIF(C11:E11,1,F11:H11)";
 			worksheet.Calculate();
-			Assert.AreEqual(17d, worksheet.Cells["D1"].Value);
-			Assert.AreEqual(17d, worksheet.Cells["D2"].Value);
-			Assert.AreEqual(17d, worksheet.Cells["D3"].Value);
-			Assert.AreEqual(8d, worksheet.Cells["D4"].Value);
-			Assert.AreEqual(12d, worksheet.Cells["D5"].Value);
-			Assert.AreEqual(12d, worksheet.Cells["D6"].Value);
-			Assert.AreEqual(16d, worksheet.Cells["D7"].Value);
-			Assert.AreEqual(21d, worksheet.Cells["D8"].Value);
-			Assert.AreEqual(12d, worksheet.Cells["D9"].Value);
-			Assert.AreEqual(88d, worksheet.Cells["D10"].Value);
-			Assert.AreEqual(33d, worksheet.Cells["D11"].Value);
-			Assert.AreEqual(4d, worksheet.Cells["D12"].Value);
+			Assert.AreEqual(17d, worksheet.Cells["B2"].Value);
+			Assert.AreEqual(17d, worksheet.Cells["B3"].Value);
+			Assert.AreEqual(17d, worksheet.Cells["B4"].Value);
+			Assert.AreEqual(8d, worksheet.Cells["B5"].Value);
+			Assert.AreEqual(12d, worksheet.Cells["B6"].Value);
+			Assert.AreEqual(12d, worksheet.Cells["B7"].Value);
+			Assert.AreEqual(16d, worksheet.Cells["B8"].Value);
+			Assert.AreEqual(21d, worksheet.Cells["B9"].Value);
+			Assert.AreEqual(12d, worksheet.Cells["B10"].Value);
+			Assert.AreEqual(88d, worksheet.Cells["B11"].Value);
+			Assert.AreEqual(33d, worksheet.Cells["B12"].Value);
+			Assert.AreEqual(4d, worksheet.Cells["B13"].Value);
 		}
 
 		[TestMethod]
@@ -897,13 +886,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = 3;
-				worksheet.Cells["B2"].Value = 1;
-				worksheet.Cells["B3"].Formula = "notaformula";
-				worksheet.Cells["B4"].Value = 2;
-				worksheet.Cells["B5"].Formula = "SUMIF($B$1:$B$2, \">0\", $B$3:$B$4)";
+				worksheet.Cells["C2"].Value = 3;
+				worksheet.Cells["D2"].Value = 1;
+				worksheet.Cells["B10"].Formula = "AVERAGEIF(C2:D2,\">0\",C10:D10)";
+				worksheet.Cells["C10"].Formula = "notAValidFormula"; // Evaluates to #NAME.
+				worksheet.Cells["D10"].Value = 2;
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
+				Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)worksheet.Cells["B10"].Value).Type);
 			}
 		}
 
@@ -1028,9 +1017,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B1"].Value = 1;
 				worksheet.Cells["B2"].Value = 1;
 				worksheet.Cells["B3"].Value = 1;
-				worksheet.Cells["B4"].Value = "{1,2,3}";
-				worksheet.Cells["B5"].Value = 1;
-				worksheet.Cells["B6"].Value = 1;
+				worksheet.Cells["B4"].Formula = "{1,2,3}";
+				worksheet.Cells["B5"].Formula = "{1,2,3}";
+				worksheet.Cells["B6"].Formula = "{1,2,3}";
 				worksheet.Cells["B7"].Formula = "SUMIF(B4:B6, B4, B1:B3)";
 				worksheet.Calculate();
 				Assert.AreEqual(3d, worksheet.Cells["B7"].Value);
@@ -1043,13 +1032,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = 1;
-				worksheet.Cells["B2"].Value = 3;
-				worksheet.Cells["B3"].Value = 5;
-				worksheet.Cells["B6"].Value = "notEmpty";
-				worksheet.Cells["B9"].Formula = "SUMIF(B4:B6, \"<a\", B1:B3)";
+				worksheet.Cells["B1"].Value = null;
+				worksheet.Cells["B2"].Value = string.Empty;
+				worksheet.Cells["B3"].Value = "notempty";
+				worksheet.Cells["C1"].Value = 1;
+				worksheet.Cells["C2"].Value = 3;
+				worksheet.Cells["C3"].Value = 5;
+				worksheet.Cells["D1"].Formula = "SUMIFS(C1:C3, B1:B3, \"<a\")";
 				worksheet.Calculate();
-				Assert.AreEqual(3d, worksheet.Cells["B9"].Value);
+				Assert.AreEqual(3d, worksheet.Cells["D1"].Value);
 			}
 		}
 
@@ -1059,13 +1050,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = 1;
-				worksheet.Cells["B2"].Value = 3;
-				worksheet.Cells["B3"].Value = 5;
-				worksheet.Cells["B6"].Value = "notEmpty";
-				worksheet.Cells["B9"].Formula = "SUMIF(B4:B6, \"\", B1:B3)";
+				worksheet.Cells["B1"].Value = null;
+				worksheet.Cells["B2"].Value = string.Empty;
+				worksheet.Cells["B3"].Value = "notempty";
+				worksheet.Cells["C1"].Value = 1;
+				worksheet.Cells["C2"].Value = 3;
+				worksheet.Cells["C3"].Value = 5;
+				worksheet.Cells["D2"].Formula = "SUMIFS(C1:C3, B1:B3, \"\")";
 				worksheet.Calculate();
-				Assert.AreEqual(4d, worksheet.Cells["B9"].Value);
+				Assert.AreEqual(4d, worksheet.Cells["D2"].Value);
 			}
 		}
 
@@ -1124,6 +1117,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = null;
 				worksheet.Cells["B2"].Value = 1;
 				worksheet.Cells["B3"].Formula = "SUMIF(B1, \"=\", B2)";
 				worksheet.Calculate();
@@ -1155,19 +1149,19 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = "ay";
-				worksheet.Cells["B2"].Value = "Modday";
-				worksheet.Cells["B3"].Value = "Monnnnday";
-				worksheet.Cells["B4"].Value = 1;
-				worksheet.Cells["B5"].Value = 3;
-				worksheet.Cells["B6"].Value = 5;
-				worksheet.Cells["B7"].Formula = "SUMIF($B$1:$B$3, \"=Mo*day\", $B$4:$B$6)";
-				worksheet.Cells["B8"].Formula = "SUMIF($B$1:$B$1, \">Mo*day\", $B$4:$B$6)";
-				worksheet.Cells["B9"].Formula = "SUMIF(B$1:$B$3, \"<Mo*day\", $B$4:$B$6)";
+				worksheet.Cells["C2"].Value = "ay";
+				worksheet.Cells["C3"].Value = "Modday";
+				worksheet.Cells["C4"].Value = "Monnnnday";
+				worksheet.Cells["D2"].Value = 1;
+				worksheet.Cells["D3"].Value = 3;
+				worksheet.Cells["D4"].Value = 5;
+				worksheet.Cells["B2"].Formula = "SUMIF(C2:C4,\"=Mo*day\",D2:D4)";
+				worksheet.Cells["B3"].Formula = "SUMIF(C2:C4,\">Mo*day\",D2:D4)";
+				worksheet.Cells["B4"].Formula = "SUMIF(C2:C4,\"<Mo*day\",D2:D4)";
 				worksheet.Calculate();
-				Assert.AreEqual(8d, worksheet.Cells["B7"].Value);
-				Assert.AreEqual(8d, worksheet.Cells["B8"].Value);
-				Assert.AreEqual(1d, worksheet.Cells["B9"].Value);
+				Assert.AreEqual(8d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(8d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
 			}
 		}
 
