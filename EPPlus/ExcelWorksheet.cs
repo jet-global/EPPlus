@@ -1359,7 +1359,6 @@ namespace OfficeOpenXml
 			{
 				this._values.Insert(rowFrom, 0, rows, 0);
 				this._formulas.Insert(rowFrom, 0, rows, 0);
-				this._commentsStore.Insert(rowFrom, 0, rows, 0);
 				this._hyperLinks.Insert(rowFrom, 0, rows, 0);
 				this._flags.Insert(rowFrom, 0, rows, 0);
 				this.Comments.Insert(rowFrom, 0, rows, 0);
@@ -1478,7 +1477,6 @@ namespace OfficeOpenXml
 			{
 				this._values.Insert(0, columnFrom, 0, columns);
 				this._formulas.Insert(0, columnFrom, 0, columns);
-				this._commentsStore.Insert(0, columnFrom, 0, columns);
 				this._hyperLinks.Insert(0, columnFrom, 0, columns);
 				this._flags.Insert(0, columnFrom, 0, columns);
 				this.Names.Insert(0, columnFrom, 0, columns);
@@ -1662,10 +1660,10 @@ namespace OfficeOpenXml
 				this._values.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this._formulas.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this._flags.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
-				this._commentsStore.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this._hyperLinks.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Names.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Comments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
+				this.VmlDrawingsComments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Workbook.Names.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns, n => n.Worksheet == this);
 
 				this.AdjustFormulasRow(rowFrom, rows);
@@ -1742,10 +1740,10 @@ namespace OfficeOpenXml
 				this._values.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._formulas.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._flags.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
-				this._commentsStore.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._hyperLinks.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._names.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this.Comments.Delete(0, columnFrom, 0, columns);
+				this.VmlDrawingsComments.Delete(0, columnFrom, 0, columns);
 				this.Workbook.Names.Delete(0, columnFrom, ExcelPackage.MaxRows, columns, n => n.Worksheet == this);
 
 				this.AdjustFormulasColumn(columnFrom, columns);
