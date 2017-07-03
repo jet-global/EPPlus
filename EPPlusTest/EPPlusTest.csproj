@@ -190,6 +190,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\DegreesTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RadiansTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\SumProductTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumsqTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\TanhTests.cs" />

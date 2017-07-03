@@ -30,8 +30,17 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// 
+	/// </summary>
 	public class SumProduct : ExcelFunction
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="arguments"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
@@ -60,14 +69,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					{
 						for (int row = r.Address._fromRow; row <= r.Address._toRow; row++)
 						{
-							AddValue(r.GetValue(row, col), currentResult);
+							if (r.GetValue(row, col) is bool)
+								AddValue(0, currentResult);
+							else
+								AddValue(r.GetValue(row, col), currentResult);
 						}
 					}
 				}
-				else if (IsNumeric(arg.Value))
+				else if (arg.Value is int || arg.Value is double || arg.Value is System.DateTime)
 				{
 					AddValue(arg.Value, currentResult);
 				}
+				else
+					return new CompileResult(eErrorType.Value);
 			}
 			// Validate that all supplied lists have the same length
 			var arrayLength = results.First().Count;
@@ -91,6 +105,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return CreateResult(result, DataType.Decimal);
 		}
 
+
+		#region Private Methods
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="convertVal"></param>
+		/// <param name="currentResult"></param>
 		private void AddValue(object convertVal, List<double> currentResult)
 		{
 			if (IsNumeric(convertVal))
@@ -106,5 +127,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				currentResult.Add(0d);
 			}
 		}
+		#endregion
 	}
 }
