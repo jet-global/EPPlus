@@ -484,5 +484,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(50d, worksheet.Cells["B1"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void SumProductWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new SumProduct();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
 	}
 }

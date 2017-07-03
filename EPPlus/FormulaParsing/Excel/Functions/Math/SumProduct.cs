@@ -31,16 +31,17 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// 
+	/// The class contains the formula for the SUMPRODUCT Excel Function. 
 	/// </summary>
 	public class SumProduct : ExcelFunction
 	{
 		/// <summary>
-		/// 
+		/// Takes the user arguments multiplies the corresponding components in the given arguments and returns the sum of
+		/// those products.
 		/// </summary>
-		/// <param name="arguments"></param>
-		/// <param name="context"></param>
-		/// <returns></returns>
+		/// <param name="arguments">The user specified arguments, usually arrays for this function.</param>
+		/// <param name="context">The current context of the function.</param>
+		/// <returns>The sum of the products fo the corresponding components in the given array.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
@@ -59,9 +60,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					}
 				}
 				else if (arg.Value is FunctionArgument)
-				{
 					AddValue(arg.Value, currentResult);
-				}
 				else if (arg.IsExcelRange)
 				{
 					var r = arg.ValueAsRangeInfo;
@@ -77,9 +76,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					}
 				}
 				else if (arg.Value is int || arg.Value is double || arg.Value is System.DateTime)
-				{
 					AddValue(arg.Value, currentResult);
-				}
 				else
 					return new CompileResult(eErrorType.Value);
 			}
@@ -88,10 +85,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			foreach (var list in results)
 			{
 				if (list.Count != arrayLength)
-				{
 					throw new ExcelErrorValueException(ExcelErrorValue.Create(eErrorType.Value));
-					//throw new ExcelFunctionException("All supplied arrays must have the same length", ExcelErrorCodes.Value);
-				}
 			}
 			for (var rowIndex = 0; rowIndex < arrayLength; rowIndex++)
 			{
@@ -108,10 +102,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 		#region Private Methods
 		/// <summary>
-		/// 
+		/// Converts the given object to a double and then adds it to the given list.
 		/// </summary>
-		/// <param name="convertVal"></param>
-		/// <param name="currentResult"></param>
+		/// <param name="convertVal">The object to add to the list. </param>
+		/// <param name="currentResult">The list the object will be added to.</param>
 		private void AddValue(object convertVal, List<double> currentResult)
 		{
 			if (IsNumeric(convertVal))
