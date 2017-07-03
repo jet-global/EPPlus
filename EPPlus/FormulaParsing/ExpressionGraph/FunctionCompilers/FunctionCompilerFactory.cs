@@ -47,6 +47,10 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 			_specialCompilers.Add(typeof(IfNa), new IfNaFunctionCompiler(repository.GetFunction("ifna")));
 			_specialCompilers.Add(typeof(Sum), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("sum")));
 			_specialCompilers.Add(typeof(SumIf), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("sumif")));
+			_specialCompilers.Add(typeof(Average), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("average")));
+			_specialCompilers.Add(typeof(AverageA), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("averagea")));
+			_specialCompilers.Add(typeof(AverageIf), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("averageif")));
+			_specialCompilers.Add(typeof(AverageIfs), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("averageifs")));
 			foreach (var key in repository.CustomCompilers.Keys)
 			{
 				_specialCompilers.Add(key, repository.CustomCompilers[key]);
