@@ -56,11 +56,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				{
 					foreach (var val in (IEnumerable<FunctionArgument>)arg.Value)
 					{
-						AddValue(val.Value, currentResult);
+						this.AddValue(val.Value, currentResult);
 					}
 				}
 				else if (arg.Value is FunctionArgument)
-					AddValue(arg.Value, currentResult);
+					this.AddValue(arg.Value, currentResult);
 				else if (arg.IsExcelRange)
 				{
 					var r = arg.ValueAsRangeInfo;
@@ -69,18 +69,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						for (int row = r.Address._fromRow; row <= r.Address._toRow; row++)
 						{
 							if (r.GetValue(row, col) is bool)
-								AddValue(0, currentResult);
+								this.AddValue(0, currentResult);
 							else
-								AddValue(r.GetValue(row, col), currentResult);
+								this.AddValue(r.GetValue(row, col), currentResult);
 						}
 					}
 				}
 				else if (arg.Value is int || arg.Value is double || arg.Value is System.DateTime)
-					AddValue(arg.Value, currentResult);
+					this.AddValue(arg.Value, currentResult);
 				else
 					return new CompileResult(eErrorType.Value);
 			}
-			// Validate that all supplied lists have the same length
+
 			var arrayLength = results.First().Count;
 			foreach (var list in results)
 			{
@@ -96,7 +96,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 				result += rowResult;
 			}
-			return CreateResult(result, DataType.Decimal);
+			return this.CreateResult(result, DataType.Decimal);
 		}
 
 
@@ -109,17 +109,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private void AddValue(object convertVal, List<double> currentResult)
 		{
 			if (IsNumeric(convertVal))
-			{
 				currentResult.Add(Convert.ToDouble(convertVal));
-			}
 			else if (convertVal is ExcelErrorValue)
-			{
 				throw (new ExcelErrorValueException((ExcelErrorValue)convertVal));
-			}
 			else
-			{
 				currentResult.Add(0d);
-			}
 		}
 		#endregion
 	}
