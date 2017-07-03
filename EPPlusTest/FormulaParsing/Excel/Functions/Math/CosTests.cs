@@ -36,7 +36,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class CosTests : MathFunctionsTestBase
 	{
-		#region TimeValue Function(Execute) Tests
+		#region CosTests Function(Execute) Tests
 		[TestMethod]
 		public void CosIsGivenAStringAsInput()
 		{
@@ -122,6 +122,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input3), this.ParsingContext);
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
+			//Note: Neither Excel or EPPlus handle Pi perfectly. Both seem to have a small rounding issue that is not a problem if you are aware of it.
 			Assert.AreEqual(-1, result1.ResultNumeric);
 			Assert.AreEqual(6.12303176911189E-17, result2.ResultNumeric,0.000001);//Neither Excel or EPPlus return 0.
 			Assert.AreEqual(1, result3.ResultNumeric);
@@ -142,8 +143,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result4 = function.Execute(FunctionsHelper.CreateArgs(input4), this.ParsingContext);
 
 			Assert.AreEqual(1, result1.ResultNumeric);
-			Assert.AreEqual(0.999999759, System.Math.Round(result2.ResultNumeric, 8), .000001);
-			Assert.AreEqual(0.540312045, System.Math.Round(result4.ResultNumeric, 9), .000001);
+			Assert.AreEqual(0.999999759, System.Math.Round(result2.ResultNumeric, 9));
+			Assert.AreEqual(0.540312045, System.Math.Round(result4.ResultNumeric, 9));
 		}
 
 		[TestMethod]
@@ -303,21 +304,39 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void CosHandlesTrueOrFalse()
+		{
+			var function = new Cos();
+
+			var input1 = true;
+			var input2 = false;
+
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(input2), this.ParsingContext);
+
+			Assert.AreEqual(0.540302306, System.Math.Round(result1.ResultNumeric, 9));
+			Assert.AreEqual(1, System.Math.Round(result2.ResultNumeric, 9));
+		}
+
+		[TestMethod]
 		public void CosFunctionWithErrorValuesAsInputReturnsTheInputErrorValue()
 		{
 			var func = new Cos();
+
 			var argNA = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.NA));
 			var argNAME = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Name));
 			var argVALUE = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Value));
 			var argNUM = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Num));
 			var argDIV0 = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Div0));
 			var argREF = FunctionsHelper.CreateArgs(ExcelErrorValue.Create(eErrorType.Ref));
+
 			var resultNA = func.Execute(argNA, this.ParsingContext);
 			var resultNAME = func.Execute(argNAME, this.ParsingContext);
 			var resultVALUE = func.Execute(argVALUE, this.ParsingContext);
 			var resultNUM = func.Execute(argNUM, this.ParsingContext);
 			var resultDIV0 = func.Execute(argDIV0, this.ParsingContext);
 			var resultREF = func.Execute(argREF, this.ParsingContext);
+
 			Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)resultNA.Result).Type);
 			Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)resultNAME.Result).Type);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)resultVALUE.Result).Type);

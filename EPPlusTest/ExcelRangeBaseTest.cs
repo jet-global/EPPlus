@@ -265,6 +265,72 @@ namespace EPPlusTest
 				Assert.AreEqual("SUM(1,2)", sheet.Cells[3, 3].Formula);
 			}
 		}
+
+		[TestMethod]
+		public void SetFormulaDoesNotOverwriteValue()
+		{
+			using (var pkg = new ExcelPackage())
+			{
+				var sheet = pkg.Workbook.Worksheets.Add("Sheet");
+				string expectedValue = "some value";
+				string expectedFormula = "SUM(1, 2)";
+				sheet.Cells[3, 3].Value = expectedValue;
+				sheet.Cells[3, 3].SetFormula($"={expectedFormula}", false);
+				Assert.AreEqual("some value", sheet.Cells[3, 3].Value);
+				Assert.AreEqual(expectedFormula, sheet.Cells[3, 3].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void SetFormulaOverwritesValue()
+		{
+			using (var pkg = new ExcelPackage())
+			{
+				var sheet = pkg.Workbook.Worksheets.Add("Sheet");
+				string expectedFormula = "SUM(1, 2)";
+				sheet.Cells[3, 3].Value = "some value";
+				sheet.Cells[3, 3].SetFormula($"={expectedFormula}", true);
+				Assert.IsNull(sheet.Cells[3, 3].Value);
+				Assert.AreEqual(expectedFormula, sheet.Cells[3, 3].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void SetNullOrEmptyFormulaOverwritesValue()
+		{
+			using (var pkg = new ExcelPackage())
+			{
+				var sheet = pkg.Workbook.Worksheets.Add("Sheet");
+				sheet.Cells[3, 3].Value = "some value";
+				sheet.Cells[3, 3].SetFormula(null, true);
+				Assert.IsNull(sheet.Cells[3, 3].Value);
+				Assert.AreEqual(string.Empty, sheet.Cells[3, 3].Formula);
+
+				sheet.Cells[3, 3].Value = "some value";
+				sheet.Cells[3, 3].SetFormula(string.Empty, true);
+				Assert.IsNull(sheet.Cells[3, 3].Value);
+				Assert.AreEqual(string.Empty, sheet.Cells[3, 3].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void SetNullOrEmptyFormulaDoesNotOverwriteValue()
+		{
+			using (var pkg = new ExcelPackage())
+			{
+				var sheet = pkg.Workbook.Worksheets.Add("Sheet");
+				string expectedValue = "some value";
+				sheet.Cells[3, 3].Value = expectedValue;
+				sheet.Cells[3, 3].SetFormula(null, false);
+				Assert.AreEqual(expectedValue, sheet.Cells[3, 3].Value);
+				Assert.AreEqual(string.Empty, sheet.Cells[3, 3].Formula);
+
+				sheet.Cells[3, 3].Value = expectedValue;
+				sheet.Cells[3, 3].SetFormula(string.Empty, false);
+				Assert.AreEqual(expectedValue, sheet.Cells[3, 3].Value);
+				Assert.AreEqual(string.Empty, sheet.Cells[3, 3].Formula);
+			}
+		}
 		#endregion
 
 		#region SetSharedFormula Tests

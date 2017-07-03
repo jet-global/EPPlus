@@ -32,47 +32,55 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 
 namespace OfficeOpenXml.Drawing.Vml
 {
 	internal class ExcelVmlDrawingCommentCollection : ExcelVmlDrawingBaseCollection, IEnumerable
 	{
-		internal RangeCollection _drawings;
-		internal ExcelVmlDrawingCommentCollection(ExcelPackage pck, ExcelWorksheet ws, Uri uri) :
-			 base(pck, ws, uri)
+		private Dictionary<ulong, ExcelVmlDrawingComment> myDrawings;
+
+		private Dictionary<ulong, ExcelVmlDrawingComment> Drawings
 		{
-			if (uri == null)
+			get
 			{
-				VmlDrawingXml.LoadXml(CreateVmlDrawings());
-				_drawings = new RangeCollection(new List<IRangeID>());
-			}
-			else
-			{
-				AddDrawingsFromXml(ws);
+				if (this.myDrawings == null)
+					this.myDrawings = new Dictionary<ulong, ExcelVmlDrawingComment>();
+				return this.myDrawings;
 			}
 		}
-		protected void AddDrawingsFromXml(ExcelWorksheet ws)
+
+		private ExcelWorksheet Worksheet { get; set; }
+		internal ExcelVmlDrawingCommentCollection(ExcelPackage package, ExcelWorksheet worksheet, Uri uri) :
+			 base(package, worksheet, uri)
 		{
-			var nodes = VmlDrawingXml.SelectNodes("//v:shape", NameSpaceManager);
-			var list = new List<IRangeID>();
+			this.Worksheet = worksheet;
+			if (uri == null)
+				this.VmlDrawingXml.LoadXml(this.CreateVmlDrawings());
+			else
+				this.AddDrawingsFromXml(worksheet);
+		}
+		protected void AddDrawingsFromXml(ExcelWorksheet worksheet)
+		{
+			XmlNodeList nodes = this.VmlDrawingXml.SelectNodes("//v:shape", this.NameSpaceManager);
 			foreach (XmlNode node in nodes)
 			{
-				var rowNode = node.SelectSingleNode("x:ClientData/x:Row", NameSpaceManager);
-				var colNode = node.SelectSingleNode("x:ClientData/x:Column", NameSpaceManager);
+				XmlNode rowNode = node.SelectSingleNode("x:ClientData/x:Row", this.NameSpaceManager);
+				XmlNode colNode = node.SelectSingleNode("x:ClientData/x:Column", this.NameSpaceManager);
 				if (rowNode != null && colNode != null)
 				{
-					var row = int.Parse(rowNode.InnerText) + 1;
-					var col = int.Parse(colNode.InnerText) + 1;
-					list.Add(new ExcelVmlDrawingComment(node, ws.Cells[row, col], NameSpaceManager));
+					int row = int.Parse(rowNode.InnerText) + 1;
+					int col = int.Parse(colNode.InnerText) + 1;
+					ulong key = ExcelCellBase.GetCellID(worksheet.SheetID, row, col);
+					this.Drawings.Add(key, new ExcelVmlDrawingComment(node, worksheet.Cells[row, col], base.NameSpaceManager));
 				}
 				else
 				{
-					list.Add(new ExcelVmlDrawingComment(node, ws.Cells[1, 1], NameSpaceManager));
+					ulong cellId = ExcelCellBase.GetCellID(worksheet.SheetID, 1, 1);
+					this.Drawings.Add(cellId, new ExcelVmlDrawingComment(node, worksheet.Cells[1, 1], base.NameSpaceManager));
 				}
 			}
-			list.Sort(new Comparison<IRangeID>((r1, r2) => (r1.RangeID < r2.RangeID ? -1 : r1.RangeID > r2.RangeID ? 1 : 0)));  //Vml drawings are not sorted. Sort to avoid missmatches.
-			_drawings = new RangeCollection(list);
 		}
 		private string CreateVmlDrawings()
 		{
@@ -93,35 +101,39 @@ namespace OfficeOpenXml.Drawing.Vml
 
 			return vml;
 		}
-		internal ExcelVmlDrawingComment Add(ExcelRangeBase cell)
+		internal ExcelVmlDrawingComment Add(ExcelRangeBase cell, XmlNode drawingNode = null)
 		{
-			XmlNode node = AddDrawing(cell);
-			var draw = new ExcelVmlDrawingComment(node, cell, NameSpaceManager);
-			_drawings.Add(draw);
-			return draw;
+			if (drawingNode == null)
+				drawingNode = this.CreateDrawing(cell);
+			else
+				this.AddDrawing(drawingNode, cell);
+			var drawing = new ExcelVmlDrawingComment(drawingNode, cell, this.NameSpaceManager);
+			ulong cellId = ExcelCellBase.GetCellID(cell.Worksheet.SheetID, cell._fromRow, cell._fromCol);
+			this.Drawings.Add(cellId, drawing);
+			return drawing;
 		}
-		private XmlNode AddDrawing(ExcelRangeBase cell)
+		internal void Delete(int fromRow, int fromCol, int rows, int columns)
+		{
+			for (int i = fromRow; i < (fromRow + rows); i++)
+			{
+				for (int j = fromCol; j < (fromCol + columns); j++)
+				{
+					ulong key = ExcelCellBase.GetCellID(this.Worksheet.SheetID, i, j);
+					if (this.Drawings.ContainsKey(key))
+						this.Drawings.Remove(key);
+				}
+			}
+		}
+		private XmlNode CreateDrawing(ExcelRangeBase cell)
 		{
 			int row = cell.Start.Row, col = cell.Start.Column;
 			var node = VmlDrawingXml.CreateElement("v", "shape", ExcelPackage.schemaMicrosoftVml);
 
-			var id = ExcelCellBase.GetCellID(cell.Worksheet.SheetID, cell._fromRow, cell._fromCol);
-			var ix = _drawings.IndexOf(id);
-			if (ix < 0 && (~ix < _drawings.Count))
-			{
-				ix = ~ix;
-				var prevDraw = _drawings[ix] as ExcelVmlDrawingBase;
-				prevDraw.TopNode.ParentNode.InsertBefore(node, prevDraw.TopNode);
-			}
-			else
-			{
-				VmlDrawingXml.DocumentElement.AppendChild(node);
-			}
+			this.InsertDrawingNode(cell, node);
 
 			node.SetAttribute("id", GetNewId());
 			node.SetAttribute("type", "#_x0000_t202");
 			node.SetAttribute("style", "position:absolute;z-index:1; visibility:hidden");
-			//node.SetAttribute("style", "position:absolute; margin-left:59.25pt;margin-top:1.5pt;width:108pt;height:59.25pt;z-index:1; visibility:hidden"); 
 			node.SetAttribute("fillcolor", "#ffffe1");
 			node.SetAttribute("insetmode", ExcelPackage.schemaMicrosoftOffice, "auto");
 
@@ -143,49 +155,66 @@ namespace OfficeOpenXml.Drawing.Vml
 			node.InnerXml = vml;
 			return node;
 		}
-		int _nextID = 0;
+		private void AddDrawing(XmlNode node, ExcelRangeBase cell)
+		{
+			node.Attributes["id"].Value = this.GetNewId();
+			node = VmlDrawingXml.ImportNode(node, true);
+			this.InsertDrawingNode(cell, node);
+		}
+		private void InsertDrawingNode(ExcelRangeBase cell, XmlNode node)
+		{
+			ulong cellId = ExcelCellBase.GetCellID(cell.Worksheet.SheetID, cell._fromRow, cell._fromCol);
+			List<ulong> nodes = this.Drawings.Keys.ToList();
+			nodes.Sort((cellId1, cellId2) => cellId1.CompareTo(cellId2));
+			int index = nodes.BinarySearch(cellId);
+			if ((index < 0) && (~index < nodes.Count))
+			{
+				index = ~index;
+				ExcelVmlDrawingBase previousDrawing = this.Drawings[nodes[index]];
+				previousDrawing.TopNode.ParentNode.InsertBefore(node, previousDrawing.TopNode);
+			}
+			else
+				this.VmlDrawingXml.DocumentElement.AppendChild(node);
+		}
+		int _nextID = 1024;
 		/// <summary>
 		/// returns the next drawing id.
 		/// </summary>
 		/// <returns></returns>
 		internal string GetNewId()
 		{
-			if (_nextID == 0)
+			const string idFormat = "_x0000_s";
+			if (_nextID == 1024)
 			{
 				foreach (ExcelVmlDrawingComment draw in this)
 				{
-					if (draw.Id.Length > 3 && draw.Id.StartsWith("vml"))
+					if (draw.Id.Length >= 11 && draw.Id.StartsWith(idFormat))
 					{
 						int id;
-						if (int.TryParse(draw.Id.Substring(3, draw.Id.Length - 3), out id))
-						{
-							if (id > _nextID)
-							{
-								_nextID = id;
-							}
-						}
+						if (int.TryParse(draw.Id.Substring(draw.Id.Length - 4, 4), out id) && id > _nextID)
+							_nextID = id;
 					}
 				}
 			}
 			_nextID++;
-			return "vml" + _nextID.ToString();
+			return idFormat + _nextID.ToString();
 		}
-		internal ExcelVmlDrawingBase this[ulong rangeID]
+		internal ExcelVmlDrawingBase this[ulong cellId]
 		{
 			get
 			{
-				return _drawings[rangeID] as ExcelVmlDrawingComment;
+				return this.Drawings[cellId] as ExcelVmlDrawingComment;
 			}
 		}
-		internal bool ContainsKey(ulong rangeID)
+		internal bool ContainsKey(ulong cellId)
 		{
-			return _drawings.ContainsKey(rangeID);
+			return this.Drawings.ContainsKey(cellId);
 		}
 		internal int Count
 		{
 			get
 			{
-				return _drawings.Count;
+				return this.Drawings.Count;
 			}
 		}
 		#region IEnumerable Members
@@ -194,12 +223,12 @@ namespace OfficeOpenXml.Drawing.Vml
 
 		public IEnumerator GetEnumerator()
 		{
-			return _drawings;
+			return this.Drawings.Values.GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return _drawings;
+			return this.Drawings.Values.GetEnumerator();
 		}
 	}
 }

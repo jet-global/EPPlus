@@ -14,7 +14,7 @@ namespace EPPlusTest.Excel.Functions
 		[TestMethod]
 		public void CIntShouldConvertTextToInteger()
 		{
-			var func = new CInt();
+			var func = new IntFunction();
 			var args = FunctionsHelper.CreateArgs("2");
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(2, result.Result);
@@ -23,7 +23,7 @@ namespace EPPlusTest.Excel.Functions
 		[TestMethod]
 		public void CIntithInvalidArgumentReturnsPoundValue()
 		{
-			var func = new CInt();
+			var func = new IntFunction();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, parsingContext);
@@ -33,7 +33,7 @@ namespace EPPlusTest.Excel.Functions
 		[TestMethod]
 		public void IntShouldConvertDecimalToInteger()
 		{
-			var func = new CInt();
+			var func = new IntFunction();
 			var args = FunctionsHelper.CreateArgs(2.88m);
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(2, result.Result);
@@ -42,7 +42,7 @@ namespace EPPlusTest.Excel.Functions
 		[TestMethod]
 		public void IntShouldConvertNegativeDecimalToInteger()
 		{
-			var func = new CInt();
+			var func = new IntFunction();
 			var args = FunctionsHelper.CreateArgs(-2.88m);
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(-3, result.Result);
@@ -51,7 +51,7 @@ namespace EPPlusTest.Excel.Functions
 		[TestMethod]
 		public void IntShouldConvertStringToInteger()
 		{
-			var func = new CInt();
+			var func = new IntFunction();
 			var args = FunctionsHelper.CreateArgs("-2.88");
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(-3, result.Result);
