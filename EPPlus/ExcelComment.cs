@@ -36,75 +36,43 @@ using OfficeOpenXml.Style;
 namespace OfficeOpenXml
 {
 	/// <summary>
-	/// An Excel Cell Comment
+	/// Represents a comment on an excel cell.
 	/// </summary>
 	public class ExcelComment : ExcelVmlDrawingComment
 	{
-		internal XmlHelper _commentHelper;
-		internal ExcelComment(XmlNamespaceManager ns, XmlNode commentTopNode, ExcelRangeBase cell, XmlNode drawingTopNode = null)
-			 : base(null, cell, cell.Worksheet.VmlDrawingsComments.NameSpaceManager)
-		{
-			this._commentHelper = XmlHelperFactory.Create(ns, commentTopNode);
-			var textElem = commentTopNode.SelectSingleNode("d:text", ns);
-			if (textElem == null)
-			{
-				textElem = commentTopNode.OwnerDocument.CreateElement("text", ExcelPackage.schemaMain);
-				commentTopNode.AppendChild(textElem);
-			}
-			if (!cell.Worksheet.VmlDrawingsComments.ContainsKey(ExcelAddress.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)))
-				cell.Worksheet.VmlDrawingsComments.Add(cell, drawingTopNode);
-			this.TopNode = cell.Worksheet.VmlDrawingsComments[ExcelCellBase.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)].TopNode;
-			this.RichText = new ExcelRichTextCollection(ns, textElem);
-		}
+		#region Properties
+		internal XmlHelper CommentHelper { get; }
+
 		const string AUTHORS_PATH = "d:comments/d:authors";
 		const string AUTHOR_PATH = "d:comments/d:authors/d:author";
 		/// <summary>
-		/// Author
+		/// Gets or sets the name of the Author of the comment.
 		/// </summary>
 		public string Author
 		{
 			get
 			{
-				int authorRef = this._commentHelper.GetXmlNodeInt("@authorId");
-				return this._commentHelper.TopNode.OwnerDocument.SelectSingleNode(string.Format("{0}[{1}]", AUTHOR_PATH, authorRef + 1), this._commentHelper.NameSpaceManager).InnerText;
+				int authorRef = this.CommentHelper.GetXmlNodeInt("@authorId");
+				return this.CommentHelper.TopNode.OwnerDocument.SelectSingleNode(string.Format("{0}[{1}]", AUTHOR_PATH, authorRef + 1), this.CommentHelper.NameSpaceManager).InnerText;
 			}
 			set
 			{
 				int authorRef = GetAuthor(value);
-				this._commentHelper.SetXmlNodeString("@authorId", authorRef.ToString());
+				this.CommentHelper.SetXmlNodeString("@authorId", authorRef.ToString());
 			}
 		}
-		private int GetAuthor(string value)
-		{
-			int authorRef = 0;
-			bool found = false;
-			foreach (XmlElement node in this._commentHelper.TopNode.OwnerDocument.SelectNodes(AUTHOR_PATH, this._commentHelper.NameSpaceManager))
-			{
-				if (node.InnerText == value)
-				{
-					found = true;
-					break;
-				}
-				authorRef++;
-			}
-			if (!found)
-			{
-				var elem = this._commentHelper.TopNode.OwnerDocument.CreateElement("d", "author", ExcelPackage.schemaMain);
-				this._commentHelper.TopNode.OwnerDocument.SelectSingleNode(AUTHORS_PATH, this._commentHelper.NameSpaceManager).AppendChild(elem);
-				elem.InnerText = value;
-			}
-			return authorRef;
-		}
+
 		/// <summary>
-		/// The comment text 
+		/// Gets or sets the text of the comment.
 		/// </summary>
 		public string Text
 		{
 			get { return this.RichText.Text ?? string.Empty; }
-			set	{	this.RichText.Text = value; }
+			set { this.RichText.Text = value; }
 		}
+
 		/// <summary>
-		/// Sets the font of the first richtext item.
+		/// Gets the font of the first richtext item.
 		/// </summary>
 		public ExcelRichText Font
 		{
@@ -115,8 +83,9 @@ namespace OfficeOpenXml
 				return null;
 			}
 		}
+
 		/// <summary>
-		/// Richtext collection
+		/// Gets or sets the Rich Text Collection.
 		/// </summary>
 		public ExcelRichTextCollection RichText
 		{
@@ -125,18 +94,18 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Reference
+		/// Gets or sets the cell reference that specifies which cell this comment is associated with.
 		/// </summary>
 		internal string Reference
 		{
-			get { return this._commentHelper.GetXmlNodeString("@ref"); }
+			get { return this.CommentHelper.GetXmlNodeString("@ref"); }
 			set
 			{
 				var a = new ExcelAddressBase(value);
 				var rows = a._fromRow - this.Range._fromRow;
 				var cols = a._fromCol - this.Range._fromCol;
 				this.Range.Address = value;
-				this._commentHelper.SetXmlNodeString("@ref", value);
+				this.CommentHelper.SetXmlNodeString("@ref", value);
 
 				this.From.Row += rows;
 				this.To.Row += rows;
@@ -148,5 +117,49 @@ namespace OfficeOpenXml
 				this.Column = this.Range._fromCol - 1;
 			}
 		}
+		#endregion
+
+		#region Constructors
+		internal ExcelComment(XmlNamespaceManager ns, XmlNode commentTopNode, ExcelRangeBase cell, XmlNode drawingTopNode = null)
+			 : base(null, cell, cell.Worksheet.VmlDrawingsComments.NameSpaceManager)
+		{
+			this.CommentHelper = XmlHelperFactory.Create(ns, commentTopNode);
+			var textElem = commentTopNode.SelectSingleNode("d:text", ns);
+			if (textElem == null)
+			{
+				textElem = commentTopNode.OwnerDocument.CreateElement("text", ExcelPackage.schemaMain);
+				commentTopNode.AppendChild(textElem);
+			}
+			if (!cell.Worksheet.VmlDrawingsComments.ContainsKey(ExcelAddress.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)))
+				cell.Worksheet.VmlDrawingsComments.Add(cell, drawingTopNode);
+			this.TopNode = cell.Worksheet.VmlDrawingsComments[ExcelCellBase.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)].TopNode;
+			this.RichText = new ExcelRichTextCollection(ns, textElem);
+		}
+		#endregion
+
+		#region Private Methods
+		private int GetAuthor(string value)
+		{
+			int authorRef = 0;
+			bool found = false;
+			foreach (XmlElement node in this.CommentHelper.TopNode.OwnerDocument.SelectNodes(AUTHOR_PATH, this.CommentHelper.NameSpaceManager))
+			{
+				if (node.InnerText == value)
+				{
+					found = true;
+					break;
+				}
+				authorRef++;
+			}
+			if (!found)
+			{
+				var elem = this.CommentHelper.TopNode.OwnerDocument.CreateElement("d", "author", ExcelPackage.schemaMain);
+				this.CommentHelper.TopNode.OwnerDocument.SelectSingleNode(AUTHORS_PATH, this.CommentHelper.NameSpaceManager).AppendChild(elem);
+				elem.InnerText = value;
+			}
+			return authorRef;
+		}
+		#endregion
+		
 	}
 }
