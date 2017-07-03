@@ -43,21 +43,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// </summary>
 	public class SumIf : HiddenValuesHandlingFunction
 	{
-		private readonly ExpressionEvaluator _evaluator;
-		#region <ExcelFunction> Overrides
-		// These two constructors can probably be combined into one. Because of this there are not comments for them.
-		public SumIf()
-			 : this(new ExpressionEvaluator())
-		{
-
-		}
-		public SumIf(ExpressionEvaluator evaluator)
-		{
-			Require.That(evaluator).Named("evaluator").IsNotNull();
-			_evaluator = evaluator;
-		}
-		#endregion
-
 		/// <summary>
 		/// Returns the sum of all the cells in a range that meet a given criteria.
 		/// </summary>
