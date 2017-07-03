@@ -26,128 +26,122 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// Evaluates Excel SUMIFS formulas.
+	/// This class contains the formula for the SUMIFS Excel Function.
 	/// </summary>
 	public class SumIfs : MultipleRangeCriteriasFunction
 	{
-		#region ExcelFunction Overrides
 		/// <summary>
-		/// Executes the function with the provided <paramref name="arguments"/>.
+		/// Returns the sum of all cells that meet multiple criteria.
 		/// </summary>
-		/// <param name="arguments">Arguments to the function, each argument can contain primitive types, lists or <see cref="ExcelDataProvider.IRangeInfo">Excel ranges</see></param>
-		/// <param name="context">The <see cref="ParsingContext"/> contains various data that can be useful in functions.</param>
-		/// <returns>A <see cref="CompileResult"/> containing the calculated value</returns>
+		/// <param name="arguments">The arguments used to calculate the average.</param>
+		/// <param name="context">The context for the function.</param>
+		/// <returns>Returns the sum of all cells in the given range that pass the given criteria(s).</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			if (functionArguments.Length < 3 || (functionArguments.Length - 1) % 2 != 0)
+			string currentCriteria = null;
+			if (this.ArgumentCountIsValid(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
-			var sumRange = functionArguments[0].ValueAsRangeInfo;
-			var sumRangeHeight = sumRange.Address.End.Row - sumRange.Address.Start.Row + 1;
-			var sumRangeWidth = sumRange.Address.End.Column - sumRange.Address.Start.Column + 1;
-			var criteria = this.GetCriteria(functionArguments);
-			if (criteria.Any(c => !c.ValidateDimensionality(sumRangeHeight, sumRangeWidth)))
-				return new CompileResult(eErrorType.Value);
-			var toSum = new List<object>();
-			for (int rowOffset = 0; rowOffset < sumRangeHeight; rowOffset++)
+			var rangeToAverage = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
+			if (rangeToAverage == null)
+				return new CompileResult(0d, DataType.Decimal);
+			var indicesOfValidCells = new List<int>();
+			for (var argumentIndex = 1; argumentIndex < arguments.Count(); argumentIndex += 2)
 			{
-				for (int colOffset = 0; colOffset < sumRangeWidth; colOffset++)
-				{
-					if (criteria.All(c => c.ValidateCriteriaAtOffset(rowOffset, colOffset, base.Evaluate)))
-					{
-						var value = sumRange.GetOffset(rowOffset, colOffset);
-						var valueAsError = value as ExcelErrorValue;
-						if (valueAsError != null)
-							return new CompileResult(valueAsError.Type);
-						toSum.Add(value);
-					}
-				}
-			}
-			var result = toSum.Where(o => this.IsNumeric(o)).Sum(o => this.ArgToDecimal(o));
-			return CreateResult(result, DataType.Decimal);
-		}
-		#endregion
+				var currentRangeToCompare = arguments.ElementAt(argumentIndex).ValueAsRangeInfo;
+				if (currentRangeToCompare == null || !this.RangesAreTheSameShape(rangeToAverage, currentRangeToCompare))
+					return new CompileResult(eErrorType.Value);
 
-		#region Private Methods
+				var currentCriteriaArgument = arguments.ElementAt(argumentIndex + 1);
+				if (currentCriteriaArgument.ValueFirst == null)
+					currentCriteria = "0";
+				else 
+					if (!this.TryGetCriteria(currentCriteriaArgument, out currentCriteria))
+						return new CompileResult(0d, DataType.Decimal);
+
+				var passingIndices = this.GetIndicesOfCellsPassingCriteria(currentRangeToCompare, currentCriteria);
+				if (argumentIndex == 1)
+					indicesOfValidCells = passingIndices;
+				else
+					indicesOfValidCells = indicesOfValidCells.Intersect(passingIndices).ToList();
+			}
+			var sumOfValidValues = 0d;
+			var numberOfValidValues = 0;
+			foreach (var cellIndex in indicesOfValidCells)
+			{
+				var currentCellValue = rangeToAverage.ElementAt(cellIndex).Value;
+				if (currentCellValue is ExcelErrorValue cellError)
+					return new CompileResult(cellError.Type);
+				else if (currentCellValue is string || currentCellValue is bool || currentCellValue == null)
+					continue;
+				sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);
+				numberOfValidValues++;
+			}
+			if (numberOfValidValues == 0)
+				return new CompileResult(0d, DataType.Decimal);
+			else
+				return this.CreateResult(sumOfValidValues, DataType.Decimal);
+		}
+
 		/// <summary>
-		/// Takses the given arguments and gathers the criteria into an enumerable list.
+		/// Returns a list containing the indexes of the cells in <paramref name="cellsToCompare"/> that satisfy
+		/// the criteria detailed in <paramref name="criteria"/>.
 		/// </summary>
-		/// <param name="arguments">The given arguments to be turned into a criteria list.</param>
-		/// <returns>The criteria needed to evaluate the SUMIF Function.</returns>
-		private IEnumerable<Criteria> GetCriteria(FunctionArgument[] arguments)
+		/// <param name="cellsToCompare">The <see cref="ExcelDataProvider.IRangeInfo"/> containing the cells to test against the <paramref name="criteria"/>.</param>
+		/// <param name="criteria">The criteria dictating the acceptable contents of a given cell.</param>
+		/// <returns>Returns a list of indexes corresponding to each cell that satisfies the given criteria.</returns>
+		private List<int> GetIndicesOfCellsPassingCriteria(ExcelDataProvider.IRangeInfo cellsToCompare, string criteria)
 		{
-			var criteria = new List<Criteria>();
-			for (int i = 1; i < arguments.Length; i += 2)
+			var passingIndices = new List<int>();
+			for (var currentCellIndex = 0; currentCellIndex < cellsToCompare.Count(); currentCellIndex++)
 			{
-				criteria.Add(new Criteria(arguments[i].ValueAsRangeInfo, arguments[i + 1].ValueFirst?.ToString()));
+				var currentCellValue = cellsToCompare.ElementAt(currentCellIndex).Value;
+				if (IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(currentCellValue), criteria))
+					passingIndices.Add(currentCellIndex);
 			}
-			return criteria;
+			return passingIndices;
 		}
-		#endregion
 
-		#region Nested Classes
-		private class Criteria
+		/// <summary>
+		/// Ensures that the given <paramref name="criteriaCandidate"/> is of a form
+		/// that can be represented as a valid criteria.
+		/// </summary>
+		/// <param name="criteriaCandidate">The <see cref="FunctionArgument"/> containing the criteria.</param>
+		/// <param name="criteria">The returned string containing a usable representation of the criteria from <paramref name="criteriaCandidate"/>.</param>
+		/// <returns>Returns true if <paramref name="criteriaCandidate"/> contains a valid form of the criteria, and false otherwise.</returns>
+		private bool TryGetCriteria(FunctionArgument criteriaCandidate, out string criteria)
 		{
-			#region Properties
-			private ExcelDataProvider.IRangeInfo Range { get; }
-
-			private string CriteriaString { get; }
-			#endregion
-
-			#region Constructors
-			/// <summary>
-			/// Creates an instance of a <see cref="Criteria"/> with the provided <paramref name="range"/>
-			/// and <paramref name="criteriaString"/>.
-			/// </summary>
-			/// <param name="range">The range to validate against.</param>
-			/// <param name="criteriaString">The criteria used for validation.</param>
-			public Criteria(ExcelDataProvider.IRangeInfo range, string criteriaString)
+			criteria = null;
+			if (criteriaCandidate.Value is ExcelDataProvider.IRangeInfo criteriaAsRange)
 			{
-				if (range == null)
-					throw new ArgumentNullException(nameof(range));
-				this.Range = range;
-				this.CriteriaString = criteriaString ?? "0";
-			}
-			#endregion
-
-			#region Public Methods
-			/// <summary>
-			/// Validates that the validation range is of a specific dimension.
-			/// </summary>
-			/// <param name="height">The desired height of the criteria range.</param>
-			/// <param name="width">The desired width of the criteria range.</param>
-			/// <returns>true if the criteria range is of the correct dimensions; otherwise false.</returns>
-			public bool ValidateDimensionality(int height, int width)
-			{
-				var myAddress = this.Range.Address;
-				var myHeight = myAddress.End.Row - myAddress.Start.Row + 1;
-				if (myHeight != height)
+				if (criteriaAsRange.IsMulti)
 					return false;
-				var myWidth = myAddress.End.Column - myAddress.Start.Column + 1;
-				if (myWidth != width)
-					return false;
-				return true;
+				else
+					criteria = this.GetFirstArgument(criteriaCandidate.ValueFirst).ToString().ToUpper();
 			}
-
-			/// <summary>
-			/// Validates a specific cell in the criteria range using the provided <paramref name="rowOffset"/>
-			/// and <paramref name="colOffset"/>.
-			/// </summary>
-			/// <param name="rowOffset">The row offset used to locate the desired cell in the validation range.</param>
-			/// <param name="colOffset">The column offset used to locate the desired cell in the validation range.</param>
-			/// <param name="validate">The validation delegate.</param>
-			/// <returns>true if the desired cell's value validates against the criteria string; otherwise false.</returns>
-			public bool ValidateCriteriaAtOffset(int rowOffset, int colOffset, Func<object, string, bool> validate)
-			{
-				var valueToValidate = this.Range.GetOffset(rowOffset, colOffset);
-				return validate(valueToValidate, this.CriteriaString);
-			}
-			#endregion
+			else
+				criteria = this.GetFirstArgument(criteriaCandidate).ValueFirst.ToString().ToUpper();
+			return true;
 		}
-		#endregion
+
+		/// <summary>
+		/// Checks if the <paramref name="expectedRange"/> is the same width and height as the
+		/// <paramref name="actualRange"/>.
+		/// </summary>
+		/// <param name="expectedRange">The <see cref="ExcelDataProvider.IRangeInfo"/> with the desired cell width and height.</param>
+		/// <param name="actualRange">The <see cref="ExcelDataProvider.IRangeInfo"/> with the width and height to be tested.</param>
+		/// <returns>Returns true if <paramref name="expectedRange"/> and <paramref name="actualRange"/> have the same width and height values.</returns>
+		private bool RangesAreTheSameShape(ExcelDataProvider.IRangeInfo expectedRange, ExcelDataProvider.IRangeInfo actualRange)
+		{
+			var expectedRangeWidth = expectedRange.Address._toCol - expectedRange.Address._fromCol;
+			var expectedRangeHeight = expectedRange.Address._toRow - expectedRange.Address._fromRow;
+			var actualRangeWidth = actualRange.Address._toCol - actualRange.Address._fromCol;
+			var actualRangeHeight = actualRange.Address._toRow - actualRange.Address._fromRow;
+			return (expectedRangeWidth == actualRangeWidth && expectedRangeHeight == actualRangeHeight);
+		}
 	}
 }

@@ -59,11 +59,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		#endregion
 
 		/// <summary>
-		/// Takes the user specified arguments and returns the sum based on the given criteria.
+		/// Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria.
 		/// </summary>
-		/// <param name="arguments">The given numbers to sum and the criteria.</param>
-		/// <param name="context">The current context of the function.</param>
-		/// <returns>The sum of the arguments based on the given criteria.</returns>
+		/// <param name="arguments">The arguments used to calculate the average.</param>
+		/// <param name="context">The context for the function.</param>
+		/// <returns>Returns the average of all cells in the given range that passed the given criteria.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
@@ -75,7 +75,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
 			{
 				if (criteriaRange.IsMulti)
-					return new CompileResult(eErrorType.Div0);
+					return new CompileResult(0d, DataType.Decimal);
 				else
 					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
 			}
@@ -117,7 +117,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					var relativeColumn = cell.Column - cellsToCompare.Address._fromCol;
 					var valueOfCellToAverage = potentialCellsToAverage.GetOffset(relativeRow, relativeColumn);
 					if (valueOfCellToAverage is ExcelErrorValue cellError)
-						return new CompileResult(cellError.Type);
+						continue;
 					if (valueOfCellToAverage is string || valueOfCellToAverage is bool || valueOfCellToAverage == null)
 						continue;
 					sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToAverage, true);
@@ -125,11 +125,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 			}
 			if (numberOfValidValues == 0)
-				return this.CreateResult(0d, DataType.Decimal);
+				return new CompileResult(0d, DataType.Decimal);
 			else
 				return this.CreateResult(sumOfValidValues, DataType.Decimal);
 		}
-
 
 		/// <summary>
 		/// Calculates the average value of all cells that match the given criteria.
@@ -152,10 +151,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					numberOfValidValues++;
 				}
 				else if (cell.Value is ExcelErrorValue candidateError)
-					return new CompileResult(candidateError.Type);
+					continue;
 			}
 			if (numberOfValidValues == 0)
-				return this.CreateResult(0d, DataType.Decimal);
+				return new CompileResult(0d, DataType.Decimal);
 			else
 				return this.CreateResult(sumOfValidValues, DataType.Decimal);
 		}
