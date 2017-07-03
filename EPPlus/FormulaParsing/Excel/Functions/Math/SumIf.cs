@@ -59,11 +59,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		#endregion
 
 		/// <summary>
-		/// Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria.
+		/// Returns the sum of all the cells in a range that meet a given criteria.
 		/// </summary>
-		/// <param name="arguments">The arguments used to calculate the average.</param>
+		/// <param name="arguments">The arguments used to calculate the sum.</param>
 		/// <param name="context">The context for the function.</param>
-		/// <returns>Returns the average of all cells in the given range that passed the given criteria.</returns>
+		/// <returns>Returns the sum of all cells in the given range that passed the given criteria.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
@@ -94,17 +94,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		}
 
 		/// <summary>
-		/// Calculates the average value of all cells that match the given criteria. The sizes/shapes of
+		/// Calculates the sum value of all cells that match the given criteria. The sizes/shapes of
 		/// <paramref name="cellsToCompare"/> and <paramref name="potentialCellsToAverage"/> do not have to be the same;
 		/// The size and shape of <paramref name="cellsToCompare"/> is applied to <paramref name="potentialCellsToAverage"/>,
 		/// using the first cell in <paramref name="potentialCellsToAverage"/> as a reference point.
 		/// </summary>
 		/// <param name="cellsToCompare">The range of cells to compare against the <paramref name="comparisonCriteria"/>.</param>
-		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the average calculation.</param>
+		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the sum calculation.</param>
 		/// <param name="potentialCellsToAverage">
-		///		If a cell in <paramref name="cellsToCompare"/> passes the criteria, then its
-		///		corresponding cell in this cell range will be included in the average calculation.</param>
-		/// <returns>Returns the average for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
+		///	If a cell in <paramref name="cellsToCompare"/> passes the criteria, then its
+		///	corresponding cell in this cell range will be included in the sum calculation.</param>
+		/// <returns>Returns the sum for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
 		private CompileResult CalculateAverageUsingAverageRange(ExcelDataProvider.IRangeInfo cellsToCompare, string comparisonCriteria, ExcelDataProvider.IRangeInfo potentialCellsToAverage)
 		{
 			var sumOfValidValues = 0d;
@@ -131,13 +131,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		}
 
 		/// <summary>
-		/// Calculates the average value of all cells that match the given criteria.
+		/// Calculates the sum value of all cells that match the given criteria.
 		/// </summary>
 		/// <param name="potentialCellsToAverage">
-		///		The cell range to compare against the given <paramref name="comparisonCriteria"/>
-		///		If a cell passes the criteria, then its value is included in the average calculation.</param>
-		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the average calculation.</param>
-		/// <returns>Returns the average value for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
+		///	The cell range to compare against the given <paramref name="comparisonCriteria"/>
+		///	If a cell passes the criteria, then its value is included in the sum calculation.</param>
+		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the sum calculation.</param>
+		/// <returns>Returns the sum value for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
 		private CompileResult CalculateAverageUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToAverage, string comparisonCriteria)
 		{
 			var sumOfValidValues = 0d;

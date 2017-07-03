@@ -38,7 +38,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <summary>
 		/// Returns the sum of all cells that meet multiple criteria.
 		/// </summary>
-		/// <param name="arguments">The arguments used to calculate the average.</param>
+		/// <param name="arguments">The arguments used to calculate the sum.</param>
 		/// <param name="context">The context for the function.</param>
 		/// <returns>Returns the sum of all cells in the given range that pass the given criteria(s).</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
