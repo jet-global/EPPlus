@@ -181,7 +181,7 @@ namespace OfficeOpenXml
 			else
 			{
 				ExcelComment nextComment = this.Comments[Worksheet._commentsStore.GetValue(nextCommentRow, nextCommentColumn)];
-				nextComment._commentHelper.TopNode.ParentNode.InsertBefore(element, nextComment._commentHelper.TopNode);
+				nextComment.CommentHelper.TopNode.ParentNode.InsertBefore(element, nextComment.CommentHelper.TopNode);
 			}
 			ExcelComment comment = new ExcelComment(this.NameSpaceManager, element, cell);
 			comment.Reference = new ExcelAddress(cell._fromRow, cell._fromCol, cell._fromRow, cell._fromCol).Address;
@@ -211,10 +211,12 @@ namespace OfficeOpenXml
 			else
 			{
 				ExcelComment nextComment = this.Comments[Worksheet._commentsStore.GetValue(nextCommentRow, nextCommentColumn)];
-				nextComment._commentHelper.TopNode.ParentNode.InsertBefore(element, nextComment._commentHelper.TopNode);
+				nextComment.CommentHelper.TopNode.ParentNode.InsertBefore(element, nextComment.CommentHelper.TopNode);
 			}
 			ExcelComment comment = new ExcelComment(this.NameSpaceManager, element, cell, copyComment.TopNode);
-			comment._commentHelper.TopNode.SelectSingleNode(".//d:text", this.NameSpaceManager).InnerXml = copyComment._commentHelper.TopNode.SelectSingleNode(".//d:text", this.NameSpaceManager).InnerXml;
+			comment.RichText = copyComment.RichText;
+			// Copy text styling.
+			comment.CommentHelper.TopNode.SelectSingleNode(".//d:text", this.NameSpaceManager).InnerXml = copyComment.CommentHelper.TopNode.SelectSingleNode(".//d:text", this.NameSpaceManager).InnerXml;
 			string author = copyComment.Author;
 			if (string.IsNullOrEmpty(author))
 				author = Thread.CurrentPrincipal.Identity.Name;
@@ -255,7 +257,7 @@ namespace OfficeOpenXml
 			if (comment != null && this.Comments.Contains(comment))
 			{
 				comment.TopNode.ParentNode.RemoveChild(comment.TopNode); //Remove VML
-				comment._commentHelper.TopNode.ParentNode.RemoveChild(comment._commentHelper.TopNode); //Remove Comment
+				comment.CommentHelper.TopNode.ParentNode.RemoveChild(comment.CommentHelper.TopNode); //Remove Comment
 				this.Comments.Remove(comment);
 			}
 			else
