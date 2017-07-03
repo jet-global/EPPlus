@@ -85,7 +85,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				{
 					foreach (var cell in rangeVal)
 					{
-						if (ShouldIgnore(cell, context) == false)
+						if (this.ShouldIgnore(cell, context) == false)
 						{
 							CheckForAndHandleExcelError(cell);
 							calculatedValue += System.Math.Pow(cell.ValueDouble, 2);

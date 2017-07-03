@@ -45,7 +45,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		private readonly ExpressionEvaluator _evaluator;
 		#region <ExcelFunction> Overrides
-		// These two constructors can probably be combined into one. Because of this there are not comments for them.
 		public SumIf()
 			 : this(new ExpressionEvaluator())
 		{
@@ -104,7 +103,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				retVal = CalculateSingleRange(args, criteria, context);
 			}
-			return CreateResult(retVal, DataType.Decimal);
+			return this.CreateResult(retVal, DataType.Decimal);
 		}
 
 		#region Private Methods
