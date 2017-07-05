@@ -53,6 +53,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
+
 			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (cellRangeToCheck == null)
 				return new CompileResult(eErrorType.Value);
@@ -60,7 +61,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
 			{
 				if (criteriaRange.IsMulti)
-					return this.CreateResult(0d, DataType.Decimal);
+					criteriaString = IfHelper.CalculateCriteria(arguments, context).ToString().ToUpper();
 				else
 					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
 			}

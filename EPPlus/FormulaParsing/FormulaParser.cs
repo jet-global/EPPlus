@@ -117,7 +117,6 @@ namespace OfficeOpenXml.FormulaParsing
 			var rangeAddress = _parsingContext.RangeAddressFactory.Create(worksheet, column, row);
 			using (var scope = _parsingContext.Scopes.NewScope(rangeAddress))
 			{
-				//    _parsingContext.Dependencies.AddFormulaScope(scope);
 				var graph = _graphBuilder.Build(tokens);
 				if (graph.Expressions.Count() == 0)
 				{

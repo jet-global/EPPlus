@@ -25,6 +25,8 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using OfficeOpenXml.FormulaParsing.Excel.Operators;
 using OfficeOpenXml.Utils;
@@ -199,6 +201,96 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				numericCandidate is decimal || 
 				numericCandidate is System.DateTime || 
 				numericCandidate is TimeSpan);
+		}
+	
+		/// <summary>
+		/// Takes a cell range and coverts it into a single value criteria. 
+		/// </summary>
+		/// <param name="arguments">The cell range that will be condensed into a single value.</param>
+		/// <param name="context">The context the function is being called in.</param>
+		/// <returns>A single value criteria as an integer.</returns>
+		public static int CalculateCriteria(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			var criteriaCandidate = arguments.ElementAt(1).ValueAsRangeInfo.Address;
+			var functionLocation = context.Scopes.Current.Address;
+			var worksheet = context.ExcelDataProvider.GetRange("Sheet1", 1, 1, "A1").Worksheet;
+
+			if (criteriaCandidate.Rows > criteriaCandidate.Columns)
+			{
+				var currentAddressRow = functionLocation.ToRow;
+				var startRow = criteriaCandidate.Start.Row;
+				var endRow = criteriaCandidate.End.Row;
+
+				if (currentAddressRow == startRow)
+				{
+					var cellColumn = criteriaCandidate.Start.Column;
+					var returnCandidate = worksheet.Cells[startRow, cellColumn].Value;
+					if (returnCandidate is double || returnCandidate is int)
+						return (int)returnCandidate;
+					else
+						return 0;
+				}
+				else if (currentAddressRow == endRow)
+				{
+
+					var cellColumn = criteriaCandidate.Start.Column;
+					var returnCandidate = worksheet.Cells[endRow, cellColumn].Value;
+					if (returnCandidate is double || returnCandidate is int)
+						return (int)returnCandidate;
+					else
+						return 0;
+				}
+				else if (currentAddressRow > startRow && currentAddressRow < endRow)
+				{
+
+					var cellColumn = criteriaCandidate.Start.Column;
+					var returnCandidate = worksheet.Cells[currentAddressRow, cellColumn].Value;
+					if (returnCandidate is double || returnCandidate is int)
+						return (int)returnCandidate;
+					else
+						return 0;
+				}
+				else
+					return 0;
+			}
+			else if (criteriaCandidate.Rows < criteriaCandidate.Columns)
+			{
+				var currentAddressCol = functionLocation.ToCol;
+				var startCol = criteriaCandidate.Start.Column;
+				var endCol = criteriaCandidate.End.Column;
+
+				if (currentAddressCol == startCol)
+				{
+					var cellRow = criteriaCandidate.Start.Row;
+					var returnCandidate = worksheet.Cells[cellRow, currentAddressCol].Value;
+					if (returnCandidate is double || returnCandidate is int)
+						return (int)returnCandidate;
+					else
+						return 0;
+				}
+				else if (currentAddressCol == endCol)
+				{
+					var cellRow = criteriaCandidate.Start.Row;
+					var returnCandidate = worksheet.Cells[cellRow, currentAddressCol].Value;
+					if (returnCandidate is double || returnCandidate is int)
+						return (int)returnCandidate;
+					else
+						return 0;
+				}
+				else if (currentAddressCol > startCol && currentAddressCol < endCol)
+				{
+					var cellRow = criteriaCandidate.Start.Row;
+					var returnCandidate = worksheet.Cells[cellRow, currentAddressCol].Value;
+					if (returnCandidate is double || returnCandidate is int)
+						return (int)returnCandidate;
+					else
+						return 0;
+				}
+				else
+					return 0;
+			}
+			else
+				return 0;
 		}
 	}
 }

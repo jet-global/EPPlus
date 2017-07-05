@@ -57,7 +57,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
 			{
 				if (criteriaRange.IsMulti)
-					return new CompileResult(eErrorType.Div0);
+					criteriaString = IfHelper.CalculateCriteria(arguments, context).ToString().ToUpper();
 				else
 					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
 			}

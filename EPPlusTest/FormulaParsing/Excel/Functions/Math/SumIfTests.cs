@@ -970,7 +970,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B2"].Value = 1;
 				worksheet.Cells["B3"].Formula = "SUMIF(B1:B2, B1:B2)";
 				worksheet.Calculate();
-				Assert.AreEqual(100d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
 			}
 		}
 
@@ -986,7 +986,46 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B4"].Value = "ab";
 				worksheet.Cells["B5"].Formula = "SUMIF(B3:B4, B3:B4, B1:B2)";
 				worksheet.Calculate();
-				Assert.AreEqual(100d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfCriteriaAsMultiCellRangeWithFunctionCallInDifferentLocationsReturnsCorrectValues()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 2;
+				worksheet.Cells["B3"].Value = 3;
+				worksheet.Cells["C1"].Value = 1;
+				worksheet.Cells["C2"].Value = 2;
+				worksheet.Cells["C3"].Value = 3;
+				worksheet.Cells["D1"].Formula = "SUMIF(B1:B3, C1:C3)";
+				worksheet.Cells["D2"].Formula = "SUMIF(B1:B3, C1:C3)";
+				worksheet.Cells["D3"].Formula = "SUMIF(B1:B3, C1:C3)";
+				worksheet.Cells["C4"].Formula = "SUMIF(B1:B3, C1:C3)";
+				worksheet.Cells["B8"].Value = 1;
+				worksheet.Cells["C8"].Value = 2;
+				worksheet.Cells["D8"].Value = 3;
+				worksheet.Cells["B9"].Value = 1;
+				worksheet.Cells["C9"].Value = 2;
+				worksheet.Cells["D9"].Value = 3;
+				worksheet.Cells["E9"].Formula = "SUMIF(B8:D8, B9:D9)";
+				worksheet.Cells["B10"].Formula = "SUMIF(B8:D8, B9:D9)";
+				worksheet.Cells["C10"].Formula = "SUMIF(B8:D8, B9:D9)";
+				worksheet.Cells["D10"].Formula = "SUMIF(B8:D8, B9:D9)";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["D1"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["D2"].Value);
+				Assert.AreEqual(3d, worksheet.Cells["D3"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["C4"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["E9"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B10"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["C10"].Value);
+				Assert.AreEqual(3d, worksheet.Cells["D10"].Value);
 			}
 		}
 
