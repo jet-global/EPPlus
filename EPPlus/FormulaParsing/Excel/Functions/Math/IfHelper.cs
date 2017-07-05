@@ -75,8 +75,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 							return IsMatch(objectToCompare, criteriaString);
 					}
 				}
-				//else
-				//	return false;
 			}
 			return IsMatch(objectToCompare, criteria);
 		}

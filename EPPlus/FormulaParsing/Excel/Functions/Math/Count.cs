@@ -24,7 +24,9 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -41,9 +43,38 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var nItems = 0d;
-			Calculate(arguments, ref nItems, context, ItemContext.SingleArg);
-			return CreateResult(nItems, DataType.Integer);
+			var numberOfValues = 0d;
+			foreach (var argument in arguments)
+			{
+				if (argument.Value is IEnumerable<FunctionArgument> subArguments)
+				{
+					foreach (var subArgument in subArguments)
+					{
+						if (IsNumeric(subArgument.Value))
+							numberOfValues++;
+					}
+				}
+				else if (argument.Value is ExcelDataProvider.IRangeInfo cellRange)
+				{
+					foreach (var cell in cellRange)
+					{
+						if (cell.Value is IEnumerable<object> array)
+						{
+							if (IsNumeric(array.ElementAt(0)))
+								numberOfValues++;
+						}
+						else if (!(cell.Value is bool) && IsNumeric(cell.Value))
+							numberOfValues++;
+					}
+				}
+				else
+				{
+					if (argument.Value is bool || ConvertUtil.TryParseDateObjectToOADate(argument.Value, out double parsedValue))
+						numberOfValues++;
+				}
+			}
+			//Calculate(arguments, ref numberOfValues, context, ItemContext.SingleArg);
+			return CreateResult(numberOfValues, DataType.Integer);
 		}
 
 		private void Calculate(IEnumerable<FunctionArgument> items, ref double nItems, ParsingContext context, ItemContext itemContext)
