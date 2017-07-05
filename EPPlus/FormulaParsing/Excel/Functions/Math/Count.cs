@@ -1,28 +1,29 @@
-﻿/* Copyright (C) 2011  Jan Källman
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+﻿/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2017 Jan Källman, Matt Delaney, and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
- * See the GNU Lesser General Public License for more details.
- *
- * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
- * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
- *
- * All code and executables are provided "as is" with no warranty either express or implied. 
- * The author accepts no liability for any damage or loss of business that this product may cause.
- *
- * Code change notes:
- * 
- * Author							Change						Date
- *******************************************************************************
- * Mats Alm   		                Added		                2013-12-03
- *******************************************************************************/
-using System;
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+* For code change notes, see the source control history.
+*******************************************************************************/
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
@@ -32,11 +33,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	public class Count : HiddenValuesHandlingFunction
 	{
-		private enum ItemContext
+		private enum ValueContext
 		{
-			InRange,
-			InArray,
-			SingleArg
+			EnteredDirectly,
+			FromArray,
+			FromCellRange
 		}
 
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
@@ -50,7 +51,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				{
 					foreach (var subArgument in subArguments)
 					{
-						if (IsNumeric(subArgument.Value))
+						if (!this.ShouldIgnore(subArgument) && this.ShouldCount(subArgument.Value, ValueContext.FromArray))
 							numberOfValues++;
 					}
 				}
@@ -58,88 +59,37 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				{
 					foreach (var cell in cellRange)
 					{
+						if (this.ShouldIgnore(cell, context))
+							continue;
 						if (cell.Value is IEnumerable<object> array)
 						{
-							if (IsNumeric(array.ElementAt(0)))
+							if (this.ShouldCount(array.ElementAt(0), ValueContext.FromArray))
 								numberOfValues++;
 						}
-						else if (!(cell.Value is bool) && IsNumeric(cell.Value))
+						else if (this.ShouldCount(cell.Value, ValueContext.FromCellRange))
 							numberOfValues++;
 					}
 				}
 				else
 				{
-					if (argument.Value is bool || ConvertUtil.TryParseDateObjectToOADate(argument.Value, out double parsedValue))
+					if (this.ShouldCount(argument.Value, ValueContext.EnteredDirectly))
 						numberOfValues++;
 				}
 			}
-			//Calculate(arguments, ref numberOfValues, context, ItemContext.SingleArg);
-			return CreateResult(numberOfValues, DataType.Integer);
+			return this.CreateResult(numberOfValues, DataType.Integer);
 		}
 
-		private void Calculate(IEnumerable<FunctionArgument> items, ref double nItems, ParsingContext context, ItemContext itemContext)
-		{
-			foreach (var item in items)
-			{
-				var cs = item.Value as ExcelDataProvider.IRangeInfo;
-				if (cs != null)
-				{
-					foreach (var c in cs)
-					{
-						_CheckForAndHandleExcelError(c, context);
-						if (ShouldIgnore(c, context) == false && ShouldCount(c.Value, ItemContext.InRange))
-						{
-							nItems++;
-						}
-					}
-				}
-				else
-				{
-					var value = item.Value as IEnumerable<FunctionArgument>;
-					if (value != null)
-					{
-						Calculate(value, ref nItems, context, ItemContext.InArray);
-					}
-					else
-					{
-						_CheckForAndHandleExcelError(item, context);
-						if (ShouldIgnore(item) == false && ShouldCount(item.Value, itemContext))
-						{
-							nItems++;
-						}
-					}
-				}
-			}
-		}
-
-		private void _CheckForAndHandleExcelError(FunctionArgument arg, ParsingContext context)
-		{
-			//if (context.Scopes.Current.IsSubtotal)
-			//{
-			//    CheckForAndHandleExcelError(arg);
-			//}
-		}
-
-		private void _CheckForAndHandleExcelError(ExcelDataProvider.ICellInfo cell, ParsingContext context)
-		{
-			//if (context.Scopes.Current.IsSubtotal)
-			//{
-			//    CheckForAndHandleExcelError(cell);
-			//}
-		}
-
-		private bool ShouldCount(object value, ItemContext context)
+		private bool ShouldCount(object value, ValueContext context)
 		{
 			switch (context)
 			{
-				case ItemContext.SingleArg:
-					return IsNumeric(value) || IsNumericString(value);
-				case ItemContext.InRange:
-					return IsNumeric(value);
-				case ItemContext.InArray:
-					return IsNumeric(value) || IsNumericString(value);
+				case ValueContext.EnteredDirectly:
+					return (value is bool || value == null || ConvertUtil.TryParseDateObjectToOADate(value, out double parsedValue));
+				case ValueContext.FromCellRange:
+				case ValueContext.FromArray:
+					return (!(value is bool) && this.IsNumeric(value));
 				default:
-					throw new ArgumentException("Unknown ItemContext:" + context.ToString());
+					return false;
 			}
 		}
 	}

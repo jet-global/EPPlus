@@ -74,6 +74,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void CountWithNullParameter()
+		{
+			var function = new Count();
+			var arguments = FunctionsHelper.CreateArgs(3, null);
+			var result = function.Execute(arguments, this.ParsingContext);
+			Assert.AreEqual(2d, result.Result);
+		}
+
+		[TestMethod]
 		public void CountWithValuesInSingleCellReferences()
 		{
 			using (var package = new ExcelPackage())
@@ -97,6 +106,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["C9"].Value = string.Empty;
 				worksheet.Cells["B10"].Formula = "COUNT(C10)";
 				worksheet.Cells["C10"].Value = null;
+				worksheet.Cells["B11"].Formula = "COUNT(,)";
 				worksheet.Calculate();
 				Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
@@ -107,6 +117,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(0d, worksheet.Cells["B8"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B9"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B10"].Value);
+				Assert.AreEqual(2d, worksheet.Cells["B11"].Value);
 			}
 		}
 
