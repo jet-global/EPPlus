@@ -2687,6 +2687,12 @@ namespace OfficeOpenXml
 		#region Private Methods
 		private void UpdateCharts(int rows, int columns, int rowFrom, int colFrom)
 		{
+			var deletedDrawings = this.Drawings.Where(drawing => this.RangeIsBeingDeleted(new ExcelAddress(drawing.From.Row, drawing.From.Column, drawing.To.Row, drawing.To.Column), rowFrom, rows, colFrom, columns)).ToArray();
+			foreach (var drawing in deletedDrawings)
+			{
+				this.Drawings.Remove(drawing);
+			}
+
 			HashSet<ExcelChart> uniqueChartTypes = new HashSet<ExcelChart>();
 			string workbook, worksheet, address;
 			foreach (var sheet in this.Workbook.Worksheets)
@@ -4805,6 +4811,8 @@ namespace OfficeOpenXml
 
 		private void UpdateDataValidationRanges(int rowFrom, int rows, int columnFrom, int columns)
 		{
+			if (rows < 0 || columns < 0)
+				this.DataValidations.RemoveAll(validation => this.RangeIsBeingDeleted(validation.Address, rowFrom, rows, columnFrom, columns));
 			foreach (var sheet in this.Workbook.Worksheets)
 			{
 				for (int i = sheet.DataValidations.Count - 1; i >= 0; i--)
@@ -4822,6 +4830,12 @@ namespace OfficeOpenXml
 					}
 				}
 			}
+		}
+
+		private bool RangeIsBeingDeleted(ExcelAddress address, int rowFrom, int rows, int columnFrom, int columns)
+		{
+			return (address._fromRow >= rowFrom && address._toRow < rowFrom + -rows ||
+				address._fromCol >= columnFrom && address._toCol < columnFrom + -columns);
 		}
 
 		private void UpdateSparkLines(int rows, int rowFrom, int columns, int columnFrom)

@@ -4083,10 +4083,10 @@ namespace EPPlusTest
 				Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[1].Series);
 				Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].Series);
 				Assert.AreEqual("Sheet1!$D$20:$D$42", drawing.PlotArea.ChartTypes[2].Series[0].Series);
-				sheet.DeleteRow(1, 20);
-				Assert.AreEqual("'Sheet1'!$C$1:$C$22", drawing.Series[1].Series);
-				Assert.AreEqual("'Sheet1'!$B$1:$B$22", drawing.Series[0].Series);
-				Assert.AreEqual("'Sheet1'!$D$1:$D$22", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+				sheet.DeleteRow(1, 10);
+				Assert.AreEqual("'Sheet1'!$C$10:$C$32", drawing.Series[1].Series);
+				Assert.AreEqual("'Sheet1'!$B$10:$B$32", drawing.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$10:$D$32", drawing.PlotArea.ChartTypes[2].Series[0].Series);
 			}
 		}
 
@@ -4266,12 +4266,12 @@ namespace EPPlusTest
 			using (var package = new ExcelPackage())
 			{
 				var sheet = package.Workbook.Worksheets.Add("Sheet");
-				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
+				var validation = sheet.Cells["D17"].DataValidation.AddListDataValidation();
 				validation.Formula.ExcelFormula = "=Sheet!$B$2:$B$6";
-				validation = sheet.Cells["D6"].DataValidation.AddListDataValidation();
+				validation = sheet.Cells["D18"].DataValidation.AddListDataValidation();
 				validation.Formula.ExcelFormula = "=$B$2:$B$6";
 
-				sheet.DeleteRow(1, 127);
+				sheet.DeleteRow(1, 6);
 
 				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
 				Assert.AreEqual("='SHEET'!#REF!", validationRange.Formula.ExcelFormula);
@@ -4466,9 +4466,9 @@ namespace EPPlusTest
 			{
 				//make a Data Validation range
 				var sheet = package.Workbook.Worksheets.Add("Sheet");
-				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
+				var validation = sheet.Cells["K5"].DataValidation.AddListDataValidation();
 				validation.Formula.ExcelFormula = "=Sheet!$B$2:$E$2";
-				validation = sheet.Cells["D6"].DataValidation.AddListDataValidation();
+				validation = sheet.Cells["K6"].DataValidation.AddListDataValidation();
 				validation.Formula.ExcelFormula = "=$B$2:$E$2";
 
 				sheet.DeleteColumn(3, 2);
@@ -4512,9 +4512,9 @@ namespace EPPlusTest
 				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
 				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
 
-				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!K5");
 				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
-				validation = sheetValidations.DataValidations.AddListValidation(sheetValidations.Cells["D6"].Address);
+				validation = sheetValidations.DataValidations.AddListValidation("K6");
 				validation.Formula.ExcelFormula = "=$A$1:$B$2";
 
 				sheetValidations.DeleteColumn(3, 2);
