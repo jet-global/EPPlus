@@ -60,7 +60,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
 			{
 				if (criteriaRange.IsMulti)
-					return new CompileResult(0d, DataType.Decimal);
+					return this.CreateResult(0d, DataType.Decimal);
 				else
 					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
 			}
