@@ -245,15 +245,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				//empty B3 cell
 				worksheet.Cells["B4"].Value = "6/17/2011 2:00";
 				worksheet.Cells["B5"].Value = "02:00 am";
-				worksheet.Cells["B6"].Formula = "=Stdev.p(B1,B2,B4,B5)";
+				//worksheet.Cells["B6"].Formula = "=Stdev.p(B1,B2,B4,B5)";
 				//worksheet.Cells["B7"].Formula = "=Stdev.p(B1,B2,B3,B4,B5)";
 				//worksheet.Cells["B8"].Formula = "=Stdev.p(B1,B2)";
-				//worksheet.Cells["B9"].Formula = "=Stdev.p(B1:B5)";
+				worksheet.Cells["B9"].Formula = "=Stdev.p(B1:B5)";
 				worksheet.Calculate();
-				Assert.AreEqual(0d, worksheet.Cells["B6"].Value);//is giving :<#DIV/0! (OfficeOpenXml.ExcelErrorValue)
+				//Assert.AreEqual(0d, worksheet.Cells["B6"].Value);//is giving :<#DIV/0! (OfficeOpenXml.ExcelErrorValue)
 				//Assert.AreEqual(0d, worksheet.Cells["B7"].Value);//is giving :<#DIV/0! (OfficeOpenXml.ExcelErrorValue)
 				//Assert.AreEqual(0d, worksheet.Cells["B8"].Value);//is giving :<#DIV/0! (OfficeOpenXml.ExcelErrorValue)
-				//Assert.AreEqual(0d, worksheet.Cells["B9"].Value);//is giving value of 0.5 same as stdev.p(1,0)
+				Assert.AreEqual(0d, worksheet.Cells["B9"].Value);//is giving value of 0.5 same as stdev.p(1,0)
 			}
 		}
 

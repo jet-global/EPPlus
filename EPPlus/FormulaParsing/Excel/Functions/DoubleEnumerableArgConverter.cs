@@ -40,7 +40,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 						 foreach (var cell in arg.ValueAsRangeInfo)
 						 {
 							 if (!ignoreErrors && cell.IsExcelError) throw new ExcelErrorValueException(ExcelErrorValue.Parse(cell.Value.ToString()));
-							 if (!CellStateHelper.ShouldIgnore(ignoreHidden, cell, context) && ConvertUtil.IsNumeric(cell.Value))
+							 if (!CellStateHelper.ShouldIgnore(ignoreHidden, cell, context) && ConvertUtil.IsNumeric(cell.Value) && !Boolean.TryParse(cell.Value.ToString() , out bool result))
+							 {
+								 argList.Add(cell.ValueDouble );
+							 }
+							 if (!CellStateHelper.ShouldIgnore(ignoreHidden, cell, context) && ConvertUtil.IsNumeric(cell.Value) && Boolean.TryParse(cell.Value.ToString(), out bool result2))
 							 {
 								 argList.Add(cell.ValueDoubleLogical);
 							 }
@@ -63,7 +67,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 							ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double result);
 							argList.Add(result);
 						}
-
 					 }
 				 });
 		}

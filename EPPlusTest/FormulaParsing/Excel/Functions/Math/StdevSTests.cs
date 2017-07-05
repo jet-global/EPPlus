@@ -233,6 +233,25 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(20355.19445, result2.ResultNumeric, .00001);
 		}
 
+
+		[TestMethod]
+		public void StdevSIsGivenAMixOfInputTypesByCellRange()
+		{
+			var function = new StdevS();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 15;
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Value = "6/17/2011 2:00";
+				worksheet.Cells["B4"].Value = "02:00 am";
+				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B4)";
+				worksheet.Calculate();
+
+				Assert.AreEqual(9.899494937, (double)worksheet.Cells["B9"].Value, .00001);
+			}
+		}
+
 		[TestMethod]
 		public void StdevSIsGivenAMixOfInputTypesWithANullInTheCenterByCellRefrenceAndRange()
 		{
@@ -240,61 +259,54 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = 1;
-				worksheet.Cells["B2"].Value = true;
+				worksheet.Cells["B1"].Value = 15;
+				worksheet.Cells["B2"].Value = 1;
+				worksheet.Cells["B3"].Value = "6/17/2011 2:00";
+				worksheet.Cells["B4"].Value = "02:00 am";
+				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(9.899494937, (double)worksheet.Cells["B9"].Value, .00001);//This is returning 9.899494937. That is the same as std.s(15,1) or (15,true)
+			}
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenAMixOfInputTypesWithANullInTheCenterByCellRefrenceAndTwoRangeInputs()
+		{
+			var function = new StdevS();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 15;
+				worksheet.Cells["B2"].Value = 1;
 				//empty B3 cell
 				worksheet.Cells["B4"].Value = "6/17/2011 2:00";
 				worksheet.Cells["B5"].Value = "02:00 am";
-				worksheet.Cells["B6"].Formula = "=stdev.s(B1,B2,B4,B5)";
-				worksheet.Cells["B7"].Formula = "=stdev.s(B1,B2,B3,B4,B5)";
 				worksheet.Cells["B8"].Formula = "=stdev.s(B1,B2)";
-				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B5)";
+				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B5,B1:B5)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B7"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B8"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B9"].Value).Type);//This is returning 0.707106781, the value of std.s(1,0)
+				Assert.AreEqual(9.899494937, (double)worksheet.Cells["B8"].Value, .00001);
+				Assert.AreEqual(8.082903769, (double)worksheet.Cells["B9"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void StdevSIsGivenAMixOfInputTypesByCellRefrenceAndRange()
+		public void StdevSIsGivenAMixOfTwoTypesAndTwoRangesThatShouldHaveAnOutput()
 		{
 			var function = new StdevS();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = 1;
-				worksheet.Cells["B2"].Value = true;
+				worksheet.Cells["B1"].Value = 23;
+				worksheet.Cells["B2"].Value = 1;
 				worksheet.Cells["B3"].Value = "6/17/2011 2:00";
 				worksheet.Cells["B4"].Value = "02:00 am";
-				worksheet.Cells["B6"].Formula = "=stdev.s(B1,B2,B3,B4)";
-				worksheet.Cells["B8"].Formula = "=stdev.s(B1,B2)";
-				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B4)";
-				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B8"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B9"].Value).Type);//This is returning 0.707106781, the value of std.s(1,0)
-			}
-		}
 
-		[TestMethod]
-		public void StdevSIsGivenAMixOfInputTypesByCellRefrenceAndRangeTestTwo()
-		{
-			var function = new StdevS();
-			using (var package = new ExcelPackage())
-			{
-				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells["B1"].Value = 1;
-				worksheet.Cells["B2"].Value = "6/17/2011 2:00";
-				worksheet.Cells["B3"].Value = "02:00 am";
-				worksheet.Cells["B6"].Formula = "=stdev.s(B1,B2,B3)";
-				worksheet.Cells["B8"].Formula = "=stdev.s(B1,B2)";
-				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B3)";
+				worksheet.Cells["A1"].Value = 23;
+				worksheet.Cells["A2"].Value = 15;
+				worksheet.Cells["A3"].Value = "02:00 am";
+				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B4, A1:A3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B8"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B9"].Value).Type);//This is returning a num error.
+				Assert.AreEqual(10.37625494, (double)worksheet.Cells["B9"].Value, .0001);
 			}
 		}
 
@@ -323,16 +335,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void StdevSTestingDirectINputVsRangeInput()
+		public void StdevSTestingDirectInputVsRangeInputWithAGapInTheMiddle()
 		{
 			var function = new StdevS();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = 1;
-				worksheet.Cells["B2"].Value = 1;
-				worksheet.Cells["B8"].Formula = "=stdev.s(B1,B2)";
-				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B2)";
+				worksheet.Cells["B3"].Value = 1;
+				worksheet.Cells["B8"].Formula = "=stdev.s(B1,B3)";
+				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B3)";
 				worksheet.Calculate();
 				Assert.AreEqual(0d, worksheet.Cells["B8"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B9"].Value);
@@ -364,6 +376,114 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(66, 52, 77, 71,null, 30, 90, 26, 56, 7), this.ParsingContext);
 			Assert.AreEqual(26.97581221, result1.ResultNumeric, .00001);
 			Assert.AreEqual(30.42020527, result2.ResultNumeric, .00001);
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenAMixedStringInputWithAEmptyCellInTheMiddle()
+		{
+			var function = new StdevS();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(10, 2, "6/17/2011 2:00", "02:00 am"), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(10, 2, "6/17/2011 2:00",null, "02:00 am"), this.ParsingContext);
+			Assert.AreEqual(20353.52823, result1.ResultNumeric, .00001);
+			Assert.AreEqual(18205.19946, result2.ResultNumeric, .00001);
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenAMixOfTwoTypesAndTwoRangesThatShouldHaveAnOutputTestTwo()
+		{
+			var function = new StdevS();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 10;
+				worksheet.Cells["B2"].Value = 2;
+				worksheet.Cells["B3"].Value = "6/17/2011 2:00";
+				worksheet.Cells["B4"].Value = "02:00 am";
+				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(5.656854249, (double) worksheet.Cells["B9"].Value, .0001);
+			}
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenTwoRangesOfIntsAsInputs()
+		{
+			var function = new StdevS();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 2;
+				worksheet.Cells["B3"].Value = 34;
+				worksheet.Cells["B4"].Value = 56;
+				worksheet.Cells["B5"].Value = 32;
+				worksheet.Cells["B6"].Value = 76;
+
+				worksheet.Cells["B7"].Value = 2;
+				worksheet.Cells["B8"].Value = 3;
+				worksheet.Cells["B9"].Value = 5;
+				worksheet.Cells["B10"].Value = 7;
+				worksheet.Cells["B11"].Value = 45;
+
+
+				worksheet.Cells["A9"].Formula = "=stdev.s(B1:B6, B7:B11)";
+				worksheet.Calculate();
+				Assert.AreEqual(26.30762074, (double)worksheet.Cells["A9"].Value, .00001);
+			}
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenTwoRangesOfIntsAsInputsWithATimeInTheMiddleOfTheFirstRange()
+		{
+			var function = new StdevS();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 2;
+				worksheet.Cells["B3"].Value = 34;
+				worksheet.Cells["B4"].Value = "12:00";
+				worksheet.Cells["B5"].Value = 32;
+				worksheet.Cells["B6"].Value = 76;
+
+				worksheet.Cells["B7"].Value = 2;
+				worksheet.Cells["B8"].Value = 3;
+				worksheet.Cells["B9"].Value = 5;
+				worksheet.Cells["B10"].Value = 7;
+				worksheet.Cells["B11"].Value = 45;
+
+
+				worksheet.Cells["A9"].Formula = "=stdev.s(B1:B6, B7:B11)";
+				worksheet.Calculate();
+				Assert.AreEqual(25.35985454, (double)worksheet.Cells["A9"].Value, .00001);
+			}
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenTwoRangesOfIntsAsInputsWithATimeInTheMiddleOfTheFirstRangeTestTwo()
+		{
+			var function = new StdevS();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 1;
+				worksheet.Cells["B2"].Value = 2;
+				worksheet.Cells["B3"].Value = 34;
+				worksheet.Cells["B4"].Value = "12:00";
+				worksheet.Cells["B5"].Value = "6/17/2011 2:00";
+				worksheet.Cells["B6"].Value = 76;
+
+				worksheet.Cells["B7"].Value = 2;
+				worksheet.Cells["B8"].Value = 3;
+				worksheet.Cells["B9"].Value = 5;
+				worksheet.Cells["B10"].Value = 7;
+				worksheet.Cells["B11"].Value = 45;
+
+
+				worksheet.Cells["A9"].Formula = "=stdev.s(B1:B6, B7:B11)";
+				worksheet.Calculate();
+				Assert.AreEqual(26.56647846, (double)worksheet.Cells["A9"].Value, .00001);
+			}
 		}
 
 		[TestMethod]
