@@ -32,16 +32,49 @@ using System;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
+	/// <summary>
+	/// Represents a converter used to convert values to expressions.
+	/// </summary>
 	public class ExpressionConverter : IExpressionConverter
 	{
+		#region Class Variables
+		private static IExpressionConverter myInstance;
+		#endregion
+
+		#region Properties
+		/// <summary>
+		/// Gets the current instance of the ExpressionConverter.
+		/// </summary>
+		public static IExpressionConverter Instance
+		{
+			get
+			{
+				if (myInstance == null)
+				{
+					myInstance = new ExpressionConverter();
+				}
+				return myInstance;
+			}
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Converts the given <see cref="Expression"/> into a <see cref="StringExpression"/>.
+		/// </summary>
+		/// <param name="expression">The <see cref="Expression"/> to convert.</param>
+		/// <returns>Returns the <see cref="StringExpression"/> representation of the given <see cref="Expression"/>.</returns>
 		public StringExpression ToStringExpression(Expression expression)
 		{
 			var result = expression.Compile();
-			var newExp = new StringExpression(result.Result.ToString());
-			newExp.Operator = expression.Operator;
-			return newExp;
+			return new StringExpression(result.Result.ToString()) { Operator = expression.Operator};
 		}
 
+		/// <summary>
+		/// Converts the given <see cref="CompileResult"/> into an <see cref="Expression"/>.
+		/// </summary>
+		/// <param name="compileResult">The <see cref="CompileResult"/> to convert.</param>
+		/// <returns>Returns the <see cref="Expression"/> representation of the given <see cref="CompileResult"/>.</returns>
 		public Expression FromCompileResult(CompileResult compileResult)
 		{
 			switch (compileResult.DataType)
@@ -55,37 +88,21 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 				case DataType.Decimal:
 					return compileResult.Result is string
 								  ? new DecimalExpression(compileResult.Result.ToString())
-								  : new DecimalExpression(((double)compileResult.Result));
+								  : new DecimalExpression(Convert.ToDouble(compileResult.Result));
 				case DataType.Boolean:
 					return compileResult.Result is string
 								  ? new BooleanExpression(compileResult.Result.ToString())
 								  : new BooleanExpression((bool)compileResult.Result);
-				//case DataType.Enumerable:
-				//    return 
 				case DataType.ExcelError:
-					//throw (new OfficeOpenXml.FormulaParsing.Exceptions.ExcelErrorValueException((ExcelErrorValue)compileResult.Result)); //Added JK
 					return compileResult.Result is string
 						 ? new ExcelErrorExpression(compileResult.Result.ToString(),
 							  ExcelErrorValue.Parse(compileResult.Result.ToString()))
 						 : new ExcelErrorExpression((ExcelErrorValue)compileResult.Result);
 				case DataType.Empty:
-					return new IntegerExpression(0); //Added JK
-
+					return new IntegerExpression(0);
 			}
 			return null;
 		}
-
-		private static IExpressionConverter _instance;
-		public static IExpressionConverter Instance
-		{
-			get
-			{
-				if (_instance == null)
-				{
-					_instance = new ExpressionConverter();
-				}
-				return _instance;
-			}
-		}
+		#endregion
 	}
 }

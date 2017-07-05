@@ -709,11 +709,9 @@ namespace OfficeOpenXml
 			{
 				IsRangeValid("comments");
 				var i = -1;
-				if (this.myWorksheet.Comments.Count > 0)
-				{
-					if (this.myWorksheet._commentsStore.Exists(this._fromRow, this._fromCol, out i))
+				if (this.myWorksheet.Comments.Count > 0 && this.myWorksheet._commentsStore.Exists(this._fromRow, this._fromCol, out i))
 						return this.myWorksheet.Comments[i] as ExcelComment;
-				}
+
 				return null;
 			}
 		}
@@ -760,8 +758,6 @@ namespace OfficeOpenXml
 		private static _setValue _setValueDelegate = Set_Value;
 		private static _setValue _setHyperLinkDelegate = Set_HyperLink;
 		private static _setValue _setIsRichTextDelegate = Set_IsRichText;
-		private static _setValue _setExistsCommentDelegate = Exists_Comment;
-		private static _setValue _setCommentDelegate = Set_Comment;
 
 		private static void Set_StyleID(ExcelRangeBase range, object value, int row, int col)
 		{
@@ -861,18 +857,6 @@ namespace OfficeOpenXml
 		private static void Set_IsRichText(ExcelRangeBase range, object value, int row, int col)
 		{
 			range.myWorksheet._flags.SetFlagValue(row, col, (bool)value, CellFlags.RichText);
-		}
-
-		private static void Exists_Comment(ExcelRangeBase range, object value, int row, int col)
-		{
-			if (range.myWorksheet._commentsStore.Exists(row, col))
-				throw (new InvalidOperationException(string.Format("Cell {0} already contain a comment.", new ExcelCellAddress(row, col).Address)));
-		}
-
-		private static void Set_Comment(ExcelRangeBase range, object value, int row, int col)
-		{
-			string[] v = (string[])value;
-			range.myWorksheet.Comments.Add(new ExcelRangeBase(range.myWorksheet, GetAddress(range._fromRow, range._fromCol)), v[0], v[1]);
 		}
 		#endregion
 		
@@ -1852,10 +1836,25 @@ namespace OfficeOpenXml
 		{
 			if (string.IsNullOrEmpty(author))
 				author = Thread.CurrentPrincipal.Identity.Name;
-			// Check if any comments exists in the range and throw an exception.
-			this.myChangePropMethod(this, _setExistsCommentDelegate, null);
-			// Create the comments.
-			this.myChangePropMethod(this, _setCommentDelegate, new string[] { text, author });
+			if (!this.myWorksheet._commentsStore.Exists(this._fromRow, this._fromCol))
+				this.myWorksheet.Comments.Add(new ExcelRangeBase(this.myWorksheet, ExcelRangeBase.GetAddress(this._fromRow, this._fromCol)), text, author);
+			else
+				throw new Exception("Comment already exists in cell.");
+			return this.myWorksheet.Comments[new ExcelCellAddress(this._fromRow, this._fromCol)];
+		}
+
+		/// <summary>
+		/// Adds a new comment for the range with the same style as the specified <paramref name="comment"/>.
+		/// If this range contains more than one cell, the top left comment is returned by the method.
+		/// </summary>
+		/// <param name="comment">The comment to copy.</param>
+		/// <returns>A reference comment of the top left cell.</returns>
+		public ExcelComment AddComment(ExcelComment comment)
+		{
+			if (!this.myWorksheet._commentsStore.Exists(this._fromRow, this._fromCol))
+				this.myWorksheet.Comments.Add(new ExcelRangeBase(this.myWorksheet, ExcelRangeBase.GetAddress(this._fromRow, this._fromCol)), comment);
+			else
+				throw new Exception("Comment already exists in cell.");
 			return this.myWorksheet.Comments[new ExcelCellAddress(this._fromRow, this._fromCol)];
 		}
 
@@ -1968,9 +1967,6 @@ namespace OfficeOpenXml
 				if (this.myWorksheet._hyperLinks.Exists(row, col, out hl))
 					cell.HyperLink = hl;
 
-				// Will just be null if no comment exists.
-				cell.Comment = this.myWorksheet.Cells[cse.Row, cse.Column].Comment;
-
 				if (this.myWorksheet._flags.Exists(row, col, out flag))
 					cell.Flag = flag;
 				copiedValue.Add(cell);
@@ -2011,7 +2007,6 @@ namespace OfficeOpenXml
 				}
 			}
 			var copiedMergedCells = new Dictionary<int, ExcelAddress>();
-			//Merged cells
 			var csem = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.myWorksheet.MergedCells.Cells, this._fromRow, this._fromCol, this._toRow, this._toCol);
 			while (csem.MoveNext())
 			{
@@ -2032,6 +2027,23 @@ namespace OfficeOpenXml
 						copiedMergedCells.Add(csem.Value, null);
 					}
 				}
+			}
+			var copiedCommentCells = new List<CopiedCell>();
+			var csec = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.myWorksheet._commentsStore, this._fromRow, this._fromCol, this._toRow, this._toCol);
+			while (csec.MoveNext())
+			{
+				var row = destination._fromRow + (csec.Row - this._fromRow);
+				var column = destination._fromCol + (csec.Column - this._fromCol);
+				var cell = new CopiedCell
+				{
+					Row = row,
+					Column = column,
+					Value = null
+				};
+				// Will just be null if no comment exists.
+				cell.Comment = this.myWorksheet.Cells[csec.Row, csec.Column].Comment;
+				if (cell.Comment != null)
+					copiedCommentCells.Add(cell);
 			}
 			destination.myWorksheet._values.Clear(destination._fromRow, destination._fromCol, toRow, toCol);
 			destination.myWorksheet._formulas.Clear(destination._fromRow, destination._fromCol, toRow, toCol);
@@ -2054,8 +2066,6 @@ namespace OfficeOpenXml
 				if (cell.HyperLink != null)
 					destination.myWorksheet._hyperLinks.SetValue(cell.Row, cell.Column, cell.HyperLink);
 
-				if (cell.Comment != null)
-					destination.Worksheet.Cells[cell.Row, cell.Column].AddComment(cell.Comment.Text, cell.Comment.Author);
 				if (cell.Flag != 0)
 					destination.myWorksheet._flags.SetValue(cell.Row, cell.Column, cell.Flag);
 			}
@@ -2067,6 +2077,11 @@ namespace OfficeOpenXml
 					destination.myWorksheet.MergedCells.Add(mergedCell, true);
 			}
 			int rowOffset = destination._fromRow;
+			// Add comment cells.
+			foreach (var cell in copiedCommentCells)
+			{
+				destination.Worksheet.Cells[cell.Row, cell.Column].AddComment(cell.Comment);
+			}
 			List<ExcelSparkline> newSparklines = new List<ExcelSparkline>();
 			foreach (var group in this.Worksheet.SparklineGroups.SparklineGroups)
 			{

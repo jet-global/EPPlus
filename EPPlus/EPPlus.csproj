@@ -441,6 +441,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIf.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfs.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Ceiling.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingMath.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Cos.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Cosh.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Cot.cs" />
@@ -457,6 +458,8 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Fact.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\FactDouble.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Floor.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\FloorMath.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\IfHelper.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Large.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Ln.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Log.cs" />
@@ -584,6 +587,7 @@
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\IfFunctionCompiler.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\IfNaFunctionCompiler.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\LookupFunctionCompiler.cs" />
+    <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\ResolveCellReferencesAsRangeCompiler.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionExpression.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\GroupExpression.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\IExpressionCompiler.cs" />
