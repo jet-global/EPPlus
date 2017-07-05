@@ -148,6 +148,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\FloorMathTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\IfHelperTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\IntFunctionTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CoshTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CosTests.cs" />

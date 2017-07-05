@@ -153,7 +153,6 @@ namespace OfficeOpenXml.FormulaParsing
 							_parsingContext.Configuration.Logger.Log(_parsingContext, msg);
 						}
 
-
 						if (rangeInfo.Address.Rows > rangeInfo.Address.Columns)
 						{
 							var rangeAddressRow = rangeAddress.ToRow;
@@ -167,9 +166,7 @@ namespace OfficeOpenXml.FormulaParsing
 								return ExcelErrorValue.Create(eErrorType.Value);
 
 							if (rangeAddressRow == startRow)
-							{
 								return rangeInfo.Worksheet.Cells[rangeInfo.Address.Start.Row, rangeInfo.Address.End.Column].Value;
-							}
 							else if (rangeAddressRow == endRow)
 							{
 								var test = rangeInfo.Address.End.Row;
@@ -177,9 +174,7 @@ namespace OfficeOpenXml.FormulaParsing
 								return rangeInfo.Worksheet.Cells[rangeInfo.Address.End.Row, rangeInfo.Address.End.Column].Value;
 							}
 							else if (rangeAddressRow > startRow && rangeAddressRow < endRow)
-							{
 								return rangeInfo.Worksheet.Cells[rangeAddress.FromRow, rangeInfo.Address.Start.Column].Value;
-							}
 						}
 						else
 						{
@@ -193,17 +188,11 @@ namespace OfficeOpenXml.FormulaParsing
 								return ExcelErrorValue.Create(eErrorType.Value);
 
 							if (rangeAddressCol == startCol)
-							{
 								return rangeInfo.Worksheet.Cells[rangeInfo.Address.Start.Row, rangeAddress.FromCol].Value;
-							}
 							else if (rangeAddressCol == endCol)
-							{
 								return rangeInfo.Worksheet.Cells[rangeInfo.Address.Start.Row, rangeAddress.FromCol].Value;
-							}
 							else if (rangeAddressCol > startCol && rangeAddressCol < endCol)
-							{
 								return rangeInfo.Worksheet.Cells[rangeInfo.Address.Start.Row, rangeAddress.FromCol].Value;
-							}
 						}
 						return ExcelErrorValue.Create(eErrorType.Value);
 					}

@@ -213,7 +213,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			var criteriaCandidate = arguments.ElementAt(1).ValueAsRangeInfo.Address;
 			var functionLocation = context.Scopes.Current.Address;
-			var worksheet = context.ExcelDataProvider.GetRange("Sheet1", 1, 1, "A1").Worksheet;
+
+			
+			var worksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
 
 			if (criteriaCandidate.Rows > criteriaCandidate.Columns)
 			{
