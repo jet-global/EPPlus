@@ -970,7 +970,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B2"].Value = 1;
 				worksheet.Cells["B3"].Formula = "SUMIF(B1:B2, B1:B2)";
 				worksheet.Calculate();
-				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(100d, worksheet.Cells["B3"].Value);
 			}
 		}
 
@@ -986,7 +986,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B4"].Value = "ab";
 				worksheet.Cells["B5"].Formula = "SUMIF(B3:B4, B3:B4, B1:B2)";
 				worksheet.Calculate();
-				Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(100d, worksheet.Cells["B5"].Value);
 			}
 		}
 

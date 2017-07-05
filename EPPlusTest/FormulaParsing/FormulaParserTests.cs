@@ -193,5 +193,34 @@ namespace EPPlusTest.FormulaParsing
 				Assert.AreEqual(3, worksheet.Cells["L8"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void ParseWithMultiDimensionalArrayReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["P12"].Value = 1;
+				worksheet.Cells["P13"].Value = 2;
+				worksheet.Cells["P14"].Value = 3;
+				worksheet.Cells["Q12"].Value = 1;
+				worksheet.Cells["Q13"].Value = 2;
+				worksheet.Cells["Q14"].Value = 3;
+
+				worksheet.Cells["S12"].Value = 1;
+				worksheet.Cells["S13"].Value = 2;
+				worksheet.Cells["S14"].Value = 3;
+				worksheet.Cells["T12"].Value = 1;
+				worksheet.Cells["T13"].Value = 2;
+				worksheet.Cells["T14"].Value = 3;
+
+				worksheet.Cells["U12"].Formula = "P12:Q14, S12:T14";
+				worksheet.Cells["S18"].Formula = "P12:Q14, S12:T14";
+
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["U12"].Value).Type);
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["S18"].Value).Type);
+			}
+		}
 	}
 }

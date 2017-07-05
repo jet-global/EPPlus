@@ -161,6 +161,12 @@ namespace OfficeOpenXml.FormulaParsing
 							var startRow = rangeInfo.Address.Start.Row;
 							var endRow = rangeInfo.Address.End.Row;
 
+							var startCol = rangeInfo.Address.Start.Column;
+							var endCol = rangeInfo.Address.End.Column;
+
+							if(startCol != endCol)
+								return ExcelErrorValue.Create(eErrorType.Value);
+
 							if (rangeAddressRow == startRow)
 							{
 								return rangeInfo.Worksheet.Cells[rangeInfo.Address.Start.Row, rangeInfo.Address.End.Column].Value;
@@ -181,6 +187,11 @@ namespace OfficeOpenXml.FormulaParsing
 							var rangeAddressCol = rangeAddress.ToCol;
 							var startCol = rangeInfo.Address.Start.Column;
 							var endCol = rangeInfo.Address.End.Column;
+							var startRow = rangeInfo.Address.Start.Row;
+							var endRow = rangeInfo.Address.End.Row;
+
+							if (startRow != endRow)
+								return ExcelErrorValue.Create(eErrorType.Value);
 
 							if (rangeAddressCol == startCol)
 							{
