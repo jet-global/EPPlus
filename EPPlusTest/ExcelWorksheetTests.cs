@@ -4822,17 +4822,38 @@ namespace EPPlusTest
 		[TestMethod]
 		public void DeleteColumnsAcrossEntireChartSourceUpdatesChart()
 		{
-			using (var package = new ExcelPackage())
+			var temp = new FileInfo(Path.GetTempFileName());
+			temp.Delete();
+			try
 			{
-				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
-				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
-				chart.From.Column = 4;
-				chart.From.Row = 4;
-				chart.To.Column = 10;
-				chart.To.Row = 10;
-				sheet.DeleteColumn(1, 12);
-				// In a two-cell-anchor chart, deleting the entire row/column set also deletes the chart.
-				Assert.IsFalse(sheet.Drawings.Any(drawing => drawing.Name.Equals("myChart")));
+				using (var package = new ExcelPackage(temp))
+				{
+					var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+					var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+					chart.From.Column = 4;
+					chart.From.Row = 4;
+					chart.To.Column = 10;
+					chart.To.Row = 10;
+					package.Save();
+				}
+				using (var package = new ExcelPackage(temp))
+				{
+					var sheet = package.Workbook.Worksheets["Chart Sheet"];
+					Assert.AreEqual(1, sheet.Drawings.Count);
+					sheet.DeleteColumn(1, 12);
+					// In a two-cell-anchor chart, deleting the entire row/column set also deletes the chart.
+					Assert.AreEqual(0, sheet.Drawings.Count);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(temp))
+				{
+					var sheet = package.Workbook.Worksheets["Chart Sheet"];
+					Assert.AreEqual(0, sheet.Drawings.Count);
+				}
+			}
+			finally
+			{
+				temp.Delete();
 			}
 		}
 
@@ -4901,17 +4922,38 @@ namespace EPPlusTest
 		[TestMethod]
 		public void DeleteColumnsDeletesDataValidationRange()
 		{
-			using (var package = new ExcelPackage())
+			var temp = new FileInfo(Path.GetTempFileName());
+			temp.Delete();
+			try
 			{
-				//make a Data Validation range
-				var sheet = package.Workbook.Worksheets.Add("Sheet");
-				var validation = sheet.Cells["Z5"].DataValidation.AddListDataValidation();
-				validation.Formula.ExcelFormula = "=Sheet!$B$2:$E$2";
-				validation = sheet.Cells["Z6"].DataValidation.AddListDataValidation();
-				validation.Formula.ExcelFormula = "=$B$2:$E$2";
-				Assert.AreEqual(2, sheet.DataValidations.Count);
-				sheet.DeleteColumn(20, 12);
-				Assert.AreEqual(0, sheet.DataValidations.Count);
+				using (var package = new ExcelPackage(temp))
+				{
+					//make a Data Validation range
+					var sheet = package.Workbook.Worksheets.Add("Sheet");
+					var validation = sheet.Cells["Z5"].DataValidation.AddListDataValidation();
+					validation.Formula.ExcelFormula = "=Sheet!$B$2:$E$2";
+					validation = sheet.Cells["Z6"].DataValidation.AddListDataValidation();
+					validation.Formula.ExcelFormula = "=$B$2:$E$2";
+					Assert.AreEqual(2, sheet.DataValidations.Count);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(temp))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					Assert.AreEqual(2, sheet.DataValidations.Count);
+					sheet.DeleteColumn(20, 12);
+					Assert.AreEqual(0, sheet.DataValidations.Count);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(temp))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					Assert.AreEqual(0, sheet.DataValidations.Count);
+				}
+			}
+			finally
+			{
+				temp.Delete();
 			}
 		}
 
