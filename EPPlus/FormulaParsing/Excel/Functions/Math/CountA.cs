@@ -1,27 +1,33 @@
-﻿/* Copyright (C) 2011  Jan Källman
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+﻿/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2017 Jan Källman, Matt Delaney, and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
- * See the GNU Lesser General Public License for more details.
- *
- * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
- * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
- *
- * All code and executables are provided "as is" with no warranty either express or implied. 
- * The author accepts no liability for any damage or loss of business that this product may cause.
- *
- * Code change notes:
- * 
- * Author							Change						Date
- *******************************************************************************
- * Mats Alm   		                Added		                2013-12-03
- *******************************************************************************/
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+* Code change notes:
+* 
+* Author							Change						Date
+********************************************************************************
+* Mats Alm   		                Added		                2013-12-03
+********************************************************************************/
 using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
@@ -33,63 +39,29 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var nItems = 0d;
-			Calculate(arguments, context, ref nItems);
-			return CreateResult(nItems, DataType.Integer);
-		}
-
-		private void Calculate(IEnumerable<FunctionArgument> items, ParsingContext context, ref double nItems)
-		{
-			foreach (var item in items)
+			var numberOfValues = 0d;
+			foreach (var argument in arguments)
 			{
-				var cs = item.Value as ExcelDataProvider.IRangeInfo;
-				if (cs != null)
+				if (argument.Value is IEnumerable<FunctionArgument> subArguments)
 				{
-					foreach (var c in cs)
+					foreach (var subArgument in subArguments)
 					{
-						_CheckForAndHandleExcelError(c, context);
-						if (!ShouldIgnore(c, context) && ShouldCount(c.Value))
-						{
-							nItems++;
-						}
+						if (!this.ShouldIgnore(subArgument) && subArgument.Value != null)
+							numberOfValues++;
 					}
 				}
-				else if (item.Value is IEnumerable<FunctionArgument>)
+				else if (argument.Value is ExcelDataProvider.IRangeInfo cellRange)
 				{
-					Calculate((IEnumerable<FunctionArgument>)item.Value, context, ref nItems);
-				}
-				else
-				{
-					_CheckForAndHandleExcelError(item, context);
-					if (!ShouldIgnore(item) && ShouldCount(item.Value))
+					foreach (var cell in cellRange)
 					{
-						nItems++;
+						if (!this.ShouldIgnore(cell, context) && cell.Value != null)
+							numberOfValues++;
 					}
 				}
-
+				else if (!this.ShouldIgnore(argument))
+					numberOfValues++;
 			}
-		}
-
-		private void _CheckForAndHandleExcelError(FunctionArgument arg, ParsingContext context)
-		{
-			if (context.Scopes.Current.IsSubtotal)
-			{
-				CheckForAndHandleExcelError(arg);
-			}
-		}
-
-		private void _CheckForAndHandleExcelError(ExcelDataProvider.ICellInfo cell, ParsingContext context)
-		{
-			if (context.Scopes.Current.IsSubtotal)
-			{
-				CheckForAndHandleExcelError(cell);
-			}
-		}
-
-		private bool ShouldCount(object value)
-		{
-			if (value == null) return false;
-			return (!string.IsNullOrEmpty(value.ToString()));
+			return this.CreateResult(numberOfValues, DataType.Integer);
 		}
 	}
 }
