@@ -102,6 +102,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void CountAWithNullParameter()
 		{
+			// The COUNTA function in Excel will count a null argument value if it is entered directly
+			// in the function's input. Null cells entered through cell references are still ignored as expected.
 			var function = new CountA();
 			var arguments = FunctionsHelper.CreateArgs(3, null);
 			var result = function.Execute(arguments, this.ParsingContext);
