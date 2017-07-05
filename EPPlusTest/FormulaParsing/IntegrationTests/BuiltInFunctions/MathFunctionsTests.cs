@@ -224,7 +224,7 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		public void CountAShouldReturnAResult()
 		{
 			var result = _parser.Parse("CountA(1,2,2,\"\", \"a\")");
-			Assert.AreEqual(4d, result);
+			Assert.AreEqual(5d, result);
 		}
 
 		[TestMethod]
