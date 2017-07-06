@@ -43,41 +43,68 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-			var range = functionArguments.ElementAt(0);
-			var criteria = GetFirstArgument(functionArguments.ElementAt(1)).ValueFirst != null ? GetFirstArgument(functionArguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
-			double result = 0d;
-			if (range.IsExcelRange)
+
+			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
+			if (cellRangeToCheck == null)
+				return new CompileResult(eErrorType.Value);
+
+			string criteriaString = null;
+			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
 			{
-				ExcelDataProvider.IRangeInfo rangeInfo = range.ValueAsRangeInfo;
-				for (int row = rangeInfo.Address.Start.Row; row < rangeInfo.Address.End.Row + 1; row++)
+				if (criteriaRange.IsMulti)
 				{
-					for (int col = rangeInfo.Address.Start.Column; col < rangeInfo.Address.End.Column + 1; col++)
-					{
-						if (criteria != null && Evaluate(GetFirstArgument(rangeInfo.Worksheet.GetValue(row, col)), criteria))
-						{
-							result++;
-						}
-					}
+					criteriaString = IfHelper.CalculateCriteria(arguments, context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet, context.Scopes.Current.Address.FromRow, context.Scopes.Current.Address.FromCol).ToString().ToUpper();
 				}
-			}
-			else if (range.Value is IEnumerable<FunctionArgument>)
-			{
-				foreach (var arg in (IEnumerable<FunctionArgument>)range.Value)
-				{
-					if (Evaluate(arg.Value, criteria))
-					{
-						result++;
-					}
-				}
+				else
+					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
 			}
 			else
+				criteriaString = this.GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString().ToUpper();
+
+			var count = 0d;
+			foreach (var currentCell in cellRangeToCheck)
 			{
-				if (Evaluate(range.Value, criteria))
-				{
-					result++;
-				}
+				if (IfHelper.ObjectMatchesCriteria(currentCell.Value, criteriaString))
+					count++;
 			}
-			return CreateResult(result, DataType.Integer);
+
+			return this.CreateResult(count, DataType.Integer);
+
+			//var range = functionArguments.ElementAt(0);
+			//var criteria = GetFirstArgument(functionArguments.ElementAt(1)).ValueFirst != null ? GetFirstArgument(functionArguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
+			//double result = 0d;
+			//if (range.IsExcelRange)
+			//{
+			//	ExcelDataProvider.IRangeInfo rangeInfo = range.ValueAsRangeInfo;
+			//	for (int row = rangeInfo.Address.Start.Row; row < rangeInfo.Address.End.Row + 1; row++)
+			//	{
+			//		for (int col = rangeInfo.Address.Start.Column; col < rangeInfo.Address.End.Column + 1; col++)
+			//		{
+			//			if (criteria != null && Evaluate(GetFirstArgument(rangeInfo.Worksheet.GetValue(row, col)), criteria))
+			//			{
+			//				result++;
+			//			}
+			//		}
+			//	}
+			//}
+			//else if (range.Value is IEnumerable<FunctionArgument>)
+			//{
+			//	foreach (var arg in (IEnumerable<FunctionArgument>)range.Value)
+			//	{
+			//		if (Evaluate(arg.Value, criteria))
+			//		{
+			//			result++;
+			//		}
+			//	}
+			//}
+			//else
+			//{
+			//	if (Evaluate(range.Value, criteria))
+			//	{
+			//		result++;
+			//	}
+			//}
+			//return CreateResult(result, DataType.Integer);
 		}
 	}
 }

@@ -49,6 +49,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 			_specialCompilers.Add(typeof(SumIf), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("sumif")));
 			_specialCompilers.Add(typeof(Count), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("count")));
 			_specialCompilers.Add(typeof(CountA), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("counta")));
+			_specialCompilers.Add(typeof(CountIf), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("countif")));
 			_specialCompilers.Add(typeof(SumIfs), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("sumifs")));
 			_specialCompilers.Add(typeof(Average), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("average")));
 			_specialCompilers.Add(typeof(AverageA), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("averagea")));

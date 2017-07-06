@@ -201,6 +201,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				numericCandidate is TimeSpan);
 		}
 
+		//public static bool TryExtractCriteriaString(FunctionArgument criteriaCandidate, ParsingContext context, out string criteriaString)
+		//{
+		//	criteriaString = null;
+		//	if (criteriaCandidate.Value is ExcelDataProvider.IRangeInfo criteriaRange)
+		//	{
+		//		if (criteriaRange.IsMulti)
+		//		{
+		//			criteriaString = IfHelper.CalculateCriteria(arguments, context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet, context.Scopes.Current.Address.FromRow, context.Scopes.Current.Address.FromCol).ToString().ToUpper();
+		//		}
+		//		else
+		//			criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
+		//	}
+		//	else
+		//		criteriaString = this.GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString().ToUpper();
+		//}
 
 		/// <summary>
 		/// Takes a cell range and converts it into a single value criteria
