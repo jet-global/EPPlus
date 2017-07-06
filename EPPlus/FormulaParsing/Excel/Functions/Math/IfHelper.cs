@@ -218,6 +218,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return 0;
 			if (arguments.ElementAt(1).Value is ExcelErrorValue)
 				return 0;
+			if (worksheet == null)
+				return 0;
+			if (rowLocation <= 0 || colLocation <= 0)
+				return 0;
 
 			var criteriaCandidate = arguments.ElementAt(1).ValueAsRangeInfo.Address;
 
