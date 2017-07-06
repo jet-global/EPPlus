@@ -60,10 +60,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			string criteriaString = null;
 			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
 			{
-				var t = context.Scopes.Current.Address.FromRow;
-				var s = context.Scopes.Current.Address.FromCol;
 				if (criteriaRange.IsMulti)
-					criteriaString = IfHelper.CalculateCriteria(arguments, context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet, context.Scopes.Current.Address.FromRow, context.Scopes.Current.Address.FromCol).ToString().ToUpper();
+				{
+					var currentWorksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
+					var cellRowVal = context.Scopes.Current.Address.FromRow;
+					var cellColVal = context.Scopes.Current.Address.FromCol;
+					criteriaString = IfHelper.CalculateCriteria(arguments, currentWorksheet,cellRowVal, cellColVal).ToString().ToUpper();
+				}
 				else
 					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
 			}

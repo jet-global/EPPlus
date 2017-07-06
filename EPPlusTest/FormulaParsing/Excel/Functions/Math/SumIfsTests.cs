@@ -1093,8 +1093,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions
 				worksheet.Cells["B7"].Formula = "SUMIFS(B2, B3, \"<FALSE\")";
 				worksheet.Calculate();
 				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
-				//Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
-				//Assert.AreEqual(1d, worksheet.Cells["B6"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B5"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B6"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B7"].Value);
 			}
 		}

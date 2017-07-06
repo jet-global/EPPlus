@@ -220,17 +220,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <summary>
 		/// Takes a cell range and converts it into a single value criteria
 		/// </summary>
-		/// <param name="arguments">The cell range that will be condensed into a single value.</param>
+		/// <param name="arguments">The cell range that will be reduced to a single value criteria.</param>
 		/// <param name="worksheet">The current worksheet that is being used.</param>
 		/// <param name="rowLocation">The row location of the cell that is calling this function.</param>
 		/// <param name="colLocation">The column location of the cell that is calling this function.</param>
 		/// <returns>A single value criteria as an integer.</returns>
-		public static int CalculateCriteria(IEnumerable<FunctionArgument> arguments, ExcelWorksheet worksheet, int rowLocation, int colLocation)
+		public static object CalculateCriteria(IEnumerable<FunctionArgument> arguments, ExcelWorksheet worksheet, int rowLocation, int colLocation)
 		{
 			if (arguments.ElementAt(1).Value == null)
 				return 0;
 			if (arguments.ElementAt(1).Value is ExcelErrorValue)
-				return 0;
 			if (worksheet == null)
 				return 0;
 			if (rowLocation <= 0 || colLocation <= 0)
@@ -247,31 +246,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				if (currentAddressRow == startRow)
 				{
 					var cellColumn = criteriaCandidate.Start.Column;
-					var returnCandidate = worksheet.Cells[startRow, cellColumn].Value;
-					if (returnCandidate is double || returnCandidate is int)
-						return (int)returnCandidate;
-					else
-						return 0;
+					return worksheet.Cells[startRow, cellColumn].Value;
 				}
 				else if (currentAddressRow == endRow)
 				{
-
 					var cellColumn = criteriaCandidate.Start.Column;
-					var returnCandidate = worksheet.Cells[endRow, cellColumn].Value;
-					if (returnCandidate is double || returnCandidate is int)
-						return (int)returnCandidate;
-					else
-						return 0;
+					return worksheet.Cells[endRow, cellColumn].Value;
 				}
 				else if (currentAddressRow > startRow && currentAddressRow < endRow)
 				{
 
 					var cellColumn = criteriaCandidate.Start.Column;
-					var returnCandidate = worksheet.Cells[currentAddressRow, cellColumn].Value;
-					if (returnCandidate is double || returnCandidate is int)
-						return (int)returnCandidate;
-					else
-						return 0;
+					return worksheet.Cells[currentAddressRow, cellColumn].Value;
 				}
 				else
 					return 0;
@@ -285,29 +271,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				if (currentAddressCol == startCol)
 				{
 					var cellRow = criteriaCandidate.Start.Row;
-					var returnCandidate = worksheet.Cells[cellRow, currentAddressCol].Value;
-					if (returnCandidate is double || returnCandidate is int)
-						return (int)returnCandidate;
-					else
-						return 0;
+					return worksheet.Cells[cellRow, currentAddressCol].Value;
 				}
 				else if (currentAddressCol == endCol)
 				{
 					var cellRow = criteriaCandidate.Start.Row;
-					var returnCandidate = worksheet.Cells[cellRow, currentAddressCol].Value;
-					if (returnCandidate is double || returnCandidate is int)
-						return (int)returnCandidate;
-					else
-						return 0;
+					return worksheet.Cells[cellRow, currentAddressCol].Value;
 				}
 				else if (currentAddressCol > startCol && currentAddressCol < endCol)
 				{
 					var cellRow = criteriaCandidate.Start.Row;
-					var returnCandidate = worksheet.Cells[cellRow, currentAddressCol].Value;
-					if (returnCandidate is double || returnCandidate is int)
-						return (int)returnCandidate;
-					else
-						return 0;
+					return worksheet.Cells[cellRow, currentAddressCol].Value;
 				}
 				else
 					return 0;
