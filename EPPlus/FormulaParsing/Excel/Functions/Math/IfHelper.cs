@@ -211,7 +211,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <param name="worksheet">The current worksheet that is being used.</param>
 		/// <param name="rowLocation">The row location of the cell that is calling this function.</param>
 		/// <param name="colLocation">The column location of the cell that is calling this function.</param>
-		/// <returns></returns>
+		/// <returns>A single value criteria as an integer.</returns>
 		public static int CalculateCriteria(IEnumerable<FunctionArgument> arguments, ExcelWorksheet worksheet, int rowLocation, int colLocation)
 		{
 			var criteriaCandidate = arguments.ElementAt(1).ValueAsRangeInfo.Address;
