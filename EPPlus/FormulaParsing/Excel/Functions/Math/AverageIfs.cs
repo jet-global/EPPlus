@@ -42,6 +42,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns the average of all cells in the given range that pass the given criteria(s).</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
+			string currentCriteria = null;
 			if (this.ArgumentCountIsValid(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
 			var rangeToAverage = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
@@ -55,8 +56,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return new CompileResult(eErrorType.Value);
 
 				var currentCriteriaArgument = arguments.ElementAt(argumentIndex + 1);
-				if (!this.TryGetCriteria(currentCriteriaArgument, out string currentCriteria))
-					currentCriteria = IfHelper.CalculateCriteria(arguments, context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet, context.Scopes.Current.Address.FromRow, context.Scopes.Current.Address.FromCol).ToString().ToUpper();
+				if (!this.TryGetCriteria(currentCriteriaArgument, out currentCriteria))
+				{
+					var currentWorksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
+					var cellRowVal = context.Scopes.Current.Address.FromRow;
+					var cellColVal = context.Scopes.Current.Address.FromCol;
+					currentCriteria = IfHelper.CalculateCriteria(arguments, currentWorksheet, cellRowVal, cellColVal).ToString().ToUpper();
+				}
 
 				var passingIndices = this.GetIndicesOfCellsPassingCriteria(currentRangeToCompare, currentCriteria);
 				if (argumentIndex == 1)

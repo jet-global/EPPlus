@@ -115,6 +115,26 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(0, result);
 			}
 		}
+
+		[TestMethod]
+		public void CalculateCriteriaWithObjectReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				var provider = new EpplusExcelDataProvider(package);
+				this.ParsingContext.Scopes.NewScope(RangeAddress.Empty);
+				worksheet.Cells["E12"].Value = 1;
+				worksheet.Cells["E13"].Value = 2;
+				worksheet.Cells["E14"].Value = 3;
+				worksheet.Cells["F12"].Value = 1;
+				worksheet.Cells["F13"].Value = ">2";
+				worksheet.Cells["F14"].Value = 3;
+				worksheet.Cells["H13"].Formula = "SUMIF(E12:E14, F12:F14)";
+				worksheet.Calculate();
+				Assert.AreEqual(3d, worksheet.Cells["H13"].Value);
+			}
+		}
 		#endregion
 	}
 }
