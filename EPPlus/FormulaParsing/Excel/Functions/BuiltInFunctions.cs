@@ -92,6 +92,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			Functions["stdevp"] = new StdevP();
 			Functions["stdev.s"] = new StdevS();
 			Functions["stdev.p"] = new StdevP();
+			Functions["Stdevpa"] = new Stdevpa();
 			Functions["subtotal"] = new Subtotal();
 			Functions["exp"] = new Exp();
 			Functions["log"] = new Log();
