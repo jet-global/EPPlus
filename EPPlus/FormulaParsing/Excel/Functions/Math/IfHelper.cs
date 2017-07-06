@@ -202,24 +202,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				numericCandidate is System.DateTime || 
 				numericCandidate is TimeSpan);
 		}
-	
-		/// <summary>
-		/// Takes a cell range and coverts it into a single value criteria. 
-		/// </summary>
-		/// <param name="arguments">The cell range that will be condensed into a single value.</param>
-		/// <param name="context">The context the function is being called in.</param>
-		/// <returns>A single value criteria as an integer.</returns>
-		public static int CalculateCriteria(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+
+
+
+		public static int CalculateCriteria(IEnumerable<FunctionArgument> arguments, ExcelWorksheet worksheet, int rowLocation, int colLocation)
 		{
 			var criteriaCandidate = arguments.ElementAt(1).ValueAsRangeInfo.Address;
-			var functionLocation = context.Scopes.Current.Address;
-
-			
-			var worksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
 
 			if (criteriaCandidate.Rows > criteriaCandidate.Columns)
 			{
-				var currentAddressRow = functionLocation.ToRow;
+				var currentAddressRow = rowLocation;
 				var startRow = criteriaCandidate.Start.Row;
 				var endRow = criteriaCandidate.End.Row;
 
@@ -257,7 +249,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			else if (criteriaCandidate.Rows < criteriaCandidate.Columns)
 			{
-				var currentAddressCol = functionLocation.ToCol;
+				var currentAddressCol = colLocation;
 				var startCol = criteriaCandidate.Start.Column;
 				var endCol = criteriaCandidate.End.Column;
 

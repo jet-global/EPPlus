@@ -39,47 +39,80 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class IfHelperTests : MathFunctionsTestBase 
 	{
-		private ExcelPackage _package;
-		private EpplusExcelDataProvider _provider;
-		private ParsingContext _parsingContext;
-		private ExcelWorksheet _worksheet;
-
-		[TestInitialize]
-		public void Initialize()
-		{
-			_package = new ExcelPackage();
-			_provider = new EpplusExcelDataProvider(_package);
-			_parsingContext = ParsingContext.Create();
-			_parsingContext.Scopes.NewScope(RangeAddress.Empty);
-			_worksheet = _package.Workbook.Worksheets.Add("TestSheet");
-		}
-
-		[TestCleanup]
-		public void Cleanup()
-		{
-			_package.Dispose();
-		}
-
 		[TestMethod]
-		public void CalculateCriteriaWithCellReferenceReturnsCorrectValue()
+		public void CalculateCriteriaWithSameRowCellReferenceReturnsCorrectValue()
 		{
 			using (var package = new ExcelPackage())
 			{
-				var provider = new EpplusExcelDataProvider(package);
 				var worksheet = package.Workbook.Worksheets.Add("Sheet2");
+				var provider = new EpplusExcelDataProvider(package);
 				this.ParsingContext.Scopes.NewScope(RangeAddress.Empty);
-
 				worksheet.Cells["B1"].Value = 5;
 				worksheet.Cells["B2"].Value = 10;
 				worksheet.Cells["B3"].Value = 15;
-
-				IRangeInfo testRange = provider.GetRange(worksheet.Name, 1, 1, 3, 1);
-				IRangeInfo secondRnage = provider.GetRange(worksheet.Name, 2, 2, 2, 2);
-
-				var res = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(secondRnage, testRange), this.ParsingContext);
-				Assert.AreEqual(3, res);
+				IRangeInfo testRange = provider.GetRange(worksheet.Name, 1, 2, 3, 2);
+				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 2, 2, 2, 2);
+				var address = firstRange.Address;
+				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				Assert.AreEqual(10, result);
 			}
+		}
 
+		[TestMethod]
+		public void CalculateCriteriaWithSameColumnCellReferenceReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				var provider = new EpplusExcelDataProvider(package);
+				this.ParsingContext.Scopes.NewScope(RangeAddress.Empty);
+				worksheet.Cells["E7"].Value = 5;
+				worksheet.Cells["F7"].Value = 10;
+				worksheet.Cells["G7"].Value = 15;
+				IRangeInfo testRange = provider.GetRange(worksheet.Name, 7, 5, 7, 7);
+				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 6, 6, 6, 6);
+				var address = firstRange.Address;
+				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				Assert.AreEqual(10, result);
+			}
+		}
+
+		[TestMethod]
+		public void CalculateCriteriaWithNonMatchingRowReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet2");
+				var provider = new EpplusExcelDataProvider(package);
+				this.ParsingContext.Scopes.NewScope(RangeAddress.Empty);
+				worksheet.Cells["B1"].Value = 5;
+				worksheet.Cells["B2"].Value = 10;
+				worksheet.Cells["B3"].Value = 15;
+				IRangeInfo testRange = provider.GetRange(worksheet.Name, 1, 2, 3, 2);
+				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 5, 5, 5, 5);
+				var address = firstRange.Address;
+				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				Assert.AreEqual(0, result);
+			}
+		}
+
+		[TestMethod]
+		public void CalculateCriteriaWithNonMatchingColReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				var provider = new EpplusExcelDataProvider(package);
+				this.ParsingContext.Scopes.NewScope(RangeAddress.Empty);
+				worksheet.Cells["E7"].Value = 5;
+				worksheet.Cells["F7"].Value = 10;
+				worksheet.Cells["G7"].Value = 15;
+				IRangeInfo testRange = provider.GetRange(worksheet.Name, 7, 5, 7, 7);
+				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 8, 8, 8, 8);
+				var address = firstRange.Address;
+				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				Assert.AreEqual(0, result);
+			}
 		}
 	}
 }

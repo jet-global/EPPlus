@@ -61,7 +61,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					currentCriteria = "0";
 				else 
 					if (!this.TryGetCriteria(currentCriteriaArgument, out currentCriteria))
-					currentCriteria = IfHelper.CalculateCriteria(arguments, context).ToString().ToUpper();
+					currentCriteria = IfHelper.CalculateCriteria(arguments, context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet, context.Scopes.Current.Address.FromRow, context.Scopes.Current.Address.FromCol).ToString().ToUpper();
 
 				var passingIndices = this.GetIndicesOfCellsPassingCriteria(currentRangeToCompare, currentCriteria);
 				if (argumentIndex == 1)
