@@ -39,6 +39,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	[TestClass]
 	public class IfHelperTests : MathFunctionsTestBase 
 	{
+		#region IfHelper Function (Execute) Tests
 		[TestMethod]
 		public void CalculateCriteriaWithSameRowCellReferenceReturnsCorrectValue()
 		{
@@ -114,5 +115,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(0, result);
 			}
 		}
+		#endregion
 	}
 }

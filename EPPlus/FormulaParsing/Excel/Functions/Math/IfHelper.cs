@@ -207,13 +207,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <summary>
 		/// Takes a cell range and converts it into a single value criteria
 		/// </summary>
-		/// <param name="arguments">The cell range that will be condensed inot a single value.</param>
+		/// <param name="arguments">The cell range that will be condensed into a single value.</param>
 		/// <param name="worksheet">The current worksheet that is being used.</param>
 		/// <param name="rowLocation">The row location of the cell that is calling this function.</param>
 		/// <param name="colLocation">The column location of the cell that is calling this function.</param>
 		/// <returns>A single value criteria as an integer.</returns>
 		public static int CalculateCriteria(IEnumerable<FunctionArgument> arguments, ExcelWorksheet worksheet, int rowLocation, int colLocation)
 		{
+			if (arguments.ElementAt(1).Value == null)
+				return 0;
+			if (arguments.ElementAt(1).Value is ExcelErrorValue)
+				return 0;
+
 			var criteriaCandidate = arguments.ElementAt(1).ValueAsRangeInfo.Address;
 
 			if (criteriaCandidate.Rows > criteriaCandidate.Columns)
