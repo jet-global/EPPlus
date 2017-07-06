@@ -201,26 +201,111 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				numericCandidate is TimeSpan);
 		}
 
-		//public static bool TryExtractCriteriaString(FunctionArgument criteriaCandidate, ParsingContext context, out string criteriaString)
-		//{
-		//	criteriaString = null;
-		//	if (criteriaCandidate.Value is ExcelDataProvider.IRangeInfo criteriaRange)
-		//	{
-		//		if (criteriaRange.IsMulti)
-		//		{
-		//			criteriaString = IfHelper.CalculateCriteria(arguments, context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet, context.Scopes.Current.Address.FromRow, context.Scopes.Current.Address.FromCol).ToString().ToUpper();
-		//		}
-		//		else
-		//			criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
-		//	}
-		//	else
-		//		criteriaString = this.GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString().ToUpper();
-		//}
+		public static bool TryExtractCriteriaString(FunctionArgument criteriaCandidate, ParsingContext context, out string criteriaString)
+		{
+			criteriaString = null;
+			//object criteriaObject = criteriaCandidate.ValueFirst;
+			object criteriaObject = null;
+			if (criteriaCandidate.Value is ExcelDataProvider.IRangeInfo criteriaRange)
+			{
+				if (criteriaRange.IsMulti)
+				{
+					var worksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
+					var functionRow = context.Scopes.Current.Address.FromRow;
+					var functionColumn = context.Scopes.Current.Address.FromCol;
+					criteriaObject = CalculateCriteria(criteriaCandidate, worksheet, functionRow, functionColumn);
+				}
+				else
+				{
+					criteriaObject = criteriaCandidate.ValueFirst;
+					if (criteriaObject is List<object> objectList)
+						criteriaObject = objectList.First();
+				}
+			}
+			else if (criteriaCandidate.Value is List<FunctionArgument> argumentList)
+			{
+				criteriaObject = argumentList.First().ValueFirst;
+			}
+			else
+				criteriaObject = criteriaCandidate.ValueFirst;
+
+			if (criteriaObject == null)
+				return false;
+			else
+				criteriaString = criteriaObject.ToString().ToUpper();
+
+			return true;
+		}
+
+		public static object CalculateCriteria(FunctionArgument criteriaArgument, ExcelWorksheet worksheet, int rowLocation, int colLocation)
+		{
+			if (criteriaArgument.Value == null)
+				return 0;
+			if (criteriaArgument.Value is ExcelErrorValue)
+				if (worksheet == null)
+					return 0;
+			if (rowLocation <= 0 || colLocation <= 0)
+				return 0;
+
+			var criteriaCandidate = criteriaArgument.ValueAsRangeInfo.Address;
+
+			if (criteriaCandidate.Rows > criteriaCandidate.Columns)
+			{
+				var currentAddressRow = rowLocation;
+				var startRow = criteriaCandidate.Start.Row;
+				var endRow = criteriaCandidate.End.Row;
+
+				if (currentAddressRow == startRow)
+				{
+					var cellColumn = criteriaCandidate.Start.Column;
+					return worksheet.Cells[startRow, cellColumn].Value;
+				}
+				else if (currentAddressRow == endRow)
+				{
+					var cellColumn = criteriaCandidate.Start.Column;
+					return worksheet.Cells[endRow, cellColumn].Value;
+				}
+				else if (currentAddressRow > startRow && currentAddressRow < endRow)
+				{
+
+					var cellColumn = criteriaCandidate.Start.Column;
+					return worksheet.Cells[currentAddressRow, cellColumn].Value;
+				}
+				else
+					return 0;
+			}
+			else if (criteriaCandidate.Rows < criteriaCandidate.Columns)
+			{
+				var currentAddressCol = colLocation;
+				var startCol = criteriaCandidate.Start.Column;
+				var endCol = criteriaCandidate.End.Column;
+
+				if (currentAddressCol == startCol)
+				{
+					var cellRow = criteriaCandidate.Start.Row;
+					return worksheet.Cells[cellRow, currentAddressCol].Value;
+				}
+				else if (currentAddressCol == endCol)
+				{
+					var cellRow = criteriaCandidate.Start.Row;
+					return worksheet.Cells[cellRow, currentAddressCol].Value;
+				}
+				else if (currentAddressCol > startCol && currentAddressCol < endCol)
+				{
+					var cellRow = criteriaCandidate.Start.Row;
+					return worksheet.Cells[cellRow, currentAddressCol].Value;
+				}
+				else
+					return 0;
+			}
+			else
+				return 0;
+		}
 
 		/// <summary>
 		/// Takes a cell range and converts it into a single value criteria
 		/// </summary>
-		/// <param name="arguments">The cell range that will be reduced to a single value criteria.</param>
+		/// <param name="criteriaArgument">The cell range that will be reduced to a single value criteria.</param>
 		/// <param name="worksheet">The current worksheet that is being used.</param>
 		/// <param name="rowLocation">The row location of the cell that is calling this function.</param>
 		/// <param name="colLocation">The column location of the cell that is calling this function.</param>
