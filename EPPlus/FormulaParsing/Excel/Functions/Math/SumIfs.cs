@@ -59,9 +59,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				var currentCriteriaArgument = arguments.ElementAt(argumentIndex + 1);
 				if (currentCriteriaArgument.ValueFirst == null)
 					currentCriteria = "0";
-				else 
+				else
+				{
 					if (!this.TryGetCriteria(currentCriteriaArgument, out currentCriteria))
-					currentCriteria = IfHelper.CalculateCriteria(arguments, context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet, context.Scopes.Current.Address.FromRow, context.Scopes.Current.Address.FromCol).ToString().ToUpper();
+					{
+						var currentWorksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
+						var cellRowVal = context.Scopes.Current.Address.FromRow;
+						var cellColVal = context.Scopes.Current.Address.FromCol;
+						currentCriteria = IfHelper.CalculateCriteria(arguments, currentWorksheet, cellRowVal, cellColVal).ToString().ToUpper();
+					}
+				}
 
 				var passingIndices = this.GetIndicesOfCellsPassingCriteria(currentRangeToCompare, currentCriteria);
 				if (argumentIndex == 1)
