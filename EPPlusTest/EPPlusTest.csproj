@@ -182,6 +182,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\SmallTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RandBetweenTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RandTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\StdevaTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\StdevpaTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\StdevPTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\StdevSTests.cs" />
