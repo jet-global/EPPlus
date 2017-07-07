@@ -53,21 +53,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (cellRangeToCheck == null)
 				return new CompileResult(eErrorType.Value);
-			string criteriaString = null;
-			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
-			{
-				if (criteriaRange.IsMulti)
-				{
-					var currentWorksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
-					var cellRowVal = context.Scopes.Current.Address.FromRow;
-					var cellColVal = context.Scopes.Current.Address.FromCol;
-					criteriaString = IfHelper.CalculateCriteria(arguments, currentWorksheet, cellRowVal, cellColVal).ToString().ToUpper();
-				}
-				else
-					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
-			}
-			else
-				criteriaString = this.GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString().ToUpper();
+			var criteriaString = IfHelper.ExtractCriteriaString(arguments.ElementAt(1), context);
 			if (arguments.Count() > 2)
 			{
 				var cellRangeToAverage = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
@@ -131,14 +117,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var numberOfValidValues = 0;
 			foreach (var cell in potentialCellsToAverage)
 			{
-				if (comparisonCriteria != null && IfHelper.IsNumeric(this.GetFirstArgument(cell.Value), true) &&
-						IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(cell.Value), comparisonCriteria))
+				var cellValue = this.GetFirstArgument(cell.Value);
+				if (comparisonCriteria != null && IfHelper.ObjectMatchesCriteria(cellValue, comparisonCriteria))
 				{
-					sumOfValidValues += cell.ValueDouble;
-					numberOfValidValues++;
+					if (cellValue is ExcelErrorValue cellErrorValue)
+						return new CompileResult(cellErrorValue.Type);
+					else if (IfHelper.IsNumeric(cellValue, true))
+					{
+						sumOfValidValues += cell.ValueDouble;
+						numberOfValidValues++;
+					}
 				}
-				else if (cell.Value is ExcelErrorValue candidateError)
-					return new CompileResult(candidateError.Type);
+				//else if (cell.Value is ExcelErrorValue candidateError)
+				//	return new CompileResult(candidateError.Type);
 			}
 			if (numberOfValidValues == 0)
 				return new CompileResult(eErrorType.Div0);

@@ -1285,7 +1285,28 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions
 				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)worksheet.Cells["B8"].Value).Type);
 			}
 		}
-		#endregion
 
+		[TestMethod]
+		public void SumIfsWithNullCriteriaReturns0()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "SUMIFS(C2:C3,D2:D3,1)";
+				worksheet.Cells["B3"].Formula = "SUMIFS(C2:C3,D2:D3,1,E2:E3,)";
+				worksheet.Cells["B4"].Formula = "SUMIFS(C2:C3,D2:D3,1,E2:E3,E3)";
+				worksheet.Cells["C2"].Value = 1.5;
+				worksheet.Cells["C3"].Value = 2.5;
+				worksheet.Cells["D2"].Value = 1;
+				worksheet.Cells["D3"].Value = 1;
+				worksheet.Cells["E2"].Value = null;
+				worksheet.Cells["E3"].Value = null;
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+			}
+		}
+		#endregion
 	}
 }

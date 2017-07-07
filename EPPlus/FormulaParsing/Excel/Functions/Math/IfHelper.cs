@@ -36,6 +36,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// <summary>
 	/// This class provides a criteria comparison function to use in any Excel functions
 	/// that require comparing cell values against a specific criteria.
+	/// This class is currently used in AverageIf.cs, AverageIfs.cs, SumIf.cs, SumIfs.cs, and CountIf.cs.
 	/// </summary>
 	public static class IfHelper
 	{
@@ -141,7 +142,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns true if the <paramref name="objectToCompare"/> passes the comparison with <paramref name="criteria"/>.</returns>
 		private static bool CompareAsInequalityExpression(object objectToCompare, string criteria, OperatorType comparisonOperator)
 		{
-			if (objectToCompare == null)
+			if (objectToCompare == null || objectToCompare is ExcelErrorValue)
 				return false;
 			var comparisonResult = int.MinValue;
 			if (ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaNumber)) // Handle the criteria as a number/date.
@@ -201,10 +202,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				numericCandidate is TimeSpan);
 		}
 
-		public static bool TryExtractCriteriaString(FunctionArgument criteriaCandidate, ParsingContext context, out string criteriaString)
+		/// <summary>
+		/// Ensures that the given <paramref name="criteriaCandidate"/> is of a form that can be
+		/// represented as a criteria.
+		/// </summary>
+		/// <param name="criteriaCandidate">The <see cref="FunctionArgument"/> containing the criteria.</param>
+		/// <param name="context">The context from the function calling this function.</param>
+		/// <returns>Returns the criteria in <paramref name="criteriaCandidate"/> as a string.</returns>
+		public static string ExtractCriteriaString(FunctionArgument criteriaCandidate, ParsingContext context)
 		{
-			criteriaString = null;
-			//object criteriaObject = criteriaCandidate.ValueFirst;
 			object criteriaObject = null;
 			if (criteriaCandidate.Value is ExcelDataProvider.IRangeInfo criteriaRange)
 			{
@@ -223,18 +229,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 			}
 			else if (criteriaCandidate.Value is List<FunctionArgument> argumentList)
-			{
 				criteriaObject = argumentList.First().ValueFirst;
-			}
 			else
 				criteriaObject = criteriaCandidate.ValueFirst;
 
+			// Note that Excel considers null criteria equivalent to a criteria of 0.
 			if (criteriaObject == null)
-				return false;
+				return "0";
 			else
-				criteriaString = criteriaObject.ToString().ToUpper();
-
-			return true;
+				return criteriaObject.ToString().ToUpper();
 		}
 
 		public static object CalculateCriteria(FunctionArgument criteriaArgument, ExcelWorksheet worksheet, int rowLocation, int colLocation)
@@ -305,7 +308,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <summary>
 		/// Takes a cell range and converts it into a single value criteria
 		/// </summary>
-		/// <param name="criteriaArgument">The cell range that will be reduced to a single value criteria.</param>
+		/// <param name="arguments">The cell range that will be reduced to a single value criteria.</param>
 		/// <param name="worksheet">The current worksheet that is being used.</param>
 		/// <param name="rowLocation">The row location of the cell that is calling this function.</param>
 		/// <param name="colLocation">The column location of the cell that is calling this function.</param>

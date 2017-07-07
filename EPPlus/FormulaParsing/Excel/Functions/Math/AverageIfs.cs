@@ -42,7 +42,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns the average of all cells in the given range that pass the given criteria(s).</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			string currentCriteria = null;
 			if (this.ArgumentCountIsValid(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
 			var rangeToAverage = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
@@ -54,15 +53,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				var currentRangeToCompare = arguments.ElementAt(argumentIndex).ValueAsRangeInfo;
 				if (currentRangeToCompare == null || !this.RangesAreTheSameShape(rangeToAverage, currentRangeToCompare))
 					return new CompileResult(eErrorType.Value);
-
-				var currentCriteriaArgument = arguments.ElementAt(argumentIndex + 1);
-				if (!this.TryGetCriteria(currentCriteriaArgument, out currentCriteria))
-				{
-					var currentWorksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
-					var cellRowVal = context.Scopes.Current.Address.FromRow;
-					var cellColVal = context.Scopes.Current.Address.FromCol;
-					currentCriteria = IfHelper.CalculateCriteria(arguments, currentWorksheet, cellRowVal, cellColVal).ToString().ToUpper();
-				}
+				var currentCriteria = IfHelper.ExtractCriteriaString(arguments.ElementAt(argumentIndex + 1), context);
 
 				var passingIndices = this.GetIndicesOfCellsPassingCriteria(currentRangeToCompare, currentCriteria);
 				if (argumentIndex == 1)
@@ -105,28 +96,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					passingIndices.Add(currentCellIndex);
 			}
 			return passingIndices;
-		}
-
-		/// <summary>
-		/// Ensures that the given <paramref name="criteriaCandidate"/> is of a form
-		/// that can be represented as a valid criteria.
-		/// </summary>
-		/// <param name="criteriaCandidate">The <see cref="FunctionArgument"/> containing the criteria.</param>
-		/// <param name="criteria">The returned string containing a usable representation of the criteria from <paramref name="criteriaCandidate"/>.</param>
-		/// <returns>Returns true if <paramref name="criteriaCandidate"/> contains a valid form of the criteria, and false otherwise.</returns>
-		private bool TryGetCriteria(FunctionArgument criteriaCandidate, out string criteria)
-		{
-			criteria = null;
-			if (criteriaCandidate.Value is ExcelDataProvider.IRangeInfo criteriaAsRange)
-			{
-				if (criteriaAsRange.IsMulti)
-					return false;
-				else
-					criteria = this.GetFirstArgument(criteriaCandidate.ValueFirst).ToString().ToUpper();
-			}
-			else
-				criteria = this.GetFirstArgument(criteriaCandidate).ValueFirst.ToString().ToUpper();
-			return true;
 		}
 
 		/// <summary>

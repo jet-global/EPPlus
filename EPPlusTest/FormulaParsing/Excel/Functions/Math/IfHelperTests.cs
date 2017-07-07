@@ -24,15 +24,15 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System.Globalization;
+using System.Threading;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Numeric;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using static OfficeOpenXml.FormulaParsing.ExcelDataProvider;
 using OfficeOpenXml.FormulaParsing;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
+using static OfficeOpenXml.FormulaParsing.ExcelDataProvider;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
@@ -40,6 +40,103 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	public class IfHelperTests : MathFunctionsTestBase 
 	{
 		#region IfHelper Function (Execute) Tests
+		[TestMethod]
+		public void ObjectMatchesCriteriaHandlesErrorValuesAsCriteria()
+		{
+			Assert.Fail("This test will fail until the IfHelper class has been fixed to properly parse error values in criteria for all cultures.");
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				var us = CultureInfo.CreateSpecificCulture("en-US");
+				Thread.CurrentThread.CurrentCulture = us;
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+					worksheet.Cells["C2"].Formula = "DAY(\"word\")"; // Evaluates to #VALUE!.
+					worksheet.Cells["C3"].Value = "#VALUE!";
+					worksheet.Cells["C4"].Value = "#VALUE";
+					worksheet.Cells["B2"].Formula = "COUNTIF(C2,\"=#VALUE!\")";
+					worksheet.Cells["B3"].Formula = "COUNTIF(C3,\"=#VALUE!\")";
+					worksheet.Cells["B4"].Formula = "COUNTIF(C2,\"#VALUE!\")";
+					worksheet.Cells["B5"].Formula = "COUNTIF(C3,\"#VALUE!\")";
+					worksheet.Cells["B6"].Formula = "COUNTIF(C2,\"=#VALUE\")";
+					worksheet.Cells["B7"].Formula = "COUNTIF(C3,\"=#VALUE\")";
+					worksheet.Cells["B8"].Formula = "COUNTIF(C4,\"=#VALUE\")";
+					worksheet.Calculate();
+					Assert.AreEqual(1, worksheet.Cells["B2"].Value);
+					Assert.AreEqual(0, worksheet.Cells["B3"].Value);
+					Assert.AreEqual(1, worksheet.Cells["B4"].Value);
+					Assert.AreEqual(0, worksheet.Cells["B5"].Value);
+					Assert.AreEqual(0, worksheet.Cells["B6"].Value);
+					Assert.AreEqual(0, worksheet.Cells["B7"].Value);
+					Assert.AreEqual(1, worksheet.Cells["B8"].Value);
+				}
+				var de = CultureInfo.CreateSpecificCulture("de-DE");
+				Thread.CurrentThread.CurrentCulture = de;
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+					worksheet.Cells["C2"].Formula = "DAY(\"word\")"; // Evaluates to #VALUE!.
+					worksheet.Cells["C3"].Value = "#WERT!"; // Note that #WERT! is the German translation for #VALUE!.
+					worksheet.Cells["C4"].Value = "#WERT";
+					worksheet.Cells["B2"].Formula = "COUNTIF(C2,\"=#WERT!\")";
+					worksheet.Cells["B3"].Formula = "COUNTIF(C3,\"=#WERT!\")";
+					worksheet.Cells["B4"].Formula = "COUNTIF(C2,\"#WERT!\")";
+					worksheet.Cells["B5"].Formula = "COUNTIF(C3,\"#WERT!\")";
+					worksheet.Cells["B6"].Formula = "COUNTIF(C2,\"=#WERT\")";
+					worksheet.Cells["B7"].Formula = "COUNTIF(C3,\"=#WERT\")";
+					worksheet.Cells["B8"].Formula = "COUNTIF(C4,\"=#WERT\")";
+					worksheet.Calculate();
+					Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B6"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B7"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B8"].Value);
+				}
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
+		[TestMethod]
+		public void ObjectMatchesCriteriaHandlesBooleanValuesAsCriteria()
+		{
+			Assert.Fail("This test will fail until the IfHelper class has been fixed to properly parse booleans in criteria for all cultures.");
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				var us = CultureInfo.CreateSpecificCulture("en-US");
+				Thread.CurrentThread.CurrentCulture = us;
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+					worksheet.Cells["C2"].Value = true;
+					worksheet.Cells["C3"].Value = "TRUE";
+					worksheet.Cells["B2"].Formula = "COUNTIF(C2, TRUE)";
+					worksheet.Cells["B3"].Formula = "COUNTIF(C3, TRUE)";
+					worksheet.Cells["B4"].Formula = "COUNTIF(C2,\"TRUE\")";
+					worksheet.Cells["B5"].Formula = "COUNTIF(C3,\"TRUE\")";
+					worksheet.Cells["B6"].Formula = "COUNTIF(C2,\"=TRUE\")";
+					worksheet.Cells["B7"].Formula = "COUNTIF(C3,\"=TRUE\")";
+					worksheet.Calculate();
+					Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B6"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B7"].Value);
+				}
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
 		[TestMethod]
 		public void CalculateCriteriaWithSameRowCellReferenceReturnsCorrectValue()
 		{

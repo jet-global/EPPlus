@@ -437,7 +437,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(0d, _worksheet.Cells[5, 4].Value);
 		}
 
-		#region Additional tests for the SUMIF Function
 		[TestMethod]
 		public void SumIfWithRangeWithOnlyNumbersReturnsCorrectValue()
 		{
@@ -1364,7 +1363,28 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(0d, worksheet.Cells["C12"].Value);
 			}
 		}
-		#endregion
+
+		[TestMethod]
+		public void SumIfWithNullCriteriaReturns0()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "SUMIF(C2:C3,1,D2:D3)";
+				worksheet.Cells["B3"].Formula = "SUMIF(C4:C5,,D2:D3)";
+				worksheet.Cells["B4"].Formula = "SUMIF(C4:C5,C5,D2:D3)";
+				worksheet.Cells["C2"].Value = 1;
+				worksheet.Cells["C3"].Value = 1;
+				worksheet.Cells["C4"].Value = 0;
+				worksheet.Cells["C5"].Value = null;
+				worksheet.Cells["D2"].Value = 1.5;
+				worksheet.Cells["D3"].Value = 2.5;
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(1.5, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(1.5, worksheet.Cells["B4"].Value);
+			}
+		}
 		#endregion
 	}
 }

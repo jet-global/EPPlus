@@ -378,20 +378,25 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			}
 		}
 
-		//[TestMethod]
-		//public void CountIfWith()
-		//{
-		//	using (var package = new ExcelPackage())
-		//	{
-		//		var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-		//		worksheet.Cells["B"].Formula = "COUNTIF()";
-		//		worksheet.Cells["C"].Value = ;
-
-		//		worksheet.Calculate();
-		//		Assert.AreEqual(, worksheet.Cells["B"].Value);
-		//	}
-		//}
-		#endregion
+		[TestMethod]
+		public void CountIfWithNullCriteriaReturns0()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "COUNTIF(C2:C5,1)";
+				worksheet.Cells["B3"].Formula = "COUNTIF(C2:C5,)";
+				worksheet.Cells["B4"].Formula = "COUNTIF(C2:C5,C5)";
+				worksheet.Cells["C2"].Value = 1;
+				worksheet.Cells["C3"].Value = 1;
+				worksheet.Cells["C4"].Value = 0;
+				worksheet.Cells["C5"].Value = null;
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+			}
+		}
 
 		[TestMethod]
 		public void CountIfNumeric()
@@ -608,5 +613,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells[3, 3].Calculate();
 			Assert.AreEqual(3d, _worksheet.Cells[3, 3].Value);
 		}
+		#endregion
 	}
 }
