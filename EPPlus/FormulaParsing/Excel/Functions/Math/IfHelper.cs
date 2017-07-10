@@ -177,8 +177,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				case OperatorType.GreaterThanOrEqual:
 					return (comparisonResult == 1 || comparisonResult == 0);
 				default:
-					return false;
-					//throw new Exception;
+					throw new InvalidOperationException(
+						"The default condition is invalid because this function should only be called if the given operator is <,<=,>, or >=.");
 			}
 		}
 
