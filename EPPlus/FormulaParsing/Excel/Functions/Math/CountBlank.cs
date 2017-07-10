@@ -11,17 +11,30 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
-			var arg = arguments.First();
-			if (!arg.IsExcelRange) throw new InvalidOperationException("CountBlank only support ranges as arguments");
-			var result = arg.ValueAsRangeInfo.GetNCells();
-			foreach (var cell in arg.ValueAsRangeInfo)
+
+			var rangeToCount = arguments.ElementAt(0).ValueAsRangeInfo;
+			if (rangeToCount == null)
+				return new CompileResult(eErrorType.Value);
+
+			var count = 0d;
+			foreach (var cell in rangeToCount)
 			{
-				if (!(cell.Value == null || cell.Value.ToString() == string.Empty))
-				{
-					result--;
-				}
+				var cellValue = GetFirstArgument(cell.Value);
+				if (cellValue == null || cellValue.Equals(string.Empty))
+					count++;
 			}
-			return CreateResult(result, DataType.Integer);
+			return this.CreateResult(count, DataType.Integer);
+			//var arg = arguments.First();
+			//if (!arg.IsExcelRange) throw new InvalidOperationException("CountBlank only support ranges as arguments");
+			//var result = arg.ValueAsRangeInfo.GetNCells();
+			//foreach (var cell in arg.ValueAsRangeInfo)
+			//{
+			//	if (!(cell.Value == null || cell.Value.ToString() == string.Empty))
+			//	{
+			//		result--;
+			//	}
+			//}
+			//return CreateResult(result, DataType.Integer);
 		}
 	}
 }

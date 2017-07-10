@@ -178,6 +178,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return (comparisonResult == 1 || comparisonResult == 0);
 				default:
 					return false;
+					//throw new Exception;
 			}
 		}
 

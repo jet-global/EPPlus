@@ -134,7 +134,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\YearFracTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\YearTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\FunctionRepositoryTests.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\CountIfsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\CountIfsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AcoshTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AcosTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AcothTests.cs" />
@@ -201,6 +201,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountATests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\CountBlankTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfsTests.cs" />
