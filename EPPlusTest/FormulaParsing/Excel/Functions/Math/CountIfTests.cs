@@ -395,7 +395,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void CountIfNumeric()
+		public void CountIfWithNumbers()
 		{
 			_worksheet.Cells["A1"].Value = 1d;
 			_worksheet.Cells["A2"].Value = 2d;
@@ -408,7 +408,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void CountIfNonNumeric()
+		public void CountIfWithNonNumericStrings()
 		{
 			_worksheet.Cells["A1"].Value = "Monday";
 			_worksheet.Cells["A2"].Value = "Tuesday";
@@ -420,22 +420,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(2d, result.Result);
 		}
 
-		public void CountIfNullExpression()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = 1d;
-			_worksheet.Cells["A3"].Value = null;
-			_worksheet.Cells["B2"].Value = null;
-			var func = new CountIf();
-			IRangeInfo range1 = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			IRangeInfo range2 = _provider.GetRange(_worksheet.Name, 2, 2, 2, 2);
-			var args = FunctionsHelper.CreateArgs(range1, range2);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(0d, result.Result);
-		}
-
 		[TestMethod]
-		public void CountIfNumericExpression()
+		public void CountIfWithNumberAsCriteria()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = 1d;
@@ -448,7 +434,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void CountIfNotEqualToNull()
+		public void CountIfWithCriteriaAsNotEqualToNull()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -461,20 +447,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void CountIfEqualToZero()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = 0d;
-			var func = new CountIf();
-			IRangeInfo range = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			var args = FunctionsHelper.CreateArgs(range, "0");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void CountIfNotEqualToZero()
+		public void CountIfWithCriteriaAsNotEqualToZero()
 		{
 			_worksheet.Cells["A1"].Value = null;
 			_worksheet.Cells["A2"].Value = string.Empty;
@@ -484,110 +457,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var args = FunctionsHelper.CreateArgs(range, "<>0");
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(2d, result.Result);
-		}
-
-		[TestMethod]
-		public void CountIfGreaterThanZero()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = 1d;
-			var func = new CountIf();
-			IRangeInfo range = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			var args = FunctionsHelper.CreateArgs(range, ">0");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void CountIfGreaterThanOrEqualToZero()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = 1d;
-			var func = new CountIf();
-			IRangeInfo range = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			var args = FunctionsHelper.CreateArgs(range, ">=0");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void CountIfLessThanZero()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = -1d;
-			var func = new CountIf();
-			IRangeInfo range = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			var args = FunctionsHelper.CreateArgs(range, "<0");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void CountIfLessThanOrEqualToZero()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = -1d;
-			var func = new CountIf();
-			IRangeInfo range = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			var args = FunctionsHelper.CreateArgs(range, "<=0");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void CountIfLessThanCharacter()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = "Not Empty";
-			var func = new CountIf();
-			IRangeInfo range = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			var args = FunctionsHelper.CreateArgs(range, "<a");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void CountIfLessThanOrEqualToCharacter()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = "Not Empty";
-			var func = new CountIf();
-			IRangeInfo range = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			var args = FunctionsHelper.CreateArgs(range, "<=a");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void CountIfGreaterThanCharacter()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = "Not Empty";
-			var func = new CountIf();
-			IRangeInfo range = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			var args = FunctionsHelper.CreateArgs(range, ">a");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
-		}
-
-		[TestMethod]
-		public void CountIfGreaterThanOrEqualToCharacter()
-		{
-			_worksheet.Cells["A1"].Value = null;
-			_worksheet.Cells["A2"].Value = string.Empty;
-			_worksheet.Cells["A3"].Value = "Not Empty";
-			var func = new CountIf();
-			IRangeInfo range = _provider.GetRange(_worksheet.Name, 1, 1, 3, 1);
-			var args = FunctionsHelper.CreateArgs(range, ">=a");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1d, result.Result);
 		}
 
 		[TestMethod]
