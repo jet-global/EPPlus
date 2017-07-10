@@ -128,6 +128,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			Functions["acosh"] = new Acosh();
 			Functions["var"] = new Var();
 			Functions["varp"] = new VarP();
+			Functions["var.p"] = new VarP();
+			Functions["var.s"] = new VarS();
+			Functions["vara"] = new Vara();
+			Functions["varpa"] = new Varpa();
 			Functions["large"] = new Large();
 			Functions["small"] = new Small();
 			Functions["degrees"] = new Degrees();

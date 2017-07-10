@@ -25,29 +25,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using OfficeOpenXml.Utils;
-using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// Estimates standard deviation based on a sample (includes logical values and text in the sample).
+	/// Estimates variance based on a sample (includes logical values and text in the sample).
 	/// </summary>
-	public class Stdeva : HiddenValuesHandlingFunction
+	public class Vara : HiddenValuesHandlingFunction
 	{
 		/// <summary>
-		/// The standard deviation is a measure of how widely values are dispersed from the average value (the mean).
+		/// Variance measures how far a data set is spread out.
 		/// Arguments can be the following: numbers; names, arrays, or references that contain numbers; text representations of numbers; or logical values, such as TRUE and FALSE, in a reference.
-		/// If an argument is an array or reference, only values in that array or reference are used. Empty cells and text values in the array or reference are ignored.
+		/// Logical values and text representations of numbers that you type directly into the list of arguments are counted.
 		/// </summary>
 		/// <param name="arguments">Up too 254 individual arguments.</param>
 		/// <param name="context">Unused, this is information about where the function is being executed.</param>
-		/// <returns>The standard deviation based on a sample.</returns>
+		/// <returns>The variance based on a sample.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			//NOTE: This follows the Functionality of excel which is diffrent from the excel documentation.
 			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
-			List<double> listToDoStandardDeviationOn = new List<double>();
+			List<double> listToDoVarianceOn = new List<double>();
 			bool DontAddBoolsTwice = false;
 			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in arguments)
@@ -57,13 +55,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					foreach (var cell in item.ValueAsRangeInfo)
 					{
 						if (cell.Value is string)
-							listToDoStandardDeviationOn.Add(0.0);
+							listToDoVarianceOn.Add(0.0);
 					}
 					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null)
 						continue;
 				}
 				if (item.ValueFirst == null)
-					listToDoStandardDeviationOn.Add(0.0);
+					listToDoVarianceOn.Add(0.0);
 				if (item.Value is ExcelDataProvider.IRangeInfo itemRange)
 				{
 					if (item.ValueFirst is bool valueIsABool)
@@ -71,12 +69,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						DontAddBoolsTwice = true;
 						if (valueIsABool == true)
 						{
-							listToDoStandardDeviationOn.Add(1);
+							listToDoVarianceOn.Add(1);
 							continue;
 						}
 						else
 						{
-							listToDoStandardDeviationOn.Add(0);
+							listToDoVarianceOn.Add(0);
 							continue;
 						}
 					}
@@ -84,26 +82,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 			}
 			foreach (var item in args)
-				if(!DontAddBoolsTwice)
-					listToDoStandardDeviationOn.Add(item);
-			if (!this.TryStandardDeviationEntireSamplePopulation(listToDoStandardDeviationOn, out double standardDeviation))
+				if (!DontAddBoolsTwice)
+					listToDoVarianceOn.Add(item);
+			if (!this.TryVarSample(listToDoVarianceOn, out double VarSample))
 				return new CompileResult(eErrorType.Value);
-			return this.CreateResult(standardDeviation, DataType.Decimal);
+			return new CompileResult(VarSample, DataType.Decimal);
 		}
 
-		private bool TryStandardDeviationEntireSamplePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
-		{
-			standardDeviation = MathObj.Sqrt(this.VarSamplePopulation(listToDoStandardDeviationOn));
-			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
-				return false;
-			return true;
-		}
-
-		private double VarSamplePopulation(List<double> listOfDoubles)
+		private bool TryVarSample(List<double> listOfDoubles, out double VarSample)
 		{
 			double avg = listOfDoubles.Average();
 			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
-			return (d / (listOfDoubles.Count() - 1));
+			VarSample = (d / (listOfDoubles.Count() - 1));
+			if (VarSample == 0 && listOfDoubles.All(x => x == -1))
+				return false;
+			return true;
 		}
 	}
 }

@@ -30,10 +30,23 @@ using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Calculates standard deviation based on the entire population given as arguments (includes logical values and text).
+	/// </summary>
 	public class Stdevpa : HiddenValuesHandlingFunction
 	{
+		/// <summary>
+		/// The standard deviation is a measure of how widely values are dispersed from the average value (the mean).
+		/// Logical values and text representations of numbers that you type directly into the list of arguments are counted.
+		/// If an argument is an array or reference, only numbers in that array or reference are counted.Empty cells, logical values, text, or error values in the array or reference are ignored.
+		/// </summary>
+		/// <param name="arguments">Up to 254 individual arguments.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>The standard deviation based on the entire population.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
+			//NOTE: This follows the Functionality of excel which is diffrent from the excel documentation.
+			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
 			List<double> listToDoStandardDeviationOn = new List<double>();
 			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in arguments)
@@ -51,9 +64,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						continue;
 				}
 				if (item.ValueFirst == null)
-				{
 					listToDoStandardDeviationOn.Add(0.0);
-				}
 				if(item.Value is ExcelDataProvider.IRangeInfo itemRange)
 				{
 					if(item.ValueFirst is bool valueIsABool)
@@ -73,9 +84,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 			}
 			foreach (var item in args)
-			{
 				listToDoStandardDeviationOn.Add(item);
-			}
 			if (!this.TryStandardDeviationEntirePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);
 			return this.CreateResult(standardDeviation, DataType.Decimal);

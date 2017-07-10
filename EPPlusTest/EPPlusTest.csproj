@@ -191,6 +191,8 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\RadiansTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\TanhTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\TanTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\VaraTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\VarpaTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarPTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarSTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />

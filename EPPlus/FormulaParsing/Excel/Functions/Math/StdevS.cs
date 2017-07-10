@@ -31,7 +31,7 @@ using MathObj = System.Math;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// Estimates standard deviation based on a sample.
+	/// Estimates standard deviation based on a sample (ignores logical values and text in the sample).
 	/// </summary>
 	public class StdevS : HiddenValuesHandlingFunction
 	{
@@ -49,7 +49,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
 			List<double> listToDoStandardDeviationOn = new List<double>();
 			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
-
 			foreach (var item in arguments)
 			{
 
@@ -63,15 +62,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return new CompileResult(eErrorType.Div0);
 				}
 				if (item.ValueFirst == null)
-				{
 					listToDoStandardDeviationOn.Add(0.0);
-				}
 			}
 			foreach(var item in args)
-			{
 				listToDoStandardDeviationOn.Add(item);
-			}
-
 			var IfStanderedDeviationWorked = this.TryStandardDeviationOnASamplePopulation(listToDoStandardDeviationOn, out double standardDeviation);
 			if (!IfStanderedDeviationWorked)
 				return new CompileResult(eErrorType.Value);

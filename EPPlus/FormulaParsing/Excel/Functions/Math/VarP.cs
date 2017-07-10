@@ -23,18 +23,59 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Calculates variance based on the entire population (ignores logical values and text in the population).
+	/// </summary>
 	public class VarP : HiddenValuesHandlingFunction
 	{
+		/// <summary>
+		/// Variance measures how far a data set is spread out.
+		/// Logical values, and text representations of numbers that you type directly into the list of arguments are counted.
+		/// If an argument is an array or reference, only numbers in that array or reference are counted. Empty cells, logical values, text, or error values in the array or reference are ignored.
+		/// </summary>
+		/// <param name="arguments">Up too 254 individual arguments.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>The variance based on an entire population.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
-				return new CompileResult(argumentError);
-			var args = ArgsToDoubleEnumerable(IgnoreHiddenValues, false, arguments, context);
-			return new CompileResult(VarMethods.VarP(args), DataType.Decimal);
+			//NOTE: This follows the Functionality of excel which is diffrent from the excel documentation.
+			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
+			List<double> listToDoVarianceOn = new List<double>();
+			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
+			foreach (var item in arguments)
+			{
+				if (item.IsExcelRange)
+				{
+					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null)
+						continue;
+					return new CompileResult(eErrorType.Div0);
+				}
+				else if (item.ValueFirst == null)
+				{
+					listToDoVarianceOn.Add(0.0);
+				}
+			}
+			foreach (var item in args)
+				listToDoVarianceOn.Add(item);
+			if(!this.TryVarPopulation(listToDoVarianceOn, out double VarPopulation))
+				return new CompileResult(eErrorType.Value);
+
+			return new CompileResult(VarPopulation, DataType.Decimal);
+		}
+
+		private bool TryVarPopulation(List<double> listOfDoubles, out double VarPopulation)
+		{
+			double avg = listOfDoubles.Average();
+			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
+			VarPopulation = (d / (listOfDoubles.Count()));
+			if (VarPopulation == 0 && listOfDoubles.All(x => x == -1))
+				return false;
+			return true;
 		}
 	}
 }

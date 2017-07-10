@@ -58,14 +58,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return new CompileResult(eErrorType.Div0);
 				}
 				else if (item.ValueFirst == null)
-				{
 					listToDoStandardDeviationOn.Add(0.0);
-				}
 			}
 			foreach (var item in args)
-			{
 				listToDoStandardDeviationOn.Add(item);
-			}
 			if (!this.TryStandardDeviationEntirePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);
 			return this.CreateResult(standardDeviation, DataType.Decimal);

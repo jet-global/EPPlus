@@ -49,6 +49,10 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 			_specialCompilers.Add(typeof(StdevS), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("stdev.s")));
 			_specialCompilers.Add(typeof(Stdevpa), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("stdevpa")));
 			_specialCompilers.Add(typeof(Stdeva), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("stdeva")));
+			_specialCompilers.Add(typeof(VarP), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("var.p")));
+			_specialCompilers.Add(typeof(VarS), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("var.s")));
+			_specialCompilers.Add(typeof(Vara), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("vara")));
+			_specialCompilers.Add(typeof(Varpa), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("varpa")));
 			foreach (var key in repository.CustomCompilers.Keys)
 			{
 				_specialCompilers.Add(key, repository.CustomCompilers[key]);

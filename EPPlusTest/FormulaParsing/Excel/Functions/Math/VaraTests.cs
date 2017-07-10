@@ -33,49 +33,49 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 
 	[TestClass]
-	public class VarPTests : MathFunctionsTestBase
+	public class VaraTests : MathFunctionsTestBase
 	{
-		#region VarP Function(Execute) Tests
+		#region Vara Function(Execute) Tests
 
 		[TestMethod]
-		public void VarPIsGivenBooleanInputs()
+		public void VaraIsGivenBooleanInputs()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var boolInputTrue = true;
 			var boolInputFalse = false;
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(boolInputTrue, boolInputTrue, boolInputFalse), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(boolInputTrue, boolInputTrue, boolInputTrue), this.ParsingContext);
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(boolInputTrue, boolInputFalse, boolInputFalse), this.ParsingContext);
 
-			Assert.AreEqual(0.222222222, result1.ResultNumeric, .00001);
+			Assert.AreEqual(0.333333333, result1.ResultNumeric, .00001);
 			Assert.AreEqual(0, result2.ResultNumeric, .00001);
-			Assert.AreEqual(0.222222222, result3.ResultNumeric, .00001);
+			Assert.AreEqual(0.333333333, result3.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenBooleanInputsFromCellRefrence()
+		public void VaraIsGivenBooleanInputsFromCellRefrence()
 		{
-			var function = new VarP();
+			var function = new Vara();
 
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = true;
 				worksheet.Cells["B2"].Value = false;
-				worksheet.Cells["B3"].Formula = "=Var.P(B1,B1,B2)";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1,B1,B1)";
-				worksheet.Cells["B5"].Formula = "=Var.P(B1,B2,B2)";
+				worksheet.Cells["B3"].Formula = "=Vara(B1,B1,B2)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1,B1,B1)";
+				worksheet.Cells["B5"].Formula = "=Vara(B1,B2,B2)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
+				Assert.AreEqual(0.333333333, (double)worksheet.Cells["B3"].Value, .00001);
+				Assert.AreEqual(0d, (double)worksheet.Cells["B4"].Value, .00001);
+				Assert.AreEqual(0.333333333, (double)worksheet.Cells["B5"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenADateSeperatedByABackslash()
+		public void VaraIsGivenADateSeperatedByABackslash()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var input1 = "1/17/2011 2:00";
 			var input2 = "6/17/2011 2:00";
 			var input3 = "1/17/2012 2:00";
@@ -85,14 +85,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input1, input3, input4), this.ParsingContext);
 
 			Assert.AreEqual(0, result1.ResultNumeric, .00001);
-			Assert.AreEqual(5066.888889, result2.ResultNumeric, .00001);
-			Assert.AreEqual(89060.22222, result3.ResultNumeric, .00001);
+			Assert.AreEqual(7600.333333, result2.ResultNumeric, .00001);
+			Assert.AreEqual(133590.3333, result3.ResultNumeric, .0001);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenADateSeperatedByABackslashInputFromCellRefrence()
+		public void VaraIsGivenADateSeperatedByABackslashInputFromCellRefrence()
 		{
-			var function = new VarP();
+			var function = new Vara();
 
 			using (var package = new ExcelPackage())
 			{
@@ -101,20 +101,20 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B2"].Value = "6/17/2011 2:00";
 				worksheet.Cells["B3"].Value = "1/17/2012 2:00";
 				worksheet.Cells["B4"].Value = "1/17/2013 2:00";
-				worksheet.Cells["B5"].Formula = "=Var.P(B1,B1,B1)";
-				worksheet.Cells["B6"].Formula = "=Var.P(B1,B2,B1)";
-				worksheet.Cells["B7"].Formula = "=Var.P(B1,B3,B4)";
+				worksheet.Cells["B5"].Formula = "=Vara(B1,B1,B1)";
+				worksheet.Cells["B6"].Formula = "=Vara(B1,B2,B1)";
+				worksheet.Cells["B7"].Formula = "=Vara(B1,B3,B4)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B5"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B6"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B7"].Value).Type);
+				Assert.AreEqual(0d, (double)worksheet.Cells["B5"].Value, .00001);
+				Assert.AreEqual(0d, (double)worksheet.Cells["B6"].Value, .00001);
+				Assert.AreEqual(0d, (double)worksheet.Cells["B7"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenMaxAmountOfInputs254()
+		public void VaraIsGivenMaxAmountOfInputs254()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var input1 = 1;
 
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(
@@ -138,13 +138,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				), this.ParsingContext);
 
 
-			Assert.AreEqual(38.43469837, result1.ResultNumeric, .00001);
+			Assert.AreEqual(38.58661417, result1.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenNumberInputFromCellRefrence()
+		public void VaraIsGivenNumberInputFromCellRefrence()
 		{
-			var function = new VarP();
+			var function = new Vara();
 
 			using (var package = new ExcelPackage())
 			{
@@ -158,21 +158,21 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B7"].Value = 26;
 				worksheet.Cells["B8"].Value = 56;
 				worksheet.Cells["B9"].Value = 7;
-				worksheet.Cells["A10"].Formula = "=Var.P(B:B)";
-				worksheet.Cells["A11"].Formula = "=Var.P(B1,B3,B5,B6,B9)";
-				worksheet.Cells["A12"].Formula = "=Var.P(B1,B3,B5,B6)";
+				worksheet.Cells["A10"].Formula = "=Vara(B:B)";
+				worksheet.Cells["A11"].Formula = "=Vara(B1,B3,B5,B6,B9)";
+				worksheet.Cells["A12"].Formula = "=Vara(B1,B3,B5,B6)";
 				worksheet.Calculate();
 
-				Assert.AreEqual(646.8395062, (double)worksheet.Cells["A10"].Value, .00001);
-				Assert.AreEqual(950.8, (double)worksheet.Cells["A11"].Value, .00001);
-				Assert.AreEqual(498.1875, (double)worksheet.Cells["A12"].Value, .00001);
+				Assert.AreEqual(727.6944444, (double)worksheet.Cells["A10"].Value, .00001);
+				Assert.AreEqual(1188.5, (double)worksheet.Cells["A11"].Value, .00001);
+				Assert.AreEqual(664.25, (double)worksheet.Cells["A12"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenNumberInputFromCellRefrenceWithEmptyCellsFirst()
+		public void VaraIsGivenNumberInputFromCellRefrenceWithEmptyCellsFirst()
 		{
-			var function = new VarP();
+			var function = new Vara();
 
 			using (var package = new ExcelPackage())
 			{
@@ -186,16 +186,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B9"].Value = 26;
 				worksheet.Cells["B10"].Value = 56;
 				worksheet.Cells["B12"].Value = 7;
-				worksheet.Cells["A12"].Formula = "=Var.P(B1:B12)";
+				worksheet.Cells["A12"].Formula = "=Vara(B1:B12)";
 				worksheet.Calculate();
-				Assert.AreEqual(646.8395062, (double)worksheet.Cells["A12"].Value, .00001);
+				Assert.AreEqual(727.6944444, (double)worksheet.Cells["A12"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenNumberInputFromCellRefrenceWithEmptyCellsFirstAndAnInvalidCellInTheMiddle()
+		public void VaraIsGivenNumberInputFromCellRefrenceWithEmptyCellsFirstAndAnInvalidCellInTheMiddle()
 		{
-			var function = new VarP();
+			var function = new Vara();
 
 			using (var package = new ExcelPackage())
 			{
@@ -209,35 +209,35 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B9"].Value = 26;
 				worksheet.Cells["B10"].Value = 56;
 				worksheet.Cells["B11"].Value = 7;
-				worksheet.Cells["A12"].Formula = "=Var.P(B1:B11)";
+				worksheet.Cells["A12"].Formula = "=Vara(B1:B11)";
 				worksheet.Calculate();
-				Assert.AreEqual(654.734375, (double)worksheet.Cells["A12"].Value, .00001);
+				Assert.AreEqual(748.2678571, (double)worksheet.Cells["A12"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenNumbersAsInputs()
+		public void VaraIsGivenNumbersAsInputs()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(-1, 0, 1), this.ParsingContext);
-			Assert.AreEqual(0.666666667, result1.ResultNumeric, .00001);
+			Assert.AreEqual(1, result1.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenAMixOfInputTypes()
+		public void VaraIsGivenAMixOfInputTypes()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(1, true, null, "6/17/2011 2:00", "02:00 am"), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(1, true, "6/17/2011 2:00", "02:00 am"), this.ParsingContext);
-			Assert.AreEqual(265175984, result1.ResultNumeric, .1);
-			Assert.AreEqual(310750455.8, result2.ResultNumeric, .1);
+			Assert.AreEqual(331469980, result1.ResultNumeric, .1);
+			Assert.AreEqual(414333941.1, result2.ResultNumeric, .1);
 		}
 
 
 		[TestMethod]
-		public void VarPIsGivenAMixOfInputTypesByCellRange()
+		public void VaraIsGivenAMixOfInputTypesByCellRange()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -245,17 +245,17 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B2"].Value = 1;
 				worksheet.Cells["B3"].Value = "6/17/2011 2:00";
 				worksheet.Cells["B4"].Value = "02:00 am";
-				worksheet.Cells["B9"].Formula = "=Var.P(B1:B4)";
+				worksheet.Cells["B9"].Formula = "=Vara(B1:B4)";
 				worksheet.Calculate();
 
-				Assert.AreEqual(49, (double)worksheet.Cells["B9"].Value, .00001);
+				Assert.AreEqual(54, (double)worksheet.Cells["B9"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenAMixOfInputTypesWithANullInTheCenterByCellRefrenceAndTwoRangeInputs()
+		public void VaraIsGivenAMixOfInputTypesWithANullInTheCenterByCellRefrenceAndTwoRangeInputs()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -264,18 +264,18 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				//empty B3 cell
 				worksheet.Cells["B4"].Value = "6/17/2011 2:00";
 				worksheet.Cells["B5"].Value = "02:00 am";
-				worksheet.Cells["B8"].Formula = "=Var.P(B1,B2)";
-				worksheet.Cells["B9"].Formula = "=Var.P(B1:B5,B1:B5)";
+				worksheet.Cells["B8"].Formula = "=Vara(B1,B2)";
+				worksheet.Cells["B9"].Formula = "=Vara(B1:B5,B1:B5)";
 				worksheet.Calculate();
-				Assert.AreEqual(49, (double)worksheet.Cells["B8"].Value, .00001);
-				Assert.AreEqual(49, (double)worksheet.Cells["B9"].Value, .00001);
+				Assert.AreEqual(98, (double)worksheet.Cells["B8"].Value, .00001);
+				Assert.AreEqual(46.28571, (double)worksheet.Cells["B9"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenAMixOfTwoTypesAndTwoRangesThatShouldHaveAnOutput()
+		public void VaraIsGivenAMixOfTwoTypesAndTwoRangesThatShouldHaveAnOutput()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -287,16 +287,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["A1"].Value = 23;
 				worksheet.Cells["A2"].Value = 15;
 				worksheet.Cells["A3"].Value = "02:00 am";
-				worksheet.Cells["B9"].Formula = "=Var.P(B1:B4, A1:A3)";
+				worksheet.Cells["B9"].Formula = "=Vara(B1:B4, A1:A3)";
 				worksheet.Calculate();
-				Assert.AreEqual(80.75, (double)worksheet.Cells["B9"].Value, .0001);
+				Assert.AreEqual(122.4762, (double)worksheet.Cells["B9"].Value, .0001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsTheSameTestsAsGivenAMixOfInputTypesByCellRefrenceExceptTheyAreAllOnes()
+		public void VaraIsTheSameTestsAsGivenAMixOfInputTypesByCellRefrenceExceptTheyAreAllOnes()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -305,10 +305,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				//empty B3 cell
 				worksheet.Cells["B4"].Value = 1;
 				worksheet.Cells["B5"].Value = 1;
-				worksheet.Cells["B6"].Formula = "=Var.P(B1,B2,B4,B5)";
-				worksheet.Cells["B7"].Formula = "=Var.P(B1,B2,B3,B4,B5)";
-				worksheet.Cells["B8"].Formula = "=Var.P(B1,B2)";
-				worksheet.Cells["B9"].Formula = "=Var.P(B1:B5)";
+				worksheet.Cells["B6"].Formula = "=Vara(B1,B2,B4,B5)";
+				worksheet.Cells["B7"].Formula = "=Vara(B1,B2,B3,B4,B5)";
+				worksheet.Cells["B8"].Formula = "=Vara(B1,B2)";
+				worksheet.Cells["B9"].Formula = "=Vara(B1:B5)";
 				worksheet.Calculate();
 				Assert.AreEqual(0d, worksheet.Cells["B6"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B7"].Value);
@@ -318,16 +318,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void VarPTestingDirectInputVsRangeInputWithAGapInTheMiddle()
+		public void VaraTestingDirectInputVsRangeInputWithAGapInTheMiddle()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = 1;
 				worksheet.Cells["B3"].Value = 1;
-				worksheet.Cells["B8"].Formula = "=Var.P(B1,B3)";
-				worksheet.Cells["B9"].Formula = "=Var.P(B1:B3)";
+				worksheet.Cells["B8"].Formula = "=Vara(B1,B3)";
+				worksheet.Cells["B9"].Formula = "=Vara(B1:B3)";
 				worksheet.Calculate();
 				Assert.AreEqual(0d, worksheet.Cells["B8"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B9"].Value);
@@ -335,46 +335,46 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void VarPTestingDirectINputVsRangeInputTest2()
+		public void VaraTestingDirectINputVsRangeInputTest2()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = 1;
 				worksheet.Cells["B2"].Value = 0;
-				worksheet.Cells["B8"].Formula = "=Var.P(B1,B2)";
-				worksheet.Cells["B9"].Formula = "=Var.P(B1:B2)";
+				worksheet.Cells["B8"].Formula = "=Vara(B1,B2)";
+				worksheet.Cells["B9"].Formula = "=Vara(B1:B2)";
 				worksheet.Calculate();
-				Assert.AreEqual(0.25, (double)worksheet.Cells["B8"].Value, .00001);
-				Assert.AreEqual(0.25, (double)worksheet.Cells["B9"].Value, .00001);
+				Assert.AreEqual(0.5, (double)worksheet.Cells["B8"].Value, .00001);
+				Assert.AreEqual(0.5, (double)worksheet.Cells["B9"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenAStringInputWithAEmptyCellInTheMiddle()
+		public void VaraIsGivenAStringInputWithAEmptyCellInTheMiddle()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(66, 52, 77, 71, 30, 90, 26, 56, 7), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(66, 52, 77, 71, null, 30, 90, 26, 56, 7), this.ParsingContext);
-			Assert.AreEqual(646.8395062, result1.ResultNumeric, .00001);
-			Assert.AreEqual(832.85, result2.ResultNumeric, .00001);
+			Assert.AreEqual(727.6944444, result1.ResultNumeric, .00001);
+			Assert.AreEqual(925.3888889, result2.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenAMixedStringInputWithAEmptyCellInTheMiddle()
+		public void VaraIsGivenAMixedStringInputWithAEmptyCellInTheMiddle()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(10, 2, "6/17/2011 2:00", "02:00 am"), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(10, 2, "6/17/2011 2:00", null, "02:00 am"), this.ParsingContext);
-			Assert.AreEqual(310699583.6, result1.ResultNumeric, .1);
-			Assert.AreEqual(265143429.9, result2.ResultNumeric, .1);
+			Assert.AreEqual(414266111.4, result1.ResultNumeric, .1);
+			Assert.AreEqual(331429287.4, result2.ResultNumeric, .1);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenAMixOfTwoTypesAndTwoRangesThatShouldHaveAnOutputTestTwo()
+		public void VaraIsGivenAMixOfTwoTypesAndTwoRangesThatShouldHaveAnOutputTestTwo()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -382,16 +382,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B2"].Value = 2;
 				worksheet.Cells["B3"].Value = "6/17/2011 2:00";
 				worksheet.Cells["B4"].Value = "02:00 am";
-				worksheet.Cells["B9"].Formula = "=Var.P(B1:B4)";
+				worksheet.Cells["B9"].Formula = "=Vara(B1:B4)";
 				worksheet.Calculate();
-				Assert.AreEqual(16, (double)worksheet.Cells["B9"].Value, .0001);
+				Assert.AreEqual(22.66666667, (double)worksheet.Cells["B9"].Value, .0001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenTwoRangesOfIntsAsInputs()
+		public void VaraIsGivenTwoRangesOfIntsAsInputs()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -409,16 +409,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B11"].Value = 45;
 
 
-				worksheet.Cells["A9"].Formula = "=Var.P(B1:B6, B7:B11)";
+				worksheet.Cells["A9"].Formula = "=Vara(B1:B6, B7:B11)";
 				worksheet.Calculate();
-				Assert.AreEqual(629.1735537, (double)worksheet.Cells["A9"].Value, .00001);
+				Assert.AreEqual(692.0909091, (double)worksheet.Cells["A9"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenTwoRangesOfIntsAsInputsWithATimeInTheMiddleOfTheFirstRange()
+		public void VaraIsGivenTwoRangesOfIntsAsInputsWithATimeInTheMiddleOfTheFirstRange()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -436,16 +436,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B11"].Value = 45;
 
 
-				worksheet.Cells["A9"].Formula = "=Var.P(B1:B6, B7:B11)";
+				worksheet.Cells["A9"].Formula = "=Vara(B1:B6, B7:B11)";
 				worksheet.Calculate();
-				Assert.AreEqual(578.81, (double)worksheet.Cells["A9"].Value, .00001);
+				Assert.AreEqual(617.7636364, (double)worksheet.Cells["A9"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenTwoRangesOfIntsAsInputsWithATimeInTheMiddleOfTheFirstRangeTestTwo()
+		public void VaraIsGivenTwoRangesOfIntsAsInputsWithATimeInTheMiddleOfTheFirstRangeTestTwo()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -463,16 +463,16 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B11"].Value = 45;
 
 
-				worksheet.Cells["A9"].Formula = "=Var.P(B1:B6, B7:B11)";
+				worksheet.Cells["A9"].Formula = "=Vara(B1:B6, B7:B11)";
 				worksheet.Calculate();
-				Assert.AreEqual(627.3580247, (double)worksheet.Cells["A9"].Value, .00001);
+				Assert.AreEqual(626.4909091, (double)worksheet.Cells["A9"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenAStringInputWithAEmptyCellInTheMiddleByCellRefrence()
+		public void VaraIsGivenAStringInputWithAEmptyCellInTheMiddleByCellRefrence()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -486,234 +486,234 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B10"].Value = 56;
 				worksheet.Cells["B11"].Value = 7;
 				worksheet.Cells["B12"].Value = 30;
-				worksheet.Cells["A12"].Formula = "=Var.P(B3:B12)";
+				worksheet.Cells["A12"].Formula = "=Vara(B3:B12)";
 				worksheet.Calculate();
-				Assert.AreEqual(646.8395062, (double)worksheet.Cells["A12"].Value, .00001);
+				Assert.AreEqual(727.6944444, (double)worksheet.Cells["A12"].Value, .00001);
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenMilitaryTimesAsInputs()
+		public void VaraIsGivenMilitaryTimesAsInputs()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("00:00", "02:00", "13:00"), this.ParsingContext);
-			Assert.AreEqual(0.056712963, result1.ResultNumeric, .00001);
+			Assert.AreEqual(0.085069444, result1.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenNumbersAsInputstakeTwo()
+		public void VaraIsGivenNumbersAsInputstakeTwo()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(-1, -1, -1), this.ParsingContext);
 			Assert.AreEqual(0, result1.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenMilitaryTimesAsInputsByCellRefrence()
+		public void VaraIsGivenMilitaryTimesAsInputsByCellRefrence()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "00:00";
 				worksheet.Cells["B2"].Value = "02:00";
 				worksheet.Cells["B3"].Value = "13:00";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1,B2,B3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1,B2,B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenMilitaryTimesAsInputsByCellRange()
+		public void VaraIsGivenMilitaryTimesAsInputsByCellRange()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "00:00";
 				worksheet.Cells["B2"].Value = "02:00";
 				worksheet.Cells["B3"].Value = "13:00";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1:B3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGiven12HourTimesAsInputs()
+		public void VaraIsGiven12HourTimesAsInputs()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("12:00 am", "02:00 am", "01:00 pm"), this.ParsingContext);
-			Assert.AreEqual(0.056712963, result1.ResultNumeric, .00001);
+			Assert.AreEqual(0.085069444, result1.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void VarPIsGiven12HourTimesAsInputsByCellRefrence()
+		public void VaraIsGiven12HourTimesAsInputsByCellRefrence()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "12:00 am";
 				worksheet.Cells["B2"].Value = "02:00 am";
 				worksheet.Cells["B3"].Value = "01:00 pm";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1,B2,B3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1,B2,B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGiven12HourTimesAsInputsByCellRange()
+		public void VaraIsGiven12HourTimesAsInputsByCellRange()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "12:00 am";
 				worksheet.Cells["B2"].Value = "02:00 am";
 				worksheet.Cells["B3"].Value = "01:00 pm";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1:B3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenMonthDayYear12HourTimeAsInputs()
+		public void VaraIsGivenMonthDayYear12HourTimeAsInputs()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("Jan 17, 2011 2:00 am", "June 5, 2017 11:00 pm", "June 15, 2017 11:00 pm"), this.ParsingContext);
-			Assert.AreEqual(1213568.837, result1.ResultNumeric, .001);
+			Assert.AreEqual(1820353.255, result1.ResultNumeric, .001);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenMonthDayYear12HourTimeAsInputsByCellRefrence()
+		public void VaraIsGivenMonthDayYear12HourTimeAsInputsByCellRefrence()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "Jan 17, 2011 2:00 am";
 				worksheet.Cells["B2"].Value = "June 5, 2017 11:00 pm";
 				worksheet.Cells["B3"].Value = "June 15, 2017 11:00 pm";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1,B2,B3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1,B2,B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenMonthDayYear12HourTimeAsInputsByCellRange()
+		public void VaraIsGivenMonthDayYear12HourTimeAsInputsByCellRange()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "Jan 17, 2011 2:00 am";
 				worksheet.Cells["B2"].Value = "June 5, 2017 11:00 pm";
 				worksheet.Cells["B3"].Value = "June 15, 2017 11:00 pm";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1:B3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenDateTimeInputsSeperatedByADashAsInputs()
+		public void VaraIsGivenDateTimeInputsSeperatedByADashAsInputs()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("1-17-2017 2:00", "6-17-2017 2:00", "9-17-2017 2:00"), this.ParsingContext);
-			Assert.AreEqual(10034.88889, result1.ResultNumeric, .00001);
+			Assert.AreEqual(15052.33333, result1.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenDateTimeInputsSeperatedByADashAsInputsByCellRefrence()
+		public void VaraIsGivenDateTimeInputsSeperatedByADashAsInputsByCellRefrence()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "1-17-2017 2:00";
 				worksheet.Cells["B2"].Value = "6-17-2017 2:00";
 				worksheet.Cells["B3"].Value = "9-17-2017 2:00";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1,B2,B3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1,B2,B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenDateTimeInputsSeperatedByADashAsInputsByCellRange()
+		public void VaraIsGivenDateTimeInputsSeperatedByADashAsInputsByCellRange()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "1-17-2017 2:00";
 				worksheet.Cells["B2"].Value = "6-17-2017 2:00";
 				worksheet.Cells["B3"].Value = "9-17-2017 2:00";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1:B3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenStringsAsInputs()
+		public void VaraIsGivenStringsAsInputs()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("string", "another string", "a third string"), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenStringsAsInputsByCellRefrence()
+		public void VaraIsGivenStringsAsInputsByCellRefrence()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "string";
 				worksheet.Cells["B2"].Value = "another string";
 				worksheet.Cells["B3"].Value = "a third string";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1,B2,B3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1,B2,B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenStringsAsInputsByCellRange()
+		public void VaraIsGivenStringsAsInputsByCellRange()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = "string";
 				worksheet.Cells["B2"].Value = "another string";
 				worksheet.Cells["B3"].Value = "a third string";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1:B3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenStringNumbersAsInputs()
+		public void VaraIsGivenStringNumbersAsInputs()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("5", "6", "7"), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs("5.5", "6.6", "7.7"), this.ParsingContext);
-			Assert.AreEqual(0.666666667, result1.ResultNumeric, .00001);
-			Assert.AreEqual(0.806666667, result2.ResultNumeric, .00001);
+			Assert.AreEqual(1, result1.ResultNumeric, .00001);
+			Assert.AreEqual(1.21, result2.ResultNumeric, .00001);
 		}
 
 		[TestMethod]
-		public void VarPIsGivenStringNumbersAsInputsByCellRefrence()
+		public void VaraIsGivenStringNumbersAsInputsByCellRefrence()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -723,18 +723,18 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B1"].Value = "5.5";
 				worksheet.Cells["B2"].Value = "6.6";
 				worksheet.Cells["B3"].Value = "7.7";
-				worksheet.Cells["A4"].Formula = "=Var.P(A1,A2,A3)";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1,B2,B3)";
+				worksheet.Cells["A4"].Formula = "=Vara(A1,A2,A3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1,B2,B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["A4"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 
 		[TestMethod]
-		public void VarPIsGivenStringNumbersAsInputsByCellRange()
+		public void VaraIsGivenStringNumbersAsInputsByCellRange()
 		{
-			var function = new VarP();
+			var function = new Vara();
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -744,11 +744,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B1"].Value = "5.5";
 				worksheet.Cells["B2"].Value = "6.6";
 				worksheet.Cells["B3"].Value = "7.7";
-				worksheet.Cells["A4"].Formula = "=Var.P(A1:A3)";
-				worksheet.Cells["B4"].Formula = "=Var.P(B1:B3)";
+				worksheet.Cells["A4"].Formula = "=Vara(A1:A3)";
+				worksheet.Cells["B4"].Formula = "=Vara(B1:B3)";
 				worksheet.Calculate();
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["A4"].Value).Type);
-				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
+				Assert.AreEqual(0d, (worksheet.Cells["B4"].Value));
 			}
 		}
 		#endregion

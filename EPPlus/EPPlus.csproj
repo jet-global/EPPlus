@@ -503,8 +503,10 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Tanh.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Trunc.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Var.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Vara.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarMethods.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarP.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\Varpa.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarS.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Numeric\IntFunction.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\ObjectEnumerableArgConverter.cs" />

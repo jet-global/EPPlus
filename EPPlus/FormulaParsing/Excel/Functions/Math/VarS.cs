@@ -22,15 +22,60 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
-	class VarS
+	/// <summary>
+	/// Estimates variance based on a sample (ignores logical values and text in the sample).
+	/// </summary>
+	public class VarS : HiddenValuesHandlingFunction
 	{
+		/// <summary>
+		/// Variance measures how far a data set is spread out.
+		/// Logical values, and text representations of numbers that you type directly into the list of arguments are counted.
+		/// If an argument is an array or reference, only numbers in that array or reference are counted. Empty cells, logical values, text, or error values in the array or reference are ignored.
+		/// </summary>
+		/// <param name="arguments">Up too 254 individual arguments.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>The variance based on a sample.</returns>
+		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		{
+			//NOTE: This follows the Functionality of excel which is diffrent from the excel documentation.
+			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
+			List<double> listToDoVarianceOn = new List<double>();
+			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
+			foreach (var item in arguments)
+			{
+				if (item.IsExcelRange)
+				{
+					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null)
+						continue;
+					return new CompileResult(eErrorType.Div0);
+				}
+				else if (item.ValueFirst == null)
+				{
+					listToDoVarianceOn.Add(0.0);
+				}
+			}
+			foreach (var item in args)
+				listToDoVarianceOn.Add(item);
+			if (!this.TryVarSample(listToDoVarianceOn, out double VarSample))
+				return new CompileResult(eErrorType.Value);
+			return new CompileResult(VarSample, DataType.Decimal);
+		}
+
+		private bool TryVarSample(List<double> listOfDoubles, out double VarSample)
+		{
+			double avg = listOfDoubles.Average();
+			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
+			VarSample = (d / (listOfDoubles.Count() - 1));
+			if (VarSample == 0 && listOfDoubles.All(x => x == -1))
+				return false;
+			return true;
+
+		}
 	}
 }
