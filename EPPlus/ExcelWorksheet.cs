@@ -2685,7 +2685,8 @@ namespace OfficeOpenXml
 		#region Private Methods
 		private void UpdateCharts(int rows, int columns, int rowFrom, int colFrom)
 		{
-			var deletedDrawings = this.Drawings.Where(drawing => this.RangeIsBeingDeleted(new ExcelAddress(drawing.From.Row, drawing.From.Column, drawing.To.Row, drawing.To.Column), rowFrom, rows, colFrom, columns)).ToArray();
+			// Only two-cell-anchor drawings can be deleted by DeleteRow/Column operations. 
+			var deletedDrawings = this.Drawings.Where(drawing => drawing.EditAs == eEditAs.TwoCell && this.RangeIsBeingDeleted(drawing.From.Row, drawing.To.Row, drawing.From.Column, drawing.To.Column, rowFrom, rows, colFrom, columns)).ToArray();
 			foreach (var drawing in deletedDrawings)
 			{
 				this.Drawings.Remove(drawing);
@@ -2705,45 +2706,44 @@ namespace OfficeOpenXml
 						int newFromColumn = drawing.From.Column;
 						int newToRow = drawing.To.Row;
 						int newToColumn = drawing.To.Column;
-						switch (drawing.EditAs)
+						int newFromRowOffset = drawing.From.RowOff;
+						int newFromColumnOffset = drawing.From.ColumnOff;
+						if (drawing.EditAs == eEditAs.TwoCell)
 						{
-							case eEditAs.OneCell:
-								if (drawing.From.Row > rowFrom)
+							if (drawing.To.Row > rowFrom)
+								newToRow += rows;
+							if (drawing.To.Column > colFrom)
+								newToColumn += columns;
+						}
+						if (drawing.EditAs == eEditAs.OneCell || drawing.EditAs == eEditAs.TwoCell)
+						{
+							if (drawing.From.Row > rowFrom)
+							{
+								newFromRow += rows;
+								if (rows < 0 && rowFrom > newFromRow)
 								{
-									newFromRow += rows;
-									newToRow += rows;
+									newFromRow = rowFrom;
+									newFromRowOffset = 0;
 								}
-								if (drawing.From.Column > colFrom)
+							}
+							if (drawing.From.Column > colFrom)
+							{
+								newFromColumn += columns;
+								if (columns < 0 && colFrom > newFromColumn)
 								{
-									newFromColumn += columns;
-									newToColumn += columns;
+									newFromColumn = colFrom;
+									newFromColumnOffset = 0;
 								}
-								break;
-							case eEditAs.TwoCell:
-								if (drawing.From.Row > rowFrom)
-									newFromRow += rows;
-								if (drawing.From.Column > colFrom)
-									newFromColumn += columns;
-								if (drawing.To.Row > rowFrom)
-									newToRow += rows;
-								if (drawing.To.Column > colFrom)
-									newToColumn += columns;
-								break;
-							case eEditAs.Absolute:
-							default:
-								// No position arrangement is required.
-								break;
+							}
 						}
 						newFromColumn = newFromColumn < 1 ? 1 : newFromColumn;
 						newFromRow = newFromRow < 1 ? 1 : newFromRow;
-
-						drawing.SetPosition(newFromRow, drawing.From.RowOff, newFromColumn, drawing.From.ColumnOff, newToRow, drawing.To.RowOff, newToColumn, drawing.To.ColumnOff);
+						drawing.SetPosition(newFromRow, newFromRowOffset, newFromColumn, newFromColumnOffset, newToRow, drawing.To.RowOff, newToColumn, drawing.To.ColumnOff);
 					}
 					// The chart Plot Area contains one copy of a chart for each series in that chart.
 					// A chart Plot Area can also have multiple distinct charts (such as when a bar chart and a line chart are plotted in the same area).
 					// This captures the behavior of a "Combo Chart".
-					var chartBase = drawing as ExcelChart;
-					if (chartBase != null)
+					if (drawing is ExcelChart chartBase)
 					{
 						foreach (var chart in chartBase.PlotArea.ChartTypes)
 						{
@@ -4581,7 +4581,6 @@ namespace OfficeOpenXml
 					{
 						sdv -= ExcelWorkbook.date1904Offset;
 					}
-
 					s = sdv.ToString(CultureInfo.InvariantCulture);
 				}
 				else if (v is TimeSpan)
@@ -4810,7 +4809,7 @@ namespace OfficeOpenXml
 		private void UpdateDataValidationRanges(int rowFrom, int rows, int columnFrom, int columns)
 		{
 			if (rows < 0 || columns < 0)
-				this.DataValidations.RemoveAll(validation => this.RangeIsBeingDeleted(validation.Address, rowFrom, rows, columnFrom, columns));
+				this.DataValidations.RemoveAll(validation => this.RangeIsBeingDeleted(validation.Address._fromRow, validation.Address._toRow, validation.Address._fromCol, validation.Address._toCol, rowFrom, rows, columnFrom, columns));
 			foreach (var sheet in this.Workbook.Worksheets)
 			{
 				for (int i = sheet.DataValidations.Count - 1; i >= 0; i--)
@@ -4830,10 +4829,10 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private bool RangeIsBeingDeleted(ExcelAddress address, int rowFrom, int rows, int columnFrom, int columns)
+		private bool RangeIsBeingDeleted(int rangeRowFrom, int rangeRowTo, int rangeColumnFrom, int rangeColumnTo, int rowFrom, int rows, int columnFrom, int columns)
 		{
-			return (address._fromRow >= rowFrom && address._toRow < rowFrom + -rows ||
-				address._fromCol >= columnFrom && address._toCol < columnFrom + -columns);
+			return (rangeRowFrom >= rowFrom && rangeRowTo < rowFrom + -rows ||
+				rangeColumnFrom >= columnFrom && rangeColumnTo < columnFrom + -columns);
 		}
 
 		private void UpdateSparkLines(int rows, int rowFrom, int columns, int columnFrom)

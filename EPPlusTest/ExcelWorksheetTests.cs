@@ -3682,6 +3682,35 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\OneCellAnchorChart.xlsx")]
+		public void DeleteRowsFromMiddleOfChartIgnoresOneCellAnchor()
+		{
+			var file = new FileInfo("OneCellAnchorChart.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$H$21:$H$30", drawing.Series[0].XSeries);
+				Assert.AreEqual("Sheet1!$I$21:$I$30", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(eEditAs.OneCell, drawing.EditAs);
+				var originalColumnOffset = drawing.From.ColumnOff;
+				var originalRowOffset = drawing.From.RowOff;
+				sheet.DeleteRow(8, 10);
+				Assert.AreEqual("'Sheet1'!$H$11:$H$20", drawing.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$I$11:$I$20", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(originalColumnOffset, drawing.From.ColumnOff);
+				Assert.AreEqual(originalRowOffset, drawing.From.RowOff);
+				Assert.AreEqual(eEditAs.OneCell, drawing.EditAs);
+			}
+		}
+
+		[TestMethod]
 		public void DeleteRowsUpdatesExcel2016ChartSeries()
 		{
 			using (ExcelPackage package = new ExcelPackage())
@@ -4087,6 +4116,94 @@ namespace EPPlusTest
 				Assert.AreEqual("'Sheet1'!$C$10:$C$32", drawing.Series[1].Series);
 				Assert.AreEqual("'Sheet1'!$B$10:$B$32", drawing.Series[0].Series);
 				Assert.AreEqual("'Sheet1'!$D$10:$D$32", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\OneCellAnchorChart.xlsx")]
+		public void DeleteRowsFromStartOfRangeUpdatesOneCellAnchor()
+		{
+			var file = new FileInfo("OneCellAnchorChart.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$H$21:$H$30", drawing.Series[0].XSeries);
+				Assert.AreEqual("Sheet1!$I$21:$I$30", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(eEditAs.OneCell, drawing.EditAs);
+				var originalColumnOffset = drawing.From.ColumnOff;
+				sheet.DeleteRow(3, 10);
+				Assert.AreEqual("'Sheet1'!$H$11:$H$20", drawing.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$I$11:$I$20", drawing.Series[0].Series);
+				Assert.AreEqual(3, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(originalColumnOffset, drawing.From.ColumnOff);
+				Assert.AreEqual(0, drawing.From.RowOff);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\TwoCellAnchorChart.xlsx")]
+		public void DeleteRowsFromStartOfRangeUpdatesTwoCellAnchor()
+		{
+			var file = new FileInfo("TwoCellAnchorChart.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$H$21:$H$30", drawing.Series[0].XSeries);
+				Assert.AreEqual("Sheet1!$I$21:$I$30", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(16, drawing.To.Row);
+				Assert.AreEqual(8, drawing.To.Column);
+				Assert.AreEqual(eEditAs.TwoCell, drawing.EditAs);
+				var originalColumnOffset = drawing.From.ColumnOff;
+				sheet.DeleteRow(3, 10);
+				Assert.AreEqual("'Sheet1'!$H$11:$H$20", drawing.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$I$11:$I$20", drawing.Series[0].Series);
+				Assert.AreEqual(3, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(originalColumnOffset, drawing.From.ColumnOff);
+				Assert.AreEqual(0, drawing.From.RowOff);
+				Assert.AreEqual(6, drawing.To.Row);
+				Assert.AreEqual(8, drawing.To.Column);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AbsoluteChart.xlsx")]
+		public void DeleteRowsFromStartOfRangeDoesNothingToAbsoluteAnchoredChart()
+		{
+			var file = new FileInfo("AbsoluteChart.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$H$21:$H$30", drawing.Series[0].XSeries);
+				Assert.AreEqual("Sheet1!$I$21:$I$30", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(16, drawing.To.Row);
+				Assert.AreEqual(8, drawing.To.Column);
+				Assert.AreEqual(eEditAs.Absolute, drawing.EditAs);
+				var originalColumnOffset = drawing.From.ColumnOff;
+				var originalRowOffset = drawing.From.RowOff;
+				sheet.DeleteRow(3, 10);
+				Assert.AreEqual("'Sheet1'!$H$11:$H$20", drawing.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$I$11:$I$20", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(originalColumnOffset, drawing.From.ColumnOff);
+				Assert.AreEqual(originalRowOffset, drawing.From.RowOff);
 			}
 		}
 
