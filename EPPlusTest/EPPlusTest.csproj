@@ -320,6 +320,7 @@
     <Compile Include="Utils\AddressUtilityTests.cs" />
     <Compile Include="Utils\GuardingTests.cs" />
     <Compile Include="Utils\SqRefUtilityTests.cs" />
+    <Compile Include="Utils\InternationalizationUtilTests.cs" />
     <Compile Include="VBA.cs" />
     <Compile Include="WorkbookTests.cs" />
     <Compile Include="WorksheetsTests.cs" />
