@@ -26,6 +26,7 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using OfficeOpenXml.FormulaParsing.Excel.Operators;
@@ -40,6 +41,77 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// </summary>
 	public static class IfHelper
 	{
+		private enum ComparisonDataType
+		{
+			ErrorValue,
+			NumericValue,
+			TextValue,
+			BooleanValue,
+			Null
+		}
+
+		public static bool ObjectMatchesCriteria(object objectToCompare, object criteriaObject)
+		{
+			var comparisonObjectDataType = GetObjectComparisonDataType(objectToCompare);
+			var criteriaObjectDataType = GetObjectComparisonDataType(criteriaObject);
+
+			if (criteriaObjectDataType == ComparisonDataType.TextValue)
+				return false; // Do text stuff here.
+			else
+				return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, criteriaObject, criteriaObjectDataType);
+		}
+
+		private static bool ObjectMatchesRawTextCriteria(string rawCriteriaString, out object objectFromCriteria, out ComparisonDataType criteriaDataType)
+		{
+			objectFromCriteria = null;
+			criteriaDataType = ComparisonDataType.TextValue;
+			if (ConvertUtil.TryParseDateObjectToOADate(rawCriteriaString, out double criteriaDouble))
+			{
+				objectFromCriteria = criteriaDouble;
+				criteriaDataType = ComparisonDataType.NumericValue;
+			}
+			else if (InternationalizationUtil.TryParseLocalBoolean(rawCriteriaString, CultureInfo.CurrentCulture, out bool criteriaBool))
+			{
+				objectFromCriteria = criteriaBool;
+				criteriaDataType = ComparisonDataType.BooleanValue;
+			}
+			else if (InternationalizationUtil.TryParseLocalErrorValue(rawCriteriaString, CultureInfo.CurrentCulture, out ExcelErrorValue criteriaErrorValue))
+			{
+				objectFromCriteria = criteriaErrorValue;
+				criteriaDataType = ComparisonDataType.ErrorValue;
+			}
+			else
+				return false;
+
+			return true;
+		}
+
+		private static bool ObjectValueEqualsCriteriaValue(object objectToCompare, ComparisonDataType objectDataType,
+														object criteriaObject, ComparisonDataType criteriaDataType)
+		{
+			if (objectDataType != criteriaDataType)
+				return false;
+
+			var objectString = objectToCompare.ToString();
+			var criteriaString = criteriaObject.ToString();
+
+			return (string.Compare(criteriaString, objectString) == 0);
+		}
+
+		private static ComparisonDataType GetObjectComparisonDataType(object objectToAssign)
+		{
+			if (objectToAssign is bool)
+				return ComparisonDataType.BooleanValue;
+			else if (ConvertUtil.TryParseDateObjectToOADate(objectToAssign, out double objectDouble))
+				return ComparisonDataType.NumericValue;
+			else if (objectToAssign is string)
+				return ComparisonDataType.TextValue;
+			else if (objectToAssign is ExcelErrorValue)
+				return ComparisonDataType.ErrorValue;
+			else
+				return ComparisonDataType.Null;
+		}
+
 		/// <summary>
 		/// Compares the given <paramref name="objectToCompare"/> against the given <paramref name="criteria"/>.
 		/// This method is expected to be used with any of the *IF or *IFS Excel functions (ex: the AVERAGEIF function).
