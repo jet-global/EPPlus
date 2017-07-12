@@ -751,6 +751,33 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
 		}
+
+		[TestMethod]
+		public void VarPIsGivenASingleTrueBooleanInput()
+		{
+			var function = new VarP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(true), this.ParsingContext);
+
+			Assert.AreEqual(0, result1.ResultNumeric, .00001); ;
+		}
+
+		[TestMethod]
+		public void VarPIsGivenASingleFalseBooleanInput()
+		{
+			var function = new VarP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(false), this.ParsingContext);
+
+			Assert.AreEqual(0, result1.ResultNumeric, .00001); ;
+		}
+
+		[TestMethod]
+		public void VarPIsGivenASingleStringInput()
+		{
+			var function = new VarP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs("string"), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
+		}
 		#endregion
 	}
 }

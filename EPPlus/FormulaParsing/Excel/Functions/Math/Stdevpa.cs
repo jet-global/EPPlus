@@ -45,14 +45,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The standard deviation based on the entire population.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			//NOTE: This follows the Functionality of excel which is diffrent from the excel documentation.
-			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
+			//Note: This follows the Functionality of excel which is diffrent from the excel documentation.
+			//If you pass in a null Stdevpa(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
 			List<double> listToDoStandardDeviationOn = new List<double>();
-			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in arguments)
 			{
-
-
 				if (item.IsExcelRange)
 				{
 					foreach (var cell in item.ValueAsRangeInfo)
@@ -83,8 +82,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return this.CreateResult(0d, DataType.Decimal);
 				}
 			}
+			var args = this.ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in args)
+			{
 				listToDoStandardDeviationOn.Add(item);
+			}
 			if (!this.TryStandardDeviationEntirePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);
 			return this.CreateResult(standardDeviation, DataType.Decimal);

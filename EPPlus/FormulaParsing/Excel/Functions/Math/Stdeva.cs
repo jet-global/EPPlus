@@ -45,11 +45,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The standard deviation based on a sample.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			//NOTE: This follows the Functionality of excel which is diffrent from the excel documentation.
-			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
+			//Note: This follows the Functionality of excel which is diffrent from the excel documentation.
+			//If you pass in a null Stdeva(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
 			List<double> listToDoStandardDeviationOn = new List<double>();
-			bool DontAddBoolsTwice = false;
-			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
+			bool skipAddingBooleanValue = false;
 			foreach (var item in arguments)
 			{
 				if (item.IsExcelRange)
@@ -68,7 +69,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				{
 					if (item.ValueFirst is bool valueIsABool)
 					{
-						DontAddBoolsTwice = true;
+						skipAddingBooleanValue = true;
 						if (valueIsABool == true)
 						{
 							listToDoStandardDeviationOn.Add(1);
@@ -83,9 +84,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return this.CreateResult(0d, DataType.Decimal);
 				}
 			}
+			var args = this.ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in args)
-				if(!DontAddBoolsTwice)
+			{
+				if (!skipAddingBooleanValue)
 					listToDoStandardDeviationOn.Add(item);
+			}
 			if (!this.TryStandardDeviationEntireSamplePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);
 			return this.CreateResult(standardDeviation, DataType.Decimal);
@@ -94,6 +98,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private bool TryStandardDeviationEntireSamplePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
 			standardDeviation = MathObj.Sqrt(this.VarSamplePopulation(listToDoStandardDeviationOn));
+			if (listToDoStandardDeviationOn.Count() <= 1)
+				return false;
 			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
 				return false;
 			return true;

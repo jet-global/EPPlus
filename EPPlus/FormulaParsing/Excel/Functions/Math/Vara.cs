@@ -43,11 +43,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The variance based on a sample.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			//NOTE: This follows the Functionality of excel which is diffrent from the excel documentation.
-			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
+			//Note: This follows the Functionality of excel which is diffrent from the excel documentation.
+			//If you pass in a null Vara(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
 			List<double> listToDoVarianceOn = new List<double>();
 			bool DontAddBoolsTwice = false;
-			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in arguments)
 			{
 				if (item.IsExcelRange)
@@ -81,20 +82,25 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return this.CreateResult(0d, DataType.Decimal);
 				}
 			}
+			var args = this.ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in args)
+			{
 				if (!DontAddBoolsTwice)
 					listToDoVarianceOn.Add(item);
-			if (!this.TryVarSample(listToDoVarianceOn, out double VarSample))
+			}
+			if (!this.TryVarSample(listToDoVarianceOn, out double variance))
 				return new CompileResult(eErrorType.Value);
-			return new CompileResult(VarSample, DataType.Decimal);
+			return new CompileResult(variance, DataType.Decimal);
 		}
 
-		private bool TryVarSample(List<double> listOfDoubles, out double VarSample)
+		private bool TryVarSample(List<double> listOfDoubles, out double variance)
 		{
 			double avg = listOfDoubles.Average();
 			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
-			VarSample = (d / (listOfDoubles.Count() - 1));
-			if (VarSample == 0 && listOfDoubles.All(x => x == -1))
+			variance = (d / (listOfDoubles.Count() - 1));
+			if (listOfDoubles.Count() <= 1)
+				return false;
+			if (variance == 0 && listOfDoubles.All(x => x == -1))
 				return false;
 			return true;
 		}

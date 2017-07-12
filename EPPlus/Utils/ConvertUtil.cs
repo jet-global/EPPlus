@@ -147,8 +147,8 @@ namespace OfficeOpenXml.Utils
 						return true;
 					}
 				}
-				else
-					return false;
+				//else
+					//return false;
 			}
 			else if (dateCandidate is int dateInt)
 			{

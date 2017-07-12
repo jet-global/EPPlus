@@ -83,7 +83,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, input1, input1), this.ParsingContext);
 			var result2 = function.Execute(FunctionsHelper.CreateArgs(input1, input2, input1), this.ParsingContext);
 			var result3 = function.Execute(FunctionsHelper.CreateArgs(input1, input3, input4), this.ParsingContext);
-
 			Assert.AreEqual(0, result1.ResultNumeric, .00001);
 			Assert.AreEqual(87.17989065, result2.ResultNumeric, .00001);
 			Assert.AreEqual(365.500114, result3.ResultNumeric, .00001);
@@ -136,8 +135,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1,
 				input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1, input1
 				), this.ParsingContext);
-
-
 			Assert.AreEqual(6.211812471, result1.ResultNumeric, .00001);
 		}
 
@@ -162,7 +159,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["A11"].Formula = "=stdev.s(B1,B3,B5,B6,B9)";
 				worksheet.Cells["A12"].Formula = "=stdev.s(B1,B3,B5,B6)";
 				worksheet.Calculate();
-
 				Assert.AreEqual(26.97581221, (double)worksheet.Cells["A10"].Value, .00001);
 				Assert.AreEqual(34.47462835, (double)worksheet.Cells["A11"].Value, .00001);
 				Assert.AreEqual(25.77304794, (double)worksheet.Cells["A12"].Value, .00001);
@@ -247,7 +243,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B4"].Value = "02:00 am";
 				worksheet.Cells["B9"].Formula = "=stdev.s(B1:B4)";
 				worksheet.Calculate();
-
 				Assert.AreEqual(9.899494937, (double)worksheet.Cells["B9"].Value, .00001);
 			}
 		}
@@ -300,7 +295,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B2"].Value = 1;
 				worksheet.Cells["B3"].Value = "6/17/2011 2:00";
 				worksheet.Cells["B4"].Value = "02:00 am";
-
 				worksheet.Cells["A1"].Value = 23;
 				worksheet.Cells["A2"].Value = 15;
 				worksheet.Cells["A3"].Value = "02:00 am";
@@ -418,14 +412,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B4"].Value = 56;
 				worksheet.Cells["B5"].Value = 32;
 				worksheet.Cells["B6"].Value = 76;
-
 				worksheet.Cells["B7"].Value = 2;
 				worksheet.Cells["B8"].Value = 3;
 				worksheet.Cells["B9"].Value = 5;
 				worksheet.Cells["B10"].Value = 7;
 				worksheet.Cells["B11"].Value = 45;
-
-
 				worksheet.Cells["A9"].Formula = "=stdev.s(B1:B6, B7:B11)";
 				worksheet.Calculate();
 				Assert.AreEqual(26.30762074, (double)worksheet.Cells["A9"].Value, .00001);
@@ -445,14 +436,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B4"].Value = "12:00";
 				worksheet.Cells["B5"].Value = 32;
 				worksheet.Cells["B6"].Value = 76;
-
 				worksheet.Cells["B7"].Value = 2;
 				worksheet.Cells["B8"].Value = 3;
 				worksheet.Cells["B9"].Value = 5;
 				worksheet.Cells["B10"].Value = 7;
 				worksheet.Cells["B11"].Value = 45;
-
-
 				worksheet.Cells["A9"].Formula = "=stdev.s(B1:B6, B7:B11)";
 				worksheet.Calculate();
 				Assert.AreEqual(25.35985454, (double)worksheet.Cells["A9"].Value, .00001);
@@ -472,14 +460,11 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B4"].Value = "12:00";
 				worksheet.Cells["B5"].Value = "6/17/2011 2:00";
 				worksheet.Cells["B6"].Value = 76;
-
 				worksheet.Cells["B7"].Value = 2;
 				worksheet.Cells["B8"].Value = 3;
 				worksheet.Cells["B9"].Value = 5;
 				worksheet.Cells["B10"].Value = 7;
 				worksheet.Cells["B11"].Value = 45;
-
-
 				worksheet.Cells["A9"].Formula = "=stdev.s(B1:B6, B7:B11)";
 				worksheet.Calculate();
 				Assert.AreEqual(26.56647846, (double)worksheet.Cells["A9"].Value, .00001);
@@ -767,6 +752,33 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["A4"].Value).Type);
 				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenASingleTrueBooleanInput()
+		{
+			var function = new StdevS();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(true), this.ParsingContext);
+
+			Assert.AreEqual(0, result1.ResultNumeric, .00001); ;
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenASingleFalseBooleanInput()
+		{
+			var function = new StdevS();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(false), this.ParsingContext);
+
+			Assert.AreEqual(0, result1.ResultNumeric, .00001); ;
+		}
+
+		[TestMethod]
+		public void StdevSIsGivenASingleStringInput()
+		{
+			var function = new StdevS();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs("string"), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
 		}
 		#endregion
 	}

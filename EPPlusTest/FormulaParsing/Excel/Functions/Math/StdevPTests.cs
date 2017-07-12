@@ -233,6 +233,32 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			Assert.AreEqual(17628.11549, result2.ResultNumeric, .00001);
 		}
 
+		[TestMethod]
+		public void StdevPIsGivenASingleTrueBooleanInput()
+		{
+			var function = new StdevP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(true), this.ParsingContext);
+
+			Assert.AreEqual(0, result1.ResultNumeric, .00001);;
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenASingleFalseBooleanInput()
+		{
+			var function = new StdevP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(false), this.ParsingContext);
+
+			Assert.AreEqual(0, result1.ResultNumeric, .00001); ;
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenASingleStringInput()
+		{
+			var function = new StdevP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs("string"), this.ParsingContext);
+
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
+		}
 
 		[TestMethod]
 		public void StdevPIsGivenAMixOfInputTypesByCellRange()
@@ -682,6 +708,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		{
 			var function = new StdevP();
 			var result1 = function.Execute(FunctionsHelper.CreateArgs("string", "another string", "a third string"), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
+		}
+
+		[TestMethod]
+		public void StdevPIsGivenAStringAsInputs()
+		{
+			var function = new StdevP();
+			var result1 = function.Execute(FunctionsHelper.CreateArgs("string"), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
 		}
 

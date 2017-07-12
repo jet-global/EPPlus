@@ -44,14 +44,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <param name="context">Unused, this is information about where the function is being executed.</param>
 		/// <returns>The standard deviation based on a sample.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
-		{	
-			//NOTE: This follows the Functionality of excel which is diffrent from the excel documentation.
+		{
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
+				return new CompileResult(argumentError);
+			//Note: This follows the Functionality of excel which is diffrent from the excel documentation.
 			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
 			List<double> listToDoStandardDeviationOn = new List<double>();
-			var args = ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
 			foreach (var item in arguments)
 			{
-
 				if (item.IsExcelRange)
 				{
 
@@ -64,10 +64,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				if (item.ValueFirst == null)
 					listToDoStandardDeviationOn.Add(0.0);
 			}
-			foreach(var item in args)
+			var args = this.ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
+			foreach (var item in args)
+			{
 				listToDoStandardDeviationOn.Add(item);
-			var IfStanderedDeviationWorked = this.TryStandardDeviationOnASamplePopulation(listToDoStandardDeviationOn, out double standardDeviation);
-			if (!IfStanderedDeviationWorked)
+			}
+			var standardDeviationSucceeded = this.TryStandardDeviationOnASamplePopulation(listToDoStandardDeviationOn, out double standardDeviation);
+			if (!standardDeviationSucceeded)
 				return new CompileResult(eErrorType.Value);
 			return this.CreateResult(standardDeviation, DataType.Decimal);
 		}
@@ -75,6 +78,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private bool TryStandardDeviationOnASamplePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
 			standardDeviation = MathObj.Sqrt(this.VarSampleSize(listToDoStandardDeviationOn));
+			if (listToDoStandardDeviationOn.Count() <= 1)
+				return false;
 			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
 				return false;
 			return true;
