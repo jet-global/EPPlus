@@ -31,259 +31,422 @@ namespace OfficeOpenXml.Utils
 {
 	class InternationalizationUtil
 	{
-		private static string defaultValueError = "#VALUE!";
-		private static string defaultNumError = "#NUM!";
-		private static string defaultDiv0Error = "#DIV/0!";
-		private static string defaultNameError = "#NAME?";
-		private static string defaultNAError = "#N/A";
-		private static string defaultRefError = "#REF!";
-		private static string defaultNullError = "#NULL!";
-
-		private static readonly Dictionary<CultureInfo, string> valueErrorStrings = new Dictionary<CultureInfo, string>()
+		#region Language Error Dictionaries
+		private static readonly Dictionary<string, eErrorType> englishErrors = new Dictionary<string, eErrorType>()
 		{
-			{CultureInfo.CreateSpecificCulture("en-us"), defaultValueError}, // English
-			{CultureInfo.CreateSpecificCulture("de-de"), "#WERT!"},			 // German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), defaultValueError}, // Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), defaultValueError}, // Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), "#VÆRDI!"},		 // Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), "#WAARDE!"},		 // Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), "#ARVO!"},			 // Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), "#VALEUR!"},		 // French
-			{CultureInfo.CreateSpecificCulture("it-it"), "#VALORE!"},		 // Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), defaultValueError}, // Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), defaultValueError}, // Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), "#VERDI!"},		 // Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), "#ARG!"},			 // Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), "#VALOR!"},		 // Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), "#VALOR!"},		 // Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), "#ЗНАЧ!"},			 // Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), "#¡VALOR!"},		 // Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), "#VÄRDEFEL!"},		 // Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), "#VRIJEDNOST!"},	 // Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), "#HODNOTA!"},		 // Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), "#ΤΙΜΗ!"},			 // Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), "#ÉRTÉK!"},		 // Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), defaultValueError}, // Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), "#VALOARE!"},		 // Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), "#HODNOTA!"},		 // Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), "#VREDN!"},		 // Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), "#DEĞER!"}			 // Turkish
+			{"#VALUE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
 		};
 
-		private static readonly Dictionary<CultureInfo, string> numErrorStrings = new Dictionary<CultureInfo, string>()
+		private static readonly Dictionary<string, eErrorType> germanErrors = new Dictionary<string, eErrorType>()
 		{
-			{CultureInfo.CreateSpecificCulture("en-us"), defaultNumError}, // English
-			{CultureInfo.CreateSpecificCulture("de-de"), "#ZAHL!"},		   // German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), defaultNumError}, // Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), defaultNumError}, // Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), defaultNumError}, // Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), "#GETAL!"},	   // Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), "#LUKU!"},		   // Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), "#NOMBRE!"},	   // French
-			{CultureInfo.CreateSpecificCulture("it-it"), defaultNumError}, // Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), defaultNumError}, // Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), defaultNumError}, // Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), defaultNumError}, // Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), "#LICZBA!"},	   // Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), "#NÚM!"},		   // Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), "#NÚM!"},		   // Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), "#ЧИСЛО!"},	   // Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), "#¡NUM!"},		   // Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), "#OGILTIGT!"},	   // Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), "#BROJ!"},		   // Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), "#ČÍSLO!"},	   // Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), "#ΑΡΙΘ!"},		   // Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), "#SZÁM!"},		   // Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), defaultNumError}, // Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), defaultNumError}, // Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), "#ČÍSLO!"},	   // Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), "#ŠTEV!"},		   // Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), "#SAYI!"}		   // Turkish
+			{"#WERT!", eErrorType.Value},
+			{"#ZAHL!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#NV", eErrorType.NA},
+			{"#BEZUG!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
 		};
 
-		private static readonly Dictionary<CultureInfo, string> div0ErrorStrings = new Dictionary<CultureInfo, string>()
+		private static readonly Dictionary<string, eErrorType> chineseErrors = new Dictionary<string, eErrorType>()
 		{
-			{CultureInfo.CreateSpecificCulture("en-us"), defaultDiv0Error}, // English
-			{CultureInfo.CreateSpecificCulture("de-de"), defaultDiv0Error}, // German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), defaultDiv0Error}, // Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), defaultDiv0Error}, // Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), "#DIVISION/0!"},   // Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), "#DEEL/0!"},	    // Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), "#JAKO/0!"},	    // Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), defaultDiv0Error}, // French
-			{CultureInfo.CreateSpecificCulture("it-it"), defaultDiv0Error}, // Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), defaultDiv0Error}, // Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), defaultDiv0Error}, // Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), defaultDiv0Error}, // Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), "#DZIEL/0!"},	    // Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), defaultDiv0Error}, // Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), defaultDiv0Error}, // Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), "#ДЕЛ/0!"},	    // Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), "#¡DIV/0!"},	    // Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), "#DIVISION/0!"},   // Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), "#DIJ/0!"},	    // Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), "#DĚLENÍ_NULOU!"}, // Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), "#ΔΙΑΙΡ./0!"},	    // Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), "#ZÉRÓOSZTÓ!"},    // Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), defaultDiv0Error}, // Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), defaultDiv0Error}, // Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), "#DELENIENULOU!"}, // Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), "#DEL/0!"},	    // Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), "#SAYI/0!"}	    // Turkish
+			{"#VALUE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
 		};
 
-		private static readonly Dictionary<CultureInfo, string> nameErrorStrings = new Dictionary<CultureInfo, string>()
+		private static readonly Dictionary<string, eErrorType> danishErrors = new Dictionary<string, eErrorType>()
 		{
-			{CultureInfo.CreateSpecificCulture("en-us"), defaultNameError}, // English
-			{CultureInfo.CreateSpecificCulture("de-de"), defaultNameError}, // German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), defaultNameError}, // Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), defaultNameError}, // Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), "#NAVN?"},		    // Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), "#NAAM?"},		    // Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), "#NIMI?"},		    // Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), "#NOM?"},		    // French
-			{CultureInfo.CreateSpecificCulture("it-it"), "#NOME?"},		    // Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), defaultNameError}, // Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), defaultNameError}, // Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), "#NAVN?"},		    // Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), "#NAZWA?"},	    // Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), "#NOME?"},		    // Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), "#NOME?"},		    // Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), "#ИМЯ?"},		    // Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), "#¿NOMBRE?"},	    // Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), "#NAMN?"},		    // Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), "#NAZIV?"},	    // Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), "#NÁZEV?"},	    // Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), "#ΟΝΟΜΑ?"},	    // Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), "#NÉV?"},		    // Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), defaultNameError}, // Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), "#NUME?"},		    // Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), "#NÁZOV?"},	    // Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), "#IME?"},		    // Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), "#AD?"}		    // Turkish
+			{"#VÆRDI!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIVISION/0!", eErrorType.Div0},
+			{"#NAVN?", eErrorType.Name},
+			{"#I/T", eErrorType.NA},
+			{"#REFERENCE!", eErrorType.Ref},
+			{"#NUL!", eErrorType.Null}
 		};
 
-		private static readonly Dictionary<CultureInfo, string> naErrorStrings = new Dictionary<CultureInfo, string>()
+		private static readonly Dictionary<string, eErrorType> dutchErrors = new Dictionary<string, eErrorType>()
 		{
-			{CultureInfo.CreateSpecificCulture("en-us"), defaultNAError},	   // English
-			{CultureInfo.CreateSpecificCulture("de-de"), "#NV"},			   // German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), defaultNAError},	   // Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), defaultNAError},	   // Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), "#I/T"},			   // Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), "#N/B"},			   // Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), "#PUUTTUU!"},		   // Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), defaultNAError},	   // French
-			{CultureInfo.CreateSpecificCulture("it-it"), "#N/D"},			   // Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), defaultNAError},	   // Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), defaultNAError},	   // Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), "#I/T"},			   // Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), "#N/D!"},			   // Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), "#N/D"},			   // Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), "#N/D"},			   // Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), "#Н/Д"},			   // Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), defaultNAError},	   // Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), "#SAKNAS!"},		   // Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), "#N/D"},			   // Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), "#NENÍ_K_DISPOZICI"}, // Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), "#Δ/Υ"},			   // Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), "#HIÁNYZIK"},		   // Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), defaultNAError},	   // Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), defaultNAError},	   // Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), "#NEDOSTUPNÝ"},	   // Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), "#N/V"},			   // Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), "#YOK"}			   // Turkish
+			{"#WAARDE!", eErrorType.Value},
+			{"#GETAL!", eErrorType.Num},
+			{"#DEEL/0!", eErrorType.Div0},
+			{"#NAAM?", eErrorType.Name},
+			{"#N/B", eErrorType.NA},
+			{"#VERW!", eErrorType.Ref},
+			{"#LEEG!", eErrorType.Null}
 		};
 
-		private static readonly Dictionary<CultureInfo, string> refErrorStrings = new Dictionary<CultureInfo, string>()
+		private static readonly Dictionary<string, eErrorType> finnishErrors = new Dictionary<string, eErrorType>()
 		{
-			{CultureInfo.CreateSpecificCulture("en-us"), defaultRefError}, // English
-			{CultureInfo.CreateSpecificCulture("de-de"), "#BEZUG!"},	   // German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), defaultRefError}, // Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), defaultRefError}, // Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), "#REFERENCE!"},   // Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), "#VERW!"},		   // Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), "#VIITTAUS!"},	   // Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), defaultRefError}, // French
-			{CultureInfo.CreateSpecificCulture("it-it"), "#RIF!"},		   // Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), defaultRefError}, // Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), defaultRefError}, // Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), defaultRefError}, // Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), "#ADR!"},		   // Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), defaultRefError}, // Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), defaultRefError}, // Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), "#ССЫЛКА!"},	   // Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), "#¡REF!"},		   // Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), "#REFERENS!"},	   // Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), defaultRefError}, // Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), "#ODKAZ!"},	   // Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), "#ΑΝΑΦ!"},		   // Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), "#HIV!"},		   // Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), defaultRefError}, // Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), defaultRefError}, // Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), "#ODKAZ!"},	   // Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), "#SKLIC!"},	   // Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), "#BAŞV!"}		   // Turkish
+			{"#ARVO!", eErrorType.Value},
+			{"#LUKU!", eErrorType.Num},
+			{"#JAKO/0!", eErrorType.Div0},
+			{"#NIMI?", eErrorType.Name},
+			{"#PUUTTUU!", eErrorType.NA},
+			{"#VIITTAUS!", eErrorType.Ref},
+			{"#TYHJÄ!", eErrorType.Null}
 		};
 
-		private static readonly Dictionary<CultureInfo, string> nullErrorStrings = new Dictionary<CultureInfo, string>()
+		private static readonly Dictionary<string, eErrorType> frenchErrors = new Dictionary<string, eErrorType>()
 		{
-			{CultureInfo.CreateSpecificCulture("en-us"), defaultNullError}, // English
-			{CultureInfo.CreateSpecificCulture("de-de"), defaultNullError}, // German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), defaultNullError}, // Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), defaultNullError}, // Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), "#NUL!"},		    // Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), "#LEEG!"},		    // Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), "#TYHJÄ!"},	    // Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), "#NUL!"},		    // French
-			{CultureInfo.CreateSpecificCulture("it-it"), defaultNullError}, // Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), defaultNullError}, // Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), defaultNullError}, // Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), defaultNullError}, // Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), "#ZERO!"},		    // Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), "#NULO!"},		    // Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), "#NULO!"},		    // Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), "#ПУСТО!"},	    // Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), "#¡NULO!"},	    // Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), "#SKÄRNING!"},	    // Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), defaultNullError}, // Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), defaultNullError}, // Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), "#ΚΕΝΟ!"},		    // Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), "#NULLA!"},	    // Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), defaultNullError}, // Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), "#NUL!"},		    // Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), "#NEPLATNÝ!"},	    // Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), "#NIČ!"},		    // Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), "#BOŞ!"}		    // Turkish
+			{"#VALEUR!", eErrorType.Value},
+			{"#NOMBRE!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NOM?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NUL!", eErrorType.Null}
 		};
 
+		private static readonly Dictionary<string, eErrorType> italianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALORE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NOME?", eErrorType.Name},
+			{"#N/D", eErrorType.NA},
+			{"#RIF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> japaneseErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALUE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> koreanErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALUE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> norwegianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VERDI!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAVN?", eErrorType.Name},
+			{"#I/T", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> polishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#ARG!", eErrorType.Value},
+			{"#LICZBA!", eErrorType.Num},
+			{"#DZIEL/0!", eErrorType.Div0},
+			{"#NAZWA?", eErrorType.Name},
+			{"#N/D!", eErrorType.NA},
+			{"#ADR!", eErrorType.Ref},
+			{"#ZERO!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> portugueseErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALOR!", eErrorType.Value},
+			{"#NÚM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NOME?", eErrorType.Name},
+			{"#N/D", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULO!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> russianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#ЗНАЧ!", eErrorType.Value},
+			{"#ЧИСЛО!", eErrorType.Num},
+			{"#ДЕЛ/0!", eErrorType.Div0},
+			{"#ИМЯ?", eErrorType.Name},
+			{"#Н/Д", eErrorType.NA},
+			{"#ССЫЛКА!", eErrorType.Ref},
+			{"#ПУСТО!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> spanishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#¡VALOR!", eErrorType.Value},
+			{"#¡NUM!", eErrorType.Num},
+			{"#¡DIV/0!", eErrorType.Div0},
+			{"#¿NOMBRE?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#¡REF!", eErrorType.Ref},
+			{"#¡NULO!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> swedishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VÄRDEFEL!", eErrorType.Value},
+			{"#OGILTIGT!", eErrorType.Num},
+			{"#DIVISION/0!", eErrorType.Div0},
+			{"#NAMN?", eErrorType.Name},
+			{"#SAKNAS!", eErrorType.NA},
+			{"#REFERENS!", eErrorType.Ref},
+			{"#SKÄRNING!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> croatianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VRIJEDNOST!", eErrorType.Value},
+			{"#BROJ!", eErrorType.Num},
+			{"#DIJ/0!", eErrorType.Div0},
+			{"#NAZIV?", eErrorType.Name},
+			{"#N/D", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> czechErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#HODNOTA!", eErrorType.Value},
+			{"#ČÍSLO!", eErrorType.Num},
+			{"#DĚLENÍ_NULOU!", eErrorType.Div0},
+			{"#NÁZEV?", eErrorType.Name},
+			{"#NENÍ_K_DISPOZICI", eErrorType.NA},
+			{"#ODKAZ!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> greekErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#ΤΙΜΗ!", eErrorType.Value},
+			{"#ΑΡΙΘ!", eErrorType.Num},
+			{"#ΔΙΑΙΡ./0!", eErrorType.Div0},
+			{"#ΟΝΟΜΑ?", eErrorType.Name},
+			{"#Δ/Υ", eErrorType.NA},
+			{"#ΑΝΑΦ!", eErrorType.Ref},
+			{"#ΚΕΝΟ!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> hungarianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#ÉRTÉK!", eErrorType.Value},
+			{"#SZÁM!", eErrorType.Num},
+			{"#ZÉRÓOSZTÓ!", eErrorType.Div0},
+			{"#NÉV?", eErrorType.Name},
+			{"#HIÁNYZIK", eErrorType.NA},
+			{"#HIV!", eErrorType.Ref},
+			{"#NULLA!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> malayErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALUE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> romanianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALOARE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NUME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NUL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> slovakErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#HODNOTA!", eErrorType.Value},
+			{"#ČÍSLO!", eErrorType.Num},
+			{"#DELENIENULOU!", eErrorType.Div0},
+			{"#NÁZOV?", eErrorType.Name},
+			{"#NEDOSTUPNÝ", eErrorType.NA},
+			{"#ODKAZ!", eErrorType.Ref},
+			{"#NEPLATNÝ!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> slovenianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VREDN!", eErrorType.Value},
+			{"#ŠTEV!", eErrorType.Num},
+			{"#DEL/0!", eErrorType.Div0},
+			{"#IME?", eErrorType.Name},
+			{"#N/V", eErrorType.NA},
+			{"#SKLIC!", eErrorType.Ref},
+			{"#NIČ!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> turkishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#DEĞER!", eErrorType.Value},
+			{"#SAYI!", eErrorType.Num},
+			{"#SAYI/0!", eErrorType.Div0},
+			{"#AD?", eErrorType.Name},
+			{"#YOK", eErrorType.NA},
+			{"#BAŞV!", eErrorType.Ref},
+			{"#BOŞ!", eErrorType.Null}
+		};
+		#endregion
+
+		private static readonly Dictionary<CultureInfo, Dictionary<string, eErrorType>> errorDictionaries = new Dictionary<CultureInfo, Dictionary<string, eErrorType>>()
+		{
+			{CultureInfo.CreateSpecificCulture("en-us"), englishErrors},	// English
+			{CultureInfo.CreateSpecificCulture("de-de"), germanErrors},		// German
+			{CultureInfo.CreateSpecificCulture("zh-tw"), chineseErrors},	// Chinese (Traditional)
+			{CultureInfo.CreateSpecificCulture("zh-cn"), chineseErrors},	// Chinese (Simplified)
+			{CultureInfo.CreateSpecificCulture("da-dk"), danishErrors},		// Danish
+			{CultureInfo.CreateSpecificCulture("nl-nl"), dutchErrors},		// Dutch
+			{CultureInfo.CreateSpecificCulture("fi-fi"), finnishErrors},	// Finnish
+			{CultureInfo.CreateSpecificCulture("fr-fr"), frenchErrors},		// French
+			{CultureInfo.CreateSpecificCulture("it-it"), italianErrors},	// Italian
+			{CultureInfo.CreateSpecificCulture("ja-jp"), japaneseErrors},	// Japanese
+			{CultureInfo.CreateSpecificCulture("ko-kr"), koreanErrors},		// Korean
+			{CultureInfo.CreateSpecificCulture("nb-no"), norwegianErrors},	// Norwegian
+			{CultureInfo.CreateSpecificCulture("pl-pl"), polishErrors},		// Polish
+			{CultureInfo.CreateSpecificCulture("pt-pt"), portugueseErrors},	// Portuguese (Portugal)
+			{CultureInfo.CreateSpecificCulture("pt-br"), portugueseErrors},	// Portuguese (Brazil)
+			{CultureInfo.CreateSpecificCulture("ru-ru"), russianErrors},	// Russian
+			{CultureInfo.CreateSpecificCulture("es-es"), spanishErrors},	// Spanish (Spain)
+			{CultureInfo.CreateSpecificCulture("sv-se"), swedishErrors},	// Swedish
+			{CultureInfo.CreateSpecificCulture("hr-hr"), croatianErrors},	// Croatian
+			{CultureInfo.CreateSpecificCulture("cs-cz"), czechErrors},		// Czech
+			{CultureInfo.CreateSpecificCulture("el-gr"), greekErrors},		// Greek
+			{CultureInfo.CreateSpecificCulture("hu-hu"), hungarianErrors},	// Hungarian
+			{CultureInfo.CreateSpecificCulture("ms-my"), malayErrors},		// Malay
+			{CultureInfo.CreateSpecificCulture("ro-ro"), romanianErrors},	// Romanian
+			{CultureInfo.CreateSpecificCulture("sk-sk"), slovakErrors},		// Slovak
+			{CultureInfo.CreateSpecificCulture("sl-si"), slovenianErrors},	// Slovenian
+			{CultureInfo.CreateSpecificCulture("tr-tr"), turkishErrors}		// Turkish
+		};
+
+		private static readonly Dictionary<CultureInfo, string> trueStrings = new Dictionary<CultureInfo, string>()
+		{
+			{CultureInfo.CreateSpecificCulture("en-us"), "TRUE"},		// English
+			{CultureInfo.CreateSpecificCulture("de-de"), "WAHR"},		// German
+			{CultureInfo.CreateSpecificCulture("zh-tw"), "TRUE"},		// Chinese (Traditional)
+			{CultureInfo.CreateSpecificCulture("zh-cn"), "TRUE"},		// Chinese (Simplified)
+			{CultureInfo.CreateSpecificCulture("da-dk"), "SAND"},		// Danish
+			{CultureInfo.CreateSpecificCulture("nl-nl"), "WAAR"},		// Dutch
+			{CultureInfo.CreateSpecificCulture("fi-fi"), "TOSI"},		// Finnish
+			{CultureInfo.CreateSpecificCulture("fr-fr"), "VRAI"},		// French
+			{CultureInfo.CreateSpecificCulture("it-it"), "VERO"},		// Italian
+			{CultureInfo.CreateSpecificCulture("ja-jp"), "TRUE"},		// Japanese
+			{CultureInfo.CreateSpecificCulture("ko-kr"), "TRUE"},		// Korean
+			{CultureInfo.CreateSpecificCulture("nb-no"), "SANN"},		// Norwegian
+			{CultureInfo.CreateSpecificCulture("pl-pl"), "PRAWDA"},		// Polish
+			{CultureInfo.CreateSpecificCulture("pt-pt"), "VERDADEIRO"},	// Portuguese (Portugal)
+			{CultureInfo.CreateSpecificCulture("pt-br"), "VERDADEIRO"},	// Portuguese (Brazil)
+			{CultureInfo.CreateSpecificCulture("ru-ru"), "ИСТИНА"},		// Russian
+			{CultureInfo.CreateSpecificCulture("es-es"), "VERDADERO"},	// Spanish (Spain)
+			{CultureInfo.CreateSpecificCulture("sv-se"), "SANT"},		// Swedish
+			{CultureInfo.CreateSpecificCulture("hr-hr"), "TRUE"},		// Croatian
+			{CultureInfo.CreateSpecificCulture("cs-cz"), "PRAVDA"},		// Czech
+			{CultureInfo.CreateSpecificCulture("el-gr"), "TRUE"},		// Greek
+			{CultureInfo.CreateSpecificCulture("hu-hu"), "IGAZ"},		// Hungarian
+			{CultureInfo.CreateSpecificCulture("ms-my"), "TRUE"},		// Malay
+			{CultureInfo.CreateSpecificCulture("ro-ro"), "TRUE"},		// Romanian
+			{CultureInfo.CreateSpecificCulture("sk-sk"), "TRUE"},		// Slovak
+			{CultureInfo.CreateSpecificCulture("sl-si"), "TRUE"},		// Slovenian
+			{CultureInfo.CreateSpecificCulture("tr-tr"), "DOĞRU"}		// Turkish
+		};
+
+		private static readonly Dictionary<CultureInfo, string> falseStrings = new Dictionary<CultureInfo, string>()
+		{
+			{CultureInfo.CreateSpecificCulture("en-us"), "FALSE"},		// English
+			{CultureInfo.CreateSpecificCulture("de-de"), "FALSCH"},		// German
+			{CultureInfo.CreateSpecificCulture("zh-tw"), "FALSE"},		// Chinese (Traditional)
+			{CultureInfo.CreateSpecificCulture("zh-cn"), "FALSE"},		// Chinese (Simplified)
+			{CultureInfo.CreateSpecificCulture("da-dk"), "FALSK"},		// Danish
+			{CultureInfo.CreateSpecificCulture("nl-nl"), "ONWAAR"},		// Dutch
+			{CultureInfo.CreateSpecificCulture("fi-fi"), "EPÄTOSI"},	// Finnish
+			{CultureInfo.CreateSpecificCulture("fr-fr"), "FAUX"},		// French
+			{CultureInfo.CreateSpecificCulture("it-it"), "FALSO"},		// Italian
+			{CultureInfo.CreateSpecificCulture("ja-jp"), "FALSE"},		// Japanese
+			{CultureInfo.CreateSpecificCulture("ko-kr"), "FALSE"},		// Korean
+			{CultureInfo.CreateSpecificCulture("nb-no"), "USANN"},		// Norwegian
+			{CultureInfo.CreateSpecificCulture("pl-pl"), "FAŁSZ"},		// Polish
+			{CultureInfo.CreateSpecificCulture("pt-pt"), "FALSO"},		// Portuguese (Portugal)
+			{CultureInfo.CreateSpecificCulture("pt-br"), "FALSO"},		// Portuguese (Brazil)
+			{CultureInfo.CreateSpecificCulture("ru-ru"), "ЛОЖЬ"},		// Russian
+			{CultureInfo.CreateSpecificCulture("es-es"), "FALSO"},		// Spanish (Spain)
+			{CultureInfo.CreateSpecificCulture("sv-se"), "FALSKT"},		// Swedish
+			{CultureInfo.CreateSpecificCulture("hr-hr"), "FALSE"},		// Croatian
+			{CultureInfo.CreateSpecificCulture("cs-cz"), "NEPRAVDA"},	// Czech
+			{CultureInfo.CreateSpecificCulture("el-gr"), "FALSE"},		// Greek
+			{CultureInfo.CreateSpecificCulture("hu-hu"), "HAMIS"},		// Hungarian
+			{CultureInfo.CreateSpecificCulture("ms-my"), "FALSE"},		// Malay
+			{CultureInfo.CreateSpecificCulture("ro-ro"), "FALSE"},		// Romanian
+			{CultureInfo.CreateSpecificCulture("sk-sk"), "FALSE"},		// Slovak
+			{CultureInfo.CreateSpecificCulture("sl-si"), "FALSE"},		// Slovenian
+			{CultureInfo.CreateSpecificCulture("tr-tr"), "YANLIŞ" }		// Turkish
+		};
+
+		/// <summary>
+		/// Attempt to parse the contents of <paramref name="errorCandidate"/> to an
+		/// <see cref="ExcelErrorValue"/>. The <paramref name="errorCandidate"/> is compared
+		/// to the error value strings for the given <paramref name="culture"/>.
+		/// </summary>
+		/// <param name="errorCandidate">The string to parse to an <see cref="ExcelErrorValue"/>.</param>
+		/// <param name="culture">
+		///		The <see cref="CultureInfo"/> that determines which error strings the 
+		///		<paramref name="errorCandidate"/> are compared against.</param>
+		/// <param name="errorValue">The resulting <see cref="ExcelErrorValue"/> from successfully parsing the <paramref name="errorCandidate"/>.</param>
+		/// <returns>Returns true if the <paramref name="errorCandidate"/> was parsed to an <see cref="ExcelErrorValue"/>, and false otherwise.</returns>
 		public static bool TryParseLocalErrorValue(string errorCandidate, CultureInfo culture, out ExcelErrorValue errorValue)
 		{
 			errorValue = null;
-			string errorString = null;
-			if (valueErrorStrings.TryGetValue(culture, out errorString) && errorString.Equals(errorCandidate))
-				errorValue = ExcelErrorValue.Create(eErrorType.Value);
-			else if (numErrorStrings.TryGetValue(culture, out errorString) && errorString.Equals(errorCandidate))
-				errorValue = ExcelErrorValue.Create(eErrorType.Num);
-			else if (div0ErrorStrings.TryGetValue(culture, out errorString) && errorString.Equals(errorCandidate))
-				errorValue = ExcelErrorValue.Create(eErrorType.Div0);
-			else if (nameErrorStrings.TryGetValue(culture, out errorString) && errorString.Equals(errorCandidate))
-				errorValue = ExcelErrorValue.Create(eErrorType.Name);
-			else if (naErrorStrings.TryGetValue(culture, out errorString) && errorString.Equals(errorCandidate))
-				errorValue = ExcelErrorValue.Create(eErrorType.NA);
-			else if (refErrorStrings.TryGetValue(culture, out errorString) && errorString.Equals(errorCandidate))
-				errorValue = ExcelErrorValue.Create(eErrorType.Ref);
-			else if (nullErrorStrings.TryGetValue(culture, out errorString) && errorString.Equals(errorCandidate))
-				errorValue = ExcelErrorValue.Create(eErrorType.Null);
-			else
+			errorCandidate = errorCandidate.ToUpper(culture);
+			Dictionary<string, eErrorType> errorDictionary = null;
+			if (!errorDictionaries.TryGetValue(culture, out errorDictionary))
 				return false;
+			if (!errorDictionary.TryGetValue(errorCandidate, out eErrorType errorType))
+				return false;
+			errorValue = ExcelErrorValue.Create(errorType);
 			return true;
 		}
 
+		/// <summary>
+		/// Attempt to parse the contents of <paramref name="booleanCandidate"/> to a
+		/// bool. The <paramref name="booleanCandidate"/> is compared to the boolean value
+		/// strings for the given <paramref name="culture"/>.
+		/// </summary>
+		/// <param name="booleanCandidate">The string to parse to a bool.</param>
+		/// <param name="culture">
+		///		The <see cref="CultureInfo"/> that determines which boolean value strings
+		///		the <paramref name="booleanCandidate"/> are compared against.</param>
+		/// <param name="booleanValue">The resulting <see cref="ExcelErrorValue"/> from successfully parsing the <paramref name="booleanCandidate"/>.</param>
+		/// <returns>Returns true if the <paramref name="booleanCandidate"/> was parsed to a bool, and false otherwise.</returns>
 		public static bool TryParseLocalBoolean(string booleanCandidate, CultureInfo culture, out bool booleanValue)
 		{
 			booleanValue = false;
-			
-			return false;
+			booleanCandidate = booleanCandidate.ToUpper(culture);
+			if (trueStrings.TryGetValue(culture, out string localTrueString) && booleanCandidate.Equals(localTrueString))
+				booleanValue = true;
+			else if (falseStrings.TryGetValue(culture, out string localFalseString) && booleanCandidate.Equals(localFalseString))
+				booleanValue = false;
+			else
+				return false;
+			return true;
 		}
 	}
 }

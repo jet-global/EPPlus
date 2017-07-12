@@ -36,6 +36,7 @@ namespace EPPlusTest.Utils
 	[TestClass]
 	public class InternationalizationUtilTests
 	{
+		#region InternationalizationUtil Tests
 		[TestMethod]
 		public void InternationaliztionUtilParsesEnglishErrorValues()
 		{
@@ -255,5 +256,116 @@ namespace EPPlusTest.Utils
 				Thread.CurrentThread.CurrentCulture = currentCulture;
 			}
 		}
+
+		[TestMethod]
+		public void InternationalizationUtilParsesEnglishBooleanStrings()
+		{
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
+				var trueString = "tRuE";
+				var falseString = "fAlSe";
+				var isBoolean = InternationalizationUtil.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
+				Assert.AreEqual(isBoolean, true);
+				Assert.AreEqual(booleanValue, true);
+				isBoolean = InternationalizationUtil.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
+				Assert.AreEqual(isBoolean, true);
+				Assert.AreEqual(booleanValue, false);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
+		[TestMethod]
+		public void InternationalizationUtilParsesGermanBooleanStrings()
+		{
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("de-de");
+				var trueString = "wAhR";
+				var falseString = "fAlScH";
+				var isBoolean = InternationalizationUtil.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
+				Assert.AreEqual(isBoolean, true);
+				Assert.AreEqual(booleanValue, true);
+				isBoolean = InternationalizationUtil.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
+				Assert.AreEqual(isBoolean, true);
+				Assert.AreEqual(booleanValue, false);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
+		[TestMethod]
+		public void InternationalizationUtilParsesPolishBooleanStrings()
+		{
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("pl-pl");
+				var trueString = "PRAWDA";
+				var falseString = "FAŁSZ";
+				var isBoolean = InternationalizationUtil.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
+				Assert.AreEqual(isBoolean, true);
+				Assert.AreEqual(booleanValue, true);
+				isBoolean = InternationalizationUtil.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
+				Assert.AreEqual(isBoolean, true);
+				Assert.AreEqual(booleanValue, false);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
+		[TestMethod]
+		public void InternationalizationUtilParsesRussianBooleanStrings()
+		{
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("ru-ru");
+				var trueString = "ИСТИНА";
+				var falseString = "ЛОЖЬ";
+				var isBoolean = InternationalizationUtil.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
+				Assert.AreEqual(isBoolean, true);
+				Assert.AreEqual(booleanValue, true);
+				isBoolean = InternationalizationUtil.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
+				Assert.AreEqual(isBoolean, true);
+				Assert.AreEqual(booleanValue, false);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
+		[TestMethod]
+		public void InternationalizationUtilParsesGreekBooleanStrings()
+		{
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("el-gr");
+				var trueString = "TRUE";
+				var falseString = "FALSE";
+				var isBoolean = InternationalizationUtil.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
+				Assert.AreEqual(isBoolean, true);
+				Assert.AreEqual(booleanValue, true);
+				isBoolean = InternationalizationUtil.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
+				Assert.AreEqual(isBoolean, true);
+				Assert.AreEqual(booleanValue, false);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+		#endregion
 	}
 }
