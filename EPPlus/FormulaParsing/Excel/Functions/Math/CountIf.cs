@@ -43,8 +43,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (cellRangeToCheck == null)
 				return new CompileResult(eErrorType.Value);
-			var criteriaString = IfHelper.ExtractCriteriaString(arguments.ElementAt(1), context);
-			double count = cellRangeToCheck.Where(cell => IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(cell.Value), criteriaString)).Count();
+			var criteriaObject = IfHelper.ExtractCriteriaObject(arguments.ElementAt(1), context);
+			double count = cellRangeToCheck.Where(cell => IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(cell.Value), criteriaObject)).Count();
+			//var criteriaString = IfHelper.ExtractCriteriaString(arguments.ElementAt(1), context);
+			//double count = cellRangeToCheck.Where(cell => IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(cell.Value), criteriaString)).Count();
 			return this.CreateResult(count, DataType.Integer);
 		}
 	}

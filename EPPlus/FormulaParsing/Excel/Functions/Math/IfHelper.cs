@@ -56,12 +56,94 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var criteriaObjectDataType = GetObjectComparisonDataType(criteriaObject);
 
 			if (criteriaObjectDataType == ComparisonDataType.TextValue)
-				return false; // Do text stuff here.
-			else
-				return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, criteriaObject, criteriaObjectDataType);
+			{
+				// Check if criteria string is an expression.
+				if (TryParseCriteriaAsExpression(criteriaObject.ToString(), out IOperator expressionOperator, out string expressionCriteria))
+				{
+					switch (expressionOperator.Operator)
+					{
+						case OperatorType.Equals:
+							{
+								if (TryExtractObjectFromCriteriaString(expressionCriteria, out object expressionCriteriaObject, out criteriaObjectDataType))
+									return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, expressionCriteriaObject, criteriaObjectDataType);
+								else
+									return CompareAsStrings(objectToCompare, comparisonObjectDataType, expressionCriteria, true);
+							}
+						case OperatorType.NotEqualTo:
+							{
+								if (TryExtractObjectFromCriteriaString(expressionCriteria, out object expressionCriteriaObject, out criteriaObjectDataType))
+									return !ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, expressionCriteriaObject, criteriaObjectDataType);
+								else
+									return !CompareAsStrings(objectToCompare, comparisonObjectDataType, expressionCriteria, true);
+							}
+						case OperatorType.GreaterThan:
+						case OperatorType.GreaterThanOrEqual:
+						case OperatorType.LessThan:
+						case OperatorType.LessThanOrEqual:
+							return CompareAsInequalityExpression(objectToCompare, comparisonObjectDataType, expressionOperator.Operator, expressionCriteria);
+						default:
+							throw new InvalidOperationException("This switch statement should never be entered if an operator other than the above 6 is parsed from the criteria string.");
+					}
+				}
+				// Check if criteria string contains a parsable, non-string object.
+				if (TryExtractObjectFromCriteriaString(criteriaObject.ToString(), out object parsedCriteriaObject, out criteriaObjectDataType))
+					return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, parsedCriteriaObject, criteriaObjectDataType);
+
+				return CompareAsStrings(objectToCompare, comparisonObjectDataType, criteriaObject.ToString());
+			}
+
+			return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, criteriaObject, criteriaObjectDataType);
 		}
 
-		private static bool ObjectMatchesRawTextCriteria(string rawCriteriaString, out object objectFromCriteria, out ComparisonDataType criteriaDataType)
+		private static bool CompareAsInequalityExpression(object objectToCompare, ComparisonDataType objectDataType, OperatorType comparisonOperator, string criteriaString)
+		{
+			var comparisonResult = int.MinValue;
+			if (objectToCompare is string)
+				objectDataType = ComparisonDataType.TextValue;
+			if (TryExtractObjectFromCriteriaString(criteriaString, out object criteriaObject, out ComparisonDataType criteriaDataType))
+			{
+				if (objectDataType != criteriaDataType)
+					return false;
+				switch (criteriaDataType)
+				{
+					case ComparisonDataType.NumericValue:
+						{
+							var criteriaValue = ConvertUtil.GetValueDouble(criteriaObject);
+							var objectToCompareValue = ConvertUtil.GetValueDouble(objectToCompare);
+							comparisonResult = objectToCompareValue.CompareTo(criteriaValue);
+							break;
+						}
+					case ComparisonDataType.BooleanValue:
+						{
+							if (objectToCompare is bool boolToCompare && criteriaObject is bool criteriaBool)
+								comparisonResult = boolToCompare.CompareTo(criteriaBool);
+							else
+								return false;
+							break;
+						}
+				}
+			}
+			else if (objectDataType == ComparisonDataType.TextValue)
+				comparisonResult = string.Compare(objectToCompare.ToString(), criteriaString, StringComparison.CurrentCultureIgnoreCase);
+			else
+				return false;
+
+			switch (comparisonOperator)
+			{
+				case OperatorType.LessThan:
+					return (comparisonResult == -1);
+				case OperatorType.LessThanOrEqual:
+					return (comparisonResult == -1 || comparisonResult == 0);
+				case OperatorType.GreaterThan:
+					return (comparisonResult == 1);
+				case OperatorType.GreaterThanOrEqual:
+					return (comparisonResult == 1 || comparisonResult == 0);
+				default:
+					throw new InvalidOperationException("This function should only be entered if the comparisonOperator is one of the 4 in the switch statement.");
+			}
+		}
+
+		private static bool TryExtractObjectFromCriteriaString(string rawCriteriaString, out object objectFromCriteria, out ComparisonDataType criteriaDataType)
 		{
 			objectFromCriteria = null;
 			criteriaDataType = ComparisonDataType.TextValue;
@@ -86,11 +168,64 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return true;
 		}
 
+		private static bool TryParseCriteriaAsExpression(string rawCriteriaString, out IOperator expressionOperator, out string expressionCriteria)
+		{
+			expressionOperator = null;
+			expressionCriteria = null;
+			var operatorIndex = -1;
+			// The criteria string is an expression if it begins with the operators <>, =, >, >=, <, or <=
+			if (Regex.IsMatch(rawCriteriaString, @"^(<>|>=|<=){1}"))
+				operatorIndex = 2;
+			else if (Regex.IsMatch(rawCriteriaString, @"^(=|<|>){1}"))
+				operatorIndex = 1;
+			if (operatorIndex != -1)
+			{
+				var expressionOperatorString = rawCriteriaString.Substring(0, operatorIndex);
+				if (OperatorsDict.Instance.TryGetValue(expressionOperatorString, out expressionOperator))
+				{
+					expressionCriteria = rawCriteriaString.Substring(operatorIndex);
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private static bool CompareAsStrings(object objectToCompare, ComparisonDataType objectDataType, string criteriaString, bool compareAsEqualityExpression = false)
+		{
+			if (criteriaString.Equals(string.Empty))
+				return ((compareAsEqualityExpression) ? objectToCompare == null : (objectToCompare == null || objectToCompare.ToString().Equals(string.Empty)));
+			if (objectDataType != ComparisonDataType.TextValue)
+				return false;
+
+			var stringToCompare = objectToCompare.ToString().ToUpper(CultureInfo.CurrentCulture);
+			criteriaString = criteriaString.ToUpper(CultureInfo.CurrentCulture);
+
+			if (criteriaString.Contains("*") || criteriaString.Contains("?"))
+			{
+				var regexPattern = Regex.Escape(criteriaString);
+				regexPattern = string.Format("^{0}$", regexPattern);
+				regexPattern = regexPattern.Replace(@"\*", ".*");
+				regexPattern = regexPattern.Replace("~.*", "\\*");
+				regexPattern = regexPattern.Replace(@"\?", ".");
+				regexPattern = regexPattern.Replace("~.", "\\?");
+				return Regex.IsMatch(stringToCompare, regexPattern);
+			}
+			else
+				// A return value of 0 from string.Compare() means that the two strings have equivalent content.
+				return (string.Compare(stringToCompare, criteriaString) == 0);
+		}
+
 		private static bool ObjectValueEqualsCriteriaValue(object objectToCompare, ComparisonDataType objectDataType,
 														object criteriaObject, ComparisonDataType criteriaDataType)
 		{
 			if (objectDataType != criteriaDataType)
 				return false;
+
+			if (criteriaDataType == ComparisonDataType.NumericValue)
+			{
+				ConvertUtil.TryParseDateObjectToOADate(criteriaObject, out double criteriaDouble);
+				criteriaObject = criteriaDouble;
+			}
 
 			var objectString = objectToCompare.ToString();
 			var criteriaString = criteriaObject.ToString();
@@ -111,6 +246,39 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			else
 				return ComparisonDataType.Null;
 		}
+
+		public static object ExtractCriteriaObject(FunctionArgument criteriaCandidate, ParsingContext context)
+		{
+			object criteriaObject = null;
+			if (criteriaCandidate.Value is ExcelDataProvider.IRangeInfo criteriaRange)
+			{
+				if (criteriaRange.IsMulti)
+				{
+					var worksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
+					var functionRow = context.Scopes.Current.Address.FromRow;
+					var functionColumn = context.Scopes.Current.Address.FromCol;
+					criteriaObject = CalculateCriteria(criteriaCandidate, worksheet, functionRow, functionColumn);
+				}
+				else
+				{
+					criteriaObject = criteriaCandidate.ValueFirst;
+					if (criteriaObject is List<object> objectList)
+						criteriaObject = objectList.First();
+				}
+			}
+			else if (criteriaCandidate.Value is List<FunctionArgument> argumentList)
+				criteriaObject = argumentList.First().ValueFirst;
+			else
+				criteriaObject = criteriaCandidate.ValueFirst;
+
+			// Note that Excel considers null criteria equivalent to a criteria of 0.
+			if (criteriaObject == null)
+				criteriaObject = 0;
+			
+			return criteriaObject;
+		}
+
+		// //////////////////////////////////////////////////////////////////
 
 		/// <summary>
 		/// Compares the given <paramref name="objectToCompare"/> against the given <paramref name="criteria"/>.
