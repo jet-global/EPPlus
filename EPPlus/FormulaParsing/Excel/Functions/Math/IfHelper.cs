@@ -41,211 +41,337 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// </summary>
 	public static class IfHelper
 	{
-		private enum ComparisonDataType
+		public static bool ObjectMatchesCriteria(object testObject, object rawCriterionObject)
 		{
-			ErrorValue,
-			NumericValue,
-			TextValue,
-			BooleanValue,
-			Null
-		}
-
-		public static bool ObjectMatchesCriteria(object objectToCompare, object criteriaObject)
-		{
-			var comparisonObjectDataType = GetObjectComparisonDataType(objectToCompare);
-			var criteriaObjectDataType = GetObjectComparisonDataType(criteriaObject);
-
-			if (criteriaObjectDataType == ComparisonDataType.TextValue)
+			object criterion = rawCriterionObject;
+			OperatorType criterionOperator = OperatorType.Equals;
+			bool criterionIsExpression = false;
+			if (rawCriterionObject is string rawCriterionString)
 			{
-				// Check if criteria string is an expression.
-				if (TryParseCriteriaAsExpression(criteriaObject.ToString(), out IOperator expressionOperator, out string expressionCriteria))
+				string criterionString;
+				if (TryParseCriterionAsExpression(rawCriterionString, out IOperator expressionOperator, out string expressionCriterion))
 				{
-					switch (expressionOperator.Operator)
-					{
-						case OperatorType.Equals:
-							{
-								if (TryExtractObjectFromCriteriaString(expressionCriteria, out object expressionCriteriaObject, out criteriaObjectDataType))
-									return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, expressionCriteriaObject, criteriaObjectDataType);
-								else
-									return CompareAsStrings(objectToCompare, comparisonObjectDataType, expressionCriteria, true);
-							}
-						case OperatorType.NotEqualTo:
-							{
-								if (TryExtractObjectFromCriteriaString(expressionCriteria, out object expressionCriteriaObject, out criteriaObjectDataType))
-									return !ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, expressionCriteriaObject, criteriaObjectDataType);
-								else
-									return !CompareAsStrings(objectToCompare, comparisonObjectDataType, expressionCriteria, true);
-							}
-						case OperatorType.GreaterThan:
-						case OperatorType.GreaterThanOrEqual:
-						case OperatorType.LessThan:
-						case OperatorType.LessThanOrEqual:
-							return CompareAsInequalityExpression(objectToCompare, comparisonObjectDataType, expressionOperator.Operator, expressionCriteria);
-						default:
-							throw new InvalidOperationException("This switch statement should never be entered if an operator other than the above 6 is parsed from the criteria string.");
-					}
+					criterionOperator = expressionOperator.Operator;
+					criterionString = expressionCriterion;
+					criterionIsExpression = true;
 				}
-				// Check if criteria string contains a parsable, non-string object.
-				if (TryExtractObjectFromCriteriaString(criteriaObject.ToString(), out object parsedCriteriaObject, out criteriaObjectDataType))
-					return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, parsedCriteriaObject, criteriaObjectDataType);
+				else
+					criterionString = rawCriterionString.ToUpper(CultureInfo.CurrentCulture);
 
-				return CompareAsStrings(objectToCompare, comparisonObjectDataType, criteriaObject.ToString());
+				if (TryParseCriterionStringToObject(criterionString, out object criterionObject))
+					criterion = criterionObject;
+				else
+					criterion = criterionString;
 			}
 
-			return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, criteriaObject, criteriaObjectDataType);
+			return IsMatch(testObject, criterionOperator, criterion, criterionIsExpression);
+			//var comparisonObjectDataType = GetObjectComparisonDataType(objectToCompare);
+			//var criteriaObjectDataType = GetObjectComparisonDataType(criteriaObject);
+
+			//if (criteriaObjectDataType == ComparisonDataType.TextValue)
+			//{
+			//	// Check if criteria string is an expression.
+			//	if (TryParseCriteriaAsExpression(criteriaObject.ToString(), out IOperator expressionOperator, out string expressionCriteria))
+			//	{
+			//		switch (expressionOperator.Operator)
+			//		{
+			//			case OperatorType.Equals:
+			//				{
+			//					if (TryExtractObjectFromCriteriaString(expressionCriteria, out object expressionCriteriaObject, out criteriaObjectDataType))
+			//						return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, expressionCriteriaObject, criteriaObjectDataType);
+			//					else
+			//						return CompareAsStrings(objectToCompare, comparisonObjectDataType, expressionCriteria, true);
+			//				}
+			//			case OperatorType.NotEqualTo:
+			//				{
+			//					if (TryExtractObjectFromCriteriaString(expressionCriteria, out object expressionCriteriaObject, out criteriaObjectDataType))
+			//						return !ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, expressionCriteriaObject, criteriaObjectDataType);
+			//					else
+			//						return !CompareAsStrings(objectToCompare, comparisonObjectDataType, expressionCriteria, true);
+			//				}
+			//			case OperatorType.GreaterThan:
+			//			case OperatorType.GreaterThanOrEqual:
+			//			case OperatorType.LessThan:
+			//			case OperatorType.LessThanOrEqual:
+			//				return CompareAsInequalityExpression(objectToCompare, comparisonObjectDataType, expressionOperator.Operator, expressionCriteria);
+			//			default:
+			//				throw new InvalidOperationException(
+			//					"This switch statement should never be entered if an operator other than the above 6 is parsed from the criteria string.");
+			//		}
+			//	}
+			//	// Check if criteria string contains a parsable, non-string object.
+			//	if (TryExtractObjectFromCriteriaString(criteriaObject.ToString(), out object parsedCriteriaObject, out criteriaObjectDataType))
+			//		return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, parsedCriteriaObject, criteriaObjectDataType);
+
+			//	return CompareAsStrings(objectToCompare, comparisonObjectDataType, criteriaObject.ToString());
+			//}
+
+			//return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, criteriaObject, criteriaObjectDataType);
 		}
 
-		private static bool CompareAsInequalityExpression(object objectToCompare, ComparisonDataType objectDataType, OperatorType comparisonOperator, string criteriaString)
+		private static bool IsMatch(object testObject, OperatorType criterionOperation, object criterionObject, bool matchCriterionAsExpression = false)
 		{
-			var comparisonResult = int.MinValue;
-			if (objectToCompare is string)
-				objectDataType = ComparisonDataType.TextValue;
-			if (TryExtractObjectFromCriteriaString(criteriaString, out object criteriaObject, out ComparisonDataType criteriaDataType))
+			/*
+			 * 1. Create an if block for each kind of datatype the criterion could be (number, string, error, bool).
+			 *	If the criterion is a string, it will always contain text or be empty; parsable objects are already parsed out.
+			 * 2. Determine what kind of datatype the testObject is (number, text, error, bool, null).
+			 * 3. Enter the criterion if statement for the correct data type, and check if the testObject is a matching data type.
+			 * 4. Do a final switch for each operator type that returns the result.
+			 */
+			var compareResult = int.MinValue;
+			bool equalityOperation = (criterionOperation == OperatorType.Equals || criterionOperation == OperatorType.NotEqualTo);
+			if (criterionObject is string criterionString)
 			{
-				if (objectDataType != criteriaDataType)
+				if (criterionString.Equals(string.Empty))
+				{
+					if (matchCriterionAsExpression)
+						compareResult = (testObject == null) ? 0 : int.MinValue;
+					else
+						compareResult = (testObject == null || testObject.Equals(string.Empty)) ? 0 : int.MinValue;
+				}
+				else if (testObject is string testString)
+					compareResult = CompareAsStrings(testString, criterionString, equalityOperation);
+				else
+					compareResult = int.MinValue;
+			}
+			else if (criterionObject is bool criterionBool)
+			{
+				if (testObject is bool testBool)
+					compareResult = testBool.CompareTo(criterionBool);
+				else
+					compareResult = int.MinValue;
+			}
+			else if (ConvertUtil.TryParseDateObjectToOADate(criterionObject, out double criterionDouble) && 
+				TryConvertObjectToDouble(testObject, out double testDouble, equalityOperation))
+			{
+				compareResult = testDouble.CompareTo(criterionDouble);
+			}
+			else if (criterionObject is ExcelErrorValue criterionErrorValue && testObject is ExcelErrorValue testErrorValue)
+			{
+				if (equalityOperation)
+					compareResult = (criterionErrorValue.Type == testErrorValue.Type) ? 0 : int.MinValue;
+				else
 					return false;
-				switch (criteriaDataType)
-				{
-					case ComparisonDataType.NumericValue:
-						{
-							var criteriaValue = ConvertUtil.GetValueDouble(criteriaObject);
-							var objectToCompareValue = ConvertUtil.GetValueDouble(objectToCompare);
-							comparisonResult = objectToCompareValue.CompareTo(criteriaValue);
-							break;
-						}
-					case ComparisonDataType.BooleanValue:
-						{
-							if (objectToCompare is bool boolToCompare && criteriaObject is bool criteriaBool)
-								comparisonResult = boolToCompare.CompareTo(criteriaBool);
-							else
-								return false;
-							break;
-						}
-				}
 			}
-			else if (objectDataType == ComparisonDataType.TextValue)
-				comparisonResult = string.Compare(objectToCompare.ToString(), criteriaString, StringComparison.CurrentCultureIgnoreCase);
-			else
-				return false;
 
-			switch (comparisonOperator)
+			switch (criterionOperation)
 			{
+				case OperatorType.Equals:
+					return (compareResult == 0);
+				case OperatorType.NotEqualTo:
+					return (compareResult != 0);
 				case OperatorType.LessThan:
-					return (comparisonResult == -1);
+					return (compareResult != int.MinValue && compareResult < 0);
 				case OperatorType.LessThanOrEqual:
-					return (comparisonResult == -1 || comparisonResult == 0);
+					return (compareResult != int.MinValue && compareResult <= 0);
 				case OperatorType.GreaterThan:
-					return (comparisonResult == 1);
+					return (compareResult != int.MinValue && compareResult > 0);
 				case OperatorType.GreaterThanOrEqual:
-					return (comparisonResult == 1 || comparisonResult == 0);
+					return (compareResult != int.MinValue && compareResult >= 0);
 				default:
-					throw new InvalidOperationException("This function should only be entered if the comparisonOperator is one of the 4 in the switch statement.");
+					throw new InvalidOperationException("The criterionOperation is an invalid operator type for this function.");
 			}
 		}
 
-		private static bool TryExtractObjectFromCriteriaString(string rawCriteriaString, out object objectFromCriteria, out ComparisonDataType criteriaDataType)
-		{
-			objectFromCriteria = null;
-			criteriaDataType = ComparisonDataType.TextValue;
-			if (ConvertUtil.TryParseDateObjectToOADate(rawCriteriaString, out double criteriaDouble))
-			{
-				objectFromCriteria = criteriaDouble;
-				criteriaDataType = ComparisonDataType.NumericValue;
-			}
-			else if (InternationalizationUtil.TryParseLocalBoolean(rawCriteriaString, CultureInfo.CurrentCulture, out bool criteriaBool))
-			{
-				objectFromCriteria = criteriaBool;
-				criteriaDataType = ComparisonDataType.BooleanValue;
-			}
-			else if (InternationalizationUtil.TryParseLocalErrorValue(rawCriteriaString, CultureInfo.CurrentCulture, out ExcelErrorValue criteriaErrorValue))
-			{
-				objectFromCriteria = criteriaErrorValue;
-				criteriaDataType = ComparisonDataType.ErrorValue;
-			}
-			else
-				return false;
-
-			return true;
-		}
-
-		private static bool TryParseCriteriaAsExpression(string rawCriteriaString, out IOperator expressionOperator, out string expressionCriteria)
+		private static bool TryParseCriterionAsExpression(string rawCriterionString, out IOperator expressionOperator, out string expressionCriterion)
 		{
 			expressionOperator = null;
-			expressionCriteria = null;
+			expressionCriterion = null;
 			var operatorIndex = -1;
 			// The criteria string is an expression if it begins with the operators <>, =, >, >=, <, or <=
-			if (Regex.IsMatch(rawCriteriaString, @"^(<>|>=|<=){1}"))
+			if (Regex.IsMatch(rawCriterionString, @"^(<>|>=|<=){1}"))
 				operatorIndex = 2;
-			else if (Regex.IsMatch(rawCriteriaString, @"^(=|<|>){1}"))
+			else if (Regex.IsMatch(rawCriterionString, @"^(=|<|>){1}"))
 				operatorIndex = 1;
 			if (operatorIndex != -1)
 			{
-				var expressionOperatorString = rawCriteriaString.Substring(0, operatorIndex);
+				var expressionOperatorString = rawCriterionString.Substring(0, operatorIndex);
 				if (OperatorsDict.Instance.TryGetValue(expressionOperatorString, out expressionOperator))
 				{
-					expressionCriteria = rawCriteriaString.Substring(operatorIndex);
+					expressionCriterion = rawCriterionString.Substring(operatorIndex);
 					return true;
 				}
 			}
 			return false;
 		}
 
-		private static bool CompareAsStrings(object objectToCompare, ComparisonDataType objectDataType, string criteriaString, bool compareAsEqualityExpression = false)
+		private static bool TryParseCriterionStringToObject(string criterionString, out object criterionObject)
 		{
-			if (criteriaString.Equals(string.Empty))
-				return ((compareAsEqualityExpression) ? objectToCompare == null : (objectToCompare == null || objectToCompare.ToString().Equals(string.Empty)));
-			if (objectDataType != ComparisonDataType.TextValue)
+			criterionObject = null;
+			if (InternationalizationUtil.TryParseLocalBoolean(criterionString, CultureInfo.CurrentCulture, out bool criterionBool))
+				criterionObject = criterionBool;
+			else if (ConvertUtil.TryParseDateObjectToOADate(criterionString, out double criterionDouble))
+				criterionObject = criterionDouble;
+			else if (InternationalizationUtil.TryParseLocalErrorValue(criterionString, CultureInfo.CurrentCulture, out ExcelErrorValue criterionErrorValue))
+				criterionObject = criterionErrorValue;
+			else
 				return false;
+			return true;
+		}
 
-			var stringToCompare = objectToCompare.ToString().ToUpper(CultureInfo.CurrentCulture);
-			criteriaString = criteriaString.ToUpper(CultureInfo.CurrentCulture);
+		private static bool TryConvertObjectToDouble(object convertObject, out double objectAsDouble, bool includeNumericStrings = true)
+		{
+			objectAsDouble = double.MinValue;
+			if (IsNumeric(convertObject, true))
+				objectAsDouble = ConvertUtil.GetValueDouble(convertObject);
+			else if (includeNumericStrings && convertObject is string objectAsString && Double.TryParse(objectAsString, out double doubleParseResult))
+				objectAsDouble = doubleParseResult;
+			else
+				return false;
+			return true;
+		}
 
-			if (criteriaString.Contains("*") || criteriaString.Contains("?"))
+		private static int CompareAsStrings(string testString, string criterionString, bool checkWildcardChars = false)
+		{
+			var compareResult = int.MinValue;
+			testString = testString.ToUpper(CultureInfo.CurrentCulture);
+			criterionString = criterionString.ToUpper(CultureInfo.CurrentCulture);
+			if (checkWildcardChars && (criterionString.Contains("*") || criterionString.Contains("?")))
 			{
-				var regexPattern = Regex.Escape(criteriaString);
-				regexPattern = string.Format("^{0}$", regexPattern);
-				regexPattern = regexPattern.Replace(@"\*", ".*");
-				regexPattern = regexPattern.Replace("~.*", "\\*");
-				regexPattern = regexPattern.Replace(@"\?", ".");
-				regexPattern = regexPattern.Replace("~.", "\\?");
-				return Regex.IsMatch(stringToCompare, regexPattern);
+				var criterionRegexPattern = Regex.Escape(criterionString);
+				criterionRegexPattern = string.Format("^{0}$", criterionRegexPattern);
+				criterionRegexPattern = criterionRegexPattern.Replace(@"\*", ".*");
+				criterionRegexPattern = criterionRegexPattern.Replace("~.*", "\\*");
+				criterionRegexPattern = criterionRegexPattern.Replace(@"\?", ".");
+				criterionRegexPattern = criterionRegexPattern.Replace("~.", "\\?");
+				compareResult = (Regex.IsMatch(testString, criterionRegexPattern)) ? 0 : int.MinValue;
 			}
 			else
-				// A return value of 0 from string.Compare() means that the two strings have equivalent content.
-				return (string.Compare(stringToCompare, criteriaString) == 0);
+				compareResult = string.Compare(testString, criterionString);
+			return compareResult;
 		}
 
-		private static bool ObjectValueEqualsCriteriaValue(object objectToCompare, ComparisonDataType objectDataType,
-														object criteriaObject, ComparisonDataType criteriaDataType)
-		{
-			if (objectDataType != criteriaDataType)
-				return false;
+		//private static bool CompareAsInequalityExpression(object objectToCompare, ComparisonDataType objectDataType, OperatorType comparisonOperator, string criteriaString)
+		//{
+		//	var comparisonResult = int.MinValue;
+		//	if (objectToCompare is string)
+		//		objectDataType = ComparisonDataType.TextValue;
+		//	if (TryExtractObjectFromCriteriaString(criteriaString, out object criteriaObject, out ComparisonDataType criteriaDataType))
+		//	{
+		//		if (objectDataType != criteriaDataType)
+		//			return false;
+		//		switch (criteriaDataType)
+		//		{
+		//			case ComparisonDataType.NumericValue:
+		//				{
+		//					var criteriaValue = ConvertUtil.GetValueDouble(criteriaObject);
+		//					var objectToCompareValue = ConvertUtil.GetValueDouble(objectToCompare);
+		//					comparisonResult = objectToCompareValue.CompareTo(criteriaValue);
+		//					break;
+		//				}
+		//			case ComparisonDataType.BooleanValue:
+		//				{
+		//					if (objectToCompare is bool boolToCompare && criteriaObject is bool criteriaBool)
+		//						comparisonResult = boolToCompare.CompareTo(criteriaBool);
+		//					else
+		//						return false;
+		//					break;
+		//				}
+		//		}
+		//	}
+		//	else if (objectDataType == ComparisonDataType.TextValue)
+		//		comparisonResult = string.Compare(objectToCompare.ToString(), criteriaString, StringComparison.CurrentCultureIgnoreCase);
+		//	else
+		//		return false;
 
-			if (criteriaDataType == ComparisonDataType.NumericValue)
-			{
-				ConvertUtil.TryParseDateObjectToOADate(criteriaObject, out double criteriaDouble);
-				criteriaObject = criteriaDouble;
-			}
+		//	switch (comparisonOperator)
+		//	{
+		//		case OperatorType.LessThan:
+		//			return (comparisonResult == -1);
+		//		case OperatorType.LessThanOrEqual:
+		//			return (comparisonResult == -1 || comparisonResult == 0);
+		//		case OperatorType.GreaterThan:
+		//			return (comparisonResult == 1);
+		//		case OperatorType.GreaterThanOrEqual:
+		//			return (comparisonResult == 1 || comparisonResult == 0);
+		//		default:
+		//			throw new InvalidOperationException("This function should only be entered if the comparisonOperator is one of the 4 in the switch statement.");
+		//	}
+		//}
 
-			var objectString = objectToCompare.ToString();
-			var criteriaString = criteriaObject.ToString();
+		//private static bool TryExtractObjectFromCriteriaString(string rawCriteriaString, out object objectFromCriteria, out ComparisonDataType criteriaDataType)
+		//{
+		//	objectFromCriteria = null;
+		//	criteriaDataType = ComparisonDataType.TextValue;
+		//	if (ConvertUtil.TryParseDateObjectToOADate(rawCriteriaString, out double criteriaDouble))
+		//	{
+		//		objectFromCriteria = criteriaDouble;
+		//		criteriaDataType = ComparisonDataType.NumericValue;
+		//	}
+		//	else if (InternationalizationUtil.TryParseLocalBoolean(rawCriteriaString, CultureInfo.CurrentCulture, out bool criteriaBool))
+		//	{
+		//		objectFromCriteria = criteriaBool;
+		//		criteriaDataType = ComparisonDataType.BooleanValue;
+		//	}
+		//	else if (InternationalizationUtil.TryParseLocalErrorValue(rawCriteriaString, CultureInfo.CurrentCulture, out ExcelErrorValue criteriaErrorValue))
+		//	{
+		//		objectFromCriteria = criteriaErrorValue;
+		//		criteriaDataType = ComparisonDataType.ErrorValue;
+		//	}
+		//	else
+		//		return false;
 
-			return (string.Compare(criteriaString, objectString) == 0);
-		}
+		//	return true;
+		//}
 
-		private static ComparisonDataType GetObjectComparisonDataType(object objectToAssign)
-		{
-			if (objectToAssign is bool)
-				return ComparisonDataType.BooleanValue;
-			else if (ConvertUtil.TryParseDateObjectToOADate(objectToAssign, out double objectDouble))
-				return ComparisonDataType.NumericValue;
-			else if (objectToAssign is string)
-				return ComparisonDataType.TextValue;
-			else if (objectToAssign is ExcelErrorValue)
-				return ComparisonDataType.ErrorValue;
-			else
-				return ComparisonDataType.Null;
-		}
+		//private static bool CompareAsStrings(object objectToCompare, ComparisonDataType objectDataType, string criteriaString, bool compareAsEqualityExpression = false)
+		//{
+		//	if (criteriaString.Equals(string.Empty))
+		//		return ((compareAsEqualityExpression) ? objectToCompare == null : (objectToCompare == null || objectToCompare.ToString().Equals(string.Empty)));
+		//	if (objectDataType != ComparisonDataType.TextValue)
+		//		return false;
+
+		//	var stringToCompare = objectToCompare.ToString().ToUpper(CultureInfo.CurrentCulture);
+		//	criteriaString = criteriaString.ToUpper(CultureInfo.CurrentCulture);
+
+		//	if (criteriaString.Contains("*") || criteriaString.Contains("?"))
+		//	{
+		//		var regexPattern = Regex.Escape(criteriaString);
+		//regexPattern = string.Format("^{0}$", regexPattern);
+		//regexPattern = regexPattern.Replace(@"\*", ".*");
+		//		regexPattern = regexPattern.Replace("~.*", "\\*");
+		//		regexPattern = regexPattern.Replace(@"\?", ".");
+		//		regexPattern = regexPattern.Replace("~.", "\\?");
+		//		return Regex.IsMatch(stringToCompare, regexPattern);
+		//	}
+		//	else
+		//		// A return value of 0 from string.Compare() means that the two strings have equivalent content.
+		//		return (string.Compare(stringToCompare, criteriaString) == 0);
+		//}
+
+		//private static bool ObjectValueEqualsCriteriaValue(object objectToCompare, ComparisonDataType objectDataType,
+		//												object criteriaObject, ComparisonDataType criteriaDataType)
+		//{
+		//	if (objectDataType != criteriaDataType)
+		//		return false;
+
+		//	if (criteriaDataType == ComparisonDataType.NumericValue)
+		//	{
+		//		ConvertUtil.TryParseDateObjectToOADate(criteriaObject, out double criteriaDouble);
+		//		criteriaObject = criteriaDouble;
+		//	}
+
+		//	var objectString = objectToCompare.ToString();
+		//	var criteriaString = criteriaObject.ToString();
+
+		//	return (string.Compare(criteriaString, objectString) == 0);
+		//}
+
+		//private static ComparisonDataType GetCriterionDataType(object criterionObject)
+		//{
+		//	if (criterionObject == null)
+		//		return ComparisonDataType.Null;
+		//	else if (criterionObject is bool)
+		//		return ComparisonDataType.BooleanValue;
+		//	else if (IsNumeric(criterionObject, true))
+		//		return ComparisonDataType.NumericValue;
+		//	else if (criterionObject is string)
+		//		return ComparisonDataType.TextValue;
+		//	else if (criterionObject is ExcelErrorValue)
+		//		return ComparisonDataType.ErrorValue;
+		//	else
+		//		return ComparisonDataType.InvalidComparisonDataType;
+		//}
 
 		public static object ExtractCriteriaObject(FunctionArgument criteriaCandidate, ParsingContext context)
 		{
@@ -274,7 +400,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			// Note that Excel considers null criteria equivalent to a criteria of 0.
 			if (criteriaObject == null)
 				criteriaObject = 0;
-			
+
 			return criteriaObject;
 		}
 
