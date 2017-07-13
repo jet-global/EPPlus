@@ -59,7 +59,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				{
 					foreach (var cell in item.ValueAsRangeInfo)
 					{
-						if (TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, false, cell, context, out double numberToAddToList, out bool onlyStringInputsGiven1))
+						if (this.TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, false, cell, context, out double numberToAddToList, out bool onlyStringInputsGiven1))
 							listToDoStandardDeviationOn.Add(numberToAddToList);
 						onlyStringInputsGiven = onlyStringInputsGiven1;
 						if(cell.Value is bool)
@@ -69,7 +69,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				else
 				{
 
-					if (TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, false, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
+					if (this.TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, false, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
 						listToDoStandardDeviationOn.Add(numberToAddToList);
 					onlyStringInputsGiven = onlyStringInputsGiven2;
 
