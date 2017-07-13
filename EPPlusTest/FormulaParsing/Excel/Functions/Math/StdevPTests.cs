@@ -252,15 +252,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void StdevPIsGivenASingleStringInput()
-		{
-			var function = new StdevP();
-			var result1 = function.Execute(FunctionsHelper.CreateArgs("string"), this.ParsingContext);
-
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
-		}
-
-		[TestMethod]
 		public void StdevPIsGivenAMixOfInputTypesByCellRange()
 		{
 			var function = new StdevP();

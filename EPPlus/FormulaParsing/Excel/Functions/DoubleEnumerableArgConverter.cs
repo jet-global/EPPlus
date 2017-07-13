@@ -52,9 +52,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 						{
 							argList.Add(cell.ValueDoubleLogical);
 						}
-						if (ConvertUtil.TryParseDateString(arg.ValueFirst, out System.DateTime dateTime))
+						if (ConvertUtil.TryParseDateString(arg.ValueFirst, out System.DateTime dateTime) && ConvertUtil.TryParseDateObjectToOADate(dateTime, out double dateTimeToOADAte))
 						{
-							ConvertUtil.TryParseDateObjectToOADate(dateTime, out double dateTimeToOADAte);
 							argList.Add(dateTimeToOADAte);
 						}
 					}
@@ -66,9 +65,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 					{
 						argList.Add(ConvertUtil.GetValueDouble(arg.Value));
 					}
-					if (arg.Value is string)
+					if (arg.Value is string && ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double result))
 					{
-						ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double result);
 						argList.Add(result);
 					}
 				}

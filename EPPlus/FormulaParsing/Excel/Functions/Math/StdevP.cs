@@ -22,6 +22,7 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
@@ -49,23 +50,40 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(argumentError);
 			//Note: This follows the Functionality of excel which is diffrent from the excel documentation.
 			//If you pass in a null Stdev.P(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
+
 			List<double> listToDoStandardDeviationOn = new List<double>();
+			bool onlyStringInputsGiven = true;
 			foreach (var item in arguments)
 			{
-				if (item.IsExcelRange)
+				if(item.ValueAsRangeInfo != null)
 				{
-					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null )
-						continue;
-					return new CompileResult(eErrorType.Div0);
+					foreach (var cell in item.ValueAsRangeInfo)
+					{
+						if (TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, false, cell, context, out double numberToAddToList, out bool onlyStringInputsGiven1))
+							listToDoStandardDeviationOn.Add(numberToAddToList);
+						onlyStringInputsGiven = onlyStringInputsGiven1;
+						if(cell.Value is bool)
+							return new CompileResult(eErrorType.Div0);
+					}
 				}
-				else if (item.ValueFirst == null)
-					listToDoStandardDeviationOn.Add(0.0);
+				else
+				{
+
+					if (TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, false, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
+						listToDoStandardDeviationOn.Add(numberToAddToList);
+					onlyStringInputsGiven = onlyStringInputsGiven2;
+
+					if (item.ValueFirst == null)
+						listToDoStandardDeviationOn.Add(0.0);
+				}
 			}
-			var args = this.ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
-			foreach (var item in args)
-			{
-				listToDoStandardDeviationOn.Add(item);
-			}
+
+			if(onlyStringInputsGiven)
+				return new CompileResult(eErrorType.Value);
+
+			if (listToDoStandardDeviationOn.Count() == 0)
+				return new CompileResult(eErrorType.Div0);
+
 			if (!this.TryStandardDeviationEntirePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);
 			return this.CreateResult(standardDeviation, DataType.Decimal);
@@ -84,6 +102,54 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			double avg = listOfDoubles.Average();
 			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
 			return (d / (listOfDoubles.Count()));
+		}
+
+		private bool TryToParseValuesFromInputArgumentByRefrenceOrRange(bool ignoreHidden, bool ignoreErrors, ExcelDataProvider.ICellInfo valueToCheck, ParsingContext context, out double numberToWorkWith, out bool onlyStrings)
+		{
+			var shouldIgnore = CellStateHelper.ShouldIgnore(ignoreHidden, valueToCheck, context);
+			var isNumeric = ConvertUtil.IsNumeric(valueToCheck.Value);
+			var isABoolean = Boolean.TryParse(valueToCheck.Value.ToString(), out bool result2);
+
+			if (!shouldIgnore && isNumeric && !isABoolean)
+			{
+				numberToWorkWith = valueToCheck.ValueDouble;
+				onlyStrings = false;
+				return true;
+			}
+			if (!shouldIgnore && isNumeric && isABoolean)
+			{
+				numberToWorkWith = valueToCheck.ValueDoubleLogical;
+				onlyStrings = false;
+				return true;
+			}
+			if (ConvertUtil.TryParseDateString(valueToCheck.ValueDouble, out System.DateTime dateTime) && ConvertUtil.TryParseDateObjectToOADate(dateTime, out double dateTimeToOADAte))
+			{
+				numberToWorkWith = dateTimeToOADAte;
+				onlyStrings = false;
+				return true;
+			}			
+			numberToWorkWith = 0.0;
+			onlyStrings = false;
+			return false;
+		}
+
+		private bool TryToParseValuesFromInputArgument(bool ignoreHidden, bool ignoreErrors, FunctionArgument valueToCheck, ParsingContext context, out double numberToWorkWith, out bool onlyStrings)
+		{
+			if (ConvertUtil.IsNumeric(valueToCheck.Value) && !CellStateHelper.ShouldIgnore(ignoreHidden, valueToCheck, context))
+			{
+				numberToWorkWith = ConvertUtil.GetValueDouble(valueToCheck.Value);
+				onlyStrings = false;
+				return true;
+			}
+			if (valueToCheck.Value is string && ConvertUtil.TryParseDateObjectToOADate(valueToCheck.Value, out double result))
+			{
+				numberToWorkWith = result;
+				onlyStrings = false;
+				return true;
+			}
+			numberToWorkWith = 0.0;
+			onlyStrings = true;
+			return false;
 		}
 	}
 }
