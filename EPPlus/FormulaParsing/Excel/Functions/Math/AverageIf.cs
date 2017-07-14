@@ -82,10 +82,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
-
 			foreach (var cell in cellsToCompare)
 			{
-				if (comparisonCriterion != null && IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(cell.Value), comparisonCriterion))
+				if (IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(cell.Value), comparisonCriterion))
 				{
 					var relativeRow = cell.Row - cellsToCompare.Address._fromRow;
 					var relativeColumn = cell.Column - cellsToCompare.Address._fromCol;
@@ -116,7 +115,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
-
 			var valuesOfPassingCells = potentialCellsToAverage.Select(cell => this.GetFirstArgument(cell.Value)).Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, comparisonCriterion));
 			foreach (var cellValue in valuesOfPassingCells)
 			{
@@ -128,7 +126,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					numberOfValidValues++;
 				}
 			}
-
 			if (numberOfValidValues == 0)
 				return new CompileResult(eErrorType.Div0);
 			else

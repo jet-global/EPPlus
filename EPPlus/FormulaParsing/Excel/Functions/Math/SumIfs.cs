@@ -22,7 +22,6 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2015-01-15
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
@@ -31,7 +30,7 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// This class contains the formula for the SUMIFS Excel Function.
+	/// Returns the sum of all cells that meet multiple criteria.
 	/// </summary>
 	public class SumIfs : MultipleRangeCriteriasFunction
 	{
@@ -40,10 +39,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// </summary>
 		/// <param name="arguments">The arguments used to calculate the sum.</param>
 		/// <param name="context">The context for the function.</param>
-		/// <returns>Returns the sum of all cells in the given range that pass the given criteria(s).</returns>
+		/// <returns>Returns the sum of all cells in the given range that pass the given criteria.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			object currentCriteria = null;
+			object currentCriterion = null;
 			if (this.ArgumentCountIsValid(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
 			var rangeToAverage = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
@@ -55,16 +54,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				var currentRangeToCompare = arguments.ElementAt(argumentIndex).ValueAsRangeInfo;
 				if (currentRangeToCompare == null || !this.RangesAreTheSameShape(rangeToAverage, currentRangeToCompare))
 					return new CompileResult(eErrorType.Value);
-				currentCriteria = IfHelper.ExtractCriterionObject(arguments.ElementAt(argumentIndex + 1), context);
-
-				var passingIndices = this.GetIndicesOfCellsPassingCriteria(currentRangeToCompare, currentCriteria);
+				currentCriterion = IfHelper.ExtractCriterionObject(arguments.ElementAt(argumentIndex + 1), context);
+				var passingIndices = this.GetIndicesOfCellsPassingCriterion(currentRangeToCompare, currentCriterion);
 				if (argumentIndex == 1)
 					indicesOfValidCells = passingIndices;
 				else
 					indicesOfValidCells = indicesOfValidCells.Intersect(passingIndices).ToList();
 			}
 			var sumOfValidValues = 0d;
-			var numberOfValidValues = 0;
 			foreach (var cellIndex in indicesOfValidCells)
 			{
 				var currentCellValue = rangeToAverage.ElementAt(cellIndex).Value;
@@ -72,29 +69,26 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					return new CompileResult(cellError.Type);
 				else if (currentCellValue is string || currentCellValue is bool || currentCellValue == null)
 					continue;
-				sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);
-				numberOfValidValues++;
+				else
+					sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);
 			}
-			if (numberOfValidValues == 0)
-				return new CompileResult(0d, DataType.Decimal);
-			else
-				return this.CreateResult(sumOfValidValues, DataType.Decimal);
+			return this.CreateResult(sumOfValidValues, DataType.Decimal);
 		}
 
 		/// <summary>
 		/// Returns a list containing the indexes of the cells in <paramref name="cellsToCompare"/> that satisfy
-		/// the criteria detailed in <paramref name="criteria"/>.
+		/// the criterion detailed in <paramref name="criterion"/>.
 		/// </summary>
-		/// <param name="cellsToCompare">The <see cref="ExcelDataProvider.IRangeInfo"/> containing the cells to test against the <paramref name="criteria"/>.</param>
-		/// <param name="criteria">The criteria dictating the acceptable contents of a given cell.</param>
-		/// <returns>Returns a list of indexes corresponding to each cell that satisfies the given criteria.</returns>
-		private List<int> GetIndicesOfCellsPassingCriteria(ExcelDataProvider.IRangeInfo cellsToCompare, object criteria)
+		/// <param name="cellsToCompare">The <see cref="ExcelDataProvider.IRangeInfo"/> containing the cells to test against the <paramref name="criterion"/>.</param>
+		/// <param name="criterion">The criterion dictating the acceptable contents of a given cell.</param>
+		/// <returns>Returns a list of indexes corresponding to each cell that satisfies the given criterion.</returns>
+		private List<int> GetIndicesOfCellsPassingCriterion(ExcelDataProvider.IRangeInfo cellsToCompare, object criterion)
 		{
 			var passingIndices = new List<int>();
 			for (var currentCellIndex = 0; currentCellIndex < cellsToCompare.Count(); currentCellIndex++)
 			{
 				var currentCellValue = cellsToCompare.ElementAt(currentCellIndex).Value;
-				if (IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(currentCellValue), criteria))
+				if (IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(currentCellValue), criterion))
 					passingIndices.Add(currentCellIndex);
 			}
 			return passingIndices;
