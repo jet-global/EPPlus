@@ -34,8 +34,17 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Count the number of cells in a cell range that meet a criterion.
+	/// </summary>
 	public class CountIf : ExcelFunction
 	{
+		/// <summary>
+		/// Count the number of cells in a cell range that meet a criterion.
+		/// </summary>
+		/// <param name="arguments">The arguments used to calculate the number of valid cells.</param>
+		/// <param name="context">The context for this function.</param>
+		/// <returns>Returns the number of cells in the cell range that meet the criterion.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
