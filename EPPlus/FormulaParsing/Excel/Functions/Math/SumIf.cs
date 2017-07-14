@@ -110,13 +110,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private CompileResult CalculateSumUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToSum, object comparisonCriterion)
 		{
 			var sumOfValidValues = 0d;
-			var valuesOfPassingCells = potentialCellsToSum.Select(cell => this.GetFirstArgument(cell.Value)).Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, comparisonCriterion));
-			foreach (var cellValue in valuesOfPassingCells)
+			var cellsToSum = potentialCellsToSum.Where(cell=> IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(cell.Value), comparisonCriterion));
+			foreach (var cell in cellsToSum)
 			{
-				if (cellValue is ExcelErrorValue cellErrorValue)
+				if (cell.Value is ExcelErrorValue cellErrorValue)
 					return new CompileResult(cellErrorValue.Type);
-				else if (IfHelper.IsNumeric(cellValue, true))
-					sumOfValidValues += ConvertUtil.GetValueDouble(cellValue);
+				else if (IfHelper.IsNumeric(cell.Value, true))
+					sumOfValidValues += ConvertUtil.GetValueDouble(cell.Value);
 			}
 			return this.CreateResult(sumOfValidValues, DataType.Decimal);
 		}

@@ -115,14 +115,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
-			var valuesOfPassingCells = potentialCellsToAverage.Select(cell => this.GetFirstArgument(cell.Value)).Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, comparisonCriterion));
-			foreach (var cellValue in valuesOfPassingCells)
+			var cellsToAverage = potentialCellsToAverage.Where(cell => IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(cell.Value), comparisonCriterion));
+			foreach (var cell in cellsToAverage)
 			{
-				if (cellValue is ExcelErrorValue cellErrorValue)
+				if (cell.Value is ExcelErrorValue cellErrorValue)
 					return new CompileResult(cellErrorValue.Type);
-				else if (IfHelper.IsNumeric(cellValue, true))
+				else if (IfHelper.IsNumeric(cell.Value, true))
 				{
-					sumOfValidValues += ConvertUtil.GetValueDouble(cellValue);
+					sumOfValidValues += ConvertUtil.GetValueDouble(cell.Value);
 					numberOfValidValues++;
 				}
 			}
