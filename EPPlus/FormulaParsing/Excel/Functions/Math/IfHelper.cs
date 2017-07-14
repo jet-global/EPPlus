@@ -65,48 +65,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 
 			return IsMatch(testObject, criterionOperator, criterion, criterionIsExpression);
-			//var comparisonObjectDataType = GetObjectComparisonDataType(objectToCompare);
-			//var criteriaObjectDataType = GetObjectComparisonDataType(criteriaObject);
-
-			//if (criteriaObjectDataType == ComparisonDataType.TextValue)
-			//{
-			//	// Check if criteria string is an expression.
-			//	if (TryParseCriteriaAsExpression(criteriaObject.ToString(), out IOperator expressionOperator, out string expressionCriteria))
-			//	{
-			//		switch (expressionOperator.Operator)
-			//		{
-			//			case OperatorType.Equals:
-			//				{
-			//					if (TryExtractObjectFromCriteriaString(expressionCriteria, out object expressionCriteriaObject, out criteriaObjectDataType))
-			//						return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, expressionCriteriaObject, criteriaObjectDataType);
-			//					else
-			//						return CompareAsStrings(objectToCompare, comparisonObjectDataType, expressionCriteria, true);
-			//				}
-			//			case OperatorType.NotEqualTo:
-			//				{
-			//					if (TryExtractObjectFromCriteriaString(expressionCriteria, out object expressionCriteriaObject, out criteriaObjectDataType))
-			//						return !ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, expressionCriteriaObject, criteriaObjectDataType);
-			//					else
-			//						return !CompareAsStrings(objectToCompare, comparisonObjectDataType, expressionCriteria, true);
-			//				}
-			//			case OperatorType.GreaterThan:
-			//			case OperatorType.GreaterThanOrEqual:
-			//			case OperatorType.LessThan:
-			//			case OperatorType.LessThanOrEqual:
-			//				return CompareAsInequalityExpression(objectToCompare, comparisonObjectDataType, expressionOperator.Operator, expressionCriteria);
-			//			default:
-			//				throw new InvalidOperationException(
-			//					"This switch statement should never be entered if an operator other than the above 6 is parsed from the criteria string.");
-			//		}
-			//	}
-			//	// Check if criteria string contains a parsable, non-string object.
-			//	if (TryExtractObjectFromCriteriaString(criteriaObject.ToString(), out object parsedCriteriaObject, out criteriaObjectDataType))
-			//		return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, parsedCriteriaObject, criteriaObjectDataType);
-
-			//	return CompareAsStrings(objectToCompare, comparisonObjectDataType, criteriaObject.ToString());
-			//}
-
-			//return ObjectValueEqualsCriteriaValue(objectToCompare, comparisonObjectDataType, criteriaObject, criteriaObjectDataType);
 		}
 
 		private static bool IsMatch(object testObject, OperatorType criterionOperation, object criterionObject, bool matchCriterionAsExpression = false)
@@ -141,17 +99,31 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				else
 					compareResult = int.MinValue;
 			}
-			else if (ConvertUtil.TryParseDateObjectToOADate(criterionObject, out double criterionDouble) && 
-				TryConvertObjectToDouble(testObject, out double testDouble, equalityOperation))
+			else if (criterionObject is System.DateTime criterionDate)
 			{
-				compareResult = testDouble.CompareTo(criterionDouble);
+				if (TryConvertObjectToDouble(testObject, out double testDateDouble))
+					compareResult = testDateDouble.CompareTo(criterionDate.ToOADate());
+				else if (TryConvertObjectToDate(testObject, out System.DateTime testDate) && equalityOperation)
+					compareResult = System.DateTime.Compare(testDate, criterionDate);
+				else
+					compareResult = int.MinValue;
 			}
-			else if (criterionObject is ExcelErrorValue criterionErrorValue && testObject is ExcelErrorValue testErrorValue)
+			else if (IsNumeric(criterionObject, true))
 			{
-				if (equalityOperation)
+				if (TryConvertObjectToDouble(testObject, out double testDouble, equalityOperation))
+				{
+					var criterionDouble = ConvertUtil.GetValueDouble(criterionObject, true);
+					compareResult = testDouble.CompareTo(criterionDouble);
+				}
+				else
+					compareResult = int.MinValue;
+			}
+			else if (criterionObject is ExcelErrorValue criterionErrorValue)
+			{
+				if (testObject is ExcelErrorValue testErrorValue && equalityOperation)
 					compareResult = (criterionErrorValue.Type == testErrorValue.Type) ? 0 : int.MinValue;
 				else
-					return false;
+					compareResult = int.MinValue;
 			}
 
 			switch (criterionOperation)
@@ -200,8 +172,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			criterionObject = null;
 			if (InternationalizationUtil.TryParseLocalBoolean(criterionString, CultureInfo.CurrentCulture, out bool criterionBool))
 				criterionObject = criterionBool;
-			else if (ConvertUtil.TryParseDateObjectToOADate(criterionString, out double criterionDouble))
+			else if (TryConvertObjectToDouble(criterionString, out double criterionDouble))
 				criterionObject = criterionDouble;
+			else if (TryConvertObjectToDate(criterionString, out System.DateTime criterionDate))
+				criterionObject = criterionDate;
 			else if (InternationalizationUtil.TryParseLocalErrorValue(criterionString, CultureInfo.CurrentCulture, out ExcelErrorValue criterionErrorValue))
 				criterionObject = criterionErrorValue;
 			else
@@ -239,6 +213,48 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			else
 				compareResult = string.Compare(testString, criterionString);
 			return compareResult;
+		}
+
+		private static bool TryConvertObjectToDouble(object doubleCandidate, out double resultDouble)
+		{
+			resultDouble = double.MinValue;
+			if (doubleCandidate is string candidateAsString)
+			{
+				var doubleParsingStyle = NumberStyles.Float | NumberStyles.AllowDecimalPoint;
+				if (double.TryParse(candidateAsString, doubleParsingStyle, CultureInfo.CurrentCulture, out double doubleFromString))
+					resultDouble = doubleFromString;
+				else
+					return false;
+			}
+			else if (doubleCandidate is int candidateAsInt)
+				resultDouble = candidateAsInt;
+			else if (doubleCandidate is double candidateAsDouble)
+				resultDouble = candidateAsDouble;
+			else
+				return false;
+
+			return true;
+		}
+
+		private static bool TryConvertObjectToDate(object dateCandidate, out System.DateTime resultDate)
+		{
+			resultDate = System.DateTime.MinValue;
+			if (dateCandidate is System.DateTime candidateAsDate)
+				resultDate = candidateAsDate;
+			else if (dateCandidate is string candidateAsString)
+			{
+				var dateParsingStyle = DateTimeStyles.NoCurrentDateDefault;
+				var timeStringParsed = System.DateTime.TryParse(candidateAsString, CultureInfo.CurrentCulture.DateTimeFormat, dateParsingStyle, out System.DateTime timeDate);
+				var dateStringParsed = System.DateTime.TryParse(candidateAsString, out System.DateTime timeDateFromInput);
+				if (timeStringParsed && dateStringParsed)
+					resultDate = timeDate;
+				else
+					return false;
+			}
+			else
+				return false;
+			
+			return true;
 		}
 
 		//private static bool CompareAsInequalityExpression(object objectToCompare, ComparisonDataType objectDataType, OperatorType comparisonOperator, string criteriaString)

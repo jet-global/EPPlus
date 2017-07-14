@@ -478,6 +478,22 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells[3, 3].Calculate();
 			Assert.AreEqual(3d, _worksheet.Cells[3, 3].Value);
 		}
+		
+		[TestMethod]
+		public void CountIfWithInequalityDateCriterion()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "COUNTIF(C2:C3, \"7/1/2017\")";
+				worksheet.Cells["B3"].Formula = "COUNTIF(C2:C3, \">=7/1/2017\")";
+				worksheet.Cells["C2"].Value = (new System.DateTime(2017, 7, 1)).ToOADate();
+				worksheet.Cells["C3"].Value = "7/1/2017";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
+			}
+		}
 		#endregion
 	}
 }

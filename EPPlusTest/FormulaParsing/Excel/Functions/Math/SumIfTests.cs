@@ -344,10 +344,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells[8, 3].Formula = "SUMIF(C2:C6,\"<\"&B8,D2:D6)";
 			_worksheet.Calculate();
 			Assert.AreEqual(3.0, _worksheet.Cells[8, 3].Value);
-			var shortDatePattern = System.Globalization.DateTimeFormatInfo.CurrentInfo.ShortDatePattern;
-			_worksheet.Cells[8, 3].Formula = string.Format("SUMIF(C2:C6,\"<{0}\",D2:D6)", new DateTime(2013, 1, 1).ToString(shortDatePattern));
-			_worksheet.Calculate();
-			Assert.AreEqual(3.0, _worksheet.Cells[8, 3].Value);
 		}
 
 		[TestMethod]

@@ -53,7 +53,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				var currentRangeToCompare = arguments.ElementAt(argumentIndex).ValueAsRangeInfo;
 				if (currentRangeToCompare == null || !this.RangesAreTheSameShape(rangeToAverage, currentRangeToCompare))
 					return new CompileResult(eErrorType.Value);
-				var currentCriteria = IfHelper.ExtractCriteriaString(arguments.ElementAt(argumentIndex + 1), context);
+				var currentCriteria = IfHelper.ExtractCriteriaObject(arguments.ElementAt(argumentIndex + 1), context);
 
 				var passingIndices = this.GetIndicesOfCellsPassingCriteria(currentRangeToCompare, currentCriteria);
 				if (argumentIndex == 1)
@@ -86,7 +86,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <param name="cellsToCompare">The <see cref="ExcelDataProvider.IRangeInfo"/> containing the cells to test against the <paramref name="criteria"/>.</param>
 		/// <param name="criteria">The criteria dictating the acceptable contents of a given cell.</param>
 		/// <returns>Returns a list of indexes corresponding to each cell that satisfies the given criteria.</returns>
-		private List<int> GetIndicesOfCellsPassingCriteria(ExcelDataProvider.IRangeInfo cellsToCompare, string criteria)
+		private List<int> GetIndicesOfCellsPassingCriteria(ExcelDataProvider.IRangeInfo cellsToCompare, object criteria)
 		{
 			var passingIndices = new List<int>();
 			for (var currentCellIndex = 0; currentCellIndex < cellsToCompare.Count(); currentCellIndex++)

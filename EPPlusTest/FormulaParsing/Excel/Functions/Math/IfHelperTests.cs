@@ -43,7 +43,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void ObjectMatchesCriteriaHandlesErrorValuesAsCriteria()
 		{
-			Assert.Fail("This test will fail until the IfHelper class has been fixed to properly parse error values in criteria for all cultures.");
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
 			{
@@ -63,13 +62,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 					worksheet.Cells["B7"].Formula = "COUNTIF(C3,\"=#VALUE\")";
 					worksheet.Cells["B8"].Formula = "COUNTIF(C4,\"=#VALUE\")";
 					worksheet.Calculate();
-					Assert.AreEqual(1, worksheet.Cells["B2"].Value);
-					Assert.AreEqual(0, worksheet.Cells["B3"].Value);
-					Assert.AreEqual(1, worksheet.Cells["B4"].Value);
-					Assert.AreEqual(0, worksheet.Cells["B5"].Value);
-					Assert.AreEqual(0, worksheet.Cells["B6"].Value);
-					Assert.AreEqual(0, worksheet.Cells["B7"].Value);
-					Assert.AreEqual(1, worksheet.Cells["B8"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B6"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B7"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B8"].Value);
 				}
 				var de = CultureInfo.CreateSpecificCulture("de-DE");
 				Thread.CurrentThread.CurrentCulture = de;
@@ -105,7 +104,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		[TestMethod]
 		public void ObjectMatchesCriteriaHandlesBooleanValuesAsCriteria()
 		{
-			Assert.Fail("This test will fail until the IfHelper class has been fixed to properly parse booleans in criteria for all cultures.");
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
 			{
@@ -129,6 +127,20 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 					Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
 					Assert.AreEqual(1d, worksheet.Cells["B6"].Value);
 					Assert.AreEqual(0d, worksheet.Cells["B7"].Value);
+				}
+				var de = CultureInfo.CreateSpecificCulture("de-de");
+				Thread.CurrentThread.CurrentCulture = de;
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+					worksheet.Cells["C2"].Value = true;
+					worksheet.Cells["C3"].Value = "WAHR"; // WAHR is the German translation for TRUE.
+					worksheet.Cells["B2"].Formula = "COUNTIF(C2, WAHR)";
+					worksheet.Cells["B3"].Formula = "COUNTIF(C3, WAHR)";
+					worksheet.Cells["B4"].Formula = "COUNTIF(C2, \"WAHR\")";
+					worksheet.Cells["B5"].Formula = "COUNTIF(C3, \"WAHR\")";
+					worksheet.Cells["B6"].Formula = "COUNTIF(C2, \"=WAHR\")";
+					worksheet.Cells["B7"].Formula = "COUNTIF(C3, \"=WAHR\")";
 				}
 			}
 			finally

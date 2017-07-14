@@ -163,6 +163,24 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(0d, worksheet.Cells["B2"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void CountBlankCountsDefaultEmptyCellsInCellRange()
+		{
+			// Note that EPPlus does not include cells that have not been explicitly set
+			// in the group of cells in the IRangeInfo. i.e. for the specified range in this test
+			// (A1:B4), only the cells that have had their value set (A1 and B2) will be included
+			// in the IRangeInfo passed to the COUNTBLANK function.
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["A1"].Value = 1;
+				worksheet.Cells["B2"].Value = string.Empty;
+				worksheet.Cells["A5"].Formula = "COUNTBLANK(A1:B4)";
+				worksheet.Calculate();
+				Assert.AreEqual(7d, worksheet.Cells["A5"].Value);
+			}
+		}
 		#endregion
 	}
 }

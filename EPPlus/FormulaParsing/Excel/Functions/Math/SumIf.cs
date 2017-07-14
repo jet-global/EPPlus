@@ -54,7 +54,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (cellRangeToCheck == null)
 				return new CompileResult(eErrorType.Value);
-			var criteriaString = IfHelper.ExtractCriteriaString(arguments.ElementAt(1), context);
+			var criteriaString = IfHelper.ExtractCriteriaObject(arguments.ElementAt(1), context);
 			if (arguments.Count() > 2)
 			{
 				var cellRangeToSum = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
@@ -79,7 +79,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		///		If a cell in <paramref name="cellsToCompare"/> passes the criteria, then its
 		///		corresponding cell in this cell range will be included in the sum calculation.</param>
 		/// <returns>Returns the sum for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
-		private CompileResult CalculateSumUsingSumRange(ExcelDataProvider.IRangeInfo cellsToCompare, string comparisonCriteria, ExcelDataProvider.IRangeInfo potentialCellsToSum)
+		private CompileResult CalculateSumUsingSumRange(ExcelDataProvider.IRangeInfo cellsToCompare, object comparisonCriteria, ExcelDataProvider.IRangeInfo potentialCellsToSum)
 		{
 			var sumOfValidValues = 0d;
 			foreach (var cell in cellsToCompare)
@@ -107,7 +107,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		///		If a cell passes the criteria, then its value is included in the sum calculation.</param>
 		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the sum calculation.</param>
 		/// <returns>Returns the sum value for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
-		private CompileResult CalculateSumUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToSum, string comparisonCriteria)
+		private CompileResult CalculateSumUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToSum, object comparisonCriteria)
 		{
 			var sumOfValidValues = 0d;
 			foreach (var cell in potentialCellsToSum)

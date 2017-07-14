@@ -39,7 +39,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var rangeToCount = arguments.ElementAt(0).ValueAsRangeInfo;
 			if (rangeToCount == null)
 				return new CompileResult(eErrorType.Value);
-			double count = rangeToCount.Select(cell => this.GetFirstArgument(cell.Value)).Where(cellValue => cellValue == null || cellValue.Equals(string.Empty)).Count();
+			// Note that the blank cells should be counted by subtracting the non-blank cells from the total rather
+			// than by counting the blank cells directly because, for cells that have not been explicitly set to any value,
+			// (null or otherwise), EPPlus will not include those cells in the given range of cells.
+			var totalCellsInRange = rangeToCount.GetNCells();
+			var numberOfCellsToIgnore = rangeToCount.Select(cell => this.GetFirstArgument(cell.Value)).Where(cellValue => !(cellValue == null || cellValue.Equals(string.Empty))).Count();
+			double count = totalCellsInRange - numberOfCellsToIgnore;
 			return this.CreateResult(count, DataType.Integer);
 		}
 	}

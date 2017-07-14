@@ -53,17 +53,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (cellRangeToCheck == null)
 				return new CompileResult(eErrorType.Value);
-			var criteriaString = IfHelper.ExtractCriteriaString(arguments.ElementAt(1), context);
+			//var criteriaString = IfHelper.ExtractCriteriaString(arguments.ElementAt(1), context);
+			var criteriaObject = IfHelper.ExtractCriteriaObject(arguments.ElementAt(1), context);
 			if (arguments.Count() > 2)
 			{
 				var cellRangeToAverage = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
 				if (cellRangeToAverage == null)
 					return new CompileResult(eErrorType.Value);
 				else
-					return this.CalculateAverageUsingAverageRange(cellRangeToCheck, criteriaString, cellRangeToAverage);
+					return this.CalculateAverageUsingAverageRange(cellRangeToCheck, criteriaObject, cellRangeToAverage);
 			}
 			else
-				return this.CalculateAverageUsingRange(cellRangeToCheck, criteriaString);
+				return this.CalculateAverageUsingRange(cellRangeToCheck, criteriaObject);
 		}
 
 		/// <summary>
@@ -78,7 +79,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		///		If a cell in <paramref name="cellsToCompare"/> passes the criteria, then its
 		///		corresponding cell in this cell range will be included in the average calculation.</param>
 		/// <returns>Returns the average for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
-		private CompileResult CalculateAverageUsingAverageRange(ExcelDataProvider.IRangeInfo cellsToCompare, string comparisonCriteria, ExcelDataProvider.IRangeInfo potentialCellsToAverage)
+		private CompileResult CalculateAverageUsingAverageRange(ExcelDataProvider.IRangeInfo cellsToCompare, object comparisonCriteria, ExcelDataProvider.IRangeInfo potentialCellsToAverage)
 		{
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
@@ -111,7 +112,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		///		If a cell passes the criteria, then its value is included in the average calculation.</param>
 		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the average calculation.</param>
 		/// <returns>Returns the average value for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
-		private CompileResult CalculateAverageUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToAverage, string comparisonCriteria)
+		private CompileResult CalculateAverageUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToAverage, object comparisonCriteria)
 		{
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;

@@ -368,20 +368,6 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		}
 
 		[TestMethod]
-		public void CountBlankShouldCalculateEmptyCells()
-		{
-			using (var pck = new ExcelPackage())
-			{
-				var sheet = pck.Workbook.Worksheets.Add("test");
-				sheet.Cells["A1"].Value = 1;
-				sheet.Cells["B2"].Value = string.Empty;
-				sheet.Cells["A5"].Formula = "COUNTBLANK(A1:B4)";
-				sheet.Calculate();
-				Assert.AreEqual(7, sheet.Cells["A5"].Value);
-			}
-		}
-
-		[TestMethod]
 		public void DegreesShouldReturnCorrectResult()
 		{
 			var result = _parser.Parse("DEGREES(0.5)");
