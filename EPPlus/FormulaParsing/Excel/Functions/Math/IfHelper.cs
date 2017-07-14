@@ -41,6 +41,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// </summary>
 	public static class IfHelper
 	{
+		/// <summary>
+		/// Compares the given <paramref name="testObject"/> against the given <paramref name="rawCriterionObject"/>.
+		/// This method is expected to be used with any of the *IF or *IFS Excel functions (ex: the AVERAGEIF function)
+		/// for comparing an object against a criterion. See the documentation for the any of the *IF or *IFS functions
+		/// for information on acceptable forms of the criterion.
+		/// </summary>
+		/// <param name="testObject">The object to compare against the given <paramref name="rawCriterionObject"/>.</param>
+		/// <param name="rawCriterionObject">The criterion value or expression that dictates whether the given <paramref name="testObject"/> passes or fails.</param>
+		/// <returns>Returns true if <paramref name="testObject"/> matches the <paramref name="rawCriterionObject"/>.</returns>
 		public static bool ObjectMatchesCriteria(object testObject, object rawCriterionObject)
 		{
 			object criterion = rawCriterionObject;
@@ -63,21 +72,25 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				else
 					criterion = criterionString;
 			}
-
 			return IsMatch(testObject, criterionOperator, criterion, criterionIsExpression);
 		}
 
+		/// <summary>
+		/// Compare the <paramref name="testObject"/> against the <paramref name="criterionObject"/> using the
+		/// <paramref name="criterionOperation"/> to determine what qualifies as a match.
+		/// </summary>
+		/// <param name="testObject">The object to compare against the <paramref name="criterionObject"/>.</param>
+		/// <param name="criterionOperation">The comparison operation to perform between the <paramref name="testObject"/> and the <paramref name="criterionObject"/>.</param>
+		/// <param name="criterionObject">The criterion value that determines what value the <paramref name="testObject"/> should be compared against.</param>
+		/// <param name="matchCriterionAsExpression">
+		///		Optional parameter that indicates whether the given criterion was explicitly parsed as an expression,
+		///		or was implied to use the Equals operator.</param>
+		/// <returns>Returns true if the <paramref name="testObject"/> matches the <paramref name="criterionObject"/> for the given <paramref name="criterionOperation"/>, and false otherwise.</returns>
 		private static bool IsMatch(object testObject, OperatorType criterionOperation, object criterionObject, bool matchCriterionAsExpression = false)
 		{
-			/*
-			 * 1. Create an if block for each kind of datatype the criterion could be (number, string, error, bool).
-			 *	If the criterion is a string, it will always contain text or be empty; parsable objects are already parsed out.
-			 * 2. Determine what kind of datatype the testObject is (number, text, error, bool, null).
-			 * 3. Enter the criterion if statement for the correct data type, and check if the testObject is a matching data type.
-			 * 4. Do a final switch for each operator type that returns the result.
-			 */
 			var compareResult = int.MinValue;
-			bool equalityOperation = (criterionOperation == OperatorType.Equals || criterionOperation == OperatorType.NotEqualTo);
+			// Excel compares some data types differently if the operator is equality based (=/<>), as opposed to inequality based (</<=/>/>=).
+			bool compareForEquality = (criterionOperation == OperatorType.Equals || criterionOperation == OperatorType.NotEqualTo);
 			if (criterionObject is string criterionString)
 			{
 				if (criterionString.Equals(string.Empty))
@@ -88,7 +101,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						compareResult = (testObject == null || testObject.Equals(string.Empty)) ? 0 : int.MinValue;
 				}
 				else if (testObject is string testString)
-					compareResult = CompareAsStrings(testString, criterionString, equalityOperation);
+					compareResult = CompareAsStrings(testString, criterionString, compareForEquality);
 				else
 					compareResult = int.MinValue;
 			}
@@ -103,14 +116,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				if (TryConvertObjectToDouble(testObject, out double testDateDouble))
 					compareResult = testDateDouble.CompareTo(criterionDate.ToOADate());
-				else if (TryConvertObjectToDate(testObject, out System.DateTime testDate) && equalityOperation)
+				else if (TryConvertObjectToDate(testObject, out System.DateTime testDate) && compareForEquality)
 					compareResult = System.DateTime.Compare(testDate, criterionDate);
 				else
 					compareResult = int.MinValue;
 			}
 			else if (IsNumeric(criterionObject, true))
 			{
-				if (TryConvertObjectToDouble(testObject, out double testDouble, equalityOperation))
+				if (TryConvertObjectToDouble(testObject, out double testDouble, compareForEquality))
 				{
 					var criterionDouble = ConvertUtil.GetValueDouble(criterionObject, true);
 					compareResult = testDouble.CompareTo(criterionDouble);
@@ -120,7 +133,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			else if (criterionObject is ExcelErrorValue criterionErrorValue)
 			{
-				if (testObject is ExcelErrorValue testErrorValue && equalityOperation)
+				if (testObject is ExcelErrorValue testErrorValue && compareForEquality)
 					compareResult = (criterionErrorValue.Type == testErrorValue.Type) ? 0 : int.MinValue;
 				else
 					compareResult = int.MinValue;
@@ -145,12 +158,22 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 		}
 
+		/// <summary>
+		/// Try to parse the given <paramref name="rawCriterionString"/> as an expression.
+		/// </summary>
+		/// <param name="rawCriterionString">The string to parse.</param>
+		/// <param name="expressionOperator">The returned <see cref="IOperator"/> indicating what kind of expression was contained in <paramref name="rawCriterionString"/>.</param>
+		/// <param name="expressionCriterion">The remainder of <paramref name="rawCriterionString"/> without the leading expression characters.</param>
+		/// <returns>
+		///		Returns true if <paramref name="rawCriterionString"/> was successfully parsed to a valid expression, and false otherwise.
+		///		It is recommended not to use the results contained in <paramref name="expressionOperator"/> or 
+		///		<paramref name="expressionCriterion"/> if this function returns false.</returns>
 		private static bool TryParseCriterionAsExpression(string rawCriterionString, out IOperator expressionOperator, out string expressionCriterion)
 		{
 			expressionOperator = null;
 			expressionCriterion = null;
 			var operatorIndex = -1;
-			// The criteria string is an expression if it begins with the operators <>, =, >, >=, <, or <=
+			// The criterion string is an expression if it begins with the operators <>, =, >, >=, <, or <=
 			if (Regex.IsMatch(rawCriterionString, @"^(<>|>=|<=){1}"))
 				operatorIndex = 2;
 			else if (Regex.IsMatch(rawCriterionString, @"^(=|<|>){1}"))
@@ -167,6 +190,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return false;
 		}
 
+		/// <summary>
+		/// Try to parse the given <paramref name="criterionString"/> to a bool, double, <see cref="System.DateTime"/>,
+		/// or an <see cref="ExcelErrorValue"/>.
+		/// </summary>
+		/// <param name="criterionString">The string to be parsed.</param>
+		/// <param name="criterionObject">The returned object parsed from the <paramref name="criterionString"/>.</param>
+		/// <returns>Returns true if the given <paramref name="criterionString"/> was parsed to an object, and false otherwise.</returns>
 		private static bool TryParseCriterionStringToObject(string criterionString, out object criterionObject)
 		{
 			criterionObject = null;
@@ -182,19 +212,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return false;
 			return true;
 		}
-
-		private static bool TryConvertObjectToDouble(object convertObject, out double objectAsDouble, bool includeNumericStrings = true)
-		{
-			objectAsDouble = double.MinValue;
-			if (IsNumeric(convertObject, true))
-				objectAsDouble = ConvertUtil.GetValueDouble(convertObject);
-			else if (includeNumericStrings && convertObject is string objectAsString && Double.TryParse(objectAsString, out double doubleParseResult))
-				objectAsDouble = doubleParseResult;
-			else
-				return false;
-			return true;
-		}
-
+		
+		/// <summary>
+		/// Compares the given <paramref name="testString"/> against the model string <paramref name="criterionString"/>.
+		/// </summary>
+		/// <param name="testString">The string being tested.</param>
+		/// <param name="criterionString">The string that provides the model for the comparison.</param>
+		/// <param name="checkWildcardChars">
+		///		Optional parameter that indicated whether the <paramref name="criterionString"/> should consider
+		///		the characters ? and * as wildcards or literals.</param>
+		/// <returns>
+		///		Returns an int less than 0 if <paramref name="testString"/> precedes <paramref name="criterionString"/> in the sort order.
+		///		Returns the int 0 if <paramref name="testString"/> and <paramref name="criterionString"/> match in content.
+		///		Returns an int greater than 0 if <paramref name="testString"/> follows <paramref name="criterionString"/> in the sort order.
+		///		Returns <see cref="int.MinValue"/> if <paramref name="criterionString"/> was comparing using wildcard characters, and <paramref name="testString"/> failed to match.</returns>
 		private static int CompareAsStrings(string testString, string criterionString, bool checkWildcardChars = false)
 		{
 			var compareResult = int.MinValue;
@@ -211,14 +242,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				compareResult = (Regex.IsMatch(testString, criterionRegexPattern)) ? 0 : int.MinValue;
 			}
 			else
-				compareResult = string.Compare(testString, criterionString);
+				compareResult = string.Compare(testString, criterionString, StringComparison.CurrentCultureIgnoreCase);
 			return compareResult;
 		}
 
-		private static bool TryConvertObjectToDouble(object doubleCandidate, out double resultDouble)
+		private static bool TryConvertObjectToDouble(object doubleCandidate, out double resultDouble, bool parseNumericStrings = true)
 		{
 			resultDouble = double.MinValue;
-			if (doubleCandidate is string candidateAsString)
+			if (parseNumericStrings && doubleCandidate is string candidateAsString)
 			{
 				var doubleParsingStyle = NumberStyles.Float | NumberStyles.AllowDecimalPoint;
 				if (double.TryParse(candidateAsString, doubleParsingStyle, CultureInfo.CurrentCulture, out double doubleFromString))
@@ -226,13 +257,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				else
 					return false;
 			}
-			else if (doubleCandidate is int candidateAsInt)
-				resultDouble = candidateAsInt;
-			else if (doubleCandidate is double candidateAsDouble)
-				resultDouble = candidateAsDouble;
+			else if (IsNumeric(doubleCandidate, true))
+				resultDouble = ConvertUtil.GetValueDouble(doubleCandidate);
 			else
 				return false;
-
 			return true;
 		}
 
@@ -257,373 +285,52 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return true;
 		}
 
-		//private static bool CompareAsInequalityExpression(object objectToCompare, ComparisonDataType objectDataType, OperatorType comparisonOperator, string criteriaString)
-		//{
-		//	var comparisonResult = int.MinValue;
-		//	if (objectToCompare is string)
-		//		objectDataType = ComparisonDataType.TextValue;
-		//	if (TryExtractObjectFromCriteriaString(criteriaString, out object criteriaObject, out ComparisonDataType criteriaDataType))
-		//	{
-		//		if (objectDataType != criteriaDataType)
-		//			return false;
-		//		switch (criteriaDataType)
-		//		{
-		//			case ComparisonDataType.NumericValue:
-		//				{
-		//					var criteriaValue = ConvertUtil.GetValueDouble(criteriaObject);
-		//					var objectToCompareValue = ConvertUtil.GetValueDouble(objectToCompare);
-		//					comparisonResult = objectToCompareValue.CompareTo(criteriaValue);
-		//					break;
-		//				}
-		//			case ComparisonDataType.BooleanValue:
-		//				{
-		//					if (objectToCompare is bool boolToCompare && criteriaObject is bool criteriaBool)
-		//						comparisonResult = boolToCompare.CompareTo(criteriaBool);
-		//					else
-		//						return false;
-		//					break;
-		//				}
-		//		}
-		//	}
-		//	else if (objectDataType == ComparisonDataType.TextValue)
-		//		comparisonResult = string.Compare(objectToCompare.ToString(), criteriaString, StringComparison.CurrentCultureIgnoreCase);
-		//	else
-		//		return false;
-
-		//	switch (comparisonOperator)
-		//	{
-		//		case OperatorType.LessThan:
-		//			return (comparisonResult == -1);
-		//		case OperatorType.LessThanOrEqual:
-		//			return (comparisonResult == -1 || comparisonResult == 0);
-		//		case OperatorType.GreaterThan:
-		//			return (comparisonResult == 1);
-		//		case OperatorType.GreaterThanOrEqual:
-		//			return (comparisonResult == 1 || comparisonResult == 0);
-		//		default:
-		//			throw new InvalidOperationException("This function should only be entered if the comparisonOperator is one of the 4 in the switch statement.");
-		//	}
-		//}
-
-		//private static bool TryExtractObjectFromCriteriaString(string rawCriteriaString, out object objectFromCriteria, out ComparisonDataType criteriaDataType)
-		//{
-		//	objectFromCriteria = null;
-		//	criteriaDataType = ComparisonDataType.TextValue;
-		//	if (ConvertUtil.TryParseDateObjectToOADate(rawCriteriaString, out double criteriaDouble))
-		//	{
-		//		objectFromCriteria = criteriaDouble;
-		//		criteriaDataType = ComparisonDataType.NumericValue;
-		//	}
-		//	else if (InternationalizationUtil.TryParseLocalBoolean(rawCriteriaString, CultureInfo.CurrentCulture, out bool criteriaBool))
-		//	{
-		//		objectFromCriteria = criteriaBool;
-		//		criteriaDataType = ComparisonDataType.BooleanValue;
-		//	}
-		//	else if (InternationalizationUtil.TryParseLocalErrorValue(rawCriteriaString, CultureInfo.CurrentCulture, out ExcelErrorValue criteriaErrorValue))
-		//	{
-		//		objectFromCriteria = criteriaErrorValue;
-		//		criteriaDataType = ComparisonDataType.ErrorValue;
-		//	}
-		//	else
-		//		return false;
-
-		//	return true;
-		//}
-
-		//private static bool CompareAsStrings(object objectToCompare, ComparisonDataType objectDataType, string criteriaString, bool compareAsEqualityExpression = false)
-		//{
-		//	if (criteriaString.Equals(string.Empty))
-		//		return ((compareAsEqualityExpression) ? objectToCompare == null : (objectToCompare == null || objectToCompare.ToString().Equals(string.Empty)));
-		//	if (objectDataType != ComparisonDataType.TextValue)
-		//		return false;
-
-		//	var stringToCompare = objectToCompare.ToString().ToUpper(CultureInfo.CurrentCulture);
-		//	criteriaString = criteriaString.ToUpper(CultureInfo.CurrentCulture);
-
-		//	if (criteriaString.Contains("*") || criteriaString.Contains("?"))
-		//	{
-		//		var regexPattern = Regex.Escape(criteriaString);
-		//regexPattern = string.Format("^{0}$", regexPattern);
-		//regexPattern = regexPattern.Replace(@"\*", ".*");
-		//		regexPattern = regexPattern.Replace("~.*", "\\*");
-		//		regexPattern = regexPattern.Replace(@"\?", ".");
-		//		regexPattern = regexPattern.Replace("~.", "\\?");
-		//		return Regex.IsMatch(stringToCompare, regexPattern);
-		//	}
-		//	else
-		//		// A return value of 0 from string.Compare() means that the two strings have equivalent content.
-		//		return (string.Compare(stringToCompare, criteriaString) == 0);
-		//}
-
-		//private static bool ObjectValueEqualsCriteriaValue(object objectToCompare, ComparisonDataType objectDataType,
-		//												object criteriaObject, ComparisonDataType criteriaDataType)
-		//{
-		//	if (objectDataType != criteriaDataType)
-		//		return false;
-
-		//	if (criteriaDataType == ComparisonDataType.NumericValue)
-		//	{
-		//		ConvertUtil.TryParseDateObjectToOADate(criteriaObject, out double criteriaDouble);
-		//		criteriaObject = criteriaDouble;
-		//	}
-
-		//	var objectString = objectToCompare.ToString();
-		//	var criteriaString = criteriaObject.ToString();
-
-		//	return (string.Compare(criteriaString, objectString) == 0);
-		//}
-
-		//private static ComparisonDataType GetCriterionDataType(object criterionObject)
-		//{
-		//	if (criterionObject == null)
-		//		return ComparisonDataType.Null;
-		//	else if (criterionObject is bool)
-		//		return ComparisonDataType.BooleanValue;
-		//	else if (IsNumeric(criterionObject, true))
-		//		return ComparisonDataType.NumericValue;
-		//	else if (criterionObject is string)
-		//		return ComparisonDataType.TextValue;
-		//	else if (criterionObject is ExcelErrorValue)
-		//		return ComparisonDataType.ErrorValue;
-		//	else
-		//		return ComparisonDataType.InvalidComparisonDataType;
-		//}
-
-		public static object ExtractCriteriaObject(FunctionArgument criteriaCandidate, ParsingContext context)
-		{
-			object criteriaObject = null;
-			if (criteriaCandidate.Value is ExcelDataProvider.IRangeInfo criteriaRange)
-			{
-				if (criteriaRange.IsMulti)
-				{
-					var worksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
-					var functionRow = context.Scopes.Current.Address.FromRow;
-					var functionColumn = context.Scopes.Current.Address.FromCol;
-					criteriaObject = CalculateCriteria(criteriaCandidate, worksheet, functionRow, functionColumn);
-				}
-				else
-				{
-					criteriaObject = criteriaCandidate.ValueFirst;
-					if (criteriaObject is List<object> objectList)
-						criteriaObject = objectList.First();
-				}
-			}
-			else if (criteriaCandidate.Value is List<FunctionArgument> argumentList)
-				criteriaObject = argumentList.First().ValueFirst;
-			else
-				criteriaObject = criteriaCandidate.ValueFirst;
-
-			// Note that Excel considers null criteria equivalent to a criteria of 0.
-			if (criteriaObject == null)
-				criteriaObject = 0;
-
-			return criteriaObject;
-		}
-
-		// //////////////////////////////////////////////////////////////////
-
 		/// <summary>
-		/// Compares the given <paramref name="objectToCompare"/> against the given <paramref name="criteria"/>.
-		/// This method is expected to be used with any of the *IF or *IFS Excel functions (ex: the AVERAGEIF function).
+		/// Ensures that the given <paramref name="criterionCandidate"/> is of a form that can be
+		/// represented as a criterion.
 		/// </summary>
-		/// <param name="objectToCompare">The object to compare against the given <paramref name="criteria"/>.</param>
-		/// <param name="criteria">The criteria value or expression that dictates whether the given <paramref name="objectToCompare"/> passes or fails.</param>
-		/// <returns>Returns true if <paramref name="objectToCompare"/> matches the <paramref name="criteria"/>.</returns>
-		public static bool ObjectMatchesCriteria(object objectToCompare, string criteria)
-		{
-			var operatorIndex = -1;
-			// Check if the criteria is an expression; i.e. begins with the operators <>, =, >, >=, <, or <=
-			if (Regex.IsMatch(criteria, @"^(<>|>=|<=){1}"))
-				operatorIndex = 2;
-			else if (Regex.IsMatch(criteria, @"^(=|<|>){1}"))
-				operatorIndex = 1;
-			// If the criteria is an expression, evaluate as such.
-			if (operatorIndex != -1)
-			{
-				var expressionOperatorString = criteria.Substring(0, operatorIndex);
-				var criteriaString = criteria.Substring(operatorIndex);
-				IOperator expressionOperator;
-				if (OperatorsDict.Instance.TryGetValue(expressionOperatorString, out expressionOperator))
-				{
-					switch (expressionOperator.Operator)
-					{
-						case OperatorType.Equals:
-							return IsMatch(objectToCompare, criteriaString, true);
-						case OperatorType.NotEqualTo:
-							return !IsMatch(objectToCompare, criteriaString, true);
-						case OperatorType.GreaterThan:
-						case OperatorType.GreaterThanOrEqual:
-						case OperatorType.LessThan:
-						case OperatorType.LessThanOrEqual:
-							return CompareAsInequalityExpression(objectToCompare, criteriaString, expressionOperator.Operator);
-						default:
-							return IsMatch(objectToCompare, criteriaString);
-					}
-				}
-			}
-			return IsMatch(objectToCompare, criteria);
-		}
-
-		/// <summary>
-		/// Compares the <paramref name="objectToCompare"/> with the given <paramref name="criteria"/>.
-		/// <paramref name="criteria"/> is expected to be either a number, boolean, string, or null. The string
-		/// can contain a date/time, or a text value that may require wildcard Regex.
-		/// The given object is considered a match with the criteria if their content are equivalent in value.
-		/// </summary>
-		/// <param name="objectToCompare">The object to compare against the given <paramref name="criteria"/>.</param>
-		/// <param name="criteria">The criteria value that dictates whether the <paramref name="objectToCompare"/> passes or fails.</param>
-		/// <param name="matchAsEqualityExpression">
-		///		Indicate if the <paramref name="criteria"/> came from an equality related expression,
-		///		which requires slightly different handling.</param>
-		/// <returns>Returns true if <paramref name="objectToCompare"/> matches the <paramref name="criteria"/>.</returns>
-		private static bool IsMatch(object objectToCompare, string criteria, bool matchAsEqualityExpression = false)
-		{
-			// Equality related expression evaluation (= or <>) only considers empty cells as equal to empty string criteria.
-			// If the given criteria was not originally preceded by an equality operator, then 
-			// both empty cells and cells containing the empty string are considered as equal to empty string criteria.
-			if (criteria.Equals(string.Empty))
-				return ((matchAsEqualityExpression) ? (objectToCompare == null) : (objectToCompare == null || objectToCompare.Equals(string.Empty)));
-			var criteriaIsBool = criteria.Equals(Boolean.TrueString.ToUpper()) || criteria.Equals(Boolean.FalseString.ToUpper());
-			if (ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaAsOADate))
-				criteria = criteriaAsOADate.ToString();
-			string objectAsString = null;
-			if (objectToCompare == null)
-				return false;
-			else if (objectToCompare is bool && criteriaIsBool)
-				return criteria.Equals(objectToCompare.ToString().ToUpper());
-			else if (objectToCompare is bool ^ criteriaIsBool)
-				return false;
-			else if (ConvertUtil.TryParseDateObjectToOADate(objectToCompare, out double objectAsOADate))
-				objectAsString = objectAsOADate.ToString();
-			else
-				objectAsString = objectToCompare.ToString().ToUpper();
-			if (criteria.Contains("*") || criteria.Contains("?"))
-			{
-				var regexPattern = Regex.Escape(criteria);
-				regexPattern = string.Format("^{0}$", regexPattern);
-				regexPattern = regexPattern.Replace(@"\*", ".*");
-				regexPattern = regexPattern.Replace("~.*", "\\*");
-				regexPattern = regexPattern.Replace(@"\?", ".");
-				regexPattern = regexPattern.Replace("~.", "\\?");
-				return Regex.IsMatch(objectAsString, regexPattern);
-			}
-			else
-				// A return value of 0 from CompareTo means that the two strings have equivalent content.
-				return (criteria.CompareTo(objectAsString) == 0);
-		}
-
-		/// <summary>
-		/// Compare the given <paramref name="objectToCompare"/> with the given <paramref name="criteria"/> using
-		/// the given <paramref name="comparisonOperator"/>.
-		/// </summary>
-		/// <param name="objectToCompare">The object to compare against the given <paramref name="criteria"/>.</param>
-		/// <param name="criteria">The criteria value that dictates whether the <paramref name="objectToCompare"/> passes or fails.</param>
-		/// <param name="comparisonOperator">
-		///		The inequality operator that dictates how the <paramref name="objectToCompare"/> should
-		///		be compared to the <paramref name="criteria"/>.</param>
-		/// <returns>Returns true if the <paramref name="objectToCompare"/> passes the comparison with <paramref name="criteria"/>.</returns>
-		private static bool CompareAsInequalityExpression(object objectToCompare, string criteria, OperatorType comparisonOperator)
-		{
-			if (objectToCompare == null || objectToCompare is ExcelErrorValue)
-				return false;
-			var comparisonResult = int.MinValue;
-			if (ConvertUtil.TryParseDateObjectToOADate(criteria, out double criteriaNumber)) // Handle the criteria as a number/date.
-			{
-				if (IsNumeric(objectToCompare, true))
-				{
-					var numberToCompare = ConvertUtil.GetValueDouble(objectToCompare);
-					comparisonResult = numberToCompare.CompareTo(criteriaNumber);
-				}
-				else
-					return false;
-			}
-			else // Handle the criteria as a non-numeric, non-date text value.
-			{
-				if (criteria.Equals(Boolean.TrueString.ToUpper()) || criteria.Equals(Boolean.FalseString.ToUpper()))
-				{
-					if (!(objectToCompare is bool objectBool))
-						return false;
-				}
-				else if (IsNumeric(objectToCompare))
-					return false;
-				comparisonResult = (objectToCompare.ToString().ToUpper()).CompareTo(criteria);
-			}
-			switch (comparisonOperator)
-			{
-				case OperatorType.LessThan:
-					return (comparisonResult == -1);
-				case OperatorType.LessThanOrEqual:
-					return (comparisonResult == -1 || comparisonResult == 0);
-				case OperatorType.GreaterThan:
-					return (comparisonResult == 1);
-				case OperatorType.GreaterThanOrEqual:
-					return (comparisonResult == 1 || comparisonResult == 0);
-				default:
-					throw new InvalidOperationException(
-						"The default condition is invalid because this function should only be called if the given operator is <,<=,>, or >=.");
-			}
-		}
-
-		/// <summary>
-		/// Returns true if <paramref name="numericCandidate"/> is numeric.
-		/// </summary>
-		/// <param name="numericCandidate">The object to check for numeric content.</param>
-		/// <param name="excludeBool">
-		///		An optional parameter to exclude boolean values from the data types that are considered numeric.
-		///		This method considers booleans as numeric by default.</param>
-		/// <returns>Returns true if <paramref name="numericCandidate"/> is numeric.</returns>
-		public static bool IsNumeric(object numericCandidate, bool excludeBool = false)
-		{
-			if (numericCandidate == null)
-				return false;
-			if (excludeBool && numericCandidate is bool)
-				return false;
-			return (numericCandidate.GetType().IsPrimitive || 
-				numericCandidate is double || 
-				numericCandidate is decimal || 
-				numericCandidate is System.DateTime || 
-				numericCandidate is TimeSpan);
-		}
-
-		/// <summary>
-		/// Ensures that the given <paramref name="criteriaCandidate"/> is of a form that can be
-		/// represented as a criteria.
-		/// </summary>
-		/// <param name="criteriaCandidate">The <see cref="FunctionArgument"/> containing the criteria.</param>
+		/// <param name="criterionCandidate">The <see cref="FunctionArgument"/> containing the criterion.</param>
 		/// <param name="context">The context from the function calling this function.</param>
-		/// <returns>Returns the criteria in <paramref name="criteriaCandidate"/> as a string.</returns>
-		public static string ExtractCriteriaString(FunctionArgument criteriaCandidate, ParsingContext context)
+		/// <returns>Returns the criterion in <paramref name="criterionCandidate"/> as an object.</returns>
+		public static object ExtractCriterionObject(FunctionArgument criterionCandidate, ParsingContext context)
 		{
-			object criteriaObject = null;
-			if (criteriaCandidate.Value is ExcelDataProvider.IRangeInfo criteriaRange)
+			object criterionObject = null;
+			if (criterionCandidate.Value is ExcelDataProvider.IRangeInfo criterionRange)
 			{
-				if (criteriaRange.IsMulti)
+				if (criterionRange.IsMulti)
 				{
 					var worksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
 					var functionRow = context.Scopes.Current.Address.FromRow;
 					var functionColumn = context.Scopes.Current.Address.FromCol;
-					criteriaObject = CalculateCriteria(criteriaCandidate, worksheet, functionRow, functionColumn);
+					criterionObject = ExtractCriterionFromCellRange(criterionCandidate, worksheet, functionRow, functionColumn);
 				}
 				else
 				{
-					criteriaObject = criteriaCandidate.ValueFirst;
-					if (criteriaObject is List<object> objectList)
-						criteriaObject = objectList.First();
+					criterionObject = criterionCandidate.ValueFirst;
+					if (criterionObject is List<object> objectList)
+						criterionObject = objectList.First();
 				}
 			}
-			else if (criteriaCandidate.Value is List<FunctionArgument> argumentList)
-				criteriaObject = argumentList.First().ValueFirst;
+			else if (criterionCandidate.Value is List<FunctionArgument> argumentList)
+				criterionObject = argumentList.First().ValueFirst;
 			else
-				criteriaObject = criteriaCandidate.ValueFirst;
+				criterionObject = criterionCandidate.ValueFirst;
 
-			// Note that Excel considers null criteria equivalent to a criteria of 0.
-			if (criteriaObject == null)
-				return "0";
-			else
-				return criteriaObject.ToString().ToUpper();
+			// Note that Excel considers null criterion equivalent to a criterion of 0.
+			if (criterionObject == null)
+				criterionObject = 0;
+			return criterionObject;
 		}
 
-		public static object CalculateCriteria(FunctionArgument criteriaArgument, ExcelWorksheet worksheet, int rowLocation, int colLocation)
+		/// <summary>
+		/// Takes a cell range and converts it into a single value criteria.
+		/// </summary>
+		/// <param name="criteriaArgument">The cell range that will be reduced to a single value criteria.</param>
+		/// <param name="worksheet">The current worksheet that is being used.</param>
+		/// <param name="rowLocation">The row location of the cell of the calling function.</param>
+		/// <param name="colLocation">The column location of the cell of the calling function.</param>
+		/// <returns>Returns the value of the cell in the given cell range that corresponds to the position of the calling function.</returns>
+		public static object ExtractCriterionFromCellRange(FunctionArgument criteriaArgument, ExcelWorksheet worksheet, int rowLocation, int colLocation)
 		{
 			if (criteriaArgument.Value == null)
 				return 0;
@@ -653,7 +360,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 				else if (currentAddressRow > startRow && currentAddressRow < endRow)
 				{
-
 					var cellColumn = criteriaCandidate.Start.Column;
 					return worksheet.Cells[currentAddressRow, cellColumn].Value;
 				}
@@ -689,76 +395,24 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		}
 
 		/// <summary>
-		/// Takes a cell range and converts it into a single value criteria
+		/// Returns true if <paramref name="numericCandidate"/> is numeric.
 		/// </summary>
-		/// <param name="arguments">The cell range that will be reduced to a single value criteria.</param>
-		/// <param name="worksheet">The current worksheet that is being used.</param>
-		/// <param name="rowLocation">The row location of the cell that is calling this function.</param>
-		/// <param name="colLocation">The column location of the cell that is calling this function.</param>
-		/// <returns>A single value criteria as an integer.</returns>
-		public static object CalculateCriteria(IEnumerable<FunctionArgument> arguments, ExcelWorksheet worksheet, int rowLocation, int colLocation)
+		/// <param name="numericCandidate">The object to check for numeric content.</param>
+		/// <param name="excludeBool">
+		///		An optional parameter to exclude boolean values from the data types that are considered numeric.
+		///		This method considers booleans as numeric by default.</param>
+		/// <returns>Returns true if <paramref name="numericCandidate"/> is numeric.</returns>
+		public static bool IsNumeric(object numericCandidate, bool excludeBool = false)
 		{
-			if (arguments.ElementAt(1).Value == null)
-				return 0;
-			if (arguments.ElementAt(1).Value is ExcelErrorValue)
-			if (worksheet == null)
-				return 0;
-			if (rowLocation <= 0 || colLocation <= 0)
-				return 0;
-
-			var criteriaCandidate = arguments.ElementAt(1).ValueAsRangeInfo.Address;
-
-			if (criteriaCandidate.Rows > criteriaCandidate.Columns)
-			{
-				var currentAddressRow = rowLocation;
-				var startRow = criteriaCandidate.Start.Row;
-				var endRow = criteriaCandidate.End.Row;
-
-				if (currentAddressRow == startRow)
-				{
-					var cellColumn = criteriaCandidate.Start.Column;
-					return worksheet.Cells[startRow, cellColumn].Value;
-				}
-				else if (currentAddressRow == endRow)
-				{
-					var cellColumn = criteriaCandidate.Start.Column;
-					return worksheet.Cells[endRow, cellColumn].Value;
-				}
-				else if (currentAddressRow > startRow && currentAddressRow < endRow)
-				{
-
-					var cellColumn = criteriaCandidate.Start.Column;
-					return worksheet.Cells[currentAddressRow, cellColumn].Value;
-				}
-				else
-					return 0;
-			}
-			else if (criteriaCandidate.Rows < criteriaCandidate.Columns)
-			{
-				var currentAddressCol = colLocation;
-				var startCol = criteriaCandidate.Start.Column;
-				var endCol = criteriaCandidate.End.Column;
-
-				if (currentAddressCol == startCol)
-				{
-					var cellRow = criteriaCandidate.Start.Row;
-					return worksheet.Cells[cellRow, currentAddressCol].Value;
-				}
-				else if (currentAddressCol == endCol)
-				{
-					var cellRow = criteriaCandidate.Start.Row;
-					return worksheet.Cells[cellRow, currentAddressCol].Value;
-				}
-				else if (currentAddressCol > startCol && currentAddressCol < endCol)
-				{
-					var cellRow = criteriaCandidate.Start.Row;
-					return worksheet.Cells[cellRow, currentAddressCol].Value;
-				}
-				else
-					return 0;
-			}
-			else
-				return 0;
+			if (numericCandidate == null)
+				return false;
+			if (excludeBool && numericCandidate is bool)
+				return false;
+			return (numericCandidate.GetType().IsPrimitive || 
+				numericCandidate is double || 
+				numericCandidate is decimal || 
+				numericCandidate is System.DateTime || 
+				numericCandidate is TimeSpan);
 		}
 	}
 }

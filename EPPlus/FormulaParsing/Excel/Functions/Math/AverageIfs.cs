@@ -53,7 +53,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				var currentRangeToCompare = arguments.ElementAt(argumentIndex).ValueAsRangeInfo;
 				if (currentRangeToCompare == null || !this.RangesAreTheSameShape(rangeToAverage, currentRangeToCompare))
 					return new CompileResult(eErrorType.Value);
-				var currentCriteria = IfHelper.ExtractCriteriaObject(arguments.ElementAt(argumentIndex + 1), context);
+				var currentCriteria = IfHelper.ExtractCriterionObject(arguments.ElementAt(argumentIndex + 1), context);
 
 				var passingIndices = this.GetIndicesOfCellsPassingCriteria(currentRangeToCompare, currentCriteria);
 				if (argumentIndex == 1)

@@ -54,7 +54,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (cellRangeToCheck == null)
 				return new CompileResult(eErrorType.Value);
 			//var criteriaString = IfHelper.ExtractCriteriaString(arguments.ElementAt(1), context);
-			var criteriaObject = IfHelper.ExtractCriteriaObject(arguments.ElementAt(1), context);
+			var criteriaObject = IfHelper.ExtractCriterionObject(arguments.ElementAt(1), context);
 			if (arguments.Count() > 2)
 			{
 				var cellRangeToAverage = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;

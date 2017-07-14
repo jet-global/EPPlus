@@ -25,6 +25,7 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -150,7 +151,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void CalculateCriteriaWithSameRowCellReferenceReturnsCorrectValue()
+		public void ExtractCriterionFromCellRangeWithSameRowCellReferenceReturnsCorrectValue()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -163,13 +164,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				IRangeInfo testRange = provider.GetRange(worksheet.Name, 1, 2, 3, 2);
 				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 2, 2, 2, 2);
 				var address = firstRange.Address;
-				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				var arguments = FunctionsHelper.CreateArgs(firstRange, testRange);
+				var result = IfHelper.ExtractCriterionFromCellRange(arguments.ElementAt(1), worksheet, address._fromRow, address._fromCol);
 				Assert.AreEqual(10, result);
 			}
 		}
 
 		[TestMethod]
-		public void CalculateCriteriaWithSameColumnCellReferenceReturnsCorrectValue()
+		public void ExtractCriterionFromCellRangeWithSameColumnCellReferenceReturnsCorrectValue()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -182,13 +184,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				IRangeInfo testRange = provider.GetRange(worksheet.Name, 7, 5, 7, 7);
 				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 6, 6, 6, 6);
 				var address = firstRange.Address;
-				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				var arguments = FunctionsHelper.CreateArgs(firstRange, testRange);
+				var result = IfHelper.ExtractCriterionFromCellRange(arguments.ElementAt(1), worksheet, address._fromRow, address._fromCol);
 				Assert.AreEqual(10, result);
 			}
 		}
 
 		[TestMethod]
-		public void CalculateCriteriaWithNonMatchingRowReturnsZero()
+		public void ExtractCriterionFromCellRangeWithNonMatchingRowReturnsZero()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -201,13 +204,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				IRangeInfo testRange = provider.GetRange(worksheet.Name, 1, 2, 3, 2);
 				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 5, 5, 5, 5);
 				var address = firstRange.Address;
-				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				var arguments = FunctionsHelper.CreateArgs(firstRange, testRange);
+				var result = IfHelper.ExtractCriterionFromCellRange(arguments.ElementAt(1), worksheet, address._fromRow, address._fromCol);
 				Assert.AreEqual(0, result);
 			}
 		}
 
 		[TestMethod]
-		public void CalculateCriteriaWithNonMatchingColReturnsZero()
+		public void ExtractCriterionFromCellRangeWithNonMatchingColReturnsZero()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -220,13 +224,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				IRangeInfo testRange = provider.GetRange(worksheet.Name, 7, 5, 7, 7);
 				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 8, 8, 8, 8);
 				var address = firstRange.Address;
-				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				var arguments = FunctionsHelper.CreateArgs(firstRange, testRange);
+				var result = IfHelper.ExtractCriterionFromCellRange(arguments.ElementAt(1), worksheet, address._fromRow, address._fromCol);
 				Assert.AreEqual(0, result);
 			}
 		}
 
 		[TestMethod]
-		public void CalculateCriteriaWithObjectReturnsCorrectValue()
+		public void ExtractCriterionFromCellRangeWithObjectReturnsCorrectValue()
 		{
 			using (var package = new ExcelPackage())
 			{
