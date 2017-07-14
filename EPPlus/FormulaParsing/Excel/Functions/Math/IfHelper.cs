@@ -50,7 +50,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <param name="testObject">The object to compare against the given <paramref name="rawCriterionObject"/>.</param>
 		/// <param name="rawCriterionObject">The criterion value or expression that dictates whether the given <paramref name="testObject"/> passes or fails.</param>
 		/// <returns>Returns true if <paramref name="testObject"/> matches the <paramref name="rawCriterionObject"/>.</returns>
-		public static bool ObjectMatchesCriteria(object testObject, object rawCriterionObject)
+		public static bool ObjectMatchesCriterion(object testObject, object rawCriterionObject)
 		{
 			object criterion = rawCriterionObject;
 			OperatorType criterionOperator = OperatorType.Equals;
