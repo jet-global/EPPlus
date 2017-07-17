@@ -41,9 +41,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 					{
 						var shouldIgnore = CellStateHelper.ShouldIgnore(ignoreHidden, cell, context);
 						var isNumeric = ConvertUtil.IsNumeric(cell.Value);
-						var isABoolean = Boolean.TryParse(cell.Value.ToString(), out bool result2);
+						var isABoolean = cell.Value is bool;
 
-						if (!ignoreErrors && cell.IsExcelError) throw new ExcelErrorValueException(ExcelErrorValue.Parse(cell.Value.ToString()));
+						if (!ignoreErrors && cell.IsExcelError)
+							throw new ExcelErrorValueException(ExcelErrorValue.Parse(cell.Value.ToString()));
 						if (!shouldIgnore && isNumeric && !isABoolean)
 						{
 							argList.Add(cell.ValueDouble);
