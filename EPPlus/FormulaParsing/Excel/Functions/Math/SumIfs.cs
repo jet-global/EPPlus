@@ -42,7 +42,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns the sum of all cells in the given range that pass the given criteria.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			object currentCriterion = null;
 			if (this.ArgumentCountIsValid(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
 			var rangeToAverage = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
@@ -54,7 +53,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				var currentRangeToCompare = arguments.ElementAt(argumentIndex).ValueAsRangeInfo;
 				if (currentRangeToCompare == null || !this.RangesAreTheSameShape(rangeToAverage, currentRangeToCompare))
 					return new CompileResult(eErrorType.Value);
-				currentCriterion = IfHelper.ExtractCriterionObject(arguments.ElementAt(argumentIndex + 1), context);
+				var currentCriterion = IfHelper.ExtractCriterionObject(arguments.ElementAt(argumentIndex + 1), context);
 				var passingIndices = this.GetIndicesOfCellsPassingCriterion(currentRangeToCompare, currentCriterion);
 				if (argumentIndex == 1)
 					indicesOfValidCells = passingIndices;
@@ -67,9 +66,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				var currentCellValue = rangeToAverage.ElementAt(cellIndex).Value;
 				if (currentCellValue is ExcelErrorValue cellError)
 					return new CompileResult(cellError.Type);
-				else if (currentCellValue is string || currentCellValue is bool || currentCellValue == null)
-					continue;
-				else
+				else if (IfHelper.IsNumeric(currentCellValue, true))
 					sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);
 			}
 			return this.CreateResult(sumOfValidValues, DataType.Decimal);
@@ -85,11 +82,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private List<int> GetIndicesOfCellsPassingCriterion(ExcelDataProvider.IRangeInfo cellsToCompare, object criterion)
 		{
 			var passingIndices = new List<int>();
-			for (var currentCellIndex = 0; currentCellIndex < cellsToCompare.Count(); currentCellIndex++)
+			var cellValuesFromRange = IfHelper.GetAllCellValuesInRange(cellsToCompare);
+			for (var cellIndex = 0; cellIndex < cellValuesFromRange.Count(); cellIndex++)
 			{
-				var currentCellValue = cellsToCompare.ElementAt(currentCellIndex).Value;
-				if (IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(currentCellValue), criterion))
-					passingIndices.Add(currentCellIndex);
+				if (IfHelper.ObjectMatchesCriterion(cellValuesFromRange.ElementAt(cellIndex), criterion))
+					passingIndices.Add(cellIndex);
 			}
 			return passingIndices;
 		}

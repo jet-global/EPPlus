@@ -82,19 +82,30 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
-			foreach (var cell in cellsToCompare)
+
+			var startingRowForComparison = cellsToCompare.Address._fromRow;
+			var startingColumnForComparison = cellsToCompare.Address._fromCol;
+			var endingRowForComparison = cellsToCompare.Address._toRow;
+			var endingColumnForComparison = cellsToCompare.Address._toCol;
+
+			for (var currentRow = startingRowForComparison; currentRow <= endingRowForComparison; currentRow++)
 			{
-				if (IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(cell.Value), comparisonCriterion))
+				for (var currentColumn = startingColumnForComparison; currentColumn <= endingColumnForComparison; currentColumn++)
 				{
-					var relativeRow = cell.Row - cellsToCompare.Address._fromRow;
-					var relativeColumn = cell.Column - cellsToCompare.Address._fromCol;
-					var valueOfCellToAverage = potentialCellsToAverage.GetOffset(relativeRow, relativeColumn);
-					if (valueOfCellToAverage is ExcelErrorValue cellError)
-						return new CompileResult(cellError.Type);
-					if (valueOfCellToAverage is string || valueOfCellToAverage is bool || valueOfCellToAverage == null)
-						continue;
-					sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToAverage, true);
-					numberOfValidValues++;
+					var currentCellValue = this.GetFirstArgument(cellsToCompare.GetValue(currentRow, currentColumn));
+					if (IfHelper.ObjectMatchesCriterion(currentCellValue, comparisonCriterion))
+					{
+						var relativeRow = currentRow - startingRowForComparison;
+						var relativeColumn = currentColumn - startingColumnForComparison;
+						var valueOfCellToAverage = potentialCellsToAverage.GetOffset(relativeRow, relativeColumn);
+						if (valueOfCellToAverage is ExcelErrorValue cellError)
+							return new CompileResult(cellError.Type);
+						else if (IfHelper.IsNumeric(valueOfCellToAverage, true))
+						{
+							sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToAverage);
+							numberOfValidValues++;
+						}
+					}
 				}
 			}
 			if (numberOfValidValues == 0)
@@ -115,14 +126,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
-			var cellsToAverage = potentialCellsToAverage.Where(cell => IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(cell.Value), comparisonCriterion));
-			foreach (var cell in cellsToAverage)
+			var cellValuesFromRange = IfHelper.GetAllCellValuesInRange(potentialCellsToAverage);
+			var valuesToAverage = cellValuesFromRange.Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, comparisonCriterion));
+			foreach (var value in valuesToAverage)
 			{
-				if (cell.Value is ExcelErrorValue cellErrorValue)
+				if (value is ExcelErrorValue cellErrorValue)
 					return new CompileResult(cellErrorValue.Type);
-				else if (IfHelper.IsNumeric(cell.Value, true))
+				else if (IfHelper.IsNumeric(value, true))
 				{
-					sumOfValidValues += ConvertUtil.GetValueDouble(cell.Value);
+					sumOfValidValues += ConvertUtil.GetValueDouble(value);
 					numberOfValidValues++;
 				}
 			}

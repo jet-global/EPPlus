@@ -67,10 +67,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				var currentCellValue = rangeToAverage.ElementAt(cellIndex).Value;
 				if (currentCellValue is ExcelErrorValue cellError)
 					return new CompileResult(cellError.Type);
-				else if (currentCellValue is string || currentCellValue is bool || currentCellValue == null)
-					continue;
-				sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);
-				numberOfValidValues++;
+				else if (IfHelper.IsNumeric(currentCellValue, true))
+				{
+					sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);
+					numberOfValidValues++;
+				}
 			}
 			if (numberOfValidValues == 0)
 				return new CompileResult(eErrorType.Div0);

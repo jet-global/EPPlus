@@ -83,11 +83,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private List<int> GetIndicesOfCellsPassingCriterion(ExcelDataProvider.IRangeInfo cellsToCompare, object criterion)
 		{
 			var passingIndices = new List<int>();
-			for (var currentCellIndex = 0; currentCellIndex < cellsToCompare.Count(); currentCellIndex++)
+			var cellValuesFromRange = IfHelper.GetAllCellValuesInRange(cellsToCompare);
+			for (var cellIndex = 0; cellIndex < cellValuesFromRange.Count(); cellIndex++)
 			{
-				var currentCellValue = cellsToCompare.ElementAt(currentCellIndex).Value;
-				if (IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(currentCellValue), criterion))
-					passingIndices.Add(currentCellIndex);
+				if (IfHelper.ObjectMatchesCriterion(cellValuesFromRange.ElementAt(cellIndex), criterion))
+					passingIndices.Add(cellIndex);
 			}
 			return passingIndices;
 		}

@@ -494,6 +494,20 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void CountIfWithUnsetEmptyCellsInCriteria()
+		{
+			// This test exists to ensure that cells that have never been set are still 
+			// being compared against the criterion.
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "COUNTIF(C2:C3,\"\")";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+			}
+		}
 		#endregion
 	}
 }

@@ -82,18 +82,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private CompileResult CalculateSumUsingSumRange(ExcelDataProvider.IRangeInfo cellsToCompare, object comparisonCriterion, ExcelDataProvider.IRangeInfo potentialCellsToSum)
 		{
 			var sumOfValidValues = 0d;
-			foreach (var cell in cellsToCompare)
+
+			var startingRowForComparison = cellsToCompare.Address._fromRow;
+			var startingColumnForComparison = cellsToCompare.Address._fromCol;
+			var endingRowForComparison = cellsToCompare.Address._toRow;
+			var endingColumnForComparison = cellsToCompare.Address._toCol;
+
+			for (var currentRow = startingRowForComparison; currentRow <= endingRowForComparison; currentRow++)
 			{
-				if (IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(cell.Value), comparisonCriterion))
+				for (var currentColumn = startingColumnForComparison; currentColumn <= endingColumnForComparison; currentColumn++)
 				{
-					var relativeRow = cell.Row - cellsToCompare.Address._fromRow;
-					var relativeColumn = cell.Column - cellsToCompare.Address._fromCol;
-					var valueOfCellToSum = potentialCellsToSum.GetOffset(relativeRow, relativeColumn);
-					if (valueOfCellToSum is ExcelErrorValue cellError)
-						continue;
-					if (valueOfCellToSum is string || valueOfCellToSum is bool || valueOfCellToSum == null)
-						continue;
-					sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToSum, true);
+					var currentCellValue = this.GetFirstArgument(cellsToCompare.GetValue(currentRow, currentColumn));
+					if (IfHelper.ObjectMatchesCriterion(currentCellValue, comparisonCriterion))
+					{
+						var relativeRow = currentRow - startingRowForComparison;
+						var relativeColumn = currentColumn - startingColumnForComparison;
+						var valueOfCellToSum = potentialCellsToSum.GetOffset(relativeRow, relativeColumn);
+						if (valueOfCellToSum is ExcelErrorValue cellError)
+							return new CompileResult(cellError.Type);
+						else if (IfHelper.IsNumeric(valueOfCellToSum, true))
+							sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToSum);
+					}
 				}
 			}
 			return this.CreateResult(sumOfValidValues, DataType.Decimal);
@@ -110,13 +119,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private CompileResult CalculateSumUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToSum, object comparisonCriterion)
 		{
 			var sumOfValidValues = 0d;
-			var cellsToSum = potentialCellsToSum.Where(cell=> IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(cell.Value), comparisonCriterion));
-			foreach (var cell in cellsToSum)
+			var cellValuesFromRange = IfHelper.GetAllCellValuesInRange(potentialCellsToSum);
+			var valuesToSum = cellValuesFromRange.Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, comparisonCriterion));
+			foreach (var value in valuesToSum)
 			{
-				if (cell.Value is ExcelErrorValue cellErrorValue)
+				if (value is ExcelErrorValue cellErrorValue)
 					return new CompileResult(cellErrorValue.Type);
-				else if (IfHelper.IsNumeric(cell.Value, true))
-					sumOfValidValues += ConvertUtil.GetValueDouble(cell.Value);
+				else if (IfHelper.IsNumeric(value, true))
+					sumOfValidValues += ConvertUtil.GetValueDouble(value);
 			}
 			return this.CreateResult(sumOfValidValues, DataType.Decimal);
 		}

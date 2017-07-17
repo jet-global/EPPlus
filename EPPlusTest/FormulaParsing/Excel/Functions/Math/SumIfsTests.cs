@@ -208,7 +208,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions
 				sheet.Cells["E1"].Formula = "SUMIFS(A:A,B:B,\">2\")";
 				sheet.Calculate();
 
-				Assert.AreEqual(3d, sheet.Cells["E1"].Value);
+				Assert.AreEqual(4d, sheet.Cells["E1"].Value);
 			}
 		}
 
@@ -1305,6 +1305,22 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions
 				Assert.AreEqual(4d, worksheet.Cells["B2"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfsWithUnsetEmptyCellsInCriteria()
+		{
+			// This test exists to ensure that cells that have never been set are still 
+			// being compared against the criterion.
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "SUMIFS(C2:C3,D2:D3,\"\")";
+				worksheet.Cells["C2"].Value = 1;
+				worksheet.Cells["C3"].Value = 2;
+				worksheet.Calculate();
+				Assert.AreEqual(3d, worksheet.Cells["B2"].Value);
 			}
 		}
 		#endregion
