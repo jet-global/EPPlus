@@ -79,7 +79,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		}
 
 		/// <summary>
-		/// Returns a list containing the indexes of the cells in <paramref name="cellsToCompare"/> that satisfy
+		/// Returns a list containing the indices of the cells in <paramref name="cellsToCompare"/> that satisfy
 		/// the criterion detailed in <paramref name="criterion"/>.
 		/// </summary>
 		/// <param name="cellsToCompare">The <see cref="ExcelDataProvider.IRangeInfo"/> containing the cells to test against the <paramref name="criteria"/>.</param>

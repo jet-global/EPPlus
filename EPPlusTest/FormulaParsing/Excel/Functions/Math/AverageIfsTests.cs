@@ -560,6 +560,25 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void AverageIfsWithUnsetEmptyCellsInCriteria()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				//worksheet.Cells["B2"].Formula = "AVERAGEIFS(C2:C4,D2:D4,1,E2:E4,\"\")";
+				worksheet.Cells["B2"].Formula = "AVERAGEIFS(C2:C4,E2:E4,\"\")";
+				worksheet.Cells["C2"].Value = 1;
+				worksheet.Cells["C3"].Value = 3;
+				worksheet.Cells["C4"].Value = 5;
+				worksheet.Cells["D2"].Value = 1;
+				worksheet.Cells["D3"].Value = 1;
+				worksheet.Cells["D4"].Value = 1;
+				worksheet.Calculate();
+				Assert.AreEqual(3d, worksheet.Cells["B2"].Value);
+			}
+		}
 		#endregion
 	}
 }

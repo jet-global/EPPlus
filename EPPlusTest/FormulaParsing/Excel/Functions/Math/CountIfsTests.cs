@@ -83,7 +83,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(1d, worksheet.Cells["B12"].Value);
 				Assert.AreEqual(2d, worksheet.Cells["B13"].Value);
 				Assert.AreEqual(2d, worksheet.Cells["B14"].Value);
-				Assert.AreEqual(1d, worksheet.Cells["B15"].Value, "This test will fail until the *IF/*IFS functions can parse error values (under any culture)");
+				Assert.AreEqual(1d, worksheet.Cells["B15"].Value);
 			}
 		}
 

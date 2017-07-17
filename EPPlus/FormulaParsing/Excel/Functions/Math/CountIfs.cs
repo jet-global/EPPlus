@@ -33,28 +33,61 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-			var argRanges = new List<ExcelDataProvider.IRangeInfo>();
-			var criterias = new List<string>();
-			for (var ix = 0; ix < 30; ix += 2)
+			var firstRange = arguments.ElementAt(0).ValueAsRangeInfo;
+			if (firstRange == null)
+				return new CompileResult(eErrorType.Value);
+			var indicesOfValidCells = new List<int>();
+			for (var argumentIndex = 0; argumentIndex < arguments.Count(); argumentIndex += 2)
 			{
-				if (functionArguments.Length <= ix) break;
-				var rangeInfo = functionArguments[ix].ValueAsRangeInfo;
-				argRanges.Add(rangeInfo);
-				var value = functionArguments[ix + 1].Value != null ? functionArguments[ix + 1].Value.ToString() : null;
-				criterias.Add(value);
+				var currentRangeToCompare = arguments.ElementAt(argumentIndex).ValueAsRangeInfo;
+				if (currentRangeToCompare == null || !this.RangesAreTheSameShape(firstRange, currentRangeToCompare))
+					return new CompileResult(eErrorType.Value);
+				var currentCriterion = IfHelper.ExtractCriterionObject(arguments.ElementAt(argumentIndex + 1), context);
+				var passingIndices = this.GetIndicesOfCellsPassingCriterion(currentRangeToCompare, currentCriterion);
+				if (argumentIndex == 0)
+					indicesOfValidCells = passingIndices;
+				else
+					indicesOfValidCells = indicesOfValidCells.Intersect(passingIndices).ToList();
 			}
-			IEnumerable<int> matchIndexes = GetMatchIndexes(argRanges[0], criterias[0]);
-			var enumerable = matchIndexes as IList<int> ?? matchIndexes.ToList();
-			for (var ix = 1; ix < argRanges.Count && enumerable.Any(); ix++)
-			{
-				var indexes = GetMatchIndexes(argRanges[ix], criterias[ix]);
-				matchIndexes = enumerable.Intersect(indexes);
-			}
+			double count = indicesOfValidCells.Count();
+			return this.CreateResult(count, DataType.Decimal);
+		}
 
-			return CreateResult((double)matchIndexes.Count(), DataType.Integer);
+		/// <summary>
+		/// Returns a list containing the indices of the cells in <paramref name="cellsToCompare"/> that satisfy
+		/// the criterion detailed in <paramref name="criterion"/>.
+		/// </summary>
+		/// <param name="cellsToCompare">The <see cref="ExcelDataProvider.IRangeInfo"/> containing the cells to test against the <paramref name="criteria"/>.</param>
+		/// <param name="criterion">The criterion dictating the acceptable contents of a given cell.</param>
+		/// <returns>Returns a list of indexes corresponding to each cell that satisfies the given criterion.</returns>
+		private List<int> GetIndicesOfCellsPassingCriterion(ExcelDataProvider.IRangeInfo cellsToCompare, object criterion)
+		{
+			var passingIndices = new List<int>();
+			for (var currentCellIndex = 0; currentCellIndex < cellsToCompare.Count(); currentCellIndex++)
+			{
+				var currentCellValue = cellsToCompare.ElementAt(currentCellIndex).Value;
+				if (IfHelper.ObjectMatchesCriterion(this.GetFirstArgument(currentCellValue), criterion))
+					passingIndices.Add(currentCellIndex);
+			}
+			return passingIndices;
+		}
+
+		/// <summary>
+		/// Checks if the <paramref name="expectedRange"/> is the same width and height as the
+		/// <paramref name="actualRange"/>.
+		/// </summary>
+		/// <param name="expectedRange">The <see cref="ExcelDataProvider.IRangeInfo"/> with the desired cell width and height.</param>
+		/// <param name="actualRange">The <see cref="ExcelDataProvider.IRangeInfo"/> with the width and height to be tested.</param>
+		/// <returns>Returns true if <paramref name="expectedRange"/> and <paramref name="actualRange"/> have the same width and height values.</returns>
+		private bool RangesAreTheSameShape(ExcelDataProvider.IRangeInfo expectedRange, ExcelDataProvider.IRangeInfo actualRange)
+		{
+			var expectedRangeWidth = expectedRange.Address._toCol - expectedRange.Address._fromCol;
+			var expectedRangeHeight = expectedRange.Address._toRow - expectedRange.Address._fromRow;
+			var actualRangeWidth = actualRange.Address._toCol - actualRange.Address._fromCol;
+			var actualRangeHeight = actualRange.Address._toRow - actualRange.Address._fromRow;
+			return (expectedRangeWidth == actualRangeWidth && expectedRangeHeight == actualRangeHeight);
 		}
 	}
 }
