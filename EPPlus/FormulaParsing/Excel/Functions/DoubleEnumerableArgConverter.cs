@@ -39,23 +39,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 				{
 					foreach (var cell in arg.ValueAsRangeInfo)
 					{
-						var shouldIgnore = CellStateHelper.ShouldIgnore(ignoreHidden, cell, context);
-						var isNumeric = ConvertUtil.IsNumeric(cell.Value);
-						var isABoolean = cell.Value is bool;
-
-						if (!ignoreErrors && cell.IsExcelError)
-							throw new ExcelErrorValueException(ExcelErrorValue.Parse(cell.Value.ToString()));
-						if (!shouldIgnore && isNumeric && !isABoolean)
+						if (!ignoreErrors && cell.IsExcelError) throw new ExcelErrorValueException(ExcelErrorValue.Parse(cell.Value.ToString()));
+						if (!CellStateHelper.ShouldIgnore(ignoreHidden, cell, context) && ConvertUtil.IsNumeric(cell.Value))
 						{
 							argList.Add(cell.ValueDouble);
-						}
-						if (!shouldIgnore && isNumeric && isABoolean)
-						{
-							argList.Add(cell.ValueDoubleLogical);
-						}
-						if (ConvertUtil.TryParseDateString(arg.ValueFirst, out System.DateTime dateTime) && ConvertUtil.TryParseDateObjectToOADate(dateTime, out double dateTimeToOADAte))
-						{
-							argList.Add(dateTimeToOADAte);
 						}
 					}
 				}
@@ -66,14 +53,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 					{
 						argList.Add(ConvertUtil.GetValueDouble(arg.Value));
 					}
-					if (arg.Value is string && ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double result))
-					{
-						argList.Add(result);
-					}
 				}
-
 			});
 		}
+
 
 		public virtual IEnumerable<double> ConvertArgsIncludingOtherTypes(IEnumerable<FunctionArgument> arguments)
 		{

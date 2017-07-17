@@ -48,61 +48,34 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			//Note: This follows the Functionality of excel which is diffrent from the excel documentation.
 			//If you pass in a null Vara(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
 			List<double> listToDoVarianceOn = new List<double>();
-			bool DontAddBoolsTwice = false;
+			bool onlyStringInputsGiven = true;
 			foreach (var item in arguments)
 			{
-				if (item.IsExcelRange)
+				if (item.ValueAsRangeInfo != null)
 				{
 					foreach (var cell in item.ValueAsRangeInfo)
 					{
-						if (cell.Value is string)
-							listToDoVarianceOn.Add(0.0);
+						if (StdevAndVarHelperClass.TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, cell, context, true, out double numberToAddToList, out bool onlyStringInputsGiven1))
+							listToDoVarianceOn.Add(numberToAddToList);
+						onlyStringInputsGiven = onlyStringInputsGiven1;
 					}
-					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null)
-						continue;
 				}
-				if (item.ValueFirst == null)
-					listToDoVarianceOn.Add(0.0);
-				if (item.Value is ExcelDataProvider.IRangeInfo itemRange)
+				else
 				{
-					if (item.ValueFirst is bool valueIsABool)
-					{
-						DontAddBoolsTwice = true;
-						if (valueIsABool == true)
-						{
-							listToDoVarianceOn.Add(1);
-							continue;
-						}
-						else
-						{
-							listToDoVarianceOn.Add(0);
-							continue;
-						}
-					}
-					return this.CreateResult(0d, DataType.Decimal);
+					if (StdevAndVarHelperClass.TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
+						listToDoVarianceOn.Add(numberToAddToList);
+					onlyStringInputsGiven = onlyStringInputsGiven2;
+					if (item.ValueFirst == null)
+						listToDoVarianceOn.Add(0.0);
 				}
 			}
-			var args = this.ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
-			foreach (var item in args)
-			{
-				if (!DontAddBoolsTwice)
-					listToDoVarianceOn.Add(item);
-			}
-			if (!this.TryVarSample(listToDoVarianceOn, out double variance))
+			if (onlyStringInputsGiven)
+				return new CompileResult(eErrorType.Value);
+			if (listToDoVarianceOn.Count() == 0)
+				return new CompileResult(eErrorType.Div0);
+			if (!StdevAndVarHelperClass.TryVarSamplePopulationForAValueErrorCheck(listToDoVarianceOn, out double variance))
 				return new CompileResult(eErrorType.Value);
 			return new CompileResult(variance, DataType.Decimal);
-		}
-
-		private bool TryVarSample(List<double> listOfDoubles, out double variance)
-		{
-			double avg = listOfDoubles.Average();
-			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
-			variance = (d / (listOfDoubles.Count() - 1));
-			if (listOfDoubles.Count() <= 1)
-				return false;
-			if (variance == 0 && listOfDoubles.All(x => x == -1))
-				return false;
-			return true;
 		}
 	}
 }

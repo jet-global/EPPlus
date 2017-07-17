@@ -490,6 +490,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\SqrtPi.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Stdev.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Stdeva.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\StdevAndVarHelperClass.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\StdevP.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Stdevpa.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\StdevS.cs" />

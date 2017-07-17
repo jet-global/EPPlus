@@ -50,46 +50,31 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			//Note: This follows the Functionality of excel which is diffrent from the excel documentation.
 			//If you pass in a null Stdeva(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
 			List<double> listToDoStandardDeviationOn = new List<double>();
-			bool skipAddingBooleanValue = false;
+			bool onlyStringInputsGiven = true;
 			foreach (var item in arguments)
 			{
-				if (item.IsExcelRange)
+				if (item.ValueAsRangeInfo != null)
 				{
 					foreach (var cell in item.ValueAsRangeInfo)
 					{
-						if (cell.Value is string)
-							listToDoStandardDeviationOn.Add(0.0);
+						if (StdevAndVarHelperClass.TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, cell, context, true, out double numberToAddToList, out bool onlyStringInputsGiven1))
+							listToDoStandardDeviationOn.Add(numberToAddToList);
+						onlyStringInputsGiven = onlyStringInputsGiven1;
 					}
-					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null)
-						continue;
 				}
-				if (item.ValueFirst == null)
-					listToDoStandardDeviationOn.Add(0.0);
-				if (item.Value is ExcelDataProvider.IRangeInfo itemRange)
+				else
 				{
-					if (item.ValueFirst is bool valueIsABool)
-					{
-						skipAddingBooleanValue = true;
-						if (valueIsABool == true)
-						{
-							listToDoStandardDeviationOn.Add(1);
-							continue;
-						}
-						else
-						{
-							listToDoStandardDeviationOn.Add(0);
-							continue;
-						}
-					}
-					return this.CreateResult(0d, DataType.Decimal);
+					if (StdevAndVarHelperClass.TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
+						listToDoStandardDeviationOn.Add(numberToAddToList);
+					onlyStringInputsGiven = onlyStringInputsGiven2;
+					if (item.ValueFirst == null)
+						listToDoStandardDeviationOn.Add(0.0);
 				}
 			}
-			var args = this.ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
-			foreach (var item in args)
-			{
-				if (!skipAddingBooleanValue)
-					listToDoStandardDeviationOn.Add(item);
-			}
+			if (onlyStringInputsGiven)
+				return new CompileResult(eErrorType.Value);
+			if (listToDoStandardDeviationOn.Count() == 0)
+				return this.CreateResult(0d, DataType.Decimal);
 			if (!this.TryStandardDeviationEntireSamplePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);
 			return this.CreateResult(standardDeviation, DataType.Decimal);
@@ -97,19 +82,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 		private bool TryStandardDeviationEntireSamplePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
-			standardDeviation = MathObj.Sqrt(this.VarSamplePopulation(listToDoStandardDeviationOn));
+			standardDeviation = MathObj.Sqrt(StdevAndVarHelperClass.VarianceForASample(listToDoStandardDeviationOn));
 			if (listToDoStandardDeviationOn.Count() <= 1)
 				return false;
 			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
 				return false;
 			return true;
-		}
-
-		private double VarSamplePopulation(List<double> listOfDoubles)
-		{
-			double avg = listOfDoubles.Average();
-			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
-			return (d / (listOfDoubles.Count() - 1));
 		}
 	}
 }

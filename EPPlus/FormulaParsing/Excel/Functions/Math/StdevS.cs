@@ -50,46 +50,34 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			//Note: This follows the Functionality of excel which is diffrent from the excel documentation.
 			//If you pass in a null Stdev.S(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
 			List<double> listToDoStandardDeviationOn = new List<double>();
+			bool onlyStringInputsGiven = true;
 			foreach (var item in arguments)
 			{
-				if (item.IsExcelRange)
+				if (item.ValueAsRangeInfo != null)
 				{
-
-					if (item.ValueFirst is double || item.ValueFirst is int || item.ValueFirst == null)
+					foreach (var cell in item.ValueAsRangeInfo)
 					{
-						continue;
+						if (StdevAndVarHelperClass.TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, cell, context, false, out double numberToAddToList, out bool onlyStringInputsGiven1))
+							listToDoStandardDeviationOn.Add(numberToAddToList);
+						onlyStringInputsGiven = onlyStringInputsGiven1;
 					}
-					return new CompileResult(eErrorType.Div0);
 				}
-				if (item.ValueFirst == null)
-					listToDoStandardDeviationOn.Add(0.0);
+				else
+				{
+					if (StdevAndVarHelperClass.TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
+						listToDoStandardDeviationOn.Add(numberToAddToList);
+					onlyStringInputsGiven = onlyStringInputsGiven2;
+					if (item.ValueFirst == null)
+						listToDoStandardDeviationOn.Add(0.0);
+				}
 			}
-			var args = this.ArgsToDoubleEnumerable(this.IgnoreHiddenValues, false, arguments, context);
-			foreach (var item in args)
-			{
-				listToDoStandardDeviationOn.Add(item);
-			}
-			var standardDeviationSucceeded = this.TryStandardDeviationOnASamplePopulation(listToDoStandardDeviationOn, out double standardDeviation);
-			if (!standardDeviationSucceeded)
+			if (onlyStringInputsGiven)
+				return new CompileResult(eErrorType.Value);
+			if (listToDoStandardDeviationOn.Count() == 0)
+				return new CompileResult(eErrorType.Div0);
+			if (!StdevAndVarHelperClass.TryStandardDeviationOnASamplePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);
 			return this.CreateResult(standardDeviation, DataType.Decimal);
-		}
-
-		private bool TryStandardDeviationOnASamplePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
-		{
-			standardDeviation = MathObj.Sqrt(this.VarSampleSize(listToDoStandardDeviationOn));
-			if (listToDoStandardDeviationOn.Count() <= 1)
-				return false;
-			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
-				return false;
-			return true;
-		}
-
-		private double VarSampleSize(List<double> listOfDoubles)
-		{
-			double avg = listOfDoubles.Average();
-			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
-			return (d / (listOfDoubles.Count() - 1));
 		}
 	}
 }
