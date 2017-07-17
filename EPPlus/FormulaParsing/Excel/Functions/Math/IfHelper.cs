@@ -323,7 +323,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		}
 
 		/// <summary>
-		/// Takes a cell range and converts it into a single value criteria.
+		/// Takes a cell range and converts it into a single value criterion.
 		/// </summary>
 		/// <param name="criteriaArgument">The cell range that will be reduced to a single value criteria.</param>
 		/// <param name="worksheet">The current worksheet that is being used.</param>
@@ -335,56 +335,58 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (criteriaArgument.Value == null)
 				return 0;
 			if (criteriaArgument.Value is ExcelErrorValue)
+			{
 				if (worksheet == null)
 					return 0;
+			}
 			if (rowLocation <= 0 || colLocation <= 0)
 				return 0;
 
-			var criteriaCandidate = criteriaArgument.ValueAsRangeInfo.Address;
+			var criterionArgument = criteriaArgument.ValueAsRangeInfo.Address;
 
-			if (criteriaCandidate.Rows > criteriaCandidate.Columns)
+			if (criterionArgument.Rows > criterionArgument.Columns)
 			{
 				var currentAddressRow = rowLocation;
-				var startRow = criteriaCandidate.Start.Row;
-				var endRow = criteriaCandidate.End.Row;
+				var startRow = criterionArgument.Start.Row;
+				var endRow = criterionArgument.End.Row;
 
 				if (currentAddressRow == startRow)
 				{
-					var cellColumn = criteriaCandidate.Start.Column;
+					var cellColumn = criterionArgument.Start.Column;
 					return worksheet.Cells[startRow, cellColumn].Value;
 				}
 				else if (currentAddressRow == endRow)
 				{
-					var cellColumn = criteriaCandidate.Start.Column;
+					var cellColumn = criterionArgument.Start.Column;
 					return worksheet.Cells[endRow, cellColumn].Value;
 				}
 				else if (currentAddressRow > startRow && currentAddressRow < endRow)
 				{
-					var cellColumn = criteriaCandidate.Start.Column;
+					var cellColumn = criterionArgument.Start.Column;
 					return worksheet.Cells[currentAddressRow, cellColumn].Value;
 				}
 				else
 					return 0;
 			}
-			else if (criteriaCandidate.Rows < criteriaCandidate.Columns)
+			else if (criterionArgument.Rows < criterionArgument.Columns)
 			{
 				var currentAddressCol = colLocation;
-				var startCol = criteriaCandidate.Start.Column;
-				var endCol = criteriaCandidate.End.Column;
+				var startCol = criterionArgument.Start.Column;
+				var endCol = criterionArgument.End.Column;
 
 				if (currentAddressCol == startCol)
 				{
-					var cellRow = criteriaCandidate.Start.Row;
+					var cellRow = criterionArgument.Start.Row;
 					return worksheet.Cells[cellRow, currentAddressCol].Value;
 				}
 				else if (currentAddressCol == endCol)
 				{
-					var cellRow = criteriaCandidate.Start.Row;
+					var cellRow = criterionArgument.Start.Row;
 					return worksheet.Cells[cellRow, currentAddressCol].Value;
 				}
 				else if (currentAddressCol > startCol && currentAddressCol < endCol)
 				{
-					var cellRow = criteriaCandidate.Start.Row;
+					var cellRow = criterionArgument.Start.Row;
 					return worksheet.Cells[cellRow, currentAddressCol].Value;
 				}
 				else

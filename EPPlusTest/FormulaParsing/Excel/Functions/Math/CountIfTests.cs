@@ -169,6 +169,24 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void CountIfWithNamedRanges()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				package.Workbook.Names.Add("NamedRange", worksheet.Cells["C3:D3"]);
+				worksheet.Cells["B2"].Formula = "COUNTIF(NamedRange,C2)";
+				worksheet.Cells["C2"].Value = ">0";
+				worksheet.Cells["C3"].Value = 3;
+				worksheet.Cells["D3"].Value = 1;
+				worksheet.Cells["B3"].Formula = "COUNTIF(NamedRange,NamedRange)";
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void CountIfWithCriteriaAsArray()
 		{
 			using (var package = new ExcelPackage())
