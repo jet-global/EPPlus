@@ -1150,7 +1150,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions
 				worksheet.Cells["D2"].Value = 1;
 				worksheet.Cells["D3"].Value = 3;
 				worksheet.Cells["D4"].Value = 5;
-
 				worksheet.Cells["B2"].Formula = "SUMIFS(D2:D4,C2:C4,\"=Mo*day\")";
 				worksheet.Cells["B3"].Formula = "SUMIFS(D2:D4,C2:C4,\">Mo*day\")";
 				worksheet.Cells["B4"].Formula = "SUMIFS(D2:D4,C2:C4,\"<Mo*day\")";

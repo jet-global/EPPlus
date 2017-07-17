@@ -50,7 +50,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-
 			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (cellRangeToCheck == null)
 				return new CompileResult(eErrorType.Value);

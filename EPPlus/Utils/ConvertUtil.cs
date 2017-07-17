@@ -207,6 +207,7 @@ namespace OfficeOpenXml.Utils
 			error = eErrorType.Value;
 			return false;
 		}
+
 		/// <summary>
 		/// Convert an object value to a double 
 		/// </summary>

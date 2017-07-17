@@ -65,8 +65,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			foreach (var cellIndex in indicesOfValidCells)
 			{
 				var currentCellValue = rangeToAverage.ElementAt(cellIndex).Value;
-				if (currentCellValue is ExcelErrorValue cellError)
-					return new CompileResult(cellError.Type);
+				if (currentCellValue is ExcelErrorValue cellErrorValue)
+					return new CompileResult(cellErrorValue.Type);
 				else if (IfHelper.IsNumeric(currentCellValue, true))
 				{
 					sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);

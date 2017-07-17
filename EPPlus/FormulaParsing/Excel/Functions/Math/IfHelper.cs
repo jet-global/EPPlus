@@ -467,10 +467,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return false;
 			if (excludeBool && numericCandidate is bool)
 				return false;
-			return (numericCandidate.GetType().IsPrimitive || 
-				numericCandidate is double || 
-				numericCandidate is decimal || 
-				numericCandidate is System.DateTime || 
+			return (numericCandidate.GetType().IsPrimitive ||
+				numericCandidate is double ||
+				numericCandidate is decimal ||
+				numericCandidate is long ||
+				numericCandidate is System.DateTime ||
 				numericCandidate is TimeSpan);
 		}
 	}
