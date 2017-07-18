@@ -144,6 +144,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["coth"] = new Coth();
 			this.Functions["acot"] = new Acot();
 			this.Functions["acoth"] = new Acoth();
+			this.Functions["floor.math"] = new FloorMath();
+			this.Functions["ceiling.math"] = new CeilingMath();
 			// Information
 			this.Functions["isblank"] = new IsBlank();
 			this.Functions["isnumber"] = new IsNumber();
