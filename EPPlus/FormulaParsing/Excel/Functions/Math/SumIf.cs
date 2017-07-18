@@ -1,27 +1,33 @@
-﻿/* Copyright (C) 2011  Jan Källman
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+﻿/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2017 Jan Källman, Matt Delaney, and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
- * See the GNU Lesser General Public License for more details.
- *
- * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
- * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
- *
- * All code and executables are provided "as is" with no warranty either express or implied. 
- * The author accepts no liability for any damage or loss of business that this product may cause.
- *
- * Code change notes:
- * 
- * Author							Change						Date
- *******************************************************************************
- * Mats Alm   		                Added		                2013-12-03
- *******************************************************************************/
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+*  * Author							Change						Date
+* *******************************************************************************
+* * Mats Alm   		                Added		                2013-12-03
+* *******************************************************************************
+* For code change notes, see the source control history.
+*******************************************************************************/
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
@@ -32,96 +38,116 @@ using Require = OfficeOpenXml.FormulaParsing.Utilities.Require;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// This class contains the functionality for the SUMIF Excel Function.
+	/// </summary>
 	public class SumIf : HiddenValuesHandlingFunction
 	{
-		private readonly ExpressionEvaluator _evaluator;
-
-		public SumIf()
-			 : this(new ExpressionEvaluator())
-		{
-
-		}
-
-		public SumIf(ExpressionEvaluator evaluator)
-		{
-			Require.That(evaluator).Named("evaluator").IsNotNull();
-			_evaluator = evaluator;
-		}
-
+		/// <summary>
+		/// Returns the sum of all the cells in a range that meet a given criteria.
+		/// </summary>
+		/// <param name="arguments">The arguments used to calculate the sum.</param>
+		/// <param name="context">The context for the function.</param>
+		/// <returns>Returns the sum of all cells in the given range that passed the given criteria.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
 				return new CompileResult(eErrorType.Value);
-			var args = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
-			var criteria = GetFirstArgument(arguments.ElementAt(1)).ValueFirst != null ? GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString() : string.Empty;
-			var retVal = 0d;
-			if (args == null)
+
+			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
+			if (cellRangeToCheck == null)
+				return new CompileResult(eErrorType.Value);
+			string criteriaString = null;
+			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
 			{
-				var val = GetFirstArgument(arguments.ElementAt(0)).Value;
-				if (criteria != null && _evaluator.Evaluate(val, criteria))
+				if (criteriaRange.IsMulti)
 				{
-					if (arguments.Count() > 2)
-					{
-						var sumVal = arguments.ElementAt(2).Value;
-						var sumRange = sumVal as ExcelDataProvider.IRangeInfo;
-						if (sumRange != null)
-						{
-							retVal = sumRange.First().ValueDouble;
-						}
-						else
-						{
-							retVal = ConvertUtil.GetValueDouble(sumVal, true);
-						}
-					}
-					else
-					{
-						retVal = ConvertUtil.GetValueDouble(val, true);
-					}
+					var currentWorksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
+					var cellRowVal = context.Scopes.Current.Address.FromRow;
+					var cellColVal = context.Scopes.Current.Address.FromCol;
+					criteriaString = IfHelper.CalculateCriteria(arguments, currentWorksheet,cellRowVal, cellColVal).ToString().ToUpper();
 				}
-			}
-			else if (arguments.Count() > 2)
-			{
-				var sumRange = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
-				retVal = CalculateWithSumRange(args, criteria, sumRange, context);
+				else
+					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
 			}
 			else
+				criteriaString = this.GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString().ToUpper();
+			if (arguments.Count() > 2)
 			{
-				retVal = CalculateSingleRange(args, criteria, context);
+				var cellRangeToAverage = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
+				if (cellRangeToAverage == null)
+					return new CompileResult(eErrorType.Value);
+				else
+					return this.CalculateAverageUsingAverageRange(cellRangeToCheck, criteriaString, cellRangeToAverage);
 			}
-			return CreateResult(retVal, DataType.Decimal);
+			else
+				return this.CalculateAverageUsingRange(cellRangeToCheck, criteriaString);
 		}
 
-		private double CalculateWithSumRange(ExcelDataProvider.IRangeInfo range, string criteria, ExcelDataProvider.IRangeInfo sumRange, ParsingContext context)
+		/// <summary>
+		/// Calculates the sum value of all cells that match the given criteria. The sizes/shapes of
+		/// <paramref name="cellsToCompare"/> and <paramref name="potentialCellsToAverage"/> do not have to be the same;
+		/// The size and shape of <paramref name="cellsToCompare"/> is applied to <paramref name="potentialCellsToAverage"/>,
+		/// using the first cell in <paramref name="potentialCellsToAverage"/> as a reference point.
+		/// </summary>
+		/// <param name="cellsToCompare">The range of cells to compare against the <paramref name="comparisonCriteria"/>.</param>
+		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the sum calculation.</param>
+		/// <param name="potentialCellsToAverage">
+		///	If a cell in <paramref name="cellsToCompare"/> passes the criteria, then its
+		///	corresponding cell in this cell range will be included in the sum calculation.</param>
+		/// <returns>Returns the sum for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
+		private CompileResult CalculateAverageUsingAverageRange(ExcelDataProvider.IRangeInfo cellsToCompare, string comparisonCriteria, ExcelDataProvider.IRangeInfo potentialCellsToAverage)
 		{
-			var retVal = 0d;
-			foreach (var cell in range)
+			var sumOfValidValues = 0d;
+			var numberOfValidValues = 0;
+			foreach (var cell in cellsToCompare)
 			{
-				if (criteria != null && _evaluator.Evaluate(GetFirstArgument(cell.Value), criteria))
+				if (comparisonCriteria != null && IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(cell.Value), comparisonCriteria))
 				{
-					var or = cell.Row - range.Address._fromRow;
-					var oc = cell.Column - range.Address._fromCol;
-					if (sumRange.Address._fromRow + or <= sumRange.Address._toRow &&
-						sumRange.Address._fromCol + oc <= sumRange.Address._toCol)
-					{
-						var v = sumRange.GetOffset(or, oc);
-						retVal += ConvertUtil.GetValueDouble(v, true);
-					}
+					var relativeRow = cell.Row - cellsToCompare.Address._fromRow;
+					var relativeColumn = cell.Column - cellsToCompare.Address._fromCol;
+					var valueOfCellToAverage = potentialCellsToAverage.GetOffset(relativeRow, relativeColumn);
+					if (valueOfCellToAverage is ExcelErrorValue cellError)
+						continue;
+					if (valueOfCellToAverage is string || valueOfCellToAverage is bool || valueOfCellToAverage == null)
+						continue;
+					sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToAverage, true);
+					numberOfValidValues++;
 				}
 			}
-			return retVal;
+			if (numberOfValidValues == 0)
+				return new CompileResult(0d, DataType.Decimal);
+			else
+				return this.CreateResult(sumOfValidValues, DataType.Decimal);
 		}
 
-		private double CalculateSingleRange(ExcelDataProvider.IRangeInfo range, string expression, ParsingContext context)
+		/// <summary>
+		/// Calculates the sum value of all cells that match the given criteria.
+		/// </summary>
+		/// <param name="potentialCellsToAverage">
+		///	The cell range to compare against the given <paramref name="comparisonCriteria"/>
+		///	If a cell passes the criteria, then its value is included in the sum calculation.</param>
+		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the sum calculation.</param>
+		/// <returns>Returns the sum value for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
+		private CompileResult CalculateAverageUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToAverage, string comparisonCriteria)
 		{
-			var retVal = 0d;
-			foreach (var cell in range)
+			var sumOfValidValues = 0d;
+			var numberOfValidValues = 0;
+			foreach (var cell in potentialCellsToAverage)
 			{
-				if (expression != null && IsNumeric(GetFirstArgument(cell.Value)) && _evaluator.Evaluate(GetFirstArgument(cell.Value), expression))
+				if (comparisonCriteria != null && IfHelper.IsNumeric(this.GetFirstArgument(cell.Value), true) &&
+						IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(cell.Value), comparisonCriteria))
 				{
-					retVal += cell.ValueDouble;
+					sumOfValidValues += cell.ValueDouble;
+					numberOfValidValues++;
 				}
+				else if (cell.Value is ExcelErrorValue candidateError)
+					continue;
 			}
-			return retVal;
+			if (numberOfValidValues == 0)
+				return new CompileResult(0d, DataType.Decimal);
+			else
+				return this.CreateResult(sumOfValidValues, DataType.Decimal);
 		}
 	}
 }

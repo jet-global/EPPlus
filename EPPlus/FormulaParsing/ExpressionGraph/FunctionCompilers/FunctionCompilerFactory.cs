@@ -45,6 +45,15 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 			_specialCompilers.Add(typeof(If), new IfFunctionCompiler(repository.GetFunction("if")));
 			_specialCompilers.Add(typeof(IfError), new IfErrorFunctionCompiler(repository.GetFunction("iferror")));
 			_specialCompilers.Add(typeof(IfNa), new IfNaFunctionCompiler(repository.GetFunction("ifna")));
+			_specialCompilers.Add(typeof(Sum), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("sum")));
+			_specialCompilers.Add(typeof(SumIf), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("sumif")));
+			_specialCompilers.Add(typeof(Count), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("count")));
+			_specialCompilers.Add(typeof(CountA), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("counta")));
+			_specialCompilers.Add(typeof(SumIfs), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("sumifs")));
+			_specialCompilers.Add(typeof(Average), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("average")));
+			_specialCompilers.Add(typeof(AverageA), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("averagea")));
+			_specialCompilers.Add(typeof(AverageIf), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("averageif")));
+			_specialCompilers.Add(typeof(AverageIfs), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("averageifs")));
 			_specialCompilers.Add(typeof(StdevP), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("stdev.p")));
 			_specialCompilers.Add(typeof(StdevS), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("stdev.s")));
 			_specialCompilers.Add(typeof(Stdevpa), new ResolveCellReferencesAsRangeCompiler(repository.GetFunction("stdevpa")));

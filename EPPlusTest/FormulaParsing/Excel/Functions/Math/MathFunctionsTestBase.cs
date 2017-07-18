@@ -24,7 +24,9 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
@@ -34,6 +36,65 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	{
 		#region Properties
 		protected ParsingContext ParsingContext { get; } = ParsingContext.Create();
+		#endregion
+
+		#region Protected Methods
+		protected ExcelPackage CreateTestingPackage()
+		{
+			var package = new ExcelPackage();
+			var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+			worksheet.Cells["C2"].Value = "Monday";
+			worksheet.Cells["D2"].Value = "Tuesday";
+			worksheet.Cells["E2"].Value = "Thursday";
+			worksheet.Cells["F2"].Value = "Friday";
+			worksheet.Cells["G2"].Value = "Thursday";
+			worksheet.Cells["H2"].Value = 5;
+			worksheet.Cells["I2"].Value = 2;
+			worksheet.Cells["J2"].Value = 3.5;
+			worksheet.Cells["K2"].Value = 6;
+			worksheet.Cells["L2"].Value = 1;
+			worksheet.Cells["M2"].Value = "5";
+			worksheet.Cells["N2"].Value = true;
+			worksheet.Cells["O2"].Value = "True";
+			worksheet.Cells["P2"].Value = false;
+			worksheet.Cells["Q2"].Value = (new DateTime(2017, 6, 22)).ToOADate();
+			worksheet.Cells["R2"].Value = (new DateTime(2017, 6, 23)).ToOADate();
+			worksheet.Cells["S2"].Value = (new DateTime(2017, 6, 24)).ToOADate();
+			worksheet.Cells["T2"].Value = 0.0;
+			worksheet.Cells["U2"].Value = 0.25;
+			worksheet.Cells["V2"].Value = 0.5;
+			worksheet.Cells["W2"].Value = 0.75;
+
+			worksheet.Cells["C3"].Value = 1;
+			worksheet.Cells["D3"].Value = 2;
+			worksheet.Cells["E3"].Value = 3;
+			worksheet.Cells["F3"].Value = 4;
+			worksheet.Cells["G3"].Value = 7;
+			worksheet.Cells["H3"].Value = 6;
+			worksheet.Cells["I3"].Value = 7;
+			worksheet.Cells["J3"].Value = 8;
+			worksheet.Cells["K3"].Value = 9;
+			worksheet.Cells["L3"].Value = 10;
+			worksheet.Cells["M3"].Value = 11;
+			worksheet.Cells["N3"].Value = 12;
+			worksheet.Cells["O3"].Value = 13;
+			worksheet.Cells["P3"].Value = 14;
+			worksheet.Cells["Q3"].Value = 15;
+			worksheet.Cells["R3"].Value = 16;
+			worksheet.Cells["S3"].Value = 17;
+			worksheet.Cells["T3"].Value = 18;
+			worksheet.Cells["U3"].Value = 19;
+			worksheet.Cells["V3"].Value = 20;
+			worksheet.Cells["W3"].Value = 21;
+
+			worksheet.Cells["C11"].Value = 1;
+			worksheet.Cells["D11"].Value = 2;
+			worksheet.Cells["E11"].Value = 1;
+			worksheet.Cells["F11"].Value = 1;
+			worksheet.Cells["G11"].Value = 2;
+			worksheet.Cells["H11"].Value = 3;
+			return package;
+		}
 		#endregion
 	}
 }

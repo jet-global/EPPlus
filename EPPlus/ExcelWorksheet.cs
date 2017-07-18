@@ -1359,7 +1359,6 @@ namespace OfficeOpenXml
 			{
 				this._values.Insert(rowFrom, 0, rows, 0);
 				this._formulas.Insert(rowFrom, 0, rows, 0);
-				this._commentsStore.Insert(rowFrom, 0, rows, 0);
 				this._hyperLinks.Insert(rowFrom, 0, rows, 0);
 				this._flags.Insert(rowFrom, 0, rows, 0);
 				this.Comments.Insert(rowFrom, 0, rows, 0);
@@ -1408,7 +1407,7 @@ namespace OfficeOpenXml
 						this.Row(rowFrom + r).OutlineLevel = newOutlineLevel;
 					}
 				}
-				this.UpdateSparkLineReferences(rows, rowFrom, 0, 0);
+				this.UpdateSparkLines(rows, rowFrom, 0, 0);
 				foreach (var tbl in Tables)
 				{
 					tbl.Address = tbl.Address.AddRow(rowFrom, rows);
@@ -1417,28 +1416,28 @@ namespace OfficeOpenXml
 				{
 					if (rowFrom <= ptbl.Address.End.Row)
 						ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
-					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && 
-						ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
-						ptbl.CacheDefinition.SourceRange.IsName == false &&
-						rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
-						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
-				}
-			}
-			this.UpdateCharts(rows, 0, rowFrom, 0);
-			// Update cross-sheet references.
-			foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
-			{
-				sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
-				foreach (var ptbl in sheet.PivotTables)
-				{
 					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
 						ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
 						ptbl.CacheDefinition.SourceRange.IsName == false &&
 						rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
 						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
 				}
+				this.UpdateCharts(rows, 0, rowFrom, 0);
+				// Update cross-sheet references.
+				foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+				{
+					sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
+					foreach (var ptbl in sheet.PivotTables)
+					{
+						if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
+							ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
+							ptbl.CacheDefinition.SourceRange.IsName == false &&
+							rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
+							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
+					}
+				}
+				this.UpdateDataValidationRanges(rowFrom, rows, 0, 0);
 			}
-			this.UpdateDataValidationRanges(rowFrom, rows, 0, 0);
 		}
 
 		/// <summary>
@@ -1478,7 +1477,6 @@ namespace OfficeOpenXml
 			{
 				this._values.Insert(0, columnFrom, 0, columns);
 				this._formulas.Insert(0, columnFrom, 0, columns);
-				this._commentsStore.Insert(0, columnFrom, 0, columns);
 				this._hyperLinks.Insert(0, columnFrom, 0, columns);
 				this._flags.Insert(0, columnFrom, 0, columns);
 				this.Names.Insert(0, columnFrom, 0, columns);
@@ -1597,43 +1595,43 @@ namespace OfficeOpenXml
 						this.Column(columnFrom + c).OutlineLevel = newOutlineLevel;
 					}
 				}
-			}
-			this.UpdateSparkLineReferences(0, 0, columns, columnFrom);
-			//Adjust tables
-			foreach (var tbl in Tables)
-			{
-				if (columnFrom > tbl.Address.Start.Column && columnFrom <= tbl.Address.End.Column)
+				this.UpdateSparkLines(0, 0, columns, columnFrom);
+				//Adjust tables
+				foreach (var tbl in Tables)
 				{
-					ExcelWorksheet.InsertTableColumns(columnFrom, columns, tbl);
-				}
+					if (columnFrom > tbl.Address.Start.Column && columnFrom <= tbl.Address.End.Column)
+					{
+						ExcelWorksheet.InsertTableColumns(columnFrom, columns, tbl);
+					}
 
-				tbl.Address = tbl.Address.AddColumn(columnFrom, columns);
-			}
-			foreach (var ptbl in PivotTables)
-			{
-				if (columnFrom <= ptbl.Address.End.Column)
-					ptbl.Address = ptbl.Address.AddColumn(columnFrom, columns);
-				if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
-					ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
-					ptbl.CacheDefinition.SourceRange.IsName == false &&
-					columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
-					ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
-			}
-			this.UpdateCharts(0, columns, 0, columnFrom);
-			// Update cross-sheet references.
-			foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
-			{
-				sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
-				foreach (var ptbl in sheet.PivotTables)
+					tbl.Address = tbl.Address.AddColumn(columnFrom, columns);
+				}
+				foreach (var ptbl in PivotTables)
 				{
-					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet && 
+					if (columnFrom <= ptbl.Address.End.Column)
+						ptbl.Address = ptbl.Address.AddColumn(columnFrom, columns);
+					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
 						ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
-						ptbl.CacheDefinition.SourceRange.IsName == false && 
+						ptbl.CacheDefinition.SourceRange.IsName == false &&
 						columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
 						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
 				}
+				this.UpdateCharts(0, columns, 0, columnFrom);
+				// Update cross-sheet references.
+				foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+				{
+					sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
+					foreach (var ptbl in sheet.PivotTables)
+					{
+						if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
+							ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
+							ptbl.CacheDefinition.SourceRange.IsName == false &&
+							columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
+							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
+					}
+				}
+				this.UpdateDataValidationRanges(0, 0, columnFrom, columns);
 			}
-			this.UpdateDataValidationRanges(0, 0, columnFrom, columns);
 		}
 
 		/// <summary>
@@ -1662,10 +1660,10 @@ namespace OfficeOpenXml
 				this._values.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this._formulas.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this._flags.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
-				this._commentsStore.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this._hyperLinks.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Names.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Comments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
+				this.VmlDrawingsComments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Workbook.Names.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns, n => n.Worksheet == this);
 
 				this.AdjustFormulasRow(rowFrom, rows);
@@ -1682,7 +1680,7 @@ namespace OfficeOpenXml
 					if (pivotTable.CacheDefinition.CacheSource == eSourceType.Worksheet &&
 						pivotTable.CacheDefinition.SourceRange != null &&
 						pivotTable.CacheDefinition.SourceRange.Worksheet == this &&
-						pivotTable.CacheDefinition.SourceRange.IsName == false && 
+						pivotTable.CacheDefinition.SourceRange.IsName == false &&
 						rowFrom <= pivotTable.CacheDefinition.SourceRange.End.Row)
 						pivotTable.CacheDefinition.SourceRange.Address = pivotTable.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows).Address;
 				}
@@ -1692,13 +1690,16 @@ namespace OfficeOpenXml
 					foreach (var pivotTable in sheet.PivotTables)
 					{
 						if (pivotTable.CacheDefinition.CacheSource == eSourceType.Worksheet &&
-							pivotTable.CacheDefinition.SourceRange != null && 
-							pivotTable.CacheDefinition.SourceRange.Worksheet == this && 
+							pivotTable.CacheDefinition.SourceRange != null &&
+							pivotTable.CacheDefinition.SourceRange.Worksheet == this &&
 							pivotTable.CacheDefinition.SourceRange.IsName == false &&
 							rowFrom <= pivotTable.CacheDefinition.SourceRange.End.Row)
-							pivotTable.CacheDefinition.SourceRange.Address = pivotTable.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows).Address;
+							pivotTable.CacheDefinition.SourceRange.Address = pivotTable.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows)?.Address ?? ExcelErrorValue.Values.Ref;
 					}
 				}
+				this.UpdateSparkLines(-rows, rowFrom, 0, 0);
+				this.UpdateCharts(-rows, 0, rowFrom, 0);
+				this.UpdateDataValidationRanges(rowFrom, -rows, 0, 0);
 			}
 		}
 
@@ -1742,11 +1743,11 @@ namespace OfficeOpenXml
 				this._values.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._formulas.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._flags.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
-				this._commentsStore.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._hyperLinks.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
-				this._names.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
+				this._names.Delete(0, columnFrom, 0, columns);
 				this.Comments.Delete(0, columnFrom, 0, columns);
-				this.Workbook.Names.Delete(0, columnFrom, ExcelPackage.MaxRows, columns, n => n.Worksheet == this);
+				this.VmlDrawingsComments.Delete(0, columnFrom, 0, columns);
+				this.Workbook.Names.Delete(0, columnFrom, 0, columns, n => n.Worksheet == this);
 
 				this.AdjustFormulasColumn(columnFrom, columns);
 				this.FixMergedCellsColumn(columnFrom, columns, true);
@@ -1790,7 +1791,7 @@ namespace OfficeOpenXml
 						ptbl.Address = ptbl.Address.DeleteColumn(columnFrom, columns);
 					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
 						ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
-						ptbl.CacheDefinition.SourceRange.IsName == false && 
+						ptbl.CacheDefinition.SourceRange.IsName == false &&
 						columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
 						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns).Address;
 				}
@@ -1803,9 +1804,12 @@ namespace OfficeOpenXml
 							ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
 							ptbl.CacheDefinition.SourceRange.IsName == false &&
 							columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
-							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns).Address;
+							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns)?.Address ?? ExcelErrorValue.Values.Ref;
 					}
 				}
+				this.UpdateCharts(0, -columns, 0, columnFrom);
+				this.UpdateSparkLines(0, 0, -columns, columnFrom);
+				this.UpdateDataValidationRanges(0, 0, columnFrom, -columns);
 			}
 		}
 
@@ -2681,6 +2685,13 @@ namespace OfficeOpenXml
 		#region Private Methods
 		private void UpdateCharts(int rows, int columns, int rowFrom, int colFrom)
 		{
+			// Only two-cell-anchor drawings can be deleted by DeleteRow/Column operations. 
+			var deletedDrawings = this.Drawings.Where(drawing => drawing.EditAs == eEditAs.TwoCell && this.RangeIsBeingDeleted(drawing.From.Row, drawing.To.Row, drawing.From.Column, drawing.To.Column, rowFrom, rows, colFrom, columns)).ToArray();
+			foreach (var drawing in deletedDrawings)
+			{
+				this.Drawings.Remove(drawing);
+			}
+
 			HashSet<ExcelChart> uniqueChartTypes = new HashSet<ExcelChart>();
 			string workbook, worksheet, address;
 			foreach (var sheet in this.Workbook.Worksheets)
@@ -2695,42 +2706,44 @@ namespace OfficeOpenXml
 						int newFromColumn = drawing.From.Column;
 						int newToRow = drawing.To.Row;
 						int newToColumn = drawing.To.Column;
-						switch (drawing.EditAs)
+						int newFromRowOffset = drawing.From.RowOff;
+						int newFromColumnOffset = drawing.From.ColumnOff;
+						if (drawing.EditAs == eEditAs.TwoCell)
 						{
-							case eEditAs.OneCell:
-								if (drawing.From.Row > rowFrom)
-								{
-									newFromRow += rows;
-									newToRow += rows;
-								}
-								if (drawing.From.Column > colFrom)
-								{
-									newFromColumn += columns;
-									newToColumn += columns;
-								}
-								break;
-							case eEditAs.TwoCell:
-								if (drawing.From.Row > rowFrom)
-									newFromRow += rows;
-								if (drawing.From.Column > colFrom)
-									newFromColumn += columns;
-								if (drawing.To.Row > rowFrom)
-									newToRow += rows;
-								if (drawing.To.Column > colFrom)
-									newToColumn += columns;
-								break;
-							case eEditAs.Absolute:
-							default:
-								// No position arrangement is required.
-								break;
+							if (drawing.To.Row > rowFrom)
+								newToRow += rows;
+							if (drawing.To.Column > colFrom)
+								newToColumn += columns;
 						}
-						drawing.SetPosition(newFromRow, drawing.From.RowOff, newFromColumn, drawing.From.ColumnOff, newToRow, drawing.To.RowOff, newToColumn, drawing.To.ColumnOff);
+						if (drawing.EditAs == eEditAs.OneCell || drawing.EditAs == eEditAs.TwoCell)
+						{
+							if (drawing.From.Row > rowFrom)
+							{
+								newFromRow += rows;
+								if (rows < 0 && rowFrom > newFromRow)
+								{
+									newFromRow = rowFrom;
+									newFromRowOffset = 0;
+								}
+							}
+							if (drawing.From.Column > colFrom)
+							{
+								newFromColumn += columns;
+								if (columns < 0 && colFrom > newFromColumn)
+								{
+									newFromColumn = colFrom;
+									newFromColumnOffset = 0;
+								}
+							}
+						}
+						newFromColumn = newFromColumn < 1 ? 1 : newFromColumn;
+						newFromRow = newFromRow < 1 ? 1 : newFromRow;
+						drawing.SetPosition(newFromRow, newFromRowOffset, newFromColumn, newFromColumnOffset, newToRow, drawing.To.RowOff, newToColumn, drawing.To.ColumnOff);
 					}
 					// The chart Plot Area contains one copy of a chart for each series in that chart.
 					// A chart Plot Area can also have multiple distinct charts (such as when a bar chart and a line chart are plotted in the same area).
 					// This captures the behavior of a "Combo Chart".
-					var chartBase = drawing as ExcelChart;
-					if (chartBase != null)
+					if (drawing is ExcelChart chartBase)
 					{
 						foreach (var chart in chartBase.PlotArea.ChartTypes)
 						{
@@ -4568,7 +4581,6 @@ namespace OfficeOpenXml
 					{
 						sdv -= ExcelWorkbook.date1904Offset;
 					}
-
 					s = sdv.ToString(CultureInfo.InvariantCulture);
 				}
 				else if (v is TimeSpan)
@@ -4796,12 +4808,14 @@ namespace OfficeOpenXml
 
 		private void UpdateDataValidationRanges(int rowFrom, int rows, int columnFrom, int columns)
 		{
-			foreach(var sheet in this.Workbook.Worksheets)
+			if (rows < 0 || columns < 0)
+				this.DataValidations.RemoveAll(validation => this.RangeIsBeingDeleted(validation.Address._fromRow, validation.Address._toRow, validation.Address._fromCol, validation.Address._toCol, rowFrom, rows, columnFrom, columns));
+			foreach (var sheet in this.Workbook.Worksheets)
 			{
 				for (int i = sheet.DataValidations.Count - 1; i >= 0; i--)
 				{
 					var validation = sheet.DataValidations.ElementAt(i) as DataValidation.Contracts.IExcelDataValidationList;
-					if(validation != null)
+					if (validation != null)
 					{
 						string worksheetName = "!";
 						if (validation.Address.WorkSheet == null && sheet.Name.ToUpper() == this.Name.ToUpper()) //This formula references the sheet it is on
@@ -4813,6 +4827,45 @@ namespace OfficeOpenXml
 					}
 				}
 			}
+		}
+
+		private bool RangeIsBeingDeleted(int rangeRowFrom, int rangeRowTo, int rangeColumnFrom, int rangeColumnTo, int rowFrom, int rows, int columnFrom, int columns)
+		{
+			return (rangeRowFrom >= rowFrom && rangeRowTo < rowFrom + -rows ||
+				rangeColumnFrom >= columnFrom && rangeColumnTo < columnFrom + -columns);
+		}
+
+		private void UpdateSparkLines(int rows, int rowFrom, int columns, int columnFrom)
+		{
+			this.RemoveDeletedSparklines(rows, rowFrom, columns, columnFrom);
+			this.UpdateSparkLineReferences(rows, rowFrom, columns, columnFrom);
+		}
+
+		private void RemoveDeletedSparklines(int rows, int rowFrom, int columns, int columnFrom)
+		{
+			// Only delete sparklines if rows or columns are being deleted.
+			if (rows >= 0 && columns >= 0)
+				return;
+
+			foreach (var group in this.SparklineGroups.SparklineGroups)
+			{
+				group.Sparklines.RemoveAll(sparkline => ExcelWorksheet.IsInRange(sparkline.HostCell, -rows, rowFrom, -columns, columnFrom));
+			}
+			var groupsToDelete = this.SparklineGroups.SparklineGroups.Where(sparklineGroup => sparklineGroup.Sparklines.Count == 0).ToArray();
+			foreach (var sparklineGroup in groupsToDelete)
+			{
+				this.SparklineGroups.TopNode.RemoveChild(sparklineGroup.TopNode);
+				this.SparklineGroups.SparklineGroups.Remove(sparklineGroup);
+			}
+		}
+
+		private static bool IsInRange(ExcelAddress address, int rows, int rowFrom, int columns, int columnFrom)
+		{
+			if (rows != 0 && address.Start.Row >= rowFrom && address.Start.Row <= rows - 1 + rowFrom)
+				return true;
+			else if (columns != 0 && address.Start.Column >= columnFrom && address.Start.Column <= columns - 1 + columnFrom)
+				return true;
+			return false;
 		}
 
 		private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)
@@ -4850,7 +4903,6 @@ namespace OfficeOpenXml
 					sparkline.HostCell._ws = newName;
 				}
 			}
-
 		}
 
 		private static void SetValueInnerUpdate(List<ExcelCoreValue> list, int index, object value)

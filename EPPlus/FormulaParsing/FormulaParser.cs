@@ -117,7 +117,6 @@ namespace OfficeOpenXml.FormulaParsing
 			var rangeAddress = _parsingContext.RangeAddressFactory.Create(worksheet, column, row);
 			using (var scope = _parsingContext.Scopes.NewScope(rangeAddress))
 			{
-				//    _parsingContext.Dependencies.AddFormulaScope(scope);
 				var graph = _graphBuilder.Build(tokens);
 				if (graph.Expressions.Count() == 0)
 				{
@@ -152,6 +151,48 @@ namespace OfficeOpenXml.FormulaParsing
 							var msg = string.Format("A range with multiple cell was returned at row {0}, column {1}",
 								 row, column);
 							_parsingContext.Configuration.Logger.Log(_parsingContext, msg);
+						}
+
+						if (rangeInfo.Address.Rows > rangeInfo.Address.Columns)
+						{
+							var rangeAddressRow = rangeAddress.ToRow;
+							var startRow = rangeInfo.Address.Start.Row;
+							var endRow = rangeInfo.Address.End.Row;
+
+							var startCol = rangeInfo.Address.Start.Column;
+							var endCol = rangeInfo.Address.End.Column;
+
+							if(startCol != endCol)
+								return ExcelErrorValue.Create(eErrorType.Value);
+
+							if (rangeAddressRow == startRow)
+								return rangeInfo.Worksheet.Cells[rangeInfo.Address.Start.Row, rangeInfo.Address.End.Column].Value;
+							else if (rangeAddressRow == endRow)
+							{
+								var test = rangeInfo.Address.End.Row;
+								var secondTest = rangeInfo.Address.End.Column;
+								return rangeInfo.Worksheet.Cells[rangeInfo.Address.End.Row, rangeInfo.Address.End.Column].Value;
+							}
+							else if (rangeAddressRow > startRow && rangeAddressRow < endRow)
+								return rangeInfo.Worksheet.Cells[rangeAddress.FromRow, rangeInfo.Address.Start.Column].Value;
+						}
+						else
+						{
+							var rangeAddressCol = rangeAddress.ToCol;
+							var startCol = rangeInfo.Address.Start.Column;
+							var endCol = rangeInfo.Address.End.Column;
+							var startRow = rangeInfo.Address.Start.Row;
+							var endRow = rangeInfo.Address.End.Row;
+
+							if (startRow != endRow)
+								return ExcelErrorValue.Create(eErrorType.Value);
+
+							if (rangeAddressCol == startCol)
+								return rangeInfo.Worksheet.Cells[rangeInfo.Address.Start.Row, rangeAddress.FromCol].Value;
+							else if (rangeAddressCol == endCol)
+								return rangeInfo.Worksheet.Cells[rangeInfo.Address.Start.Row, rangeAddress.FromCol].Value;
+							else if (rangeAddressCol > startCol && rangeAddressCol < endCol)
+								return rangeInfo.Worksheet.Cells[rangeInfo.Address.Start.Row, rangeAddress.FromCol].Value;
 						}
 						return ExcelErrorValue.Create(eErrorType.Value);
 					}

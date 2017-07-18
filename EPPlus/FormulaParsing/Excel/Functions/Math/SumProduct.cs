@@ -30,8 +30,18 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// The class contains the formula for the SUMPRODUCT Excel Function. 
+	/// </summary>
 	public class SumProduct : ExcelFunction
 	{
+		/// <summary>
+		/// Takes the user arguments multiplies the corresponding components in the given arguments and returns the sum of
+		/// those products.
+		/// </summary>
+		/// <param name="arguments">The user specified arguments, usually arrays for this function.</param>
+		/// <param name="context">The current context of the function.</param>
+		/// <returns>The sum of the products fo the corresponding components in the given array.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
@@ -46,13 +56,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				{
 					foreach (var val in (IEnumerable<FunctionArgument>)arg.Value)
 					{
-						AddValue(val.Value, currentResult);
+						this.AddValue(val.Value, currentResult);
 					}
 				}
 				else if (arg.Value is FunctionArgument)
-				{
-					AddValue(arg.Value, currentResult);
-				}
+					this.AddValue(arg.Value, currentResult);
 				else if (arg.IsExcelRange)
 				{
 					var r = arg.ValueAsRangeInfo;
@@ -60,24 +68,26 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					{
 						for (int row = r.Address._fromRow; row <= r.Address._toRow; row++)
 						{
-							AddValue(r.GetValue(row, col), currentResult);
+							if (r.GetValue(row, col) is bool)
+								this.AddValue(0, currentResult);
+							else if (r.GetValue(row, col) is ExcelErrorValue)
+								return new CompileResult((ExcelErrorValue)r.GetValue(row, col));
+							else
+								this.AddValue(r.GetValue(row, col), currentResult);
 						}
 					}
 				}
-				else if (IsNumeric(arg.Value))
-				{
-					AddValue(arg.Value, currentResult);
-				}
+				else if (arg.Value is int || arg.Value is double || arg.Value is System.DateTime)
+					this.AddValue(arg.Value, currentResult);
+				else
+					return new CompileResult(eErrorType.Value);
 			}
-			// Validate that all supplied lists have the same length
+
 			var arrayLength = results.First().Count;
 			foreach (var list in results)
 			{
 				if (list.Count != arrayLength)
-				{
 					throw new ExcelErrorValueException(ExcelErrorValue.Create(eErrorType.Value));
-					//throw new ExcelFunctionException("All supplied arrays must have the same length", ExcelErrorCodes.Value);
-				}
 			}
 			for (var rowIndex = 0; rowIndex < arrayLength; rowIndex++)
 			{
@@ -88,23 +98,22 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 				result += rowResult;
 			}
-			return CreateResult(result, DataType.Decimal);
+			return this.CreateResult(result, DataType.Decimal);
 		}
 
+		#region Private Methods
+		/// <summary>
+		/// Converts the given object to a double and then adds it to the given list.
+		/// </summary>
+		/// <param name="convertVal">The object to add to the list. </param>
+		/// <param name="currentResult">The list the object will be added to.</param>
 		private void AddValue(object convertVal, List<double> currentResult)
 		{
 			if (IsNumeric(convertVal))
-			{
 				currentResult.Add(Convert.ToDouble(convertVal));
-			}
-			else if (convertVal is ExcelErrorValue)
-			{
-				throw (new ExcelErrorValueException((ExcelErrorValue)convertVal));
-			}
 			else
-			{
 				currentResult.Add(0d);
-			}
 		}
+		#endregion
 	}
 }

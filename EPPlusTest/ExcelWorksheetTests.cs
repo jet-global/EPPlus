@@ -3120,8 +3120,7 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
 				worksheet1.InsertRow(10, 10);
-				string workbook, worksheet, address;
-				ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$36", address);
 				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$Z$36", address);
@@ -3205,7 +3204,7 @@ namespace EPPlusTest
 				validation.Formula.ExcelFormula = "=$B$2:$B$3";
 
 				//expand the range
-				sheet.InsertRow(3,2);
+				sheet.InsertRow(3, 2);
 
 				//validate that the Data Validation range has also expanded
 				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
@@ -3395,9 +3394,8 @@ namespace EPPlusTest
 				var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
-				string workbook, worksheet, address;
 				worksheet2.InsertColumn(10, 10);
-				ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$26", address);
 				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$AJ$26", address);
@@ -3573,6 +3571,286 @@ namespace EPPlusTest
 		#endregion
 
 		#region DeleteRow Tests
+		#region Delete Rows in the middle of a range. 
+		[TestMethod]
+		public void DeleteRowsUpdatesScatterChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+				worksheet.DeleteRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsUpdatesPieChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Pie) as ExcelPieChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 5);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$8", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$8", chart.Series[0].Series);
+				worksheet.DeleteRow(3, 5);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsUpdatesBarChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 5);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$8", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$8", chart.Series[0].Series);
+				worksheet.DeleteRow(3, 5);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsUpdatesBubbleChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				worksheet.Cells[2, 4].Value = 1;
+				worksheet.Cells[3, 4].Value = 2;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "$D$2:$D$3");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$2:$D$6", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+				worksheet.DeleteRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$3", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$2:$D$3", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\ComboFromExcel.xlsx")]
+		public void DeleteRowsUpdatesComboChart()
+		{
+			var file = new FileInfo("ComboFromExcel.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[1].Series);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].Series);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+				sheet.DeleteRow(22, 20);
+				Assert.AreEqual("'Sheet1'!$C$20:$C$22", drawing.Series[1].Series);
+				Assert.AreEqual("'Sheet1'!$B$20:$B$22", drawing.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$20:$D$22", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\OneCellAnchorChart.xlsx")]
+		public void DeleteRowsFromMiddleOfChartIgnoresOneCellAnchor()
+		{
+			var file = new FileInfo("OneCellAnchorChart.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$H$21:$H$30", drawing.Series[0].XSeries);
+				Assert.AreEqual("Sheet1!$I$21:$I$30", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(eEditAs.OneCell, drawing.EditAs);
+				var originalColumnOffset = drawing.From.ColumnOff;
+				var originalRowOffset = drawing.From.RowOff;
+				sheet.DeleteRow(8, 10);
+				Assert.AreEqual("'Sheet1'!$H$11:$H$20", drawing.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$I$11:$I$20", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(originalColumnOffset, drawing.From.ColumnOff);
+				Assert.AreEqual(originalRowOffset, drawing.From.RowOff);
+				Assert.AreEqual(eEditAs.OneCell, drawing.EditAs);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsUpdatesExcel2016ChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+				var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$1:$Z$26"));
+				var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$1:$Z$26"));
+				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
+
+				worksheet1.DeleteRow(10, 10);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				Assert.AreEqual("$A$1:$Z$16", address);
+				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$1:$Z$16", address);
+				address = null;
+				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$1:$Z$26", address);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowCrossSheetDoesNotChangeChartPosition()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+				var otherSheet = package.Workbook.Worksheets.Add("Unrelated Sheet");
+				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+				chart.From.Column = 4;
+				chart.From.Row = 2;
+				chart.To.Column = 10;
+				chart.To.Row = 12;
+				otherSheet.DeleteRow(1, 10);
+				otherSheet.DeleteColumn(1, 10);
+				Assert.AreEqual(4, chart.From.Column);
+				Assert.AreEqual(2, chart.From.Row);
+				Assert.AreEqual(10, chart.To.Column);
+				Assert.AreEqual(12, chart.To.Row);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowAndColumnsAboveChartUpdatesChartPosition()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+				chart.From.Column = 4;
+				chart.From.Row = 12;
+				chart.To.Column = 10;
+				chart.To.Row = 22;
+				sheet.DeleteRow(1, 10);
+				Assert.AreEqual(2, chart.From.Row);
+				Assert.AreEqual(12, chart.To.Row);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowAndColumnsInsideChartUpdatesChartTo()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+				chart.From.Column = 4;
+				chart.From.Row = 4;
+				chart.To.Column = 10;
+				chart.To.Row = 20;
+				sheet.DeleteRow(6, 10);
+				Assert.AreEqual(4, chart.From.Row);
+				Assert.AreEqual(10, chart.To.Row);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowUpdatesDataValidationRange()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$B$6";
+				validation = sheet.Cells["D6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$B$6";
+
+				sheet.DeleteRow(3, 2);
+
+				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$2:$B$4", validationRange.Formula.ExcelFormula);
+
+				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=$B$2:$B$4", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsUpdatesDataValidationRangeAcrossSheets()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
+				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
+
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
+				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
+
+				sheetTarget.DeleteRow(3, 2);
+
+				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$2:$E$3", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsRetainsDataValidationRangeOtherSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
+				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
+
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
+				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
+				validation = sheetValidations.DataValidations.AddListValidation(sheetValidations.Cells["D6"].Address);
+				validation.Formula.ExcelFormula = "=$A$1:$B$2";
+
+				sheetValidations.DeleteRow(3, 2);
+
+				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$2:$E$5", validationRange.Formula.ExcelFormula);
+
+				validationRange = sheetValidations.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=$A$1:$B$2", validationRange.Formula.ExcelFormula);
+			}
+		}
+
 		[TestMethod]
 		public void DeleteRowUpdatesCrossSheetFunctions()
 		{
@@ -3610,6 +3888,49 @@ namespace EPPlusTest
 
 				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
 				Assert.AreEqual("'sheet2'!E4:E6", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\Sparkline Demos.xlsx")]
+		public void DeleteRowUpdatesSparklines()
+		{
+			var file = new FileInfo("Sparkline Demos.xlsx");
+			Assert.IsTrue(file.Exists);
+			var temp = Path.GetTempFileName();
+			File.Delete(temp);
+			var copy = file.CopyTo(temp);
+			try
+			{
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(6, sparklines.Count);
+					sheet.DeleteRow(7);
+					Assert.AreEqual(5, sparklines.Count);
+					Assert.AreEqual("'Sheet1'!D6:F6", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D7:F7", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D6:D7", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!E6:E7", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!F6:F7", sparklines[0].Sparklines[0].Formula.Address);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(5, sparklines.Count);
+					Assert.AreEqual("'Sheet1'!D6:F6", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D7:F7", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D6:D7", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!E6:E7", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!F6:F7", sparklines[0].Sparklines[0].Formula.Address);
+				}
+			}
+			finally
+			{
+				copy.Delete();
 			}
 		}
 
@@ -3654,7 +3975,677 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region Delete Rows over the start of a range. 
+		[TestMethod]
+		public void DeleteRowsAcrossStartOfChartUpdatesChart()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+				chart.From.Column = 4;
+				chart.From.Row = 4;
+				chart.To.Column = 10;
+				chart.To.Row = 10;
+				sheet.DeleteRow(1, 6);
+				Assert.AreEqual(1, chart.From.Row);
+				Assert.AreEqual(4, chart.To.Row);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsAcrossEntireChartSourceUpdatesChart()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+				chart.From.Column = 4;
+				chart.From.Row = 4;
+				chart.To.Column = 10;
+				chart.To.Row = 10;
+				sheet.DeleteRow(1, 12);
+				// In a two-cell-anchor chart, deleting the entire row/column set also deletes the chart.
+				Assert.IsFalse(sheet.Drawings.Any(drawing => drawing.Name.Equals("myChart")));
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromBeginningOfRangeUpdatesScatterChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+				worksheet.DeleteRow(1, 3);
+				Assert.AreEqual("'Sheet1'!$B$1:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$1:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromBeginningOfRangeUpdatesPieChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Pie) as ExcelPieChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 5);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$8", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$8", chart.Series[0].Series);
+				worksheet.DeleteRow(1, 5);
+				Assert.AreEqual("'Sheet1'!$B$1:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$1:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromStartOfRangeUpdatesBarChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 5);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$8", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$8", chart.Series[0].Series);
+				worksheet.DeleteRow(1, 5);
+				Assert.AreEqual("'Sheet1'!$B$1:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$1:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromStartOfRangeUpdatesBubbleChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				worksheet.Cells[2, 4].Value = 1;
+				worksheet.Cells[3, 4].Value = 2;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "$D$2:$D$3");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$2:$D$6", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+				worksheet.DeleteRow(1, 3);
+				Assert.AreEqual("'Sheet1'!$B$1:$B$3", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$1:$C$3", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$1:$D$3", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\ComboFromExcel.xlsx")]
+		public void DeleteRowsFromStartOfRangeUpdatesComboChart()
+		{
+			var file = new FileInfo("ComboFromExcel.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", drawing.Series[1].Series);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", drawing.Series[0].Series);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+				sheet.DeleteRow(1, 10);
+				Assert.AreEqual("'Sheet1'!$C$10:$C$32", drawing.Series[1].Series);
+				Assert.AreEqual("'Sheet1'!$B$10:$B$32", drawing.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$10:$D$32", drawing.PlotArea.ChartTypes[2].Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\OneCellAnchorChart.xlsx")]
+		public void DeleteRowsFromStartOfRangeUpdatesOneCellAnchor()
+		{
+			var file = new FileInfo("OneCellAnchorChart.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$H$21:$H$30", drawing.Series[0].XSeries);
+				Assert.AreEqual("Sheet1!$I$21:$I$30", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(eEditAs.OneCell, drawing.EditAs);
+				var originalColumnOffset = drawing.From.ColumnOff;
+				sheet.DeleteRow(3, 10);
+				Assert.AreEqual("'Sheet1'!$H$11:$H$20", drawing.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$I$11:$I$20", drawing.Series[0].Series);
+				Assert.AreEqual(3, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(originalColumnOffset, drawing.From.ColumnOff);
+				Assert.AreEqual(0, drawing.From.RowOff);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\TwoCellAnchorChart.xlsx")]
+		public void DeleteRowsFromStartOfRangeUpdatesTwoCellAnchor()
+		{
+			var file = new FileInfo("TwoCellAnchorChart.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$H$21:$H$30", drawing.Series[0].XSeries);
+				Assert.AreEqual("Sheet1!$I$21:$I$30", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(16, drawing.To.Row);
+				Assert.AreEqual(8, drawing.To.Column);
+				Assert.AreEqual(eEditAs.TwoCell, drawing.EditAs);
+				var originalColumnOffset = drawing.From.ColumnOff;
+				sheet.DeleteRow(3, 10);
+				Assert.AreEqual("'Sheet1'!$H$11:$H$20", drawing.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$I$11:$I$20", drawing.Series[0].Series);
+				Assert.AreEqual(3, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(originalColumnOffset, drawing.From.ColumnOff);
+				Assert.AreEqual(0, drawing.From.RowOff);
+				Assert.AreEqual(6, drawing.To.Row);
+				Assert.AreEqual(8, drawing.To.Column);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AbsoluteChart.xlsx")]
+		public void DeleteRowsFromStartOfRangeDoesNothingToAbsoluteAnchoredChart()
+		{
+			var file = new FileInfo("AbsoluteChart.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets[1];
+				var drawing = sheet.Drawings[0] as ExcelChart;
+				Assert.IsNotNull(drawing);
+				Assert.AreEqual("Sheet1!$H$21:$H$30", drawing.Series[0].XSeries);
+				Assert.AreEqual("Sheet1!$I$21:$I$30", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(16, drawing.To.Row);
+				Assert.AreEqual(8, drawing.To.Column);
+				Assert.AreEqual(eEditAs.Absolute, drawing.EditAs);
+				var originalColumnOffset = drawing.From.ColumnOff;
+				var originalRowOffset = drawing.From.RowOff;
+				sheet.DeleteRow(3, 10);
+				Assert.AreEqual("'Sheet1'!$H$11:$H$20", drawing.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$I$11:$I$20", drawing.Series[0].Series);
+				Assert.AreEqual(4, drawing.From.Row);
+				Assert.AreEqual(1, drawing.From.Column);
+				Assert.AreEqual(originalColumnOffset, drawing.From.ColumnOff);
+				Assert.AreEqual(originalRowOffset, drawing.From.RowOff);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromStartOfRangeUpdatesExcel2016ChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+				var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$2:$Z$26"));
+				var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$9:$Z$26"));
+				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$4:$Z$26"));
+
+				worksheet1.DeleteRow(1, 10);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				Assert.AreEqual("$A$1:$Z$16", address);
+				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$1:$Z$16", address);
+				address = null;
+				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$4:$Z$26", address);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowFromStartOfRangeUpdatesDataValidationRange()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$B$6";
+				validation = sheet.Cells["D6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$B$6";
+
+				sheet.DeleteRow(1, 4);
+
+				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$1:$B$2", validationRange.Formula.ExcelFormula);
+
+				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=$B$1:$B$2", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsFromBeginningOfRangeUpdatesDataValidationRangeAcrossSheets()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
+				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
+
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
+				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
+
+				sheetTarget.DeleteRow(1, 3);
+
+				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$1:$E$2", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowFromBeginningOfRangeUpdatesCrossSheetFunctions()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+
+				sheet1.Cells["C3"].Formula = "SUM(sheet2!C3:C5)";
+
+				sheet2.DeleteRow(1, 4);
+
+				Assert.AreEqual("SUM('SHEET2'!C1)", sheet1.Cells["C3"].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowFromBeginningOfRangeUpdatesPivotTableSourceRangeCrossSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
+				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet1.DeleteRow(1, 1);
+
+				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet2.DeleteRow(1, 5);
+
+				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E1:E2", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+		#endregion
+
+		#region Delete Rows so that the range references are no longer valid.
+		[TestMethod]
+		public void DeleteRowsAllRowsUpdatesChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+				worksheet.DeleteRow(1, 12);
+				Assert.AreEqual("'Sheet1'!#REF!", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!#REF!", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsOverAllDataUpdatesBubbleChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				worksheet.Cells[2, 4].Value = 1;
+				worksheet.Cells[3, 4].Value = 2;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+				chart.Series.AddSeries("$C$2:$C$3", "$B$2:$B$3", "$D$2:$D$3");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$2:$D$6", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+				worksheet.DeleteRow(1, 6);
+				Assert.AreEqual("'Sheet1'!#REF!", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!#REF!", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!#REF!", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsCoveringAllValuesUpdatesExcel2016ChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+				var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$2:$Z$26"));
+				var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$9:$Z$26"));
+				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$4:$Z$26"));
+
+				worksheet1.DeleteRow(1, 26);
+				Assert.AreEqual("#REF!", range0.Address);
+				Assert.AreEqual("#REF!", range1.Address);
+				ExcelRangeBase.SplitAddress(range2.Address, out string workbook, out string worksheet, out string address);
+				Assert.AreEqual("$A$4:$Z$26", address);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowEntireDataValidationSourceRangeUpdatesDataValidationRange()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var validation = sheet.Cells["D17"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$B$6";
+				validation = sheet.Cells["D18"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$B$6";
+
+				sheet.DeleteRow(1, 6);
+
+				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!#REF!", validationRange.Formula.ExcelFormula);
+
+				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=#REF!", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsDeletesDataValidationRange()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var validation = sheet.Cells["Z5"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$E$2";
+				validation = sheet.Cells["Z6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$E$2";
+				Assert.AreEqual(2, sheet.DataValidations.Count);
+				sheet.DeleteRow(4, 3);
+				Assert.AreEqual(0, sheet.DataValidations.Count);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowEntireSourceRangeUpdatesPivotTableSourceRangeCrossSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
+				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet1.DeleteRow(1, 1);
+
+				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet2.DeleteRow(1, 10);
+
+				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!#REF!", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+		#endregion
+		#endregion
+
 		#region DeleteColumn Tests
+		#region Delete columns in the middle of a range.
+		[TestMethod]
+		public void DeleteColumnsAboveChartUpdatesChartPosition()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+				chart.From.Column = 10;
+				chart.From.Row = 2;
+				chart.To.Column = 12;
+				chart.To.Row = 12;
+				sheet.DeleteColumn(1, 6);
+				Assert.AreEqual(4, chart.From.Column);
+				Assert.AreEqual(6, chart.To.Column);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsInsideChartUpdatesChart()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+				chart.From.Column = 4;
+				chart.From.Row = 4;
+				chart.To.Column = 10;
+				chart.To.Row = 10;
+				sheet.DeleteColumn(6, 2);
+				Assert.AreEqual(4, chart.From.Column);
+				Assert.AreEqual(8, chart.To.Column);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsUpdatesExcel2016ChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+				var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$1:$Z$26"));
+				var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
+				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
+
+				worksheet2.DeleteColumn(10, 10);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				Assert.AreEqual("$A$1:$Z$26", address);
+				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$1:$P$26", address);
+				address = null;
+				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$1:$P$26", address);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsUpdatesNamedRanges()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+				var range0 = worksheet2.Names.Add("myNamedRange", new ExcelRangeBase(worksheet1, "$A$1:$Z$26"));
+				var range1 = package.Workbook.Names.Add("workbookNamedRange", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
+
+				worksheet2.DeleteColumn(10, 10);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				Assert.AreEqual("$A$1:$P$26", address);
+				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$1:$P$26", address);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsUpdatesScatterChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[2, 3].Value = "Trucks";
+				worksheet.Cells[3, 2].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+				chart.Series.AddSeries("$B$3:$C$3", "$B$2:$C$2", "");
+				worksheet.InsertColumn(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$F$2", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$B$3:$F$3", chart.Series[0].Series);
+				worksheet.DeleteColumn(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$C$2", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$B$3:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsUpdatesBarChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[2, 3].Value = "Trucks";
+				worksheet.Cells[3, 2].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+				chart.Series.AddSeries("$B$3:$H$3", "$B$2:$H$2", "");
+				worksheet.DeleteColumn(3, 5);
+				Assert.AreEqual("'Sheet1'!$B$2:$C$2", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$B$3:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsUpdatesPieChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[2, 3].Value = "Trucks";
+				worksheet.Cells[3, 2].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Pie) as ExcelPieChart;
+				chart.Series.AddSeries("$B$3:$F$3", "$B$2:$F$2", "");
+				worksheet.DeleteColumn(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$C$2", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$B$3:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnUpdatesDataValidationRange()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var validation = sheet.Cells["K5"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$E$2";
+				validation = sheet.Cells["K6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$E$2";
+
+				sheet.DeleteColumn(3, 2);
+
+				//validate that the Data Validation range has also expanded
+				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$2:$C$2", validationRange.Formula.ExcelFormula);
+
+				//validate implicitly addressed Data Validation range has also expanded
+				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=$B$2:$C$2", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsUpdatesDataValidationRangeAcrossSheets()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
+				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
+
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
+				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
+
+				sheetTarget.DeleteColumn(3, 2);
+
+				//validate that the Data Validation range has also expanded
+				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$2:$C$5", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsRetainsDataValidationRangeOtherSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
+				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
+
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!K5");
+				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
+				validation = sheetValidations.DataValidations.AddListValidation("K6");
+				validation.Formula.ExcelFormula = "=$A$1:$B$2";
+
+				sheetValidations.DeleteColumn(3, 2);
+
+				//validate that the Data Validation range has not expanded
+				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$B$2:$E$5", validationRange.Formula.ExcelFormula);
+
+				//validate that the implicitly addressed Data Validation range has not expanded
+				validationRange = sheetValidations.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=$A$1:$B$2", validationRange.Formula.ExcelFormula);
+			}
+		}
+
 		[TestMethod]
 		public void DeleteColumnUpdatesCrossSheetFunctions()
 		{
@@ -3692,6 +4683,49 @@ namespace EPPlusTest
 
 				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
 				Assert.AreEqual("'sheet2'!D5:D7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\Sparkline Demos.xlsx")]
+		public void DeleteColumnUpdatesSparklines()
+		{
+			var file = new FileInfo("Sparkline Demos.xlsx");
+			Assert.IsTrue(file.Exists);
+			var temp = Path.GetTempFileName();
+			File.Delete(temp);
+			var copy = file.CopyTo(temp);
+			try
+			{
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(6, sparklines.Count);
+					sheet.DeleteColumn(5);
+					Assert.AreEqual(5, sparklines.Count);
+					Assert.AreEqual("'Sheet1'!D6:E6", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D7:E7", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D8:E8", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D6:D8", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!E6:E8", sparklines[0].Sparklines[0].Formula.Address);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(5, sparklines.Count);
+					Assert.AreEqual("'Sheet1'!D6:E6", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D7:E7", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D8:E8", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!D6:D8", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!E6:E8", sparklines[0].Sparklines[0].Formula.Address);
+				}
+			}
+			finally
+			{
+				copy.Delete();
 			}
 		}
 
@@ -3734,6 +4768,410 @@ namespace EPPlusTest
 				Assert.AreEqual("F6:H23", pivotTable.Address.Address);
 			}
 		}
+		#endregion
+
+		#region Delete columns from the start of a range.
+		[TestMethod]
+		public void DeleteColumnsAcrossStartOfChartUpdatesChart()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+				var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+				chart.From.Column = 4;
+				chart.From.Row = 4;
+				chart.To.Column = 10;
+				chart.To.Row = 10;
+				sheet.DeleteColumn(1, 6);
+				Assert.AreEqual(1, chart.From.Column);
+				Assert.AreEqual(4, chart.To.Column);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsFromStartOfChartSeriesUpdatesExcel2016ChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+				var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$1:$Z$26"));
+				var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!$C$1:$Z$26"));
+				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$B$1:$Z$26"));
+
+				worksheet2.DeleteColumn(1, 10);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				Assert.AreEqual("$A$1:$Z$26", address);
+				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$1:$P$26", address);
+				address = null;
+				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				Assert.AreEqual("$A$1:$P$26", address);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsFromStartOfSeriesUpdatesScatterChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[2, 3].Value = "Trucks";
+				worksheet.Cells[3, 2].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.XYScatter) as ExcelScatterChart;
+				chart.Series.AddSeries("$B$3:$C$3", "$B$2:$C$2", "");
+				worksheet.InsertColumn(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$F$2", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$B$3:$F$3", chart.Series[0].Series);
+				worksheet.DeleteColumn(1, 3);
+				Assert.AreEqual("'Sheet1'!$A$2:$C$2", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$A$3:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsFromStartOfRangeUpdatesChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[2, 3].Value = "Trucks";
+				worksheet.Cells[3, 2].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+				chart.Series.AddSeries("$B$3:$H$3", "$B$2:$H$2", "");
+				worksheet.DeleteColumn(1, 5);
+				Assert.AreEqual("'Sheet1'!$A$2:$C$2", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$A$3:$C$3", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsOverStartOfDataValidationRangeUpdatesDataValidationRange()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$E$2";
+				validation = sheet.Cells["D6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$E$2";
+
+				sheet.DeleteColumn(1, 2);
+
+				//validate that the Data Validation range has also expanded
+				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$A$2:$C$2", validationRange.Formula.ExcelFormula);
+
+				//validate implicitly addressed Data Validation range has also expanded
+				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=$A$2:$C$2", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsFromStartOfRangeUpdatesDataValidationRangeAcrossSheets()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
+				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
+
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
+				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
+
+				sheetTarget.DeleteColumn(1, 2);
+
+				//validate that the Data Validation range has also expanded
+				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!$A$2:$C$5", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnAcrossStartOfRangeUpdatesCrossSheetFunctions()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+
+				sheet1.Cells["C3"].Formula = "SUM(sheet2!C3:E3)";
+
+				sheet2.DeleteColumn(1, 3);
+
+				Assert.AreEqual("SUM('SHEET2'!A3:B3)", sheet1.Cells["C3"].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnAcrossPivotTableSourceUpdatesPivotTableSourceRangeCrossSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:G7"], "PivotTable");
+				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet1.DeleteColumn(1, 1);
+
+				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet2.DeleteColumn(1, 5);
+
+				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!A5:B7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+		#endregion
+
+		#region Delete columns across an entire source range.
+		[TestMethod]
+		public void DeleteColumnsAcrossEntireChartSourceUpdatesChart()
+		{
+			var temp = new FileInfo(Path.GetTempFileName());
+			temp.Delete();
+			try
+			{
+				using (var package = new ExcelPackage(temp))
+				{
+					var sheet = package.Workbook.Worksheets.Add("Chart Sheet");
+					var chart = sheet.Drawings.AddChart("myChart", eChartType.BarClustered);
+					chart.From.Column = 4;
+					chart.From.Row = 4;
+					chart.To.Column = 10;
+					chart.To.Row = 10;
+					package.Save();
+				}
+				using (var package = new ExcelPackage(temp))
+				{
+					var sheet = package.Workbook.Worksheets["Chart Sheet"];
+					Assert.AreEqual(1, sheet.Drawings.Count);
+					sheet.DeleteColumn(1, 12);
+					// In a two-cell-anchor chart, deleting the entire row/column set also deletes the chart.
+					Assert.AreEqual(0, sheet.Drawings.Count);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(temp))
+				{
+					var sheet = package.Workbook.Worksheets["Chart Sheet"];
+					Assert.AreEqual(0, sheet.Drawings.Count);
+				}
+			}
+			finally
+			{
+				temp.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsOverEntireChartSeriesUpdatesExcel2016ChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
+				var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$1:$Z$26"));
+				var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!$C$1:$Z$26"));
+				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$B$1:$Z$26"));
+
+				worksheet2.DeleteColumn(1, 26);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				Assert.AreEqual("$A$1:$Z$26", address);
+				Assert.AreEqual("#REF!", range1.Address);
+				Assert.AreEqual("#REF!", range2.Address);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsOverAllDataUpdatesChartSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[2, 3].Value = "Trucks";
+				worksheet.Cells[3, 2].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.BarClustered) as ExcelBarChart;
+				chart.Series.AddSeries("$B$3:$H$3", "$B$2:$H$2", "");
+				worksheet.DeleteColumn(1, 10);
+				Assert.AreEqual("'Sheet1'!#REF!", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!#REF!", chart.Series[0].Series);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsOverEntireDataValidationRangeUpdatesDataValidationRange()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var validation = sheet.Cells["Z5"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=Sheet!$B$2:$E$2";
+				validation = sheet.Cells["Z6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$E$2";
+
+				sheet.DeleteColumn(1, 12);
+
+				//validate that the Data Validation range has also expanded
+				var validationRange = sheet.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!#REF!", validationRange.Formula.ExcelFormula);
+
+				//validate implicitly addressed Data Validation range has also expanded
+				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("=#REF!", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsDeletesDataValidationRange()
+		{
+			var temp = new FileInfo(Path.GetTempFileName());
+			temp.Delete();
+			try
+			{
+				using (var package = new ExcelPackage(temp))
+				{
+					//make a Data Validation range
+					var sheet = package.Workbook.Worksheets.Add("Sheet");
+					var validation = sheet.Cells["Z5"].DataValidation.AddListDataValidation();
+					validation.Formula.ExcelFormula = "=Sheet!$B$2:$E$2";
+					validation = sheet.Cells["Z6"].DataValidation.AddListDataValidation();
+					validation.Formula.ExcelFormula = "=$B$2:$E$2";
+					Assert.AreEqual(2, sheet.DataValidations.Count);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(temp))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					Assert.AreEqual(2, sheet.DataValidations.Count);
+					sheet.DeleteColumn(20, 12);
+					Assert.AreEqual(0, sheet.DataValidations.Count);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(temp))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					Assert.AreEqual(0, sheet.DataValidations.Count);
+				}
+			}
+			finally
+			{
+				temp.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnsEntireValidationRangePoundRefsDataValidationRangeAcrossSheets()
+		{
+			using (var package = new ExcelPackage())
+			{
+				//make a Data Validation range
+				var sheetTarget = package.Workbook.Worksheets.Add("Sheet");
+				var sheetValidations = package.Workbook.Worksheets.Add("Data Validation");
+
+				var validation = sheetValidations.DataValidations.AddListValidation(@"'Sheet'!" + sheetTarget.Cells["D5"].Address);
+				validation.Formula.ExcelFormula = "='SHEET'!$B$2:$E$5";
+
+				sheetTarget.DeleteColumn(1, 20);
+
+				var validationRange = sheetValidations.DataValidations.First() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
+				Assert.AreEqual("='SHEET'!#REF!", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnAcrossEntireCrossSheetRangePoundRefsCrossSheetFunctions()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+
+				sheet1.Cells["C3"].Formula = "SUM(sheet2!C3:E3)";
+
+				sheet2.DeleteColumn(1, 23);
+
+				Assert.AreEqual("SUM('SHEET2'!#REF!)", sheet1.Cells["C3"].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnAcrossEntirePivotTableSourceUpdatesPivotTableSourceRangeCrossSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:G7"], "PivotTable");
+				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet1.DeleteColumn(1, 1);
+
+				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+
+				sheet2.DeleteColumn(1, 16);
+
+				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
+				Assert.AreEqual("'sheet2'!#REF!", pivotTable.CacheDefinition.SourceRange.FullAddress);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\Sparkline Demos.xlsx")]
+		public void DeleteColumnAcrossSparklineSourceUpdatesSparklines()
+		{
+			var file = new FileInfo("Sparkline Demos.xlsx");
+			Assert.IsTrue(file.Exists);
+			var temp = Path.GetTempFileName();
+			File.Delete(temp);
+			var copy = file.CopyTo(temp);
+			try
+			{
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(6, sparklines.Count);
+					sheet.DeleteColumn(4, 3);
+					Assert.AreEqual(3, sparklines.Count);
+					Assert.AreEqual("'Sheet1'!#REF!", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!#REF!", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!#REF!", sparklines[0].Sparklines[0].Formula.Address);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets.First();
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(3, sparklines.Count);
+					Assert.AreEqual("'Sheet1'!#REF!", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!#REF!", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("'Sheet1'!#REF!", sparklines[0].Sparklines[0].Formula.Address);
+				}
+			}
+			finally
+			{
+				copy.Delete();
+			}
+		}
+		#endregion
 		#endregion
 
 		#region PivotTable Tests
@@ -3843,9 +5281,8 @@ namespace EPPlusTest
 				var range1 = package.Workbook.Names.Add("not_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet1!A1:Z26"));
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!A1:Z26"));
 
-				string workbook, worksheet, address;
 				worksheet1.Name = "Work Sheet One";
-				ExcelRangeBase.SplitAddress(range0.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("Work Sheet One", worksheet);
 				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
 				Assert.AreEqual("Work Sheet One", worksheet);
