@@ -36,10 +36,13 @@ namespace OfficeOpenXml.Utils
 	/// </summary>
 	public static class ConvertUtil
 	{
-		internal static bool IsNumeric(object candidate)
+		internal static bool IsNumeric(object candidate, bool ignoreBool = false)
 		{
-			if (candidate == null) return false;
-			return (candidate.GetType().IsPrimitive || candidate is double || candidate is decimal || candidate is DateTime || candidate is TimeSpan || candidate is long);
+			if (candidate == null)
+				return false;
+			else if (ignoreBool && candidate is bool)
+				return false;
+			return (candidate.GetType().IsPrimitive || candidate is double || candidate is decimal || candidate is long || candidate is DateTime || candidate is TimeSpan);
 		}
 		/// <summary>
 		/// Tries to parse a double from the specified <paramref name="candidate"/> which is expected to be a string value.

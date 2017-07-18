@@ -73,7 +73,7 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 			if (v is ExcelDataProvider.IRangeInfo)
 			{
 				var r = ((ExcelDataProvider.IRangeInfo)v);
-				if (r.GetNCells() > 1)
+				if (r.GetTotalCellCount() > 1)
 				{
 					v = ExcelErrorValue.Create(eErrorType.NA);
 				}

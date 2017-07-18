@@ -29,316 +29,9 @@ using System.Globalization;
 
 namespace OfficeOpenXml.Utils
 {
-	class InternationalizationUtil
+	class InternationalizationUtility
 	{
-		#region Language Error Dictionaries
-		private static readonly Dictionary<string, eErrorType> englishErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VALUE!", eErrorType.Value},
-			{"#NUM!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NAME?", eErrorType.Name},
-			{"#N/A", eErrorType.NA},
-			{"#REF!", eErrorType.Ref},
-			{"#NULL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> germanErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#WERT!", eErrorType.Value},
-			{"#ZAHL!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NAME?", eErrorType.Name},
-			{"#NV", eErrorType.NA},
-			{"#BEZUG!", eErrorType.Ref},
-			{"#NULL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> chineseErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VALUE!", eErrorType.Value},
-			{"#NUM!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NAME?", eErrorType.Name},
-			{"#N/A", eErrorType.NA},
-			{"#REF!", eErrorType.Ref},
-			{"#NULL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> danishErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VÆRDI!", eErrorType.Value},
-			{"#NUM!", eErrorType.Num},
-			{"#DIVISION/0!", eErrorType.Div0},
-			{"#NAVN?", eErrorType.Name},
-			{"#I/T", eErrorType.NA},
-			{"#REFERENCE!", eErrorType.Ref},
-			{"#NUL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> dutchErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#WAARDE!", eErrorType.Value},
-			{"#GETAL!", eErrorType.Num},
-			{"#DEEL/0!", eErrorType.Div0},
-			{"#NAAM?", eErrorType.Name},
-			{"#N/B", eErrorType.NA},
-			{"#VERW!", eErrorType.Ref},
-			{"#LEEG!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> finnishErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#ARVO!", eErrorType.Value},
-			{"#LUKU!", eErrorType.Num},
-			{"#JAKO/0!", eErrorType.Div0},
-			{"#NIMI?", eErrorType.Name},
-			{"#PUUTTUU!", eErrorType.NA},
-			{"#VIITTAUS!", eErrorType.Ref},
-			{"#TYHJÄ!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> frenchErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VALEUR!", eErrorType.Value},
-			{"#NOMBRE!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NOM?", eErrorType.Name},
-			{"#N/A", eErrorType.NA},
-			{"#REF!", eErrorType.Ref},
-			{"#NUL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> italianErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VALORE!", eErrorType.Value},
-			{"#NUM!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NOME?", eErrorType.Name},
-			{"#N/D", eErrorType.NA},
-			{"#RIF!", eErrorType.Ref},
-			{"#NULL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> japaneseErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VALUE!", eErrorType.Value},
-			{"#NUM!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NAME?", eErrorType.Name},
-			{"#N/A", eErrorType.NA},
-			{"#REF!", eErrorType.Ref},
-			{"#NULL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> koreanErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VALUE!", eErrorType.Value},
-			{"#NUM!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NAME?", eErrorType.Name},
-			{"#N/A", eErrorType.NA},
-			{"#REF!", eErrorType.Ref},
-			{"#NULL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> norwegianErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VERDI!", eErrorType.Value},
-			{"#NUM!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NAVN?", eErrorType.Name},
-			{"#I/T", eErrorType.NA},
-			{"#REF!", eErrorType.Ref},
-			{"#NULL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> polishErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#ARG!", eErrorType.Value},
-			{"#LICZBA!", eErrorType.Num},
-			{"#DZIEL/0!", eErrorType.Div0},
-			{"#NAZWA?", eErrorType.Name},
-			{"#N/D!", eErrorType.NA},
-			{"#ADR!", eErrorType.Ref},
-			{"#ZERO!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> portugueseErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VALOR!", eErrorType.Value},
-			{"#NÚM!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NOME?", eErrorType.Name},
-			{"#N/D", eErrorType.NA},
-			{"#REF!", eErrorType.Ref},
-			{"#NULO!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> russianErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#ЗНАЧ!", eErrorType.Value},
-			{"#ЧИСЛО!", eErrorType.Num},
-			{"#ДЕЛ/0!", eErrorType.Div0},
-			{"#ИМЯ?", eErrorType.Name},
-			{"#Н/Д", eErrorType.NA},
-			{"#ССЫЛКА!", eErrorType.Ref},
-			{"#ПУСТО!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> spanishErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#¡VALOR!", eErrorType.Value},
-			{"#¡NUM!", eErrorType.Num},
-			{"#¡DIV/0!", eErrorType.Div0},
-			{"#¿NOMBRE?", eErrorType.Name},
-			{"#N/A", eErrorType.NA},
-			{"#¡REF!", eErrorType.Ref},
-			{"#¡NULO!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> swedishErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VÄRDEFEL!", eErrorType.Value},
-			{"#OGILTIGT!", eErrorType.Num},
-			{"#DIVISION/0!", eErrorType.Div0},
-			{"#NAMN?", eErrorType.Name},
-			{"#SAKNAS!", eErrorType.NA},
-			{"#REFERENS!", eErrorType.Ref},
-			{"#SKÄRNING!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> croatianErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VRIJEDNOST!", eErrorType.Value},
-			{"#BROJ!", eErrorType.Num},
-			{"#DIJ/0!", eErrorType.Div0},
-			{"#NAZIV?", eErrorType.Name},
-			{"#N/D", eErrorType.NA},
-			{"#REF!", eErrorType.Ref},
-			{"#NULL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> czechErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#HODNOTA!", eErrorType.Value},
-			{"#ČÍSLO!", eErrorType.Num},
-			{"#DĚLENÍ_NULOU!", eErrorType.Div0},
-			{"#NÁZEV?", eErrorType.Name},
-			{"#NENÍ_K_DISPOZICI", eErrorType.NA},
-			{"#ODKAZ!", eErrorType.Ref},
-			{"#NULL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> greekErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#ΤΙΜΗ!", eErrorType.Value},
-			{"#ΑΡΙΘ!", eErrorType.Num},
-			{"#ΔΙΑΙΡ./0!", eErrorType.Div0},
-			{"#ΟΝΟΜΑ?", eErrorType.Name},
-			{"#Δ/Υ", eErrorType.NA},
-			{"#ΑΝΑΦ!", eErrorType.Ref},
-			{"#ΚΕΝΟ!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> hungarianErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#ÉRTÉK!", eErrorType.Value},
-			{"#SZÁM!", eErrorType.Num},
-			{"#ZÉRÓOSZTÓ!", eErrorType.Div0},
-			{"#NÉV?", eErrorType.Name},
-			{"#HIÁNYZIK", eErrorType.NA},
-			{"#HIV!", eErrorType.Ref},
-			{"#NULLA!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> malayErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VALUE!", eErrorType.Value},
-			{"#NUM!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NAME?", eErrorType.Name},
-			{"#N/A", eErrorType.NA},
-			{"#REF!", eErrorType.Ref},
-			{"#NULL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> romanianErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VALOARE!", eErrorType.Value},
-			{"#NUM!", eErrorType.Num},
-			{"#DIV/0!", eErrorType.Div0},
-			{"#NUME?", eErrorType.Name},
-			{"#N/A", eErrorType.NA},
-			{"#REF!", eErrorType.Ref},
-			{"#NUL!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> slovakErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#HODNOTA!", eErrorType.Value},
-			{"#ČÍSLO!", eErrorType.Num},
-			{"#DELENIENULOU!", eErrorType.Div0},
-			{"#NÁZOV?", eErrorType.Name},
-			{"#NEDOSTUPNÝ", eErrorType.NA},
-			{"#ODKAZ!", eErrorType.Ref},
-			{"#NEPLATNÝ!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> slovenianErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#VREDN!", eErrorType.Value},
-			{"#ŠTEV!", eErrorType.Num},
-			{"#DEL/0!", eErrorType.Div0},
-			{"#IME?", eErrorType.Name},
-			{"#N/V", eErrorType.NA},
-			{"#SKLIC!", eErrorType.Ref},
-			{"#NIČ!", eErrorType.Null}
-		};
-
-		private static readonly Dictionary<string, eErrorType> turkishErrors = new Dictionary<string, eErrorType>()
-		{
-			{"#DEĞER!", eErrorType.Value},
-			{"#SAYI!", eErrorType.Num},
-			{"#SAYI/0!", eErrorType.Div0},
-			{"#AD?", eErrorType.Name},
-			{"#YOK", eErrorType.NA},
-			{"#BAŞV!", eErrorType.Ref},
-			{"#BOŞ!", eErrorType.Null}
-		};
-		#endregion
-
-		private static readonly Dictionary<CultureInfo, Dictionary<string, eErrorType>> errorDictionaries = new Dictionary<CultureInfo, Dictionary<string, eErrorType>>()
-		{
-			{CultureInfo.CreateSpecificCulture("en-us"), englishErrors},	// English
-			{CultureInfo.CreateSpecificCulture("de-de"), germanErrors},		// German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), chineseErrors},	// Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), chineseErrors},	// Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), danishErrors},		// Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), dutchErrors},		// Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), finnishErrors},	// Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), frenchErrors},		// French
-			{CultureInfo.CreateSpecificCulture("it-it"), italianErrors},	// Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), japaneseErrors},	// Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), koreanErrors},		// Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), norwegianErrors},	// Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), polishErrors},		// Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), portugueseErrors},	// Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), portugueseErrors},	// Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), russianErrors},	// Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), spanishErrors},	// Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), swedishErrors},	// Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), croatianErrors},	// Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), czechErrors},		// Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), greekErrors},		// Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), hungarianErrors},	// Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), malayErrors},		// Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), romanianErrors},	// Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), slovakErrors},		// Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), slovenianErrors},	// Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), turkishErrors}		// Turkish
-		};
-
+		#region Localized Boolean Dictionaries
 		private static readonly Dictionary<CultureInfo, string> trueStrings = new Dictionary<CultureInfo, string>()
 		{
 			{CultureInfo.CreateSpecificCulture("en-us"), "TRUE"},		// English
@@ -399,6 +92,315 @@ namespace OfficeOpenXml.Utils
 			{CultureInfo.CreateSpecificCulture("sk-sk"), "FALSE"},		// Slovak
 			{CultureInfo.CreateSpecificCulture("sl-si"), "FALSE"},		// Slovenian
 			{CultureInfo.CreateSpecificCulture("tr-tr"), "YANLIŞ" }		// Turkish
+		};
+		#endregion
+
+		#region Localized Error Dictionaries
+		private static readonly Dictionary<string, eErrorType> EnglishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALUE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> GermanErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#WERT!", eErrorType.Value},
+			{"#ZAHL!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#NV", eErrorType.NA},
+			{"#BEZUG!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> ChineseErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALUE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> DanishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VÆRDI!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIVISION/0!", eErrorType.Div0},
+			{"#NAVN?", eErrorType.Name},
+			{"#I/T", eErrorType.NA},
+			{"#REFERENCE!", eErrorType.Ref},
+			{"#NUL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> DutchErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#WAARDE!", eErrorType.Value},
+			{"#GETAL!", eErrorType.Num},
+			{"#DEEL/0!", eErrorType.Div0},
+			{"#NAAM?", eErrorType.Name},
+			{"#N/B", eErrorType.NA},
+			{"#VERW!", eErrorType.Ref},
+			{"#LEEG!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> FinnishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#ARVO!", eErrorType.Value},
+			{"#LUKU!", eErrorType.Num},
+			{"#JAKO/0!", eErrorType.Div0},
+			{"#NIMI?", eErrorType.Name},
+			{"#PUUTTUU!", eErrorType.NA},
+			{"#VIITTAUS!", eErrorType.Ref},
+			{"#TYHJÄ!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> FrenchErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALEUR!", eErrorType.Value},
+			{"#NOMBRE!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NOM?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NUL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> ItalianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALORE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NOME?", eErrorType.Name},
+			{"#N/D", eErrorType.NA},
+			{"#RIF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> JapaneseErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALUE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> KoreanErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALUE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> NorwegianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VERDI!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAVN?", eErrorType.Name},
+			{"#I/T", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> PolishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#ARG!", eErrorType.Value},
+			{"#LICZBA!", eErrorType.Num},
+			{"#DZIEL/0!", eErrorType.Div0},
+			{"#NAZWA?", eErrorType.Name},
+			{"#N/D!", eErrorType.NA},
+			{"#ADR!", eErrorType.Ref},
+			{"#ZERO!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> PortugueseErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALOR!", eErrorType.Value},
+			{"#NÚM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NOME?", eErrorType.Name},
+			{"#N/D", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULO!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> RussianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#ЗНАЧ!", eErrorType.Value},
+			{"#ЧИСЛО!", eErrorType.Num},
+			{"#ДЕЛ/0!", eErrorType.Div0},
+			{"#ИМЯ?", eErrorType.Name},
+			{"#Н/Д", eErrorType.NA},
+			{"#ССЫЛКА!", eErrorType.Ref},
+			{"#ПУСТО!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> SpanishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#¡VALOR!", eErrorType.Value},
+			{"#¡NUM!", eErrorType.Num},
+			{"#¡DIV/0!", eErrorType.Div0},
+			{"#¿NOMBRE?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#¡REF!", eErrorType.Ref},
+			{"#¡NULO!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> SwedishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VÄRDEFEL!", eErrorType.Value},
+			{"#OGILTIGT!", eErrorType.Num},
+			{"#DIVISION/0!", eErrorType.Div0},
+			{"#NAMN?", eErrorType.Name},
+			{"#SAKNAS!", eErrorType.NA},
+			{"#REFERENS!", eErrorType.Ref},
+			{"#SKÄRNING!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> CroatianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VRIJEDNOST!", eErrorType.Value},
+			{"#BROJ!", eErrorType.Num},
+			{"#DIJ/0!", eErrorType.Div0},
+			{"#NAZIV?", eErrorType.Name},
+			{"#N/D", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> CzechErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#HODNOTA!", eErrorType.Value},
+			{"#ČÍSLO!", eErrorType.Num},
+			{"#DĚLENÍ_NULOU!", eErrorType.Div0},
+			{"#NÁZEV?", eErrorType.Name},
+			{"#NENÍ_K_DISPOZICI", eErrorType.NA},
+			{"#ODKAZ!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> GreekErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#ΤΙΜΗ!", eErrorType.Value},
+			{"#ΑΡΙΘ!", eErrorType.Num},
+			{"#ΔΙΑΙΡ./0!", eErrorType.Div0},
+			{"#ΟΝΟΜΑ?", eErrorType.Name},
+			{"#Δ/Υ", eErrorType.NA},
+			{"#ΑΝΑΦ!", eErrorType.Ref},
+			{"#ΚΕΝΟ!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> HungarianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#ÉRTÉK!", eErrorType.Value},
+			{"#SZÁM!", eErrorType.Num},
+			{"#ZÉRÓOSZTÓ!", eErrorType.Div0},
+			{"#NÉV?", eErrorType.Name},
+			{"#HIÁNYZIK", eErrorType.NA},
+			{"#HIV!", eErrorType.Ref},
+			{"#NULLA!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> MalayErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALUE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NAME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NULL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> RomanianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VALOARE!", eErrorType.Value},
+			{"#NUM!", eErrorType.Num},
+			{"#DIV/0!", eErrorType.Div0},
+			{"#NUME?", eErrorType.Name},
+			{"#N/A", eErrorType.NA},
+			{"#REF!", eErrorType.Ref},
+			{"#NUL!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> SlovakErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#HODNOTA!", eErrorType.Value},
+			{"#ČÍSLO!", eErrorType.Num},
+			{"#DELENIENULOU!", eErrorType.Div0},
+			{"#NÁZOV?", eErrorType.Name},
+			{"#NEDOSTUPNÝ", eErrorType.NA},
+			{"#ODKAZ!", eErrorType.Ref},
+			{"#NEPLATNÝ!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> SlovenianErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#VREDN!", eErrorType.Value},
+			{"#ŠTEV!", eErrorType.Num},
+			{"#DEL/0!", eErrorType.Div0},
+			{"#IME?", eErrorType.Name},
+			{"#N/V", eErrorType.NA},
+			{"#SKLIC!", eErrorType.Ref},
+			{"#NIČ!", eErrorType.Null}
+		};
+
+		private static readonly Dictionary<string, eErrorType> TurkishErrors = new Dictionary<string, eErrorType>()
+		{
+			{"#DEĞER!", eErrorType.Value},
+			{"#SAYI!", eErrorType.Num},
+			{"#SAYI/0!", eErrorType.Div0},
+			{"#AD?", eErrorType.Name},
+			{"#YOK", eErrorType.NA},
+			{"#BAŞV!", eErrorType.Ref},
+			{"#BOŞ!", eErrorType.Null}
+		};
+		#endregion
+
+		private static readonly Dictionary<CultureInfo, Dictionary<string, eErrorType>> errorDictionaries = new Dictionary<CultureInfo, Dictionary<string, eErrorType>>()
+		{
+			{CultureInfo.CreateSpecificCulture("en-us"), EnglishErrors},	// English
+			{CultureInfo.CreateSpecificCulture("de-de"), GermanErrors},		// German
+			{CultureInfo.CreateSpecificCulture("zh-tw"), ChineseErrors},	// Chinese (Traditional)
+			{CultureInfo.CreateSpecificCulture("zh-cn"), ChineseErrors},	// Chinese (Simplified)
+			{CultureInfo.CreateSpecificCulture("da-dk"), DanishErrors},		// Danish
+			{CultureInfo.CreateSpecificCulture("nl-nl"), DutchErrors},		// Dutch
+			{CultureInfo.CreateSpecificCulture("fi-fi"), FinnishErrors},	// Finnish
+			{CultureInfo.CreateSpecificCulture("fr-fr"), FrenchErrors},		// French
+			{CultureInfo.CreateSpecificCulture("it-it"), ItalianErrors},	// Italian
+			{CultureInfo.CreateSpecificCulture("ja-jp"), JapaneseErrors},	// Japanese
+			{CultureInfo.CreateSpecificCulture("ko-kr"), KoreanErrors},		// Korean
+			{CultureInfo.CreateSpecificCulture("nb-no"), NorwegianErrors},	// Norwegian
+			{CultureInfo.CreateSpecificCulture("pl-pl"), PolishErrors},		// Polish
+			{CultureInfo.CreateSpecificCulture("pt-pt"), PortugueseErrors},	// Portuguese (Portugal)
+			{CultureInfo.CreateSpecificCulture("pt-br"), PortugueseErrors},	// Portuguese (Brazil)
+			{CultureInfo.CreateSpecificCulture("ru-ru"), RussianErrors},	// Russian
+			{CultureInfo.CreateSpecificCulture("es-es"), SpanishErrors},	// Spanish (Spain)
+			{CultureInfo.CreateSpecificCulture("sv-se"), SwedishErrors},	// Swedish
+			{CultureInfo.CreateSpecificCulture("hr-hr"), CroatianErrors},	// Croatian
+			{CultureInfo.CreateSpecificCulture("cs-cz"), CzechErrors},		// Czech
+			{CultureInfo.CreateSpecificCulture("el-gr"), GreekErrors},		// Greek
+			{CultureInfo.CreateSpecificCulture("hu-hu"), HungarianErrors},	// Hungarian
+			{CultureInfo.CreateSpecificCulture("ms-my"), MalayErrors},		// Malay
+			{CultureInfo.CreateSpecificCulture("ro-ro"), RomanianErrors},	// Romanian
+			{CultureInfo.CreateSpecificCulture("sk-sk"), SlovakErrors},		// Slovak
+			{CultureInfo.CreateSpecificCulture("sl-si"), SlovenianErrors},	// Slovenian
+			{CultureInfo.CreateSpecificCulture("tr-tr"), TurkishErrors}		// Turkish
 		};
 
 		/// <summary>

@@ -99,7 +99,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						var valueOfCellToSum = potentialCellsToSum.GetOffset(relativeRow, relativeColumn);
 						if (valueOfCellToSum is ExcelErrorValue cellError)
 							return new CompileResult(cellError.Type);
-						else if (IfHelper.IsNumeric(valueOfCellToSum, true))
+						else if (ConvertUtil.IsNumeric(valueOfCellToSum, true))
 							sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToSum);
 					}
 				}
@@ -118,13 +118,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private CompileResult CalculateSumUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToSum, object comparisonCriterion)
 		{
 			var sumOfValidValues = 0d;
-			var cellValuesFromRange = IfHelper.GetAllCellValuesInRange(potentialCellsToSum);
-			var valuesToSum = cellValuesFromRange.Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, comparisonCriterion));
+			var valuesToSum = potentialCellsToSum.Select(cell => this.GetFirstArgument(cell.Value)).Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, comparisonCriterion));
 			foreach (var value in valuesToSum)
 			{
 				if (value is ExcelErrorValue cellErrorValue)
 					return new CompileResult(cellErrorValue.Type);
-				else if (IfHelper.IsNumeric(value, true))
+				else if (ConvertUtil.IsNumeric(value, true))
 					sumOfValidValues += ConvertUtil.GetValueDouble(value);
 			}
 			return this.CreateResult(sumOfValidValues, DataType.Decimal);

@@ -249,6 +249,32 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(3d, worksheet.Cells["H13"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void ObjectMatchesCriteriaWithInequalitiesAndErrorValues()
+		{
+			var nullError = ExcelErrorValue.Create(eErrorType.Null);
+			var div0Error = ExcelErrorValue.Create(eErrorType.Div0);
+			var valueError = ExcelErrorValue.Create(eErrorType.Value);
+			var refError = ExcelErrorValue.Create(eErrorType.Ref);
+			var nameError = ExcelErrorValue.Create(eErrorType.Name);
+			var numError = ExcelErrorValue.Create(eErrorType.Num);
+			var naError = ExcelErrorValue.Create(eErrorType.NA);
+			var nullLessThanDiv = IfHelper.ObjectMatchesCriterion(nullError, "<#DIV/0!");
+			var divLessThanValue = IfHelper.ObjectMatchesCriterion(div0Error, "<#VALUE!"); ;
+			var valueLessThanRef = IfHelper.ObjectMatchesCriterion(valueError, "<#REF!"); ;
+			var refLessThanName = IfHelper.ObjectMatchesCriterion(refError, "<#NAME?"); ;
+			var nameLessThanNum = IfHelper.ObjectMatchesCriterion(nameError, "<#NUM!"); ;
+			var numLessThanNA = IfHelper.ObjectMatchesCriterion(numError, "<#NA");
+			var naGreaterThanNum = IfHelper.ObjectMatchesCriterion(naError, "<#NUM!"); ;
+			Assert.AreEqual(nullLessThanDiv, true);
+			Assert.AreEqual(divLessThanValue, true);
+			Assert.AreEqual(valueLessThanRef, true);
+			Assert.AreEqual(refLessThanName, true);
+			Assert.AreEqual(nameLessThanNum, true);
+			Assert.AreEqual(numLessThanNA, true);
+			Assert.AreEqual(naGreaterThanNum, true);
+		}
 		#endregion
 	}
 }

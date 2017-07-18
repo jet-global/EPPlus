@@ -34,11 +34,11 @@ using OfficeOpenXml.Utils;
 namespace EPPlusTest.Utils
 {
 	[TestClass]
-	public class InternationalizationUtilTests
+	public class InternationalizationUtilityTests
 	{
-		#region InternationalizationUtil Tests
+		#region InternationalizationUtility Tests
 		[TestMethod]
-		public void InternationaliztionUtilParsesEnglishErrorValues()
+		public void InternationaliztionUtilityParsesEnglishErrorValues()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
@@ -53,25 +53,25 @@ namespace EPPlusTest.Utils
 				var nullErrorString = "#NULL!";
 				bool isErrorValue = false;
 				ExcelErrorValue error = null;
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Value, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(numErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(numErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Num, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(div0ErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(div0ErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Div0, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(nameErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(nameErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Name, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(naErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(naErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.NA, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(refErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(refErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Ref, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(nullErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(nullErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Null, error.Type);
 			}
@@ -82,7 +82,7 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void InternationaliztionUtilParsesGermanErrorValues()
+		public void InternationaliztionUtilityParsesGermanErrorValues()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
@@ -97,25 +97,25 @@ namespace EPPlusTest.Utils
 				var nullErrorString = "#NULL!";
 				bool isErrorValue = false;
 				ExcelErrorValue error = null;
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Value, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(numErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(numErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Num, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(div0ErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(div0ErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Div0, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(nameErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(nameErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Name, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(naErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(naErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.NA, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(refErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(refErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Ref, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(nullErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(nullErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Null, error.Type);
 			}
@@ -126,7 +126,7 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void InternationaliztionUtilParsesPolishErrorValues()
+		public void InternationaliztionUtilityParsesPolishErrorValues()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
@@ -141,25 +141,25 @@ namespace EPPlusTest.Utils
 				var nullErrorString = "#ZERO!";
 				bool isErrorValue = false;
 				ExcelErrorValue error = null;
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Value, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(numErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(numErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Num, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(div0ErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(div0ErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Div0, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(nameErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(nameErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Name, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(naErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(naErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.NA, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(refErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(refErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Ref, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(nullErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(nullErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Null, error.Type);
 			}
@@ -170,7 +170,7 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void InternationaliztionUtilParsesRussianErrorValues()
+		public void InternationaliztionUtilityParsesRussianErrorValues()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
@@ -185,25 +185,25 @@ namespace EPPlusTest.Utils
 				var nullErrorString = "#ПУСТО!";
 				bool isErrorValue = false;
 				ExcelErrorValue error = null;
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Value, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(numErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(numErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Num, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(div0ErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(div0ErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Div0, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(nameErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(nameErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Name, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(naErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(naErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.NA, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(refErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(refErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Ref, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(nullErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(nullErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Null, error.Type);
 			}
@@ -214,7 +214,7 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void InternationaliztionUtilParsesGreekErrorValues()
+		public void InternationaliztionUtilityParsesGreekErrorValues()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
@@ -229,25 +229,25 @@ namespace EPPlusTest.Utils
 				var nullErrorString = "#ΚΕΝΟ!";
 				bool isErrorValue = false;
 				ExcelErrorValue error = null;
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Value, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(numErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(numErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Num, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(div0ErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(div0ErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Div0, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(nameErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(nameErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Name, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(naErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(naErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.NA, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(refErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(refErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Ref, error.Type);
-				isErrorValue = InternationalizationUtil.TryParseLocalErrorValue(nullErrorString, CultureInfo.CurrentCulture, out error);
+				isErrorValue = InternationalizationUtility.TryParseLocalErrorValue(nullErrorString, CultureInfo.CurrentCulture, out error);
 				Assert.AreEqual(isErrorValue, true);
 				Assert.AreEqual(eErrorType.Null, error.Type);
 			}
@@ -258,7 +258,7 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void InternationalizationUtilParsesEnglishBooleanStrings()
+		public void InternationalizationUtilityParsesEnglishBooleanStrings()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
@@ -266,10 +266,10 @@ namespace EPPlusTest.Utils
 				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
 				var trueString = "tRuE";
 				var falseString = "fAlSe";
-				var isBoolean = InternationalizationUtil.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
+				var isBoolean = InternationalizationUtility.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
 				Assert.AreEqual(isBoolean, true);
 				Assert.AreEqual(booleanValue, true);
-				isBoolean = InternationalizationUtil.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
+				isBoolean = InternationalizationUtility.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
 				Assert.AreEqual(isBoolean, true);
 				Assert.AreEqual(booleanValue, false);
 			}
@@ -280,7 +280,7 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void InternationalizationUtilParsesGermanBooleanStrings()
+		public void InternationalizationUtilityParsesGermanBooleanStrings()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
@@ -288,10 +288,10 @@ namespace EPPlusTest.Utils
 				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("de-de");
 				var trueString = "wAhR";
 				var falseString = "fAlScH";
-				var isBoolean = InternationalizationUtil.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
+				var isBoolean = InternationalizationUtility.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
 				Assert.AreEqual(isBoolean, true);
 				Assert.AreEqual(booleanValue, true);
-				isBoolean = InternationalizationUtil.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
+				isBoolean = InternationalizationUtility.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
 				Assert.AreEqual(isBoolean, true);
 				Assert.AreEqual(booleanValue, false);
 			}
@@ -302,7 +302,7 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void InternationalizationUtilParsesPolishBooleanStrings()
+		public void InternationalizationUtilityParsesPolishBooleanStrings()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
@@ -310,10 +310,10 @@ namespace EPPlusTest.Utils
 				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("pl-pl");
 				var trueString = "PRAWDA";
 				var falseString = "FAŁSZ";
-				var isBoolean = InternationalizationUtil.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
+				var isBoolean = InternationalizationUtility.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
 				Assert.AreEqual(isBoolean, true);
 				Assert.AreEqual(booleanValue, true);
-				isBoolean = InternationalizationUtil.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
+				isBoolean = InternationalizationUtility.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
 				Assert.AreEqual(isBoolean, true);
 				Assert.AreEqual(booleanValue, false);
 			}
@@ -324,7 +324,7 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void InternationalizationUtilParsesRussianBooleanStrings()
+		public void InternationalizationUtilityParsesRussianBooleanStrings()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
@@ -332,10 +332,10 @@ namespace EPPlusTest.Utils
 				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("ru-ru");
 				var trueString = "ИСТИНА";
 				var falseString = "ЛОЖЬ";
-				var isBoolean = InternationalizationUtil.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
+				var isBoolean = InternationalizationUtility.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
 				Assert.AreEqual(isBoolean, true);
 				Assert.AreEqual(booleanValue, true);
-				isBoolean = InternationalizationUtil.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
+				isBoolean = InternationalizationUtility.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
 				Assert.AreEqual(isBoolean, true);
 				Assert.AreEqual(booleanValue, false);
 			}
@@ -346,7 +346,7 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
-		public void InternationalizationUtilParsesGreekBooleanStrings()
+		public void InternationalizationUtilityParsesGreekBooleanStrings()
 		{
 			var currentCulture = CultureInfo.CurrentCulture;
 			try
@@ -354,10 +354,10 @@ namespace EPPlusTest.Utils
 				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("el-gr");
 				var trueString = "TRUE";
 				var falseString = "FALSE";
-				var isBoolean = InternationalizationUtil.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
+				var isBoolean = InternationalizationUtility.TryParseLocalBoolean(trueString, CultureInfo.CurrentCulture, out bool booleanValue);
 				Assert.AreEqual(isBoolean, true);
 				Assert.AreEqual(booleanValue, true);
-				isBoolean = InternationalizationUtil.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
+				isBoolean = InternationalizationUtility.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out booleanValue);
 				Assert.AreEqual(isBoolean, true);
 				Assert.AreEqual(booleanValue, false);
 			}

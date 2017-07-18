@@ -100,7 +100,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 						var valueOfCellToAverage = potentialCellsToAverage.GetOffset(relativeRow, relativeColumn);
 						if (valueOfCellToAverage is ExcelErrorValue cellError)
 							return new CompileResult(cellError.Type);
-						else if (IfHelper.IsNumeric(valueOfCellToAverage, true))
+						else if (ConvertUtil.IsNumeric(valueOfCellToAverage, true))
 						{
 							sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToAverage);
 							numberOfValidValues++;
@@ -126,13 +126,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
-			var cellValuesFromRange = IfHelper.GetAllCellValuesInRange(potentialCellsToAverage);
-			var valuesToAverage = cellValuesFromRange.Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, comparisonCriterion));
+			var valuesToAverage = potentialCellsToAverage.Select(cell => this.GetFirstArgument(cell.Value)).Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, comparisonCriterion));
 			foreach (var value in valuesToAverage)
 			{
 				if (value is ExcelErrorValue cellErrorValue)
 					return new CompileResult(cellErrorValue.Type);
-				else if (IfHelper.IsNumeric(value, true))
+				else if (ConvertUtil.IsNumeric(value, true))
 				{
 					sumOfValidValues += ConvertUtil.GetValueDouble(value);
 					numberOfValidValues++;
