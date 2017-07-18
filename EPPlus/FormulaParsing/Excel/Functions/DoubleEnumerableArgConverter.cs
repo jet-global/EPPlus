@@ -34,28 +34,29 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		public virtual IEnumerable<double> ConvertArgs(bool ignoreHidden, bool ignoreErrors, IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			return base.FuncArgsToFlatEnumerable(arguments, (arg, argList) =>
-				 {
-					 if (arg.IsExcelRange)
-					 {
-						 foreach (var cell in arg.ValueAsRangeInfo)
-						 {
-							 if (!ignoreErrors && cell.IsExcelError) throw new ExcelErrorValueException(ExcelErrorValue.Parse(cell.Value.ToString()));
-							 if (!CellStateHelper.ShouldIgnore(ignoreHidden, cell, context) && ConvertUtil.IsNumeric(cell.Value))
-							 {
-								 argList.Add(cell.ValueDouble);
-							 }
-						 }
-					 }
-					 else
-					 {
-						 if (!ignoreErrors && arg.ValueIsExcelError) throw new ExcelErrorValueException(arg.ValueAsExcelErrorValue);
-						 if (ConvertUtil.IsNumeric(arg.Value) && !CellStateHelper.ShouldIgnore(ignoreHidden, arg, context))
-						 {
-							 argList.Add(ConvertUtil.GetValueDouble(arg.Value));
-						 }
-					 }
-				 });
+			{
+				if (arg.IsExcelRange)
+				{
+					foreach (var cell in arg.ValueAsRangeInfo)
+					{
+						if (!ignoreErrors && cell.IsExcelError) throw new ExcelErrorValueException(ExcelErrorValue.Parse(cell.Value.ToString()));
+						if (!CellStateHelper.ShouldIgnore(ignoreHidden, cell, context) && ConvertUtil.IsNumeric(cell.Value))
+						{
+							argList.Add(cell.ValueDouble);
+						}
+					}
+				}
+				else
+				{
+					if (!ignoreErrors && arg.ValueIsExcelError) throw new ExcelErrorValueException(arg.ValueAsExcelErrorValue);
+					if (ConvertUtil.IsNumeric(arg.Value) && !CellStateHelper.ShouldIgnore(ignoreHidden, arg, context))
+					{
+						argList.Add(ConvertUtil.GetValueDouble(arg.Value));
+					}
+				}
+			});
 		}
+
 
 		public virtual IEnumerable<double> ConvertArgsIncludingOtherTypes(IEnumerable<FunctionArgument> arguments)
 		{
@@ -63,7 +64,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			{
 					//var cellInfo = arg.Value as EpplusExcelDataProvider.CellInfo;
 					//var value = cellInfo != null ? cellInfo.Value : arg.Value;
-					if (arg.Value is ExcelDataProvider.IRangeInfo)
+				if (arg.Value is ExcelDataProvider.IRangeInfo)
 				{
 					foreach (var cell in (ExcelDataProvider.IRangeInfo)arg.Value)
 					{

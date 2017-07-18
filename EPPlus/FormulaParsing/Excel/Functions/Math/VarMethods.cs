@@ -33,9 +33,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private static double Divide(double left, double right)
 		{
 			if (System.Math.Abs(right - 0d) < double.Epsilon)
-			{
 				throw new ExcelErrorValueException(eErrorType.Div0);
-			}
 			return left / right;
 		}
 

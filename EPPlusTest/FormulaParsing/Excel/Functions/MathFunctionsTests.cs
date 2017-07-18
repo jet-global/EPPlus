@@ -84,46 +84,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void StdevShouldCalculateCorrectResult()
-		{
-			var func = new Stdev();
-			var args = FunctionsHelper.CreateArgs(1, 3, 5);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2d, result.Result);
-		}
-
-		[TestMethod]
-		public void StdevShouldIgnoreHiddenValuesWhenIgnoreHiddenValuesIsSet()
-		{
-			var func = new Stdev();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(1, 3, 5, 6);
-			args.Last().SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(2d, result.Result);
-		}
-
-		[TestMethod]
-		public void StdevPShouldCalculateCorrectResult()
-		{
-			var func = new StdevP();
-			var args = FunctionsHelper.CreateArgs(2, 3, 4);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(0.8165d, Math.Round((double)result.Result, 5));
-		}
-
-		[TestMethod]
-		public void StdevPShouldIgnoreHiddenValuesWhenIgnoreHiddenValuesIsSet()
-		{
-			var func = new StdevP();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(2, 3, 4, 165);
-			args.Last().SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(0.8165d, Math.Round((double)result.Result, 5));
-		}
-
-		[TestMethod]
 		public void ExpShouldCalculateCorrectResult()
 		{
 			var func = new Exp();
@@ -317,46 +277,6 @@ namespace EPPlusTest.Excel.Functions
 			args.ElementAt(0).SetExcelStateFlag(ExcelCellState.HiddenCell);
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(2d, result.Result);
-		}
-
-		[TestMethod]
-		public void VarShouldReturnCorrectResult()
-		{
-			var func = new Var();
-			var args = FunctionsHelper.CreateArgs(1, 2, 3, 4);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1.6667d, System.Math.Round((double)result.Result, 4));
-		}
-
-		[TestMethod]
-		public void VarShouldIgnoreHiddenValuesIfIgnoreHiddenIsTrue()
-		{
-			var func = new Var();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(1, 2, 3, 4, 9);
-			args.Last().SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1.6667d, System.Math.Round((double)result.Result, 4));
-		}
-
-		[TestMethod]
-		public void VarPShouldReturnCorrectResult()
-		{
-			var func = new VarP();
-			var args = FunctionsHelper.CreateArgs(1, 2, 3, 4);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1.25d, result.Result);
-		}
-
-		[TestMethod]
-		public void VarPShouldIgnoreHiddenValuesIfIgnoreHiddenIsTrue()
-		{
-			var func = new VarP();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(1, 2, 3, 4, 9);
-			args.Last().SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(1.25d, result.Result);
 		}
 
 		[TestMethod]
@@ -825,16 +745,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void StdevWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Stdev();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
 		public void SubtotalWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new Subtotal();
@@ -893,26 +803,5 @@ namespace EPPlusTest.Excel.Functions
 			var result = func.Execute(args, parsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
-
-		[TestMethod]
-		public void VarWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Var();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void VarPWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new VarP();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
 	}
 }
