@@ -22,11 +22,8 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OfficeOpenXml.Utils;
 using MathObj = System.Math;
 
@@ -37,6 +34,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// </summary>
 	class StdevAndVarHelperClass
 	{
+		/// <summary>
+		///  This is used by the Stdev and Var functions to parse the values it receives from a cell range or refreence.
+		/// </summary>
+		/// <param name="IgnoreHiddenValues">This controls wether you should skip Hidden Values or not.</param>
+		/// <param name="valueToParse">This is the value that will be parsed.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <param name="includeLogicals">A flag to control wether you should parse logicals or not.</param>
+		/// <param name="parsedValue">This out value is the parse value in double form.</param>
+		/// <param name="theInputContainedOnlyStrings">This bool flag shows if only string inputs were given.</param>
+		/// <returns>Returns true if the parseing succeded and false if it fails.</returns>
 		public static bool TryToParseValuesFromInputArgumentByRefrenceOrRange(bool IgnoreHiddenValues, ExcelDataProvider.ICellInfo valueToParse, ParsingContext context, bool includeLogicals, out double parsedValue, out bool theInputContainedOnlyStrings)
 		{
 			if(includeLogicals)
@@ -59,7 +66,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					theInputContainedOnlyStrings = false;
 					return true;
 				}
-				if (ConvertUtil.TryParseDateString(valueToParse.ValueDouble, out System.DateTime dateTime) && ConvertUtil.TryParseDateObjectToOADate(dateTime, out double dateTimeToOADate))
+				if (ConvertUtil.TryParseDateObjectToOADate(valueToParse.ValueDouble, out double dateTimeToOADate))
 				{
 					parsedValue = 0;
 					theInputContainedOnlyStrings = false;
@@ -86,9 +93,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					theInputContainedOnlyStrings = false;
 					return false;
 				}
-				if (ConvertUtil.TryParseDateString(valueToParse.ValueDouble, out System.DateTime dateTime) && ConvertUtil.TryParseDateObjectToOADate(dateTime, out double dateTimeToOADAte))
+				if (ConvertUtil.TryParseDateObjectToOADate(valueToParse.ValueDouble, out double dateTimeToOADate))
 				{
-					parsedValue = dateTimeToOADAte;
+					parsedValue = dateTimeToOADate;
 					theInputContainedOnlyStrings = false;
 					return false;
 				}
@@ -97,10 +104,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return false;
 			}
 		}
-
-		public static bool TryToParseValuesFromInputArgument(bool ignoreHidden, FunctionArgument valueToParse, ParsingContext context, out double parsedValue, out bool theInputContainedOnlyStrings)
+		/// <summary>
+		/// This is used by the Stdev and Var functions to parse the values it receives from a direct input.
+		/// </summary>
+		/// <param name="IgnoreHiddenValues">This controls wether you should skip Hidden Values or not.</param>
+		/// <param name="valueToParse">This is the value that will be parsed.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <param name="parsedValue">This out value is the parse value in double form.</param>
+		/// <param name="theInputContainedOnlyStrings">This bool flag shows if only string inputs were given.</param>
+		/// <returns>Returns true if the parseing succeded and false if it fails.</returns>
+		public static bool TryToParseValuesFromInputArgument(bool IgnoreHiddenValues, FunctionArgument valueToParse, ParsingContext context, out double parsedValue, out bool theInputContainedOnlyStrings)
 		{
-			if (ConvertUtil.IsNumeric(valueToParse.Value) && !CellStateHelper.ShouldIgnore(ignoreHidden, valueToParse, context))
+			if (ConvertUtil.IsNumeric(valueToParse.Value) && !CellStateHelper.ShouldIgnore(IgnoreHiddenValues, valueToParse, context))
 			{
 				parsedValue = ConvertUtil.GetValueDouble(valueToParse.Value);
 				theInputContainedOnlyStrings = false;
@@ -116,21 +131,34 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			theInputContainedOnlyStrings = true;
 			return false;
 		}
-
+		/// <summary>
+		/// Calculates the Variance for a Sample Population.
+		/// </summary>
+		/// <param name="args">A list of inputs to have their variance calculated.</param>
+		/// <returns>The Variance for a Sample population</returns>
 		public static double VarianceForASample(List<double> args)
 		{
 			double avg = args.Average();
 			double d = args.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
 			return (d / (args.Count() - 1));
 		}
-
+		/// <summary>
+		/// Calculates the Variance for a entire Population.
+		/// </summary>
+		/// <param name="args">A list of inputs to have their variance calculated.</param>
+		/// <returns>The Variance for a entire population</returns>
 		public static double VarianceForAnEntirePopulation(List<double> args)
 		{
 			double avg = args.Average();
 			double d = args.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
 			return (d / (args.Count()));
 		}
-
+		/// <summary>
+		/// Does the standard deviation on an entire pupulation.
+		/// </summary>
+		/// <param name="listToDoStandardDeviationOn">This is the list of the entire population to have their standaerd deviation Calulated.</param>
+		/// <param name="standardDeviation">This is the calculated standard Deviation.</param>
+		/// <returns>Returns true if the standard Deviation succeaded, else false.</returns>
 		public static bool TryStandardDeviationEntirePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
 			standardDeviation = MathObj.Sqrt(StdevAndVarHelperClass.VarianceForAnEntirePopulation(listToDoStandardDeviationOn));
@@ -138,7 +166,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return false;
 			return true;
 		}
-
+		/// <summary>
+		/// Does the standard deviation on an sample pupulation.
+		/// </summary>
+		/// <param name="listToDoStandardDeviationOn">This is the list of the sample population to have their standaerd deviation Calulated.</param>
+		/// <param name="standardDeviation">This is the calculated standard Deviation.</param>
+		/// <returns>Returns true if the standard Deviation succeaded, else false.</returns>
 		public static bool TryStandardDeviationOnASamplePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
 			standardDeviation = MathObj.Sqrt(StdevAndVarHelperClass.VarianceForASample(listToDoStandardDeviationOn));
@@ -148,7 +181,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return false;
 			return true;
 		}
-
+		/// <summary>
+		/// Checks if the variance for an entire poulation is able to be calcuated.
+		/// </summary>
+		/// <param name="listOfDoubles">A list of inputs to have their variance calculated.</param>
+		/// <param name="variance">The out value of the variance.</param>
+		/// <returns>Returns true if it succeads and false if it fails.</returns>
 		public static bool TryVarPopulationForAValueErrorCheck(List<double> listOfDoubles, out double variance)
 		{
 			double avg = listOfDoubles.Average();
@@ -158,7 +196,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return false;
 			return true;
 		}
-
+		/// <summary>
+		/// Checks if the variance for an sample poulation is able to be calcuated.
+		/// </summary>
+		/// <param name="listOfDoubles">A list of inputs to have their variance calculated.</param>
+		/// <param name="variance">The out value of the variance.</param>
+		/// <returns>Returns true if it succeads and false if it fails.</returns>
 		public static bool TryVarSamplePopulationForAValueErrorCheck(List<double> listOfDoubles, out double variance)
 		{
 			double avg = listOfDoubles.Average();
