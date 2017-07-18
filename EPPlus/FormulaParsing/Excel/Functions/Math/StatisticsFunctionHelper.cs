@@ -24,6 +24,7 @@
  *******************************************************************************/
 using System.Collections.Generic;
 using System.Linq;
+using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.Utils;
 using MathObj = System.Math;
 
@@ -32,8 +33,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// <summary>
 	/// This is a helper class that is used for all standard deviation and variance methods.
 	/// </summary>
-	class StdevAndVarHelperClass
+	class StatisticsFunctionHelper
 	{
+		#region Statistics Function Helper Methods
+
 		/// <summary>
 		///  This is used by the Stdev and Var functions to parse the values it receives from a cell range or refreence.
 		/// </summary>
@@ -46,17 +49,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns true if the parseing succeded and false if it fails.</returns>
 		public static bool TryToParseValuesFromInputArgumentByRefrenceOrRange(bool IgnoreHiddenValues, ExcelDataProvider.ICellInfo valueToParse, ParsingContext context, bool includeLogicals, out double parsedValue, out bool theInputContainedOnlyStrings)
 		{
-			if(includeLogicals)
+			var shouldIgnore = CellStateHelper.ShouldIgnore(IgnoreHiddenValues, valueToParse, context);
+			var isNumeric = ConvertUtil.IsNumeric(valueToParse.Value);
+			var isABoolean = valueToParse.Value is bool;
+
+			if (!shouldIgnore && isNumeric && !isABoolean)
 			{
-				var shouldIgnore = CellStateHelper.ShouldIgnore(IgnoreHiddenValues, valueToParse, context);
-				var isNumeric = ConvertUtil.IsNumeric(valueToParse.Value);
-				var isABoolean = valueToParse.Value is bool;
-				if (!shouldIgnore && isNumeric && !isABoolean)
-				{
-					parsedValue = valueToParse.ValueDouble;
-					theInputContainedOnlyStrings = false;
-					return true;
-				}
+				parsedValue = valueToParse.ValueDouble;
+				theInputContainedOnlyStrings = false;
+				return true;
+			}
+			if (includeLogicals)
+			{
 				if (isABoolean)
 				{
 					if ((bool)valueToParse.Value == true)
@@ -68,7 +72,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				}
 				if (ConvertUtil.TryParseDateObjectToOADate(valueToParse.ValueDouble, out double dateTimeToOADate))
 				{
-					parsedValue = 0;
+					parsedValue = dateTimeToOADate;
 					theInputContainedOnlyStrings = false;
 					return true;
 				}
@@ -78,15 +82,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			else
 			{
-				var shouldIgnore = CellStateHelper.ShouldIgnore(IgnoreHiddenValues, valueToParse, context);
-				var isNumeric = ConvertUtil.IsNumeric(valueToParse.Value);
-				var isABoolean = valueToParse.Value is bool;
-				if (!shouldIgnore && isNumeric && !isABoolean)
-				{
-					parsedValue = valueToParse.ValueDouble;
-					theInputContainedOnlyStrings = false;
-					return true;
-				}
+
 				if (isABoolean)
 				{
 					parsedValue = valueToParse.ValueDoubleLogical;
@@ -104,6 +100,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return false;
 			}
 		}
+
 		/// <summary>
 		/// This is used by the Stdev and Var functions to parse the values it receives from a direct input.
 		/// </summary>
@@ -131,6 +128,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			theInputContainedOnlyStrings = true;
 			return false;
 		}
+
 		/// <summary>
 		/// Calculates the Variance for a Sample Population.
 		/// </summary>
@@ -142,6 +140,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			double d = args.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
 			return (d / (args.Count() - 1));
 		}
+
 		/// <summary>
 		/// Calculates the Variance for a entire Population.
 		/// </summary>
@@ -153,6 +152,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			double d = args.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
 			return (d / (args.Count()));
 		}
+
 		/// <summary>
 		/// Does the standard deviation on an entire pupulation.
 		/// </summary>
@@ -161,11 +161,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns true if the standard Deviation succeaded, else false.</returns>
 		public static bool TryStandardDeviationEntirePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
-			standardDeviation = MathObj.Sqrt(StdevAndVarHelperClass.VarianceForAnEntirePopulation(listToDoStandardDeviationOn));
+			standardDeviation = MathObj.Sqrt(StatisticsFunctionHelper.VarianceForAnEntirePopulation(listToDoStandardDeviationOn));
 			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
 				return false;
 			return true;
 		}
+
 		/// <summary>
 		/// Does the standard deviation on an sample pupulation.
 		/// </summary>
@@ -174,13 +175,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns true if the standard Deviation succeaded, else false.</returns>
 		public static bool TryStandardDeviationOnASamplePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
-			standardDeviation = MathObj.Sqrt(StdevAndVarHelperClass.VarianceForASample(listToDoStandardDeviationOn));
+			standardDeviation = MathObj.Sqrt(StatisticsFunctionHelper.VarianceForASample(listToDoStandardDeviationOn));
 			if (listToDoStandardDeviationOn.Count() <= 1)
 				return false;
 			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
 				return false;
 			return true;
 		}
+
 		/// <summary>
 		/// Checks if the variance for an entire poulation is able to be calcuated.
 		/// </summary>
@@ -196,6 +198,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return false;
 			return true;
 		}
+
 		/// <summary>
 		/// Checks if the variance for an sample poulation is able to be calcuated.
 		/// </summary>
@@ -213,5 +216,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return false;
 			return true;
 		}
+		#endregion
 	}
 }

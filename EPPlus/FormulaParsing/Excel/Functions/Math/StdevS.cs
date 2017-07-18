@@ -55,14 +55,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				{
 					foreach (var cell in item.ValueAsRangeInfo)
 					{
-						if (StdevAndVarHelperClass.TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, cell, context, false, out double numberToAddToList, out bool onlyStringInputsGiven1))
+						if (StatisticsFunctionHelper.TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, cell, context, false, out double numberToAddToList, out bool onlyStringInputsGiven1))
 							listToDoStandardDeviationOn.Add(numberToAddToList);
 						onlyStringInputsGiven = onlyStringInputsGiven1;
 					}
 				}
 				else
 				{
-					if (StdevAndVarHelperClass.TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
+					if (StatisticsFunctionHelper.TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
 						listToDoStandardDeviationOn.Add(numberToAddToList);
 					onlyStringInputsGiven = onlyStringInputsGiven2;
 					if (item.ValueFirst == null)
@@ -73,7 +73,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(eErrorType.Value);
 			if (listToDoStandardDeviationOn.Count() == 0)
 				return new CompileResult(eErrorType.Div0);
-			if (!StdevAndVarHelperClass.TryStandardDeviationOnASamplePopulation(listToDoStandardDeviationOn, out double standardDeviation))
+			if (!StatisticsFunctionHelper.TryStandardDeviationOnASamplePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);
 			return this.CreateResult(standardDeviation, DataType.Decimal);
 		}

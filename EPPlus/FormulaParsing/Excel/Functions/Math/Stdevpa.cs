@@ -56,14 +56,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				{
 					foreach (var cell in item.ValueAsRangeInfo)
 					{
-						if (StdevAndVarHelperClass.TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, cell, context, true, out double numberToAddToList, out bool onlyStringInputsGiven1))
+						if (StatisticsFunctionHelper.TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, cell, context, true, out double numberToAddToList, out bool onlyStringInputsGiven1))
 							listToDoStandardDeviationOn.Add(numberToAddToList);
 						onlyStringInputsGiven = onlyStringInputsGiven1;
 					}
 				}
 				else
 				{
-					if (StdevAndVarHelperClass.TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
+					if (StatisticsFunctionHelper.TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
 						listToDoStandardDeviationOn.Add(numberToAddToList);
 					onlyStringInputsGiven = onlyStringInputsGiven2;
 					if (item.ValueFirst == null)
@@ -81,7 +81,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 
 		private bool TryStandardDeviationEntirePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
-			standardDeviation = MathObj.Sqrt(StdevAndVarHelperClass.VarianceForAnEntirePopulation(listToDoStandardDeviationOn));
+			standardDeviation = MathObj.Sqrt(StatisticsFunctionHelper.VarianceForAnEntirePopulation(listToDoStandardDeviationOn));
 			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
 				return false;
 			return true;
