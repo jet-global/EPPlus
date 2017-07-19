@@ -88,6 +88,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var endingRowForComparison = cellsToCompare.Address._toRow;
 			var endingColumnForComparison = cellsToCompare.Address._toCol;
 
+			// This will always look at every cell in the given range of cells to compare. This is done instead of
+			// using the iterator provided by the range of cells to compare because the collection of cells that it iterates over
+			// does not include empty cells that have not been set since the workbook's creation. This function
+			// wants to consider empty cells for comparing with the criterion, but it can be better optimized.
+			// A similar problem and optimization opportunity exists in the AverageIfs, SumIf, SumIfs, CountIf, and CountIfs functions.
 			for (var currentRow = startingRowForComparison; currentRow <= endingRowForComparison; currentRow++)
 			{
 				for (var currentColumn = startingColumnForComparison; currentColumn <= endingColumnForComparison; currentColumn++)

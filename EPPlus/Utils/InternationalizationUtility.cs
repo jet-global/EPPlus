@@ -32,66 +32,62 @@ namespace OfficeOpenXml.Utils
 	class InternationalizationUtility
 	{
 		#region Localized Boolean Dictionaries
-		private static readonly Dictionary<CultureInfo, string> trueStrings = new Dictionary<CultureInfo, string>()
+		private static readonly Dictionary<string, string> trueStrings = new Dictionary<string, string>()
 		{
-			{CultureInfo.CreateSpecificCulture("en-us"), "TRUE"},		// English
-			{CultureInfo.CreateSpecificCulture("de-de"), "WAHR"},		// German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), "TRUE"},		// Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), "TRUE"},		// Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), "SAND"},		// Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), "WAAR"},		// Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), "TOSI"},		// Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), "VRAI"},		// French
-			{CultureInfo.CreateSpecificCulture("it-it"), "VERO"},		// Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), "TRUE"},		// Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), "TRUE"},		// Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), "SANN"},		// Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), "PRAWDA"},		// Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), "VERDADEIRO"},	// Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), "VERDADEIRO"},	// Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), "ИСТИНА"},		// Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), "VERDADERO"},	// Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), "SANT"},		// Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), "TRUE"},		// Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), "PRAVDA"},		// Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), "TRUE"},		// Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), "IGAZ"},		// Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), "TRUE"},		// Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), "TRUE"},		// Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), "TRUE"},		// Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), "TRUE"},		// Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), "DOĞRU"}		// Turkish
+			{"en", "TRUE"},			// English
+			{"de", "WAHR"},			// German
+			{"zh", "TRUE"},			// Chinese
+			{"da", "SAND"},			// Danish
+			{"nl", "WAAR"},			// Dutch
+			{"fi", "TOSI"},			// Finnish
+			{"fr", "VRAI"},			// French
+			{"it", "VERO"},			// Italian
+			{"ja", "TRUE"},			// Japanese
+			{"ko", "TRUE"},			// Korean
+			{"nb", "SANN"},			// Norwegian
+			{"pl", "PRAWDA"},		// Polish
+			{"pt", "VERDADEIRO"},	// Portuguese
+			{"ru", "ИСТИНА"},		// Russian
+			{"es", "VERDADERO"},	// Spanish
+			{"sv", "SANT"},			// Swedish
+			{"hr", "TRUE"},			// Croatian
+			{"cs", "PRAVDA"},		// Czech
+			{"el", "TRUE"},			// Greek
+			{"hu", "IGAZ"},			// Hungarian
+			{"ms", "TRUE"},			// Malay
+			{"ro", "TRUE"},			// Romanian
+			{"sk", "TRUE"},			// Slovak
+			{"sl", "TRUE"},			// Slovenian
+			{"tr", "DOĞRU"}			// Turkish
 		};
 
-		private static readonly Dictionary<CultureInfo, string> falseStrings = new Dictionary<CultureInfo, string>()
+		private static readonly Dictionary<string, string> falseStrings = new Dictionary<string, string>()
 		{
-			{CultureInfo.CreateSpecificCulture("en-us"), "FALSE"},		// English
-			{CultureInfo.CreateSpecificCulture("de-de"), "FALSCH"},		// German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), "FALSE"},		// Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), "FALSE"},		// Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), "FALSK"},		// Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), "ONWAAR"},		// Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), "EPÄTOSI"},	// Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), "FAUX"},		// French
-			{CultureInfo.CreateSpecificCulture("it-it"), "FALSO"},		// Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), "FALSE"},		// Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), "FALSE"},		// Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), "USANN"},		// Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), "FAŁSZ"},		// Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), "FALSO"},		// Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), "FALSO"},		// Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), "ЛОЖЬ"},		// Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), "FALSO"},		// Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), "FALSKT"},		// Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), "FALSE"},		// Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), "NEPRAVDA"},	// Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), "FALSE"},		// Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), "HAMIS"},		// Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), "FALSE"},		// Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), "FALSE"},		// Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), "FALSE"},		// Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), "FALSE"},		// Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), "YANLIŞ" }		// Turkish
+			{"en", "FALSE"},		// English
+			{"de", "FALSCH"},		// German
+			{"zh", "FALSE"},		// Chinese
+			{"da", "FALSK"},		// Danish
+			{"nl", "ONWAAR"},		// Dutch
+			{"fi", "EPÄTOSI"},		// Finnish
+			{"fr", "FAUX"},			// French
+			{"it", "FALSO"},		// Italian
+			{"ja", "FALSE"},		// Japanese
+			{"ko", "FALSE"},		// Korean
+			{"nb", "USANN"},		// Norwegian
+			{"pl", "FAŁSZ"},		// Polish
+			{"pt", "FALSO"},		// Portuguese
+			{"ru", "ЛОЖЬ"},			// Russian
+			{"es", "FALSO"},		// Spanish
+			{"sv", "FALSKT"},		// Swedish
+			{"hr", "FALSE"},		// Croatian
+			{"cs", "NEPRAVDA"},		// Czech
+			{"el", "FALSE"},		// Greek
+			{"hu", "HAMIS"},		// Hungarian
+			{"ms", "FALSE"},		// Malay
+			{"ro", "FALSE"},		// Romanian
+			{"sk", "FALSE"},		// Slovak
+			{"sl", "FALSE"},		// Slovenian
+			{"tr", "YANLIŞ" }		// Turkish
 		};
 		#endregion
 
@@ -372,35 +368,33 @@ namespace OfficeOpenXml.Utils
 		};
 		#endregion
 
-		private static readonly Dictionary<CultureInfo, Dictionary<string, eErrorType>> errorDictionaries = new Dictionary<CultureInfo, Dictionary<string, eErrorType>>()
+		private static readonly Dictionary<string, Dictionary<string, eErrorType>> errorDictionaries = new Dictionary<string, Dictionary<string, eErrorType>>()
 		{
-			{CultureInfo.CreateSpecificCulture("en-us"), EnglishErrors},	// English
-			{CultureInfo.CreateSpecificCulture("de-de"), GermanErrors},		// German
-			{CultureInfo.CreateSpecificCulture("zh-tw"), ChineseErrors},	// Chinese (Traditional)
-			{CultureInfo.CreateSpecificCulture("zh-cn"), ChineseErrors},	// Chinese (Simplified)
-			{CultureInfo.CreateSpecificCulture("da-dk"), DanishErrors},		// Danish
-			{CultureInfo.CreateSpecificCulture("nl-nl"), DutchErrors},		// Dutch
-			{CultureInfo.CreateSpecificCulture("fi-fi"), FinnishErrors},	// Finnish
-			{CultureInfo.CreateSpecificCulture("fr-fr"), FrenchErrors},		// French
-			{CultureInfo.CreateSpecificCulture("it-it"), ItalianErrors},	// Italian
-			{CultureInfo.CreateSpecificCulture("ja-jp"), JapaneseErrors},	// Japanese
-			{CultureInfo.CreateSpecificCulture("ko-kr"), KoreanErrors},		// Korean
-			{CultureInfo.CreateSpecificCulture("nb-no"), NorwegianErrors},	// Norwegian
-			{CultureInfo.CreateSpecificCulture("pl-pl"), PolishErrors},		// Polish
-			{CultureInfo.CreateSpecificCulture("pt-pt"), PortugueseErrors},	// Portuguese (Portugal)
-			{CultureInfo.CreateSpecificCulture("pt-br"), PortugueseErrors},	// Portuguese (Brazil)
-			{CultureInfo.CreateSpecificCulture("ru-ru"), RussianErrors},	// Russian
-			{CultureInfo.CreateSpecificCulture("es-es"), SpanishErrors},	// Spanish (Spain)
-			{CultureInfo.CreateSpecificCulture("sv-se"), SwedishErrors},	// Swedish
-			{CultureInfo.CreateSpecificCulture("hr-hr"), CroatianErrors},	// Croatian
-			{CultureInfo.CreateSpecificCulture("cs-cz"), CzechErrors},		// Czech
-			{CultureInfo.CreateSpecificCulture("el-gr"), GreekErrors},		// Greek
-			{CultureInfo.CreateSpecificCulture("hu-hu"), HungarianErrors},	// Hungarian
-			{CultureInfo.CreateSpecificCulture("ms-my"), MalayErrors},		// Malay
-			{CultureInfo.CreateSpecificCulture("ro-ro"), RomanianErrors},	// Romanian
-			{CultureInfo.CreateSpecificCulture("sk-sk"), SlovakErrors},		// Slovak
-			{CultureInfo.CreateSpecificCulture("sl-si"), SlovenianErrors},	// Slovenian
-			{CultureInfo.CreateSpecificCulture("tr-tr"), TurkishErrors}		// Turkish
+			{"en", EnglishErrors},		// English
+			{"de", GermanErrors},		// German
+			{"zh", ChineseErrors},		// Chinese
+			{"da", DanishErrors},		// Danish
+			{"nl", DutchErrors},		// Dutch
+			{"fi", FinnishErrors},		// Finnish
+			{"fr", FrenchErrors},		// French
+			{"it", ItalianErrors},		// Italian
+			{"ja", JapaneseErrors},		// Japanese
+			{"ko", KoreanErrors},		// Korean
+			{"nb", NorwegianErrors},	// Norwegian
+			{"pl", PolishErrors},		// Polish
+			{"pt", PortugueseErrors},	// Portuguese
+			{"ru", RussianErrors},		// Russian
+			{"es", SpanishErrors},		// Spanish
+			{"sv", SwedishErrors},		// Swedish
+			{"hr", CroatianErrors},		// Croatian
+			{"cs", CzechErrors},		// Czech
+			{"el", GreekErrors},		// Greek
+			{"hu", HungarianErrors},	// Hungarian
+			{"ms", MalayErrors},		// Malay
+			{"ro", RomanianErrors},		// Romanian
+			{"sk", SlovakErrors},		// Slovak
+			{"sl", SlovenianErrors},	// Slovenian
+			{"tr", TurkishErrors}		// Turkish
 		};
 
 		/// <summary>
@@ -419,7 +413,7 @@ namespace OfficeOpenXml.Utils
 			errorValue = null;
 			errorCandidate = errorCandidate.ToUpper(culture);
 			Dictionary<string, eErrorType> errorDictionary = null;
-			if (!errorDictionaries.TryGetValue(culture, out errorDictionary))
+			if (!errorDictionaries.TryGetValue(culture.TwoLetterISOLanguageName, out errorDictionary))
 				return false;
 			if (!errorDictionary.TryGetValue(errorCandidate, out eErrorType errorType))
 				return false;
@@ -441,10 +435,11 @@ namespace OfficeOpenXml.Utils
 		public static bool TryParseLocalBoolean(string booleanCandidate, CultureInfo culture, out bool booleanValue)
 		{
 			booleanValue = false;
+			var cultureLanguageCode = culture.TwoLetterISOLanguageName;
 			booleanCandidate = booleanCandidate.ToUpper(culture);
-			if (trueStrings.TryGetValue(culture, out string localTrueString) && booleanCandidate.Equals(localTrueString))
+			if (trueStrings.TryGetValue(cultureLanguageCode, out string localTrueString) && booleanCandidate.Equals(localTrueString))
 				booleanValue = true;
-			else if (falseStrings.TryGetValue(culture, out string localFalseString) && booleanCandidate.Equals(localFalseString))
+			else if (falseStrings.TryGetValue(cultureLanguageCode, out string localFalseString) && booleanCandidate.Equals(localFalseString))
 				booleanValue = false;
 			else
 				return false;

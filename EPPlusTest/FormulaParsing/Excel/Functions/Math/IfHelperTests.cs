@@ -265,8 +265,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var valueLessThanRef = IfHelper.ObjectMatchesCriterion(valueError, "<#REF!"); ;
 			var refLessThanName = IfHelper.ObjectMatchesCriterion(refError, "<#NAME?"); ;
 			var nameLessThanNum = IfHelper.ObjectMatchesCriterion(nameError, "<#NUM!"); ;
-			var numLessThanNA = IfHelper.ObjectMatchesCriterion(numError, "<#NA");
-			var naGreaterThanNum = IfHelper.ObjectMatchesCriterion(naError, "<#NUM!"); ;
+			var numLessThanNA = IfHelper.ObjectMatchesCriterion(numError, "<#N/A");
+			var naGreaterThanNum = IfHelper.ObjectMatchesCriterion(naError, ">#NUM!"); ;
 			Assert.AreEqual(nullLessThanDiv, true);
 			Assert.AreEqual(divLessThanValue, true);
 			Assert.AreEqual(valueLessThanRef, true);

@@ -52,6 +52,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (cellRangeToCheck == null)
 				return new CompileResult(eErrorType.Value);
+
+			// This will always look at every cell in the given range of cells to compare. This is done instead of
+			// using the iterator provided by the range of cells to compare because the collection of cells that it iterates over
+			// does not include empty cells that have not been set since the workbook's creation. This function
+			// wants to consider empty cells for comparing with the criterion, but it can be better optimized.
+			// A similar problem and optimization opportunity exists in the AverageIf, AverageIfs, SumIf, SumIfs, and CountIfs functions.
 			var cellValuesFromRange = IfHelper.GetAllCellValuesInRange(cellRangeToCheck);
 			var criteriaObject = IfHelper.ExtractCriterionObject(arguments.ElementAt(1), context);
 			double count = cellValuesFromRange.Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, criteriaObject)).Count();

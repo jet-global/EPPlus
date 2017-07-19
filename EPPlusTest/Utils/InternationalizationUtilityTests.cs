@@ -366,6 +366,37 @@ namespace EPPlusTest.Utils
 				Thread.CurrentThread.CurrentCulture = currentCulture;
 			}
 		}
+
+		[TestMethod]
+		public void InternationalizationUtilityWithSupportedLanguageCodeAndNonSupportedCultureCode()
+		{
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("es-mx"); // Spanish-Mexico
+				var valueErrorString = "#¡VALOR!";
+				var isValueError = InternationalizationUtility.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out ExcelErrorValue error);
+				Assert.AreEqual(isValueError, true);
+				Assert.AreEqual(error.Type, eErrorType.Value);
+				var falseString = "FALSO";
+				var isFalseBoolean = InternationalizationUtility.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out bool falseBool);
+				Assert.AreEqual(isFalseBoolean, true);
+				Assert.AreEqual(falseBool, false);
+				Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("de-at"); // German-Austria
+				valueErrorString = "#WERT!";
+				isValueError = InternationalizationUtility.TryParseLocalErrorValue(valueErrorString, CultureInfo.CurrentCulture, out error);
+				Assert.AreEqual(isValueError, true);
+				Assert.AreEqual(error.Type, eErrorType.Value);
+				falseString = "FALSCH";
+				isFalseBoolean = InternationalizationUtility.TryParseLocalBoolean(falseString, CultureInfo.CurrentCulture, out falseBool);
+				Assert.AreEqual(isFalseBoolean, true);
+				Assert.AreEqual(falseBool, false);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
 		#endregion
 	}
 }

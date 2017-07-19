@@ -43,10 +43,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	{
 		private enum ComparisonValue
 		{
-			Equal,
-			NotEqual,
 			LessThan,
-			GreaterThan
+			Equal,
+			GreaterThan,
+			NotEqual
 		}
 
 		#region IfHelper Public Static Functions
@@ -283,7 +283,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				compareResult = dateResult;
 			else if (IfHelper.TryCompareAsNumericValues(testObject, criterionObject, compareForEquality, out ComparisonValue numberResult))
 				compareResult = numberResult;
-			else if (IfHelper.TryCompareAsErrorValues(testObject, criterionObject, compareForEquality, out ComparisonValue errorResult))
+			else if (IfHelper.TryCompareAsErrorValues(testObject, criterionObject, out ComparisonValue errorResult))
 				compareResult = errorResult;
 
 			switch (criterionOperation)
@@ -305,6 +305,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 		}
 
+		/// <summary>
+		/// Try to compare the objects as string values.
+		/// </summary>
+		/// <param name="testObject">The object being compared.</param>
+		/// <param name="criterionObject">The criterion used to judge the <paramref name="testObject"/>.</param>
+		/// <param name="compareForEquality">Indicates how the two objects should be compared.</param>
+		/// <param name="matchCriterionAsExpression">Indicates what is considered a match in the case where the criterion is an empty string.</param>
+		/// <param name="result">
+		///		Indicates how <paramref name="testObject"/> compares to the <paramref name="criterionObject"/>.
+		///		Do not use this value if this function returns false.</param>
+		/// <returns>Returns true if <paramref name="testObject"/> and <paramref name="criterionObject"/> are able to be compared, and false otherwise.</returns>
 		private static bool TryCompareAsStrings(object testObject, object criterionObject, bool compareForEquality, bool matchCriterionAsExpression, out ComparisonValue result)
 		{
 			result = ComparisonValue.NotEqual;
@@ -327,6 +338,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return true;
 		}
 
+		/// <summary>
+		/// Try to compare the objects as booleans.
+		/// </summary>
+		/// <param name="testObject">The object being compared.</param>
+		/// <param name="criterionObject">The criterion used to judge the <paramref name="testObject"/>.</param>
+		/// <param name="result">
+		///		Indicates how <paramref name="testObject"/> compares to the <paramref name="criterionObject"/>.
+		///		Do not use this value if this function returns false.</param>
+		/// <returns>Returns true if <paramref name="testObject"/> and <paramref name="criterionObject"/> are able to be compared, and false otherwise.</returns>
 		private static bool TryCompareAsBooleans(object testObject, object criterionObject, out ComparisonValue result)
 		{
 			result = ComparisonValue.NotEqual;
@@ -337,6 +357,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return true;
 		}
 
+		/// <summary>
+		/// Try to compare the objects as dates.
+		/// </summary>
+		/// <param name="testObject">The object being compared.</param>
+		/// <param name="criterionObject">The criterion used to judge the <paramref name="testObject"/>.</param>
+		/// <param name="compareForEquality">Indicates how the two objects should be compared.</param>
+		/// <param name="result">
+		///		Indicates how <paramref name="testObject"/> compares to the <paramref name="criterionObject"/>.
+		///		Do not use this value if this function returns false.</param>
+		/// <returns>Returns true if <paramref name="testObject"/> and <paramref name="criterionObject"/> are able to be compared, and false otherwise.</returns>
 		private static bool TryCompareAsDates(object testObject, object criterionObject, bool compareForEquality, out ComparisonValue result)
 		{
 			result = ComparisonValue.NotEqual;
@@ -354,6 +384,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return true;
 		}
 
+		/// <summary>
+		/// Try to compare the objects as numbers.
+		/// </summary>
+		/// <param name="testObject">The object being compared.</param>
+		/// <param name="criterionObject">The criterion used to judge the <paramref name="testObject"/>.</param>
+		/// <param name="compareForEquality">Indicates how the two objects should be compared.</param>
+		/// <param name="result">
+		///		Indicates how <paramref name="testObject"/> compares to the <paramref name="criterionObject"/>.
+		///		Do not use this value if this function returns false.</param>
+		/// <returns>Returns true if <paramref name="testObject"/> and <paramref name="criterionObject"/> are able to be compared, and false otherwise.</returns>
 		private static bool TryCompareAsNumericValues(object testObject, object criterionObject, bool compareForEquality, out ComparisonValue result)
 		{
 			result = ComparisonValue.NotEqual;
@@ -372,19 +412,58 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			return true;
 		}
 
-		private static bool TryCompareAsErrorValues(object testObject, object criterionObject, bool compareForEquality, out ComparisonValue result)
+		/// <summary>
+		/// Try to compare the objects as Excel error values.
+		/// </summary>
+		/// <param name="testObject">The object being compared.</param>
+		/// <param name="criterionObject">The criterion used to judge the <paramref name="testObject"/>.</param>
+		/// <param name="result">
+		///		Indicates how <paramref name="testObject"/> compares to the <paramref name="criterionObject"/>.
+		///		Do not use this value if this function returns false.</param>
+		/// <returns>Returns true if <paramref name="testObject"/> and <paramref name="criterionObject"/> are able to be compared, and false otherwise.</returns>
+		private static bool TryCompareAsErrorValues(object testObject, object criterionObject, out ComparisonValue result)
 		{
 			result = ComparisonValue.NotEqual;
-			if (criterionObject is ExcelErrorValue criterionErrorValue)
-			{
-				if (testObject is ExcelErrorValue testErrorValue && compareForEquality)
-					result = (criterionErrorValue.Type == testErrorValue.Type) ? ComparisonValue.Equal : ComparisonValue.NotEqual;
-				else
-					return false;
-			}
+			if (criterionObject is ExcelErrorValue criterionErrorValue && testObject is ExcelErrorValue testErrorValue)
+				result = IfHelper.CompareAsErrorValues(testErrorValue.Type, criterionErrorValue.Type);
 			else
 				return false;
 			return true;
+		}
+
+		private static ComparisonValue CompareAsErrorValues(eErrorType testErrorValue, eErrorType criterionErrorValue)
+		{
+			var testErrorNumericValue = IfHelper.GetErrorNumericValue(testErrorValue);
+			var criterionErrorNumericValue = IfHelper.GetErrorNumericValue(criterionErrorValue);
+			if (testErrorNumericValue < criterionErrorNumericValue)
+				return ComparisonValue.LessThan;
+			else if (testErrorNumericValue > criterionErrorNumericValue)
+				return ComparisonValue.GreaterThan;
+			else
+				return ComparisonValue.Equal;
+		}
+
+		private static int GetErrorNumericValue(eErrorType error)
+		{
+			switch (error)
+			{
+				case eErrorType.Null:
+					return 0;
+				case eErrorType.Div0:
+					return 1;
+				case eErrorType.Value:
+					return 2;
+				case eErrorType.Ref:
+					return 3;
+				case eErrorType.Name:
+					return 4;
+				case eErrorType.Num:
+					return 5;
+				case eErrorType.NA:
+					return 6;
+				default:
+					throw new ArgumentException("Invalid error type.");
+			}
 		}
 
 		/// <summary>
@@ -457,7 +536,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		///		Returns <see cref="int.MinValue"/> if <paramref name="criterionString"/> was comparing using wildcard characters, and <paramref name="testString"/> failed to match.</returns>
 		private static ComparisonValue CompareAsStrings(string testString, string criterionString, bool checkWildcardChars = false)
 		{
-			//var compareResult = int.MinValue;
 			var compareResult = ComparisonValue.NotEqual;
 			testString = testString.ToUpper(CultureInfo.CurrentCulture);
 			criterionString = criterionString.ToUpper(CultureInfo.CurrentCulture);
@@ -469,7 +547,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				criterionRegexPattern = criterionRegexPattern.Replace("~.*", "\\*");
 				criterionRegexPattern = criterionRegexPattern.Replace(@"\?", ".");
 				criterionRegexPattern = criterionRegexPattern.Replace("~.", "\\?");
-				//compareResult = (Regex.IsMatch(testString, criterionRegexPattern)) ? 0 : int.MinValue;
 				compareResult = (Regex.IsMatch(testString, criterionRegexPattern)) ? ComparisonValue.Equal : ComparisonValue.NotEqual;
 			}
 			else
