@@ -567,6 +567,22 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void StdevSIsGiven12HourTimesAsInputsByCellRefrenceTestTwo()
+		{
+			var function = new StdevS();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "12:00 am";
+				worksheet.Cells["B2"].Value = "02:00 am";
+				worksheet.Cells["B3"].Value = "01:00 pm";
+				worksheet.Cells["B4"].Formula = "=stdev.s(B1,B2,B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.Div0, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
+			}
+		}
+
+		[TestMethod]
 		public void StdevSIsGiven12HourTimesAsInputsByCellRange()
 		{
 			var function = new StdevS();

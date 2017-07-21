@@ -47,6 +47,42 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void ProductIsGiven5MilitaryTimes()
+		{
+			var function = new Product();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "00:00";
+				worksheet.Cells["B2"].Value = "12:00";
+				worksheet.Cells["B3"].Value = "13:15";
+				worksheet.Cells["B4"].Value = "2:00";
+				worksheet.Cells["B5"].Value = "13:00";
+				worksheet.Cells["A1"].Formula = "=subtotal(106,B1:B5)";
+				worksheet.Calculate();
+				Assert.AreEqual(0, (double)worksheet.Cells["A1"].Value, .00001);
+			}
+		}
+
+		[TestMethod]
+		public void ProductIsGiven5DateTimes()
+		{
+			var function = new Product();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = "1/12/2017  16:00";
+				worksheet.Cells["B2"].Value = "5/12/2015  2:00:00";
+				worksheet.Cells["B3"].Value = "3/20/2012  12:00";
+				worksheet.Cells["B4"].Value = "12/12/2010  11:00";
+				worksheet.Cells["B5"].Value = "1/11/2011  10:00";
+				worksheet.Cells["A1"].Formula = "=subtotal(6,B1:B5)";
+				worksheet.Calculate();
+				Assert.AreEqual(0, (double)worksheet.Cells["A1"].Value, .00001);
+			}
+		}
+
+		[TestMethod]
 		public void ProductWithZeroReturnsCorrectValue()
 		{
 			var function = new Product();

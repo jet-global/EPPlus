@@ -45,7 +45,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			_functions[4] = new Max();
 			_functions[5] = new Min();
 			_functions[6] = new Product();
-			_functions[7] = new Stdev();
+			_functions[7] = new StdevS();
 			_functions[8] = new StdevP();
 			_functions[9] = new Sum();
 			_functions[10] = new Var();
@@ -57,7 +57,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			AddHiddenValueHandlingFunction(new Max(), 104);
 			AddHiddenValueHandlingFunction(new Min(), 105);
 			AddHiddenValueHandlingFunction(new Product(), 106);
-			AddHiddenValueHandlingFunction(new Stdev(), 107);
+			AddHiddenValueHandlingFunction(new StdevS(), 107);
 			AddHiddenValueHandlingFunction(new StdevP(), 108);
 			AddHiddenValueHandlingFunction(new Sum(), 109);
 			AddHiddenValueHandlingFunction(new Var(), 110);
