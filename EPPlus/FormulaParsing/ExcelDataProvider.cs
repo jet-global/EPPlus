@@ -17,7 +17,7 @@ namespace OfficeOpenXml.FormulaParsing
 		{
 			bool IsEmpty { get; }
 			bool IsMulti { get; }
-			int GetNCells();
+			int GetTotalCellCount();
 			ExcelAddressBase Address { get; }
 			object GetValue(int row, int col);
 			object GetOffset(int rowOffset, int colOffset);

@@ -164,7 +164,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 						if (nArgs >= minLength) return false;
 						if (arg.IsExcelRange)
 						{
-							nArgs += arg.ValueAsRangeInfo.GetNCells();
+							nArgs += arg.ValueAsRangeInfo.GetTotalCellCount();
 							if (nArgs >= minLength) return false;
 						}
 					}

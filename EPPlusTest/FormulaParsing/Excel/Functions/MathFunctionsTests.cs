@@ -221,16 +221,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void CountShouldIncludeNumericStringsAndDatesInArray()
-		{
-			var func = new Count();
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(1d, 2m, 3, new DateTime(2012, 4, 1), "4"));
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(5d, result.Result);
-		}
-
-
-		[TestMethod]
 		public void CountShouldIncludeEnumerableMembers()
 		{
 			var func = new Count();
@@ -248,15 +238,6 @@ namespace EPPlusTest.Excel.Functions
 			args.ElementAt(0).SetExcelStateFlag(ExcelCellState.HiddenCell);
 			var result = func.Execute(args, _parsingContext);
 			Assert.AreEqual(2d, result.Result);
-		}
-
-		[TestMethod]
-		public void CountAShouldReturnNumberOfNonWhitespaceItems()
-		{
-			var func = new CountA();
-			var args = FunctionsHelper.CreateArgs(1d, 2m, 3, new DateTime(2012, 4, 1), "4", null, string.Empty);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(5d, result.Result);
 		}
 
 		[TestMethod]

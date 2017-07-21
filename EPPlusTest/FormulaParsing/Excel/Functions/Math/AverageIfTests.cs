@@ -764,6 +764,45 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual(5d, result.Result);
 		}
+
+		[TestMethod]
+		public void AverageIfWithNullCriteriaReturnsDiv0()
+		{
+			// Note that Excel treats null criteria as equivalent to the number 0 as the criteria.
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "AVERAGEIF(D2:D3,1,C2:C3)";
+				worksheet.Cells["B3"].Formula = "AVERAGEIF(E2:E3,,C2:C3)";
+				worksheet.Cells["B4"].Formula = "AVERAGEIF(E2:E3,E3,C2:C3)";
+				worksheet.Cells["C2"].Value = 1;
+				worksheet.Cells["C3"].Value = 3;
+				worksheet.Cells["D2"].Value = 1;
+				worksheet.Cells["D3"].Value = 1;
+				worksheet.Cells["E2"].Value = 0;
+				worksheet.Cells["E3"].Value = null;
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void AverageIfWithUnsetEmptyCellsInCriteria()
+		{
+			// This test exists to ensure that cells that have never been set are still 
+			// being compared against the criterion.
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "AVERAGEIF(D2:D3,\"\",C2:C3)";
+				worksheet.Cells["C2"].Value = 1;
+				worksheet.Cells["C3"].Value = 3;
+				worksheet.Calculate();
+				Assert.AreEqual(2d, worksheet.Cells["B2"].Value);
+			}
+		}
 		#endregion
 	}
 }

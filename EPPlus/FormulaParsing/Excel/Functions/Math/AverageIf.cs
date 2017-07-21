@@ -36,16 +36,16 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
-	/// Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria.
+	/// Returns the average (arithmetic mean) of all the cells in a range that meet a given criterion.
 	/// </summary>
 	public class AverageIf : HiddenValuesHandlingFunction
 	{
 		/// <summary>
-		/// Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria.
+		/// Returns the average (arithmetic mean) of all the cells in a range that meet a given criterion.
 		/// </summary>
 		/// <param name="arguments">The arguments used to calculate the average.</param>
 		/// <param name="context">The context for the function.</param>
-		/// <returns>Returns the average of all cells in the given range that passed the given criteria.</returns>
+		/// <returns>Returns the average of all cells in the given range that passed the given criterion.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentCountIsValid(arguments, 2) == false)
@@ -53,62 +53,64 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var cellRangeToCheck = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (cellRangeToCheck == null)
 				return new CompileResult(eErrorType.Value);
-			string criteriaString = null;
-			if (arguments.ElementAt(1).Value is ExcelDataProvider.IRangeInfo criteriaRange)
-			{
-				if (criteriaRange.IsMulti)
-				{
-					var currentWorksheet = context.ExcelDataProvider.GetRange(context.Scopes.Current.Address.Worksheet, 1, 1, "A1").Worksheet;
-					var cellRowVal = context.Scopes.Current.Address.FromRow;
-					var cellColVal = context.Scopes.Current.Address.FromCol;
-					criteriaString = IfHelper.CalculateCriteria(arguments, currentWorksheet, cellRowVal, cellColVal).ToString().ToUpper();
-				}
-				else
-					criteriaString = this.GetFirstArgument(arguments.ElementAt(1).ValueFirst).ToString().ToUpper();
-			}
-			else
-				criteriaString = this.GetFirstArgument(arguments.ElementAt(1)).ValueFirst.ToString().ToUpper();
+			var criterionObject = IfHelper.ExtractCriterionObject(arguments.ElementAt(1), context);
 			if (arguments.Count() > 2)
 			{
 				var cellRangeToAverage = arguments.ElementAt(2).Value as ExcelDataProvider.IRangeInfo;
 				if (cellRangeToAverage == null)
 					return new CompileResult(eErrorType.Value);
 				else
-					return this.CalculateAverageUsingAverageRange(cellRangeToCheck, criteriaString, cellRangeToAverage);
+					return this.CalculateAverageUsingAverageRange(cellRangeToCheck, criterionObject, cellRangeToAverage);
 			}
 			else
-				return this.CalculateAverageUsingRange(cellRangeToCheck, criteriaString);
+				return this.CalculateAverageUsingRange(cellRangeToCheck, criterionObject);
 		}
 
 		/// <summary>
-		/// Calculates the average value of all cells that match the given criteria. The sizes/shapes of
+		/// Calculates the average value of all cells that match the given criterion. The sizes/shapes of
 		/// <paramref name="cellsToCompare"/> and <paramref name="potentialCellsToAverage"/> do not have to be the same;
 		/// The size and shape of <paramref name="cellsToCompare"/> is applied to <paramref name="potentialCellsToAverage"/>,
 		/// using the first cell in <paramref name="potentialCellsToAverage"/> as a reference point.
 		/// </summary>
-		/// <param name="cellsToCompare">The range of cells to compare against the <paramref name="comparisonCriteria"/>.</param>
-		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the average calculation.</param>
+		/// <param name="cellsToCompare">The range of cells to compare against the <paramref name="comparisonCriterion"/>.</param>
+		/// <param name="comparisonCriterion">The criterion dictating which cells should be included in the average calculation.</param>
 		/// <param name="potentialCellsToAverage">
-		///		If a cell in <paramref name="cellsToCompare"/> passes the criteria, then its
+		///		If a cell in <paramref name="cellsToCompare"/> passes the criterion, then its
 		///		corresponding cell in this cell range will be included in the average calculation.</param>
-		/// <returns>Returns the average for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
-		private CompileResult CalculateAverageUsingAverageRange(ExcelDataProvider.IRangeInfo cellsToCompare, string comparisonCriteria, ExcelDataProvider.IRangeInfo potentialCellsToAverage)
+		/// <returns>Returns the average for all cells that pass the <paramref name="comparisonCriterion"/>.</returns>
+		private CompileResult CalculateAverageUsingAverageRange(ExcelDataProvider.IRangeInfo cellsToCompare, object comparisonCriterion, ExcelDataProvider.IRangeInfo potentialCellsToAverage)
 		{
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
-			foreach (var cell in cellsToCompare)
+
+			var startingRowForComparison = cellsToCompare.Address._fromRow;
+			var startingColumnForComparison = cellsToCompare.Address._fromCol;
+			var endingRowForComparison = cellsToCompare.Address._toRow;
+			var endingColumnForComparison = cellsToCompare.Address._toCol;
+
+			// This will always look at every cell in the given range of cells to compare. This is done instead of
+			// using the iterator provided by the range of cells to compare because the collection of cells that it iterates over
+			// does not include empty cells that have not been set since the workbook's creation. This function
+			// wants to consider empty cells for comparing with the criterion, but it can be better optimized.
+			// A similar problem and optimization opportunity exists in the AverageIfs, SumIf, SumIfs, CountIf, and CountIfs functions.
+			for (var currentRow = startingRowForComparison; currentRow <= endingRowForComparison; currentRow++)
 			{
-				if (comparisonCriteria != null && IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(cell.Value), comparisonCriteria))
+				for (var currentColumn = startingColumnForComparison; currentColumn <= endingColumnForComparison; currentColumn++)
 				{
-					var relativeRow = cell.Row - cellsToCompare.Address._fromRow;
-					var relativeColumn = cell.Column - cellsToCompare.Address._fromCol;
-					var valueOfCellToAverage = potentialCellsToAverage.GetOffset(relativeRow, relativeColumn);
-					if (valueOfCellToAverage is ExcelErrorValue cellError)
-						return new CompileResult(cellError.Type);
-					if (valueOfCellToAverage is string || valueOfCellToAverage is bool || valueOfCellToAverage == null)
-						continue;
-					sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToAverage, true);
-					numberOfValidValues++;
+					var currentCellValue = this.GetFirstArgument(cellsToCompare.GetValue(currentRow, currentColumn));
+					if (IfHelper.ObjectMatchesCriterion(currentCellValue, comparisonCriterion))
+					{
+						var relativeRow = currentRow - startingRowForComparison;
+						var relativeColumn = currentColumn - startingColumnForComparison;
+						var valueOfCellToAverage = potentialCellsToAverage.GetOffset(relativeRow, relativeColumn);
+						if (valueOfCellToAverage is ExcelErrorValue cellError)
+							return new CompileResult(cellError.Type);
+						else if (ConvertUtil.IsNumeric(valueOfCellToAverage, true))
+						{
+							sumOfValidValues += ConvertUtil.GetValueDouble(valueOfCellToAverage);
+							numberOfValidValues++;
+						}
+					}
 				}
 			}
 			if (numberOfValidValues == 0)
@@ -118,27 +120,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		}
 
 		/// <summary>
-		/// Calculates the average value of all cells that match the given criteria.
+		/// Calculates the average value of all cells that match the given criterion.
 		/// </summary>
 		/// <param name="potentialCellsToAverage">
-		///		The cell range to compare against the given <paramref name="comparisonCriteria"/>
-		///		If a cell passes the criteria, then its value is included in the average calculation.</param>
-		/// <param name="comparisonCriteria">The criteria dictating which cells should be included in the average calculation.</param>
-		/// <returns>Returns the average value for all cells that pass the <paramref name="comparisonCriteria"/>.</returns>
-		private CompileResult CalculateAverageUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToAverage, string comparisonCriteria)
+		///		The cell range to compare against the given <paramref name="comparisonCriterion"/>
+		///		If a cell passes the criterion, then its value is included in the average calculation.</param>
+		/// <param name="comparisonCriterion">The criterion dictating which cells should be included in the average calculation.</param>
+		/// <returns>Returns the average value for all cells that pass the <paramref name="comparisonCriterion"/>.</returns>
+		private CompileResult CalculateAverageUsingRange(ExcelDataProvider.IRangeInfo potentialCellsToAverage, object comparisonCriterion)
 		{
 			var sumOfValidValues = 0d;
 			var numberOfValidValues = 0;
-			foreach (var cell in potentialCellsToAverage)
+			var valuesToAverage = potentialCellsToAverage.Select(cell => this.GetFirstArgument(cell.Value)).Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, comparisonCriterion));
+			foreach (var value in valuesToAverage)
 			{
-				if (comparisonCriteria != null && IfHelper.IsNumeric(this.GetFirstArgument(cell.Value), true) &&
-						IfHelper.ObjectMatchesCriteria(this.GetFirstArgument(cell.Value), comparisonCriteria))
+				if (value is ExcelErrorValue cellErrorValue)
+					return new CompileResult(cellErrorValue.Type);
+				else if (ConvertUtil.IsNumeric(value, true))
 				{
-					sumOfValidValues += cell.ValueDouble;
+					sumOfValidValues += ConvertUtil.GetValueDouble(value);
 					numberOfValidValues++;
 				}
-				else if (cell.Value is ExcelErrorValue candidateError)
-					return new CompileResult(candidateError.Type);
 			}
 			if (numberOfValidValues == 0)
 				return new CompileResult(eErrorType.Div0);

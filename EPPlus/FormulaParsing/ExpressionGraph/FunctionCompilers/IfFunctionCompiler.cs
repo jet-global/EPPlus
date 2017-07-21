@@ -71,7 +71,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 			if (v is ExcelDataProvider.IRangeInfo)
 			{
 				var r = ((ExcelDataProvider.IRangeInfo)v);
-				if (r.GetNCells() > 1)
+				if (r.GetTotalCellCount() > 1)
 				{
 					return new CompileResult(eErrorType.Value);
 				}

@@ -134,7 +134,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\YearFracTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\YearTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\FunctionRepositoryTests.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\CountIfsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\CountIfsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AcoshTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AcosTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AcothTests.cs" />
@@ -210,6 +210,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarpaTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarPTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarSTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\CountBlankTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfsTests.cs" />
@@ -328,6 +329,7 @@
     <Compile Include="Utils\AddressUtilityTests.cs" />
     <Compile Include="Utils\GuardingTests.cs" />
     <Compile Include="Utils\SqRefUtilityTests.cs" />
+    <Compile Include="Utils\InternationalizationUtilityTests.cs" />
     <Compile Include="VBA.cs" />
     <Compile Include="WorkbookTests.cs" />
     <Compile Include="WorksheetsTests.cs" />

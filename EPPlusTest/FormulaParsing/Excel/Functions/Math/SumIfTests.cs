@@ -344,10 +344,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells[8, 3].Formula = "SUMIF(C2:C6,\"<\"&B8,D2:D6)";
 			_worksheet.Calculate();
 			Assert.AreEqual(3.0, _worksheet.Cells[8, 3].Value);
-			var shortDatePattern = System.Globalization.DateTimeFormatInfo.CurrentInfo.ShortDatePattern;
-			_worksheet.Cells[8, 3].Formula = string.Format("SUMIF(C2:C6,\"<{0}\",D2:D6)", new DateTime(2013, 1, 1).ToString(shortDatePattern));
-			_worksheet.Calculate();
-			Assert.AreEqual(3.0, _worksheet.Cells[8, 3].Value);
 		}
 
 		[TestMethod]
@@ -418,7 +414,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells[5, 4].Formula = "SUMIF(B2,\"Value\",B3)";
 			_worksheet.Calculate();
 			Assert.AreEqual(0d, _worksheet.Cells[4, 4].Value);
-			Assert.AreEqual(0d, _worksheet.Cells[5, 4].Value);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)_worksheet.Cells[5, 4].Value).Type);
 		}
 
 		[TestMethod]
@@ -434,10 +430,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			_worksheet.Cells[5, 4].Formula = "SUMIF(B2:D2,\"Value\",B3:D3)";
 			_worksheet.Calculate();
 			Assert.AreEqual(0d, _worksheet.Cells[4, 4].Value);
-			Assert.AreEqual(0d, _worksheet.Cells[5, 4].Value);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)_worksheet.Cells[5, 4].Value).Type);
 		}
 
-		#region Additional tests for the SUMIF Function
 		[TestMethod]
 		public void SumIfWithRangeWithOnlyNumbersReturnsCorrectValue()
 		{
@@ -730,7 +725,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Cells["B3"].Value = 2;
 				worksheet.Cells["B4"].Formula = "SUMIF(B1:B3, \"<>-10\", $B$1)";
 				worksheet.Calculate();
-				Assert.AreEqual(6d, worksheet.Cells["B4"].Value);
+				Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)worksheet.Cells["B4"].Value).Type);
 			}
 		}
 
@@ -1364,7 +1359,44 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				Assert.AreEqual(0d, worksheet.Cells["C12"].Value);
 			}
 		}
-		#endregion
+
+		[TestMethod]
+		public void SumIfWithNullCriteriaReturns0()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "SUMIF(C2:C3,1,D2:D3)";
+				worksheet.Cells["B3"].Formula = "SUMIF(C4:C5,,D2:D3)";
+				worksheet.Cells["B4"].Formula = "SUMIF(C4:C5,C5,D2:D3)";
+				worksheet.Cells["C2"].Value = 1;
+				worksheet.Cells["C3"].Value = 1;
+				worksheet.Cells["C4"].Value = 0;
+				worksheet.Cells["C5"].Value = null;
+				worksheet.Cells["D2"].Value = 1.5;
+				worksheet.Cells["D3"].Value = 2.5;
+				worksheet.Calculate();
+				Assert.AreEqual(4d, worksheet.Cells["B2"].Value);
+				Assert.AreEqual(1.5, worksheet.Cells["B3"].Value);
+				Assert.AreEqual(1.5, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfWithUnsetEmptyCellsInCriteria()
+		{
+			// This test exists to ensure that cells that have never been set are still 
+			// being compared against the criterion.
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "SUMIF(D2:D3,\"\",C2:C3)";
+				worksheet.Cells["C2"].Value = 1;
+				worksheet.Cells["C3"].Value = 2;
+				worksheet.Calculate();
+				Assert.AreEqual(3d, worksheet.Cells["B2"].Value);
+			}
+		}
 		#endregion
 	}
 }
