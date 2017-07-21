@@ -14,6 +14,8 @@
 	* Better support for Excel-generated Charts,
 	* Bugfixes to the CellStore, ExcelWorkbook/Worksheet, and other core classes,
 	* Other fixes and improvements as noted in the commit history.
+* This fork is NOT the source code for the EPPlus NuGet Package; we do not maintain the NuGet Package.
+	* The source code for the NuGet can be found [here](https://epplus.codeplex.com/).
 
 ### Why these changes are not on the mainline:
 * There are some half-cooked features in this fork (We've added support for updating existing charts, but not inserting new charts, for example); we need these features, but Jan and swmal are understandably hesitant to include these half-cooked features in the EPPlus mainline. 
