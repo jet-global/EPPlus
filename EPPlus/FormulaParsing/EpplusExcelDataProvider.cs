@@ -44,7 +44,7 @@ namespace OfficeOpenXml.FormulaParsing
 				_cell = new CellInfo(_ws, _values);
 			}
 
-			public int GetNCells()
+			public int GetTotalCellCount()
 			{
 				return ((_toRow - _fromRow) + 1) * ((_toCol - _fromCol) + 1);
 			}

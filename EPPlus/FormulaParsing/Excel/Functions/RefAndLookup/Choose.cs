@@ -76,7 +76,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			get { return true; }
 		}
 
-		public int GetNCells()
+		public int GetTotalCellCount()
 		{
 			return 0;
 		}

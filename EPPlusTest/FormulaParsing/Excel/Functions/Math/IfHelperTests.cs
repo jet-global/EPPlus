@@ -24,15 +24,16 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System.Globalization;
+using System.Linq;
+using System.Threading;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Numeric;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using static OfficeOpenXml.FormulaParsing.ExcelDataProvider;
 using OfficeOpenXml.FormulaParsing;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
+using static OfficeOpenXml.FormulaParsing.ExcelDataProvider;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
@@ -41,7 +42,116 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 	{
 		#region IfHelper Function (Execute) Tests
 		[TestMethod]
-		public void CalculateCriteriaWithSameRowCellReferenceReturnsCorrectValue()
+		public void ObjectMatchesCriteriaHandlesErrorValuesAsCriteria()
+		{
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				var us = CultureInfo.CreateSpecificCulture("en-US");
+				Thread.CurrentThread.CurrentCulture = us;
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+					worksheet.Cells["C2"].Formula = "DAY(\"word\")"; // Evaluates to #VALUE!.
+					worksheet.Cells["C3"].Value = "#VALUE!";
+					worksheet.Cells["C4"].Value = "#VALUE";
+					worksheet.Cells["B2"].Formula = "COUNTIF(C2,\"=#VALUE!\")";
+					worksheet.Cells["B3"].Formula = "COUNTIF(C3,\"=#VALUE!\")";
+					worksheet.Cells["B4"].Formula = "COUNTIF(C2,\"#VALUE!\")";
+					worksheet.Cells["B5"].Formula = "COUNTIF(C3,\"#VALUE!\")";
+					worksheet.Cells["B6"].Formula = "COUNTIF(C2,\"=#VALUE\")";
+					worksheet.Cells["B7"].Formula = "COUNTIF(C3,\"=#VALUE\")";
+					worksheet.Cells["B8"].Formula = "COUNTIF(C4,\"=#VALUE\")";
+					worksheet.Calculate();
+					Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B6"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B7"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B8"].Value);
+				}
+				var de = CultureInfo.CreateSpecificCulture("de-DE");
+				Thread.CurrentThread.CurrentCulture = de;
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+					worksheet.Cells["C2"].Formula = "DAY(\"word\")"; // Evaluates to #VALUE!.
+					worksheet.Cells["C3"].Value = "#WERT!"; // Note that #WERT! is the German translation for #VALUE!.
+					worksheet.Cells["C4"].Value = "#WERT";
+					worksheet.Cells["B2"].Formula = "COUNTIF(C2,\"=#WERT!\")";
+					worksheet.Cells["B3"].Formula = "COUNTIF(C3,\"=#WERT!\")";
+					worksheet.Cells["B4"].Formula = "COUNTIF(C2,\"#WERT!\")";
+					worksheet.Cells["B5"].Formula = "COUNTIF(C3,\"#WERT!\")";
+					worksheet.Cells["B6"].Formula = "COUNTIF(C2,\"=#WERT\")";
+					worksheet.Cells["B7"].Formula = "COUNTIF(C3,\"=#WERT\")";
+					worksheet.Cells["B8"].Formula = "COUNTIF(C4,\"=#WERT\")";
+					worksheet.Calculate();
+					Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B6"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B7"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B8"].Value);
+				}
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
+		[TestMethod]
+		public void ObjectMatchesCriteriaHandlesBooleanValuesAsCriteria()
+		{
+			var currentCulture = CultureInfo.CurrentCulture;
+			try
+			{
+				var us = CultureInfo.CreateSpecificCulture("en-US");
+				Thread.CurrentThread.CurrentCulture = us;
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+					worksheet.Cells["C2"].Value = true;
+					worksheet.Cells["C3"].Value = "TRUE";
+					worksheet.Cells["B2"].Formula = "COUNTIF(C2, TRUE)";
+					worksheet.Cells["B3"].Formula = "COUNTIF(C3, TRUE)";
+					worksheet.Cells["B4"].Formula = "COUNTIF(C2,\"TRUE\")";
+					worksheet.Cells["B5"].Formula = "COUNTIF(C3,\"TRUE\")";
+					worksheet.Cells["B6"].Formula = "COUNTIF(C2,\"=TRUE\")";
+					worksheet.Cells["B7"].Formula = "COUNTIF(C3,\"=TRUE\")";
+					worksheet.Calculate();
+					Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B4"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B5"].Value);
+					Assert.AreEqual(1d, worksheet.Cells["B6"].Value);
+					Assert.AreEqual(0d, worksheet.Cells["B7"].Value);
+				}
+				var de = CultureInfo.CreateSpecificCulture("de-de");
+				Thread.CurrentThread.CurrentCulture = de;
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+					worksheet.Cells["C2"].Value = true;
+					worksheet.Cells["C3"].Value = "WAHR"; // WAHR is the German translation for TRUE.
+					worksheet.Cells["B2"].Formula = "COUNTIF(C2, WAHR)";
+					worksheet.Cells["B3"].Formula = "COUNTIF(C3, WAHR)";
+					worksheet.Cells["B4"].Formula = "COUNTIF(C2, \"WAHR\")";
+					worksheet.Cells["B5"].Formula = "COUNTIF(C3, \"WAHR\")";
+					worksheet.Cells["B6"].Formula = "COUNTIF(C2, \"=WAHR\")";
+					worksheet.Cells["B7"].Formula = "COUNTIF(C3, \"=WAHR\")";
+				}
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
+		}
+
+		[TestMethod]
+		public void ExtractCriterionFromCellRangeWithSameRowCellReferenceReturnsCorrectValue()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -54,13 +164,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				IRangeInfo testRange = provider.GetRange(worksheet.Name, 1, 2, 3, 2);
 				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 2, 2, 2, 2);
 				var address = firstRange.Address;
-				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				var arguments = FunctionsHelper.CreateArgs(firstRange, testRange);
+				var result = IfHelper.ExtractCriterionFromCellRange(arguments.ElementAt(1), worksheet, address._fromRow, address._fromCol);
 				Assert.AreEqual(10, result);
 			}
 		}
 
 		[TestMethod]
-		public void CalculateCriteriaWithSameColumnCellReferenceReturnsCorrectValue()
+		public void ExtractCriterionFromCellRangeWithSameColumnCellReferenceReturnsCorrectValue()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -73,13 +184,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				IRangeInfo testRange = provider.GetRange(worksheet.Name, 7, 5, 7, 7);
 				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 6, 6, 6, 6);
 				var address = firstRange.Address;
-				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				var arguments = FunctionsHelper.CreateArgs(firstRange, testRange);
+				var result = IfHelper.ExtractCriterionFromCellRange(arguments.ElementAt(1), worksheet, address._fromRow, address._fromCol);
 				Assert.AreEqual(10, result);
 			}
 		}
 
 		[TestMethod]
-		public void CalculateCriteriaWithNonMatchingRowReturnsZero()
+		public void ExtractCriterionFromCellRangeWithNonMatchingRowReturnsZero()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -92,13 +204,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				IRangeInfo testRange = provider.GetRange(worksheet.Name, 1, 2, 3, 2);
 				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 5, 5, 5, 5);
 				var address = firstRange.Address;
-				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				var arguments = FunctionsHelper.CreateArgs(firstRange, testRange);
+				var result = IfHelper.ExtractCriterionFromCellRange(arguments.ElementAt(1), worksheet, address._fromRow, address._fromCol);
 				Assert.AreEqual(0, result);
 			}
 		}
 
 		[TestMethod]
-		public void CalculateCriteriaWithNonMatchingColReturnsZero()
+		public void ExtractCriterionFromCellRangeWithNonMatchingColReturnsZero()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -111,13 +224,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				IRangeInfo testRange = provider.GetRange(worksheet.Name, 7, 5, 7, 7);
 				IRangeInfo firstRange = provider.GetRange(worksheet.Name, 8, 8, 8, 8);
 				var address = firstRange.Address;
-				var result = IfHelper.CalculateCriteria(FunctionsHelper.CreateArgs(firstRange, testRange), worksheet, address._fromRow, address._fromCol);
+				var arguments = FunctionsHelper.CreateArgs(firstRange, testRange);
+				var result = IfHelper.ExtractCriterionFromCellRange(arguments.ElementAt(1), worksheet, address._fromRow, address._fromCol);
 				Assert.AreEqual(0, result);
 			}
 		}
 
 		[TestMethod]
-		public void CalculateCriteriaWithObjectReturnsCorrectValue()
+		public void ExtractCriterionFromCellRangeWithObjectReturnsCorrectValue()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -134,6 +248,32 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				worksheet.Calculate();
 				Assert.AreEqual(3d, worksheet.Cells["H13"].Value);
 			}
+		}
+
+		[TestMethod]
+		public void ObjectMatchesCriteriaWithInequalitiesAndErrorValues()
+		{
+			var nullError = ExcelErrorValue.Create(eErrorType.Null);
+			var div0Error = ExcelErrorValue.Create(eErrorType.Div0);
+			var valueError = ExcelErrorValue.Create(eErrorType.Value);
+			var refError = ExcelErrorValue.Create(eErrorType.Ref);
+			var nameError = ExcelErrorValue.Create(eErrorType.Name);
+			var numError = ExcelErrorValue.Create(eErrorType.Num);
+			var naError = ExcelErrorValue.Create(eErrorType.NA);
+			var nullLessThanDiv = IfHelper.ObjectMatchesCriterion(nullError, "<#DIV/0!");
+			var divLessThanValue = IfHelper.ObjectMatchesCriterion(div0Error, "<#VALUE!"); ;
+			var valueLessThanRef = IfHelper.ObjectMatchesCriterion(valueError, "<#REF!"); ;
+			var refLessThanName = IfHelper.ObjectMatchesCriterion(refError, "<#NAME?"); ;
+			var nameLessThanNum = IfHelper.ObjectMatchesCriterion(nameError, "<#NUM!"); ;
+			var numLessThanNA = IfHelper.ObjectMatchesCriterion(numError, "<#N/A");
+			var naGreaterThanNum = IfHelper.ObjectMatchesCriterion(naError, ">#NUM!"); ;
+			Assert.AreEqual(nullLessThanDiv, true);
+			Assert.AreEqual(divLessThanValue, true);
+			Assert.AreEqual(valueLessThanRef, true);
+			Assert.AreEqual(refLessThanName, true);
+			Assert.AreEqual(nameLessThanNum, true);
+			Assert.AreEqual(numLessThanNA, true);
+			Assert.AreEqual(naGreaterThanNum, true);
 		}
 		#endregion
 	}
