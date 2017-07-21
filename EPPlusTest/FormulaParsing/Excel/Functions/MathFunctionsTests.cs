@@ -504,53 +504,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void ProductShouldPoundValueWhenThereAreTooFewArguments()
-		{
-			var func = new Product();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void ProductShouldMultiplyArguments()
-		{
-			var func = new Product();
-			var args = FunctionsHelper.CreateArgs(2d, 2d, 4d);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(16d, result.Result);
-		}
-
-		[TestMethod]
-		public void ProductShouldHandleEnumerable()
-		{
-			var func = new Product();
-			var args = FunctionsHelper.CreateArgs(2d, 2d, FunctionsHelper.CreateArgs(4d, 2d));
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(32d, result.Result);
-		}
-
-		[TestMethod]
-		public void ProductShouldIgnoreHiddenValuesIfIgnoreHiddenIsTrue()
-		{
-			var func = new Product();
-			func.IgnoreHiddenValues = true;
-			var args = FunctionsHelper.CreateArgs(2d, 2d, FunctionsHelper.CreateArgs(4d, 2d));
-			args.ElementAt(1).SetExcelStateFlag(ExcelCellState.HiddenCell);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(16d, result.Result);
-		}
-
-		[TestMethod]
-		public void ProductShouldHandleFirstItemIsEnumerable()
-		{
-			var func = new Product();
-			var args = FunctionsHelper.CreateArgs(FunctionsHelper.CreateArgs(4d, 2d), 2d, 2d);
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual(32d, result.Result);
-		}
-
-		[TestMethod]
 		public void VarShouldReturnCorrectResult()
 		{
 			var func = new Var();
