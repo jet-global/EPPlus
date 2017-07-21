@@ -23,18 +23,59 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Calculates variance based on the entire population (ignores logical values and text in the population).
+	/// </summary>
 	public class VarP : HiddenValuesHandlingFunction
 	{
+		/// <summary>
+		/// Variance measures how far a data set is spread out.
+		/// Logical values, and text representations of numbers that you type directly into the list of arguments are counted.
+		/// If an argument is an array or reference, only numbers in that array or reference are counted. Empty cells, logical values, text, or error values in the array or reference are ignored.
+		/// </summary>
+		/// <param name="arguments">Up too 254 individual arguments.</param>
+		/// <param name="context">Unused, this is information about where the function is being executed.</param>
+		/// <returns>The variance based on an entire population.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var args = ArgsToDoubleEnumerable(IgnoreHiddenValues, false, arguments, context);
-			return new CompileResult(VarMethods.VarP(args), DataType.Decimal);
+			//Note: This follows the Functionality of excel which is diffrent from the excel documentation.
+			//If you pass in a null Var.P(1,1,1,,) it will treat those emtpy spaces as zeros insted of ignoring them.
+			List<double> listToDoVarianceOn = new List<double>();
+			bool onlyStringInputsGiven = true;
+			foreach (var item in arguments)
+			{
+				if (item.ValueAsRangeInfo != null)
+				{
+					foreach (var cell in item.ValueAsRangeInfo)
+					{
+						if (StatisticsFunctionHelper.TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, cell, context, false, out double numberToAddToList, out bool onlyStringInputsGiven1))
+							listToDoVarianceOn.Add(numberToAddToList);
+						onlyStringInputsGiven = onlyStringInputsGiven1;
+					}
+				}
+				else
+				{
+					if (StatisticsFunctionHelper.TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
+						listToDoVarianceOn.Add(numberToAddToList);
+					onlyStringInputsGiven = onlyStringInputsGiven2;
+					if (item.ValueFirst == null)
+						listToDoVarianceOn.Add(0.0);
+				}
+			}
+			if (onlyStringInputsGiven)
+				return new CompileResult(eErrorType.Value);
+			if (listToDoVarianceOn.Count() == 0)
+				return new CompileResult(eErrorType.Div0);
+			if (!StatisticsFunctionHelper.TryVarPopulationForAValueErrorCheck(listToDoVarianceOn, out double variance))
+				return new CompileResult(eErrorType.Value);
+			return new CompileResult(variance, DataType.Decimal);
 		}
 	}
 }

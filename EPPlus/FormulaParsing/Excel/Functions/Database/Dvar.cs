@@ -50,6 +50,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Database
 			var values = GetMatchingValues(arguments, context);
 			if (!values.Any()) return CreateResult(0d, DataType.Integer);
 			return CreateResult(VarMethods.Var(values), DataType.Integer);
+			//return CreateResult(VarMethods.Var(values), DataType.Integer); StatisticsFunctionHelper.VarianceForASample(values)
 		}
 	}
 }

@@ -23,6 +23,7 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
@@ -33,8 +34,31 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var args = ArgsToDoubleEnumerable(IgnoreHiddenValues, false, arguments, context);
-			return new CompileResult(VarMethods.Var(args), DataType.Decimal);
+			List<double> listToDoVarianceOn = new List<double>();
+
+			foreach (var item in arguments)
+			{
+				if (item.ValueAsRangeInfo != null)
+				{
+					foreach (var cell in item.ValueAsRangeInfo)
+					{
+						if (StatisticsFunctionHelper.TryToParseValuesFromInputArgumentByRefrenceOrRange(this.IgnoreHiddenValues, cell, context, false, out double numberToAddToList, out bool onlyStringInputsGiven1))
+							listToDoVarianceOn.Add(numberToAddToList);
+					}
+				}
+				else
+				{
+					if (StatisticsFunctionHelper.TryToParseValuesFromInputArgument(this.IgnoreHiddenValues, item, context, out double numberToAddToList, out bool onlyStringInputsGiven2))
+						listToDoVarianceOn.Add(numberToAddToList);
+					if (item.ValueFirst == null)
+						listToDoVarianceOn.Add(0.0);
+				}
+			}
+			if (listToDoVarianceOn.Count() == 0)
+				return new CompileResult(eErrorType.Div0);
+			if (!StatisticsFunctionHelper.TryVarSamplePopulationForAValueErrorCheck(listToDoVarianceOn, out double variance))
+				return new CompileResult(eErrorType.Value);
+			return new CompileResult(variance, DataType.Decimal);
 		}
 	}
 }

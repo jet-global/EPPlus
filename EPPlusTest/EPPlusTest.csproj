@@ -185,6 +185,10 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\SmallTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RandBetweenTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RandTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\StdevaTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\StdevpaTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\StdevPTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\StdevSTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\DegreesTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RadiansTests.cs" />
@@ -201,6 +205,10 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\AverageIfsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountATests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\VaraTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\VarpaTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\VarPTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\VarSTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountBlankTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />

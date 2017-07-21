@@ -73,7 +73,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["pi"] = new Pi();
 			this.Functions["product"] = new Product();
 			this.Functions["ceiling"] = new Ceiling();
-			this.Functions["ceiling.math"] = new CeilingMath();
 			this.Functions["count"] = new Count();
 			this.Functions["counta"] = new CountA();
 			this.Functions["countblank"] = new CountBlank();
@@ -82,7 +81,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["fact"] = new Fact();
 			this.Functions["factdouble"] = new FactDouble();
 			this.Functions["floor"] = new Floor();
-			this.Functions["floor.math"] = new FloorMath();
 			this.Functions["sin"] = new Sin();
 			this.Functions["sinh"] = new Sinh();
 			this.Functions["sum"] = new Sum();
@@ -92,8 +90,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["sumsq"] = new Sumsq();
 			this.Functions["stdev"] = new Stdev();
 			this.Functions["stdevp"] = new StdevP();
-			this.Functions["stdev.s"] = new Stdev();
+			this.Functions["stdev.s"] = new StdevS();
 			this.Functions["stdev.p"] = new StdevP();
+			this.Functions["Stdevpa"] = new Stdevpa();
+			this.Functions["Stdeva"] = new Stdeva();
 			this.Functions["subtotal"] = new Subtotal();
 			this.Functions["exp"] = new Exp();
 			this.Functions["log"] = new Log();
@@ -128,6 +128,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["acosh"] = new Acosh();
 			this.Functions["var"] = new Var();
 			this.Functions["varp"] = new VarP();
+			this.Functions["var.p"] = new VarP();
+			this.Functions["var.s"] = new VarS();
+			this.Functions["vara"] = new Vara();
+			this.Functions["varpa"] = new Varpa();
 			this.Functions["large"] = new Large();
 			this.Functions["small"] = new Small();
 			this.Functions["degrees"] = new Degrees();
@@ -140,6 +144,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["coth"] = new Coth();
 			this.Functions["acot"] = new Acot();
 			this.Functions["acoth"] = new Acoth();
+			this.Functions["floor.math"] = new FloorMath();
+			this.Functions["ceiling.math"] = new CeilingMath();
 			// Information
 			this.Functions["isblank"] = new IsBlank();
 			this.Functions["isnumber"] = new IsNumber();
