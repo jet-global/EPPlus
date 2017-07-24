@@ -4063,7 +4063,7 @@ namespace OfficeOpenXml
 				pt.SetXmlNodeString("d:location/@ref", pt.Address.Address);
 				if (pt.CacheDefinition.SourceRange != null && !pt.CacheDefinition.SourceRange.IsName)
 				{
-					pt.CacheDefinition.SetXmlNodeString(ExcelPivotCacheDefinition._sourceAddressPath, pt.CacheDefinition.SourceRange.Address);
+					pt.CacheDefinition.SetXmlNodeString(ExcelPivotCacheDefinition._sourceAddressPath, pt.CacheDefinition.SourceRange.FullAddress);
 				}
 
 				var fields =
