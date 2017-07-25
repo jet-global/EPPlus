@@ -4063,10 +4063,10 @@ namespace OfficeOpenXml
 				pt.SetXmlNodeString("d:location/@ref", pt.Address.Address);
 				if (pt.CacheDefinition.SourceRange != null && !pt.CacheDefinition.SourceRange.IsName)
 				{
-					string worksheet = pt.CacheDefinition.GetXmlNodeString(ExcelPivotCacheDefinition._sourceWorksheetPath);
-					string address = !string.IsNullOrEmpty(worksheet) ?
-						pt.CacheDefinition.SourceRange.Address : 
-						pt.CacheDefinition.SourceRange.FullAddress;
+					string pivotTableReferenceSheet = pt.CacheDefinition.GetXmlNodeString(ExcelPivotCacheDefinition._sourceWorksheetPath);
+					string address = string.IsNullOrEmpty(pivotTableReferenceSheet) ?
+						pt.CacheDefinition.SourceRange.FullAddress :
+						pt.CacheDefinition.SourceRange.Address;
 					pt.CacheDefinition.SetXmlNodeString(ExcelPivotCacheDefinition._sourceAddressPath, address);
 				}
 
