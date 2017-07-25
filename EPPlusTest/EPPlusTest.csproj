@@ -98,6 +98,7 @@
     <Compile Include="Calculation.cs" />
     <Compile Include="ConditionalFormatting\ConditionalFormatting.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerCacheTest.cs" />
+    <Compile Include="Drawing\Slicers\ExcelSlicerDrawingTest.cs" />
     <Compile Include="ExcelAddressTest.cs" />
     <Compile Include="ExcelCellBaseTest.cs" />
     <Compile Include="ExcelNamedRangeCollectionTest.cs" />
@@ -341,11 +342,17 @@
     <None Include="Workbooks\FormulaTest.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Workbooks\PivotTableWithReference.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Workbooks\SharedFormulasColumns.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Workbooks\SharedFormulasRows.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Workbooks\SlicerWithSpecialCharacterName.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

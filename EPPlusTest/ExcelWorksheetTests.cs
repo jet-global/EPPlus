@@ -5383,6 +5383,21 @@ namespace EPPlusTest
 				file.Delete();
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"Workbooks\PivotTableWithReference.xlsx")]
+		public void SavePivotTableWithCrossSheetReference()
+		{
+			var file = new FileInfo("PivotTableWithReference.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				package.Save();
+				var pivotTable = package.Workbook.Worksheets.ElementAt(1).PivotTables.First();
+				var refAddress = pivotTable.CacheDefinition.GetXmlNodeString(ExcelPivotCacheDefinition._sourceAddressPath);
+				Assert.AreEqual($"'Venta diaria'!$I$9:$U$15", refAddress);
+			}
+		}
 		#endregion
 
 		#region AutoFilters Tests

@@ -82,7 +82,21 @@ namespace OfficeOpenXml.Drawing.Slicers
 		internal ExcelSlicerDrawing(ExcelDrawings drawings, XmlNode node) : base(drawings, node, "xdr:wsDr/mc:AlternateContent/mc:Choice/xdr:GraphicFrame/a:Graphic/a:graphicData/sle:slicer/@name")
 		{
 			this.Worksheet = drawings.Worksheet;
-			this.Slicer = this.Worksheet.Slicers.Slicers.First(slicer => slicer.Name == this.Name);
+			this.Slicer = this.Worksheet.Slicers.Slicers.First(slicer => this.CompareSlicerName(slicer.Name, this.Name));
+		}
+		#endregion
+
+		#region Private Methods
+		private bool CompareSlicerName(string name1, string name2)
+		{
+			// Excel will sometimes encode line feed characters as unicode rather than XML encoding,
+			// so known problem unicode characters (such as line feed) are scrubbed.
+			return this.StandardizeNewlineFormats(name1) == this.StandardizeNewlineFormats(name2);
+		}
+
+		private string StandardizeNewlineFormats(string str)
+		{
+			return str.Replace("_x000a_", "\n");
 		}
 		#endregion
 	}
