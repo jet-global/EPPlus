@@ -5385,26 +5385,18 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"Workbooks\PivotTableWithReference.xlsx")]
 		public void SavePivotTableWithCrossSheetReference()
 		{
-			this._pck = new ExcelPackage();
-			string dataSheetName = "DataSheet";
-			string sourceRange = "A1:D4";
-			var dataSheet = this._pck.Workbook.Worksheets.Add(dataSheetName);
-			dataSheet.Cells["A1"].LoadFromArrays(new object[][] { new[] { "A", "B", "C", "D" } });
-			dataSheet.Cells["A2"].LoadFromArrays(new object[][]
+			var file = new FileInfo("PivotTableWithReference.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
 			{
-				new object [] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-				new object [] { 9, 8, 7 ,6, 5, 4, 3, 2, 1, 0 },
-				new object [] { 1, 1, 2, 3, 5, 8, 13, 21, 34, 55}
-			});
-			var pivotTableSheet = this._pck.Workbook.Worksheets.Add("PivotTableSheet");
-			var table = pivotTableSheet.Tables.Add(pivotTableSheet.Cells[sourceRange], "PivotData");
-			pivotTableSheet.PivotTables.Add(pivotTableSheet.Cells["G1"], dataSheet.Cells["A1:D4"], "PivotTable");
-			this._pck.Save();
-			var pivotTable = pivotTableSheet.PivotTables["PivotTable"];
-			var actualSourceAddress = pivotTable.CacheDefinition.GetXmlNodeString(ExcelPivotCacheDefinition._sourceAddressPath);
-			Assert.AreEqual($"'{dataSheetName}'!{sourceRange}", actualSourceAddress);
+				package.Save();
+				var pivotTable = package.Workbook.Worksheets.ElementAt(1).PivotTables.First();
+				var refAddress = pivotTable.CacheDefinition.GetXmlNodeString(ExcelPivotCacheDefinition._sourceAddressPath);
+				Assert.AreEqual($"'Venta diaria'!$I$9:$U$15", refAddress);
+			}
 		}
 		#endregion
 

@@ -91,10 +91,10 @@ namespace OfficeOpenXml.Drawing.Slicers
 		{
 			// Excel will sometimes encode line feed characters as unicode rather than XML encoding,
 			// so known problem unicode characters (such as line feed) are scrubbed.
-			return this.ReplaceSpecialCharacters(name1) == this.ReplaceSpecialCharacters(name2);
+			return this.StandardizeNewlineFormats(name1) == this.StandardizeNewlineFormats(name2);
 		}
 
-		private string ReplaceSpecialCharacters(string str)
+		private string StandardizeNewlineFormats(string str)
 		{
 			return str.Replace("_x000a_", "\n");
 		}
