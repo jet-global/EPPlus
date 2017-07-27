@@ -136,7 +136,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var result = 0d;
 			foreach (var value in valueList)
 			{
-				if (result == 0d && value > 0d)
+				if (result == 0d && value != 0d)
 				{
 					result = value;
 				}
