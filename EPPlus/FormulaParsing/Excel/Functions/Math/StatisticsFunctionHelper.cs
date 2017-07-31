@@ -70,9 +70,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					theInputContainedOnlyStrings = false;
 					return true;
 				}
-				if (ConvertUtil.TryParseObjectToDecimal(valueToParse.ValueDouble, out double dateTimeToOADate))
+				if (ConvertUtil.TryParseObjectToDecimal(valueToParse.ValueDouble, out double numericValue))
 				{
-					parsedValue = dateTimeToOADate;
+					parsedValue = numericValue;
 					theInputContainedOnlyStrings = false;
 					return true;
 				}
@@ -89,9 +89,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					theInputContainedOnlyStrings = false;
 					return false;
 				}
-				if (ConvertUtil.TryParseObjectToDecimal(valueToParse.ValueDouble, out double dateTimeToOADate))
+				if (ConvertUtil.TryParseObjectToDecimal(valueToParse.ValueDouble, out double numericValue))
 				{
-					parsedValue = dateTimeToOADate;
+					parsedValue = numericValue;
 					theInputContainedOnlyStrings = false;
 					return false;
 				}
