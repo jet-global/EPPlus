@@ -190,6 +190,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\StdevpaTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\StdevPTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\StdevSTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\DegreesTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\RadiansTests.cs" />
@@ -212,7 +213,6 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarSTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountBlankTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Logical\IfErrorTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultFactoryTests.cs" />
@@ -291,7 +291,6 @@
     <Compile Include="FormulaParsing\IntegrationTests\BuiltInFunctions\MathFunctionsTests.cs" />
     <Compile Include="FormulaParsing\IntegrationTests\BuiltInFunctions\RefAndLookupTests.cs" />
     <Compile Include="FormulaParsing\IntegrationTests\BuiltInFunctions\StringFunctionsTests.cs" />
-    <Compile Include="FormulaParsing\IntegrationTests\BuiltInFunctions\SubtotalTests.cs" />
     <Compile Include="FormulaParsing\IntegrationTests\BuiltInFunctions\TextFunctionsTests.cs" />
     <Compile Include="FormulaParsing\IntegrationTests\BuiltInFunctions\DatabaseTests.cs" />
     <Compile Include="FormulaParsing\IntegrationTests\ErrorHandling\SumTests.cs" />
