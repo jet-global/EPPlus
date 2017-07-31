@@ -55,7 +55,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 			if (dateArgument == null || monthsToAddArgument == null)
 				return new CompileResult(eErrorType.NA);
-			if (ConvertUtil.TryParseDateObjectToOADate(dateArgument, out result))
+			if (ConvertUtil.TryParseObjectToDecimal(dateArgument, out result))
 			{
 				if (result < 0)
 					return new CompileResult(eErrorType.Num);
@@ -72,7 +72,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				var monthCandidate = this.ArgToDecimal(arguments, 1);
 				monthsToAdd = (int)monthCandidate;
 			}
-			else if (ConvertUtil.TryParseDateObjectToOADate(monthsToAddArgument, out result))
+			else if (ConvertUtil.TryParseObjectToDecimal(monthsToAddArgument, out result))
 			{
 				monthsToAdd = (int)result;
 			}

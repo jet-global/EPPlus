@@ -57,13 +57,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (numberCandidate == null)
 				return this.CreateResult(0d, DataType.Decimal);
 
-			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
+			if (!ConvertUtil.TryParseObjectToDecimal(numberCandidate, out double number))
 				return new CompileResult(eErrorType.Value);
 
 			if (nDecimalsCandidate == null)
 				return this.CreateResult(System.Math.Floor(number), DataType.Decimal);
 
-			if (!ConvertUtil.TryParseDateObjectToOADate(nDecimalsCandidate, out double nDecimalsDouble))
+			if (!ConvertUtil.TryParseObjectToDecimal(nDecimalsCandidate, out double nDecimalsDouble))
 				return new CompileResult(eErrorType.Value);
 			var nDecimals = (int)nDecimalsDouble;
 

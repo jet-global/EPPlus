@@ -45,13 +45,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (this.ArgumentCountIsValid(arguments, 1) == false)
 				return new CompileResult(eErrorType.Value);
 			var argument = arguments.First().Value;
-			if (!ConvertUtil.TryParseDateObjectToOADate(argument, out double resultOfTryParseDateObjectToOADate))
+			if (!ConvertUtil.TryParseObjectToDecimal(argument, out double numericValue))
 				return new CompileResult(eErrorType.Value);
 
-			if (AdvancedTrigonometry.TryCheckIfCosecantWillHaveADivideByZeroError(resultOfTryParseDateObjectToOADate, out double cosecant))
+			if (AdvancedTrigonometry.TryCheckIfCosecantWillHaveADivideByZeroError(numericValue, out double cosecant))
 				return new CompileResult(eErrorType.Div0);
 
-			return this.CreateResult(AdvancedTrigonometry.HyperbolicCotangent(resultOfTryParseDateObjectToOADate), DataType.Decimal);
+			return this.CreateResult(AdvancedTrigonometry.HyperbolicCotangent(numericValue), DataType.Decimal);
 		}
 	}
 }

@@ -51,7 +51,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var serialNumberCandidate = arguments.ElementAt(0).Value;
-			if (ConvertUtil.TryParseDateObjectToOADate(serialNumberCandidate, out double serialNumber) &&
+			if (ConvertUtil.TryParseObjectToDecimal(serialNumberCandidate, out double serialNumber) &&
 				serialNumber < 1 && serialNumber >= 0) // Zero and fractions are special cases and require specific output.
 				return this.CreateResult(0, DataType.Integer);
 			else if (ConvertUtil.TryParseDateObject(serialNumberCandidate, out System.DateTime date, out eErrorType? error))

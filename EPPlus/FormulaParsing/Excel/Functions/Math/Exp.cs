@@ -52,7 +52,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(argumentError);
 			if (arguments.ElementAt(0).ValueIsExcelError)
 				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
-			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double exponent))
+			if (!ConvertUtil.TryParseObjectToDecimal(arguments.ElementAt(0).Value, out double exponent))
 				return new CompileResult(eErrorType.Value);
 			return this.CreateResult(System.Math.Exp(exponent), DataType.Decimal);
 		}

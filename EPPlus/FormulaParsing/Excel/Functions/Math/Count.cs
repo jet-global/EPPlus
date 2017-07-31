@@ -88,7 +88,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			switch (context)
 			{
 				case ValueContext.EnteredDirectly:
-					return (value == null || value is decimal || ConvertUtil.TryParseDateObjectToOADate(value, out double parsedValue));
+					return (value == null || value is decimal || ConvertUtil.TryParseObjectToDecimal(value, out double parsedValue));
 				case ValueContext.FromCellRange:
 				case ValueContext.FromArray:
 					return (!(value is bool) && this.IsNumeric(value));

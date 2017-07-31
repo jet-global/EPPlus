@@ -50,7 +50,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double number))
+			if (!ConvertUtil.TryParseObjectToDecimal(arguments.ElementAt(0).Value, out double number))
 				return new CompileResult(eErrorType.Value);
 			if (number < 0)
 				return new CompileResult(eErrorType.Num);

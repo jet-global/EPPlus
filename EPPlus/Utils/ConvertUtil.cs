@@ -105,7 +105,7 @@ namespace OfficeOpenXml.Utils
 		/// <param name="dateCandidate">The object to convert into an Excel OADate.</param>
 		/// <param name="OADate">The resulting Excel OADate that <paramref name="dateCandidate"/> was converted to.</param>
 		/// <returns>Return true if the given object was successfully parsed into an Excel OADate, or false otherwise.</returns>
-		public static bool TryParseDateObjectToOADate(object dateCandidate, out double OADate)
+		public static bool TryParseObjectToDecimal(object dateCandidate, out double OADate)
 		{
 			OADate = -1.0;
 			if (dateCandidate is DateTime dateDateTime)
@@ -188,7 +188,7 @@ namespace OfficeOpenXml.Utils
 				date = validDate;
 				return true;
 			}
-			else if (TryParseDateObjectToOADate(dateCandidate, out double OADate))
+			else if (TryParseObjectToDecimal(dateCandidate, out double OADate))
 			{
 				// Note: This if statement is to account for an error from Lotus 1-2-3
 				// that Excel implemented which incorrectly includes 2/29/1900 as a valid date;

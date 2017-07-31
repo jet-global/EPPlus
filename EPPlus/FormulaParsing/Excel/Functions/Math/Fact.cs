@@ -48,7 +48,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return new CompileResult(argumentError);
 			if (arguments.ElementAt(0).ValueIsExcelError)
 				return new CompileResult(arguments.ElementAt(0).ValueAsExcelErrorValue);
-			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double parsedNumberAsDouble))
+			if (!ConvertUtil.TryParseObjectToDecimal(arguments.ElementAt(0).Value, out double parsedNumberAsDouble))
 				return new CompileResult(eErrorType.Value);
 			var number = (int)parsedNumberAsDouble;
 			if (number < 0)

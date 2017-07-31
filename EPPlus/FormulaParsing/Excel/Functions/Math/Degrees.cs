@@ -47,9 +47,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var angleObj = arguments.ElementAt(0).Value;
-			// The method TryParseDateObjectToOADate attempts to parse the given object as a double.
+			// The method TryParseObjectToDecimal attempts to parse the given object as a double.
 			// That double is only used as an OADate if the given object represented a date.
-			if (!ConvertUtil.TryParseDateObjectToOADate(angleObj, out double angle))
+			if (!ConvertUtil.TryParseObjectToDecimal(angleObj, out double angle))
 				return new CompileResult(eErrorType.Value);
 			var result = (angle * 180) / System.Math.PI;
 			return this.CreateResult(result, DataType.Decimal);

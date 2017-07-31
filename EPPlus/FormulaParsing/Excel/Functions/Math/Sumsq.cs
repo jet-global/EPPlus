@@ -97,7 +97,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					CheckForAndHandleExcelError(arg);
 					if (IsNumericString(arg.Value) && !isInArray)
 					{
-						ConvertUtil.TryParseDateObjectToOADate(arg.Value, out double value);
+						ConvertUtil.TryParseObjectToDecimal(arg.Value, out double value);
 						return System.Math.Pow(value, 2);
 					}
 					var ignoreBool = isInArray;
@@ -105,7 +105,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					{
 						if(arg.Value == null)
 							return 0;
-						if (!ConvertUtil.TryParseDateObjectToOADate(arg.Value, out _))
+						if (!ConvertUtil.TryParseObjectToDecimal(arg.Value, out _))
 							return -1;
 					}
 					calculatedValue += System.Math.Pow(ConvertUtil.GetValueDouble(arg.Value, ignoreBool), 2);

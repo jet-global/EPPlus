@@ -51,7 +51,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var dateObj = arguments.ElementAt(0).Value;
-			if (ConvertUtil.TryParseDateObjectToOADate(dateObj, out double dateDouble) &&
+			if (ConvertUtil.TryParseObjectToDecimal(dateObj, out double dateDouble) &&
 				dateDouble < 1 && dateDouble >= 0) // Zero and fractions are special cases and require specific output.
 				return this.CreateResult(1, DataType.Integer);
 			else if (ConvertUtil.TryParseDateObject(dateObj, out System.DateTime date, out eErrorType? error))

@@ -151,7 +151,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				if (numberCandidate is bool)
 					return ConvertUtil.GetValueDouble(numberCandidate);
-				else if (ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
+				else if (ConvertUtil.TryParseObjectToDecimal(numberCandidate, out double number))
 					return number;
 			}
 			return default(double?);
