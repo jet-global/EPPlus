@@ -53,10 +53,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (numeratorCandidate == null ||denominatorCandidate == null)
 				return new CompileResult(eErrorType.NA);
 			if (!ConvertUtil.TryParseNumericString(numeratorCandidate, out candidateAsDouble))
-				if (!ConvertUtil.TryParseDateObjectToOADate(numeratorCandidate, out candidateAsDouble))
+				if (!ConvertUtil.TryParseObjectToDecimal(numeratorCandidate, out candidateAsDouble))
 					return new CompileResult(eErrorType.Value);
 			if (!ConvertUtil.TryParseNumericString(denominatorCandidate, out candidateAsDouble))
-				if (!ConvertUtil.TryParseDateObjectToOADate(denominatorCandidate, out candidateAsDouble))
+				if (!ConvertUtil.TryParseObjectToDecimal(denominatorCandidate, out candidateAsDouble))
 					return new CompileResult(eErrorType.Value);
 
 			var num = this.ArgToDecimal(arguments, 0);

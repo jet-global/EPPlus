@@ -53,7 +53,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var dateObj = arguments.ElementAt(0).Value;
-			if (ConvertUtil.TryParseDateObjectToOADate(dateObj, out double OADate))
+			if (ConvertUtil.TryParseObjectToDecimal(dateObj, out double OADate))
 			{
 				// Check the special case where the time value is close to rolling over to the next day, which requires special rounding.
 				if (OADate - System.Math.Truncate(OADate) > 0.999988425925926)

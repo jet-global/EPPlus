@@ -50,8 +50,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var firstArgument = arguments.First();
 			var secondArgument = arguments.ElementAt(1);
 
-			ConvertUtil.TryParseDateObjectToOADate(firstArgument.Value, out double low);
-			ConvertUtil.TryParseDateObjectToOADate(secondArgument.Value, out double high);
+			ConvertUtil.TryParseObjectToDecimal(firstArgument.Value, out double low);
+			ConvertUtil.TryParseObjectToDecimal(secondArgument.Value, out double high);
 
 			if (low > high)
 				return CreateResult(eErrorType.Value, DataType.ExcelError);

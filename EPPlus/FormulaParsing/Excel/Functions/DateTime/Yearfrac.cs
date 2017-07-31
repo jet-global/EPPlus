@@ -61,8 +61,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			var date2Candidate = functionArguments[1].Value;
 			if (date1Candidate == null || date2Candidate == null)
 				return new CompileResult(eErrorType.NA);
-			var date1IsValid = ConvertUtil.TryParseDateObjectToOADate(date1Candidate, out double date1Num);
-			var date2IsValid = ConvertUtil.TryParseDateObjectToOADate(date2Candidate, out double date2Num);
+			var date1IsValid = ConvertUtil.TryParseObjectToDecimal(date1Candidate, out double date1Num);
+			var date2IsValid = ConvertUtil.TryParseObjectToDecimal(date2Candidate, out double date2Num);
 			if (!date1IsValid)
 				return new CompileResult(eErrorType.Value);
 			else if (date1Num < 0)
@@ -71,7 +71,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(eErrorType.Value);
 			else if (date2Num < 0)
 				return new CompileResult(eErrorType.Num);
-			// The date1Num and date2Num provided by TryParseDateObjectToOADate are Excel OADates;
+			// The date1Num and date2Num provided by TryParseObjectToDecimal are Excel OADates;
 			// they need to be converted back to System.DateTime OADates for the special case
 			// of dates before 3/1/1900 (OADate 61 in both Excel and System.DateTime).
 			if (date1Num < 61)

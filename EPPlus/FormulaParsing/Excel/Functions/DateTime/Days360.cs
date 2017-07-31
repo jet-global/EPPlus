@@ -59,12 +59,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				startDateObj = 0;
 			if (endDateObj == null)
 				endDateObj = 0;
-			if (!ConvertUtil.TryParseDateObjectToOADate(startDateObj, out double startOADate) ||
-				!ConvertUtil.TryParseDateObjectToOADate(endDateObj, out double endOADate))
+			if (!ConvertUtil.TryParseObjectToDecimal(startDateObj, out double startOADate) ||
+				!ConvertUtil.TryParseObjectToDecimal(endDateObj, out double endOADate))
 				return new CompileResult(eErrorType.Value);
 			if (startOADate < 0 || endOADate < 0)
 				return new CompileResult(eErrorType.Num);
-			// The startOADate and endOADate provided by TryParseDateObjectToOADate are Excel OADates;
+			// The startOADate and endOADate provided by TryParseObjectToDecimal are Excel OADates;
 			// they need to be converted back to System.DateTime OADates for the special case
 			// of dates before 3/1/1900 (OADate 61 in both Excel and System.DateTime).
 			if (startOADate < 61 && startOADate > 0)

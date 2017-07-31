@@ -123,7 +123,7 @@ namespace EPPlusTest.Utils
 		public void TryParseDateObjectToOADateParsesDateTimeObject()
 		{
 			var date = new DateTime(1900, 3, 1);
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(date, out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal(date, out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(date.ToOADate(), OADate);
 		}
@@ -132,7 +132,7 @@ namespace EPPlusTest.Utils
 		public void TryParseDateObjectToOADateParsesInt()
 		{
 			var expectedDate = new DateTime(1900, 3, 1);
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(61, out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal(61, out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(expectedDate.ToOADate(), OADate);
 		}
@@ -141,7 +141,7 @@ namespace EPPlusTest.Utils
 		public void TryParseDateObjectToOADateParsesDouble()
 		{
 			var expectedDate = new DateTime(1900, 3, 1, 12, 0, 0);
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(61.5, out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal(61.5, out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(expectedDate.ToOADate(), OADate);
 		}
@@ -149,7 +149,7 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void TryParseDateObjectToOADateParsesNegativeInt()
 		{
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(-1, out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal(-1, out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(-1, OADate);
 		}
@@ -157,7 +157,7 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void TryParseDateObjectToOADateParsesNegativeDouble()
 		{
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(-1.5, out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal(-1.5, out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(-1.5, OADate);
 		}
@@ -165,7 +165,7 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void TryParseDateObjectToOADateParsesZero()
 		{
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(0, out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal(0, out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(0, OADate);
 		}
@@ -174,7 +174,7 @@ namespace EPPlusTest.Utils
 		public void TryParseDateObjectToOADateParsesIntWithinString()
 		{
 			var expectedDate = new DateTime(1900, 3, 1);
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("61", out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal("61", out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(expectedDate.ToOADate(), OADate);
 		}
@@ -183,7 +183,7 @@ namespace EPPlusTest.Utils
 		public void TryParseDateObjectToOADateParsesDoubleWithinString()
 		{
 			var expectedDate = new DateTime(1900, 3, 1, 12, 0, 0);
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("61.5", out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal("61.5", out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(expectedDate.ToOADate(), OADate);
 		}
@@ -191,7 +191,7 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void TryParseDateObjectToOADateParsesNegativeIntWithinString()
 		{
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("-1", out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal("-1", out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(-1, OADate);
 		}
@@ -199,7 +199,7 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void TryParseDateObjectToOADateParsesNegativeDoubleWithinString()
 		{
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("-1.5", out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal("-1.5", out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(-1.5, OADate);
 		}
@@ -207,7 +207,7 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void TryParseDateObjectToOADateDoesNotParseNonDateString()
 		{
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("word", out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal("word", out double OADate);
 			Assert.AreEqual(false, isValidDate);
 			Assert.AreEqual(-1.0, OADate);
 		}
@@ -216,7 +216,7 @@ namespace EPPlusTest.Utils
 		public void TryParseDateObjectToOADateParsesDateAsString()
 		{
 			var expectedDate = new DateTime(1900, 3, 1, 5, 56, 59);
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate("3/1/1900 5:56:59", out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal("3/1/1900 5:56:59", out double OADate);
 			Assert.AreEqual(true, isValidDate);
 			Assert.AreEqual(expectedDate.ToOADate(), OADate);
 		}
@@ -225,7 +225,7 @@ namespace EPPlusTest.Utils
 		public void TryParseDateObjectToOADateParsesDoublesInStringsAsDoublesCorrectly()
 		{
 			var testNumber = "1.11";
-			var isValidOADate = ConvertUtil.TryParseDateObjectToOADate(testNumber, out double OADate);
+			var isValidOADate = ConvertUtil.TryParseObjectToDecimal(testNumber, out double OADate);
 			Assert.IsTrue(isValidOADate);
 			Assert.AreEqual(1.11, OADate);
 		}
@@ -233,7 +233,7 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void TryParseDateObjectToOADateParsesMilitaryTime()
 		{
-			Assert.IsTrue(ConvertUtil.TryParseDateObjectToOADate("23:59", out double oaDate));
+			Assert.IsTrue(ConvertUtil.TryParseObjectToDecimal("23:59", out double oaDate));
 			Assert.AreEqual(0.99, oaDate, 0.01);
 		}
 
@@ -248,21 +248,21 @@ namespace EPPlusTest.Utils
 				{
 					// This should parse as a decimal value under the US culture.
 					var decimalValue = "1.11";
-					var isValidDate = ConvertUtil.TryParseDateObjectToOADate(decimalValue, out double parseResult);
+					var isValidDate = ConvertUtil.TryParseObjectToDecimal(decimalValue, out double parseResult);
 					Assert.IsTrue(isValidDate);
 					Assert.AreEqual(1.11, parseResult);
 					// DateTime parses this as a date (M.DD.YYYY) under the US culture,
 					// but Excel does not recognize this as a valid date format under the US culture.
 					var dateValue = "1.11.2017";
 					var expectedDate = new DateTime(2017, 1, 11);
-					isValidDate = ConvertUtil.TryParseDateObjectToOADate(dateValue, out parseResult);
+					isValidDate = ConvertUtil.TryParseObjectToDecimal(dateValue, out parseResult);
 					Assert.IsTrue(isValidDate);
 					Assert.AreEqual(expectedDate.ToOADate(), parseResult);
 					// DateTime parses this as a valid date under the US culture,
 					// but Excel does not recognize this as a valid date format under the US culture.
 					var USShortDate = "1,11";
 					expectedDate = new DateTime(DateTime.Today.Year, 1, 11);
-					isValidDate = ConvertUtil.TryParseDateObjectToOADate(USShortDate, out parseResult);
+					isValidDate = ConvertUtil.TryParseObjectToDecimal(USShortDate, out parseResult);
 					Assert.IsTrue(isValidDate);
 					Assert.AreEqual(expectedDate.ToOADate(), parseResult);
 				}
@@ -271,19 +271,19 @@ namespace EPPlusTest.Utils
 				{
 					// This should parse as a date (D.MM.CurrentYear) under the German culture.
 					var GermanShortDate = "1.11";
-					var isValidDate = ConvertUtil.TryParseDateObjectToOADate(GermanShortDate, out double parseResult);
+					var isValidDate = ConvertUtil.TryParseObjectToDecimal(GermanShortDate, out double parseResult);
 					var expectedDate = new DateTime(DateTime.Today.Year, 11, 1);
 					Assert.IsTrue(isValidDate);
 					Assert.AreEqual(expectedDate.ToOADate(), parseResult);
 					// This should parse as a date (D.MM.YYYY) under the German culture.
 					var GermanDate = "1.11.2017";
 					expectedDate = new DateTime(2017, 11, 1);
-					isValidDate = ConvertUtil.TryParseDateObjectToOADate(GermanDate, out parseResult);
+					isValidDate = ConvertUtil.TryParseObjectToDecimal(GermanDate, out parseResult);
 					Assert.IsTrue(isValidDate);
 					Assert.AreEqual(expectedDate.ToOADate(), parseResult);
 					// This should parse as a decimal value under the German culture.
 					var GermanDecimalValue = "1,11";
-					isValidDate = ConvertUtil.TryParseDateObjectToOADate(GermanDecimalValue, out parseResult);
+					isValidDate = ConvertUtil.TryParseObjectToDecimal(GermanDecimalValue, out parseResult);
 					Assert.IsTrue(isValidDate);
 					Assert.AreEqual(1.11, parseResult);
 				}
@@ -303,7 +303,7 @@ namespace EPPlusTest.Utils
 			// properly replicate Excel's behavior with dates of this format in EPPlus.
 			var expectedDate = new DateTime(2017, 1, 11);
 			var testNumber = "1.11.2017";
-			var isValidDate = ConvertUtil.TryParseDateObjectToOADate(testNumber, out double OADate);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal(testNumber, out double OADate);
 			Assert.AreEqual(expectedDate.ToOADate(), OADate);
 		}
 		#endregion

@@ -58,7 +58,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (workDaysCandidate == null || serialNumberCandidate == null)
 				return new CompileResult(eErrorType.NA);
 
-			var serialNumberIsZero = (ConvertUtil.TryParseDateObjectToOADate(serialNumberCandidate, out double parsedSerialNumber)
+			var serialNumberIsZero = (ConvertUtil.TryParseObjectToDecimal(serialNumberCandidate, out double parsedSerialNumber)
 				&& parsedSerialNumber < 1 && parsedSerialNumber >= 0);
 
 			if (serialNumberIsZero || ConvertUtil.TryParseDateObject(serialNumberCandidate, out output, out eErrorType? error))

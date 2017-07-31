@@ -54,13 +54,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (arguments.ElementAt(0).Value == null)
 				return this.CreateResult(0d, DataType.Decimal);
 
-			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out double number))
+			if (!ConvertUtil.TryParseObjectToDecimal(arguments.ElementAt(0).Value, out double number))
 				return new CompileResult(eErrorType.Value);
 
 			if (arguments.ElementAt(1).Value == null)
 				return this.CreateResult(System.Math.Round(number, 0), DataType.Decimal);
 
-			if (!ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(1).Value, out double nDigitsDecimal))
+			if (!ConvertUtil.TryParseObjectToDecimal(arguments.ElementAt(1).Value, out double nDigitsDecimal))
 				return new CompileResult(eErrorType.Value);
 			var nDigits = (int)nDigitsDecimal;
 

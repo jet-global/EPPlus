@@ -57,18 +57,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			var significanceCandidate = arguments.ElementAt(1).Value;
 			if (numberCandidate == null)
 				return this.CreateResult(0d, DataType.Decimal);
-			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double number))
+			if (!ConvertUtil.TryParseObjectToDecimal(numberCandidate, out double number))
 				return new CompileResult(eErrorType.Value);
 			if (significanceCandidate == null)
 				return this.CreateResult(System.Math.Ceiling(number), DataType.Decimal);
-			if (!ConvertUtil.TryParseDateObjectToOADate(significanceCandidate, out double significance))
+			if (!ConvertUtil.TryParseObjectToDecimal(significanceCandidate, out double significance))
 				return new CompileResult(eErrorType.Value);
 			if (significance < 0)
 				significance = -1 * significance;
 			if (arguments.Count() > 2)
 			{
 				var modeCandidate = arguments.ElementAt(2).Value ?? 0;
-				if (!ConvertUtil.TryParseDateObjectToOADate(modeCandidate, out double mode))
+				if (!ConvertUtil.TryParseObjectToDecimal(modeCandidate, out double mode))
 					return new CompileResult(eErrorType.Value);
 				if (mode == 0 || number > 0)
 				{

@@ -53,7 +53,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var dateObj = arguments.ElementAt(0).Value;
-			if (ConvertUtil.TryParseDateObjectToOADate(dateObj, out double OADate))
+			if (ConvertUtil.TryParseObjectToDecimal(dateObj, out double OADate))
 			{
 				OADate = System.Math.Round(OADate, 5);
 				if (OADate < 0)

@@ -55,7 +55,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (numberCandidate == null)
 				return this.CreateResult(0d, DataType.Decimal);
 
-			if (!ConvertUtil.TryParseDateObjectToOADate(numberCandidate, out double doubleArg))
+			if (!ConvertUtil.TryParseObjectToDecimal(numberCandidate, out double doubleArg))
 				return new CompileResult(eErrorType.Value);
 
 			var numberValue = doubleArg; 

@@ -61,7 +61,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				else if (val.IsExcelRange) { }
 				else if (val.Value is null) { }
 				else if (ConvertUtil.TryParseNumericString(val.Value, out valAsDouble)) { }
-				else if (ConvertUtil.TryParseDateObjectToOADate(val.Value, out valAsDouble)) { }
+				else if (ConvertUtil.TryParseObjectToDecimal(val.Value, out valAsDouble)) { }
 				else if (val.Value is IEnumerable<FunctionArgument>) { }
 				else
 					return new CompileResult(eErrorType.Value);
@@ -99,7 +99,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 					{
 						return current * argAsDouble;
 					}
-					else if (ConvertUtil.TryParseDateObjectToOADate(obj, out argAsDouble))
+					else if (ConvertUtil.TryParseObjectToDecimal(obj, out argAsDouble))
 					{
 						return current * argAsDouble;
 					}
@@ -128,7 +128,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return argAsDouble;
 			}
-			else if (ConvertUtil.TryParseDateObjectToOADate(arguments.ElementAt(0).Value, out argAsDouble))
+			else if (ConvertUtil.TryParseObjectToDecimal(arguments.ElementAt(0).Value, out argAsDouble))
 			{
 				return argAsDouble;
 			}
