@@ -498,7 +498,8 @@ namespace OfficeOpenXml.Drawing
 		/// <param name="drawing">The drawing</param>
 		public void Remove(ExcelDrawing drawing)
 		{
-			this.Remove(this._drawingNames[drawing.Name]);
+			//this.Remove(this._drawingNames[drawing.Name]);
+			this.RemoveDrawing(drawing);
 		}
 
 		/// <summary>
@@ -545,12 +546,21 @@ namespace OfficeOpenXml.Drawing
 		{
 			var draw = this._drawings[index];
 			draw.DeleteMe();
-			for (int i = index + 1; i < this._drawings.Count; i++)
-			{
-				this._drawingNames[this._drawings[i].Name]--;
-			}
-			this._drawingNames.Remove(draw.Name);
+			//for (int i = index + 1; i < this._drawings.Count; i++)
+			//{
+			//	this._drawingNames[this._drawings[i].Name]--;
+			//}
+			//this._drawingNames.Remove(draw.Name);
 			this._drawings.Remove(draw);
+		}
+
+		internal void RemoveDrawing(ExcelDrawing drawing)
+		{
+			if (this._drawings.Contains(drawing))
+			{
+				drawing.DeleteMe();
+				this._drawings.Remove(drawing);
+			}
 		}
 
 		internal void ClearDrawings()
