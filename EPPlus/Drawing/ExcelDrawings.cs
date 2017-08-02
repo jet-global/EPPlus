@@ -39,6 +39,7 @@ using System.Xml;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Table.PivotTable;
 using OfficeOpenXml.Utils;
+
 namespace OfficeOpenXml.Drawing
 {
 	/// <summary>
@@ -46,7 +47,6 @@ namespace OfficeOpenXml.Drawing
 	/// </summary>
 	public class ExcelDrawings : IEnumerable<ExcelDrawing>, IDisposable
 	{
-
 		#region Class Variables
 		private XmlDocument _drawingsXml = new XmlDocument();
 		private List<ExcelDrawing> _drawings;
@@ -469,7 +469,7 @@ namespace OfficeOpenXml.Drawing
 		public void Clear()
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
-				throw new InvalidOperationException("Can' remove charts from chart worksheets");
+				throw new InvalidOperationException("Can't remove charts from chart worksheets");
 			this.ClearDrawings();
 		}
 
