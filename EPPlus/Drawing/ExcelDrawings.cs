@@ -500,9 +500,9 @@ namespace OfficeOpenXml.Drawing
 
 		internal void ClearDrawings()
 		{
-			while (this.Count > 0)
+			for (int i = this.Count - 1; i >= 0; i--)
 			{
-				this.RemoveDrawing(this._drawings[0]);
+				this.RemoveDrawing(this._drawings[i]);
 			}
 		}
 
@@ -594,11 +594,7 @@ namespace OfficeOpenXml.Drawing
 		{
 			get
 			{
-				var drawingsWithGivenName = this._drawings.Where((ExcelDrawing drawing) => drawing.Name.Equals(Name));
-				if (drawingsWithGivenName.Count() > 0)
-					return drawingsWithGivenName.First();
-				else
-					return null;
+				return this._drawings.FirstOrDefault(drawing => drawing.Name.Equals(Name));
 			}
 		}
 		#endregion
