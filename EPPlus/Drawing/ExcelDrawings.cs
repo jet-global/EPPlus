@@ -247,25 +247,24 @@ namespace OfficeOpenXml.Drawing
 
 			foreach (XmlNode node in list)
 			{
-
-				ExcelDrawing dr;
+				ExcelDrawing drawing;
 				switch (node.LocalName)
 				{
 					case "oneCellAnchor":
 					//dr = new ExcelDrawing(this, node, "xdr:sp/xdr:nvSpPr/xdr:cNvPr/@name");                        
 					case "twoCellAnchor":
 					case "absoluteAnchor":
-						dr = ExcelDrawing.GetDrawing(this, node);
+						drawing = ExcelDrawing.GetDrawing(this, node);
 						break;
 					default: //"absoluteCellAnchor":
-						dr = null;
+						drawing = null;
 						break;
 				}
-				if (dr != null)
+				if (drawing != null)
 				{
-					this._drawings.Add(dr);
-					if (!this.Worksheet.Workbook.NextSlicerIdNumber.ContainsKey(dr.Name))
-						this.Worksheet.Workbook.NextSlicerIdNumber[dr.Name] = 1;
+					this._drawings.Add(drawing);
+					if (!this.Worksheet.Workbook.NextSlicerIdNumber.ContainsKey(drawing.Name))
+						this.Worksheet.Workbook.NextSlicerIdNumber[drawing.Name] = 1;
 				}
 			}
 		}
@@ -308,7 +307,6 @@ namespace OfficeOpenXml.Drawing
 		/// <returns>The chart</returns>
 		public ExcelChart AddChart(string name, eChartType chartType, ExcelPivotTable pivotTableSource)
 		{
-
 			if (chartType == eChartType.StockHLC || chartType == eChartType.StockOHLC || chartType == eChartType.StockVOHLC)
 				throw (new NotImplementedException("Chart type is not supported in the current version"));
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
@@ -403,8 +401,7 @@ namespace OfficeOpenXml.Drawing
 		/// </summary>
 		/// <param name="name">Name</param>
 		/// <param name="style">Shape style</param>
-		/// <returns>The shape object</returns>
-
+		/// <returns>The shape object.</returns>
 		public ExcelShape AddShape(string name, eShapeStyle style)
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
@@ -493,7 +490,7 @@ namespace OfficeOpenXml.Drawing
 		internal void RemoveDrawing(ExcelDrawing drawing)
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
-				throw new InvalidOperationException("Can't remove charts from chart worksheets");
+				throw new InvalidOperationException("Can't remove charts from chart worksheets.");
 			else if (this._drawings.Contains(drawing))
 			{
 				drawing.DeleteMe();
