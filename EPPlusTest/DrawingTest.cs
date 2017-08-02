@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using EPPlusTest.Properties;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -706,6 +707,82 @@ namespace EPPlusTest
 			ws.Workbook.Styles.NamedStyles[0].Style.Font.Size = 16;
 			var pic = ws.Drawings.AddPicture("Pic1", Resources.Test1);
 			pic.SetPosition(10, 12);
+		}
+		#endregion
+
+		#region Additional Drawings Tests
+		[TestMethod]
+		public void GetDrawingByNameGetsCorrectDrawing()
+		{
+			var worksheet = _pck.Workbook.Worksheets.Add("sheet");
+			var lineChartDrawing = worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+			var hexagonDrawing = worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+			var pictureDrawing = worksheet.Drawings.AddPicture("Picture", Resources.Test1);
+
+			Assert.AreEqual(3, worksheet.Drawings.Count);
+			ExcelDrawing retrievedDrawing = worksheet.Drawings["LineChart"];
+			Assert.AreEqual(lineChartDrawing, retrievedDrawing);
+			retrievedDrawing = worksheet.Drawings["Hexagon"];
+			Assert.AreEqual(hexagonDrawing, retrievedDrawing);
+			retrievedDrawing = worksheet.Drawings["Picture"];
+			Assert.AreEqual(pictureDrawing, retrievedDrawing);
+			Assert.AreEqual(3, worksheet.Drawings.Count);
+			retrievedDrawing = worksheet.Drawings["NonExistent Drawing"];
+			Assert.AreEqual(null, retrievedDrawing);
+		}
+
+		[TestMethod]
+		public void DrawingWithMultipleDrawingsWithTheSameName()
+		{
+			var worksheet = _pck.Workbook.Worksheets.Add("sheet");
+			var picture1 = worksheet.Drawings.AddPicture("drawing", Resources.Test1);
+			var picture2 = worksheet.Drawings.AddPicture("drawing", Resources.Test1);
+			var shape1 = worksheet.Drawings.AddShape("drawing", eShapeStyle.Hexagon);
+			var shape2 = worksheet.Drawings.AddShape("drawing", eShapeStyle.Hexagon);
+			Assert.AreEqual(picture1, worksheet.Drawings["drawing"]);
+			worksheet.Drawings.Remove(picture1);
+			Assert.AreEqual(picture2, worksheet.Drawings["drawing"]);
+			worksheet.Drawings.Remove(picture2);
+			Assert.AreEqual(shape1, worksheet.Drawings["drawing"]);
+			worksheet.Drawings.Remove(shape1);
+			Assert.AreEqual(shape2, worksheet.Drawings["drawing"]);
+			worksheet.Drawings.Remove(shape2);
+			Assert.AreEqual(null, worksheet.Drawings["drawing"]);
+		}
+
+		[TestMethod]
+		public void RemoveDrawings()
+		{
+			var worksheet = _pck.Workbook.Worksheets.Add("sheet");
+			var lineChartDrawing = worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+			var hexagonDrawing = worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+			var pictureDrawing = worksheet.Drawings.AddPicture("Picture", Resources.Test1);
+
+			Assert.AreEqual(3, worksheet.Drawings.Count);
+			Assert.IsTrue(worksheet.Drawings.Contains(pictureDrawing));
+			worksheet.Drawings.Remove(2);
+			Assert.IsFalse(worksheet.Drawings.Contains(pictureDrawing));
+
+			Assert.IsTrue(worksheet.Drawings.Contains(hexagonDrawing));
+			worksheet.Drawings.Remove(hexagonDrawing);
+			Assert.IsFalse(worksheet.Drawings.Contains(hexagonDrawing));
+
+			Assert.IsTrue(worksheet.Drawings.Contains(lineChartDrawing));
+			worksheet.Drawings.Remove("LineChart");
+			Assert.IsFalse(worksheet.Drawings.Contains(lineChartDrawing));
+			Assert.AreEqual(0, worksheet.Drawings.Count);
+		}
+
+		[TestMethod]
+		public void ClearDrawings()
+		{
+			var worksheet = _pck.Workbook.Worksheets.Add("sheet");
+			var lineChartDrawing = worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+			var hexagonDrawing = worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+			var pictureDrawing = worksheet.Drawings.AddPicture("Picture", Resources.Test1);
+			Assert.AreEqual(3, worksheet.Drawings.Count);
+			worksheet.Drawings.ClearDrawings();
+			Assert.AreEqual(0, worksheet.Drawings.Count);
 		}
 		#endregion
 

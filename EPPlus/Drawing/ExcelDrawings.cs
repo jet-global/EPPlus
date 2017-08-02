@@ -354,10 +354,10 @@ namespace OfficeOpenXml.Drawing
 			{
 				XmlElement drawNode = CreateDrawingXml();
 				drawNode.SetAttribute("editAs", "oneCell");
-				ExcelPicture pic = new ExcelPicture(this, drawNode, image, hyperlink);
-				pic.Name = name;
-				this._drawings.Add(pic);
-				return pic;
+				ExcelPicture picture = new ExcelPicture(this, drawNode, image, hyperlink);
+				picture.Name = name;
+				this._drawings.Add(picture);
+				return picture;
 			}
 			throw (new Exception("AddPicture: Image can't be null"));
 		}
@@ -388,10 +388,10 @@ namespace OfficeOpenXml.Drawing
 			{
 				XmlElement drawNode = this.CreateDrawingXml();
 				drawNode.SetAttribute("editAs", "oneCell");
-				ExcelPicture pic = new ExcelPicture(this, drawNode, imageFile, hyperlink);
-				pic.Name = name;
-				this._drawings.Add(pic);
-				return pic;
+				ExcelPicture picture = new ExcelPicture(this, drawNode, imageFile, hyperlink);
+				picture.Name = name;
+				this._drawings.Add(picture);
+				return picture;
 			}
 			throw (new Exception("AddPicture: ImageFile can't be null"));
 		}
@@ -466,7 +466,7 @@ namespace OfficeOpenXml.Drawing
 		public void Clear()
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
-				throw new InvalidOperationException("Can't remove charts from chart worksheets");
+				throw new InvalidOperationException("Can't remove charts from chart worksheets.");
 			this.ClearDrawings();
 		}
 
