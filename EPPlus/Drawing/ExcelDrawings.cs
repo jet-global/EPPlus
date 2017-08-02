@@ -34,6 +34,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Table.PivotTable;
@@ -48,7 +49,6 @@ namespace OfficeOpenXml.Drawing
 
 		#region Class Variables
 		private XmlDocument _drawingsXml = new XmlDocument();
-		private Dictionary<string, int> _drawingNames;
 		private List<ExcelDrawing> _drawings;
 		private XmlNamespaceManager _nsManager = null;
 		private Packaging.ZipPackagePart _part = null;
@@ -161,7 +161,6 @@ namespace OfficeOpenXml.Drawing
 			this._drawingsXml = new XmlDocument();
 			this._drawingsXml.PreserveWhitespace = false;
 			this._drawings = new List<ExcelDrawing>();
-			this._drawingNames = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
 			this.Package = xlPackage;
 			this.Worksheet = sheet;
 			XmlNode node = sheet.WorksheetXml.SelectSingleNode("//d:drawing", sheet.NameSpaceManager);
@@ -265,8 +264,6 @@ namespace OfficeOpenXml.Drawing
 				if (dr != null)
 				{
 					this._drawings.Add(dr);
-					if (!this._drawingNames.ContainsKey(dr.Name))
-						this._drawingNames.Add(dr.Name, _drawings.Count - 1);
 					if (!this.Worksheet.Workbook.NextSlicerIdNumber.ContainsKey(dr.Name))
 						this.Worksheet.Workbook.NextSlicerIdNumber[dr.Name] = 1;
 				}
@@ -311,27 +308,15 @@ namespace OfficeOpenXml.Drawing
 		/// <returns>The chart</returns>
 		public ExcelChart AddChart(string name, eChartType chartType, ExcelPivotTable pivotTableSource)
 		{
-			if (this._drawingNames.ContainsKey(name))
-			{
-				throw new Exception("Name already exists in the drawings collection");
-			}
 
-			if (chartType == eChartType.StockHLC ||
-				chartType == eChartType.StockOHLC ||
-				chartType == eChartType.StockVOHLC)
-			{
+			if (chartType == eChartType.StockHLC || chartType == eChartType.StockOHLC || chartType == eChartType.StockVOHLC)
 				throw (new NotImplementedException("Chart type is not supported in the current version"));
-			}
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
-			{
 				throw new InvalidOperationException("Chart Worksheets can't have more than one chart");
-			}
 			XmlElement drawNode = this.CreateDrawingXml();
-
 			ExcelChart chart = ExcelChart.GetNewChart(this, drawNode, chartType, null, pivotTableSource);
 			chart.Name = name;
 			this._drawings.Add(chart);
-			this._drawingNames.Add(name, this._drawings.Count - 1);
 			return chart;
 		}
 
@@ -369,16 +354,11 @@ namespace OfficeOpenXml.Drawing
 		{
 			if (image != null)
 			{
-				if (this._drawingNames.ContainsKey(name))
-				{
-					throw new Exception("Name already exists in the drawings collection");
-				}
 				XmlElement drawNode = CreateDrawingXml();
 				drawNode.SetAttribute("editAs", "oneCell");
 				ExcelPicture pic = new ExcelPicture(this, drawNode, image, hyperlink);
 				pic.Name = name;
 				this._drawings.Add(pic);
-				this._drawingNames.Add(name, _drawings.Count - 1);
 				return pic;
 			}
 			throw (new Exception("AddPicture: Image can't be null"));
@@ -405,21 +385,14 @@ namespace OfficeOpenXml.Drawing
 		public ExcelPicture AddPicture(string name, FileInfo imageFile, Uri hyperlink)
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
-			{
 				throw new InvalidOperationException("Chart worksheets can't have more than one drawing");
-			}
 			if (imageFile != null)
 			{
-				if (this._drawingNames.ContainsKey(name))
-				{
-					throw new Exception("Name already exists in the drawings collection");
-				}
 				XmlElement drawNode = this.CreateDrawingXml();
 				drawNode.SetAttribute("editAs", "oneCell");
 				ExcelPicture pic = new ExcelPicture(this, drawNode, imageFile, hyperlink);
 				pic.Name = name;
 				this._drawings.Add(pic);
-				this._drawingNames.Add(name, _drawings.Count - 1);
 				return pic;
 			}
 			throw (new Exception("AddPicture: ImageFile can't be null"));
@@ -435,20 +408,12 @@ namespace OfficeOpenXml.Drawing
 		public ExcelShape AddShape(string name, eShapeStyle style)
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
-			{
 				throw new InvalidOperationException("Chart worksheets can't have more than one drawing");
-			}
-			if (this._drawingNames.ContainsKey(name))
-			{
-				throw new Exception("Name already exists in the drawings collection");
-			}
 			XmlElement drawNode = this.CreateDrawingXml();
-
 			ExcelShape shape = new ExcelShape(this, drawNode, style);
 			shape.Name = name;
 			shape.Style = style;
 			this._drawings.Add(shape);
-			this._drawingNames.Add(name, _drawings.Count - 1);
 			return shape;
 		}
 
@@ -461,54 +426,41 @@ namespace OfficeOpenXml.Drawing
 		public ExcelShape AddShape(string name, ExcelShape source)
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
-			{
 				throw new InvalidOperationException("Chart worksheets can't have more than one drawing");
-			}
-			if (this._drawingNames.ContainsKey(name))
-			{
-				throw new Exception("Name already exists in the drawings collection");
-			}
 			XmlElement drawNode = this.CreateDrawingXml();
 			drawNode.InnerXml = source.TopNode.InnerXml;
-
 			ExcelShape shape = new ExcelShape(this, drawNode);
 			shape.Name = name;
 			shape.Style = source.Style;
 			this._drawings.Add(shape);
-			this._drawingNames.Add(name, _drawings.Count - 1);
 			return shape;
 		}
 
 		/// <summary>
 		/// Removes a drawing.
 		/// </summary>
-		/// <param name="index">The index of the drawing</param>
+		/// <param name="index">The index of the <see cref="ExcelDrawing"/> to remove.</param>
 		public void Remove(int index)
 		{
-			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
-			{
-				throw new InvalidOperationException("Can' remove charts from chart worksheets");
-			}
-			this.RemoveDrawing(index);
+			this.RemoveDrawing(this._drawings[index]);
 		}
 
 		/// <summary>
 		/// Removes a drawing.
 		/// </summary>
-		/// <param name="drawing">The drawing</param>
+		/// <param name="drawing">The <see cref="ExcelDrawing"/> to remove.</param>
 		public void Remove(ExcelDrawing drawing)
 		{
-			//this.Remove(this._drawingNames[drawing.Name]);
 			this.RemoveDrawing(drawing);
 		}
 
 		/// <summary>
 		/// Removes a drawing.
 		/// </summary>
-		/// <param name="name">The name of the drawing</param>
+		/// <param name="name">The name of the <see cref="ExcelDrawing"/> to remove.</param>
 		public void Remove(string name)
 		{
-			this.Remove(this._drawingNames[name]);
+			this.RemoveDrawing(this[name]);
 		}
 
 		/// <summary>
@@ -517,9 +469,7 @@ namespace OfficeOpenXml.Drawing
 		public void Clear()
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
-			{
 				throw new InvalidOperationException("Can' remove charts from chart worksheets");
-			}
 			this.ClearDrawings();
 		}
 
@@ -529,12 +479,10 @@ namespace OfficeOpenXml.Drawing
 			this.Hashes.Clear();
 			this.Hashes = null;
 			this._part = null;
-			this._drawingNames.Clear();
-			this._drawingNames = null;
 			this.DrawingRelationship = null;
-			foreach (var d in _drawings)
+			foreach (var drawing in this._drawings)
 			{
-				d.Dispose();
+				drawing.Dispose();
 			}
 			this._drawings.Clear();
 			this._drawings = null;
@@ -542,21 +490,11 @@ namespace OfficeOpenXml.Drawing
 		#endregion
 
 		#region Internal Methods
-		internal void RemoveDrawing(int index)
-		{
-			var draw = this._drawings[index];
-			draw.DeleteMe();
-			//for (int i = index + 1; i < this._drawings.Count; i++)
-			//{
-			//	this._drawingNames[this._drawings[i].Name]--;
-			//}
-			//this._drawingNames.Remove(draw.Name);
-			this._drawings.Remove(draw);
-		}
-
 		internal void RemoveDrawing(ExcelDrawing drawing)
 		{
-			if (this._drawings.Contains(drawing))
+			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
+				throw new InvalidOperationException("Can't remove charts from chart worksheets");
+			else if (this._drawings.Contains(drawing))
 			{
 				drawing.DeleteMe();
 				this._drawings.Remove(drawing);
@@ -565,9 +503,9 @@ namespace OfficeOpenXml.Drawing
 
 		internal void ClearDrawings()
 		{
-			while (Count > 0)
+			while (this.Count > 0)
 			{
-				this.RemoveDrawing(0);
+				this.RemoveDrawing(this._drawings[0]);
 			}
 		}
 
@@ -599,11 +537,8 @@ namespace OfficeOpenXml.Drawing
 				if (d.EditAs != Drawing.eEditAs.TwoCell)
 				{
 					if (d.EditAs == Drawing.eEditAs.Absolute)
-					{
 						d.SetPixelTop(pos[ix, 0]);
-					}
 					d.SetPixelHeight(pos[ix, 1]);
-
 				}
 				ix++;
 			}
@@ -651,22 +586,22 @@ namespace OfficeOpenXml.Drawing
 		}
 
 		/// <summary>
-		/// Returns the drawing matching the specified name
+		/// Returns the <see cref="ExcelDrawing"/> matching the specified name.
 		/// </summary>
-		/// <param name="Name">The name of the worksheet</param>
-		/// <returns></returns>
+		/// <param name="Name">The name of the desired <see cref="ExcelDrawing"/>.</param>
+		/// <returns>
+		///		Returns the first <see cref="ExcelDrawing"/> with the given <paramref name="Name"/>,
+		///		or null if no <see cref="ExcelDrawing"/> exists with the given <paramref name="Name"/>.
+		///	</returns>
 		public ExcelDrawing this[string Name]
 		{
 			get
 			{
-				if (this._drawingNames.ContainsKey(Name))
-				{
-					return this._drawings[this._drawingNames[Name]];
-				}
+				var drawingsWithGivenName = this._drawings.Where((ExcelDrawing drawing) => drawing.Name.Equals(Name));
+				if (drawingsWithGivenName.Count() > 0)
+					return drawingsWithGivenName.First();
 				else
-				{
 					return null;
-				}
 			}
 		}
 		#endregion
