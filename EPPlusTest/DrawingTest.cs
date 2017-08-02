@@ -732,12 +732,15 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		public void DrawingWithMultipleDrawingsWithTheSameName()
+		public void MultipleDrawingsWithTheSameNameGetsCorrectDrawing()
 		{
 			var worksheet = _pck.Workbook.Worksheets.Add("sheet");
 			var picture1 = worksheet.Drawings.AddPicture("drawing", Resources.Test1);
+			Assert.AreEqual(picture1, worksheet.Drawings["drawing"]);
 			var picture2 = worksheet.Drawings.AddPicture("drawing", Resources.Test1);
+			Assert.AreEqual(picture1, worksheet.Drawings["drawing"]);
 			var shape1 = worksheet.Drawings.AddShape("drawing", eShapeStyle.Hexagon);
+			Assert.AreEqual(picture1, worksheet.Drawings["drawing"]);
 			var shape2 = worksheet.Drawings.AddShape("drawing", eShapeStyle.Hexagon);
 			Assert.AreEqual(picture1, worksheet.Drawings["drawing"]);
 			worksheet.Drawings.Remove(picture1);
