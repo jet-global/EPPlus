@@ -50,7 +50,7 @@ namespace OfficeOpenXml.Drawing
 		#region Class Variables
 		private XmlDocument _drawingsXml = new XmlDocument();
 		private List<ExcelDrawing> _drawings;
-		private XmlNamespaceManager _nsManager = null;
+		private XmlNamespaceManager _namespaceManager = null;
 		private Packaging.ZipPackagePart _part = null;
 		private Uri _uriDrawing = null;
 		#endregion
@@ -67,28 +67,28 @@ namespace OfficeOpenXml.Drawing
 		internal ExcelPackage Package { get; set; }
 
 		/// <summary>
-		/// Gets or sets the relationship between this drawings object and the worksheet.
+		/// Gets or sets the relationship between this <see cref="ExcelDrawings"/> object and the worksheet.
 		/// </summary>
 		internal Packaging.ZipPackageRelationship DrawingRelationship { get; set; } = null;
 
 		/// <summary>
-		/// Gets or sets the worksheet that these drawings are drawn on.
+		/// Gets or sets the <see cref="ExcelWorksheet"/> that these drawings are drawn on.
 		/// </summary>
 		internal ExcelWorksheet Worksheet { get; set; }
 
 		/// <summary>
-		/// Provides access to a namespace manager instance to allow XPath searching
+		/// Provides access to a namespace manager instance to allow XPath searching.
 		/// </summary>
 		public XmlNamespaceManager NameSpaceManager
 		{
 			get
 			{
-				return this._nsManager;
+				return this._namespaceManager;
 			}
 		}
 
 		/// <summary>
-		/// A reference to the drawing xml document
+		/// Gets a reference to the drawing Xml document.
 		/// </summary>
 		public XmlDocument DrawingXml
 		{
@@ -98,18 +98,14 @@ namespace OfficeOpenXml.Drawing
 			}
 		}
 
+		/// <summary>
+		/// Gets the number of <see cref="ExcelDrawing"/> objects in this <see cref="ExcelDrawings"/> object's collection.
+		/// </summary>
 		public int Count
 		{
 			get
 			{
-				if (this._drawings == null)
-				{
-					return 0;
-				}
-				else
-				{
-					return this._drawings.Count;
-				}
+				return (this._drawings == null ? 0 : this._drawings.Count);
 			}
 		}
 
@@ -121,6 +117,9 @@ namespace OfficeOpenXml.Drawing
 			}
 		}
 
+		/// <summary>
+		/// Gets the <see cref="Uri"/> for this <see cref="ExcelDrawings"/> object.
+		/// </summary>
 		public Uri UriDrawing
 		{
 			get
@@ -251,7 +250,6 @@ namespace OfficeOpenXml.Drawing
 				switch (node.LocalName)
 				{
 					case "oneCellAnchor":
-					//dr = new ExcelDrawing(this, node, "xdr:sp/xdr:nvSpPr/xdr:cNvPr/@name");                        
 					case "twoCellAnchor":
 					case "absoluteAnchor":
 						drawing = ExcelDrawing.GetDrawing(this, node);
@@ -270,23 +268,27 @@ namespace OfficeOpenXml.Drawing
 		}
 
 		/// <summary>
-		/// Creates the NamespaceManager. 
+		/// Creates the NamespaceManager.
 		/// </summary>
 		private void CreateNSM()
 		{
-			NameTable nt = new NameTable();
-			this._nsManager = new XmlNamespaceManager(nt);
-			this._nsManager.AddNamespace("a", ExcelPackage.schemaDrawings);
-			this._nsManager.AddNamespace("xdr", ExcelPackage.schemaSheetDrawings);
-			this._nsManager.AddNamespace("c", ExcelPackage.schemaChart);
-			this._nsManager.AddNamespace("r", ExcelPackage.schemaRelationships);
-			this._nsManager.AddNamespace("mc", ExcelPackage.schemaMarkupCompatibility);
-			this._nsManager.AddNamespace("sle", ExcelPackage.schemaSlicerDrawing);
+			NameTable nameTable = new NameTable();
+			this._namespaceManager = new XmlNamespaceManager(nameTable);
+			this._namespaceManager.AddNamespace("a", ExcelPackage.schemaDrawings);
+			this._namespaceManager.AddNamespace("xdr", ExcelPackage.schemaSheetDrawings);
+			this._namespaceManager.AddNamespace("c", ExcelPackage.schemaChart);
+			this._namespaceManager.AddNamespace("r", ExcelPackage.schemaRelationships);
+			this._namespaceManager.AddNamespace("mc", ExcelPackage.schemaMarkupCompatibility);
+			this._namespaceManager.AddNamespace("sle", ExcelPackage.schemaSlicerDrawing);
 		}
 
 		#endregion
 
 		#region Public Methods
+		/// <summary>
+		/// Returns an <see cref="IEnumerator"/> for this object's collection of <see cref="ExcelDrawing"/> objects.
+		/// </summary>
+		/// <returns>Returns an <see cref="IEnumerator"/> for this object's collection of <see cref="ExcelDrawing"/> objects.</returns>
 		public IEnumerator GetEnumerator()
 		{
 			return (this._drawings.GetEnumerator());
@@ -299,12 +301,12 @@ namespace OfficeOpenXml.Drawing
 
 		/// <summary>
 		/// Add a new chart to the worksheet.
-		/// Do not support Bubble-, Radar-, Stock- or Surface charts. 
+		/// Note that Bubble-, Radar-, Stock- and Surface charts are not supported.
 		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="chartType">Type of chart</param>
-		/// <param name="pivotTableSource">The pivottable source for a pivotchart</param>    
-		/// <returns>The chart</returns>
+		/// <param name="name">The name of the chart.</param>
+		/// <param name="chartType">The type of chart.</param>
+		/// <param name="pivotTableSource">The Pivot Table source for a Pivot Chart.</param>
+		/// <returns>Returns the newly created <see cref="ExcelChart"/>.</returns>
 		public ExcelChart AddChart(string name, eChartType chartType, ExcelPivotTable pivotTableSource)
 		{
 			if (chartType == eChartType.StockHLC || chartType == eChartType.StockOHLC || chartType == eChartType.StockVOHLC)
@@ -320,39 +322,39 @@ namespace OfficeOpenXml.Drawing
 
 		/// <summary>
 		/// Add a new chart to the worksheet.
-		/// Do not support Bubble-, Radar-, Stock- or Surface charts. 
+		/// Note that Bubble-, Radar-, Stock- and Surface charts are not supported.
 		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="chartType">Type of chart</param>
-		/// <returns>The chart</returns>
+		/// <param name="name">The name of the chart.</param>
+		/// <param name="chartType">The type of chart.</param>
+		/// <returns>Returns the newly created <see cref="ExcelChart"/>.</returns>
 		public ExcelChart AddChart(string name, eChartType chartType)
 		{
 			return this.AddChart(name, chartType, null);
 		}
 
 		/// <summary>
-		/// Add a picure to the worksheet
+		/// Add a picure to the worksheet.
 		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="image">An image. Allways saved in then JPeg format</param>
-		/// <returns></returns>
+		/// <param name="name">The name of the picture.</param>
+		/// <param name="image">The image displayed by the picture, always saved in JPeg format.</param>
+		/// <returns>Returns the newly created <see cref="ExcelPicture"/>.</returns>
 		public ExcelPicture AddPicture(string name, Image image)
 		{
 			return this.AddPicture(name, image, null);
 		}
 
 		/// <summary>
-		/// Add a picure to the worksheet
+		/// Add a picure to the worksheet.
 		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="image">An image. Allways saved in then JPeg format</param>
-		/// <param name="hyperlink">Picture Hyperlink</param>
-		/// <returns></returns>
+		/// <param name="name">The name of the picture.</param>
+		/// <param name="image">The image displayed by the picture, always saved in JPeg format.</param>
+		/// <param name="hyperlink">The picture Hyperlink.</param>
+		/// <returns>Returns the newly created <see cref="ExcelPicture"/>.</returns>
 		public ExcelPicture AddPicture(string name, Image image, Uri hyperlink)
 		{
 			if (image != null)
 			{
-				XmlElement drawNode = CreateDrawingXml();
+				XmlElement drawNode = this.CreateDrawingXml();
 				drawNode.SetAttribute("editAs", "oneCell");
 				ExcelPicture picture = new ExcelPicture(this, drawNode, image, hyperlink);
 				picture.Name = name;
@@ -363,23 +365,23 @@ namespace OfficeOpenXml.Drawing
 		}
 
 		/// <summary>
-		/// Add a picure to the worksheet
+		/// Add a picure to the worksheet.
 		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="imageFile">The image file</param>
-		/// <returns></returns>
+		/// <param name="name">The name of the picture.</param>
+		/// <param name="imageFile">The <see cref="FileInfo"/> containing the file path to the image displayed by the picture.</param>
+		/// <returns>Returns the newly created <see cref="ExcelPicture"/>.</returns>
 		public ExcelPicture AddPicture(string name, FileInfo imageFile)
 		{
 			return this.AddPicture(name, imageFile, null);
 		}
 
 		/// <summary>
-		/// Add a picure to the worksheet
+		/// Add a picure to the worksheet.
 		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="imageFile">The image file</param>
-		/// <param name="hyperlink">Picture Hyperlink</param>
-		/// <returns></returns>
+		/// <param name="name">The name of the picture.</param>
+		/// <param name="imageFile">The <see cref="FileInfo"/> containing the file path to the image displayed by the picture.</param>
+		/// <param name="hyperlink">The picture Hyperlink.</param>
+		/// <returns>Returns the newly created <see cref="ExcelPicture"/>.</returns>
 		public ExcelPicture AddPicture(string name, FileInfo imageFile, Uri hyperlink)
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
@@ -397,11 +399,11 @@ namespace OfficeOpenXml.Drawing
 		}
 
 		/// <summary>
-		/// Add a new shape to the worksheet
+		/// Add a new shape to the worksheet.
 		/// </summary>
-		/// <param name="name">Name</param>
-		/// <param name="style">Shape style</param>
-		/// <returns>The shape object.</returns>
+		/// <param name="name">The name of the shape.</param>
+		/// <param name="style">The style of the shape.</param>
+		/// <returns>Returns the newly created <see cref="ExcelShape"/>.</returns>
 		public ExcelShape AddShape(string name, eShapeStyle style)
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
@@ -415,11 +417,11 @@ namespace OfficeOpenXml.Drawing
 		}
 
 		/// <summary>
-		/// Add a new shape to the worksheet
+		/// Add a new shape to the worksheet.
 		/// </summary>
-		/// <param name="name">Name</param>
-		/// <param name="source">Source shape</param>
-		/// <returns>The shape object</returns>
+		/// <param name="name">The name of the shape.</param>
+		/// <param name="source">The <see cref="ExcelShape"/> to model this shape after.</param>
+		/// <returns>Returns the newly created <see cref="ExcelShape"/>.</returns>
 		public ExcelShape AddShape(string name, ExcelShape source)
 		{
 			if (this.Worksheet is ExcelChartsheet && this._drawings.Count > 0)
@@ -454,14 +456,17 @@ namespace OfficeOpenXml.Drawing
 		/// <summary>
 		/// Removes a drawing.
 		/// </summary>
-		/// <param name="name">The name of the <see cref="ExcelDrawing"/> to remove.</param>
+		/// <param name="name">
+		///		The name of the <see cref="ExcelDrawing"/> to remove. If multiple <see cref="ExcelDrawing"/>s exist with the same name,
+		///		the first one in the the list with <paramref name="name"/> will be removed.
+		///	</param>
 		public void Remove(string name)
 		{
 			this.RemoveDrawing(this[name]);
 		}
 
 		/// <summary>
-		/// Removes all drawings from the collection
+		/// Removes all drawings from the collection.
 		/// </summary>
 		public void Clear()
 		{
@@ -470,6 +475,9 @@ namespace OfficeOpenXml.Drawing
 			this.ClearDrawings();
 		}
 
+		/// <summary>
+		/// Free all resources associated with this <see cref="ExcelDrawings"/> object.
+		/// </summary>
 		public void Dispose()
 		{
 			this._drawingsXml = null;
@@ -570,10 +578,10 @@ namespace OfficeOpenXml.Drawing
 
 		#region Public Operators
 		/// <summary>
-		/// Returns the drawing at the specified position.  
+		/// Returns the <see cref="ExcelDrawing"/> at the specified position in the list.  
 		/// </summary>
-		/// <param name="PositionID">The position of the drawing. 0-base</param>
-		/// <returns></returns>
+		/// <param name="PositionID">The (0-based) position of the desired drawing in the list.</param>
+		/// <returns>Returns the <see cref="ExcelDrawing"/> at the position given by <paramref name="PositionID"/>.</returns>
 		public ExcelDrawing this[int PositionID]
 		{
 			get
