@@ -709,6 +709,11 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region AddPicture Tests
+		// Test adding from an Image object (with and without URI).
+		// Test adding from a FileInfo object (with and without URI).
+		#endregion
+
 		#region Read Chart Tests
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\ScatterFromExcel.xlsx")]
