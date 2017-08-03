@@ -732,7 +732,7 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		public void GetDrawingFromNewWorkbook()
+		public void GetDrawingFromEmptyWorkbook()
 		{
 			using (var package = new ExcelPackage())
 			{
