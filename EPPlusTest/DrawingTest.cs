@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using EPPlusTest.Properties;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -66,7 +67,7 @@ namespace EPPlusTest
 
 		public void Picture()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Picture");
+			var ws = base._pck.Workbook.Worksheets.Add("Picture");
 			var pic = ws.Drawings.AddPicture("Pic1", Resources.Test1);
 
 			pic = ws.Drawings.AddPicture("Pic2", Resources.Test1);
@@ -95,7 +96,7 @@ namespace EPPlusTest
 			pic = ws.Drawings.AddPicture("PicPixelSized", Resources.Test1);
 			pic.SetPosition(800, 800);
 			pic.SetSize(568 * 2, 66 * 2);
-			var ws2 = _pck.Workbook.Worksheets.Add("Picture2");
+			var ws2 = base._pck.Workbook.Worksheets.Add("Picture2");
 			var fi = new FileInfo(Path.Combine(_clipartPath, "BitmapImage.gif"));
 			if (fi.Exists)
 			{
@@ -106,12 +107,12 @@ namespace EPPlusTest
 				TestContext.WriteLine("AG00021_.GIF does not exists. Skipping Pic7.");
 			}
 
-			var wsCopy = _pck.Workbook.Worksheets.Add("Picture3", ws2);
+			var wsCopy = base._pck.Workbook.Worksheets.Add("Picture3", ws2);
 		}
 
 		public void DrawingSizingAndPositioning()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("DrawingPosSize");
+			var ws = base._pck.Workbook.Worksheets.Add("DrawingPosSize");
 
 			var pic = ws.Drawings.AddPicture("Pic1", Resources.Test1);
 			pic.SetPosition(1, 0, 1, 0);
@@ -131,7 +132,7 @@ namespace EPPlusTest
 
 		public void BarChart()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("BarChart");
+			var ws = base._pck.Workbook.Worksheets.Add("BarChart");
 			var chrt = ws.Drawings.AddChart("barChart", eChartType.BarClustered) as ExcelBarChart;
 			chrt.SetPosition(50, 50);
 			chrt.SetSize(800, 300);
@@ -154,7 +155,7 @@ namespace EPPlusTest
 
 		public void PieChart()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("PieChart");
+			var ws = base._pck.Workbook.Worksheets.Add("PieChart");
 			var chrt = ws.Drawings.AddChart("pieChart", eChartType.Pie) as ExcelPieChart;
 
 			AddTestSerie(ws, chrt);
@@ -173,7 +174,7 @@ namespace EPPlusTest
 
 		public void PieOfChart()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("PieOfChart");
+			var ws = base._pck.Workbook.Worksheets.Add("PieOfChart");
 			var chrt = ws.Drawings.AddChart("pieOfChart", eChartType.BarOfPie) as ExcelOfPieChart;
 
 			AddTestSerie(ws, chrt);
@@ -191,7 +192,7 @@ namespace EPPlusTest
 
 		public void PieChart3D()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("PieChart3d");
+			var ws = base._pck.Workbook.Worksheets.Add("PieChart3d");
 			var chrt = ws.Drawings.AddChart("pieChart3d", eChartType.Pie3D) as ExcelPieChart;
 			AddTestSerie(ws, chrt);
 
@@ -210,7 +211,7 @@ namespace EPPlusTest
 
 		public void Scatter()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Scatter");
+			var ws = base._pck.Workbook.Worksheets.Add("Scatter");
 			var chrt = ws.Drawings.AddChart("ScatterChart1", eChartType.XYScatterSmoothNoMarkers) as ExcelScatterChart;
 			AddTestSerie(ws, chrt);
 			chrt.To.Row = 23;
@@ -246,7 +247,7 @@ namespace EPPlusTest
 
 		public void Bubble()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Bubble");
+			var ws = base._pck.Workbook.Worksheets.Add("Bubble");
 			var chrt = ws.Drawings.AddChart("Bubble", eChartType.Bubble) as ExcelBubbleChart;
 			AddTestData(ws);
 
@@ -274,7 +275,7 @@ namespace EPPlusTest
 
 		public void Radar()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Radar");
+			var ws = base._pck.Workbook.Worksheets.Add("Radar");
 			AddTestData(ws);
 
 			var chrt = ws.Drawings.AddChart("Radar1", eChartType.Radar) as ExcelRadarChart;
@@ -310,7 +311,7 @@ namespace EPPlusTest
 
 		public void Surface()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Surface");
+			var ws = base._pck.Workbook.Worksheets.Add("Surface");
 			AddTestData(ws);
 
 			var chrt = ws.Drawings.AddChart("Surface1", eChartType.Surface) as ExcelSurfaceChart;
@@ -326,7 +327,7 @@ namespace EPPlusTest
 
 		public void Pyramid()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Pyramid");
+			var ws = base._pck.Workbook.Worksheets.Add("Pyramid");
 			var chrt = ws.Drawings.AddChart("Pyramid1", eChartType.PyramidCol) as ExcelBarChart;
 			AddTestSerie(ws, chrt);
 			chrt.VaryColors = true;
@@ -366,7 +367,7 @@ namespace EPPlusTest
 
 		public void Cone()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Cone");
+			var ws = base._pck.Workbook.Worksheets.Add("Cone");
 			var chrt = ws.Drawings.AddChart("Cone1", eChartType.ConeBarClustered) as ExcelBarChart;
 			AddTestSerie(ws, chrt);
 			chrt.VaryColors = true;
@@ -380,7 +381,7 @@ namespace EPPlusTest
 
 		public void Column()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Column");
+			var ws = base._pck.Workbook.Worksheets.Add("Column");
 			var chrt = ws.Drawings.AddChart("Column1", eChartType.ColumnClustered3D) as ExcelBarChart;
 			AddTestSerie(ws, chrt);
 			chrt.VaryColors = true;
@@ -399,7 +400,7 @@ namespace EPPlusTest
 
 		public void Dougnut()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Dougnut");
+			var ws = base._pck.Workbook.Worksheets.Add("Dougnut");
 			var chrt = ws.Drawings.AddChart("Dougnut1", eChartType.DoughnutExploded) as ExcelDoughnutChart;
 			AddTestSerie(ws, chrt);
 			chrt.SetSize(200);
@@ -410,7 +411,7 @@ namespace EPPlusTest
 
 		public void Line()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Line");
+			var ws = base._pck.Workbook.Worksheets.Add("Line");
 			var chrt = ws.Drawings.AddChart("Line1", eChartType.Line) as ExcelLineChart;
 			AddTestSerie(ws, chrt);
 			chrt.SetSize(150);
@@ -457,7 +458,7 @@ namespace EPPlusTest
 
 		public void LineMarker()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("LineMarker1");
+			var ws = base._pck.Workbook.Worksheets.Add("LineMarker1");
 			var chrt = ws.Drawings.AddChart("Line1", eChartType.LineMarkers) as ExcelLineChart;
 			AddTestSerie(ws, chrt);
 			chrt.SetSize(150);
@@ -477,7 +478,7 @@ namespace EPPlusTest
 
 		public void Drawings()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("Shapes");
+			var ws = base._pck.Workbook.Worksheets.Add("Shapes");
 			int y = 100, i = 1;
 			foreach (eShapeStyle style in Enum.GetValues(typeof(eShapeStyle)))
 			{
@@ -550,7 +551,7 @@ namespace EPPlusTest
 
 		public void Line2Test()
 		{
-			ExcelWorksheet worksheet = _pck.Workbook.Worksheets.Add("LineIssue");
+			ExcelWorksheet worksheet = base._pck.Workbook.Worksheets.Add("LineIssue");
 
 			ExcelChart chart = worksheet.Drawings.AddChart("LineChart", eChartType.Line);
 
@@ -578,7 +579,7 @@ namespace EPPlusTest
 
 		public void MultiChartSeries()
 		{
-			ExcelWorksheet worksheet = _pck.Workbook.Worksheets.Add("MultiChartTypes");
+			ExcelWorksheet worksheet = base._pck.Workbook.Worksheets.Add("MultiChartTypes");
 
 			ExcelChart chart = worksheet.Drawings.AddChart("chtPie", eChartType.LineMarkers);
 			chart.SetPosition(100, 100);
@@ -649,7 +650,7 @@ namespace EPPlusTest
 
 		public void DeleteDrawing()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("DeleteDrawing1");
+			var ws = base._pck.Workbook.Worksheets.Add("DeleteDrawing1");
 			var chart1 = ws.Drawings.AddChart("Chart1", eChartType.Line);
 			var chart2 = ws.Drawings.AddChart("Chart2", eChartType.Line);
 			var shape1 = ws.Drawings.AddShape("Shape1", eShapeStyle.ActionButtonBackPrevious);
@@ -658,7 +659,7 @@ namespace EPPlusTest
 			ws.Drawings.Remove(chart2);
 			ws.Drawings.Remove("Pic1");
 
-			ws = _pck.Workbook.Worksheets.Add("DeleteDrawing2");
+			ws = base._pck.Workbook.Worksheets.Add("DeleteDrawing2");
 			chart1 = ws.Drawings.AddChart("Chart1", eChartType.Line);
 			chart2 = ws.Drawings.AddChart("Chart2", eChartType.Line);
 			shape1 = ws.Drawings.AddShape("Shape1", eShapeStyle.ActionButtonBackPrevious);
@@ -666,7 +667,7 @@ namespace EPPlusTest
 
 			ws.Drawings.Remove("chart1");
 
-			ws = _pck.Workbook.Worksheets.Add("ClearDrawing2");
+			ws = base._pck.Workbook.Worksheets.Add("ClearDrawing2");
 			chart1 = ws.Drawings.AddChart("Chart1", eChartType.Line);
 			chart2 = ws.Drawings.AddChart("Chart2", eChartType.Line);
 			shape1 = ws.Drawings.AddShape("Shape1", eShapeStyle.ActionButtonBackPrevious);
@@ -698,7 +699,7 @@ namespace EPPlusTest
 
 		public void DrawingRowheightDynamic()
 		{
-			var ws = _pck.Workbook.Worksheets.Add("PicResize");
+			var ws = base._pck.Workbook.Worksheets.Add("PicResize");
 			ws.Cells["A1"].Value = "test";
 			ws.Cells["A1"].Style.Font.Name = "Symbol";
 			ws.Cells["A1"].Style.Font.Size = 39;
@@ -706,6 +707,146 @@ namespace EPPlusTest
 			ws.Workbook.Styles.NamedStyles[0].Style.Font.Size = 16;
 			var pic = ws.Drawings.AddPicture("Pic1", Resources.Test1);
 			pic.SetPosition(10, 12);
+		}
+		#endregion
+
+		#region Additional Drawings Tests
+		[TestMethod]
+		public void GetDrawingByNameGetsCorrectDrawing()
+		{
+			var worksheet = base._pck.Workbook.Worksheets.Add("sheet");
+			var lineChartDrawing = worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+			var hexagonDrawing = worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+			var pictureDrawing = worksheet.Drawings.AddPicture("Picture", Resources.Test1);
+
+			Assert.AreEqual(3, worksheet.Drawings.Count);
+			ExcelDrawing retrievedDrawing = worksheet.Drawings["LineChart"];
+			Assert.AreEqual(lineChartDrawing, retrievedDrawing);
+			retrievedDrawing = worksheet.Drawings["Hexagon"];
+			Assert.AreEqual(hexagonDrawing, retrievedDrawing);
+			retrievedDrawing = worksheet.Drawings["Picture"];
+			Assert.AreEqual(pictureDrawing, retrievedDrawing);
+			Assert.AreEqual(3, worksheet.Drawings.Count);
+			retrievedDrawing = worksheet.Drawings["NonExistent Drawing"];
+			Assert.AreEqual(null, retrievedDrawing);
+		}
+
+		[TestMethod]
+		public void GetDrawingFromEmptyWorkbook()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("sheet");
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				var retrievedDrawing = worksheet.Drawings["NonExistent Drawing"];
+				Assert.AreEqual(null, retrievedDrawing);
+			}
+		}
+
+		[TestMethod]
+		public void MultipleDrawingsWithTheSameNameGetsCorrectDrawing()
+		{
+			var worksheet = base._pck.Workbook.Worksheets.Add("sheet");
+			var picture1 = worksheet.Drawings.AddPicture("drawing", Resources.Test1);
+			Assert.AreEqual(picture1, worksheet.Drawings["drawing"]);
+			var picture2 = worksheet.Drawings.AddPicture("drawing", Resources.Test1);
+			Assert.AreEqual(picture1, worksheet.Drawings["drawing"]);
+			var shape1 = worksheet.Drawings.AddShape("drawing", eShapeStyle.Hexagon);
+			Assert.AreEqual(picture1, worksheet.Drawings["drawing"]);
+			var shape2 = worksheet.Drawings.AddShape("drawing", eShapeStyle.Hexagon);
+			Assert.AreEqual(picture1, worksheet.Drawings["drawing"]);
+			worksheet.Drawings.Remove(picture1);
+			Assert.AreEqual(picture2, worksheet.Drawings["drawing"]);
+			worksheet.Drawings.Remove(picture2);
+			Assert.AreEqual(shape1, worksheet.Drawings["drawing"]);
+			worksheet.Drawings.Remove(shape1);
+			Assert.AreEqual(shape2, worksheet.Drawings["drawing"]);
+			worksheet.Drawings.Remove(shape2);
+			Assert.AreEqual(null, worksheet.Drawings["drawing"]);
+		}
+
+		[TestMethod]
+		public void RemoveDrawings()
+		{
+			var worksheet = base._pck.Workbook.Worksheets.Add("sheet");
+			var lineChartDrawing = worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+			var hexagonDrawing = worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+			var pictureDrawing = worksheet.Drawings.AddPicture("Picture", Resources.Test1);
+
+			Assert.AreEqual(3, worksheet.Drawings.Count);
+			Assert.IsTrue(worksheet.Drawings.Contains(pictureDrawing));
+			worksheet.Drawings.Remove(2);
+			Assert.IsFalse(worksheet.Drawings.Contains(pictureDrawing));
+
+			Assert.IsTrue(worksheet.Drawings.Contains(hexagonDrawing));
+			worksheet.Drawings.Remove(hexagonDrawing);
+			Assert.IsFalse(worksheet.Drawings.Contains(hexagonDrawing));
+
+			Assert.IsTrue(worksheet.Drawings.Contains(lineChartDrawing));
+			worksheet.Drawings.Remove("LineChart");
+			Assert.IsFalse(worksheet.Drawings.Contains(lineChartDrawing));
+			Assert.AreEqual(0, worksheet.Drawings.Count);
+		}
+
+		[TestMethod]
+		public void ClearDrawings()
+		{
+			var worksheet = base._pck.Workbook.Worksheets.Add("sheet");
+			var lineChartDrawing = worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+			var hexagonDrawing = worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+			var pictureDrawing = worksheet.Drawings.AddPicture("Picture", Resources.Test1);
+			Assert.AreEqual(3, worksheet.Drawings.Count);
+			worksheet.Drawings.ClearDrawings();
+			Assert.AreEqual(0, worksheet.Drawings.Count);
+		}
+
+		[TestMethod]
+		public void SaveCloseAndLoadDrawingsIntoWorkbook()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add(sheetName);
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.SaveAs(fileInfo);
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+				worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+				worksheet.Drawings.AddPicture("Picture", Resources.Test1);
+				Assert.AreEqual(3, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
+				worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
+				worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
+				worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			if (fileInfo.Exists)
+				fileInfo.Delete();
 		}
 		#endregion
 
