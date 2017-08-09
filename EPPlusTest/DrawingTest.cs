@@ -848,6 +848,453 @@ namespace EPPlusTest
 			if (fileInfo.Exists)
 				fileInfo.Delete();
 		}
+
+		[TestMethod]
+		public void SaveCloseAndLoadDrawingsIntoWorkbookWithABMPImage()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add(sheetName);
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.SaveAs(fileInfo);
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+				worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+				worksheet.Drawings.AddPicture("Picture", Resources.bmpTestResource);
+				Assert.AreEqual(3, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
+				worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
+				worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
+				worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+		}
+
+		[TestMethod]
+		public void SaveCloseAndLoadDrawingsIntoWorkbookWithAGIFImage()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add(sheetName);
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.SaveAs(fileInfo);
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+				worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+				worksheet.Drawings.AddPicture("Picture", Resources.gifTestResource);
+				Assert.AreEqual(3, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
+				worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
+				worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
+				worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+		}
+
+		[TestMethod]
+		public void SaveCloseAndLoadDrawingsIntoWorkbookWithAJPEGImage()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add(sheetName);
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.SaveAs(fileInfo);
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+				worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+				worksheet.Drawings.AddPicture("Picture", Resources.jpegTestResource);
+				Assert.AreEqual(3, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
+				worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
+				worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
+				worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+		}
+
+		[TestMethod]
+		public void SaveCloseAndLoadDrawingsIntoWorkbookWithAPNGImage()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add(sheetName);
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.SaveAs(fileInfo);
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+				worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+				worksheet.Drawings.AddPicture("Picture", Resources.pngTestResource);
+				Assert.AreEqual(3, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
+				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
+				worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
+				worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
+				worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			using (var package = new ExcelPackage(fileInfo))
+			{
+				var worksheet = package.Workbook.Worksheets[sheetName];
+				Assert.AreEqual(0, worksheet.Drawings.Count);
+				package.Save();
+			}
+
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+		}
+
+		[TestMethod]
+		public void AddPicturePNGAndTestItsLocation()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			try
+			{
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					var test = worksheet.Drawings.AddPicture("Picture", Resources.pngTestResource);
+					test.SetPosition(4, 0, 7, 0);
+					Assert.AreEqual(4, test.From.Row);
+					Assert.AreEqual(7, test.From.Column);
+					package.Save();
+				}
+
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var sheet = package.Workbook.Worksheets[sheetName];
+					var picture = sheet.Drawings["Picture"];
+					Assert.AreEqual(4, picture.From.Row);
+					Assert.AreEqual(7, picture.From.Column);
+				}
+			}
+			finally
+			{
+				if (fileInfo.Exists)
+					fileInfo.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void AddPictureJpegAndTestItsLocation()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			try
+			{
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					var test = worksheet.Drawings.AddPicture("Picture", Resources.jpegTestResource);
+					test.SetPosition(4, 0, 7, 0);
+					Assert.AreEqual(4, test.From.Row);
+					Assert.AreEqual(7, test.From.Column);
+					package.Save();
+				}
+
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var sheet = package.Workbook.Worksheets[sheetName];
+					var picture = sheet.Drawings["Picture"];
+					Assert.AreEqual(4, picture.From.Row);
+					Assert.AreEqual(7, picture.From.Column);
+				}
+			}
+			finally
+			{
+				if (fileInfo.Exists)
+					fileInfo.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void AddPictureGIFAndTestItsLocation()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			try
+			{
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					var test = worksheet.Drawings.AddPicture("Picture", Resources.gifTestResource);
+					test.SetPosition(4, 0, 7, 0);
+					Assert.AreEqual(4, test.From.Row);
+					Assert.AreEqual(7, test.From.Column);
+					package.Save();
+				}
+
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var sheet = package.Workbook.Worksheets[sheetName];
+					var picture = sheet.Drawings["Picture"];
+					Assert.AreEqual(4, picture.From.Row);
+					Assert.AreEqual(7, picture.From.Column);
+				}
+			}
+			finally
+			{
+				if (fileInfo.Exists)
+					fileInfo.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void AddPictureBMPAndTestItsLocation()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			try
+			{
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					var test = worksheet.Drawings.AddPicture("Picture", Resources.bmpTestResource);
+					test.SetPosition(4, 0, 7, 0);
+					Assert.AreEqual(4, test.From.Row);
+					Assert.AreEqual(7, test.From.Column);
+					package.Save();
+				}
+
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var sheet = package.Workbook.Worksheets[sheetName];
+					var picture = sheet.Drawings["Picture"];
+					Assert.AreEqual(4, picture.From.Row);
+					Assert.AreEqual(7, picture.From.Column);
+				}
+			}
+			finally
+			{
+				if (fileInfo.Exists)
+					fileInfo.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void AddPictureBMPAndTestItsLocationOneCellAnchor()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			try
+			{
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					var test = worksheet.Drawings.AddPicture("Picture", Resources.bmpTestResource);
+					test.EditAs = eEditAs.OneCell;
+					test.SetPosition(4, 0, 7, 0);
+					test.SetSize(100, 500);
+					Assert.AreEqual(4, test.From.Row);
+					Assert.AreEqual(7, test.From.Column);
+					var PixelWidth = test.GetPixelWidth();
+					var PixelHeight = test.GetPixelHeight();
+					Assert.AreEqual(100, test.GetPixelWidth());
+					Assert.AreEqual(500, test.GetPixelHeight());
+					package.Save();
+				}
+
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var sheet = package.Workbook.Worksheets[sheetName];
+					var picture = sheet.Drawings["Picture"];
+					Assert.AreEqual(4, picture.From.Row);
+					Assert.AreEqual(7, picture.From.Column);
+					var PixelWidth2 = picture.GetPixelWidth();
+					var PixelHeight2 = picture.GetPixelHeight();
+					Assert.AreEqual(100, picture.GetPixelWidth());
+					Assert.AreEqual(500, picture.GetPixelHeight());
+				}
+			}
+			finally
+			{
+				if (fileInfo.Exists)
+					fileInfo.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void AddPictureBMPAndTestItsLocationTwoCellAnchor()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			try
+			{
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					var test = worksheet.Drawings.AddPicture("Picture", Resources.bmpTestResource);
+					test.SetPosition(4, 0, 7, 0);
+					Assert.AreEqual(4, test.From.Row);
+					Assert.AreEqual(7, test.From.Column);
+					test.EditAs = eEditAs.TwoCell;
+					package.Save();
+				}
+
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var sheet = package.Workbook.Worksheets[sheetName];
+					var picture = sheet.Drawings["Picture"];
+					Assert.AreEqual(4, picture.From.Row);
+					Assert.AreEqual(7, picture.From.Column);
+				}
+			}
+			finally
+			{
+				if (fileInfo.Exists)
+					fileInfo.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void AddPictureBMPAndTestItsLocationAbsoluteCellAnchor()
+		{
+			string sheetName = "DrawingSheet";
+			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
+			if (fileInfo.Exists)
+				fileInfo.Delete();
+			try
+			{
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					var test = worksheet.Drawings.AddPicture("Picture", Resources.bmpTestResource);
+					test.EditAs = eEditAs.Absolute;
+					test.SetPixelLeft(450);
+					test.SetPixelTop(90);
+					Assert.AreEqual(4, test.From.Row);
+					Assert.AreEqual(7, test.From.Column);
+					package.Save();
+				}
+
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var sheet = package.Workbook.Worksheets[sheetName];
+					var picture = sheet.Drawings["Picture"];
+					Assert.AreEqual(4, picture.From.Row);
+					Assert.AreEqual(7, picture.From.Column);
+				}
+			}
+			finally
+			{
+				if (fileInfo.Exists)
+					fileInfo.Delete();
+			}
+		}
 		#endregion
 
 		#region AddPicture Tests
