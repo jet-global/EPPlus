@@ -387,6 +387,11 @@
     <EmbeddedResource Include="Resources\BitmapImage.gif" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\BmpImage.bmp" />
+    <Content Include="Resources\bmpTestResource.bmp" />
+    <Content Include="Resources\gifTestResource.gif" />
+    <Content Include="Resources\jpegTestResource.jpeg" />
+    <Content Include="Resources\pngTestResource.png" />
     <Content Include="Resources\Test1.jpg" />
   </ItemGroup>
   <ItemGroup>
