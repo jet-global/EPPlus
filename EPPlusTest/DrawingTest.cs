@@ -856,46 +856,52 @@ namespace EPPlusTest
 			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
 			if (fileInfo.Exists)
 				fileInfo.Delete();
-			using (var package = new ExcelPackage())
-			{
-				var worksheet = package.Workbook.Worksheets.Add(sheetName);
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.SaveAs(fileInfo);
-			}
+			try
+			{ 
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.SaveAs(fileInfo);
+				}
 
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				worksheet.Drawings.AddChart("LineChart", eChartType.Line);
-				worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
-				worksheet.Drawings.AddPicture("Picture", Resources.bmpTestResource);
-				Assert.AreEqual(3, worksheet.Drawings.Count);
-				package.Save();
-			}
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+					worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+					worksheet.Drawings.AddPicture("Picture", Resources.bmpTestResource);
+					Assert.AreEqual(3, worksheet.Drawings.Count);
+					package.Save();
+				}
 
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
-				worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
-				worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
-				worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.Save();
-			}
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
+					worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
+					worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
+					worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.Save();
+				}
 
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.Save();
-			}
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.Save();
+				}
 
-			if (fileInfo.Exists)
-				fileInfo.Delete();
+			}
+			finally
+			{
+				if (fileInfo.Exists)
+					fileInfo.Delete();
+			}
 		}
 
 		[TestMethod]
@@ -905,95 +911,105 @@ namespace EPPlusTest
 			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
 			if (fileInfo.Exists)
 				fileInfo.Delete();
-			using (var package = new ExcelPackage())
-			{
-				var worksheet = package.Workbook.Worksheets.Add(sheetName);
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.SaveAs(fileInfo);
-			}
+			try
+			{ 
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.SaveAs(fileInfo);
+				}
 
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				worksheet.Drawings.AddChart("LineChart", eChartType.Line);
-				worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
-				worksheet.Drawings.AddPicture("Picture", Resources.gifTestResource);
-				Assert.AreEqual(3, worksheet.Drawings.Count);
-				package.Save();
-			}
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+					worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+					worksheet.Drawings.AddPicture("Picture", Resources.gifTestResource);
+					Assert.AreEqual(3, worksheet.Drawings.Count);
+					package.Save();
+				}
 
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
-				worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
-				worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
-				worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.Save();
-			}
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
+					worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
+					worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
+					worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.Save();
+				}
 
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.Save();
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.Save();
+				}
 			}
-
-			if (fileInfo.Exists)
-				fileInfo.Delete();
+			finally
+			{
+				if (fileInfo.Exists)
+					fileInfo.Delete();
+			}
 		}
 
-		[TestMethod]
+[TestMethod]
 		public void SaveCloseAndLoadDrawingsIntoWorkbookWithAJPEGImage()
 		{
 			string sheetName = "DrawingSheet";
 			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
 			if (fileInfo.Exists)
 				fileInfo.Delete();
-			using (var package = new ExcelPackage())
-			{
-				var worksheet = package.Workbook.Worksheets.Add(sheetName);
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.SaveAs(fileInfo);
-			}
+			try { 
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.SaveAs(fileInfo);
+				}
 
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				worksheet.Drawings.AddChart("LineChart", eChartType.Line);
-				worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
-				worksheet.Drawings.AddPicture("Picture", Resources.jpegTestResource);
-				Assert.AreEqual(3, worksheet.Drawings.Count);
-				package.Save();
-			}
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+					worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+					worksheet.Drawings.AddPicture("Picture", Resources.jpegTestResource);
+					Assert.AreEqual(3, worksheet.Drawings.Count);
+					package.Save();
+				}
 
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
-				worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
-				worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
-				worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.Save();
-			}
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
+					worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
+					worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
+					worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.Save();
+				}
 
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.Save();
-			}
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.Save();
+				}
 
-			if (fileInfo.Exists)
-				fileInfo.Delete();
+			}
+			finally
+			{
+				if (fileInfo.Exists)
+					fileInfo.Delete();
+			}
 		}
 
 		[TestMethod]
@@ -1003,46 +1019,51 @@ namespace EPPlusTest
 			FileInfo fileInfo = new FileInfo(base._worksheetPath + "SaveAndLoadTest.xlsx");
 			if (fileInfo.Exists)
 				fileInfo.Delete();
-			using (var package = new ExcelPackage())
+			try
 			{
-				var worksheet = package.Workbook.Worksheets.Add(sheetName);
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.SaveAs(fileInfo);
-			}
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add(sheetName);
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.SaveAs(fileInfo);
+				}
 
-			using (var package = new ExcelPackage(fileInfo))
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					worksheet.Drawings.AddChart("LineChart", eChartType.Line);
+					worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
+					worksheet.Drawings.AddPicture("Picture", Resources.pngTestResource);
+					Assert.AreEqual(3, worksheet.Drawings.Count);
+					package.Save();
+				}
+
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
+					Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
+					worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
+					worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
+					worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.Save();
+				}
+
+				using (var package = new ExcelPackage(fileInfo))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					Assert.AreEqual(0, worksheet.Drawings.Count);
+					package.Save();
+				}
+			}
+			finally
 			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				worksheet.Drawings.AddChart("LineChart", eChartType.Line);
-				worksheet.Drawings.AddShape("Hexagon", eShapeStyle.Hexagon);
-				worksheet.Drawings.AddPicture("Picture", Resources.pngTestResource);
-				Assert.AreEqual(3, worksheet.Drawings.Count);
-				package.Save();
+				if (fileInfo.Exists)
+					fileInfo.Delete();
 			}
-
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["LineChart"]));
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Hexagon"]));
-				Assert.IsTrue(worksheet.Drawings.Contains(worksheet.Drawings["Picture"]));
-				worksheet.Drawings.Remove(worksheet.Drawings["LineChart"]);
-				worksheet.Drawings.Remove(worksheet.Drawings["Hexagon"]);
-				worksheet.Drawings.Remove(worksheet.Drawings["Picture"]);
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.Save();
-			}
-
-			using (var package = new ExcelPackage(fileInfo))
-			{
-				var worksheet = package.Workbook.Worksheets[sheetName];
-				Assert.AreEqual(0, worksheet.Drawings.Count);
-				package.Save();
-			}
-
-			if (fileInfo.Exists)
-				fileInfo.Delete();
 		}
 
 		[TestMethod]
@@ -1199,8 +1220,6 @@ namespace EPPlusTest
 					test.SetSize(100, 500);
 					Assert.AreEqual(4, test.From.Row);
 					Assert.AreEqual(7, test.From.Column);
-					var PixelWidth = test.GetPixelWidth();
-					var PixelHeight = test.GetPixelHeight();
 					Assert.AreEqual(100, test.GetPixelWidth());
 					Assert.AreEqual(500, test.GetPixelHeight());
 					package.Save();
@@ -1295,11 +1314,6 @@ namespace EPPlusTest
 					fileInfo.Delete();
 			}
 		}
-		#endregion
-
-		#region AddPicture Tests
-		// Test adding from an Image object (with and without URI).
-		// Test adding from a FileInfo object (with and without URI).
 		#endregion
 
 		#region Read Chart Tests
