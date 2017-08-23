@@ -75,6 +75,31 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void DeleteRowsHandlesDifferentShapesOfColumns()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				for (int row = 4; row <= 8; row++)
+				{
+					sheet.Cells[row, 2].Formula = $"{row}";
+				}
+				for (int row = 1; row <= 8; row++)
+				{
+					sheet.Cells[row, 3].Formula = $"{row}";
+				}
+				sheet.DeleteRow(2, 4);
+				Assert.AreEqual("1", sheet.Cells[1, 3].Formula);
+				Assert.AreEqual("6", sheet.Cells[2, 2].Formula);
+				Assert.AreEqual("6", sheet.Cells[2, 3].Formula);
+				Assert.AreEqual("7", sheet.Cells[3, 2].Formula);
+				Assert.AreEqual("7", sheet.Cells[3, 3].Formula);
+				Assert.AreEqual("8", sheet.Cells[4, 2].Formula);
+				Assert.AreEqual("8", sheet.Cells[4, 3].Formula);
+			}
+		}
+
+		[TestMethod]
 		public void Insert1()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("Insert1");
