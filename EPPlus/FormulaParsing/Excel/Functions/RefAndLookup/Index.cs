@@ -58,6 +58,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				if (row > rangeInfo.Address._toRow - rangeInfo.Address._fromRow + 1 || column > rangeInfo.Address._toCol - rangeInfo.Address._fromCol + 1)
 					return new CompileResult(eErrorType.Value);
 				var candidate = rangeInfo.GetOffset(row - 1, column - 1);
+				if (column == 0)
+					candidate = rangeInfo.GetOffset(row - 1, column);
+				
 				return crf.Create(candidate);
 			}
 			throw new NotImplementedException();
