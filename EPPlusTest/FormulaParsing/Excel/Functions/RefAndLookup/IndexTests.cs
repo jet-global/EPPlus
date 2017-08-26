@@ -121,7 +121,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 				workSheet.Cells["C31"].Formula = "DATE(2017, 8, 9)";
 				workSheet.Cells["C32"].Formula = "DATE(2017, 8, 8)";
 				workSheet.Cells["C33"].Formula = "DATE(2017, 8, 7)";
-
 				workSheet.Cells["D18"].Value = 2;
 				workSheet.Cells["D19"].Value = 1;
 				workSheet.Cells["D20"].Value = 7;
@@ -138,16 +137,69 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 				workSheet.Cells["D31"].Value = 3;
 				workSheet.Cells["D32"].Value = 2;
 				workSheet.Cells["D33"].Value = 1;
-
 				workSheet.Cells["F21"].Formula = "INDEX($C$18:$C33, MATCH(7, $D$18:$D$33, 0), 0) - 6";
 				workSheet.Cells["F22"].Formula = "INDEX($C$18:$C33, 3, 0) - 6";
-
 				workSheet.Cells["E3"].Formula = "DATE(2017, 8, 14)";
 				workSheet.Calculate();
-				//Seeing if the correct value comes from the function
 				Assert.AreEqual(workSheet.Cells["E3"].Value, workSheet.Cells["F22"].Value);
 				Assert.AreEqual(workSheet.Cells["E3"].Value, workSheet.Cells["F21"].Value);
 			}
+		}
+
+		[TestMethod]
+		public void IndexWithNoParametersReutrnsPoundValue()
+		{
+			var function = new Index();
+			var result = function.Execute(FunctionsHelper.CreateArgs(), this.ParsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithRegularInputReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 6;
+			this.Worksheet.Cells["B3"].Value = 4;
+			this.Worksheet.Cells["B4"].Value = 9;
+			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:B4, 3)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(4, this.Worksheet.Cells["C2"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithRowAsNumericStringReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 6;
+			this.Worksheet.Cells["B3"].Value = 4;
+			this.Worksheet.Cells["B4"].Value = 9;
+			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:B4, \"2\")";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(6, this.Worksheet.Cells["C2"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithRowAsDateReturnsPoundRef()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 6;
+			this.Worksheet.Cells["B3"].Value = 4;
+			this.Worksheet.Cells["B4"].Value = 9;
+			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:B4, DATE(1990, 1, 1))";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["C2"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithRowAsGenericStringReturnsPoundValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 6;
+			this.Worksheet.Cells["B3"].Value = 4;
+			this.Worksheet.Cells["B4"].Value = 9;
+			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:B4, \"string\")";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["C2"].Value).Type);
 		}
 		#endregion
 	}
