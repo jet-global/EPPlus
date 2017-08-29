@@ -100,6 +100,34 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void DeleteRowsAcrossMultipleCellStorePages()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				for (int i = 1; i < 1024; i++)
+				{
+					sheet.Cells[i, 2].Value = i;
+				}
+				for (int i = 1500; i < 4096; i++)
+				{
+					sheet.Cells[i, 2].Value = i;
+				}
+				int splitPoint = 400;
+				sheet.DeleteRow(splitPoint, 600);
+				sheet.DeleteRow(splitPoint, 600);
+				for (int i = 1; i < splitPoint; i++)
+				{
+					Assert.AreEqual(i, sheet.Cells[i, 2].Value);
+				}
+				for (int i = splitPoint; i < 2872; i++)
+				{
+					Assert.AreEqual(i + 1200, sheet.Cells[i, 2].Value);
+				}
+			}
+		}
+
+		[TestMethod]
 		public void Insert1()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("Insert1");

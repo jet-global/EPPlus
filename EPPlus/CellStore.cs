@@ -808,6 +808,11 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 									{
 										var fr = shift ? fromRow : endRow - rowsLeft;
 										pagePos = column.GetPosition(fr);
+										// This should never be the same page we deleted from earlier in this method.
+										// Rather, it should be the next [remaining] page.
+										// The only valid same-index case is when the entire original page was deleted. 
+										if (page == column._pages[pagePos] && column._pages[pagePos + 1] != null)
+											pagePos++;
 										delEndRow = this.DeleteCells(column._pages[pagePos], fr, shift ? fr + rowsLeft : endRow, shift);
 										if (shift)
 											this.UpdatePageOffset(column, pagePos, rowsLeft);
@@ -1313,6 +1318,8 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 
 	private int DeleteCells(PageIndex page, int fromRow, int toRow, bool shift)
 	{
+		if (page.RowCount == 0)
+			return fromRow;
 		var fromPos = page.GetPosition(fromRow - (page.IndexOffset));
 		if (fromPos < 0)
 		{
