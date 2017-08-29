@@ -267,9 +267,9 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		{
 			this.Worksheet.Cells["B1"].Value = 3;
 			this.Worksheet.Cells["C1"].Value = 345;
-			this.Worksheet.Cells["D3"].Formula = "INDEX(B1:C1, 2)";
+			this.Worksheet.Cells["D3"].Formula = "INDEX(B1:C1, 1)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(345, this.Worksheet.Cells["D3"].Value);
+			Assert.AreEqual(3, this.Worksheet.Cells["D3"].Value);
 		}
 
 		[TestMethod]
@@ -314,7 +314,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["B1"].Value = "string";
 			this.Worksheet.Cells["C1"].Value = "string";
 			this.Worksheet.Cells["D1"].Value = "string";
-			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:B3, 2)";
+			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:D1, 2)";
 			this.Worksheet.Calculate();
 			Assert.AreEqual("string", this.Worksheet.Cells["C2"].Value);
 		}
@@ -352,6 +352,344 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C2, 2)";
 			this.Worksheet.Calculate();
 			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionRowNumericStringArrayReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Value = "\"1\"";
+			this.Worksheet.Cells["C1"].Value = "\"5\"";
+			this.Worksheet.Cells["D1"].Value = "\"9\"";
+			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:D1, 2)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual("\"5\"", this.Worksheet.Cells["C2"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionColumnNumericStringArrayReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Value = "\"4\"";
+			this.Worksheet.Cells["B2"].Value = "\"76\"";
+			this.Worksheet.Cells["B3"].Value = "\"9\"";
+			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:B3, 2)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual("\"76\"" , this.Worksheet.Cells["C2"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithLargeNumericStringArrayWithNullThirdParameterReturnsPoundValue()
+		{
+			this.Worksheet.Cells["B1"].Value = "\"3\"";
+			this.Worksheet.Cells["B2"].Value = "\"45\"";
+			this.Worksheet.Cells["C1"].Value = "\"2\"";
+			this.Worksheet.Cells["C2"].Value = "\"90\"";
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C2, 2, )";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithLargeNumericStringArrayWithNoThirdParameterReturnsPoundRef()
+		{
+			this.Worksheet.Cells["B1"].Value = "\"6\"";
+			this.Worksheet.Cells["B2"].Value = "\"8\"";
+			this.Worksheet.Cells["C1"].Value = "\"10\"";
+			this.Worksheet.Cells["C2"].Value = "\"45\"";
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C2, 2)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionRowDateArrayReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Formula = "DATE(2016, 4, 10)";
+			this.Worksheet.Cells["C1"].Formula = "DATE(2016, 9, 8)";
+			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:C1, 2)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(42621, this.Worksheet.Cells["C2"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionColumnDateArrayReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Formula = "DATE(2016, 6, 5)";
+			this.Worksheet.Cells["B2"].Formula = "DATE(2016, 9, 8)";
+			this.Worksheet.Cells["B3"].Formula = "DATE(2016, 7, 1)";
+			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:B3, 2)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(42621, this.Worksheet.Cells["C2"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithLargeDateArrayWithNullThirdParameterReturnsPoundValue()
+		{
+			this.Worksheet.Cells["B1"].Formula = "DATE(2017, 8, 3)";
+			this.Worksheet.Cells["B2"].Formula = "DATE(2017, 8, 13)";
+			this.Worksheet.Cells["C1"].Formula = "DATE(2017, 8, 5)";
+			this.Worksheet.Cells["C2"].Formula = "DATE(2017, 8, 9)";
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C2, 2, )";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithLargeDateArrayWithNoThirdParameterReturnsPoundRef()
+		{
+			this.Worksheet.Cells["B1"].Formula = "DATE(2017, 8, 5)";
+			this.Worksheet.Cells["B2"].Formula = "DATE(2017, 8, 14)";
+			this.Worksheet.Cells["C1"].Formula = "DATE(2017, 8, 23)";
+			this.Worksheet.Cells["C2"].Formula = "DATE(2017, 8, 30)";
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C2, 2)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		//Tests dealing specifically with the column parameter of the INDEX Function
+		[TestMethod]
+		public void IndexWithCorrectColumnInputReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, 2)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(80, this.Worksheet.Cells["D5"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithColumnAsNumericStringReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, \"2\")";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(80, this.Worksheet.Cells["D5"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithColumnAsDateReturnsPoundRef()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, DATE(1990, 1, 1))";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithColumnAsGeneralStringReturnsPoundValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, \"string\")";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithColunmAsZeroWithOneDimensionArrayReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, 0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(4, this.Worksheet.Cells["D5"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithColumnAsZeroWithTwoDimensionArrayReturnsPoundValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, 0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithColumnAsNegativeNumberReturnsPoundValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, -3)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithColumnAsReferenceToCellReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, C3)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(3, this.Worksheet.Cells["D5"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithColumnValueGreaterThanNumberOfColumnsReturnsPoundRef()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, 56)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithMissingColumnInputReturnsPoundValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, )";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithNoRowParameterReturnsPoundValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, , 2)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithBothRowAndColumnZeroReturnsPoundValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 5;
+			this.Worksheet.Cells["B2"].Value = 4;
+			this.Worksheet.Cells["B3"].Value = 90;
+			this.Worksheet.Cells["C1"].Value = 45;
+			this.Worksheet.Cells["C2"].Value = 80;
+			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 0, 0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionRowNumberArrayWithColumnReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 3;
+			this.Worksheet.Cells["C1"].Value = 345;
+			this.Worksheet.Cells["D3"].Formula = "INDEX(B1:C1, 1, 1)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(3, this.Worksheet.Cells["D3"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionColumnNumberArrayWithColumnReturnsCorrectValue()
+		{
+			this.Worksheet.Cells["B1"].Value = 45;
+			this.Worksheet.Cells["B2"].Value = 5;
+			this.Worksheet.Cells["B3"].Value = 10;
+			this.Worksheet.Cells["D3"].Formula = "INDEX(B1:B3, 1, 1)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(45, this.Worksheet.Cells["D3"].Value);
+		}
+
+		[TestMethod]
+		public void IndexWithLargeNumberArrayReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionRowStringArrayWithColumnReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionColumnStringArrayWithColumnReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void IndexWithLargeStringArrayReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionRowNumericStringArrayWithColumnReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionColumnNumericStringArrayWithColumnReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void IndexWithLargeNumericStringArrayReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionRowDateArrayWithColumnReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void IndexWithOneDimensionColumnDateArrayWithColumnReturnsCorrectValue()
+		{
+
+		}
+
+		[TestMethod]
+		public void IndexWithLargeDateArrayReturnsCorrectValue()
+		{
+
 		}
 		#endregion
 	}
