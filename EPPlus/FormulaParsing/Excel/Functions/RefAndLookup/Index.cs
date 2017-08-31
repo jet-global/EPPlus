@@ -39,8 +39,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				return new CompileResult(argumentError);
 			var arg1 = arguments.ElementAt(0);
 			var arg2 = arguments.ElementAt(1);
-			
 
+			
 
 			var args = arg1.Value as IEnumerable<FunctionArgument>;
 			var crf = new CompileResultFactory();
@@ -77,22 +77,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 
 
 				if (rangeInfo.Address.Rows == 1 && arguments.Count() < 3)
+				{
 					column = row;
-				//else if (rangeInfo.Address.Columns == 1 && arguments.ElementAt(2) is null)
-					//row = row;
-
+					row = 1;
+				}
+				else if (arguments.ElementAt(2).Value == null)
+					return new CompileResult(eErrorType.Value);
+						
+			
 
 				if (row > rangeInfo.Address.Rows || column > rangeInfo.Address.Columns)
 					return new CompileResult(eErrorType.Ref);
 
-				if (arguments.ElementAt(2).Value == null)
-					return new CompileResult(eErrorType.Value);
+				
 
 				if (row > rangeInfo.Address._toRow - rangeInfo.Address._fromRow + 1 || column > rangeInfo.Address._toCol - rangeInfo.Address._fromCol + 1)
 					return new CompileResult(eErrorType.Value);
 				var candidate = rangeInfo.GetOffset(row - 1, column - 1);
 				if (column == 0)
 					candidate = rangeInfo.GetOffset(row - 1, column);
+				
+			
 				
 				return crf.Create(candidate);
 			}

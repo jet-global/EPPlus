@@ -398,7 +398,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["C1"].Formula = "DATE(2016, 9, 8)";
 			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:C1, 2)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(42621, this.Worksheet.Cells["C2"].Value);
+			Assert.AreEqual(42621d, this.Worksheet.Cells["C2"].Value);
 		}
 
 		[TestMethod]
@@ -714,7 +714,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["C1"].Formula = "DATE(2017, 9, 1)";
 			this.Worksheet.Cells["D3"].Formula = "INDEX(B1:C1, 1, 1)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(42918, this.Worksheet.Cells["D3"].Value);
+			Assert.AreEqual(42918d, this.Worksheet.Cells["D3"].Value);
 		}
 
 		[TestMethod]
@@ -725,7 +725,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["B3"].Formula = "DATE(2017, 8, 5)";
 			this.Worksheet.Cells["D3"].Formula = "INDEX(B1:B3, 2, 1)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(42918, this.Worksheet.Cells["D3"].Value);
+			Assert.AreEqual(42918d, this.Worksheet.Cells["D3"].Value);
 		}
 
 		[TestMethod]
@@ -739,7 +739,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["C3"].Formula = "DATE(2017, 8, 1)";
 			this.Worksheet.Cells["D3"].Formula = "INDEX(B1:C3, 3, 2)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(42918, this.Worksheet.Cells["D3"].Value);
+			Assert.AreEqual(42948d, this.Worksheet.Cells["D3"].Value);
 		}
 
 		[TestMethod]
