@@ -750,6 +750,34 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Calculate();
 			Assert.AreEqual(42918, this.Worksheet.Cells["D3"].Value);
 		}
+
+		[TestMethod]
+		public void IndexWithRowAsDoubleReturnsPoundRef()
+		{
+			this.Worksheet.Cells["B1"].Value = 3;
+			this.Worksheet.Cells["B2"].Value = 10;
+			this.Worksheet.Cells["B3"].Value = 20;
+			this.Worksheet.Cells["C1"].Value = 5;
+			this.Worksheet.Cells["C2"].Value = 6;
+			this.Worksheet.Cells["C3"].Value = 90;
+			this.Worksheet.Cells["D1"].Formula = "INDEX(B1:C3, 3.3)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D1"].Value));
+		}
+
+		[TestMethod]
+		public void IndexWithColumnAsDoubleReturnsPoundRef()
+		{
+			this.Worksheet.Cells["B1"].Value = 3;
+			this.Worksheet.Cells["B2"].Value = 10;
+			this.Worksheet.Cells["B3"].Value = 20;
+			this.Worksheet.Cells["C1"].Value = 5;
+			this.Worksheet.Cells["C2"].Value = 6;
+			this.Worksheet.Cells["C3"].Value = 90;
+			this.Worksheet.Cells["D1"].Formula = "INDEX(B1:C3, 3, 1.2)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D1"].Value));
+		}
 		#endregion
 	}
 }

@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
@@ -38,6 +39,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				return new CompileResult(argumentError);
 			var arg1 = arguments.ElementAt(0);
 			var arg2 = arguments.ElementAt(1);
+			
+
+
 			var args = arg1.Value as IEnumerable<FunctionArgument>;
 			var crf = new CompileResultFactory();
 			if (args != null)
@@ -52,9 +56,28 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				return crf.Create(arg2.Value);
 			if (arg1.IsExcelRange)
 			{
+				
 				var row = this.ArgToInt(arguments, 1);
+
+				if (row == 0)
+					return new CompileResult(eErrorType.Value);
+				if (row < 0)
+					return new CompileResult(eErrorType.Value);
+
 				var column = arguments.Count() > 2 ? this.ArgToInt(arguments, 2) : 1;
+
+				if (column == 0 && row == 0)
+					return new CompileResult(eErrorType.Value);
+				if (column < 0)
+					return new CompileResult(eErrorType.Value);
+
 				var rangeInfo = arg1.ValueAsRangeInfo;
+
+				if (row > rangeInfo.Address.Rows || column > rangeInfo.Address.Columns)
+					return new CompileResult(eErrorType.Ref);
+
+
+
 				if (row > rangeInfo.Address._toRow - rangeInfo.Address._fromRow + 1 || column > rangeInfo.Address._toCol - rangeInfo.Address._fromCol + 1)
 					return new CompileResult(eErrorType.Value);
 				var candidate = rangeInfo.GetOffset(row - 1, column - 1);
