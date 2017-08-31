@@ -764,6 +764,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 				var pageFromRow = fromRow >> pageBits;
 				for (int c = 0; c < this.ColumnCount; c++)
 				{
+					int rowsToDelete = rows;
 					var column = this._columnIndex[c];
 					if (column.Index >= fromCol)
 					{
@@ -774,25 +775,27 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 						if (pagePos < column.PageCount)
 						{
 							var page = column._pages[pagePos];
-							if (shift && page.RowCount > 0 && page.MinIndex > fromRow && page.MaxIndex >= fromRow + rows)
+							if (shift && page.RowCount > 0 && page.MinIndex > fromRow && page.MaxIndex >= fromRow + rowsToDelete)
 							{
+								// The entire page is being shifted.
 								var o = page.MinIndex - fromRow;
-								if (o < rows)
+								if (o < rowsToDelete)
 								{
-									rows -= o;
+									rowsToDelete -= o;
 									page.Offset -= o;
 									this.UpdatePageOffset(column, pagePos, o);
 								}
 								else
 								{
-									page.Offset -= rows;
-									this.UpdatePageOffset(column, pagePos, rows);
+									page.Offset -= rowsToDelete;
+									this.UpdatePageOffset(column, pagePos, rowsToDelete);
 									continue;
 								}
 							}
-							if (page.RowCount > 0 && page.MinIndex <= fromRow + rows - 1 && page.MaxIndex >= fromRow) //The row is inside the page
+							if (page.RowCount > 0 && page.MinIndex <= fromRow + rowsToDelete - 1 && page.MaxIndex >= fromRow) 
 							{
-								var endRow = fromRow + rows;
+								// The range starts within a page: shift rows within the page. 
+								var endRow = fromRow + rowsToDelete;
 								var delEndRow = this.DeleteCells(column._pages[pagePos], fromRow, endRow, shift);
 								if (shift && delEndRow != fromRow)
 									this.UpdatePageOffset(column, pagePos, delEndRow - fromRow);
@@ -805,6 +808,11 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 									{
 										var fr = shift ? fromRow : endRow - rowsLeft;
 										pagePos = column.GetPosition(fr);
+										// This should never be the same page we deleted from earlier in this method.
+										// Rather, it should be the next [remaining] page.
+										// The only valid same-index case is when the entire original page was deleted. 
+										if (page == column._pages[pagePos] && column._pages[pagePos + 1] != null)
+											pagePos++;
 										delEndRow = this.DeleteCells(column._pages[pagePos], fr, shift ? fr + rowsLeft : endRow, shift);
 										if (shift)
 											this.UpdatePageOffset(column, pagePos, rowsLeft);
@@ -813,18 +821,18 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 							}
 							else if (pagePos > 0 && column._pages[pagePos].IndexOffset > fromRow) //The row is on the page before.
 							{
-								int offset = fromRow + rows - 1 - ((pageFromRow - 1) << pageBits);
+								int offset = fromRow + rowsToDelete - 1 - ((pageFromRow - 1) << pageBits);
 								var rowPos = column._pages[pagePos - 1].GetPosition(offset);
 								if (rowPos > 0 && pagePos > 0)
 								{
 									if (shift)
-										this.UpdateIndexOffset(column, pagePos - 1, rowPos, fromRow + rows - 1, -rows);
+										this.UpdateIndexOffset(column, pagePos - 1, rowPos, fromRow + rowsToDelete - 1, -rowsToDelete);
 								}
 							}
 							else
 							{
 								if (shift && pagePos + 1 < column.PageCount)
-									this.UpdateIndexOffset(column, pagePos + 1, 0, column._pages[pagePos + 1].MinIndex, -rows);
+									this.UpdateIndexOffset(column, pagePos + 1, 0, column._pages[pagePos + 1].MinIndex, -rowsToDelete);
 							}
 						}
 					}
@@ -1310,6 +1318,8 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 
 	private int DeleteCells(PageIndex page, int fromRow, int toRow, bool shift)
 	{
+		if (page.RowCount == 0)
+			return fromRow;
 		var fromPos = page.GetPosition(fromRow - (page.IndexOffset));
 		if (fromPos < 0)
 		{
