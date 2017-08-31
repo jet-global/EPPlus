@@ -66,17 +66,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 
 				var column = arguments.Count() > 2 ? this.ArgToInt(arguments, 2) : 1;
 
+
 				if (column == 0 && row == 0)
 					return new CompileResult(eErrorType.Value);
 				if (column < 0)
 					return new CompileResult(eErrorType.Value);
 
+
 				var rangeInfo = arg1.ValueAsRangeInfo;
+
+
+				if (rangeInfo.Address.Rows == 1 && arguments.Count() < 3)
+					column = row;
+				//else if (rangeInfo.Address.Columns == 1 && arguments.ElementAt(2) is null)
+					//row = row;
+
 
 				if (row > rangeInfo.Address.Rows || column > rangeInfo.Address.Columns)
 					return new CompileResult(eErrorType.Ref);
 
-
+				if (arguments.ElementAt(2).Value == null)
+					return new CompileResult(eErrorType.Value);
 
 				if (row > rangeInfo.Address._toRow - rangeInfo.Address._fromRow + 1 || column > rangeInfo.Address._toCol - rangeInfo.Address._fromCol + 1)
 					return new CompileResult(eErrorType.Value);

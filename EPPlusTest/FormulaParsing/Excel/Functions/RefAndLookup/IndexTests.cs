@@ -57,16 +57,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		#endregion
 
 		#region Index Tests
-		[TestMethod]
-		public void IndexReturnsPoundValueWhenTooFewArgumentsAreSupplied()
-		{
-			this.Worksheet.Cells["A1"].Value = 1d;
-			this.Worksheet.Cells["A2"].Value = 3d;
-			this.Worksheet.Cells["A3"].Value = 5d;
-			this.Worksheet.Cells["A4"].Formula = "INDEX(A1:A3,213)";
-			this.Worksheet.Calculate();
-			Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), this.Worksheet.Cells["A4"].Value);
-		}
+
 
 		[TestMethod]
 		public void IndexReturnsValueByIndex()
@@ -549,10 +540,10 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["B3"].Value = 90;
 			this.Worksheet.Cells["C1"].Value = 45;
 			this.Worksheet.Cells["C2"].Value = 80;
-			this.Worksheet.Cells["C3"].Value = 3;
+			this.Worksheet.Cells["C3"].Value = 2;
 			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, C3)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(3, this.Worksheet.Cells["D5"].Value);
+			Assert.AreEqual(80, this.Worksheet.Cells["D5"].Value);
 		}
 
 		[TestMethod]
