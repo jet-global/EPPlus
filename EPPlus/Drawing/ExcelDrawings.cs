@@ -183,54 +183,49 @@ namespace OfficeOpenXml.Drawing
 			if (this.DrawingXml.OuterXml == "")
 			{
 				this.DrawingXml.LoadXml(string.Format("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><xdr:wsDr xmlns:xdr=\"{0}\" xmlns:a=\"{1}\" />", ExcelPackage.schemaSheetDrawings, ExcelPackage.schemaDrawings));
-				this._uriDrawing = new Uri(string.Format("/xl/drawings/drawing{0}.xml", Worksheet.SheetID), UriKind.Relative);
-
-				Packaging.ZipPackage package = Worksheet.Package.Package;
-				this._part = package.CreatePart(_uriDrawing, "application/vnd.openxmlformats-officedocument.drawing+xml", Package.Compression);
+				this._uriDrawing = XmlHelper.GetNewUri(this.Package.Package, "/xl/drawings/drawing{0}.xml");
+				Packaging.ZipPackage package = this.Worksheet.Package.Package;
+				this._part = package.CreatePart(this._uriDrawing, "application/vnd.openxmlformats-officedocument.drawing+xml", this.Package.Compression);
 
 				StreamWriter streamChart = new StreamWriter(this._part.GetStream(FileMode.Create, FileAccess.Write));
 				this.DrawingXml.Save(streamChart);
 				streamChart.Close();
 				package.Flush();
 
-				this.DrawingRelationship = this.Worksheet.Part.CreateRelationship(UriHelper.GetRelativeUri(Worksheet.WorksheetUri, _uriDrawing), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/drawing");
-				XmlElement e = Worksheet.WorksheetXml.CreateElement("drawing", ExcelPackage.schemaMain);
-				e.SetAttribute("id", ExcelPackage.schemaRelationships, DrawingRelationship.Id);
+				this.DrawingRelationship = this.Worksheet.Part.CreateRelationship(UriHelper.GetRelativeUri(this.Worksheet.WorksheetUri, this._uriDrawing), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/drawing");
+				XmlElement drawingElement = this.Worksheet.WorksheetXml.CreateElement("drawing", ExcelPackage.schemaMain);
+				drawingElement.SetAttribute("id", ExcelPackage.schemaRelationships, this.DrawingRelationship.Id);
 
-				this.Worksheet.WorksheetXml.DocumentElement.AppendChild(e);
+				this.Worksheet.WorksheetXml.DocumentElement.AppendChild(drawingElement);
 				package.Flush();
 			}
-			XmlNode colNode = this._drawingsXml.SelectSingleNode("//xdr:wsDr", NameSpaceManager);
-			XmlElement drawNode;
+			XmlNode columnNode = this._drawingsXml.SelectSingleNode("//xdr:wsDr", this.NameSpaceManager);
+			XmlElement drawingNode;
 			if (this.Worksheet is ExcelChartsheet)
 			{
-				drawNode = this._drawingsXml.CreateElement("xdr", "absoluteAnchor", ExcelPackage.schemaSheetDrawings);
+				drawingNode = this._drawingsXml.CreateElement("xdr", "absoluteAnchor", ExcelPackage.schemaSheetDrawings);
 				XmlElement posNode = this._drawingsXml.CreateElement("xdr", "pos", ExcelPackage.schemaSheetDrawings);
 				posNode.SetAttribute("y", "0");
 				posNode.SetAttribute("x", "0");
-				drawNode.AppendChild(posNode);
+				drawingNode.AppendChild(posNode);
 				XmlElement extNode = this._drawingsXml.CreateElement("xdr", "ext", ExcelPackage.schemaSheetDrawings);
 				extNode.SetAttribute("cy", "6072876");
 				extNode.SetAttribute("cx", "9299263");
-				drawNode.AppendChild(extNode);
-				colNode.AppendChild(drawNode);
+				drawingNode.AppendChild(extNode);
+				columnNode.AppendChild(drawingNode);
 			}
 			else
 			{
-				drawNode = this._drawingsXml.CreateElement("xdr", "twoCellAnchor", ExcelPackage.schemaSheetDrawings);
-				colNode.AppendChild(drawNode);
-				//Add from position Element;
+				drawingNode = this._drawingsXml.CreateElement("xdr", "twoCellAnchor", ExcelPackage.schemaSheetDrawings);
+				columnNode.AppendChild(drawingNode);
 				XmlElement fromNode = this._drawingsXml.CreateElement("xdr", "from", ExcelPackage.schemaSheetDrawings);
-				drawNode.AppendChild(fromNode);
+				drawingNode.AppendChild(fromNode);
 				fromNode.InnerXml = "<xdr:col>0</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>0</xdr:rowOff>";
-
-				//Add to position Element;
 				XmlElement toNode = this._drawingsXml.CreateElement("xdr", "to", ExcelPackage.schemaSheetDrawings);
-				drawNode.AppendChild(toNode);
+				drawingNode.AppendChild(toNode);
 				toNode.InnerXml = "<xdr:col>10</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>10</xdr:row><xdr:rowOff>0</xdr:rowOff>";
 			}
-
-			return drawNode;
+			return drawingNode;
 		}
 
 		private void AddDrawings()
