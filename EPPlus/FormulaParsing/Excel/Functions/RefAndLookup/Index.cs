@@ -27,38 +27,90 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
+	/// <summary>
+	/// This class contains the formula for obtaining the value from a given cell range with a specified 
+	/// row or column value. 
+	/// </summary>
 	public class Index : ExcelFunction
 	{
+		/// <summary>
+		/// Takes the data and the associated row/column value and returns the value from the cell range
+		/// at the given row or column value. 
+		/// </summary>
+		/// <param name="arguments">The cell range, the row value, and the column value.</param>
+		/// <param name="context">The context in which the function is called.</param>
+		/// <returns></returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var arg1 = arguments.ElementAt(0);
-			var arg2 = arguments.ElementAt(1);
-			var args = arg1.Value as IEnumerable<FunctionArgument>;
-			var crf = new CompileResultFactory();
+			var cellRange = arguments.ElementAt(0);
+			var rowDataCandidate = arguments.ElementAt(1);
+		
+			var args = cellRange.Value as IEnumerable<FunctionArgument>;
+			var result = new CompileResultFactory();
 			if (args != null)
 			{
 				var index = this.ArgToInt(arguments, 1);
 				if (index > args.Count())
 					throw new ExcelErrorValueException(eErrorType.Ref);
 				var candidate = args.ElementAt(index - 1);
-				return crf.Create(candidate.Value);
+				return base.CreateResult(candidate.Value, DataType.Integer);
 			}
-			if (arg2 != null && arg2.Value is ExcelErrorValue && arg2.Value.ToString() == ExcelErrorValue.Values.NA)
-				return crf.Create(arg2.Value);
-			if (arg1.IsExcelRange)
+			if (rowDataCandidate != null && rowDataCandidate.Value is ExcelErrorValue && rowDataCandidate.Value.ToString() == ExcelErrorValue.Values.NA)
+				return base.CreateResult(rowDataCandidate.Value, DataType.Integer);
+			if (cellRange.IsExcelRange)
 			{
+				var rowCandidate = arguments.ElementAt(1).DataType;
+				if (rowCandidate == DataType.Date)
+					return new CompileResult(eErrorType.Ref);
+				else if (rowCandidate == DataType.Decimal)
+					return new CompileResult(eErrorType.Ref);
 				var row = this.ArgToInt(arguments, 1);
-				var column = arguments.Count() > 2 ? this.ArgToInt(arguments, 2) : 1;
-				var rangeInfo = arg1.ValueAsRangeInfo;
+
+				if (row == 0)
+					return new CompileResult(eErrorType.Value);
+				if (row < 0)
+					return new CompileResult(eErrorType.Value);
+
+				var column = 1;
+				if (arguments.Count() > 2)
+				{
+					var colCandidate = arguments.ElementAt(2).DataType;
+					if (colCandidate == DataType.Date)
+						return new CompileResult(eErrorType.Ref);
+					else if (colCandidate == DataType.Decimal)
+						return new CompileResult(eErrorType.Ref);
+					else
+						column = this.ArgToInt(arguments, 2);
+				}
+				else
+					if ((arguments.ElementAt(0).ValueAsRangeInfo.Address.Columns > 1) && arguments.ElementAt(0).ValueAsRangeInfo.Address.Rows > 1)
+						return new CompileResult(eErrorType.Ref);
+				if ((column == 0 && row == 0) || column < 0)
+					return new CompileResult(eErrorType.Value);
+
+				var rangeInfo = cellRange.ValueAsRangeInfo;
+				if (rangeInfo.Address.Rows == 1 && arguments.Count() < 3)
+				{
+					column = row;
+					row = 1;
+				}
+				var numColumns = arguments.ElementAt(0).ValueAsRangeInfo.Address.Columns;
+				if ((numColumns > 1 && column == 0))
+					return new CompileResult(eErrorType.Value);
+				if (row > rangeInfo.Address.Rows || column > rangeInfo.Address.Columns)
+					return new CompileResult(eErrorType.Ref);
 				if (row > rangeInfo.Address._toRow - rangeInfo.Address._fromRow + 1 || column > rangeInfo.Address._toCol - rangeInfo.Address._fromCol + 1)
 					return new CompileResult(eErrorType.Value);
 				var candidate = rangeInfo.GetOffset(row - 1, column - 1);
-				return crf.Create(candidate);
+				if (column == 0)
+					candidate = rangeInfo.GetOffset(row - 1, column);
+				return base.CreateResult(candidate, DataType.Integer);
 			}
 			throw new NotImplementedException();
 		}
