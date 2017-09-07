@@ -87,8 +87,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 					else
 						column = this.ArgToInt(arguments, 2);
 				}
-
-			
+				else
+				{
+					if (arguments.ElementAt(0).ValueAsRangeInfo.Address.Columns > 1)
+					{
+						if (arguments.ElementAt(0).ValueAsRangeInfo.Address.Rows > 1)
+						{
+							return new CompileResult(eErrorType.Ref);
+						}
+					}
+				}
+				
 
 
 

@@ -388,7 +388,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["C2"].Value = "45";
 			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C2, 2)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
 		}
 
 		[TestMethod]
@@ -433,7 +433,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["C2"].Formula = "DATE(2017, 8, 30)";
 			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C2, 2)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D5"].Value).Type);
 		}
 
 		//Tests dealing specifically with the column parameter of the INDEX Function
