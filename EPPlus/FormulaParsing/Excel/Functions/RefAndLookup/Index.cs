@@ -56,7 +56,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				return crf.Create(arg2.Value);
 			if (arg1.IsExcelRange)
 			{
-				
+				//Testing to make sure we don't have a date in the row parameter 
+				var testVar = arguments.ElementAt(1).DataType;
+
+				if (testVar == DataType.Date)
+					return new CompileResult(eErrorType.Ref);
+				else if (testVar == DataType.Decimal)
+					return new CompileResult(eErrorType.Ref);
+
 				var row = this.ArgToInt(arguments, 1);
 
 				if (row == 0)
@@ -64,13 +71,34 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				if (row < 0)
 					return new CompileResult(eErrorType.Value);
 
-				var column = arguments.Count() > 2 ? this.ArgToInt(arguments, 2) : 1;
+
+
+				
+				var column = 1;
+				if (arguments.Count() > 2)
+				{
+					
+
+					var colTestVar = arguments.ElementAt(2).DataType;
+					if (colTestVar == DataType.Date)
+						return new CompileResult(eErrorType.Ref);
+					else if (colTestVar == DataType.Decimal)
+						return new CompileResult(eErrorType.Ref);
+					else
+						column = this.ArgToInt(arguments, 2);
+				}
+
+			
+
 
 
 				if (column == 0 && row == 0)
 					return new CompileResult(eErrorType.Value);
 				if (column < 0)
 					return new CompileResult(eErrorType.Value);
+
+
+
 
 
 				var rangeInfo = arg1.ValueAsRangeInfo;
@@ -81,10 +109,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 					column = row;
 					row = 1;
 				}
-				else if (arguments.ElementAt(2).Value == null)
+
+
+
+				var test = arguments.ElementAt(0).ValueAsRangeInfo.Address.Columns;
+				if ((test > 1 && column == 0))
 					return new CompileResult(eErrorType.Value);
-						
-			
+				//else if (arguments.ElementAt(2).Value == null)
+				//return new CompileResult(eErrorType.Value);
+
+
 
 				if (row > rangeInfo.Address.Rows || column > rangeInfo.Address.Columns)
 					return new CompileResult(eErrorType.Ref);

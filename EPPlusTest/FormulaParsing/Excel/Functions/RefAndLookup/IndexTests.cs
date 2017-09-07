@@ -248,7 +248,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["B2"].Value = 6;
 			this.Worksheet.Cells["B3"].Value = 4;
 			this.Worksheet.Cells["B4"].Value = 9;
-			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:B4, B4)";
+			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:B4, B3)";
 			this.Worksheet.Calculate();
 			Assert.AreEqual(9, this.Worksheet.Cells["C2"].Value);
 		}
@@ -409,7 +409,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["B3"].Formula = "DATE(2016, 7, 1)";
 			this.Worksheet.Cells["C2"].Formula = "INDEX(B1:B3, 2)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(42621, this.Worksheet.Cells["C2"].Value);
+			Assert.AreEqual(42621d, this.Worksheet.Cells["C2"].Value);
 		}
 
 		[TestMethod]
@@ -499,7 +499,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["B1"].Value = 5;
 			this.Worksheet.Cells["B2"].Value = 4;
 			this.Worksheet.Cells["B3"].Value = 90;
-			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:C3, 2, 0)";
+			this.Worksheet.Cells["D5"].Formula = "INDEX(B1:B3, 2, 0)";
 			this.Worksheet.Calculate();
 			Assert.AreEqual(4, this.Worksheet.Cells["D5"].Value);
 		}
@@ -753,7 +753,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["C3"].Value = 90;
 			this.Worksheet.Cells["D1"].Formula = "INDEX(B1:C3, 3.3)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D1"].Value));
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D1"].Value).Type);
 		}
 
 		[TestMethod]
@@ -767,7 +767,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			this.Worksheet.Cells["C3"].Value = 90;
 			this.Worksheet.Cells["D1"].Formula = "INDEX(B1:C3, 3, 1.2)";
 			this.Worksheet.Calculate();
-			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D1"].Value));
+			Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)this.Worksheet.Cells["D1"].Value).Type);
 		}
 		#endregion
 	}
