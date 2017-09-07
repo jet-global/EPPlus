@@ -59,10 +59,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				if (index > args.Count())
 					throw new ExcelErrorValueException(eErrorType.Ref);
 				var candidate = args.ElementAt(index - 1);
-				return result.Create(candidate.Value);
+				return base.CreateResult(candidate.Value, DataType.Integer);
 			}
 			if (rowDataCandidate != null && rowDataCandidate.Value is ExcelErrorValue && rowDataCandidate.Value.ToString() == ExcelErrorValue.Values.NA)
-				return result.Create(rowDataCandidate.Value);
+				return base.CreateResult(rowDataCandidate.Value, DataType.Integer);
 			if (cellRange.IsExcelRange)
 			{
 				var rowCandidate = arguments.ElementAt(1).DataType;
@@ -91,7 +91,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				else
 					if ((arguments.ElementAt(0).ValueAsRangeInfo.Address.Columns > 1) && arguments.ElementAt(0).ValueAsRangeInfo.Address.Rows > 1)
 						return new CompileResult(eErrorType.Ref);
-
 				if ((column == 0 && row == 0) || column < 0)
 					return new CompileResult(eErrorType.Value);
 
@@ -101,21 +100,17 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 					column = row;
 					row = 1;
 				}
-
 				var numColumns = arguments.ElementAt(0).ValueAsRangeInfo.Address.Columns;
 				if ((numColumns > 1 && column == 0))
 					return new CompileResult(eErrorType.Value);
-
 				if (row > rangeInfo.Address.Rows || column > rangeInfo.Address.Columns)
 					return new CompileResult(eErrorType.Ref);
-
 				if (row > rangeInfo.Address._toRow - rangeInfo.Address._fromRow + 1 || column > rangeInfo.Address._toCol - rangeInfo.Address._fromCol + 1)
 					return new CompileResult(eErrorType.Value);
 				var candidate = rangeInfo.GetOffset(row - 1, column - 1);
 				if (column == 0)
 					candidate = rangeInfo.GetOffset(row - 1, column);
-				
-				return result.Create(candidate);
+				return base.CreateResult(candidate, DataType.Integer);
 			}
 			throw new NotImplementedException();
 		}

@@ -242,7 +242,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		}
 
 		[TestMethod]
-		public void IndexWithRowAsRefereneToCellReturnsCorrectValue()
+		public void IndexWithRowAsReferenceToCellReturnsCorrectValue()
 		{
 			this.Worksheet.Cells["B1"].Value = 5;
 			this.Worksheet.Cells["B2"].Value = 6;
