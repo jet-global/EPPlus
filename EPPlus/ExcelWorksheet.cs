@@ -4892,18 +4892,15 @@ namespace OfficeOpenXml
 
 		private void ChangeSparklineSheetNames(string newName)
 		{
-			string workbook, worksheet, address;
 			foreach (var group in this.SparklineGroups.SparklineGroups)
 			{
 				foreach (var sparkline in group.Sparklines)
 				{
-					ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
+					ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out var workbook, out var worksheet, out var address);
 					if (string.IsNullOrEmpty(worksheet))
 						return;
-					else
-					{
+					else if (worksheet.Equals(this.Name))
 						sparkline.Formula.SetAddress(ExcelRangeBase.GetFullAddress(newName, address));
-					}
 					sparkline.HostCell._ws = newName;
 				}
 			}

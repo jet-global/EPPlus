@@ -2092,14 +2092,28 @@ namespace OfficeOpenXml
 					{
 						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
 						var newFormula = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-						if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
+						if (!string.IsNullOrEmpty(worksheet))
 							newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
-						var newHostCell = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-						var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };
+						var newHostCellAddress = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+						var newHostCell = string.IsNullOrEmpty(destination?.Worksheet?.Name) ? new ExcelAddress(newHostCellAddress) : new ExcelAddress(destination.Worksheet.Name, newHostCellAddress);
+						var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = newHostCell };
 						newSparklines.Add(newSparkline);
 					}
 				}
-				group.Sparklines.AddRange(newSparklines);
+				if (newSparklines.Count > 0)
+				{
+					if (destination.Worksheet.Equals(this.Worksheet))
+						group.Sparklines.AddRange(newSparklines);
+					else
+					{
+						var newGroup = new ExcelSparklineGroup(destination.Worksheet, group.NameSpaceManager, group.TopNode);
+						newGroup.Sparklines.Clear();
+						newGroup.Sparklines.AddRange(newSparklines);
+						if (destination.Worksheet.SparklineGroups.TopNode == null)
+							destination.Worksheet.SparklineGroups.TopNode = newGroup.TopNode; 
+						destination.Worksheet.SparklineGroups.SparklineGroups.Add(newGroup);
+					}
+				}
 			}
 			if (this._fromCol == 1 && this._toCol == ExcelPackage.MaxColumns)
 			{

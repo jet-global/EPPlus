@@ -5293,6 +5293,79 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void RenameWorksheetUpdatesSparklines()
+		{
+			var nsManager = new System.Xml.XmlNamespaceManager(new System.Xml.NameTable());
+			nsManager.AddNamespace("x14", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
+			nsManager.AddNamespace("xm", "http://schemas.microsoft.com/office/excel/2006/main");
+			var doc = new System.Xml.XmlDocument();
+			doc.LoadXml(@"<sparklineGroups xmlns:xm=""http://schemas.microsoft.com/office/excel/2006/main"" xmlns:x14=""http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"">
+				<x14:sparklineGroup displayEmptyCellsAs=""gap"">
+					<x14:colorSeries rgb=""FF376092"" />
+					<x14:colorNegative rgb=""FFD00000"" />
+					<x14:colorAxis rgb=""FF000000"" />
+					<x14:colorMarkers rgb=""FFD00000"" />
+					<x14:colorFirst rgb=""FFD00000"" />
+					<x14:colorLast rgb=""FFD00000"" />
+					<x14:colorHigh rgb=""FFD00000"" />
+					<x14:colorLow rgb=""FFD00000"" />
+					<x14:sparklines>
+						<x14:sparkline>
+							<xm:f>Sheet1!B4:L4</xm:f>
+							<xm:sqref>C19</xm:sqref>
+						</x14:sparkline>
+					</x14:sparklines>
+				</x14:sparklineGroup>
+			</sparklineGroups>");
+			var topNode = doc.FirstChild.FirstChild;
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.SparklineGroups.SparklineGroups.Add(new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, nsManager, topNode));
+				worksheet.Name = "a new name";
+				Assert.AreEqual(worksheet.Name, worksheet.SparklineGroups.SparklineGroups[0].Sparklines[0].HostCell.WorkSheet);
+				Assert.AreEqual(worksheet.Name, worksheet.SparklineGroups.SparklineGroups[0].Sparklines[0].Formula.WorkSheet);
+			}
+		}
+
+		[TestMethod]
+		public void RenameWorksheetUpdatesSparklinesCrossSheet()
+		{
+			var nsManager = new System.Xml.XmlNamespaceManager(new System.Xml.NameTable());
+			nsManager.AddNamespace("x14", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
+			nsManager.AddNamespace("xm", "http://schemas.microsoft.com/office/excel/2006/main");
+			var doc = new System.Xml.XmlDocument();
+			doc.LoadXml(@"<sparklineGroups xmlns:xm=""http://schemas.microsoft.com/office/excel/2006/main"" xmlns:x14=""http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"">
+				<x14:sparklineGroup displayEmptyCellsAs=""gap"">
+					<x14:colorSeries rgb=""FF376092"" />
+					<x14:colorNegative rgb=""FFD00000"" />
+					<x14:colorAxis rgb=""FF000000"" />
+					<x14:colorMarkers rgb=""FFD00000"" />
+					<x14:colorFirst rgb=""FFD00000"" />
+					<x14:colorLast rgb=""FFD00000"" />
+					<x14:colorHigh rgb=""FFD00000"" />
+					<x14:colorLow rgb=""FFD00000"" />
+					<x14:sparklines>
+						<x14:sparkline>
+							<xm:f>Sheet2!B4:L4</xm:f>
+							<xm:sqref>C19</xm:sqref>
+						</x14:sparkline>
+					</x14:sparklines>
+				</x14:sparklineGroup>
+			</sparklineGroups>");
+			var topNode = doc.FirstChild.FirstChild;
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				worksheet1.SparklineGroups.SparklineGroups.Add(new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet1, nsManager, topNode));
+				worksheet1.Name = "a new name";
+				Assert.AreEqual(worksheet1.Name, worksheet1.SparklineGroups.SparklineGroups[0].Sparklines[0].HostCell.WorkSheet);
+				Assert.AreEqual(worksheet2.Name, worksheet1.SparklineGroups.SparklineGroups[0].Sparklines[0].Formula.WorkSheet);
+			}
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(ArgumentException))]
 		public void ExcelWorksheetRenameWithStartApostropheThrowsException()
 		{
