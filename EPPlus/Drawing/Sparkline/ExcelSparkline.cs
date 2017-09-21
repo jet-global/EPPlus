@@ -65,28 +65,49 @@ namespace OfficeOpenXml.Drawing.Sparkline
 		/// <param name="topNode">The x14:Sparkline node containing information about the sparkline.</param>
 		public ExcelSparkline(ExcelSparklineGroup group, XmlNamespaceManager nameSpaceManager, XmlNode topNode) : base(nameSpaceManager, topNode)
 		{
-			if (group == null)
-				throw new ArgumentNullException(nameof(group));
 			if (topNode == null)
 				throw new ArgumentNullException(nameof(topNode));
-			this.Group = group;
+			this.Group = group ?? throw new ArgumentNullException(nameof(group));
 			var formulaNode = topNode.SelectSingleNode("xm:f", nameSpaceManager);
 			var hostNode = topNode.SelectSingleNode("xm:sqref", nameSpaceManager);
-			Formula = new ExcelAddress(formulaNode.InnerText);
-			HostCell = group.Worksheet.Cells[hostNode.InnerText];
-			group.Worksheet.Cells[HostCell.Address].Sparklines.Add(this);
+			this.Formula = formulaNode == null ? null : new ExcelAddress(formulaNode.InnerText);
+			this.HostCell = group.Worksheet.Cells[hostNode.InnerText];
+			group.Worksheet.Cells[this.HostCell.Address].Sparklines.Add(this);
 		}
 
 		/// <summary>
-		/// Create a new <see cref="ExcelSparkline"/> from scratch (Without using an existing XML Node).
+		/// Create a new <see cref="ExcelSparkline"/> from scratch (without using an existing XML Node).
 		/// </summary>
+		/// <param name="hostCell">The <see cref="ExcelAddress"/> that hosts the sparkline.</param>
+		/// <param name="formula">The <see cref="ExcelAddress"/> that the sparkline references.</param>
 		/// <param name="group">The <see cref="ExcelSparklineGroup"/> that this line will belong to.</param>
 		/// <param name="nameSpaceManager">The namespace manager for the object.</param>
-		public ExcelSparkline(ExcelSparklineGroup group, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
+		public ExcelSparkline(ExcelAddress hostCell, ExcelAddress formula, ExcelSparklineGroup group, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
 		{
-			if (group == null)
-				throw new ArgumentNullException(nameof(group));
-			this.Group = group;
+			this.HostCell = hostCell ?? throw new ArgumentNullException(nameof(hostCell));
+			this.Group = group ?? throw new ArgumentNullException(nameof(group));
+			this.Formula = formula;
+			this.TopNode = group.TopNode.OwnerDocument.CreateElement("x14:sparkline", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Save the Sparkline's properties and attributes to the TopNode's XML. 
+		/// </summary>
+		public void Save()
+		{
+			this.TopNode.RemoveAll();
+			if (this.Formula != null)
+			{
+				var formulaNode = this.TopNode.OwnerDocument.CreateElement("xm:f", "http://schemas.microsoft.com/office/excel/2006/main");
+				formulaNode.InnerText = this.Formula.FullAddress;
+				this.TopNode.AppendChild(formulaNode);
+			}
+			var hostNode = this.TopNode.OwnerDocument.CreateElement("xm:sqref", "http://schemas.microsoft.com/office/excel/2006/main");
+			hostNode.InnerText = this.HostCell.Address;
+			this.TopNode.AppendChild(hostNode);
+			this.Group.Worksheet.Cells[this.HostCell.Address].Sparklines.Add(this);
 		}
 		#endregion
 	}

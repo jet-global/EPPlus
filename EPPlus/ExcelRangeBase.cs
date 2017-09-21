@@ -1310,6 +1310,41 @@ namespace OfficeOpenXml
 				this.Worksheet.MergedCells.Remove(item);
 			}
 		}
+
+		private void CopySparklines(ExcelRangeBase destination)
+		{
+			List<ExcelSparklineGroup> newSparklineGroups = new List<ExcelSparklineGroup>();
+			foreach (var group in this.Worksheet.SparklineGroups.SparklineGroups)
+			{
+				ExcelSparklineGroup newGroup = null;
+				foreach (var sparkline in group.Sparklines)
+				{
+					if (sparkline.HostCell.Collide(this) != eAddressCollition.No)
+					{
+						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
+						string newFormulaString = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+						ExcelAddress newFormula = null;
+						if (newFormulaString != "#REF!")
+						{
+							newFormulaString = string.IsNullOrEmpty(worksheet) ? newFormulaString : ExcelRangeBase.GetFullAddress(worksheet, newFormulaString);
+							newFormula = new ExcelAddress(newFormulaString);
+						}
+						var newHostCellAddress = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+						if (newGroup == null)
+						{
+							newGroup = new ExcelSparklineGroup(destination.Worksheet, group.NameSpaceManager);
+							newGroup.CopyNode(group.TopNode, false);
+						}
+						var newSparkline = new ExcelSparkline(new ExcelAddress(newHostCellAddress), newFormula, newGroup, sparkline.NameSpaceManager);
+						this.Worksheet.Cells[newSparkline.HostCell.Address].Sparklines.Add(newSparkline);
+						newGroup.Sparklines.Add(newSparkline);
+					}
+				}
+				if (newGroup != null)
+					newSparklineGroups.Add(newGroup);
+			}
+			destination.Worksheet.SparklineGroups.SparklineGroups.AddRange(newSparklineGroups);
+		}
 		#endregion
 
 		#region Public Methods
@@ -2082,39 +2117,7 @@ namespace OfficeOpenXml
 			{
 				destination.Worksheet.Cells[cell.Row, cell.Column].AddComment(cell.Comment);
 			}
-			List<ExcelSparkline> newSparklines = new List<ExcelSparkline>();
-			foreach (var group in this.Worksheet.SparklineGroups.SparklineGroups)
-			{
-				newSparklines.Clear();
-				foreach (var sparkline in group.Sparklines)
-				{
-					if (sparkline.HostCell.Collide(this) != eAddressCollition.No)
-					{
-						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
-						var newFormula = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-						if (!string.IsNullOrEmpty(worksheet))
-							newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
-						var newHostCellAddress = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-						var newHostCell = string.IsNullOrEmpty(destination?.Worksheet?.Name) ? new ExcelAddress(newHostCellAddress) : new ExcelAddress(destination.Worksheet.Name, newHostCellAddress);
-						var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = newHostCell };
-						newSparklines.Add(newSparkline);
-					}
-				}
-				if (newSparklines.Count > 0)
-				{
-					if (destination.Worksheet.Equals(this.Worksheet))
-						group.Sparklines.AddRange(newSparklines);
-					else
-					{
-						var newGroup = new ExcelSparklineGroup(destination.Worksheet, group.NameSpaceManager, group.TopNode);
-						newGroup.Sparklines.Clear();
-						newGroup.Sparklines.AddRange(newSparklines);
-						if (destination.Worksheet.SparklineGroups.TopNode == null)
-							destination.Worksheet.SparklineGroups.TopNode = newGroup.TopNode; 
-						destination.Worksheet.SparklineGroups.SparklineGroups.Add(newGroup);
-					}
-				}
-			}
+			this.CopySparklines(destination);
 			if (this._fromCol == 1 && this._toCol == ExcelPackage.MaxColumns)
 			{
 				for (int row = 0; row < this.Rows; row++)
@@ -2355,12 +2358,10 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region IDisposable Members
-
 		public void Dispose()
 		{
-			//_worksheet = null;            
+			//_worksheet = null;
 		}
-
 		#endregion
 
 		#region Enumerator

@@ -78,101 +78,206 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		public void CopySparklinesCopiesToDifferentSheet()
+		[DeploymentItem(@"..\..\Workbooks\Sparkline Demos.xlsx")]
+		public void CopySparklinesCopiesToSameSheet()
 		{
-			InitBase();
-			var package = new ExcelPackage();
-			var worksheet1 = package.Workbook.Worksheets.Add("sheet1");
-			var worksheet2 = package.Workbook.Worksheets.Add("sheet2");
-			var worksheet3 = package.Workbook.Worksheets.Add("sheet3");
-			var nsManager = new System.Xml.XmlNamespaceManager(new System.Xml.NameTable());
-			nsManager.AddNamespace("x14", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
-			nsManager.AddNamespace("xm", "http://schemas.microsoft.com/office/excel/2006/main");
-			var doc = new System.Xml.XmlDocument();
-			doc.LoadXml(@"<sparklineGroups xmlns:xm=""http://schemas.microsoft.com/office/excel/2006/main"" xmlns:x14=""http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"">
-				<x14:sparklineGroup displayEmptyCellsAs=""gap"">
-					<x14:colorSeries rgb=""FF376092"" />
-					<x14:colorNegative rgb=""FFD00000"" />
-					<x14:colorAxis rgb=""FF000000"" />
-					<x14:colorMarkers rgb=""FFD00000"" />
-					<x14:colorFirst rgb=""FFD00000"" />
-					<x14:colorLast rgb=""FFD00000"" />
-					<x14:colorHigh rgb=""FFD00000"" />
-					<x14:colorLow rgb=""FFD00000"" />
-					<x14:sparklines>
-						<x14:sparkline>
-							<xm:f>Sheet3!B4:L4</xm:f>
-							<xm:sqref>C19</xm:sqref>
-						</x14:sparkline>
-					</x14:sparklines>
-				</x14:sparklineGroup>
-			</sparklineGroups>");
-			var topNode = doc.FirstChild.FirstChild;
-			worksheet1.SparklineGroups.SparklineGroups.Add(new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet1, nsManager, topNode));
-			worksheet1.Cells["C19"].Copy(worksheet2.Cells["B2"]);
-
-			var originalSparklineGroups = worksheet1.SparklineGroups.SparklineGroups;
-			Assert.AreEqual(1, originalSparklineGroups.Count);
-			var originalSparklines = originalSparklineGroups[0].Sparklines;
-			Assert.AreEqual(1, originalSparklines.Count);
-			var originalSparkline = originalSparklines[0];
-			Assert.AreEqual(new ExcelAddress(worksheet1.Name, "C19").FullAddress, originalSparkline.HostCell.FullAddress);
-
-			var newSparklineGroups = worksheet2.SparklineGroups.SparklineGroups;
-			Assert.AreEqual(1, newSparklineGroups.Count);
-			var newSparklines = newSparklineGroups[0].Sparklines;
-			Assert.AreEqual(1, newSparklines.Count);
-			var newSparkline = newSparklines[0];
-			Assert.AreEqual(originalSparkline.Formula.WorkSheet, newSparkline.Formula.WorkSheet);
-			Assert.AreEqual(originalSparkline.Formula.Start.Address, newSparkline.Formula.Start.Address);
-			Assert.AreEqual(originalSparkline.Formula.End.Address, newSparkline.Formula.End.Address);
-			Assert.AreEqual(new ExcelAddress(worksheet2.Name, "B2").FullAddress, newSparkline.HostCell.FullAddress);
+			var file = new FileInfo("Sparkline Demos.xlsx");
+			Assert.IsTrue(file.Exists);
+			var temp = Path.GetTempFileName();
+			File.Delete(temp);
+			var copy = file.CopyTo(temp);
+			try
+			{
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet1 = package.Workbook.Worksheets["Sheet1"];
+					var sparklines = sheet1.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(7, sparklines.Count);
+					sheet1.Cells[9, 3, 12, 4].Copy(new ExcelRange(sheet1, 13, 3, 16, 4));
+					Assert.AreEqual(9, sparklines.Count);
+					Assert.AreEqual("'Sheet2'!B6:I6", sparklines[8].Sparklines[0].Formula.Address);
+					Assert.AreEqual("C16", sparklines[8].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("'Sheet1'!D10:D12", sparklines[7].Sparklines[0].Formula.Address);
+					Assert.AreEqual("D13", sparklines[7].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet2!B2:I2", sparklines[6].Sparklines[0].Formula.Address);
+					Assert.AreEqual("C12", sparklines[6].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D6:F6", sparklines[5].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G6", sparklines[5].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D7:F7", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G7", sparklines[4].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D8:F8", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G8", sparklines[3].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D6:D8", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("D9", sparklines[2].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!E6:E8", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("E9", sparklines[1].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!F6:F8", sparklines[0].Sparklines[0].Formula.Address);
+					Assert.AreEqual("F9", sparklines[0].Sparklines[0].HostCell.Address);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet = package.Workbook.Worksheets["Sheet1"];
+					var sparklines = sheet.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(9, sparklines.Count);
+					Assert.AreEqual("'Sheet2'!B6:I6", sparklines[8].Sparklines[0].Formula.Address);
+					Assert.AreEqual("C16", sparklines[8].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("'Sheet1'!D10:D12", sparklines[7].Sparklines[0].Formula.Address);
+					Assert.AreEqual("D13", sparklines[7].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet2!B2:I2", sparklines[6].Sparklines[0].Formula.Address);
+					Assert.AreEqual("C12", sparklines[6].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D6:F6", sparklines[5].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G6", sparklines[5].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D7:F7", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G7", sparklines[4].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D8:F8", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G8", sparklines[3].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D6:D8", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("D9", sparklines[2].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!E6:E8", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("E9", sparklines[1].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!F6:F8", sparklines[0].Sparklines[0].Formula.Address);
+					Assert.AreEqual("F9", sparklines[0].Sparklines[0].HostCell.Address);
+				}
+			}
+			finally
+			{
+				copy.Delete();
+			}
 		}
 
 		[TestMethod]
-		public void CopySparklinesCopiesToSameSheet()
+		[DeploymentItem(@"..\..\Workbooks\Sparkline Demos.xlsx")]
+		public void CopySparklinesCopiesToDifferentSheet()
 		{
-			InitBase();
-			var package = new ExcelPackage();
-			var worksheet1 = package.Workbook.Worksheets.Add("sheet1");
-			var worksheet3 = package.Workbook.Worksheets.Add("sheet3");
-			var nsManager = new System.Xml.XmlNamespaceManager(new System.Xml.NameTable());
-			nsManager.AddNamespace("x14", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
-			nsManager.AddNamespace("xm", "http://schemas.microsoft.com/office/excel/2006/main");
-			var doc = new System.Xml.XmlDocument();
-			doc.LoadXml(@"<sparklineGroups xmlns:xm=""http://schemas.microsoft.com/office/excel/2006/main"" xmlns:x14=""http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"">
-				<x14:sparklineGroup displayEmptyCellsAs=""gap"">
-					<x14:colorSeries rgb=""FF376092"" />
-					<x14:colorNegative rgb=""FFD00000"" />
-					<x14:colorAxis rgb=""FF000000"" />
-					<x14:colorMarkers rgb=""FFD00000"" />
-					<x14:colorFirst rgb=""FFD00000"" />
-					<x14:colorLast rgb=""FFD00000"" />
-					<x14:colorHigh rgb=""FFD00000"" />
-					<x14:colorLow rgb=""FFD00000"" />
-					<x14:sparklines>
-						<x14:sparkline>
-							<xm:f>Sheet3!B4:L4</xm:f>
-							<xm:sqref>C19</xm:sqref>
-						</x14:sparkline>
-					</x14:sparklines>
-				</x14:sparklineGroup>
-			</sparklineGroups>");
-			var topNode = doc.FirstChild.FirstChild;
-			worksheet1.SparklineGroups.SparklineGroups.Add(new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet1, nsManager, topNode));
-			worksheet1.Cells["C19"].Copy(worksheet1.Cells["B2"]);
+			var file = new FileInfo("Sparkline Demos.xlsx");
+			Assert.IsTrue(file.Exists);
+			var temp = Path.GetTempFileName();
+			File.Delete(temp);
+			var copy = file.CopyTo(temp);
+			try
+			{
+				string newSheetName = "Sheet3";
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet1 = package.Workbook.Worksheets["Sheet1"];
+					var sheet3 = package.Workbook.Worksheets.Add(newSheetName);
+					var sheet1Sparklines = sheet1.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(7, sheet1Sparklines.Count);
+					sheet1.Cells[9, 3, 12, 4].Copy(new ExcelRange(sheet3, 13, 3, 16, 4));
+					Assert.AreEqual(7, sheet1Sparklines.Count);
+					Assert.AreEqual("Sheet2!B2:I2", sheet1Sparklines[6].Sparklines[0].Formula.Address);
+					Assert.AreEqual("C12", sheet1Sparklines[6].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D6:F6", sheet1Sparklines[5].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G6", sheet1Sparklines[5].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D7:F7", sheet1Sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G7", sheet1Sparklines[4].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D8:F8", sheet1Sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G8", sheet1Sparklines[3].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D6:D8", sheet1Sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("D9", sheet1Sparklines[2].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!E6:E8", sheet1Sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("E9", sheet1Sparklines[1].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!F6:F8", sheet1Sparklines[0].Sparklines[0].Formula.Address);
+					Assert.AreEqual("F9", sheet1Sparklines[0].Sparklines[0].HostCell.Address);
+					var sheet3Sparklines = sheet3.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(2, sheet3Sparklines.Count);
+					Assert.AreEqual("'Sheet1'!D10:D12", sheet3Sparklines[0].Sparklines[0].Formula.Address);
+					Assert.AreEqual("D13", sheet3Sparklines[0].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("'Sheet2'!B6:I6", sheet3Sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("C16", sheet3Sparklines[1].Sparklines[0].HostCell.Address);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet1 = package.Workbook.Worksheets["Sheet1"];
+					var sheet3 = package.Workbook.Worksheets[newSheetName];
+					var sheet1Sparklines = sheet1.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(7, sheet1Sparklines.Count);
+					Assert.AreEqual("Sheet2!B2:I2", sheet1Sparklines[6].Sparklines[0].Formula.Address);
+					Assert.AreEqual("C12", sheet1Sparklines[6].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D6:F6", sheet1Sparklines[5].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G6", sheet1Sparklines[5].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D7:F7", sheet1Sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G7", sheet1Sparklines[4].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D8:F8", sheet1Sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("G8", sheet1Sparklines[3].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!D6:D8", sheet1Sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("D9", sheet1Sparklines[2].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!E6:E8", sheet1Sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("E9", sheet1Sparklines[1].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("Sheet1!F6:F8", sheet1Sparklines[0].Sparklines[0].Formula.Address);
+					Assert.AreEqual("F9", sheet1Sparklines[0].Sparklines[0].HostCell.Address);
+					var sheet3Sparklines = sheet3.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(2, sheet3Sparklines.Count);
+					Assert.AreEqual("'Sheet1'!D10:D12", sheet3Sparklines[0].Sparklines[0].Formula.Address);
+					Assert.AreEqual("D13", sheet3Sparklines[0].Sparklines[0].HostCell.Address);
+					Assert.AreEqual("'Sheet2'!B6:I6", sheet3Sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("C16", sheet3Sparklines[1].Sparklines[0].HostCell.Address);
+				}
+			}
+			finally
+			{
+				copy.Delete();
+			}
+		}
 
-			var sparklineGroups = worksheet1.SparklineGroups.SparklineGroups;
-			Assert.AreEqual(1, sparklineGroups.Count);
-			var sparkLines = sparklineGroups[0].Sparklines;
-			Assert.AreEqual(2, sparkLines.Count);
-			var originalSparkline = sparkLines[0];
-			var newSparkline = sparkLines[1];
-			Assert.AreEqual(new ExcelAddress(worksheet1.Name, "C19").FullAddress, originalSparkline.HostCell.FullAddress);
-			Assert.AreEqual(new ExcelAddress(worksheet1.Name, "B2").FullAddress, newSparkline.HostCell.FullAddress);
-			Assert.AreEqual(originalSparkline.Formula.WorkSheet, newSparkline.Formula.WorkSheet);
-			Assert.AreEqual(originalSparkline.Formula.Start.Address, newSparkline.Formula.Start.Address);
-			Assert.AreEqual(originalSparkline.Formula.End.Address, newSparkline.Formula.End.Address);
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\Sparkline Demos.xlsx")]
+		public void CopySparklinesCopiesToDifferentSheetBadReference()
+		{
+			var file = new FileInfo("Sparkline Demos.xlsx");
+			Assert.IsTrue(file.Exists);
+			var temp = Path.GetTempFileName();
+			File.Delete(temp);
+			var copy = file.CopyTo(temp);
+			try
+			{
+				string newSheetName = "Sheet3";
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet1 = package.Workbook.Worksheets["Sheet1"];
+					var sheet3 = package.Workbook.Worksheets.Add(newSheetName);
+					var sheet1Sparklines = sheet1.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(7, sheet1Sparklines.Count);
+					sheet1.Cells["C12"].Copy(new ExcelRange(sheet3, 2, 2, 2, 2));
+					Assert.AreEqual(7, sheet1Sparklines.Count);
+					Assert.AreEqual("Sheet2!B2:I2", sheet1Sparklines[6].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!D6:F6", sheet1Sparklines[5].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!D7:F7", sheet1Sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!D8:F8", sheet1Sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!D6:D8", sheet1Sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!E6:E8", sheet1Sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!F6:F8", sheet1Sparklines[0].Sparklines[0].Formula.Address);
+					var sheet3Sparklines = sheet3.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(1, sheet3Sparklines.Count);
+					Assert.IsNull(sheet3Sparklines[0].Sparklines[0].Formula);
+					Assert.AreEqual("B2", sheet3Sparklines[0].Sparklines[0].HostCell.Address);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(copy))
+				{
+					var sheet1 = package.Workbook.Worksheets["Sheet1"];
+					var sheet3 = package.Workbook.Worksheets[newSheetName];
+					var sparklines = sheet1.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(7, sparklines.Count);
+					Assert.AreEqual("Sheet2!B2:I2", sparklines[6].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!D6:F6", sparklines[5].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!D7:F7", sparklines[4].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!D8:F8", sparklines[3].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!D6:D8", sparklines[2].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!E6:E8", sparklines[1].Sparklines[0].Formula.Address);
+					Assert.AreEqual("Sheet1!F6:F8", sparklines[0].Sparklines[0].Formula.Address);
+					var sheet3Sparklines = sheet3.SparklineGroups.SparklineGroups;
+					Assert.AreEqual(1, sheet3Sparklines.Count);
+					Assert.AreEqual("B2", sheet3Sparklines[0].Sparklines[0].HostCell.Address);
+					Assert.IsNull(sheet3Sparklines[0].Sparklines[0].Formula);
+				}
+			}
+			finally
+			{
+				copy.Delete();
+			}
 		}
 		#endregion
 

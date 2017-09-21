@@ -4874,34 +4874,46 @@ namespace OfficeOpenXml
 
 		private void UpdateSparkLineReferences(int rows, int rowFrom, int columns, int columnFrom)
 		{
-			string workbook, worksheet, address;
-			foreach (var group in this.SparklineGroups.SparklineGroups)
+			foreach (var sheet in this.Workbook.Worksheets)
 			{
-				foreach (var sparkline in group.Sparklines)
+				foreach (var group in sheet.SparklineGroups.SparklineGroups)
 				{
-					ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out workbook, out worksheet, out address);
-					address = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
-					if (string.IsNullOrEmpty(worksheet))
-						sparkline.Formula.Address = address;
-					else
-						sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(worksheet, address);
-					sparkline.HostCell.Address = this.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
+					foreach (var sparkline in group.Sparklines)
+					{
+						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
+						// Only update the formula if it references the modified sheet.
+						if (worksheet == this.Name)
+						{
+							address = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
+							if (string.IsNullOrEmpty(worksheet))
+								sparkline.Formula.Address = address;
+							else
+								sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(worksheet, address);
+						}
+						// Only update host cell if it is in the modified sheet. 
+						if (sheet.Name == this.Name)
+							sparkline.HostCell.Address = this.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
+					}
 				}
 			}
 		}
 
 		private void ChangeSparklineSheetNames(string newName)
 		{
-			foreach (var group in this.SparklineGroups.SparklineGroups)
+			foreach (var sheet in this.Workbook.Worksheets)
 			{
-				foreach (var sparkline in group.Sparklines)
+				foreach (var group in sheet.SparklineGroups.SparklineGroups)
 				{
-					ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out var workbook, out var worksheet, out var address);
-					if (string.IsNullOrEmpty(worksheet))
-						return;
-					else if (worksheet.Equals(this.Name))
-						sparkline.Formula.SetAddress(ExcelRangeBase.GetFullAddress(newName, address));
-					sparkline.HostCell._ws = newName;
+					foreach (var sparkline in group.Sparklines)
+					{
+						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out var workbook, out var worksheet, out var address);
+						if (string.IsNullOrEmpty(worksheet))
+							return;
+						else if (worksheet.Equals(this.Name))
+							sparkline.Formula.SetAddress(ExcelRangeBase.GetFullAddress(newName, address));
+						if (sheet.Name == this.Name)
+							sparkline.HostCell._ws = newName;
+					}
 				}
 			}
 		}

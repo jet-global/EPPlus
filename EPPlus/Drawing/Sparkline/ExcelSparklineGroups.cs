@@ -56,19 +56,12 @@ namespace OfficeOpenXml.Drawing.Sparkline
 		public void Save()
 		{
 			if (this.SparklineGroups.Count == 0 || this.SparklineGroups[0].Sparklines.Count == 0)
-			{
 				return;
-			}
-			else if (this.TopNode == null)
+			this.TopNode.RemoveAll();
+			foreach (var group in this.SparklineGroups)
 			{
-				throw new NotImplementedException("Saving new SparkineGroups is currently not supported.");
-			}
-			else
-			{
-				foreach (var group in this.SparklineGroups)
-				{
-					group.Save();
-				}
+				group.Save();
+				base.TopNode.AppendChild(group.TopNode);
 			}
 		}
 		#endregion
@@ -85,18 +78,33 @@ namespace OfficeOpenXml.Drawing.Sparkline
 			this.Worksheet = worksheet;
 			foreach (var groupNode in topNode.ChildNodes)
 			{
-				SparklineGroups.Add(new ExcelSparklineGroup(worksheet, nameSpaceManager, (XmlNode)groupNode));
+				this.SparklineGroups.Add(new ExcelSparklineGroup(worksheet, nameSpaceManager, (XmlNode)groupNode));
 			}
 		}
 
 		/// <summary>
-		/// Create a new <see cref="ExcelSparklineGroups"/>.
+		/// Create a new <see cref="ExcelSparklineGroups"/> from scratch (without an existing XML Node).
 		/// </summary>
 		/// <param name="worksheet">The worksheet the sparkline groups exist on.</param>
 		/// <param name="nameSpaceManager">The namespace manager for the object.</param>
 		public ExcelSparklineGroups(ExcelWorksheet worksheet, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
 		{
-			this.Worksheet = worksheet;
+			this.Worksheet = worksheet ?? throw new ArgumentNullException(nameof(worksheet));
+			XmlNode extNode = this.Worksheet.TopNode.SelectSingleNode("extLst/ext");
+			XmlNode extLstNode = null;
+			if (extNode == null)
+			{
+				extNode = this.Worksheet.TopNode.OwnerDocument.CreateNode(XmlNodeType.Element, "ext", nameSpaceManager.DefaultNamespace);
+				extLstNode = this.Worksheet.TopNode.SelectSingleNode("extLst");
+				if (extLstNode == null)
+				{
+					extLstNode = this.Worksheet.TopNode.OwnerDocument.CreateNode(XmlNodeType.Element, "extLst", nameSpaceManager.DefaultNamespace);
+					this.Worksheet.TopNode.AppendChild(extLstNode);
+				}
+				extLstNode.AppendChild(extNode);
+			}
+			base.TopNode = this.Worksheet.TopNode.OwnerDocument.CreateElement("x14:sparklineGroups", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
+			extNode.AppendChild(this.TopNode);
 		}
 		#endregion
 	}

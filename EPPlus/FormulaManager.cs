@@ -79,19 +79,19 @@ namespace OfficeOpenXml
 						}
 						if (rowIncrement > 0)
 						{
-							address = address.AddRow(afterRow, rowIncrement, setFixed);
+							address = address?.AddRow(afterRow, rowIncrement, setFixed);
 						}
 						else if (rowIncrement < 0)
 						{
-							address = address.DeleteRow(afterRow, -rowIncrement, setFixed);
+							address = address?.DeleteRow(afterRow, -rowIncrement, setFixed);
 						}
 						if (colIncrement > 0)
 						{
-							address = address.AddColumn(afterColumn, colIncrement, setFixed);
+							address = address?.AddColumn(afterColumn, colIncrement, setFixed);
 						}
 						else if (colIncrement < 0)
 						{
-							address = address.DeleteColumn(afterColumn, -colIncrement, setFixed);
+							address = address?.DeleteColumn(afterColumn, -colIncrement, setFixed);
 						}
 						if (address == null || !address.IsValidRowCol())
 						{
