@@ -195,6 +195,66 @@ namespace OfficeOpenXml.Drawing.Sparkline
 			this.SaveColors();
 			this.SaveSparklines();
 		}
+
+		/// <summary>
+		/// Copies the color and style contents of the given node to the current <see cref="ExcelSparklineGroup"/>, 
+		/// excluding the node's contained sparklines.
+		/// </summary>
+		/// <param name="topNode">The node containing the color and style elements to copy.</param>
+		public void CopyNodeStyle(XmlNode topNode)
+		{
+			// Parse the color nodes.
+			var node = topNode.SelectSingleNode("x14:colorSeries", base.NameSpaceManager);
+			if (node != null)
+				this.ColorSeries = this.GetColorFromColorNode(node);
+			node = topNode.SelectSingleNode("x14:colorNegative", base.NameSpaceManager);
+			if (node != null)
+				this.ColorNegative = this.GetColorFromColorNode(node);
+			node = topNode.SelectSingleNode("x14:colorAxis", base.NameSpaceManager);
+			if (node != null)
+				this.ColorAxis = this.GetColorFromColorNode(node);
+			node = topNode.SelectSingleNode("x14:colorMarkers", base.NameSpaceManager);
+			if (node != null)
+				this.ColorMarkers = this.GetColorFromColorNode(node);
+			node = topNode.SelectSingleNode("x14:colorFirst", base.NameSpaceManager);
+			if (node != null)
+				this.ColorFirst = this.GetColorFromColorNode(node);
+			node = topNode.SelectSingleNode("x14:colorLast", base.NameSpaceManager);
+			if (node != null)
+				this.ColorLast = this.GetColorFromColorNode(node);
+			node = topNode.SelectSingleNode("x14:colorHigh", base.NameSpaceManager);
+			if (node != null)
+				this.ColorHigh = this.GetColorFromColorNode(node);
+			node = topNode.SelectSingleNode("x14:colorLow", base.NameSpaceManager);
+			if (node != null)
+				this.ColorLow = this.GetColorFromColorNode(node);
+			// Parse the attributes.
+			var attribute = topNode.Attributes["type"];
+			if (attribute != null)
+				this.Type = ParseSparklineType(attribute.InnerText);
+			attribute = topNode.Attributes["displayEmptyCellsAs"];
+			if (attribute != null)
+				this.DisplayEmptyCellsAs = ParseDisplayEmptyCellsAs(attribute.InnerText);
+			this.Negative = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "negative");
+			this.ManualMin = GetAttributeDouble(topNode, "manualMin");
+			this.ManualMax = GetAttributeDouble(topNode, "manualMax");
+			this.LineWeight = GetAttributeDouble(topNode, "lineWeight");
+			this.DateAxis = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "dateAxis");
+			this.Markers = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "markers");
+			this.High = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "high");
+			this.Low = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "low");
+			this.First = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "first");
+			this.Last = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "last");
+			this.DisplayXAxis = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "displayXAxis");
+			this.DisplayHidden = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "displayHidden");
+			attribute = topNode.Attributes["minAxisType"];
+			if (attribute != null)
+				this.MinAxisType = ParseSparklineAxisMinMax(attribute.InnerText);
+			attribute = topNode.Attributes["maxAxisType"];
+			if (attribute != null)
+				this.MaxAxisType = ParseSparklineAxisMinMax(attribute.InnerText);
+			this.RightToLeft = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "rightToLeft");
+		}
 		#endregion
 
 		#region Private Methods
@@ -208,20 +268,9 @@ namespace OfficeOpenXml.Drawing.Sparkline
 			sparklinesNode.RemoveAll();
 			foreach (var sparkline in this.Sparklines)
 			{
-				sparklinesNode.AppendChild(this.CreateSparklineNode(sparkline));
+				sparkline.Save();
+				sparklinesNode.AppendChild(sparkline.TopNode);
 			}
-		}
-
-		private XmlNode CreateSparklineNode(ExcelSparkline sparkline)
-		{
-			var node = this.TopNode.OwnerDocument.CreateElement("x14:sparkline", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
-			var f = this.TopNode.OwnerDocument.CreateElement("xm:f", "http://schemas.microsoft.com/office/excel/2006/main");
-			f.InnerText = sparkline.Formula.Address;
-			node.AppendChild(f);
-			var sqref = this.TopNode.OwnerDocument.CreateElement("xm:sqref", "http://schemas.microsoft.com/office/excel/2006/main");
-			sqref.InnerText = sparkline.HostCell.Address;
-			node.AppendChild(sqref);
-			return node;
 		}
 
 		private void SaveColors()
@@ -437,71 +486,25 @@ namespace OfficeOpenXml.Drawing.Sparkline
 			if (topNode == null)
 				throw new ArgumentNullException(nameof(topNode));
 			this.Worksheet = worksheet;
-			// Parse the color nodes.
-			var node = TopNode.SelectSingleNode("x14:colorSeries", nameSpaceManager);
-			if (node != null)
-				this.ColorSeries = this.GetColorFromColorNode(node);
-			node = TopNode.SelectSingleNode("x14:colorNegative", nameSpaceManager);
-			if (node != null)
-				this.ColorNegative = this.GetColorFromColorNode(node);
-			node = TopNode.SelectSingleNode("x14:colorAxis", nameSpaceManager);
-			if (node != null)
-				this.ColorAxis = this.GetColorFromColorNode(node);
-			node = TopNode.SelectSingleNode("x14:colorMarkers", nameSpaceManager);
-			if (node != null)
-				this.ColorMarkers = this.GetColorFromColorNode(node);
-			node = TopNode.SelectSingleNode("x14:colorFirst", nameSpaceManager);
-			if (node != null)
-				this.ColorFirst = this.GetColorFromColorNode(node);
-			node = TopNode.SelectSingleNode("x14:colorLast", nameSpaceManager);
-			if (node != null)
-				this.ColorLast = this.GetColorFromColorNode(node);
-			node = TopNode.SelectSingleNode("x14:colorHigh", nameSpaceManager);
-			if (node != null)
-				this.ColorHigh = this.GetColorFromColorNode(node);
-			node = TopNode.SelectSingleNode("x14:colorLow", nameSpaceManager);
-			if (node != null)
-				this.ColorLow = this.GetColorFromColorNode(node);
-			// Parse the attributes.
-			var attribute = topNode.Attributes["type"];
-			if (attribute != null)
-				this.Type = ParseSparklineType(attribute.InnerText);
-			attribute = TopNode.Attributes["displayEmptyCellsAs"];
-			if (attribute != null)
-				this.DisplayEmptyCellsAs = ParseDisplayEmptyCellsAs(attribute.InnerText);
-			this.Negative = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "negative");
-			this.ManualMin = GetAttributeDouble(topNode, "manualMin");
-			this.ManualMax = GetAttributeDouble(topNode, "manualMax");
-			this.LineWeight = GetAttributeDouble(topNode, "lineWeight");
-			this.DateAxis = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "dateAxis");
-			this.Markers = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "markers");
-			this.High = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "high");
-			this.Low = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "low");
-			this.First = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "first");
-			this.Last = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "last");
-			this.DisplayXAxis = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "displayXAxis");
-			this.DisplayHidden = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "displayHidden");
-			attribute = topNode.Attributes["minAxisType"];
-			if (attribute != null)
-				this.MinAxisType = ParseSparklineAxisMinMax(attribute.InnerText);
-			attribute = topNode.Attributes["maxAxisType"];
-			if (attribute != null)
-				this.MaxAxisType = ParseSparklineAxisMinMax(attribute.InnerText);
-			this.RightToLeft = ExcelConditionalFormattingHelper.GetAttributeBool(TopNode, "rightToLeft");
-			// Parse the actual sparklines.
-			var sparklineNodes = TopNode.SelectSingleNode("x14:sparklines", nameSpaceManager)?.ChildNodes;
+			this.CopyNodeStyle(topNode);
+			var sparklineNodes = topNode.SelectSingleNode("x14:sparklines", base.NameSpaceManager)?.ChildNodes;
+			if (sparklineNodes == null)
+				return;
 			foreach (var sparklineNode in sparklineNodes)
-				this.Sparklines.Add(new ExcelSparkline(this, nameSpaceManager, (XmlNode)sparklineNode));
+			{
+				this.Sparklines.Add(new ExcelSparkline(this, base.NameSpaceManager, (XmlNode)sparklineNode));
+			}
 		}
 
 		/// <summary>
-		/// Creating new <see cref="ExcelSparklineGroup"/>s from scratch is not implemented.
+		/// Creates a new <see cref="ExcelSparklineGroup"/> from scratch (without an XML Node).
 		/// </summary>
 		/// <param name="worksheet">The worksheet to add the <see cref="ExcelSparklineGroup"/> to.</param>
 		/// <param name="nameSpaceManager">The namespace manager for the <see cref="ExcelSparklineGroup"/>.</param>
 		public ExcelSparklineGroup(ExcelWorksheet worksheet, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
 		{
-			throw new NotImplementedException();
+			this.Worksheet = worksheet;
+			base.TopNode = worksheet.TopNode.OwnerDocument.CreateElement("x14:sparklineGroup", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
 		}
 		#endregion
 	}

@@ -685,7 +685,9 @@ namespace OfficeOpenXml
 				group.Sparklines.Clear();
 				foreach (var originalSparkline in originalWorksheet.SparklineGroups.SparklineGroups[i].Sparklines)
 				{
-					var sparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(originalSparkline.Formula.Address), HostCell = new ExcelAddress(originalSparkline.HostCell.Address) };
+					ExcelAddress newFormula = new ExcelAddress(originalSparkline.Formula.Address);
+					ExcelAddress newHostCell = new ExcelAddress(originalSparkline.HostCell.Address);
+					var sparkline = new ExcelSparkline(newHostCell, newFormula, group, group.NameSpaceManager);
 					sparkline.Formula.ChangeWorksheet(originalWorksheet.Name, addedWorksheet.Name);
 					group.Sparklines.Add(sparkline);
 				}

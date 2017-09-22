@@ -57,7 +57,7 @@ namespace OfficeOpenXml
 	/// <summary>
 	/// A range of cells 
 	/// </summary>
-	public class ExcelRangeBase : ExcelAddress, IExcelCell, IDisposable, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
+	public class ExcelRangeBase : ExcelAddress, IExcelCell, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
 	{
 		#region Class Variables
 		/// <summary>
@@ -1310,6 +1310,43 @@ namespace OfficeOpenXml
 				this.Worksheet.MergedCells.Remove(item);
 			}
 		}
+
+		private void CopySparklines(ExcelRangeBase destination)
+		{
+			List<ExcelSparklineGroup> newSparklineGroups = new List<ExcelSparklineGroup>();
+			foreach (var group in this.Worksheet.SparklineGroups.SparklineGroups)
+			{
+				ExcelSparklineGroup newGroup = null;
+				foreach (var sparkline in group.Sparklines)
+				{
+					if (sparkline.HostCell.Collide(this) != eAddressCollition.No)
+					{
+						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
+						string newFormulaString = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+						ExcelAddress newFormula = null;
+						if (newFormulaString != "#REF!")
+						{
+							if (this.Worksheet.Name == worksheet)
+								worksheet = destination.Worksheet.Name;
+							newFormulaString = string.IsNullOrEmpty(worksheet) ? newFormulaString : ExcelRangeBase.GetFullAddress(worksheet, newFormulaString);
+							newFormula = new ExcelAddress(newFormulaString);
+						}
+						var newHostCellAddress = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+						if (newGroup == null)
+						{
+							newGroup = new ExcelSparklineGroup(destination.Worksheet, group.NameSpaceManager);
+							newGroup.CopyNodeStyle(group.TopNode);
+						}
+						var newSparkline = new ExcelSparkline(new ExcelAddress(newHostCellAddress), newFormula, newGroup, sparkline.NameSpaceManager);
+						this.Worksheet.Cells[newSparkline.HostCell.Address].Sparklines.Add(newSparkline);
+						newGroup.Sparklines.Add(newSparkline);
+					}
+				}
+				if (newGroup != null)
+					newSparklineGroups.Add(newGroup);
+			}
+			destination.Worksheet.SparklineGroups.SparklineGroups.AddRange(newSparklineGroups);
+		}
 		#endregion
 
 		#region Public Methods
@@ -2082,25 +2119,7 @@ namespace OfficeOpenXml
 			{
 				destination.Worksheet.Cells[cell.Row, cell.Column].AddComment(cell.Comment);
 			}
-			List<ExcelSparkline> newSparklines = new List<ExcelSparkline>();
-			foreach (var group in this.Worksheet.SparklineGroups.SparklineGroups)
-			{
-				newSparklines.Clear();
-				foreach (var sparkline in group.Sparklines)
-				{
-					if (sparkline.HostCell.Collide(this) != eAddressCollition.No)
-					{
-						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
-						var newFormula = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-						if (!string.IsNullOrEmpty(worksheet) && worksheet.Equals(this.WorkSheet))
-							newFormula = ExcelRangeBase.GetFullAddress(worksheet, newFormula);
-						var newHostCell = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
-						var newSparkline = new ExcelSparkline(group, group.NameSpaceManager) { Formula = new ExcelAddress(newFormula), HostCell = new ExcelAddress(newHostCell) };
-						newSparklines.Add(newSparkline);
-					}
-				}
-				group.Sparklines.AddRange(newSparklines);
-			}
+			this.CopySparklines(destination);
 			if (this._fromCol == 1 && this._toCol == ExcelPackage.MaxColumns)
 			{
 				for (int row = 0; row < this.Rows; row++)
@@ -2340,15 +2359,6 @@ namespace OfficeOpenXml
 		}
 		#endregion
 
-		#region IDisposable Members
-
-		public void Dispose()
-		{
-			//_worksheet = null;            
-		}
-
-		#endregion
-
 		#region Enumerator
 		ICellStoreEnumerator<ExcelCoreValue> cellEnum;
 
@@ -2430,6 +2440,11 @@ namespace OfficeOpenXml
 			this._enumAddressIx = -1;
 			this.cellEnum = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(this.myWorksheet._values, this._fromRow, this._fromCol, this._toRow, this._toCol);
 		}
+
+		/// <summary>
+		/// No-op dispose implementation for IEnumerator.
+		/// </summary>
+		public void Dispose() { }
 		#endregion
 	}
 }
