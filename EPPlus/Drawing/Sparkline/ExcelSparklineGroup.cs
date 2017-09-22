@@ -197,12 +197,11 @@ namespace OfficeOpenXml.Drawing.Sparkline
 		}
 
 		/// <summary>
-		/// Copies the contents of the given node to the current <see cref="ExcelSparklineGroup"/>, 
-		/// excluding the node's sparklines if specified.
+		/// Copies the color and style contents of the given node to the current <see cref="ExcelSparklineGroup"/>, 
+		/// excluding the node's contained sparklines.
 		/// </summary>
-		/// <param name="topNode">The node containing the contents to copy.</param>
-		/// <param name="copyChildren">Whether or not to copy the child sparklines of the given node.</param>
-		public void CopyNode(XmlNode topNode, bool copyChildren)
+		/// <param name="topNode">The node containing the color and style elements to copy.</param>
+		public void CopyNodeStyle(XmlNode topNode)
 		{
 			// Parse the color nodes.
 			var node = topNode.SelectSingleNode("x14:colorSeries", base.NameSpaceManager);
@@ -255,13 +254,6 @@ namespace OfficeOpenXml.Drawing.Sparkline
 			if (attribute != null)
 				this.MaxAxisType = ParseSparklineAxisMinMax(attribute.InnerText);
 			this.RightToLeft = ExcelConditionalFormattingHelper.GetAttributeBool(topNode, "rightToLeft");
-			if (copyChildren)
-			{
-				// Parse the actual sparklines.
-				var sparklineNodes = topNode.SelectSingleNode("x14:sparklines", base.NameSpaceManager)?.ChildNodes;
-				foreach (var sparklineNode in sparklineNodes)
-					this.Sparklines.Add(new ExcelSparkline(this, base.NameSpaceManager, (XmlNode)sparklineNode));
-			}
 		}
 		#endregion
 
@@ -494,7 +486,14 @@ namespace OfficeOpenXml.Drawing.Sparkline
 			if (topNode == null)
 				throw new ArgumentNullException(nameof(topNode));
 			this.Worksheet = worksheet;
-			this.CopyNode(topNode, true);
+			this.CopyNodeStyle(topNode);
+			var sparklineNodes = topNode.SelectSingleNode("x14:sparklines", base.NameSpaceManager)?.ChildNodes;
+			if (sparklineNodes == null)
+				return;
+			foreach (var sparklineNode in sparklineNodes)
+			{
+				this.Sparklines.Add(new ExcelSparkline(this, base.NameSpaceManager, (XmlNode)sparklineNode));
+			}
 		}
 
 		/// <summary>

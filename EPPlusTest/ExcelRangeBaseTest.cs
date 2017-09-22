@@ -182,7 +182,7 @@ namespace EPPlusTest
 					Assert.AreEqual("F9", sheet1Sparklines[0].Sparklines[0].HostCell.Address);
 					var sheet3Sparklines = sheet3.SparklineGroups.SparklineGroups;
 					Assert.AreEqual(2, sheet3Sparklines.Count);
-					Assert.AreEqual("'Sheet1'!D10:D12", sheet3Sparklines[0].Sparklines[0].Formula.Address);
+					Assert.AreEqual($"'{newSheetName}'!D10:D12", sheet3Sparklines[0].Sparklines[0].Formula.Address);
 					Assert.AreEqual("D13", sheet3Sparklines[0].Sparklines[0].HostCell.Address);
 					Assert.AreEqual("'Sheet2'!B6:I6", sheet3Sparklines[1].Sparklines[0].Formula.Address);
 					Assert.AreEqual("C16", sheet3Sparklines[1].Sparklines[0].HostCell.Address);
@@ -210,7 +210,7 @@ namespace EPPlusTest
 					Assert.AreEqual("F9", sheet1Sparklines[0].Sparklines[0].HostCell.Address);
 					var sheet3Sparklines = sheet3.SparklineGroups.SparklineGroups;
 					Assert.AreEqual(2, sheet3Sparklines.Count);
-					Assert.AreEqual("'Sheet1'!D10:D12", sheet3Sparklines[0].Sparklines[0].Formula.Address);
+					Assert.AreEqual($"'{newSheetName}'!D10:D12", sheet3Sparklines[0].Sparklines[0].Formula.Address);
 					Assert.AreEqual("D13", sheet3Sparklines[0].Sparklines[0].HostCell.Address);
 					Assert.AreEqual("'Sheet2'!B6:I6", sheet3Sparklines[1].Sparklines[0].Formula.Address);
 					Assert.AreEqual("C16", sheet3Sparklines[1].Sparklines[0].HostCell.Address);

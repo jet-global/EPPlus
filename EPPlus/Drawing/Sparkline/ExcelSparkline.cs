@@ -67,10 +67,12 @@ namespace OfficeOpenXml.Drawing.Sparkline
 		{
 			if (topNode == null)
 				throw new ArgumentNullException(nameof(topNode));
-			this.Group = group ?? throw new ArgumentNullException(nameof(group));
+			if (group == null)
+				throw new ArgumentNullException(nameof(group));
+			this.Group = group;
 			var formulaNode = topNode.SelectSingleNode("xm:f", nameSpaceManager);
 			var hostNode = topNode.SelectSingleNode("xm:sqref", nameSpaceManager);
-			this.Formula = formulaNode == null ? null : new ExcelAddress(formulaNode.InnerText);
+			this.Formula = formulaNode != null ? new ExcelAddress(formulaNode.InnerText) : null;
 			this.HostCell = group.Worksheet.Cells[hostNode.InnerText];
 			group.Worksheet.Cells[this.HostCell.Address].Sparklines.Add(this);
 		}
@@ -79,13 +81,17 @@ namespace OfficeOpenXml.Drawing.Sparkline
 		/// Create a new <see cref="ExcelSparkline"/> from scratch (without using an existing XML Node).
 		/// </summary>
 		/// <param name="hostCell">The <see cref="ExcelAddress"/> that hosts the sparkline.</param>
-		/// <param name="formula">The <see cref="ExcelAddress"/> that the sparkline references.</param>
+		/// <param name="formula">The <see cref="ExcelAddress"/> that the sparkline references. Can be null.</param>
 		/// <param name="group">The <see cref="ExcelSparklineGroup"/> that this line will belong to.</param>
 		/// <param name="nameSpaceManager">The namespace manager for the object.</param>
 		public ExcelSparkline(ExcelAddress hostCell, ExcelAddress formula, ExcelSparklineGroup group, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
 		{
-			this.HostCell = hostCell ?? throw new ArgumentNullException(nameof(hostCell));
-			this.Group = group ?? throw new ArgumentNullException(nameof(group));
+			if (hostCell == null)
+				throw new ArgumentNullException(nameof(hostCell));
+			if (group == null)
+				throw new ArgumentNullException(nameof(group));
+			this.HostCell = hostCell;
+			this.Group = group;
 			this.Formula = formula;
 			this.TopNode = group.TopNode.OwnerDocument.CreateElement("x14:sparkline", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
 		}

@@ -89,7 +89,9 @@ namespace OfficeOpenXml.Drawing.Sparkline
 		/// <param name="nameSpaceManager">The namespace manager for the object.</param>
 		public ExcelSparklineGroups(ExcelWorksheet worksheet, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
 		{
-			this.Worksheet = worksheet ?? throw new ArgumentNullException(nameof(worksheet));
+			if (worksheet == null)
+				throw new ArgumentNullException(nameof(worksheet));
+			this.Worksheet = worksheet; 
 			XmlNode extNode = this.Worksheet.TopNode.SelectSingleNode("extLst/ext");
 			XmlNode extLstNode = null;
 			if (extNode == null)

@@ -57,7 +57,7 @@ namespace OfficeOpenXml
 	/// <summary>
 	/// A range of cells 
 	/// </summary>
-	public class ExcelRangeBase : ExcelAddress, IExcelCell, IDisposable, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
+	public class ExcelRangeBase : ExcelAddress, IExcelCell, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
 	{
 		#region Class Variables
 		/// <summary>
@@ -1326,6 +1326,8 @@ namespace OfficeOpenXml
 						ExcelAddress newFormula = null;
 						if (newFormulaString != "#REF!")
 						{
+							if (this.Worksheet.Name == worksheet)
+								worksheet = destination.Worksheet.Name;
 							newFormulaString = string.IsNullOrEmpty(worksheet) ? newFormulaString : ExcelRangeBase.GetFullAddress(worksheet, newFormulaString);
 							newFormula = new ExcelAddress(newFormulaString);
 						}
@@ -1333,7 +1335,7 @@ namespace OfficeOpenXml
 						if (newGroup == null)
 						{
 							newGroup = new ExcelSparklineGroup(destination.Worksheet, group.NameSpaceManager);
-							newGroup.CopyNode(group.TopNode, false);
+							newGroup.CopyNodeStyle(group.TopNode);
 						}
 						var newSparkline = new ExcelSparkline(new ExcelAddress(newHostCellAddress), newFormula, newGroup, sparkline.NameSpaceManager);
 						this.Worksheet.Cells[newSparkline.HostCell.Address].Sparklines.Add(newSparkline);
@@ -2357,13 +2359,6 @@ namespace OfficeOpenXml
 		}
 		#endregion
 
-		#region IDisposable Members
-		public void Dispose()
-		{
-			//_worksheet = null;
-		}
-		#endregion
-
 		#region Enumerator
 		ICellStoreEnumerator<ExcelCoreValue> cellEnum;
 
@@ -2445,6 +2440,11 @@ namespace OfficeOpenXml
 			this._enumAddressIx = -1;
 			this.cellEnum = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(this.myWorksheet._values, this._fromRow, this._fromCol, this._toRow, this._toCol);
 		}
+
+		/// <summary>
+		/// No-op dispose implementation for IEnumerator.
+		/// </summary>
+		public void Dispose() { }
 		#endregion
 	}
 }
