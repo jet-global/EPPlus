@@ -57,7 +57,25 @@ namespace OfficeOpenXml.Drawing.Sparkline
 		{
 			if (this.SparklineGroups.Count == 0 || this.SparklineGroups[0].Sparklines.Count == 0)
 				return;
-			this.TopNode.RemoveAll();
+			if (base.TopNode == null)
+			{
+				XmlNode extNode = this.Worksheet.TopNode.SelectSingleNode("d:extLst/d:ext", base.NameSpaceManager);
+				XmlNode extLstNode = null;
+				if (extNode == null)
+				{
+					extNode = this.Worksheet.TopNode.OwnerDocument.CreateNode(XmlNodeType.Element, "ext", base.NameSpaceManager.DefaultNamespace);
+					extLstNode = this.Worksheet.TopNode.SelectSingleNode("d:extLst", base.NameSpaceManager);
+					if (extLstNode == null)
+					{
+						extLstNode = this.Worksheet.TopNode.OwnerDocument.CreateNode(XmlNodeType.Element, "extLst", base.NameSpaceManager.DefaultNamespace);
+						this.Worksheet.TopNode.AppendChild(extLstNode);
+					}
+					extLstNode.AppendChild(extNode);
+				}
+				base.TopNode = this.Worksheet.TopNode.OwnerDocument.CreateElement("x14:sparklineGroups", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
+				extNode.AppendChild(base.TopNode);
+			}
+			base.TopNode.RemoveAll();
 			foreach (var group in this.SparklineGroups)
 			{
 				group.Save();
@@ -92,21 +110,6 @@ namespace OfficeOpenXml.Drawing.Sparkline
 			if (worksheet == null)
 				throw new ArgumentNullException(nameof(worksheet));
 			this.Worksheet = worksheet; 
-			XmlNode extNode = this.Worksheet.TopNode.SelectSingleNode("extLst/ext");
-			XmlNode extLstNode = null;
-			if (extNode == null)
-			{
-				extNode = this.Worksheet.TopNode.OwnerDocument.CreateNode(XmlNodeType.Element, "ext", nameSpaceManager.DefaultNamespace);
-				extLstNode = this.Worksheet.TopNode.SelectSingleNode("extLst");
-				if (extLstNode == null)
-				{
-					extLstNode = this.Worksheet.TopNode.OwnerDocument.CreateNode(XmlNodeType.Element, "extLst", nameSpaceManager.DefaultNamespace);
-					this.Worksheet.TopNode.AppendChild(extLstNode);
-				}
-				extLstNode.AppendChild(extNode);
-			}
-			base.TopNode = this.Worksheet.TopNode.OwnerDocument.CreateElement("x14:sparklineGroups", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
-			extNode.AppendChild(this.TopNode);
 		}
 		#endregion
 	}
