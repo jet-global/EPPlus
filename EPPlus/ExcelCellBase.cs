@@ -683,38 +683,16 @@ namespace OfficeOpenXml
 		/// <returns>The full address</returns>
 		public static string GetFullAddress(string worksheetName, string address)
 		{
-			return GetFullAddress(worksheetName, address, true);
-		}
-		internal static string GetFullAddress(string worksheetName, string address, bool fullRowCol)
-		{
 			if (address.IndexOf("!") == -1 || address == "#REF!")
 			{
-				if (fullRowCol)
-				{
 					string[] cells = address.Split(':');
 					if (cells.Length > 0)
 					{
 						var addressFormat = string.IsNullOrEmpty(worksheetName) ? "{1}" : "'{0}'!{1}";
 						address = string.Format(addressFormat, worksheetName, cells[0]);
 						if (cells.Length > 1)
-						{
 							address += string.Format(":{0}", cells[1]);
-						}
 					}
-				}
-				else
-				{
-					var a = new ExcelAddressBase(address);
-					if ((a._fromRow == 1 && a._toRow == ExcelPackage.MaxRows) || (a._fromCol == 1 && a._toCol == ExcelPackage.MaxColumns))
-					{
-						var addressFormat = string.IsNullOrEmpty(worksheetName) ? "{1}{2}:{3}{4}" : "'{0}'!{1}{2}:{3}{4}";
-						address = string.Format("'{0}'!{1}{2}:{3}{4}", worksheetName, ExcelAddress.GetColumnLetter(a._fromCol), a._fromRow, ExcelAddress.GetColumnLetter(a._toCol), a._toRow);
-					}
-					else
-					{
-						address = GetFullAddress(worksheetName, address, true);
-					}
-				}
 			}
 			return address;
 		}
