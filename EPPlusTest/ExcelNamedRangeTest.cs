@@ -54,5 +54,47 @@ namespace EPPlusTest
 			}
 		}
 		#endregion
+
+		#region GetRelativeAddress Tests
+		[TestMethod]
+		public virtual void TryGetNamedRangeAddress()
+		{
+			string sheetName1 = "Sheet1", sheetName2 = "Name with spaces";
+			using (var package = new ExcelPackage())
+			using (var workbook = package.Workbook)
+			using (var worksheet1 = workbook.Worksheets.Add(sheetName1))
+			using (var worksheet2 = workbook.Worksheets.Add(sheetName2))
+			using (var cell1 = worksheet1.Cells["$D3"])
+			using (var cell2 = worksheet1.Cells["G$5"])
+			using (var cell3 = worksheet2.Cells["E5"])
+			using (var cell4 = worksheet2.Cells["$C$8"])
+			{
+				var names = workbook.Names;
+				names.Add("Name1", cell1);
+				names.Add("Name2", cell2);
+				names.Add("Name3", cell3);
+				names.Add("Name4", cell4);
+
+				// Relative references to a named range are relative to cell A1. Offsets that cause the 
+				// relative address to exceed the maximum row or column will wrap around.
+				// Examples:
+				//	$B2 means on column B and down one row from the relative address.
+				//	D$5 means on row 5 and right three columns from the relative address.
+				//	C3 means right two and down three from the relative address.
+				var expected = $"'{sheetName1}'!$D4";
+				string actual = package.Workbook.Names["Name1"].GetRelativeAddress(2, 2);
+				Assert.AreEqual(expected, actual);
+				expected = $"'{sheetName1}'!H$5";
+				actual = package.Workbook.Names["Name2"].GetRelativeAddress(2, 2);
+				Assert.AreEqual(expected, actual);
+				expected = $"'{sheetName2}'!F6";
+				actual = package.Workbook.Names["Name3"].GetRelativeAddress(2, 2);
+				Assert.AreEqual(expected, actual);
+				expected = $"'{sheetName2}'!$C$8";
+				actual = package.Workbook.Names["Name4"].GetRelativeAddress(2, 2);
+				Assert.AreEqual(expected, actual);
+			}
+		}
+		#endregion
 	}
 }

@@ -536,6 +536,24 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region SetAddress Tests
+		[TestMethod]
+		public void SetAddress()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				// It probably shouldn't be allowed to change the address of a cell, but since
+				// it is the backing worksheet reference should be set correctly.
+				var cell = sheet.Cells[3, 3];
+				cell.Address = "'Sheet2'!D4";
+				Assert.AreEqual(sheet2.Name, cell.Worksheet.Name);
+				Assert.AreNotEqual(sheet2.Name, sheet.Cells[3, 3].Worksheet.Name);
+			}
+		}
+		#endregion
+
 		#region SetSharedFormula Tests
 		[TestMethod]
 		public void SetSharedFormulaRemovesLeadingEquals()
