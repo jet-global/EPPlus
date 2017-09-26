@@ -103,6 +103,8 @@ namespace OfficeOpenXml
 		{
 			if (this.IsTableAddress)
 				SetRCFromTable(this.myWorkbook.Package, null);
+			if (this.myWorksheet.Name != this.WorkSheet)
+				this.myWorksheet = this.myWorkbook.Worksheets[this.WorkSheet];
 			SetDelegate();
 		}
 

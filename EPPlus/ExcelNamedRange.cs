@@ -130,9 +130,45 @@ namespace OfficeOpenXml
 		internal ExcelNamedRange(string name, ExcelWorkbook wb, ExcelWorksheet nameSheet, int index) :
 			 base(wb, nameSheet, name, true)
 		{
-			Name = name;
-			LocalSheet = nameSheet;
-			Index = index;
+			this.Name = name;
+			this.LocalSheet = nameSheet;
+			this.Index = index;
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Gets the address relative to the specified row and column.
+		/// </summary>
+		/// <param name="relativeRow">The row from which the named range is used.</param>
+		/// <param name="relativeColumn">The column from which the named range is used.</param>
+		/// <returns>the address relative to the specified row and column.</returns>
+		public string GetRelativeAddress(int relativeRow, int relativeColumn)
+		{
+			// Relative references are relative to cell A1. Offsets that cause the 
+			// relative address to exceed the maximum row or column will wrap around.
+			// Examples:
+			//	$B2 means on column B and down one row from the relative address.
+			//	D$5 means on row 5 and right three columns from the relative address.
+			//	C3 means right two and down three from the relative address.
+			int fromRow = this.GetRelativeLocation(_fromRowFixed, _fromRow, relativeRow, ExcelPackage.MaxRows);
+			int fromColumn = this.GetRelativeLocation(_fromColFixed, _fromCol, relativeColumn, ExcelPackage.MaxColumns);
+			int toRow = this.GetRelativeLocation(_toRowFixed, _toRow, relativeRow, ExcelPackage.MaxRows);
+			int toColumn = this.GetRelativeLocation(_toColFixed, _toCol, relativeColumn, ExcelPackage.MaxColumns);
+			var address = ExcelCellBase.GetAddress(fromRow, fromColumn, toRow, toColumn, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
+			return ExcelCellBase.GetFullAddress(this.Worksheet.Name, address);
+		}
+		#endregion
+
+		#region Private Methods
+		private int GetRelativeLocation(bool fixedLocation, int current, int relative, int maximum)
+		{
+			if (fixedLocation)
+				return current;
+			int row = current + relative - 1;
+			if (row > maximum)
+				return row - maximum;
+			return row;
 		}
 		#endregion
 
