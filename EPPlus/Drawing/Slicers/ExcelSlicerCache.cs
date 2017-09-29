@@ -43,6 +43,8 @@ namespace OfficeOpenXml.Drawing.Slicers
 	{
 		#region Class Variables
 		private List<PivotTableNode> myPivotTables = new List<PivotTableNode>();
+		private List<OlapDataNode> myOlapDataSources = new List<OlapDataNode>();
+		private List<TabularDataNode> myTabularDataSources = new List<TabularDataNode>();
 		#endregion
 
 		#region Properties
@@ -57,6 +59,24 @@ namespace OfficeOpenXml.Drawing.Slicers
 				this.TopNode.Attributes["name"].Value = value;
 				if (this.Slicer != null)
 					this.Slicer.TopNode.Attributes["cache"].Value = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the source name of this <see cref="ExcelSlicerCache"/>.
+		/// </summary>
+		public string SourceName
+		{
+			get { return this.TopNode.Attributes["sourceName"]?.Value; }
+			set
+			{
+				var attribute = this.TopNode.Attributes["sourceName"];
+				if (attribute == null)
+				{
+					attribute = this.TopNode.OwnerDocument.CreateAttribute("sourceName");
+					this.TopNode.Attributes.Append(attribute);
+				}
+				attribute.Value = value;
 			}
 		}
 
@@ -76,6 +96,22 @@ namespace OfficeOpenXml.Drawing.Slicers
 		public IReadOnlyList<PivotTableNode> PivotTables
 		{
 			get { return myPivotTables; }
+		}
+
+		/// <summary>
+		/// Gets a readonly list of olap data sources for this slicer cache.
+		/// </summary>
+		public IReadOnlyList<OlapDataNode> OlapDataSources
+		{
+			get { return myOlapDataSources; }
+		}
+
+		/// <summary>
+		/// Gets a readonly list of table data sources for this slicer cache.
+		/// </summary>
+		public IReadOnlyList<TabularDataNode> TabularDataSources
+		{
+			get { return myTabularDataSources; }
 		}
 
 		private XmlDocument Part { get; set; }
@@ -98,6 +134,14 @@ namespace OfficeOpenXml.Drawing.Slicers
 			{
 				myPivotTables.Add(new PivotTableNode(pivotTableNode));
 			}
+			foreach (XmlNode olapDataNode in this.TopNode.SelectNodes("default:data/default:olap", this.NameSpaceManager))
+			{
+				myOlapDataSources.Add(new OlapDataNode(olapDataNode, this.NameSpaceManager));
+			}
+			foreach (XmlNode tabularDataNode in this.TopNode.SelectNodes("default:data/default:tabular", this.NameSpaceManager))
+			{
+				myTabularDataSources.Add(new TabularDataNode(tabularDataNode, this.NameSpaceManager));
+			}
 		}
 		#endregion
 
@@ -109,50 +153,6 @@ namespace OfficeOpenXml.Drawing.Slicers
 		internal void Save(ExcelPackage package)
 		{
 			package.SavePart(new Uri("/xl/" + this.SlicerCacheUri, UriKind.Relative), this.Part);
-		}
-		#endregion
-
-		#region Nested Classes
-		/// <summary>
-		/// Wraps a <pivotTable /> in <slicerCacheDefinition-pivotTables />
-		/// </summary>
-		public class PivotTableNode
-		{
-			#region Properties
-			/// <summary>
-			/// Gets or sets the tabId, which identifies which worksheet the pivot table corresponding to this slicerCache exists on.
-			/// </summary>
-			public string TabId
-			{
-				get { return this.Node.Attributes["tabId"].Value; }
-				set { this.Node.Attributes["tabId"].Value = value; }
-			}
-
-			/// <summary>
-			/// Gets or sets the name of the PivotTable this slicer cache's slicer is affecting.
-			/// </summary>
-			public string PivotTableName
-			{
-				get { return this.Node.Attributes["name"].Value; }
-				set { this.Node.Attributes["name"].Value = value; }
-			}
-
-			private XmlNode Node { get; set; }
-			#endregion
-
-			#region Constructors
-			/// <summary>
-			/// Creates an instance of a <see cref="PivotTableNode"/>.
-			/// This is a wrapper for the <pivotTable /> in <slicerCacheDefinition />
-			/// </summary>
-			/// <param name="node">The <see cref="XmlNode"/> underlying this <see cref="PivotTableNode"/>.</param>
-			public PivotTableNode(XmlNode node)
-			{
-				if (node == null)
-					throw new ArgumentNullException(nameof(node));
-				this.Node = node;
-			}
-			#endregion
 		}
 		#endregion
 	}

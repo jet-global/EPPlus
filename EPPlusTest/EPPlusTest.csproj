@@ -99,6 +99,14 @@
     <Compile Include="ConditionalFormatting\ConditionalFormatting.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerCacheTest.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerDrawingTest.cs" />
+    <Compile Include="Drawing\Slicers\OlapDataNodeTest.cs" />
+    <Compile Include="Drawing\Slicers\PivotTableNodeTest.cs" />
+    <Compile Include="Drawing\Slicers\SlicerLevelNodeTest.cs" />
+    <Compile Include="Drawing\Slicers\SlicerRangeItemTest.cs" />
+    <Compile Include="Drawing\Slicers\SlicerRangeNodeTest.cs" />
+    <Compile Include="Drawing\Slicers\SlicerSelectionNodeTest.cs" />
+    <Compile Include="Drawing\Slicers\TabularDataNodeTest.cs" />
+    <Compile Include="Drawing\Slicers\TabularItemNodeTest.cs" />
     <Compile Include="ExcelAddressTest.cs" />
     <Compile Include="ExcelCellBaseTest.cs" />
     <Compile Include="ExcelNamedRangeCollectionTest.cs" />
@@ -223,6 +231,8 @@
     <Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTestBase.cs" />
     <Compile Include="Style\Dxf\ExcelDxfStyleTest.cs" />
     <Compile Include="Style\XmlAccess\ExcelFontXmlTest.cs" />
+    <Compile Include="Table\PivotTable\CacheFieldItemTest.cs" />
+    <Compile Include="Table\PivotTable\CacheFieldNodeTest.cs" />
     <Compile Include="Utils\ConvertUtilTest.cs" />
     <Compile Include="DataValidation\CustomValidationTests.cs" />
     <Compile Include="DataValidation\DataValidationTests.cs" />

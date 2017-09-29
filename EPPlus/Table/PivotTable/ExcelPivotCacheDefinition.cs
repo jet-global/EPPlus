@@ -30,6 +30,7 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -83,6 +84,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					_sourceRange = pivotTable.WorkSheet.Workbook.Worksheets[worksheetName].Cells[GetXmlNodeString(_sourceAddressPath)];
 				}
+			}
+			foreach (XmlNode cacheFieldNode in this.TopNode.SelectNodes("d:cacheFields/d:cacheField", this.NameSpaceManager))
+			{
+				myCacheFields.Add(new CacheFieldNode(cacheFieldNode, this.NameSpaceManager));
 			}
 		}
 		internal ExcelPivotCacheDefinition(XmlNamespaceManager ns, ExcelPivotTable pivotTable, ExcelRangeBase sourceAddress, int tblId) :
@@ -164,6 +169,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get;
 			private set;
+		}
+
+		private List<CacheFieldNode> myCacheFields = new List<CacheFieldNode>();
+		public IReadOnlyList<CacheFieldNode> CacheFields
+		{
+			get { return myCacheFields; }
 		}
 
 		const string _sourceNamePath = "d:cacheSource/d:worksheetSource/@name";
