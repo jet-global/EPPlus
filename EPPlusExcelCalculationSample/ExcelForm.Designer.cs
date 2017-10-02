@@ -28,20 +28,20 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.button_Save = new System.Windows.Forms.Button();
 			this.saveFileDialog_SaveExcel = new System.Windows.Forms.SaveFileDialog();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
-			this.textBox_fx = new System.Windows.Forms.TextBox();
-			this.label1 = new System.Windows.Forms.Label();
-			this.dataGridView_Ws1 = new System.Windows.Forms.DataGridView();
-			this.E = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.D = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.C = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.B = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.A = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.button_ApplyFormula = new System.Windows.Forms.Button();
+			this.dataGridView_Ws1 = new System.Windows.Forms.DataGridView();
+			this.A = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.B = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.C = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.D = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.E = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.label1 = new System.Windows.Forms.Label();
+			this.textBox_fx = new System.Windows.Forms.TextBox();
 			this.tabControl_Worksheets = new System.Windows.Forms.TabControl();
 			this.button1 = new System.Windows.Forms.Button();
 			this.tabPage1.SuspendLayout();
@@ -73,12 +73,81 @@
 			this.tabPage1.Text = "Sheet1";
 			this.tabPage1.UseVisualStyleBackColor = true;
 			// 
-			// textBox_fx
+			// button_ApplyFormula
 			// 
-			this.textBox_fx.Location = new System.Drawing.Point(94, 16);
-			this.textBox_fx.Name = "textBox_fx";
-			this.textBox_fx.Size = new System.Drawing.Size(356, 20);
-			this.textBox_fx.TabIndex = 0;
+			this.button_ApplyFormula.Location = new System.Drawing.Point(456, 14);
+			this.button_ApplyFormula.Name = "button_ApplyFormula";
+			this.button_ApplyFormula.Size = new System.Drawing.Size(64, 23);
+			this.button_ApplyFormula.TabIndex = 3;
+			this.button_ApplyFormula.Text = "Apply";
+			this.button_ApplyFormula.UseVisualStyleBackColor = true;
+			this.button_ApplyFormula.Click += new System.EventHandler(this.button_ApplyFormula_Click);
+			// 
+			// dataGridView_Ws1
+			// 
+			this.dataGridView_Ws1.AllowUserToAddRows = false;
+			this.dataGridView_Ws1.AllowUserToDeleteRows = false;
+			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle1.Font = new System.Drawing.Font("Times New Roman", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+			this.dataGridView_Ws1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+			this.dataGridView_Ws1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridView_Ws1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.A,
+            this.B,
+            this.C,
+            this.D,
+            this.E});
+			this.dataGridView_Ws1.Location = new System.Drawing.Point(6, 43);
+			this.dataGridView_Ws1.MultiSelect = false;
+			this.dataGridView_Ws1.Name = "dataGridView_Ws1";
+			dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle2.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridView_Ws1.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
+			this.dataGridView_Ws1.ScrollBars = System.Windows.Forms.ScrollBars.None;
+			this.dataGridView_Ws1.ShowCellErrors = false;
+			this.dataGridView_Ws1.ShowCellToolTips = false;
+			this.dataGridView_Ws1.ShowEditingIcon = false;
+			this.dataGridView_Ws1.ShowRowErrors = false;
+			this.dataGridView_Ws1.Size = new System.Drawing.Size(563, 311);
+			this.dataGridView_Ws1.TabIndex = 2;
+			this.dataGridView_Ws1.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataGridView_Ws1_CellBeginEdit);
+			this.dataGridView_Ws1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView_Ws1_CellContentClick);
+			this.dataGridView_Ws1.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.dataGridView_Ws1_CellValidating);
+			// 
+			// A
+			// 
+			this.A.HeaderText = "A";
+			this.A.Name = "A";
+			// 
+			// B
+			// 
+			this.B.HeaderText = "B";
+			this.B.Name = "B";
+			// 
+			// C
+			// 
+			this.C.HeaderText = "C";
+			this.C.Name = "C";
+			// 
+			// D
+			// 
+			this.D.HeaderText = "D";
+			this.D.Name = "D";
+			// 
+			// E
+			// 
+			this.E.HeaderText = "E";
+			this.E.Name = "E";
 			// 
 			// label1
 			// 
@@ -89,80 +158,12 @@
 			this.label1.TabIndex = 1;
 			this.label1.Text = "fx";
 			// 
-			// dataGridView_Ws1
+			// textBox_fx
 			// 
-			this.dataGridView_Ws1.AllowUserToAddRows = false;
-			this.dataGridView_Ws1.AllowUserToDeleteRows = false;
-			dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle3.Font = new System.Drawing.Font("Times New Roman", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-			this.dataGridView_Ws1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
-			this.dataGridView_Ws1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridView_Ws1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-				this.A,
-				this.B,
-				this.C,
-				this.D,
-				this.E});
-			this.dataGridView_Ws1.Location = new System.Drawing.Point(6, 43);
-			this.dataGridView_Ws1.MultiSelect = false;
-			this.dataGridView_Ws1.Name = "dataGridView_Ws1";
-			dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle4.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridView_Ws1.RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
-			this.dataGridView_Ws1.ScrollBars = System.Windows.Forms.ScrollBars.None;
-			this.dataGridView_Ws1.ShowCellErrors = false;
-			this.dataGridView_Ws1.ShowCellToolTips = false;
-			this.dataGridView_Ws1.ShowEditingIcon = false;
-			this.dataGridView_Ws1.ShowRowErrors = false;
-			this.dataGridView_Ws1.Size = new System.Drawing.Size(563, 311);
-			this.dataGridView_Ws1.TabIndex = 2;
-			this.dataGridView_Ws1.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataGridView_Ws1_CellBeginEdit);
-			this.dataGridView_Ws1.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.dataGridView_Ws1_CellValidating);
-			// 
-			// E
-			// 
-			this.E.HeaderText = "E";
-			this.E.Name = "E";
-			// 
-			// D
-			// 
-			this.D.HeaderText = "D";
-			this.D.Name = "D";
-			// 
-			// C
-			// 
-			this.C.HeaderText = "C";
-			this.C.Name = "C";
-			// 
-			// B
-			// 
-			this.B.HeaderText = "B";
-			this.B.Name = "B";
-			// 
-			// A
-			// 
-			this.A.HeaderText = "A";
-			this.A.Name = "A";
-			// 
-			// button_ApplyFormula
-			// 
-			this.button_ApplyFormula.Location = new System.Drawing.Point(456, 14);
-			this.button_ApplyFormula.Name = "button_ApplyFormula";
-			this.button_ApplyFormula.Size = new System.Drawing.Size(64, 23);
-			this.button_ApplyFormula.TabIndex = 3;
-			this.button_ApplyFormula.Text = "Apply";
-			this.button_ApplyFormula.UseVisualStyleBackColor = true;
-			this.button_ApplyFormula.Click += new System.EventHandler(this.button_ApplyFormula_Click);
+			this.textBox_fx.Location = new System.Drawing.Point(94, 16);
+			this.textBox_fx.Name = "textBox_fx";
+			this.textBox_fx.Size = new System.Drawing.Size(356, 20);
+			this.textBox_fx.TabIndex = 0;
 			// 
 			// tabControl_Worksheets
 			// 
@@ -195,7 +196,7 @@
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "ExcelForm";
-			this.Text = "EPPlus Excel demo";
+			this.Text = "Interview Demo: EPPlus Function Implementations";
 			this.tabPage1.ResumeLayout(false);
 			this.tabPage1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView_Ws1)).EndInit();

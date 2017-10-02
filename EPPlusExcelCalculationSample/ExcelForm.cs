@@ -34,18 +34,23 @@ namespace EPPlusExcelFormDemo
 			{
 				for (var row = 1; row < 9; row++)
 				{
-					ws1.Cells[row, col].Value = row * col;
+					ws1.Cells[row, col].Value = 0;
 				}
 			}
-			ws1.Cells[7, 1].Value = "SUM";
-			ws1.Cells[7, 2].Formula = "SUM(B1:B6)";
-			ws1.Cells[7, 3].Formula = "SUM(C1:C6)";
-			ws1.Cells[7, 4].Formula = "SUM(D1:D6)";
-
-			ws1.Cells[8, 1].Value = "STDEV";
-			ws1.Cells[8, 2].Formula = "STDEV(B1:B6)";
-			ws1.Cells[8, 3].Formula = "STDEV(C1:C6)";
-			ws1.Cells[8, 4].Formula = "STDEV(D1:D6)";
+			ws1.Cells[1, 1].Formula = "PRODUCT(1, 5, 4, 2, 1, 1, 1)";
+			ws1.Cells[2, 2].Value = 2;
+			ws1.Cells[2, 3].Value = 3;
+			ws1.Cells[2, 4].Value = 4;
+			ws1.Cells[3, 2].Value = 0;
+			ws1.Cells[3, 3].Value = 3;
+			ws1.Cells[3, 4].Value = 4;
+			ws1.Cells[4, 2].Value = -2;
+			ws1.Cells[4, 3].Value = 3;
+			ws1.Cells[4, 4].Value = 4;
+			ws1.Cells[2, 1].Formula = "PRODUCT(B2:D2)";
+			ws1.Cells[3, 1].Formula = "PRODUCT(B3:D3)";
+			ws1.Cells[4, 1].Formula = "PRODUCT(B4:D4)";
+			ws1.Cells[8, 5].Value = "End of Worksheet";
 			_package.Workbook.Calculate();
 		}
 
@@ -234,6 +239,11 @@ namespace EPPlusExcelFormDemo
 		{
 			var frm = new frmFunctions(_package.Workbook.FormulaParserManager.GetImplementedFunctionNames().ToList());
 			frm.ShowDialog(this);
+
+		}
+
+		private void dataGridView_Ws1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+		{
 
 		}
 	}
