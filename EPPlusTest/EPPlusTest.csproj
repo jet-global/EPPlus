@@ -97,7 +97,6 @@
     <Compile Include="Address.cs" />
     <Compile Include="Calculation.cs" />
     <Compile Include="ConditionalFormatting\ConditionalFormatting.cs" />
-    <Compile Include="Drawing\Slicers\ExcelSlicerCacheTest.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerDrawingTest.cs" />
     <Compile Include="Drawing\Slicers\OlapDataNodeTest.cs" />
     <Compile Include="Drawing\Slicers\PivotTableNodeTest.cs" />
