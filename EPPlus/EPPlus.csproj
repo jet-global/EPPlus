@@ -220,6 +220,14 @@
     <Compile Include="Drawing\Slicers\ExcelSlicerDrawing.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerCache.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicers.cs" />
+    <Compile Include="Drawing\Slicers\OlapDataNode.cs" />
+    <Compile Include="Drawing\Slicers\PivotTableNode.cs" />
+    <Compile Include="Drawing\Slicers\SlicerLevelNode.cs" />
+    <Compile Include="Drawing\Slicers\SlicerRangeItem.cs" />
+    <Compile Include="Drawing\Slicers\SlicerRangeNode.cs" />
+    <Compile Include="Drawing\Slicers\SlicerSelectionNode.cs" />
+    <Compile Include="Drawing\Slicers\TabularDataNode.cs" />
+    <Compile Include="Drawing\Slicers\TabularItemNode.cs" />
     <Compile Include="Drawing\Sparkline\ExcelSparkline.cs" />
     <Compile Include="Drawing\Sparkline\ExcelSparklineGroup.cs" />
     <Compile Include="Drawing\Sparkline\ExcelSparklineGroups.cs" />
@@ -748,6 +756,8 @@
     <Compile Include="RangeCollection.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Table\PivotTable\CacheFieldItem.cs" />
+    <Compile Include="Table\PivotTable\CacheFieldNode.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\InternationalizationUtility.cs" />
     <Compile Include="Utils\UriHelper.cs" />
