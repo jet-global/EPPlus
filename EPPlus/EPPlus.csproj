@@ -222,6 +222,7 @@
     <Compile Include="Drawing\Slicers\ExcelSlicers.cs" />
     <Compile Include="Drawing\Slicers\OlapDataNode.cs" />
     <Compile Include="Drawing\Slicers\PivotTableNode.cs" />
+    <Compile Include="Drawing\Slicers\SlicerCacheItemParent.cs" />
     <Compile Include="Drawing\Slicers\SlicerLevelNode.cs" />
     <Compile Include="Drawing\Slicers\SlicerRangeItem.cs" />
     <Compile Include="Drawing\Slicers\SlicerRangeNode.cs" />

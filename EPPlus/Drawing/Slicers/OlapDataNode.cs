@@ -64,7 +64,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 			}
 			foreach (XmlNode slicerSelectionNode in this.Node.SelectNodes("default:selections/default:selection", this.NameSpaceManager))
 			{
-				mySelections.Add(new SlicerSelectionNode(slicerSelectionNode));
+				mySelections.Add(new SlicerSelectionNode(slicerSelectionNode, this.NameSpaceManager));
 			}
 		}
 		#endregion
