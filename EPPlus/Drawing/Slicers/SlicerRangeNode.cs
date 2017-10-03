@@ -51,7 +51,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 			this.NameSpaceManager = namespaceManager;
 			foreach (XmlNode slicerRangeItem in this.Node.SelectNodes("default:i", this.NameSpaceManager))
 			{
-				myItems.Add(new SlicerRangeItem(slicerRangeItem));
+				myItems.Add(new SlicerRangeItem(slicerRangeItem, this.NameSpaceManager));
 			}
 		}
 		#endregion

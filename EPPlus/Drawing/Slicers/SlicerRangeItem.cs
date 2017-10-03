@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace OfficeOpenXml.Drawing.Slicers
@@ -8,6 +9,10 @@ namespace OfficeOpenXml.Drawing.Slicers
 	/// </summary>
 	public class SlicerRangeItem
 	{
+		#region Class Variables
+		private List<SlicerCacheItemParent> myParents = new List<SlicerCacheItemParent>();
+		#endregion
+
 		#region Properties
 		/// <summary>
 		/// Gets or sets the name of this item.
@@ -45,7 +50,16 @@ namespace OfficeOpenXml.Drawing.Slicers
 			}
 		}
 
+		/// <summary>
+		/// Gets a readonly list of the OLAP parents in this range.
+		/// </summary>
+		public IReadOnlyList<SlicerCacheItemParent> Parents
+		{
+			get { return myParents; }
+		}
+
 		private XmlNode Node { get; set; }
+		private XmlNamespaceManager NameSpaceManager { get; set; }
 		#endregion
 
 		#region Constructors
@@ -53,11 +67,19 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// Creates an instance of a <see cref="SlicerRangeItem"/>.
 		/// </summary>
 		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="SlicerRangeItem"/>.</param>
-		public SlicerRangeItem(XmlNode node)
+		/// <param name="namespaceManager">The namespace manager to use for searching child nodes.</param>
+		public SlicerRangeItem(XmlNode node, XmlNamespaceManager namespaceManager)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
+			if (namespaceManager == null)
+				throw new ArgumentNullException(nameof(namespaceManager));
 			this.Node = node;
+			this.NameSpaceManager = namespaceManager;
+			foreach (XmlNode slicerCacheItemParent in this.Node.SelectNodes("default:p", this.NameSpaceManager))
+			{
+				myParents.Add(new SlicerCacheItemParent(slicerCacheItemParent));
+			}
 		}
 		#endregion
 	}
