@@ -168,49 +168,32 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Address of the conditional formatting rule
+		/// Address of the conditional formatting rule.
 		/// </summary>
 		/// <remarks>
-		/// The address is stores in a parent node called &lt;conditionalFormatting&gt; in the
-		/// @sqref attribute. Excel groups rules that have the same address inside one node.
+		/// The address is stored in a parent node called &lt;conditionalFormatting&gt; in the
+		/// @sqref attribute. Excel (sometimes) groups rules that have the same address inside one node,
+		/// but there are cases when it doesn't such as in pivot table conditional formattings.
 		/// </remarks>
 		public ExcelAddress Address
 		{
 			get
 			{
 				return new ExcelAddress(
-				  Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value);
+				  this.Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value);
 			}
 			set
 			{
-				// Check if the address is to be changed
-				if (Address.Address != value.Address)
+				if (this.Address.Address != value.Address)
 				{
-					// Save the old parente node
-					XmlNode oldNode = Node;
-					XmlNode oldParentNode = Node.ParentNode;
-
-					// Create/Get the new <conditionalFormatting> parent node
-					XmlNode newParentNode = CreateComplexNode(
-					  _worksheet.WorksheetXml.DocumentElement,
-					  string.Format(
-						 "{0}[{1}='{2}']/{1}='{2}'",
-						 //{0}
-						 ExcelConditionalFormattingConstants.Paths.ConditionalFormatting,
-						 // {1}
-						 ExcelConditionalFormattingConstants.Paths.SqrefAttribute,
-						 // {2}
-						 value.AddressSpaceSeparated));
-
-					// Move the <cfRule> node to the new <conditionalFormatting> parent node
-					TopNode = newParentNode.AppendChild(Node);
-
-					// Check if the old <conditionalFormatting> parent node has <cfRule> node inside it
-					if (!oldParentNode.HasChildNodes)
+					XmlNode parentNode = this.Node.ParentNode;
+					if (parentNode.ChildNodes.Count > 1)
 					{
-						// Remove the old parent node
-						oldParentNode.ParentNode.RemoveChild(oldParentNode);
+						XmlNode newParentNode = this.Node.ParentNode.CloneNode(false);
+						this.TopNode = newParentNode.AppendChild(this.Node);
+						parentNode = newParentNode;
 					}
+					XmlHelper.SetAttribute(parentNode, ExcelConditionalFormattingConstants.Attributes.Sqref, value.AddressSpaceSeparated);
 				}
 			}
 		}
