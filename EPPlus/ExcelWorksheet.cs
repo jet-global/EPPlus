@@ -2758,7 +2758,7 @@ namespace OfficeOpenXml
 										string newSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
 										serie.Series = ExcelRangeBase.GetFullAddress(worksheet, newSeries);
 									}
-									if (serie.XSeries != null && string.Empty != serie.XSeries)
+									if (!string.IsNullOrEmpty(serie.XSeries))
 									{
 										ExcelRangeBase.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
 										string newXSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
@@ -3116,13 +3116,15 @@ namespace OfficeOpenXml
 								{
 									serie.Series = ExcelRangeBase.GetFullAddress(value, address);
 								}
-								ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
-								if (worksheet == this._name)
+								if (!string.IsNullOrEmpty(serie.XSeries))
 								{
-									serie.XSeries = ExcelRangeBase.GetFullAddress(value, address);
+									ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+									if (worksheet == this._name)
+									{
+										serie.XSeries = ExcelRangeBase.GetFullAddress(value, address);
+									}
 								}
-								var bubbleSerie = serie as ExcelBubbleChartSerie;
-								if (bubbleSerie != null)
+								if (serie is ExcelBubbleChartSerie bubbleSerie)
 								{
 									ExcelRange.SplitAddress(bubbleSerie.BubbleSize, out workbook, out worksheet, out address);
 									if (worksheet == this._name)
