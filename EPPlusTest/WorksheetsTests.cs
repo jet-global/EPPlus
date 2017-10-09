@@ -135,8 +135,39 @@ namespace EPPlusTest
 			Assert.AreEqual("Sheet2", worksheet);
 			Assert.AreEqual("$A$1:$A$16", range);
 		}
-		#endregion
 
+		[TestMethod]
+		public void AddWorksheetUpdatesChartSeriesReferencesWithoutXSeries()
+		{
+			var package = new ExcelPackage();
+			var myWorkbook = package.Workbook;
+			var firstSheet = myWorkbook.Worksheets.Add("Sheet1");
+			var chart1 = firstSheet.Drawings.AddChart("Chart1", eChartType.BarClustered);
+			chart1.Series.Add("Sheet1!$B$1:$B$16", string.Empty);
+			// Completely delete the ser/cat node; it will be partially created by Series.Add().
+			var xSeriesNode = chart1.Series.TopNode.SelectSingleNode("c:ser", chart1.NameSpaceManager);
+			Assert.IsNotNull(xSeriesNode);
+			xSeriesNode.RemoveChild(xSeriesNode.SelectSingleNode("c:cat", chart1.Series.NameSpaceManager));
+			var secondSheet = myWorkbook.Worksheets.Add("Sheet2", firstSheet);
+
+			Assert.AreEqual(1, firstSheet.Drawings.Count);
+			chart1 = firstSheet.Drawings[0] as ExcelBarChart;
+			string workbook, worksheet, range;
+			var serie1 = chart1.Series[0];
+			ExcelAddressBase.SplitAddress(serie1.Series, out workbook, out worksheet, out range);
+			Assert.AreEqual("Sheet1", worksheet);
+			Assert.AreEqual("$B$1:$B$16", range);
+			Assert.AreEqual(string.Empty, serie1.XSeries);
+
+			Assert.AreEqual(1, secondSheet.Drawings.Count);
+			var chart2 = secondSheet.Drawings[0] as ExcelBarChart;
+			var serie2 = chart2.Series[0];
+			ExcelAddressBase.SplitAddress(serie2.Series, out workbook, out worksheet, out range);
+			Assert.AreEqual("Sheet2", worksheet);
+			Assert.AreEqual("$B$1:$B$16", range);
+			Assert.AreEqual(string.Empty, serie1.XSeries);
+		}
+		#endregion
 
 		#region Delete Column with Save Tests
 

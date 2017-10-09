@@ -251,10 +251,13 @@ namespace OfficeOpenXml
 							{
 								serie.Series = ExcelRange.GetFullAddress(added.Name, address);
 							}
-							ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
-							if (worksheet == originalWorksheet.Name)
+							if (!string.IsNullOrEmpty(serie.XSeries))
 							{
-								serie.XSeries = ExcelRange.GetFullAddress(added.Name, address);
+								ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
+								if (worksheet == originalWorksheet.Name)
+								{
+									serie.XSeries = ExcelRange.GetFullAddress(added.Name, address);
+								}
 							}
 						}
 					}
