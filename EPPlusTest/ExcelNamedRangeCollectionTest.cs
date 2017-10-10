@@ -868,6 +868,36 @@ namespace EPPlusTest
 				Assert.AreEqual("Correct!", sheet.Cells[4, 4].Value);
 			}
 		}
+
+		[TestMethod]
+		public void RelativeNamedRangeResolvesDependencies()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				excelPackage.Workbook.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, $"$E1"));
+				sheet.Cells[3, 4].Formula = "RelativeNamedRange";
+				sheet.Cells[3, 5].Formula = "F3";
+				sheet.Cells[3, 6].Value = "Correct!";
+				sheet.Calculate();
+				Assert.AreEqual("Correct!", sheet.Cells[3, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void ReferencedRelativeNamedRangeResolvesDependencies()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				excelPackage.Workbook.Names.Add("RelativeNamedRange", new ExcelRangeBase(sheet, $"$E1"));
+				sheet.Cells[3, 4].Formula = @"IF(RelativeNamedRange=""Correct!"", true, false)";
+				sheet.Cells[3, 5].Formula = "F3";
+				sheet.Cells[3, 6].Value = "Correct!";
+				sheet.Calculate();
+				Assert.AreEqual(true, sheet.Cells[3, 4].Value);
+			}
+		}
 		#endregion
 	}
 }
