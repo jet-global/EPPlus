@@ -74,7 +74,6 @@ namespace OfficeOpenXml.Drawing.Sparkline
 			var hostNode = topNode.SelectSingleNode("xm:sqref", nameSpaceManager);
 			this.Formula = formulaNode != null ? new ExcelAddress(formulaNode.InnerText) : null;
 			this.HostCell = group.Worksheet.Cells[hostNode.InnerText];
-			group.Worksheet.Cells[this.HostCell.Address].Sparklines.Add(this);
 		}
 
 		/// <summary>
@@ -113,7 +112,6 @@ namespace OfficeOpenXml.Drawing.Sparkline
 			var hostNode = this.TopNode.OwnerDocument.CreateElement("xm:sqref", "http://schemas.microsoft.com/office/excel/2006/main");
 			hostNode.InnerText = this.HostCell.Address;
 			this.TopNode.AppendChild(hostNode);
-			this.Group.Worksheet.Cells[this.HostCell.Address].Sparklines.Add(this);
 		}
 		#endregion
 	}

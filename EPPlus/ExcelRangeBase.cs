@@ -750,8 +750,6 @@ namespace OfficeOpenXml
 				return fullAddress.TrimEnd(',');
 			}
 		}
-
-		internal List<ExcelSparkline> Sparklines { get; } = new List<ExcelSparkline>();
 		#endregion
 
 		#region Private Methods
@@ -1323,15 +1321,18 @@ namespace OfficeOpenXml
 				{
 					if (sparkline.HostCell.Collide(this) != eAddressCollition.No)
 					{
-						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
-						string newFormulaString = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
 						ExcelAddress newFormula = null;
-						if (newFormulaString != "#REF!")
+						if (sparkline.Formula != null)
 						{
-							if (this.Worksheet.Name == worksheet)
-								worksheet = destination.Worksheet.Name;
-							newFormulaString = string.IsNullOrEmpty(worksheet) ? newFormulaString : ExcelRangeBase.GetFullAddress(worksheet, newFormulaString);
-							newFormula = new ExcelAddress(newFormulaString);
+							ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
+							string newFormulaString = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
+							if (newFormulaString != "#REF!")
+							{
+								if (this.Worksheet.Name == worksheet)
+									worksheet = destination.Worksheet.Name;
+								newFormulaString = string.IsNullOrEmpty(worksheet) ? newFormulaString : ExcelRangeBase.GetFullAddress(worksheet, newFormulaString);
+								newFormula = new ExcelAddress(newFormulaString);
+							}
 						}
 						var newHostCellAddress = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
 						if (newGroup == null)
@@ -1340,7 +1341,6 @@ namespace OfficeOpenXml
 							newGroup.CopyNodeStyle(group.TopNode);
 						}
 						var newSparkline = new ExcelSparkline(new ExcelAddress(newHostCellAddress), newFormula, newGroup, sparkline.NameSpaceManager);
-						this.Worksheet.Cells[newSparkline.HostCell.Address].Sparklines.Add(newSparkline);
 						newGroup.Sparklines.Add(newSparkline);
 					}
 				}

@@ -279,6 +279,44 @@ namespace EPPlusTest
 				copy.Delete();
 			}
 		}
+
+		[TestMethod]
+		public void CopySparklineWithNoFormula()
+		{
+			var tempWorkbook = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet");
+					var worksheetSparklineGroups = worksheet.SparklineGroups.SparklineGroups;
+
+					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
+					// Use NULL for Formula
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					sparklineGroup.Sparklines.Add(sparkline);
+					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
+					package.SaveAs(tempWorkbook);
+				}
+				using (var package = new ExcelPackage(tempWorkbook))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet"];
+					var sparklineGroups = worksheet.SparklineGroups;
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					var origin = worksheet.Cells["C3"];
+					var target = worksheet.Cells["E5"];
+					origin.Copy(target);
+					Assert.AreEqual(2, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[1].Sparklines.Count);
+				}
+			}
+			finally
+			{
+				tempWorkbook.Delete();
+			}
+		}
 		#endregion
 
 		#region Shared Formula Overwrite Tests
