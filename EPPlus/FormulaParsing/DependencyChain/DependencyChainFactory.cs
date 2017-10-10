@@ -274,8 +274,13 @@ namespace OfficeOpenXml.FormulaParsing
 						{
 							if (name.NameValue == null)
 							{
-								f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, name.Start.Row,
-									 name.Start.Column, name.End.Row, name.End.Column);
+								ExcelAddress address;
+								if (!name._fromRowFixed || !name._fromColFixed)
+									address = new ExcelAddress(name.GetRelativeAddress(f.Row, f.Column));
+								else
+									address = new ExcelAddress(name.FullAddress);
+								f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, address._fromRow,
+									 address._fromCol, address._toRow, address._toCol);
 								goto iterateCells;
 							}
 						}
