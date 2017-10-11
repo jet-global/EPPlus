@@ -4882,15 +4882,18 @@ namespace OfficeOpenXml
 				{
 					foreach (var sparkline in group.Sparklines)
 					{
-						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
-						// Only update the formula if it references the modified sheet.
-						if (worksheet == this.Name)
+						if (sparkline.Formula != null)
 						{
-							address = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
-							if (string.IsNullOrEmpty(worksheet))
-								sparkline.Formula.Address = address;
-							else
-								sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(worksheet, address);
+							ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
+							// Only update the formula if it references the modified sheet.
+							if (worksheet == this.Name)
+							{
+								address = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, columnFrom, this.Name, this.Name);
+								if (string.IsNullOrEmpty(worksheet))
+									sparkline.Formula.Address = address;
+								else
+									sparkline.Formula.Address = ExcelRangeBase.GetFullAddress(worksheet, address);
+							}
 						}
 						// Only update host cell if it is in the modified sheet. 
 						if (sheet.Name == this.Name)
@@ -4908,11 +4911,14 @@ namespace OfficeOpenXml
 				{
 					foreach (var sparkline in group.Sparklines)
 					{
-						ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out var workbook, out var worksheet, out var address);
-						if (string.IsNullOrEmpty(worksheet))
-							return;
-						else if (worksheet.Equals(this.Name))
-							sparkline.Formula.SetAddress(ExcelRangeBase.GetFullAddress(newName, address));
+						if (sparkline.Formula != null)
+						{
+							ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out var workbook, out var worksheet, out var address);
+							if (string.IsNullOrEmpty(worksheet))
+								return;
+							else if (worksheet.Equals(this.Name))
+								sparkline.Formula.SetAddress(ExcelRangeBase.GetFullAddress(newName, address));
+						}
 						if (sheet.Name == this.Name)
 							sparkline.HostCell._ws = newName;
 					}

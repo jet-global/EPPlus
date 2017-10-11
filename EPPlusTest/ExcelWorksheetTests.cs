@@ -3149,6 +3149,44 @@ namespace EPPlusTest
 				Assert.AreEqual("SUM(B2:C2)", sheet2.Cells["D2"].Formula);
 			}
 		}
+
+		[TestMethod]
+		public void CopySheetWithSparklineContainingNullFormula()
+		{
+			var tempWorkbook = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet");
+					var worksheetSparklineGroups = worksheet.SparklineGroups.SparklineGroups;
+
+					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
+					// Use NULL for Formula
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					sparklineGroup.Sparklines.Add(sparkline);
+					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
+					package.SaveAs(tempWorkbook);
+				}
+				using (var package = new ExcelPackage(tempWorkbook))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet"];
+					var originalSparklineGroups = worksheet.SparklineGroups;
+					Assert.AreEqual(1, originalSparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, originalSparklineGroups.SparklineGroups[0].Sparklines.Count);
+					var copiedSheet = package.Workbook.Worksheets.Add("CopiedSheet", worksheet);
+					Assert.AreEqual(1, originalSparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, originalSparklineGroups.SparklineGroups[0].Sparklines.Count);
+					var copiedSparklineGroups = copiedSheet.SparklineGroups;
+					Assert.AreEqual(1, copiedSparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, copiedSparklineGroups.SparklineGroups[0].Sparklines.Count);
+				}
+			}
+			finally
+			{
+				tempWorkbook.Delete();
+			}
+		}
 		#endregion
 
 		#region InsertRows Tests
@@ -3497,6 +3535,43 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void InsertRowWithSparklineContainingNullFormula()
+		{
+			var tempWorkbook = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet");
+					var worksheetSparklineGroups = worksheet.SparklineGroups.SparklineGroups;
+
+					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
+					// Use NULL for Formula
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					sparklineGroup.Sparklines.Add(sparkline);
+					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
+					package.SaveAs(tempWorkbook);
+				}
+				using (var package = new ExcelPackage(tempWorkbook))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet"];
+					var sparklineGroups = worksheet.SparklineGroups;
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					Assert.AreEqual("C3", sparklineGroups.SparklineGroups[0].Sparklines[0].HostCell.Address);
+					worksheet.InsertRow(1, 1);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					Assert.AreEqual("C4", sparklineGroups.SparklineGroups[0].Sparklines[0].HostCell.Address);
+				}
+			}
+			finally
+			{
+				tempWorkbook.Delete();
+			}
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void InsertRowTooManyTotalRowsThrowsException()
 		{
@@ -3682,6 +3757,43 @@ namespace EPPlusTest
 				worksheet.InsertColumn(1, 1);
 
 				Assert.AreEqual("H6:J23", pivotTable.Address.Address);
+			}
+		}
+
+		[TestMethod]
+		public void InsertColumnWithSparklineContainingNullFormula()
+		{
+			var tempWorkbook = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet");
+					var worksheetSparklineGroups = worksheet.SparklineGroups.SparklineGroups;
+
+					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
+					// Use NULL for Formula
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					sparklineGroup.Sparklines.Add(sparkline);
+					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
+					package.SaveAs(tempWorkbook);
+				}
+				using (var package = new ExcelPackage(tempWorkbook))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet"];
+					var sparklineGroups = worksheet.SparklineGroups;
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					Assert.AreEqual("C3", sparklineGroups.SparklineGroups[0].Sparklines[0].HostCell.Address);
+					worksheet.InsertColumn(1, 1);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					Assert.AreEqual("D3", sparklineGroups.SparklineGroups[0].Sparklines[0].HostCell.Address);
+				}
+			}
+			finally
+			{
+				tempWorkbook.Delete();
 			}
 		}
 
@@ -4642,6 +4754,43 @@ namespace EPPlusTest
 			}
 		}
 		#endregion
+
+		[TestMethod]
+		public void DeleteRowWithSparklineContainingNullFormula()
+		{
+			var tempWorkbook = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet");
+					var worksheetSparklineGroups = worksheet.SparklineGroups.SparklineGroups;
+
+					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
+					// Use NULL for Formula
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					sparklineGroup.Sparklines.Add(sparkline);
+					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
+					package.SaveAs(tempWorkbook);
+				}
+				using (var package = new ExcelPackage(tempWorkbook))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet"];
+					var sparklineGroups = worksheet.SparklineGroups;
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					Assert.AreEqual("C3", sparklineGroups.SparklineGroups[0].Sparklines[0].HostCell.Address);
+					worksheet.DeleteRow(1, 1);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					Assert.AreEqual("C2", sparklineGroups.SparklineGroups[0].Sparklines[0].HostCell.Address);
+				}
+			}
+			finally
+			{
+				tempWorkbook.Delete();
+			}
+		}
 		#endregion
 
 		#region DeleteColumn Tests
@@ -5439,6 +5588,43 @@ namespace EPPlusTest
 			}
 		}
 		#endregion
+
+		[TestMethod]
+		public void DeleteColumnWithSparklineContainingNullFormula()
+		{
+			var tempWorkbook = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet");
+					var worksheetSparklineGroups = worksheet.SparklineGroups.SparklineGroups;
+
+					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
+					// Use NULL for Formula
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					sparklineGroup.Sparklines.Add(sparkline);
+					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
+					package.SaveAs(tempWorkbook);
+				}
+				using (var package = new ExcelPackage(tempWorkbook))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet"];
+					var sparklineGroups = worksheet.SparklineGroups;
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					Assert.AreEqual("C3", sparklineGroups.SparklineGroups[0].Sparklines[0].HostCell.Address);
+					worksheet.DeleteColumn(1, 1);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					Assert.AreEqual("B3", sparklineGroups.SparklineGroups[0].Sparklines[0].HostCell.Address);
+				}
+			}
+			finally
+			{
+				tempWorkbook.Delete();
+			}
+		}
 		#endregion
 
 		#region PivotTable Tests
@@ -5644,6 +5830,39 @@ namespace EPPlusTest
 			finally
 			{
 				copy.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void RenameWorksheetWithSparklineContainingNullFormula()
+		{
+			var tempWorkbook = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var worksheet = package.Workbook.Worksheets.Add("Sheet");
+					var worksheetSparklineGroups = worksheet.SparklineGroups.SparklineGroups;
+
+					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
+					// Use NULL for Formula
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					sparklineGroup.Sparklines.Add(sparkline);
+					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
+					package.SaveAs(tempWorkbook);
+				}
+				using (var package = new ExcelPackage(tempWorkbook))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet"];
+					var sparklineGroups = worksheet.SparklineGroups;
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups.Count);
+					Assert.AreEqual(1, sparklineGroups.SparklineGroups[0].Sparklines.Count);
+					worksheet.Name = "RenamedSheet";
+				}
+			}
+			finally
+			{
+				tempWorkbook.Delete();
 			}
 		}
 
