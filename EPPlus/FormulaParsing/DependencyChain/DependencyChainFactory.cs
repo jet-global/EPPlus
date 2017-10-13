@@ -31,6 +31,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 
@@ -176,7 +178,7 @@ namespace OfficeOpenXml.FormulaParsing
 
 		/// <summary>
 		/// This method follows the calculation chain to get the order of the calculation
-		/// Goto (!) is used internally to prevent stackoverflow on extremly larget dependency trees (that is, many recursive formulas).
+		/// Goto (!) is used internally to prevent stackoverflow on extremly large dependency trees (that is, many recursive formulas).
 		/// </summary>
 		/// <param name="depChain">The dependency chain object</param>
 		/// <param name="lexer">The formula tokenizer</param>
@@ -318,6 +320,40 @@ namespace OfficeOpenXml.FormulaParsing
 							}
 						}
 					}
+				}
+				else if (t.TokenType == TokenType.Function && t.Value.ToUpper() == Offset.Name)
+				{
+					// TODO: Handle legitimate CircularReferenceExceptions
+					// May need to use Calculate(...)'s row and column to check for legitimate circular references?
+					var stringBuilder = new StringBuilder($"{WTOffset.Name}(");
+					int offsetStartIndex = f.tokenIx;
+					int parenCount = 1;
+					for (f.tokenIx += 2; parenCount > 0 && f.tokenIx < f.Tokens.Count; f.tokenIx++)
+					{
+						var token = f.Tokens[f.tokenIx];
+						stringBuilder.Append(token.Value);
+						if (token.TokenType == TokenType.OpeningParenthesis)
+							parenCount++;
+						else if (token.TokenType == TokenType.ClosingParenthesis)
+							parenCount--;
+					}
+					ExcelRange cell = ws.Cells[f.Row, f.Column];
+					string originalFormula = cell.Formula;
+					string addressOffsetFormula = stringBuilder.ToString();
+					stringBuilder = new StringBuilder();
+					for (int i = 0; i < f.Tokens.Count; i++)
+					{
+						if (i == offsetStartIndex)
+							stringBuilder.Append(0);
+						else if (i < offsetStartIndex || i >= f.tokenIx)
+							stringBuilder.Append(f.Tokens[i].Value);
+					}
+					cell.Formula = stringBuilder.ToString();
+					ExcelAddress adr = new ExcelAddress((string)ws.Calculate(addressOffsetFormula, f.Row, f.Column));
+					cell.Formula = originalFormula;
+					f.ws = string.IsNullOrEmpty(adr.WorkSheet) ? ws : wb.Worksheets[adr.WorkSheet];
+					f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
+					goto iterateCells;
 				}
 				f.tokenIx++;
 			}

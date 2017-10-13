@@ -1322,7 +1322,21 @@ namespace OfficeOpenXml
 		public ExcelAddress(int fromRow, int fromCol, int toRow, int toColumn)
 			: base(fromRow, fromCol, toRow, toColumn)
 		{
-			_ws = "";
+			_ws = string.Empty;
+		}
+
+		/// <summary>
+		/// Creates an instance of <see cref="ExcelAddress"/>.
+		/// </summary>
+		/// <param name="worksheet">A worksheet to assign the address.</param>
+		/// <param name="fromRow">start row</param>
+		/// <param name="fromCol">start column</param>
+		/// <param name="toRow">End row</param>
+		/// <param name="toColumn">End column</param>
+		public ExcelAddress(string worksheet, int fromRow, int fromCol, int toRow, int toColumn)
+			: base(fromRow, fromCol, toRow, toColumn)
+		{
+			if (string.IsNullOrEmpty(this._ws)) this._ws = worksheet;
 		}
 
 		/// <summary>

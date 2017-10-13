@@ -132,13 +132,29 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
+		/// Calculate a specific <paramref name="formula"/> in the context of the specified <paramref name="worksheet"/>, 
+		/// <paramref name="row"/>, and <paramref name="column"/>.
+		/// </summary>
+		/// <param name="worksheet">The worksheet whose context should be used during the calculation for references that do not specify a sheet.</param>
+		/// <param name="formula">The formula to be calculated.</param>
+		/// <param name="row">The row within which to evaluate the specified formula.</param>
+		/// <param name="column">The column within which to evaluate the specified formula.</param>
+		/// <returns>The result of the calculation.</returns>
+		public static object Calculate(this ExcelWorksheet worksheet, string formula, int row, int column)
+		{
+			return Calculate(worksheet, formula, new ExcelCalculationOption(), row, column);
+		}
+
+		/// <summary>
 		/// Calculate a specific <paramref name="formula"/> in the context of the specified <paramref name="worksheet"/> with the specified <paramref name="options"/>.
 		/// </summary>
 		/// <param name="worksheet">The worksheet whose context should be used during the calculation for references that do not specify a sheet.</param>
 		/// <param name="formula">The formula to be calculated.</param>
 		/// <param name="options">The options for this calculation. At the moment, this does nothing.</param>
+		/// <param name="row">The row within which to evaluate the specified formula.</param>
+		/// <param name="column">The column within which to evaluate the specified formula.</param>
 		/// <returns>The result of the calculation.</returns>
-		public static object Calculate(this ExcelWorksheet worksheet, string formula, ExcelCalculationOption options)
+		public static object Calculate(this ExcelWorksheet worksheet, string formula, ExcelCalculationOption options, int row = -1, int column = -1)
 		{
 			try
 			{
@@ -154,7 +170,7 @@ namespace OfficeOpenXml
 
 				CalcChain(worksheet.Workbook, parser, dc);
 
-				return parser.ParseCell(f.Tokens, worksheet.Name, -1, -1);
+				return parser.ParseCell(f.Tokens, worksheet.Name, row, column);
 			}
 			catch (Exception ex)
 			{
