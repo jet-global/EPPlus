@@ -118,7 +118,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			var address = new ExcelAddress(startRange);
 			string targetWorksheetName;
 			if (string.IsNullOrEmpty(address.WorkSheet))
-				targetWorksheetName = context.Scopes.Current.Address.Worksheet;
+				targetWorksheetName = context.Scopes?.Current?.Address?.Worksheet;
 			else
 				targetWorksheetName = address.WorkSheet;
 			var fromRow = address._fromRow + rowOffset;

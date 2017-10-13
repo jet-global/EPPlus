@@ -8,13 +8,13 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 {
+	[TestClass]
 	public class OffsetTests
 	{
 		#region Offset/OffsetAddress Tests
 		[TestMethod]
 		public void OffsetReturnsPoundValueIfTooFewArgumentsAreSupplied()
 		{
-			var func = new Offset();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs("B2", 2);
 			this.ValidateOffsetAndOffsetAddress(args, parsingContext, eErrorType.Value, eErrorType.Value, true);
@@ -23,7 +23,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		[TestMethod]
 		public void OffsetReturnsPoundRefIfInvalidArgumentsAreSupplied()
 		{
-			var func = new Offset();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs("B2", 0, 0, 0, 0);
 			this.ValidateOffsetAndOffsetAddress(args, parsingContext, eErrorType.Ref, eErrorType.Ref, true);
@@ -32,7 +31,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		[TestMethod]
 		public void OffsetWithInvalidArgumentReturnsPoundValue()
 		{
-			var func = new Offset();
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			this.ValidateOffsetAndOffsetAddress(args, parsingContext, eErrorType.Value, eErrorType.Value, true);
