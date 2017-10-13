@@ -325,7 +325,7 @@ namespace OfficeOpenXml.FormulaParsing
 				{
 					// TODO: Handle legitimate CircularReferenceExceptions
 					// May need to use Calculate(...)'s row and column to check for legitimate circular references?
-					var stringBuilder = new StringBuilder($"{WTOffset.Name}(");
+					var stringBuilder = new StringBuilder($"{OffsetAddress.Name}(");
 					int offsetStartIndex = f.tokenIx;
 					int parenCount = 1;
 					for (f.tokenIx += 2; parenCount > 0 && f.tokenIx < f.Tokens.Count; f.tokenIx++)

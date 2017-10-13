@@ -10,10 +10,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 	/// <remarks>
 	/// This function is used internally to calculate an OFFSET( ) function's dependencies before calculation.
 	/// </remarks>
-	public class WTOffset : LookupFunction
+	public class OffsetAddress : LookupFunction
 	{
 		#region Constants
-		public const string Name = "WTOFFSET";
+		public const string Name = "OFFSETADDRESS";
 		#endregion
 
 		#region ExcelFunction Overrides
