@@ -363,7 +363,7 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 
 		[TestMethod]
 		[ExpectedException(typeof(CircularReferenceException))]
-		public void OffsetWithCircularReferenceThrowsException()
+		public void OffsetWithSimpleCircularReferenceThrowsException()
 		{
 			using (var package = new ExcelPackage())
 			{
@@ -376,14 +376,32 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 
 		[TestMethod]
 		[ExpectedException(typeof(CircularReferenceException))]
-		public void OffsetWithIndirectCircularReferenceThrowsException()
+		public void OffsetWithCircularReferenceThrowsException()
 		{
 			using (var package = new ExcelPackage())
 			{
 				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
-				sheet1.Cells["E3"].Formula = "OFFSET(D3, 1,0)";
-				sheet1.Cells["D4"].Formula = @"INDIRECT(""E4"")";
-				sheet1.Cells["E4"].Formula = "E3";
+				sheet1.Cells["E3"].Formula = "offset(F3, 1,0)";
+				sheet1.Cells["F4"].Formula = "G4";
+				sheet1.Cells["G4"].Formula = "IF(TRUE, D3, C3)";
+				sheet1.Cells["D3"].Formula = "E3";
+				sheet1.Cells["E3"].Calculate();
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(CircularReferenceException))]
+		public void OffsetWithCrossSheetCircularReferenceThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				sheet1.Cells["E3"].Formula = "offset(F3, 1,0)";
+				sheet1.Cells["F4"].Formula = "G4";
+				sheet1.Cells["G4"].Formula = "IF(TRUE, D3, C3)";
+				sheet1.Cells["D3"].Formula = "Sheet2!E3";
+				sheet2.Cells["E3"].Formula = "Sheet1!E3";
 				sheet1.Cells["E3"].Calculate();
 			}
 		}

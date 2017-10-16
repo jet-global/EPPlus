@@ -323,8 +323,6 @@ namespace OfficeOpenXml.FormulaParsing
 				}
 				else if (t.TokenType == TokenType.Function && t.Value.ToUpper() == Offset.Name)
 				{
-					// TODO: Handle legitimate CircularReferenceExceptions
-					// May need to use Calculate(...)'s row and column to check for legitimate circular references?
 					var stringBuilder = new StringBuilder($"{OffsetAddress.Name}(");
 					int offsetStartIndex = f.tokenIx;
 					int parenCount = 1;
@@ -340,7 +338,7 @@ namespace OfficeOpenXml.FormulaParsing
 					ExcelRange cell = ws.Cells[f.Row, f.Column];
 					string originalFormula = cell.Formula;
 					string addressOffsetFormula = stringBuilder.ToString();
-					stringBuilder = new StringBuilder();
+					stringBuilder.Clear();
 					for (int i = 0; i < f.Tokens.Count; i++)
 					{
 						if (i == offsetStartIndex)
@@ -397,7 +395,8 @@ namespace OfficeOpenXml.FormulaParsing
 						//Check for circular references
 						foreach (var par in stack)
 						{
-							if (ExcelAddressBase.GetCellID(par.ws.SheetID, par.iterator.Row, par.iterator.Column) == id)
+							if (ExcelAddressBase.GetCellID(par.ws.SheetID, par.iterator.Row, par.iterator.Column) == id 
+								|| ExcelAddressBase.GetCellID(par.ws.SheetID, par.Row, par.Column) == id)
 							{
 								if (options.AllowCircularReferences == false)
 								{
