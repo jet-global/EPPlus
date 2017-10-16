@@ -199,6 +199,109 @@ namespace EPPlusTest.Excel
 			Assert.AreEqual(true, Operator.LessThan.Apply(new CompileResult(false, DataType.Boolean), new CompileResult(true, DataType.Boolean)).Result);
 			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(false, DataType.Boolean), new CompileResult(true, DataType.Boolean)).Result);
 		}
+
+		[TestMethod]
+		public void OperatorLogicalOperatorsShouldCorrectlyCompareLogicalAndEmptyValues()
+		{
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult(true, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(CompileResult.Empty, new CompileResult(true, DataType.Boolean)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(false, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(CompileResult.Empty, new CompileResult(false, DataType.Boolean)).Result);
+
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult(true, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.GreaterThanOrEqual.Apply(CompileResult.Empty, new CompileResult(true, DataType.Boolean)).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult(false, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(CompileResult.Empty, new CompileResult(false, DataType.Boolean)).Result);
+
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(new CompileResult(true, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(CompileResult.Empty, new CompileResult(true, DataType.Boolean)).Result);
+			Assert.AreEqual(true, Operator.EqualsTo.Apply(new CompileResult(false, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.EqualsTo.Apply(CompileResult.Empty, new CompileResult(false, DataType.Boolean)).Result);
+
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(true, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(CompileResult.Empty, new CompileResult(true, DataType.Boolean)).Result);
+			Assert.AreEqual(false, Operator.NotEqualsTo.Apply(new CompileResult(false, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.NotEqualsTo.Apply(CompileResult.Empty, new CompileResult(false, DataType.Boolean)).Result);
+
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult(true, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.LessThan.Apply(CompileResult.Empty, new CompileResult(true, DataType.Boolean)).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult(false, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(CompileResult.Empty, new CompileResult(false, DataType.Boolean)).Result);
+
+			Assert.AreEqual(false, Operator.LessThanOrEqual.Apply(new CompileResult(true, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(CompileResult.Empty, new CompileResult(true, DataType.Boolean)).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(false, DataType.Boolean), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(CompileResult.Empty, new CompileResult(false, DataType.Boolean)).Result);
+		}
+
+		[TestMethod]
+		public void OperatorLogicalOperatorsShouldCorrectlyCompareNumericAndEmptyValues()
+		{
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult(1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(CompileResult.Empty, new CompileResult(1d, DataType.Decimal)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(-1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(CompileResult.Empty, new CompileResult(-1d, DataType.Decimal)).Result);
+
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult(1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.GreaterThanOrEqual.Apply(CompileResult.Empty, new CompileResult(1d, DataType.Decimal)).Result);
+			Assert.AreEqual(false, Operator.GreaterThanOrEqual.Apply(new CompileResult(-1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(CompileResult.Empty, new CompileResult(-1d, DataType.Decimal)).Result);
+
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(new CompileResult(1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(CompileResult.Empty, new CompileResult(1d, DataType.Decimal)).Result);
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(new CompileResult(-1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(CompileResult.Empty, new CompileResult(-1d, DataType.Decimal)).Result);
+
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(CompileResult.Empty, new CompileResult(1d, DataType.Decimal)).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(-1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(CompileResult.Empty, new CompileResult(-1d, DataType.Decimal)).Result);
+
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult(1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.LessThan.Apply(CompileResult.Empty, new CompileResult(1d, DataType.Decimal)).Result);
+			Assert.AreEqual(true, Operator.LessThan.Apply(new CompileResult(-1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(CompileResult.Empty, new CompileResult(-1d, DataType.Decimal)).Result);
+
+			Assert.AreEqual(false, Operator.LessThanOrEqual.Apply(new CompileResult(1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(CompileResult.Empty, new CompileResult(1d, DataType.Decimal)).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(-1d, DataType.Decimal), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.LessThanOrEqual.Apply(CompileResult.Empty, new CompileResult(-1d, DataType.Decimal)).Result);
+		}
+
+		[TestMethod]
+		public void OperatorLogicalOperatorsShouldCorrectlyCompareStringAndEmptyValues()
+		{
+			const string value = "sdflkjsdlfk";
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult(value, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(CompileResult.Empty, new CompileResult(value, DataType.String)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(string.Empty, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(CompileResult.Empty, new CompileResult(string.Empty, DataType.String)).Result);
+
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult(value, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.GreaterThanOrEqual.Apply(CompileResult.Empty, new CompileResult(value, DataType.String)).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult(string.Empty, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(CompileResult.Empty, new CompileResult(string.Empty, DataType.String)).Result);
+
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(new CompileResult(value, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(CompileResult.Empty, new CompileResult(value, DataType.String)).Result);
+			Assert.AreEqual(true, Operator.EqualsTo.Apply(new CompileResult(string.Empty, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.EqualsTo.Apply(CompileResult.Empty, new CompileResult(string.Empty, DataType.String)).Result);
+
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(value, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(CompileResult.Empty, new CompileResult(value, DataType.String)).Result);
+			Assert.AreEqual(false, Operator.NotEqualsTo.Apply(new CompileResult(string.Empty, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.NotEqualsTo.Apply(CompileResult.Empty, new CompileResult(string.Empty, DataType.String)).Result);
+
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult(value, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.LessThan.Apply(CompileResult.Empty, new CompileResult(value, DataType.String)).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult(string.Empty, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(CompileResult.Empty, new CompileResult(string.Empty, DataType.String)).Result);
+
+			Assert.AreEqual(false, Operator.LessThanOrEqual.Apply(new CompileResult(value, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(CompileResult.Empty, new CompileResult(value, DataType.String)).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(string.Empty, DataType.String), CompileResult.Empty).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(CompileResult.Empty, new CompileResult(string.Empty, DataType.String)).Result);
+		}
 		#endregion
 
 		#region Operator Plus Tests

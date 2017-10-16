@@ -28,56 +28,44 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
+	/// <summary>
+	/// An Excel function that returns the the value of a cell at an offset of a given a range.
+	/// </summary>
 	public class Offset : LookupFunction
 	{
+		#region Constants
+		public const string Name = "OFFSET";
+		#endregion
+
+		#region Public LookupFunction Overrides
+		/// <summary>
+		/// Executes the OFFSET function with the specified <paramref name="arguments"/> in the specified <paramref name="context"/>.
+		/// </summary>
+		/// <param name="arguments">The arguments with which to evaluate the function.</param>
+		/// <param name="context">The context in which to evaluate the function.</param>
+		/// <returns>A <see cref="CompileResult"/> result.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
 			if (this.ArgumentsAreValid(functionArguments, 3, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var startRange = ArgToString(functionArguments, 0);
-			var rowOffset = ArgToInt(functionArguments, 1);
-			var colOffset = ArgToInt(functionArguments, 2);
-			int width = 0, height = 0;
-			if (functionArguments.Length > 3)
-			{
-				height = ArgToInt(functionArguments, 3);
-				if (height == 0)
-					return new CompileResult(eErrorType.Ref);
-			}
-			if (functionArguments.Length > 4)
-			{
-				width = ArgToInt(functionArguments, 4);
-				if (width == 0)
-					return new CompileResult(eErrorType.Ref);
-			}
-
-			var adr = new ExcelAddress(startRange);
-			var ws = adr.WorkSheet;
-
-			var fromRow = adr._fromRow + rowOffset;
-			var fromCol = adr._fromCol + colOffset;
-			var toRow = (height != 0 ? height : adr._toRow) + rowOffset;
-			var toCol = (width != 0 ? width : adr._toCol) + colOffset;
-			//var toRow = (height != 0 ? fromRow + height : adr._toRow + rowOffset);
-			//var toCol = (width != 0 ? fromCol + width : adr._toCol + colOffset);
-
-			var newRange = context.ExcelDataProvider.GetRange(ws, fromRow, fromCol, toRow, toCol);
+			ExcelAddress offset = base.CalculateOffset(functionArguments, context);
+			if (offset == null)
+				return new CompileResult(eErrorType.Ref);
+			var newRange = context.ExcelDataProvider.GetRange(offset.WorkSheet, offset._fromRow, offset._fromCol, offset._toRow, offset._toCol);
 			if (!newRange.IsMulti)
 			{
-				if (newRange.IsEmpty) return CompileResult.Empty;
-				var val = newRange.GetValue(fromRow, fromCol);
+				if (newRange.IsEmpty)
+					return CompileResult.Empty;
+				var val = newRange.GetValue(offset._fromRow, offset._fromCol);
 				if (IsNumeric(val))
-				{
 					return CreateResult(val, DataType.Decimal);
-				}
 				if (val is ExcelErrorValue)
-				{
 					return CreateResult(val, DataType.ExcelError);
-				}
 				return CreateResult(val, DataType.String);
 			}
 			return CreateResult(newRange, DataType.Enumerable);
 		}
+		#endregion
 	}
 }

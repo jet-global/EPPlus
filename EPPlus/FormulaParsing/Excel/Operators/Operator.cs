@@ -389,14 +389,18 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		#endregion
 
 		#region Private Static Methods
-		private static object GetObjectWithDefaultValueThatMatchesTheOtherObjectType(CompileResult target, CompileResult other)
+		private static CompileResult GetObjectWithDefaultValueThatMatchesTheOtherObjectType(CompileResult target, CompileResult other)
 		{
 			if (target.Result == null)
 			{
-				if (other.DataType == DataType.String) return string.Empty;
-				else return 0d;
+				if (other.DataType == DataType.String)
+					return new CompileResult(string.Empty, other.DataType);
+				else if (other.DataType == DataType.Boolean)
+					return new CompileResult(false, other.DataType);
+				else
+					return new CompileResult(0d, other.DataType);
 			}
-			return target.ResultValue;
+			return target;
 		}
 
 		private static CompileResult Compare(CompileResult left, CompileResult right, Func<int, bool> comparison)
@@ -410,9 +414,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 
 		private static int Compare(CompileResult leftInput, CompileResult rightInput)
 		{
-			object left, right;
-			left = Operator.GetObjectWithDefaultValueThatMatchesTheOtherObjectType(leftInput, rightInput);
-			right = Operator.GetObjectWithDefaultValueThatMatchesTheOtherObjectType(rightInput, leftInput);
+			CompileResult leftMatch = Operator.GetObjectWithDefaultValueThatMatchesTheOtherObjectType(leftInput, rightInput);
+			CompileResult rightMatch = Operator.GetObjectWithDefaultValueThatMatchesTheOtherObjectType(rightInput, leftInput);
+			object left = leftMatch.ResultValue;
+			object right = rightMatch.ResultValue;
 			var leftIsNumeric = ConvertUtil.IsNumeric(left) && !(left is bool);
 			var rightIsNumeric = ConvertUtil.IsNumeric(right) && !(right is bool);
 
@@ -421,9 +426,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 				var leftNumber = ConvertUtil.GetValueDouble(left);
 				var rightNumber = ConvertUtil.GetValueDouble(right);
 				if (leftNumber.Equals(rightNumber))
-				{
 					return 0;
-				}
 				return leftNumber.CompareTo(rightNumber);
 			}
 			// Numbers are less than text are less than logical values: https://stackoverflow.com/questions/35050151/excel-if-statement-comparing-text-with-number
@@ -431,11 +434,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 				return -1;
 			else if (rightIsNumeric)
 				return 1;
-			else if (leftInput.DataType == DataType.String && rightInput.DataType == DataType.Boolean)
+			else if (leftMatch.DataType == DataType.String && rightMatch.DataType == DataType.Boolean)
 				return -1;
-			else if (leftInput.DataType == DataType.Boolean && rightInput.DataType == DataType.String)
+			else if (leftMatch.DataType == DataType.Boolean && rightMatch.DataType == DataType.String)
 				return 1;
-			else if (leftInput.DataType == DataType.Boolean && rightInput.DataType == DataType.Boolean)
+			else if (leftMatch.DataType == DataType.Boolean && rightMatch.DataType == DataType.Boolean)
 			{
 				if (left.Equals(right))
 					return 0;
@@ -444,7 +447,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 				else
 					return -1;
 			}
-			else if (leftInput.DataType == DataType.String && rightInput.DataType == DataType.String)
+			else if (leftMatch.DataType == DataType.String && rightMatch.DataType == DataType.String)
 			{
 				var comparisonResult = Operator.CompareString(left, right);
 				return comparisonResult;

@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
+using OfficeOpenXml.FormulaParsing.Exceptions;
 using Rhino.Mocks;
 
 namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
@@ -10,11 +11,14 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 	[TestClass]
 	public class RefAndLookupTests : FormulaParserTestBase
 	{
+		#region Class Variables
 		private ExcelDataProvider _excelDataProvider;
 		const string WorksheetName = null;
 		private ExcelPackage _package;
 		private ExcelWorksheet _worksheet;
+		#endregion
 
+		#region Test Setup
 		[TestInitialize]
 		public void Initialize()
 		{
@@ -30,7 +34,9 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		{
 			_package.Dispose();
 		}
+		#endregion
 
+		#region <X>Lookup Tests
 		[TestMethod]
 		public void VLookupShouldReturnCorrespondingValue()
 		{
@@ -105,17 +111,9 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 			var result = _parser.Parse("LOOKUP(4, " + lookupAddress + ")");
 			Assert.AreEqual(1, result);
 		}
+		#endregion
 
-		[TestMethod]
-		public void MatchShouldReturnIndexOfMatchingValue()
-		{
-			var lookupAddress = "A1:A2";
-			_excelDataProvider.Stub(x => x.GetCellValue(WorksheetName, 1, 1)).Return(3);
-			_excelDataProvider.Stub(x => x.GetCellValue(WorksheetName, 1, 2)).Return(5);
-			var result = _parser.Parse("MATCH(3, " + lookupAddress + ")");
-			Assert.AreEqual(1, result);
-		}
-
+		#region Row/Column Tests
 		[TestMethod]
 		public void RowShouldReturnRowNumber()
 		{
@@ -179,32 +177,9 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 			var result = _parser.Parse("Choose(1, \"A\", \"B\")");
 			Assert.AreEqual("A", result);
 		}
+		#endregion
 
-		[TestMethod]
-		public void AddressShouldReturnCorrectResult()
-		{
-			_excelDataProvider.Stub(x => x.ExcelMaxRows).Return(12345);
-			var result = _parser.Parse("Address(1, 1)");
-			Assert.AreEqual("$A$1", result);
-		}
-
-		[TestMethod]
-		public void IndirectShouldReturnARange()
-		{
-			using (var package = new ExcelPackage(new MemoryStream()))
-			{
-				var s1 = package.Workbook.Worksheets.Add("Test");
-				s1.Cells["A1:A2"].Value = 2;
-				s1.Cells["A3"].Formula = "SUM(Indirect(\"A1:A2\"))";
-				s1.Calculate();
-				Assert.AreEqual(4d, s1.Cells["A3"].Value);
-
-				s1.Cells["A4"].Formula = "SUM(Indirect(\"A1:A\" & \"2\"))";
-				s1.Calculate();
-				Assert.AreEqual(4d, s1.Cells["A4"].Value);
-			}
-		}
-
+		#region Offset Tests
 		[TestMethod]
 		public void OffsetShouldReturnASingleValue()
 		{
@@ -300,6 +275,174 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 			}
 		}
 
+		[TestMethod]
+		public void OffsetShouldGetValueOnCorrectSheet()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				sheet1.Cells["E5"].Value = "Bad";
+				sheet2.Cells["E5"].Value = "Good";
+				sheet2.Cells["C3"].Formula = "OFFSET(D4, 1, 1)";
+				sheet2.Calculate();
+				Assert.AreEqual("Good", sheet2.Cells["C3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void OffsetShouldGetCalculatedValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Cells["E5"].Formula = "CONCATENATE(\"Y\",\"o\")";
+				sheet1.Cells["C3"].Formula = "OFFSET(D4, 1, 1)";
+				sheet1.Cells["C3"].Calculate();
+				Assert.AreEqual("Yo", sheet1.Cells["C3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void OffsetWithSemiCircularReferenceGetsValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Cells["D3"].Formula = "IF(TRUE, 0, E3)";
+				sheet1.Cells["D4"].Value = "Good";
+				sheet1.Cells["E3"].Formula = "OFFSET(D3, 1,0)";
+				sheet1.Cells["E3"].Calculate();
+				Assert.AreEqual("Good", sheet1.Cells["E3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void OffsetWithSimpleSemiCircularReferenceThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Cells["E3"].Formula = "offset(E3, 1,0)";
+				sheet1.Cells["E4"].Value = "Good";
+				sheet1.Cells["E3"].Calculate();
+				Assert.AreEqual("Good", sheet1.Cells["E3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void OffsetWithSemiCircularChainedReferenceGetsValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Cells["D3"].Formula = "IF(TRUE, 0, E3)";
+				sheet1.Cells["E3"].Formula = "OFFSET(D3, 1,0)";
+				sheet1.Cells["D4"].Formula = @"INDIRECT(""E4"")";
+				sheet1.Cells["E3"].Value = "Good";
+				sheet1.Cells["E3"].Calculate();
+				Assert.AreEqual("Good", sheet1.Cells["E3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void OffsetsWithSemiCircularChainedReferenceGetsValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Cells["D3"].Formula = "SUM(OFFSET(C3, 1, 0), OFFSET(E3, 1, 0))";
+				sheet1.Cells["C3"].Formula = "=D3";
+				sheet1.Cells["C4"].Value = 10d;
+				sheet1.Cells["E3"].Formula = "=D3";
+				sheet1.Cells["E4"].Value = 5d;
+				sheet1.Cells["D3"].Calculate();
+				Assert.AreEqual(15d, sheet1.Cells["D3"].Value);
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(CircularReferenceException))]
+		public void OffsetWithSimpleCircularReferenceThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Cells["E3"].Formula = "offset(F3, 1,0)";
+				sheet1.Cells["F4"].Formula = "E3";
+				sheet1.Cells["E3"].Calculate();
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(CircularReferenceException))]
+		public void OffsetWithCircularReferenceThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Cells["E3"].Formula = "offset(F3, 1,0)";
+				sheet1.Cells["F4"].Formula = "G4";
+				sheet1.Cells["G4"].Formula = "IF(TRUE, D3, C3)";
+				sheet1.Cells["D3"].Formula = "E3";
+				sheet1.Cells["E3"].Calculate();
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(CircularReferenceException))]
+		public void OffsetWithCrossSheetCircularReferenceThrowsException()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var sheet2 = package.Workbook.Worksheets.Add("Sheet2");
+				sheet1.Cells["E3"].Formula = "offset(F3, 1,0)";
+				sheet1.Cells["F4"].Formula = "G4";
+				sheet1.Cells["G4"].Formula = "IF(TRUE, D3, C3)";
+				sheet1.Cells["D3"].Formula = "Sheet2!E3";
+				sheet2.Cells["E3"].Formula = "Sheet1!E3";
+				sheet1.Cells["E3"].Calculate();
+			}
+		}
+		#endregion
+
+		#region Miscellaneous Tests
+		[TestMethod]
+		public void AddressShouldReturnCorrectResult()
+		{
+			_excelDataProvider.Stub(x => x.ExcelMaxRows).Return(12345);
+			var result = _parser.Parse("Address(1, 1)");
+			Assert.AreEqual("$A$1", result);
+		}
+
+		[TestMethod]
+		public void IndirectShouldReturnARange()
+		{
+			using (var package = new ExcelPackage(new MemoryStream()))
+			{
+				var s1 = package.Workbook.Worksheets.Add("Test");
+				s1.Cells["A1:A2"].Value = 2;
+				s1.Cells["A3"].Formula = "SUM(Indirect(\"A1:A2\"))";
+				s1.Calculate();
+				Assert.AreEqual(4d, s1.Cells["A3"].Value);
+
+				s1.Cells["A4"].Formula = "SUM(Indirect(\"A1:A\" & \"2\"))";
+				s1.Calculate();
+				Assert.AreEqual(4d, s1.Cells["A4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MatchShouldReturnIndexOfMatchingValue()
+		{
+			var lookupAddress = "A1:A2";
+			_excelDataProvider.Stub(x => x.GetCellValue(WorksheetName, 1, 1)).Return(3);
+			_excelDataProvider.Stub(x => x.GetCellValue(WorksheetName, 1, 2)).Return(5);
+			var result = _parser.Parse("MATCH(3, " + lookupAddress + ")");
+			Assert.AreEqual(1, result);
+		}
+
 		[TestMethod, Ignore]
 		public void VLookupShouldHandleNames()
 		{
@@ -311,5 +454,6 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 				v = s1.Cells["X10"].Formula;
 			}
 		}
+		#endregion
 	}
 }
