@@ -641,7 +641,7 @@ namespace EPPlusTest
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells[3, 3].Formula = "{\"test1\",\"test2\"}";
 				worksheet.Calculate();
-				CollectionAssert.AreEqual(new List<object> { "test1", "test2" }, (List<object>)worksheet.Cells[3, 3].Value);
+				Assert.AreEqual("test1", worksheet.Cells[3, 3].Value);
 			}
 		}
 
@@ -653,7 +653,7 @@ namespace EPPlusTest
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells[3, 3].Formula = "IF(FALSE,\"true\",{\"false\"})";
 				worksheet.Cells[3, 3].Calculate();
-				CollectionAssert.AreEqual(new List<object> { "false" }, (List<object>)worksheet.Cells[3, 3].Value);
+				Assert.AreEqual("false", worksheet.Cells[3, 3].Value);
 			}
 		}
 		#endregion

@@ -30,7 +30,9 @@
  *******************************************************************************/
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Exceptions;
@@ -190,6 +192,8 @@ namespace OfficeOpenXml
 				{
 					var ws = wb.Worksheets.GetBySheetID(item.SheetID);
 					var v = parser.ParseCell(item.Tokens, ws == null ? "" : ws.Name, item.Row, item.Column);
+					if (v is IEnumerable enumerable && !(v is string))
+						v = enumerable.Cast<object>().FirstOrDefault();
 					SetValue(wb, item, v);
 					if (debug)
 					{
