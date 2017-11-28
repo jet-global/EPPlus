@@ -416,6 +416,7 @@ namespace OfficeOpenXml
 		private X14ConditionalFormattingCollection _x14ConditionalFormatting = null;
 		private ExcelDataValidationCollection _dataValidation = null;
 		private ExcelBackgroundImage _backgroundImage = null;
+		private bool? _customHeight;
 		#endregion
 
 		#region Internal Properties
@@ -643,6 +644,9 @@ namespace OfficeOpenXml
 			get
 			{
 				this.CheckSheetType();
+				if (double.IsNaN(this._defaultRowHeight) == false)
+					return this._defaultRowHeight;
+
 				this._defaultRowHeight = GetXmlNodeDouble("d:sheetFormatPr/@defaultRowHeight");
 				if (double.IsNaN(this._defaultRowHeight) || this.CustomHeight == false)
 				{
@@ -676,10 +680,13 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				return this.GetXmlNodeBool("d:sheetFormatPr/@customHeight");
+				if (this._customHeight == null)
+					this._customHeight = this.GetXmlNodeBool("d:sheetFormatPr/@customHeight");
+				return this._customHeight.Value;
 			}
 			set
 			{
+				this._customHeight = value;
 				this.SetXmlNodeBool("d:sheetFormatPr/@customHeight", value);
 			}
 		}

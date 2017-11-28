@@ -534,6 +534,7 @@ namespace OfficeOpenXml.Drawing
 			{
 				var height = dh;
 
+				// This is a deceptively non-performant enumerator, because iterating across a row in the CellStore is relatively slow: O(lg( (# of columns with values in the worksheet) * (# of cells with a value in the worksheet) )).
 				var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_drawings.Worksheet._values, row, 0, row, ExcelPackage.MaxColumns);
 				var styles = _drawings.Worksheet.Workbook.Styles;
 				while (cse.MoveNext())
