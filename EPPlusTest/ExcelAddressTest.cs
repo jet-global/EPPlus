@@ -9,6 +9,36 @@ namespace EPPlusTest
 		#region ExcelAddressBase Tests
 		#region Address Tests
 		[TestMethod]
+		public void ExcelAddressBaseWithFullyQualifiedEndReferenceSheetNameInQuotes()
+		{
+			var address = "Sheet2!B2:'Sheet2'!C2";
+			var result = new ExcelAddressBase(address);
+			Assert.AreEqual(2, result._fromRow);
+			Assert.AreEqual(2, result._fromCol);
+			Assert.AreEqual(2, result._toRow);
+			Assert.AreEqual(3, result._toCol);
+			Assert.IsFalse(result._fromRowFixed);
+			Assert.IsFalse(result._fromColFixed);
+			Assert.IsFalse(result._toRowFixed);
+			Assert.IsFalse(result._toColFixed);
+		}
+
+		[TestMethod]
+		public void ExcelAddressBaseWithFullyQualifiedEndReference()
+		{
+			var address = "'Sheet2'!B2:Sheet2!C2";
+			var result = new ExcelAddressBase(address);
+			Assert.AreEqual(2, result._fromRow);
+			Assert.AreEqual(2, result._fromCol);
+			Assert.AreEqual(2, result._toRow);
+			Assert.AreEqual(3, result._toCol);
+			Assert.IsFalse(result._fromRowFixed);
+			Assert.IsFalse(result._fromColFixed);
+			Assert.IsFalse(result._toRowFixed);
+			Assert.IsFalse(result._toColFixed);
+		}
+
+		[TestMethod]
 		public void ExcelAddressBase_Address()
 		{
 			var excelAddress = new ExcelAddressBase("C3");
@@ -144,6 +174,35 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase("Sheet!C3,Sheet2!D4,Sheet3!E5");
 			Assert.AreEqual("'Sheet'!C3,'Sheet'!D4,'Sheet'!E5", excelAddress.FullAddress);
+		}
+
+
+		[TestMethod]
+		public void ExcelAddressBaseWithDoubledSheetNameNoQuotes()
+		{
+			var address = new ExcelAddressBase("Sheet1!A1:Sheet1!A3");
+			Assert.AreEqual("A1:A3", address.FirstAddress);
+		}
+
+		[TestMethod]
+		public void ExcelAddressBaseWithDoubledSheetNameAllQuotes()
+		{
+			var address = new ExcelAddressBase("'Sheet 1'!A1:'Sheet 1'!A3");
+			Assert.AreEqual("A1:A3", address.FirstAddress);
+		}
+
+		[TestMethod]
+		public void ExcelAddressBaseWithDoubledSheetNameFirstQuotedOnly()
+		{
+			var address = new ExcelAddressBase("'Sheet1'!A1:Sheet1!A3");
+			Assert.AreEqual("A1:A3", address.FirstAddress);
+		}
+
+		[TestMethod]
+		public void ExcelAddressBaseWithDoubledSheetNameLastQuotedOnly()
+		{
+			var address = new ExcelAddressBase("Sheet1!A1:'Sheet1'!A3");
+			Assert.AreEqual("A1:A3", address.FirstAddress);
 		}
 		#endregion
 
