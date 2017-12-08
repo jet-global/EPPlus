@@ -730,6 +730,7 @@ namespace OfficeOpenXml
 
 		private bool ExtractAddress(string fullAddress)
 		{
+			fullAddress = Regex.Replace(fullAddress, ":[^!,]*!", ":"); // strip sheet names from overly-qualified references like A1:Sheet1!A2 or A4:'sheet name'!B5.
 			var brackPos = new Stack<int>();
 			var bracketParts = new List<string>();
 			string first = "", second = "";
