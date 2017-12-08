@@ -21,6 +21,7 @@ namespace EPPlusTest
 			Assert.IsFalse(result._fromColFixed);
 			Assert.IsFalse(result._toRowFixed);
 			Assert.IsFalse(result._toColFixed);
+			Assert.AreEqual("Sheet2", result.WorkSheet);
 		}
 
 		[TestMethod]
@@ -36,6 +37,7 @@ namespace EPPlusTest
 			Assert.IsFalse(result._fromColFixed);
 			Assert.IsFalse(result._toRowFixed);
 			Assert.IsFalse(result._toColFixed);
+			Assert.AreEqual("Sheet2", result.WorkSheet);
 		}
 
 		[TestMethod]
