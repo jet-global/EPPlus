@@ -107,7 +107,6 @@ namespace OfficeOpenXml
 		private XmlDocument _workbookXml;
 		private bool? date1904Cache = null;
 		private XmlDocument _stylesXml;
-		private List<string> _externalReferences = new List<string>();
 		#endregion
 
 		#region Public Properties
@@ -470,6 +469,11 @@ namespace OfficeOpenXml
 				}
 			}
 		}
+
+		/// <summary>
+		/// Gets the collection of external references in the workbook.
+		/// </summary>
+		public ExternalReferenceCollection ExternalReferences { get; }
 		#endregion
 
 		#region Internal Properties
@@ -502,12 +506,7 @@ namespace OfficeOpenXml
 		/// Gets or sets the list of shared string information. Every element in this list should also be in the SharedStrings dictionary.
 		/// </summary>
 		internal List<SharedStringItem> SharedStringsList { get; set; } = new List<SharedStringItem>(); //Used when reading cells.
-
-		/// <summary>
-		/// Gets a list of external references in the workbook.
-		/// </summary>
-		internal List<string> ExternalReferences { get { return this._externalReferences; } }
-
+		
 		/// <summary>
 		/// Gets the <see cref="ExcelPackage"/> that this workbook belongs to.
 		/// </summary>
@@ -568,7 +567,7 @@ namespace OfficeOpenXml
 			}
 		}
 		#endregion
-
+		
 		#region Constructors
 		/// <summary>
 		/// Creates a new instance of the ExcelWorkbook class.
@@ -589,6 +588,9 @@ namespace OfficeOpenXml
 			this.SchemaNodeOrder = new string[] { "fileVersion", "fileSharing", "workbookPr", "workbookProtection", "bookViews", "sheets", "functionGroups", "functionPrototypes", "externalReferences", "definedNames", "calcPr", "oleSize", "customWorkbookViews", "pivotCaches", "smartTagPr", "smartTagTypes", "webPublishing", "fileRecoveryPr", };
 			this.FullCalcOnLoad = true;  //Full calculation on load by default, for both new workbooks and templates.
 			this.GetSharedStrings();
+			var node = this.WorkbookXml.SelectSingleNode("//d:externalReferences", this.NameSpaceManager);
+			if (node != null)
+				this.ExternalReferences = new ExternalReferenceCollection(this.ResolveExternalReference, node, this.NameSpaceManager);
 		}
 		#endregion
 
@@ -674,11 +676,11 @@ namespace OfficeOpenXml
 
 							string externalIndex = fullAddress.Substring(start + 1, end - start - 1);
 							int index;
-							if (int.TryParse(externalIndex, out index))
+							if (int.TryParse(externalIndex, out index) && this.ExternalReferences != null)
 							{
-								if (index > 0 && index <= _externalReferences.Count)
+								if (index > 0 && index <= this.ExternalReferences.References.Count)
 								{
-									fullAddress = fullAddress.Substring(0, start) + "[" + _externalReferences[index - 1] + "]" + fullAddress.Substring(end + 1);
+									fullAddress = fullAddress.Substring(0, start) + "[" + this.ExternalReferences.References[index - 1].Name + "]" + fullAddress.Substring(end + 1);
 								}
 							}
 						}
@@ -761,6 +763,13 @@ namespace OfficeOpenXml
 				throw new InvalidOperationException("The workbook must contain at least one worksheet");
 
 			this.DeleteCalcChain();
+
+			// An empty <externalReferences /> node corrupts the workbook.
+			if (this.ExternalReferences?.References.Count == 0)
+			{
+				var document = this.ExternalReferences.TopNode.ParentNode;
+				document.RemoveChild(this.ExternalReferences.TopNode);
+			}
 
 			if (this._vba == null && !this.Package.Package.PartExists(new Uri(ExcelVbaProject.PartUri, UriKind.Relative)))
 			{
@@ -890,38 +899,7 @@ namespace OfficeOpenXml
 			var pivotCaches = this.WorkbookXml.SelectSingleNode("//d:pivotCaches", NameSpaceManager);
 			pivotCaches.AppendChild(item);
 		}
-
-		/// <summary>
-		/// Initialize the _externalReferences object.
-		/// </summary>
-		internal void GetExternalReferences()
-		{
-			XmlNodeList nl = this.WorkbookXml.SelectNodes("//d:externalReferences/d:externalReference", NameSpaceManager);
-			if (nl != null)
-			{
-				foreach (XmlElement elem in nl)
-				{
-					string rID = elem.GetAttribute("r:id");
-					var rel = this.Part.GetRelationship(rID);
-					var part = this.Package.Package.GetPart(UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri));
-					XmlDocument xmlExtRef = new XmlDocument();
-					LoadXmlSafe(xmlExtRef, part.GetStream());
-
-					XmlElement book = xmlExtRef.SelectSingleNode("//d:externalBook", NameSpaceManager) as XmlElement;
-					if (book != null)
-					{
-						string rId_ExtRef = book.GetAttribute("r:id");
-						var rel_extRef = part.GetRelationship(rId_ExtRef);
-						if (rel_extRef != null)
-						{
-							this._externalReferences.Add(rel_extRef.TargetUri.OriginalString);
-						}
-
-					}
-				}
-			}
-		}
-
+		
 		/// <summary>
 		/// Determine the next Table and PivotTable ID numbers.
 		/// </summary>
@@ -1213,6 +1191,23 @@ namespace OfficeOpenXml
 				return true;
 			}
 			return false;
+		}
+
+		private string ResolveExternalReference(string referenceId)
+		{
+			var rel = this.Part.GetRelationship(referenceId);
+			var part = this.Package.Package.GetPart(UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri));
+			XmlDocument xmlExtRef = new XmlDocument();
+			LoadXmlSafe(xmlExtRef, part.GetStream());
+			XmlElement book = xmlExtRef.SelectSingleNode("//d:externalBook", NameSpaceManager) as XmlElement;
+			if (book != null)
+			{
+				string rId_ExtRef = book.GetAttribute("r:id");
+				var rel_extRef = part.GetRelationship(rId_ExtRef);
+				if (rel_extRef != null)
+					return rel_extRef.TargetUri.OriginalString;
+			}
+			return null;
 		}
 		#endregion
 
