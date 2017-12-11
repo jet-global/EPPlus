@@ -217,8 +217,6 @@ namespace OfficeOpenXml
 					var nsm = this.CreateDefaultNSM();
 
 					this._workbook = new ExcelWorkbook(this, nsm);
-
-					this._workbook.GetExternalReferences();
 					this._workbook.GetDefinedNames();
 
 				}

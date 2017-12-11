@@ -113,6 +113,7 @@
     <Compile Include="ExcelNamedRangeTest.cs" />
     <Compile Include="ExcelPackageTest.cs" />
     <Compile Include="ExcelWorksheetTests.cs" />
+    <Compile Include="ExternalReferenceCollectionTest.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AbsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingMathTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingTests.cs" />
