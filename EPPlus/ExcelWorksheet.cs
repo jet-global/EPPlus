@@ -4830,11 +4830,11 @@ namespace OfficeOpenXml
 					if (sheet.DataValidations.ElementAt(i) is DataValidation.Contracts.IExcelDataValidationList validation)
 					{
 						string worksheetName = "!";
-						if (validation.Address.WorkSheet == null && sheet.Name.ToUpper() == this.Name.ToUpper()) //This formula references the sheet it is on
+						if (sheet.Name?.ToUpper() == this.Name.ToUpper()) // This formula references the sheet it is on.
 							worksheetName = sheet.Name;
-						else if (validation.Address.WorkSheet != null && validation.Address.WorkSheet.ToUpper() == this.Name.ToUpper()) //This formula references another sheet in the workbook
+						else if (validation.Address.WorkSheet != null && validation.Address.WorkSheet.ToUpper() == this.Name.ToUpper()) // This formula references another sheet in the workbook.
 							worksheetName = validation.Address.WorkSheet;
-						if (!worksheetName.Equals("!")) //Only update the formula if we have a valid reference to a worksheet
+						if (!worksheetName.Equals("!")) // Only update the formula if we have a valid reference to a worksheet.
 							validation.Formula.ExcelFormula = this.Package.FormulaManager.UpdateFormulaReferences(validation.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, worksheetName, this.Name);
 					}
 				}
