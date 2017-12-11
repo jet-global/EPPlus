@@ -3377,9 +3377,12 @@ namespace EPPlusTest
 			{
 				//make a Data Validation range
 				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var sheet2 = package.Workbook.Worksheets.Add("Sheet2");
 				var validation = sheet.Cells["D5"].DataValidation.AddListDataValidation();
 				validation.Formula.ExcelFormula = "=Sheet!$B$2:$B$3";
 				validation = sheet.Cells["D6"].DataValidation.AddListDataValidation();
+				validation.Formula.ExcelFormula = "=$B$2:$B$3";
+				validation = sheet2.Cells["B2"].DataValidation.AddListDataValidation();
 				validation.Formula.ExcelFormula = "=$B$2:$B$3";
 
 				//expand the range
