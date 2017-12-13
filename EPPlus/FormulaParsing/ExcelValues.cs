@@ -11,31 +11,31 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Division by zero
 		/// </summary>
-		Div0,
+		Div0 = -2146826281,
 		/// <summary>
 		/// Not applicable
 		/// </summary>
-		NA,
+		NA = -2146826246,
 		/// <summary>
 		/// Name error
 		/// </summary>
-		Name,
+		Name = -2146826259,
 		/// <summary>
 		/// Null error
 		/// </summary>
-		Null,
+		Null = -2146826288,
 		/// <summary>
 		/// Num error
 		/// </summary>
-		Num,
+		Num = -2146826252,
 		/// <summary>
 		/// Reference error
 		/// </summary>
-		Ref,
+		Ref = -2146826265,
 		/// <summary>
 		/// Value error
 		/// </summary>
-		Value
+		Value = -2146826273
 	}
 
 	/// <summary>
