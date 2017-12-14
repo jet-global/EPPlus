@@ -27,7 +27,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using OfficeOpenXml.FormulaParsing.Utilities;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions
@@ -231,8 +230,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			return false;
 		}
 
-
-
 		/// <summary>
 		/// Returns the value of the argument att the position of the 0-based
 		/// <paramref name="index"/> as a string.
@@ -286,17 +283,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		}
 
 		/// <summary>
-		/// If the argument is a boolean value its value will be returned.
-		/// If the argument is an integer value, true will be returned if its
+		/// If the specified <paramref name="value"/> is a boolean value its value will be returned.
+		/// If the <paramref name="value"/> is an integer value, true will be returned if its
 		/// value is not 0, otherwise false.
 		/// </summary>
-		/// <param name="arguments"></param>
-		/// <param name="index"></param>
-		/// <returns></returns>
-		protected bool ArgToBool(IEnumerable<FunctionArgument> arguments, int index)
+		/// <param name="value">The value to parse to a boolean value.</param>
+		/// <returns>True if the value coalesces to true, false otherwise.</returns>
+		protected bool ArgToBool(object value)
 		{
-			var obj = arguments.ElementAt(index).Value ?? string.Empty;
-			return (bool)_argumentParsers.GetParser(DataType.Boolean).Parse(obj);
+			return (bool)_argumentParsers.GetParser(DataType.Boolean).Parse(value ?? string.Empty);
+		}
+
+		/// <summary>
+		/// If the specified <paramref name="argument"/>'s value is a boolean value its value will be returned.
+		/// If the specified <paramref name="argument"/>'s value is an integer value, true will be returned if its
+		/// value is not 0, otherwise false.
+		/// </summary>
+		/// <param name="argument">The argument to parse to a boolean value.</param>
+		/// <returns>True if the <paramref name="argument"/>'s value coalesces to true, false otherwise.</returns>
+		protected bool ArgToBool(FunctionArgument argument)
+		{
+			return this.ArgToBool(argument.Value);
 		}
 
 		/// <summary>
@@ -307,11 +314,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <returns></returns>
 		protected FunctionArgument GetFirstArgument(FunctionArgument argument)
 		{
-			var list = argument.Value as List<FunctionArgument>;
-			if (list != null)
-			{
-				return list.First();
-			}
+			if (argument.Value is IEnumerable<FunctionArgument> enumerableArgument)
+				return enumerableArgument.First();
 			return argument;
 		}
 
@@ -323,11 +327,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <returns></returns>
 		protected object GetFirstArgument(object argument)
 		{
-			var list = argument as List<object>;
-			if (list != null)
-			{
-				return list.First();
-			}
+			if (argument is IEnumerable<object> enumerableArgument)
+				return enumerableArgument.First();
 			return argument;
 		}
 

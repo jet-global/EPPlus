@@ -23,25 +23,42 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
-using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using static OfficeOpenXml.FormulaParsing.ExcelDataProvider;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Logical
 {
+	/// <summary>
+	/// Represents the Excel logical OR function.
+	/// </summary>
 	public class Or : ExcelFunction
 	{
+		#region ExcelFunction Overrides
+		/// <summary>
+		/// Calculates the logical OR value of the specified <paramref name="arguments"/>.
+		/// </summary>
+		/// <param name="arguments">The arguments on which to performa a logical OR.</param>
+		/// <param name="context">The context in which to evaluate.</param>
+		/// <returns>The logical OR value of the specified <paramref name="arguments"/>.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			for (var x = 0; x < arguments.Count(); x++)
+			foreach (var argument in arguments)
 			{
-				if (ArgToBool(arguments, x))
+				if (argument.IsExcelRange)
 				{
-					return new CompileResult(true, DataType.Boolean);
+					foreach (var cell in argument.Value as IRangeInfo)
+					{
+						if (this.ArgToBool(cell.Value))
+							return new CompileResult(true, DataType.Boolean);
+					}
 				}
+				else if (this.ArgToBool(argument))
+					return new CompileResult(true, DataType.Boolean);
 			}
 			return new CompileResult(false, DataType.Boolean);
 		}
 	}
+	#endregion
 }

@@ -45,7 +45,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				if (arguments.ElementAt(2).Value is string)
 					return new CompileResult(eErrorType.Value);
-				ascendingOrder = base.ArgToBool(arguments, 2);
+				ascendingOrder = base.ArgToBool(arguments.ElementAt(2));
 			}
 
 			var numberList = new List<double>();
