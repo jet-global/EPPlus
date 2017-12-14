@@ -23,18 +23,30 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Logical
 {
+	/// <summary>
+	/// Represents the Excel logical NOT function.
+	/// </summary>
 	public class Not : ExcelFunction
 	{
+		#region ExcelFunction Overrides
+		/// <summary>
+		/// Negates the logical value of the specified <paramref name="arguments"/>.
+		/// </summary>
+		/// <param name="arguments">The arguments to evaluate.</param>
+		/// <param name="context">The context within which to evaluate the function.</param>
+		/// <returns>The negated value of the specified <paramref name="arguments"/>.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var result = !ArgToBool(arguments, 0);
+			var result = !ArgToBool(arguments.ElementAt(0));
 			return new CompileResult(result, DataType.Boolean);
 		}
+		#endregion
 	}
 }

@@ -90,7 +90,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				}
 				else
 				{
-					european = this.ArgToBool(arguments, 2);
+					european = this.ArgToBool(arguments.ElementAt(2));
 					if (arguments.ElementAt(2).Value is int intval && intval > 0)
 						european = true;
 				}

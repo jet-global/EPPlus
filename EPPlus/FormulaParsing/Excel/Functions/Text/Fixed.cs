@@ -7,6 +7,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 {
 	public class Fixed : ExcelFunction
 	{
+		#region ExcelFunction Overrides
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
@@ -20,7 +21,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 			}
 			if (arguments.Count() > 2)
 			{
-				noCommas = ArgToBool(arguments, 2);
+				noCommas = ArgToBool(arguments.ElementAt(2));
 			}
 			var format = (noCommas ? "F" : "N") + nDecimals.ToString(CultureInfo.InvariantCulture);
 			if (nDecimals < 0)
@@ -32,5 +33,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 			var retVal = number.ToString(format);
 			return CreateResult(retVal, DataType.String);
 		}
+		#endregion
 	}
 }

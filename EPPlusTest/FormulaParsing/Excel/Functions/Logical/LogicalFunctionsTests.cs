@@ -13,25 +13,7 @@ namespace EPPlusTest.Excel.Functions
 	{
 		private ParsingContext _parsingContext = ParsingContext.Create();
 
-		[TestMethod]
-		public void IfShouldReturnCorrectResult()
-		{
-			var func = new If();
-			var args = FunctionsHelper.CreateArgs(true, "A", "B");
-			var result = func.Execute(args, _parsingContext);
-			Assert.AreEqual("A", result.Result);
-		}
-
-		[TestMethod, Ignore]
-		public void IfShouldIgnoreCase()
-		{
-			using (var pck = new ExcelPackage(new FileInfo(@"c:\temp\book1.xlsx")))
-			{
-				pck.Workbook.Calculate();
-				Assert.AreEqual("Sant", pck.Workbook.Worksheets.First().Cells["C3"].Value);
-			}
-		}
-
+		#region Combination Logical Test Methods
 		[TestMethod]
 		public void IfNestedInIfErrorReturnsPoundValueToTheIfErrorInsteadOfThrowingException()
 		{
@@ -51,7 +33,9 @@ namespace EPPlusTest.Excel.Functions
 				Assert.AreEqual("Error Occurred", sheet.Cells[2, 5].Value);
 			}
 		}
+		#endregion
 
+		#region NOT Test Methods
 		[TestMethod]
 		public void NotShouldReturnFalseIfArgumentIsTrue()
 		{
@@ -119,6 +103,78 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
+		public void NotWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Not();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+		#endregion
+
+		#region OR Test Methods
+		[TestMethod]
+		public void OrShouldReturnTrueIfOneArgumentIsTrue()
+		{
+			var func = new Or();
+			var args = FunctionsHelper.CreateArgs(true, false, false);
+			var result = func.Execute(args, _parsingContext);
+			Assert.IsTrue((bool)result.Result);
+		}
+
+		[TestMethod]
+		public void OrShouldReturnTrueIfRangeArgumentIsTrue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Value = 0;
+				sheet.Cells[2, 3].Value = -1231230;
+				sheet.Cells[2, 4].Value = false;
+				sheet.Cells[3, 3].Formula = "OR(B2:D2)";
+				sheet.Cells[3, 3].Calculate();
+				Assert.IsTrue((bool)sheet.Cells[3, 3].Value);
+			}
+		}
+
+		[TestMethod]
+		public void OrShouldReturnFalseIfAllRangeArgumentValuesAreFalse()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Value = "strings are false.";
+				sheet.Cells[2, 3].Value = string.Empty;
+				sheet.Cells[2, 4].Value = false;
+				sheet.Cells[3, 3].Formula = "OR(B2:D2)";
+				sheet.Cells[3, 3].Calculate();
+				Assert.IsFalse((bool)sheet.Cells[3, 3].Value);
+			}
+		}
+
+		[TestMethod]
+		public void OrShouldReturnTrueIfOneArgumentIsTrueString()
+		{
+			var func = new Or();
+			var args = FunctionsHelper.CreateArgs("true", "FALSE", false);
+			var result = func.Execute(args, _parsingContext);
+			Assert.IsTrue((bool)result.Result);
+		}
+
+		[TestMethod]
+		public void OrWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new Or();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+		#endregion
+
+		#region AND Test Methods
+		[TestMethod]
 		public void AndShouldHandleStringLiteralTrue()
 		{
 			using (var package = new ExcelPackage())
@@ -168,23 +224,78 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void OrShouldReturnTrueIfOneArgumentIsTrue()
+		public void AndShouldReturnTrueIfRangeArgumentValuesAreTrue()
 		{
-			var func = new Or();
-			var args = FunctionsHelper.CreateArgs(true, false, false);
-			var result = func.Execute(args, _parsingContext);
-			Assert.IsTrue((bool)result.Result);
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Value = 9999;
+				sheet.Cells[2, 3].Value = -1231230;
+				sheet.Cells[2, 4].Value = true;
+				sheet.Cells[3, 3].Formula = "AND(B2:D2)";
+				sheet.Cells[3, 3].Calculate();
+				Assert.IsTrue((bool)sheet.Cells[3, 3].Value);
+			}
 		}
 
 		[TestMethod]
-		public void OrShouldReturnTrueIfOneArgumentIsTrueString()
+		public void AndShouldReturnFalseIfAnyRangeArgumentValuesAreFalse()
 		{
-			var func = new Or();
-			var args = FunctionsHelper.CreateArgs("true", "FALSE", false);
-			var result = func.Execute(args, _parsingContext);
-			Assert.IsTrue((bool)result.Result);
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Value = 0;
+				sheet.Cells[2, 3].Value = 234234;
+				sheet.Cells[2, 4].Value = true;
+				sheet.Cells[3, 3].Formula = "AND(B2:D2)";
+				sheet.Cells[3, 3].Calculate();
+				Assert.IsFalse((bool)sheet.Cells[3, 3].Value);
+			}
 		}
 
+		[TestMethod]
+		public void AndWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new And();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+		#endregion
+
+		#region IF Test Methods
+		[TestMethod]
+		public void IfShouldReturnCorrectResult()
+		{
+			var func = new If();
+			var args = FunctionsHelper.CreateArgs(true, "A", "B");
+			var result = func.Execute(args, _parsingContext);
+			Assert.AreEqual("A", result.Result);
+		}
+
+		[TestMethod]
+		public void IfWithInvalidArgumentReturnsPoundValue()
+		{
+			var func = new If();
+			var parsingContext = ParsingContext.Create();
+			var args = FunctionsHelper.CreateArgs();
+			var result = func.Execute(args, parsingContext);
+			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod, Ignore]
+		public void IfShouldIgnoreCase()
+		{
+			using (var pck = new ExcelPackage(new FileInfo(@"c:\temp\book1.xlsx")))
+			{
+				pck.Workbook.Calculate();
+				Assert.AreEqual("Sant", pck.Workbook.Worksheets.First().Cells["C3"].Value);
+			}
+		}
+		#endregion
+
+		#region IFNA TestMethods
 		[TestMethod]
 		public void IfNaShouldReturnSecondArgIfCriteriaEvaluatesAsAnError2()
 		{
@@ -212,26 +323,6 @@ namespace EPPlusTest.Excel.Functions
 		}
 
 		[TestMethod]
-		public void AndWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new And();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void IfWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new If();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
 		public void IfNaWithInvalidArgumentReturnsPoundValue()
 		{
 			var func = new IfNa();
@@ -240,26 +331,6 @@ namespace EPPlusTest.Excel.Functions
 			var result = func.Execute(args, parsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
-
-		[TestMethod]
-		public void NotWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Not();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void OrWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Or();
-			var parsingContext = ParsingContext.Create();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
+		#endregion
 	}
 }
