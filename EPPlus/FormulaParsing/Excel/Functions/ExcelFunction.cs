@@ -314,8 +314,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <returns></returns>
 		protected FunctionArgument GetFirstArgument(FunctionArgument argument)
 		{
-			if (argument.Value is List<FunctionArgument> list)
-				return list.First();
+			if (argument.Value is IEnumerable<FunctionArgument> enumerableArgument)
+				return enumerableArgument.First();
 			return argument;
 		}
 
@@ -327,8 +327,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <returns></returns>
 		protected object GetFirstArgument(object argument)
 		{
-			if (argument is List<object> list)
-				return list.First();
+			if (argument is IEnumerable<object> enumerableArgument)
+				return enumerableArgument.First();
 			return argument;
 		}
 
