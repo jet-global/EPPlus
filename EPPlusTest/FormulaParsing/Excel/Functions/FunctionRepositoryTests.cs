@@ -46,6 +46,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions
 			Assert.IsNotNull(function);
 			Assert.IsTrue(function is Abs);
 		}
+
+		[TestMethod]
+		public void GetFunctionForInvalidFunctionTest()
+		{
+			var functionRepository = FunctionRepository.Create();
+			var function = functionRepository.GetFunction("NOTAFUNCTION");
+			Assert.IsNull(function);
+		}
 		#endregion
 
 		#region Nested Classes

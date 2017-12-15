@@ -77,7 +77,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		}
 
 		/// <summary>
-		/// Gets an <see cref="ExcelFunction"/> from the function name.
+		/// Gets an <see cref="ExcelFunction"/> from the function name, or null if a matching function was not found.
 		/// </summary>
 		/// <param name="name">The name of the function.</param>
 		/// <returns>The <see cref="ExcelFunction"/></returns>
@@ -88,11 +88,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			if (name.StartsWith(invariantCulturePrefix))
 				name = name.Remove(0, invariantCulturePrefix.Length);
 			if (!_functions.ContainsKey(name))
-			{
-				//throw new InvalidOperationException("Non supported function: " + name);
-				//throw new ExcelErrorValueException("Non supported function: " + name, ExcelErrorValue.Create(eErrorType.Name));
 				return null;
-			}
 			return _functions[name];
 		}
 
