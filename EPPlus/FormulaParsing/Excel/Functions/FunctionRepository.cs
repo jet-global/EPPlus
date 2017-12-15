@@ -78,6 +78,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 
 		public virtual ExcelFunction GetFunction(string name)
 		{
+			string invariantCulturePrefix = "_xlfn.";
+			if (name.ToLower().StartsWith(invariantCulturePrefix))
+				name = name.Remove(0, invariantCulturePrefix.Length);
 			if (!_functions.ContainsKey(name.ToLower(CultureInfo.InvariantCulture)))
 			{
 				//throw new InvalidOperationException("Non supported function: " + name);
