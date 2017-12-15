@@ -24,11 +24,11 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
@@ -342,7 +342,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		public void MedianShouldPoundNumIfNoArgs()
 		{
 			var function = new Median();
-			var arguments = FunctionsHelper.Empty();
+			var arguments = new FunctionArgument[] { new FunctionArgument(null) };
 			var result = function.Execute(arguments, this.ParsingContext);
 			Assert.AreEqual(OfficeOpenXml.FormulaParsing.ExpressionGraph.DataType.ExcelError, result.DataType);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)(result.Result)).Type);
