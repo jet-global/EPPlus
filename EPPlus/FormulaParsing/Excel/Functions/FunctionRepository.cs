@@ -76,15 +76,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			}
 		}
 
+		/// <summary>
+		/// Gets an <see cref="ExcelFunction"/> from the function name, or null if a matching function was not found.
+		/// </summary>
+		/// <param name="name">The name of the function.</param>
+		/// <returns>The <see cref="ExcelFunction"/></returns>
 		public virtual ExcelFunction GetFunction(string name)
 		{
-			if (!_functions.ContainsKey(name.ToLower(CultureInfo.InvariantCulture)))
-			{
-				//throw new InvalidOperationException("Non supported function: " + name);
-				//throw new ExcelErrorValueException("Non supported function: " + name, ExcelErrorValue.Create(eErrorType.Name));
+			string invariantCulturePrefix = "_xlfn.";
+			name = name.ToLower(CultureInfo.InvariantCulture);
+			if (name.StartsWith(invariantCulturePrefix))
+				name = name.Remove(0, invariantCulturePrefix.Length);
+			if (!_functions.ContainsKey(name))
 				return null;
-			}
-			return _functions[name.ToLower(CultureInfo.InvariantCulture)];
+			return _functions[name];
 		}
 
 		/// <summary>

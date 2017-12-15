@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers;
 
@@ -23,6 +25,34 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions
 			Assert.IsTrue(functionRepository.CustomCompilers.ContainsKey(typeof(MyFunction)));
 			// Make sure reloading the module overwrites previous functions and compilers
 			functionRepository.LoadModule(new TestFunctionModule());
+		}
+		#endregion
+
+		#region GetFunction Tests
+		[TestMethod]
+		public void GetFunctionWithXlfnPrefix()
+		{
+			var functionRepository = FunctionRepository.Create();
+			var function = functionRepository.GetFunction("_xlfn.IF");
+			Assert.IsNotNull(function);
+			Assert.IsTrue(function is If);
+		}
+
+		[TestMethod]
+		public void GetFunctionTest()
+		{
+			var functionRepository = FunctionRepository.Create();
+			var function = functionRepository.GetFunction("ABS");
+			Assert.IsNotNull(function);
+			Assert.IsTrue(function is Abs);
+		}
+
+		[TestMethod]
+		public void GetFunctionForInvalidFunctionTest()
+		{
+			var functionRepository = FunctionRepository.Create();
+			var function = functionRepository.GetFunction("NOTAFUNCTION");
+			Assert.IsNull(function);
 		}
 		#endregion
 
