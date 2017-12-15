@@ -79,15 +79,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		public virtual ExcelFunction GetFunction(string name)
 		{
 			string invariantCulturePrefix = "_xlfn.";
-			if (name.ToLower().StartsWith(invariantCulturePrefix))
+			name = name.ToLower(CultureInfo.InvariantCulture);
+			if (name.StartsWith(invariantCulturePrefix))
 				name = name.Remove(0, invariantCulturePrefix.Length);
-			if (!_functions.ContainsKey(name.ToLower(CultureInfo.InvariantCulture)))
+			if (!_functions.ContainsKey(name))
 			{
 				//throw new InvalidOperationException("Non supported function: " + name);
 				//throw new ExcelErrorValueException("Non supported function: " + name, ExcelErrorValue.Create(eErrorType.Name));
 				return null;
 			}
-			return _functions[name.ToLower(CultureInfo.InvariantCulture)];
+			return _functions[name];
 		}
 
 		/// <summary>
