@@ -76,6 +76,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			}
 		}
 
+		/// <summary>
+		/// Gets an <see cref="ExcelFunction"/> from the function name.
+		/// </summary>
+		/// <param name="name">The name of the function.</param>
+		/// <returns>The <see cref="ExcelFunction"/></returns>
 		public virtual ExcelFunction GetFunction(string name)
 		{
 			string invariantCulturePrefix = "_xlfn.";
