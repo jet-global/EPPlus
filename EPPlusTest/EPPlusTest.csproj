@@ -225,6 +225,8 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Logical\IfErrorTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\OffsetTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Text\ValueFunctionTest.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\TimeStringParserTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultFactoryTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\FunctionCompilerFactoryTests.cs" />
@@ -282,7 +284,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\RefAndLookupTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\IndexTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\LookupNavigatorFactoryTests.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\TextFunctionsTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Text\TextFunctionsTests.cs" />
     <Compile Include="FormulaParsing\Excel\OperatorsTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\EnumerableExpressionTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\ExcelAddressExpressionTests.cs" />

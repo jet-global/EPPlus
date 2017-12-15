@@ -30,53 +30,53 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 {
+	/// <summary>
+	/// Represents the Excel VALUE function.
+	/// </summary>
 	public class Value : ExcelFunction
 	{
-		private readonly string _groupSeparator = CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator;
-		private readonly string _decimalSeparator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
-		private readonly string _timeSeparator = CultureInfo.CurrentCulture.DateTimeFormat.TimeSeparator;
-		private readonly string _shortTimePattern = CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
-		private readonly DateValue _dateValueFunc = new DateValue();
-		private readonly TimeValue _timeValueFunc = new TimeValue();
-
+		#region ExcelFunction Overrides
+		/// <summary>
+		/// Converts a text string that represents a number into a number.
+		/// </summary>
+		/// <param name="arguments">The arguments containing text number to convert to a number.</param>
+		/// <param name="context">The context in which to evaluate the function.</param>
+		/// <returns>A <see cref="CompileResult"/> containing a number if the argument was valid, otherwise an error <see cref="CompileResult"/>.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var val = ArgToString(arguments, 0).TrimEnd(' ');
+			var value = ArgToString(arguments, 0).TrimEnd(' ');
+			if (string.IsNullOrEmpty(value))
+				return CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 			double result = 0d;
-			if (Regex.IsMatch(val, $"^[\\d]*({Regex.Escape(_groupSeparator)}?[\\d]*)?({Regex.Escape(_decimalSeparator)}[\\d]*)?[ ?% ?]?$"))
+			var groupSeparator = Regex.Escape(CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator);
+			var decimalSeparator = Regex.Escape(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+			if (Regex.IsMatch(value, $"^[\\d]*({groupSeparator}?[\\d]*)?({decimalSeparator}[\\d]*)?[ ?% ?]?$"))
 			{
-				if (val.EndsWith("%"))
+				if (value.EndsWith("%"))
 				{
-					val = val.TrimEnd('%');
-					result = double.Parse(val) / 100;
+					value = value.Remove(value.Length - 1, 1);
+					result = double.Parse(value) / 100;
 				}
 				else
-				{
-					result = double.Parse(val);
-				}
+					result = double.Parse(value);
 				return CreateResult(result, DataType.Decimal);
 			}
-			if (double.TryParse(val, NumberStyles.Float, CultureInfo.CurrentCulture, out result))
-			{
+			if (double.TryParse(value, NumberStyles.Float, CultureInfo.CurrentCulture, out result))
 				return CreateResult(result, DataType.Decimal);
-			}
-			var timeSeparator = Regex.Escape(_timeSeparator);
-			if (Regex.IsMatch(val, @"^[\d]{1,2}" + timeSeparator + @"[\d]{2}(" + timeSeparator + @"[\d]{2})?$"))
+			var timeSeparator = Regex.Escape(CultureInfo.CurrentCulture.DateTimeFormat.TimeSeparator);
+			if (Regex.IsMatch(value, @"^[\d]{1,2}" + timeSeparator + @"[\d]{2}(" + timeSeparator + @"[\d]{2})?$"))
 			{
-				var timeResult = _timeValueFunc.Execute(val);
+				var timeResult = new TimeValue().Execute(value);
 				if (timeResult.DataType != DataType.ExcelError)
-				{
 					return timeResult;
-				}
 			}
-			var dateResult = _dateValueFunc.Execute(val);
+			var dateResult = new DateValue().Execute(value);
 			if (dateResult.DataType == DataType.Date)
-			{
 				return dateResult;
-			}
 			return CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 		}
+		#endregion
 	}
 }
