@@ -39,9 +39,10 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\externalreferences.xlsx")]
 		public void ExternalWorkbookReferenceIsLoadedWithIdAndName()
 		{
-			var testFile = new FileInfo(@"..\..\Workbooks\externalreferences.xlsx");
+			var testFile = new FileInfo(@"externalreferences.xlsx");
 			var tempFile = new FileInfo(Path.GetTempFileName());
 			if (tempFile.Exists)
 				tempFile.Delete();
