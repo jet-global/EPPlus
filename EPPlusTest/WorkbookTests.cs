@@ -51,9 +51,19 @@ namespace EPPlusTest
 			{
 				using (var package = new ExcelPackage(tempFile))
 				{
+					Assert.AreEqual(2, package.Workbook.ExternalReferences.References.Count);
+					Assert.AreEqual(1, package.Workbook.ExternalReferences.References[0].Id);
+					Assert.AreEqual(@"/Source/Jet/ExternalWorkbook.xlam", package.Workbook.ExternalReferences.References[0].Name);
+					package.Workbook.ExternalReferences.DeleteReference(1);
+					Assert.AreEqual(1, package.Workbook.ExternalReferences.References.Count);
+					package.Save();
+				}
+				// If no links exist then the entire collection must be removed for Excel to not corrupt it.
+				// The ExternalReferences collection is null in this case.
+				using (var package = new ExcelPackage(tempFile))
+				{
 					Assert.AreEqual(1, package.Workbook.ExternalReferences.References.Count);
 					Assert.AreEqual(1, package.Workbook.ExternalReferences.References[0].Id);
-					Assert.AreEqual(@"file:///E:\Source\Jet\ExternalWorkbook.xlam", package.Workbook.ExternalReferences.References[0].Name);
 					package.Workbook.ExternalReferences.DeleteReference(1);
 					Assert.AreEqual(0, package.Workbook.ExternalReferences.References.Count);
 					package.Save();
@@ -63,6 +73,56 @@ namespace EPPlusTest
 				using (var package = new ExcelPackage(tempFile))
 				{
 					Assert.IsNull(package.Workbook.ExternalReferences);
+				}
+			}
+			finally
+			{
+				tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\externalreferences.xlsx")]
+		public void ExternalWorkbookReferencesPoundRefAsFunctions()
+		{
+			var testFile = new FileInfo(@"externalreferences.xlsx");
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			testFile.CopyTo(tempFile.FullName);
+			try
+			{
+				using (var package = new ExcelPackage(tempFile))
+				{
+					Assert.AreEqual(2, package.Workbook.ExternalReferences.References.Count);
+					var sheet = package.Workbook.Worksheets.First();
+					sheet.Cells["F9"].Calculate();
+					Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Ref), sheet.Cells["F9"].Value);
+				}
+			}
+			finally
+			{
+				tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\externalreferences.xlsx")]
+		public void ExternalWorkbookReferencesPoundRefAsNamedRanges()
+		{
+			var testFile = new FileInfo(@"externalreferences.xlsx");
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			testFile.CopyTo(tempFile.FullName);
+			try
+			{
+				using (var package = new ExcelPackage(tempFile))
+				{
+					Assert.AreEqual(2, package.Workbook.ExternalReferences.References.Count);
+					var sheet = package.Workbook.Worksheets.First();
+					sheet.Cells["F15"].Calculate();
+					Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Ref), sheet.Cells["F15"].Value);
 				}
 			}
 			finally
