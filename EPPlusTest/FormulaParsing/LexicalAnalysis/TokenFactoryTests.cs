@@ -163,5 +163,14 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 			Assert.AreEqual(TokenType.NameValue, token.TokenType);
 			Assert.AreEqual("NamedValue", token.Value);
 		}
+
+		[TestMethod]
+		public void CreateShouldCreateExternalWorkbookReferenceAsInvalidReference()
+		{
+			var input = "[1]ws!A1:B15";
+			var token = _tokenFactory.Create(Enumerable.Empty<Token>(), input);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("[1]WS!A1:B15", token.Value);
+		}
 	}
 }
