@@ -30,6 +30,9 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-27
  *******************************************************************************/
 
+using System.Collections.Generic;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+
 namespace OfficeOpenXml
 {
 	/// <summary>
@@ -50,14 +53,7 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				if (LocalSheet == null)
-				{
-					return -1;
-				}
-				else
-				{
-					return LocalSheet.PositionID - 1;
-				}
+				return this.LocalSheet == null ? -1 : this.LocalSheet.PositionID - 1;
 			}
 		}
 
@@ -68,14 +64,7 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				if (LocalSheet == null)
-				{
-					return -1;
-				}
-				else
-				{
-					return LocalSheet.SheetID;
-				}
+				return this.LocalSheet == null ? -1 : this.LocalSheet.SheetID;
 			}
 		}
 
@@ -142,7 +131,7 @@ namespace OfficeOpenXml
 		/// </summary>
 		/// <param name="relativeRow">The row from which the named range is used.</param>
 		/// <param name="relativeColumn">The column from which the named range is used.</param>
-		/// <returns>the address relative to the specified row and column.</returns>
+		/// <returns>The address relative to the specified row and column.</returns>
 		public string GetRelativeAddress(int relativeRow, int relativeColumn)
 		{
 			// Relative references are relative to cell A1. Offsets that cause the 
@@ -157,6 +146,31 @@ namespace OfficeOpenXml
 			int toColumn = this.GetRelativeLocation(_toColFixed, _toCol, relativeColumn, ExcelPackage.MaxColumns);
 			var address = ExcelCellBase.GetAddress(fromRow, fromColumn, toRow, toColumn, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
 			return ExcelCellBase.GetFullAddress(this.Worksheet.Name, address);
+		}
+
+		/// <summary>
+		/// Gets the formula of a named range relative to the specified <paramref name="relativeRow"/> and <paramref name="relativeColumn"/>.
+		/// </summary>
+		/// <param name="relativeRow">The row from which the named range is referenced.</param>
+		/// <param name="relativeColumn">The column from which the named range is referenced.</param>
+		/// <returns>The updated formula relative to the specified <paramref name="relativeRow"/> and <paramref name="relativeColumn"/>.</returns>
+		public IEnumerable<Token> GetRelativeNameFormula(int relativeRow, int relativeColumn)
+		{
+			var tokens = this.myWorkbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
+			foreach (var token in tokens)
+			{
+				if (token.TokenType == TokenType.ExcelAddress)
+				{
+					var address = new ExcelAddress(token.Value);
+					int fromRow = this.GetRelativeLocation(address._fromRowFixed, address._fromRow, relativeRow, ExcelPackage.MaxRows);
+					int fromColumn = this.GetRelativeLocation(address._fromColFixed, address._fromCol, relativeColumn, ExcelPackage.MaxColumns);
+					int toRow = this.GetRelativeLocation(address._toRowFixed, address._toRow, relativeRow, ExcelPackage.MaxRows);
+					int toColumn = this.GetRelativeLocation(address._toColFixed, address._toCol, relativeColumn, ExcelPackage.MaxColumns);
+					var updatedAddress = ExcelCellBase.GetAddress(fromRow, fromColumn, toRow, toColumn, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed);
+					token.Value = ExcelCellBase.GetFullAddress(address.WorkSheet, updatedAddress);
+				}
+			}
+			return tokens;
 		}
 		#endregion
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 
 namespace EPPlusTest
@@ -6,6 +7,568 @@ namespace EPPlusTest
 	[TestClass]
 	public class ExcelNamedRangeCollectionTest
 	{
+		#region Named Range Integration Test Stubs
+		#region Copy/Delete Worksheet Tests
+		[TestMethod]
+		public void CopyWorksheetWithWorksheetScopedNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO: 
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B2, Sheet2!$B$2)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
+					//  - Copy Sheet1
+					//  - Verify that there are three new named ranges scoped to the new sheet, formula is updated on first, unchanged on second, third is referencing new sheet.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that there are three new named ranges, formula is updated on first, unchanged on second, third is updated to reference the new sheet.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void CopyWorksheetWithWorkbookScopedNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO: 
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B2, Sheet2!$B$2)
+					//  - Copy Sheet1
+					//  - Verify that named ranges are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that named ranges are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteWorksheetWithWorksheetScopedNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO: 
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B2, Sheet2!$B$2)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
+					//  - Delete Sheet1
+					//  - Verify that only the last one remains and the formula is updated with #REFs.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that only the last one remains and the formula is updated with #REFs.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteWorksheetWithWorkbookScopedNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B2, Sheet2!$B$2)
+					//  - Delete Sheet1
+					//  - Verify that the first named range formula #REFs and the second is unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that the first named range formula #REFs and the second is unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
+
+		#region Insert Row(s) Tests
+		[TestMethod]
+		public void InsertRowBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Insert row at Sheet1, row 4.
+					//  - Verify that only "Sheet1!$B$5" references are changed to "Sheet1!$B$6", all others are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that only "Sheet1!$B$5" references are changed to "Sheet1!$B$6", all others are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void InsertMultipleRowsBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Insert 3 rows at Sheet1, row 4.
+					//  - Verify that only "Sheet1!$B$5" references are changed to "Sheet1!$B$8", all others are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that only "Sheet1!$B$5" references are changed to "Sheet1!$B$8", all others are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void InsertRowAfterNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Insert row at Sheet1, row 6.
+					//  - Verify that all formulas are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that all formulas are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
+
+		#region Insert Column(s) Tests
+		[TestMethod]
+		public void InsertColumnBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
+					//  - Insert column at Sheet1, column B.
+					//  - Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$E$5", all others are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$E$5", all others are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void InsertMultipleColumnsBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
+					//  - Insert 3 columns at Sheet1, column B.
+					//  - Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$G$5", all others are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$G$5", all others are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void InsertColumnAfterNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Insert column at Sheet1, column F.
+					//  - Verify that all formulas are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that all formulas are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
+
+		#region Delete Row(s) Tests
+		[TestMethod]
+		public void DeleteRowBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
+					//  - Delete Row at Sheet1, Row 3.
+					//  - Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$D$4", all others are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$D$4", all others are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteMultipleRowsBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!F5, Sheet2!$F$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!F5, Sheet2!$F$5)
+					//  - Delete 3 rows at Sheet1, row 2.
+					//  - Verify that only "Sheet1!$F$5" references are changed to "Sheet1!$F$2", all others are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that only "Sheet1!$F$5" references are changed to "Sheet1!$F$2", all others are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowAfterNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Delete row at Sheet1, row 7.
+					//  - Verify that all formulas are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that all formulas are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
+
+		#region Delete Columnn(s) Tests
+		[TestMethod]
+		public void DeleteColumnBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
+					//  - Delete column at Sheet1, column B.
+					//  - Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$C$5", all others are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$C$5", all others are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteMultipleColumnsBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!F5, Sheet2!$F$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!F5, Sheet2!$F$5)
+					//  - Delete 3 columns at Sheet1, column B.
+					//  - Verify that only "Sheet1!$F$5" references are changed to "Sheet1!$C$5", all others are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that only "Sheet1!$F$5" references are changed to "Sheet1!$C$5", all others are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnAfterNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					// TODO:
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
+					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
+					//  - Delete column at Sheet1, column F.
+					//  - Verify that all formulas are unchanged.
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					// TODO: Verify that all formulas are unchanged.
+				}
+				Assert.Fail("This test is not implemented yet.");
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
+		#endregion
+
 		#region Insert Tests
 		[TestMethod]
 		public void InsertRowsBeforeAbsoluteNamedRange()
@@ -17,6 +580,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "$C$3"));
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!$C$6", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!$C$6", namedRange.Address);
 				Assert.AreEqual(-1, namedRange.ActualSheetID);
 				Assert.AreEqual(-1, namedRange.LocalSheetID);
@@ -33,6 +597,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3"));
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("C3", namedRange.NameFormula);
 				Assert.AreEqual("C3", namedRange.Address);
 			}
 		}
@@ -48,6 +613,7 @@ namespace EPPlusTest
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
 				// No sheet name is added because the address was not modified in any way.
+				Assert.AreEqual("$C$3", namedRange.NameFormula);
 				Assert.AreEqual("$C$3", namedRange.Address);
 			}
 		}
@@ -63,6 +629,7 @@ namespace EPPlusTest
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
 				// No sheet name is added because the address was not modified in any way.
+				Assert.AreEqual("C3", namedRange.NameFormula);
 				Assert.AreEqual("C3", namedRange.Address);
 			}
 		}
@@ -77,6 +644,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C$3:C$5"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!C$3:C$8", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!C$3:C$8", namedRange.Address);
 			}
 		}
@@ -92,6 +660,7 @@ namespace EPPlusTest
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
 				// Relative named ranges are not expanded when rows are inserted inside them.
+				Assert.AreEqual("C3:C5", namedRange.NameFormula);
 				Assert.AreEqual("C3:C5", namedRange.Address);
 			}
 		}
@@ -106,6 +675,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C:D"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("C:D", namedRange.NameFormula);
 				Assert.AreEqual("C:D", namedRange.Address);
 			}
 		}
@@ -120,6 +690,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "$C:$C"));
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("$C:$C", namedRange.NameFormula);
 				Assert.AreEqual("$C:$C", namedRange.Address);
 			}
 		}
@@ -134,6 +705,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3,D3:D5,E5"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!C3,'Sheet'!D3:D5,'Sheet'!E5", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!C3,'Sheet'!D3:D5,'Sheet'!E5", namedRange.Address);
 			}
 		}
@@ -148,6 +720,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C$3,D$3:D$5,E$5"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!C$3,'Sheet'!D$3:D$8,'Sheet'!E$8", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!C$3,'Sheet'!D$3:D$8,'Sheet'!E$8", namedRange.Address);
 			}
 		}
@@ -162,6 +735,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C$3"));
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!C$6", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!C$6", namedRange.Address);
 			}
 		}
@@ -176,6 +750,24 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3"));
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!C3", namedRange.NameFormula);
+				Assert.AreEqual("Sheet!C3", namedRange.Address);
+			}
+		}
+
+		[TestMethod]
+		public void InsertRowsBeforeRelativeNamedRangeAbsoluteCrossSheetFormulaWithSheetNames()
+		{
+			// TODO: Finish this test to insert to shift formula reference on other sheet.
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+				var namedRangeCollection = new ExcelNamedRangeCollection(excelPackage.Workbook);
+				namedRangeCollection.Add("NamedRange", @"CONCATENATE(Sheet2!$B$2, Sheet2!C3, Sheet2!D$4, Sheet!$B$2)");
+				namedRangeCollection.Insert(1, 0, 3, 0);
+				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!C3", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!C3", namedRange.Address);
 			}
 		}
@@ -190,6 +782,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C$3"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!$C$3", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!$C$3", namedRange.Address);
 			}
 		}
@@ -204,6 +797,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!C3", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!C3", namedRange.Address);
 			}
 		}
@@ -218,6 +812,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C$3:$C$5"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!$C$3:$C$8", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!$C$3:$C$8", namedRange.Address);
 			}
 		}
@@ -232,6 +827,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3:C5"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!C3:C5", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!C3:C5", namedRange.Address);
 			}
 		}
@@ -246,6 +842,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C:D"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!C:D", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!C:D", namedRange.Address);
 			}
 		}
@@ -260,6 +857,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C$3,Sheet!$D$3:$D$5,Sheet!$E$5"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!$C$3,'Sheet'!$D$3:$D$8,'Sheet'!$E$8", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!$C$3,'Sheet'!$D$3:$D$8,'Sheet'!$E$8", namedRange.Address);
 			}
 		}
@@ -274,6 +872,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3,Sheet!D3:D5,Sheet!E5"));
 				namedRangeCollection.Insert(4, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!C3,'Sheet'!D3:D5,'Sheet'!E5", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!C3,'Sheet'!D3:D5,'Sheet'!E5", namedRange.Address);
 			}
 		}
@@ -289,6 +888,7 @@ namespace EPPlusTest
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
 				Assert.AreEqual("'Sheet'!$F$3", namedRange.Address);
+				Assert.AreEqual("'Sheet'!$F$3", namedRange.NameFormula);
 			}
 		}
 
@@ -302,6 +902,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "$3:$3"));
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("$3:$3", namedRange.NameFormula);
 				Assert.AreEqual("$3:$3", namedRange.Address);
 			}
 		}
@@ -316,6 +917,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "3:3"));
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("3:3", namedRange.NameFormula);
 				Assert.AreEqual("3:3", namedRange.Address);
 			}
 		}
@@ -330,6 +932,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3"));
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("C3", namedRange.NameFormula);
 				Assert.AreEqual("C3", namedRange.Address);
 			}
 		}
@@ -341,10 +944,13 @@ namespace EPPlusTest
 			{
 				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
 				var namedRangeCollection = new ExcelNamedRangeCollection(excelPackage.Workbook);
-				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "$C$3"));
+				var originalNamedRange = namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "$C$3"));
+				Assert.AreEqual("'Sheet'!$C$3", originalNamedRange.NameFormula);
+				Assert.AreEqual("$C$3", originalNamedRange.Address);
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
-				// No sheet name is added because the address was not modified in any way.
+				Assert.AreEqual("'Sheet'!$C$3", namedRange.NameFormula);
+				// No sheet name is added to the address because the address was not modified in any way.
 				Assert.AreEqual("$C$3", namedRange.Address);
 			}
 		}
@@ -356,10 +962,13 @@ namespace EPPlusTest
 			{
 				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
 				var namedRangeCollection = new ExcelNamedRangeCollection(excelPackage.Workbook);
-				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3"));
+				var originalNamedRange = namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3"));
+				Assert.AreEqual("'Sheet'!C3", originalNamedRange.NameFormula);
+				Assert.AreEqual("C3", originalNamedRange.Address);
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
-				// No sheet name is added because the address was not modified in any way.
+				Assert.AreEqual("'Sheet'!C3", namedRange.NameFormula);
+				// No sheet name is added to the address because the address was not modified in any way.
 				Assert.AreEqual("C3", namedRange.Address);
 			}
 		}
@@ -374,6 +983,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "$C3:$E3"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!$C3:$H3", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!$C3:$H3", namedRange.Address);
 			}
 		}
@@ -388,6 +998,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3:E3"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("C3:E3", namedRange.NameFormula);
 				Assert.AreEqual("C3:E3", namedRange.Address);
 			}
 		}
@@ -402,6 +1013,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "2:3"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("2:3", namedRange.NameFormula);
 				Assert.AreEqual("2:3", namedRange.Address);
 			}
 		}
@@ -416,6 +1028,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "$C$3,$C4:$E4,$E5"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!$C$3,'Sheet'!$C4:$H4,'Sheet'!$H5", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!$C$3,'Sheet'!$C4:$H4,'Sheet'!$H5", namedRange.Address);
 			}
 		}
@@ -430,6 +1043,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3,C4:E4,E5"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!C3,'Sheet'!C4:E4,'Sheet'!E5", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!C3,'Sheet'!C4:E4,'Sheet'!E5", namedRange.Address);
 			}
 		}
@@ -444,6 +1058,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C$3"));
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!$F$3", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!$F$3", namedRange.Address);
 			}
 		}
@@ -458,6 +1073,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3"));
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!C3", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!C3", namedRange.Address);
 			}
 		}
@@ -472,6 +1088,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C3"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!$C3", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!$C3", namedRange.Address);
 			}
 		}
@@ -486,6 +1103,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C$3"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!C$3", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!C$3", namedRange.Address);
 			}
 		}
@@ -500,6 +1118,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C3:$E3"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!$C3:$H3", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!$C3:$H3", namedRange.Address);
 			}
 		}
@@ -514,6 +1133,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3:E3"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!C3:E3", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!C3:E3", namedRange.Address);
 			}
 		}
@@ -528,6 +1148,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!2:3"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!2:3", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!2:3", namedRange.Address);
 			}
 		}
@@ -542,6 +1163,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C$3,Sheet!$C$4:$E$4,Sheet!$E$5"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!$C$3,'Sheet'!$C$4:$H$4,'Sheet'!$H$5", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!$C$3,'Sheet'!$C$4:$H$4,'Sheet'!$H$5", namedRange.Address);
 			}
 		}
@@ -556,6 +1178,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3,Sheet!C4:E4,Sheet!E5"));
 				namedRangeCollection.Insert(0, 4, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!C3,'Sheet'!C4:E4,'Sheet'!E5", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!C3,'Sheet'!C4:E4,'Sheet'!E5", namedRange.Address);
 			}
 		}
@@ -570,6 +1193,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3") { Address = "#REF!#REF!" });
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("#REF!#REF!", namedRange.NameFormula);
 				Assert.AreEqual("#REF!#REF!", namedRange.Address);
 			}
 		}
@@ -584,6 +1208,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3") { Address = "#REF!#REF!" });
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("#REF!#REF!", namedRange.NameFormula);
 				Assert.AreEqual("#REF!#REF!", namedRange.Address);
 			}
 		}
@@ -598,6 +1223,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3") { Address = "Sheet!#REF!" });
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!#REF!", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!#REF!", namedRange.Address);
 			}
 		}
@@ -612,6 +1238,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3") { Address = "Sheet!#REF!" });
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("Sheet!#REF!", namedRange.NameFormula);
 				Assert.AreEqual("Sheet!#REF!", namedRange.Address);
 			}
 		}
@@ -626,6 +1253,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3") { Address = "#REF!$C$3" });
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'#REF'!$C$6", namedRange.NameFormula);
 				Assert.AreEqual("'#REF'!$C$6", namedRange.Address);
 			}
 		}
@@ -640,6 +1268,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3") { Address = "#REF!C3" });
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("#REF!C3", namedRange.NameFormula);
 				Assert.AreEqual("#REF!C3", namedRange.Address);
 			}
 		}
@@ -654,6 +1283,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3") { Address = "#REF!$C3" });
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'#REF'!$F3", namedRange.NameFormula);
 				Assert.AreEqual("'#REF'!$F3", namedRange.Address);
 			}
 		}
@@ -668,6 +1298,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3") { Address = "#REF!C3" });
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("#REF!C3", namedRange.NameFormula);
 				Assert.AreEqual("#REF!C3", namedRange.Address);
 			}
 		}
@@ -682,6 +1313,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3") { Address = "Sheet!$C$3,#REF!$C$3,Sheet!#REF!" });
 				namedRangeCollection.Insert(1, 0, 3, 0);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!$C$6,'Sheet'!$C$6,'Sheet'!#REF!", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!$C$6,'Sheet'!$C$6,'Sheet'!#REF!", namedRange.Address);
 			}
 		}
@@ -696,6 +1328,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "C3") { Address = "Sheet!$C$3,#REF!$C$3,Sheet!#REF!" });
 				namedRangeCollection.Insert(0, 1, 0, 3);
 				var namedRange = namedRangeCollection["NamedRange"];
+				Assert.AreEqual("'Sheet'!$F$3,'Sheet'!$F$3,'Sheet'!#REF!", namedRange.NameFormula);
 				Assert.AreEqual("'Sheet'!$F$3,'Sheet'!$F$3,'Sheet'!#REF!", namedRange.Address);
 			}
 		}

@@ -76,17 +76,25 @@ namespace EPPlusTest
 		public void SavePreservesRelativeWorkbookLevelNamedRanges()
 		{
 			var file = new FileInfo(Path.GetTempFileName());
-			file.Delete();
-			using (var package = new ExcelPackage())
+			if (file.Exists)
+				file.Delete();
+			try
 			{
-				var sheet = package.Workbook.Worksheets.Add("Sheet");
-				package.Workbook.Names.Add("MyNamedRange", new ExcelRangeBase(sheet, "$C1"));
-				Assert.AreEqual("'Sheet'!$C1", package.Workbook.Names["MyNamedRange"].FullAddress);
-				package.SaveAs(file);
+				using (var package = new ExcelPackage())
+				{
+					var sheet = package.Workbook.Worksheets.Add("Sheet");
+					package.Workbook.Names.Add("MyNamedRange", new ExcelRangeBase(sheet, "$C1"));
+					Assert.AreEqual("'Sheet'!$C1", package.Workbook.Names["MyNamedRange"].FullAddress);
+					package.SaveAs(file);
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					Assert.AreEqual("'Sheet'!$C1", package.Workbook.Names["MyNamedRange"].FullAddress);
+				}
 			}
-			using (var package = new ExcelPackage(file))
+			finally
 			{
-				Assert.AreEqual("'Sheet'!$C1", package.Workbook.Names["MyNamedRange"].FullAddress);
+				file.Delete();
 			}
 		}
 		#endregion

@@ -246,6 +246,11 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Properties
+		public static implicit operator string(ExcelRangeBase excelRangeBase)
+		{
+			return excelRangeBase.ToString();
+		}
+
 		/// <summary>
 		/// The styleobject for the range.
 		/// </summary>

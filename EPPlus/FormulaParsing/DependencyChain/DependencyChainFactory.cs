@@ -116,6 +116,7 @@ namespace OfficeOpenXml.FormulaParsing
 			var id = ExcelCellBase.GetCellID(ws == null ? 0 : ws.SheetID, name.Index, 0);
 			if (!depChain.Index.ContainsKey(id))
 			{
+				// TODO: Need to update named range formula resolution here.
 				var f = new FormulaCell() { SheetID = ws == null ? -1 : ws.SheetID, Row = name.Index, Column = 0, Formula = name.NameFormula };
 				if (!string.IsNullOrEmpty(f.Formula))
 				{
@@ -233,92 +234,115 @@ namespace OfficeOpenXml.FormulaParsing
 				}
 				else if (t.TokenType == TokenType.NameValue)
 				{
-					string adrWb, adrWs, adrName;
-					ExcelNamedRange name;
-					ExcelAddressBase.SplitAddress(t.Value, out adrWb, out adrWs, out adrName, f.ws == null ? "" : f.ws.Name);
-					if (!string.IsNullOrEmpty(adrWs))
-					{
-						if (f.ws == null)
-						{
-							f.ws = wb.Worksheets[adrWs];
-						}
-						if (f.ws.Names.ContainsKey(t.Value))
-						{
-							name = f.ws.Names[adrName];
-						}
-						else if (wb.Names.ContainsKey(adrName))
-						{
-							name = wb.Names[adrName];
-						}
-						else
-						{
-							name = null;
-						}
-						if (name != null) f.ws = name.Worksheet;
-					}
-					else if (wb.Names.ContainsKey(adrName))
-					{
-						name = wb.Names[t.Value];
-						if (string.IsNullOrEmpty(adrWs))
-						{
-							f.ws = name.Worksheet;
-						}
-					}
-					else
-					{
-						name = null;
-					}
+					//string adrWb, adrWs, adrName;
+					//ExcelNamedRange name;
+					//ExcelAddressBase.SplitAddress(t.Value, out adrWb, out adrWs, out adrName, f.ws == null ? "" : f.ws.Name);
+					//if (!string.IsNullOrEmpty(adrWs))
+					//{
+					//	if (f.ws == null)
+					//	{
+					//		f.ws = wb.Worksheets[adrWs];
+					//	}
+					//	if (f.ws.Names.ContainsKey(t.Value))
+					//	{
+					//		name = f.ws.Names[adrName];
+					//	}
+					//	else if (wb.Names.ContainsKey(adrName))
+					//	{
+					//		name = wb.Names[adrName];
+					//	}
+					//	else
+					//	{
+					//		name = null;
+					//	}
+					//	if (name != null) f.ws = name.Worksheet;
+					//}
+					//else if (wb.Names.ContainsKey(adrName))
+					//{
+					//	name = wb.Names[t.Value];
+					//	if (string.IsNullOrEmpty(adrWs))
+					//	{
+					//		f.ws = name.Worksheet;
+					//	}
+					//}
+					//else
+					//{
+					//	name = null;
+					//}
 
+					ExcelNamedRange name = null;
+					var worksheet = f.ws ?? ws;
+					// Worksheet-scoped named ranges take precedence over workbook-scoped named ranges.
+					if (worksheet?.Names?.ContainsKey(t.Value) == true)
+						name = worksheet.Names[t.Value];
+					else if (wb.Names.ContainsKey(t.Value))
+						name = wb.Names[t.Value];
 					if (name != null)
 					{
-
-						if (string.IsNullOrEmpty(name.NameFormula))
+						//if (string.IsNullOrEmpty(name.NameFormula))
+						//{
+						//	if (name.NameValue == null)
+						//	{
+						//		ExcelAddress address;
+						//		if (!name._fromRowFixed || !name._fromColFixed)
+						//			address = new ExcelAddress(name.GetRelativeAddress(f.Row, f.Column));
+						//		else
+						//			address = new ExcelAddress(name.FullAddress);
+						//		f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, address._fromRow,
+						//			 address._fromCol, address._toRow, address._toCol);
+						//		goto iterateCells;
+						//	}
+						//}
+						//if (name.NameValue != null && string.IsNullOrEmpty(name.NameFormula))
+						//{
+						//	f.Tokens[f.tokenIx] = name.myWorkbook.FormulaParser.Lexer.Tokenize(Convert.ToString(name.NameValue)).FirstOrDefault();
+						//}
+						//else
+						//{
+						var nameFormulaTokens = name.GetRelativeNameFormula(f.Row, f.Column)?.ToList();
+						if (nameFormulaTokens.Count == 0 && name.Value != null)
 						{
-							if (name.NameValue == null)
-							{
-								ExcelAddress address;
-								if (!name._fromRowFixed || !name._fromColFixed)
-									address = new ExcelAddress(name.GetRelativeAddress(f.Row, f.Column));
-								else
-									address = new ExcelAddress(name.FullAddress);
-								f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, address._fromRow,
-									 address._fromCol, address._toRow, address._toCol);
-								goto iterateCells;
-							}
+							// TODO: This probably won't handle array values correctly.
+							nameFormulaTokens = name.myWorkbook.FormulaParser.Lexer.Tokenize(name.Value.ToString())?.ToList();
 						}
-						else
-						{
-							var id = ExcelAddressBase.GetCellID(name.LocalSheetID, name.Index, 0);
+						f.Tokens.RemoveAt(f.tokenIx);
+						f.Tokens.InsertRange(f.tokenIx, nameFormulaTokens);
 
-							if (!depChain.Index.ContainsKey(id))
-							{
-								var rf = new FormulaCell() { SheetID = name.ActualSheetID, Row = name.Index, Column = 0 };
-								rf.Formula = name.NameFormula;
-								if (name.ActualSheetID == -1)
-									rf.Tokens = lexer.Tokenize(rf.Formula)?.ToList();
-								else
-									rf.Tokens = lexer.Tokenize(rf.Formula, name.LocalSheet.Name)?.ToList();
+						goto iterateToken;
+							//var id = ExcelAddressBase.GetCellID(name.LocalSheetID, name.Index, 0);
 
-								depChain.Add(rf);
-								stack.Push(f);
-								f = rf;
-								goto iterateToken;
-							}
-							else
-							{
-								if (stack.Count > 0)
-								{
-									//Check for circular references
-									foreach (var par in stack)
-									{
-										if (ExcelAddressBase.GetCellID(par.SheetID, par.Row, par.Column) == id && !options.AllowCircularReferences)
-										{
-											throw (new CircularReferenceException(string.Format("Circular Reference in name {0}", name.Name)));
-										}
-									}
-								}
-							}
-						}
+							//if (!depChain.Index.ContainsKey(id))
+							//{
+							//	var rf = new FormulaCell() { SheetID = name.ActualSheetID, Row = name.Index, Column = 0 };
+							//	rf.Tokens = name.GetRelativeFormula(f.Row, f.Column)?.ToList();
+								
+							//	// TODO: is it necessary to set rf.Formula here?
+							//	//rf.Formula = name.NameFormula;
+							//	//if (name.ActualSheetID == -1)
+							//	//	rf.Tokens = lexer.Tokenize(rf.Formula)?.ToList();
+							//	//else
+							//	//	rf.Tokens = lexer.Tokenize(rf.Formula, name.LocalSheet.Name)?.ToList();
+
+							//	depChain.Add(rf);
+							//	stack.Push(f);
+							//	f = rf;
+							//  goto iterateToken;
+							//  }
+							//else
+							//{
+							//	if (stack.Count > 0)
+							//	{
+							//		//Check for circular references
+							//		foreach (var par in stack)
+							//		{
+							//			if (ExcelAddressBase.GetCellID(par.SheetID, par.Row, par.Column) == id && !options.AllowCircularReferences)
+							//			{
+							//				throw (new CircularReferenceException(string.Format("Circular Reference in name {0}", name.Name)));
+							//			}
+							//		}
+							//	}
+							//}
+						//}
 					}
 				}
 				else if (t.TokenType == TokenType.Function && t.Value.ToUpper() == Offset.Name)
