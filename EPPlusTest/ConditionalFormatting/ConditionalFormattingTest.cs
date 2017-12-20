@@ -217,5 +217,114 @@ namespace EPPlusTest
 			}
 		}
 		#endregion
+
+		#region TransformFormulaReferences Test
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void TransformFormulaReferencesValAttributeTest()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				var twoColorScale = (ExcelConditionalFormattingTwoColorScale)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.TwoColorScale);
+				Assert.AreEqual("colorScale", twoColorScale.Node.Attributes["type"].Value);
+				var innerNodes = twoColorScale.Node.ChildNodes[0].ChildNodes;
+				var minNode = innerNodes[0];
+				var maxNode = innerNodes[1];
+				Assert.AreEqual("$K$6", minNode.Attributes["val"].Value);
+				Assert.AreEqual("$K$7", maxNode.Attributes["val"].Value);
+
+				formattings.TransformFormulaReferences(s => { try { return new ExcelAddress(s).AddColumn(1, 2).Address; } catch { return s; } });
+
+				formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				twoColorScale = (ExcelConditionalFormattingTwoColorScale)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.TwoColorScale);
+				Assert.AreEqual("colorScale", twoColorScale.Node.Attributes["type"].Value);
+				innerNodes = twoColorScale.Node.ChildNodes[0].ChildNodes;
+				minNode = innerNodes[0];
+				maxNode = innerNodes[1];
+				Assert.AreEqual("$M$6", minNode.Attributes["val"].Value);
+				Assert.AreEqual("$M$7", maxNode.Attributes["val"].Value);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void TransformFormulaReferencesFiveIconListTest()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				var iconSet = (ExcelConditionalFormattingFiveIconSet)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.FiveIconSet);
+				Assert.AreEqual("iconSet", iconSet.Node.Attributes["type"].Value);
+				var innerNodes = iconSet.Node.ChildNodes[0].ChildNodes;
+				var firstValue = innerNodes[0];
+				var secondValue = innerNodes[1];
+				var thirdValue = innerNodes[2];
+				var fourthValue = innerNodes[3];
+				var fifthValue = innerNodes[4];
+				Assert.AreEqual("0", firstValue.Attributes["val"].Value);
+				Assert.AreEqual("$Q$7", secondValue.Attributes["val"].Value);
+				Assert.AreEqual("$Q$8", thirdValue.Attributes["val"].Value);
+				Assert.AreEqual("$Q$9", fourthValue.Attributes["val"].Value);
+				Assert.AreEqual("$Q$10", fifthValue.Attributes["val"].Value);
+
+				formattings.TransformFormulaReferences(s => { try { return new ExcelAddress(s).AddColumn(1, 2).AddRow(1, 3).Address; } catch { return s; } });
+
+				formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				iconSet = (ExcelConditionalFormattingFiveIconSet)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.FiveIconSet);
+				Assert.AreEqual("iconSet", iconSet.Node.Attributes["type"].Value);
+				innerNodes = iconSet.Node.ChildNodes[0].ChildNodes;
+				firstValue = innerNodes[0];
+				secondValue = innerNodes[1];
+				thirdValue = innerNodes[2];
+				fourthValue = innerNodes[3];
+				fifthValue = innerNodes[4];
+				Assert.AreEqual("0", firstValue.Attributes["val"].Value);
+				Assert.AreEqual("$S$10", secondValue.Attributes["val"].Value);
+				Assert.AreEqual("$S$11", thirdValue.Attributes["val"].Value);
+				Assert.AreEqual("$S$12", fourthValue.Attributes["val"].Value);
+				Assert.AreEqual("$S$13", fifthValue.Attributes["val"].Value);
+				Assert.AreEqual("0", iconSet.Icon1.Formula);
+				Assert.AreEqual("$S$10", iconSet.Icon2.Formula);
+				Assert.AreEqual("$S$11", iconSet.Icon3.Formula);
+				Assert.AreEqual("$S$12", iconSet.Icon4.Formula);
+				Assert.AreEqual("$S$13", iconSet.Icon5.Formula);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void TransformFormulaReferencesFormulaTagTest()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				var between = (ExcelConditionalFormattingBetween)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("cellIs", between.Node.Attributes["type"].Value);
+				var innerNodes = between.Node.ChildNodes;
+				var formula1 = innerNodes[0];
+				var formula2 = innerNodes[1];
+				Assert.AreEqual("$Q$22", formula1.FirstChild.Value);
+				Assert.AreEqual("$Q$23", formula2.FirstChild.Value);
+
+				formattings.TransformFormulaReferences(s => $"IF({s},1,0)");
+
+				formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				between = (ExcelConditionalFormattingBetween)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("cellIs", between.Node.Attributes["type"].Value);
+				innerNodes = between.Node.ChildNodes;
+				formula1 = innerNodes[0];
+				formula2 = innerNodes[1];
+				Assert.AreEqual("IF($Q$22,1,0)", formula1.FirstChild.Value);
+				Assert.AreEqual("IF($Q$23,1,0)", formula2.FirstChild.Value);
+			}
+		}
+		#endregion
 	}
 }
