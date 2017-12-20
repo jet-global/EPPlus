@@ -325,6 +325,35 @@ namespace EPPlusTest
 				Assert.AreEqual("IF($Q$23,1,0)", formula2.FirstChild.Value);
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void TransformFormulaReferencesX14Test()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var formattings = package.Workbook.Worksheets.First().X14ConditionalFormatting;
+				Assert.AreEqual(2, formattings.X14Rules.Count);
+				var dataBarRule = formattings.X14Rules.First();
+				Assert.AreEqual(1, dataBarRule.Formulae.Count);
+				Assert.AreEqual("$O$6", dataBarRule.Formulae.First().Formula);
+				var containsTextRule = formattings.X14Rules[1];
+				Assert.AreEqual(2, containsTextRule.Formulae.Count);
+				Assert.AreEqual("NOT(ISERROR(SEARCH($S$22,E22)))", containsTextRule.Formulae.First().Formula);
+				Assert.AreEqual("$S$22", containsTextRule.Formulae[1].Formula);
+
+				formattings.TransformFormulaReferences(s => $"IF({s},1,0)");
+
+				formattings = package.Workbook.Worksheets.First().X14ConditionalFormatting;
+				dataBarRule = formattings.X14Rules.First();
+				Assert.AreEqual(1, dataBarRule.Formulae.Count);
+				Assert.AreEqual("IF($O$6,1,0)", dataBarRule.Formulae.First().Formula);
+				Assert.AreEqual("IF(NOT(ISERROR(SEARCH($S$22,E22))),1,0)", containsTextRule.Formulae.First().Formula);
+				Assert.AreEqual("IF($S$22,1,0)", containsTextRule.Formulae[1].Formula);
+			}
+		}
 		#endregion
 	}
 }

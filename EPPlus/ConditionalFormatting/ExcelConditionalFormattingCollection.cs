@@ -906,7 +906,6 @@ namespace OfficeOpenXml.ConditionalFormatting
 		{
 			XmlHelper.TransformValuesInNode(this.TopNode, this.NameSpaceManager, transformer, ".//d:conditionalFormatting//d:formula");
 			XmlHelper.TransformAttributesInNode(this.TopNode, this.NameSpaceManager, transformer, ".//d:conditionalFormatting//d:cfvo", Attributes.Val);
-			XmlHelper.TransformValuesInNode(this.TopNode, this.NameSpaceManager, transformer, ".//x14:conditionalFormatting//x14:cfvo//xm:f");
 		}
 		#endregion
 	}
