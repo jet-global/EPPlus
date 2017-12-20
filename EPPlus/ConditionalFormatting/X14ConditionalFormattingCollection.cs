@@ -41,7 +41,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="transformer">The transformation to apply.</param>
 		public virtual void TransformFormulaReferences(Func<string, string> transformer)
 		{
-			XmlHelper.TransformValuesInNode(this.TopNode, this.NameSpaceManager, transformer, ".//x14:conditionalFormatting//xm:f");
+			XmlHelper.TransformValuesInNode(this.TopNode, this.NameSpaceManager, transformer, ".//x14:cfRule//xm:f");
 		}
 		#endregion
 	}
