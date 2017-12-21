@@ -202,7 +202,7 @@ namespace OfficeOpenXml.Table.PivotTable
 							{
 								if (name.Equals(n.Name, StringComparison.InvariantCultureIgnoreCase))
 								{
-									_sourceRange = n;
+									_sourceRange = new ExcelRange(n.LocalSheet, n.NameFormula);
 									return _sourceRange;
 								}
 							}
@@ -217,7 +217,7 @@ namespace OfficeOpenXml.Table.PivotTable
 								{
 									if (name.Equals(n.Name, StringComparison.InvariantCultureIgnoreCase))
 									{
-										_sourceRange = n;
+										_sourceRange = new ExcelRange(n.LocalSheet, n.NameFormula);
 										break;
 									}
 								}

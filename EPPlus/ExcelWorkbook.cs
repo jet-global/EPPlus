@@ -1143,32 +1143,26 @@ namespace OfficeOpenXml
 
 		private void SetNameElement(ExcelNamedRange name, XmlElement elem)
 		{
-			if (name.IsName)
+			if (string.IsNullOrEmpty(name.NameFormula))
 			{
-				if (string.IsNullOrEmpty(name.NameFormula))
+				if ((name.NameValue.GetType().IsPrimitive || name.NameValue is double || name.NameValue is decimal))
 				{
-					if ((name.NameValue.GetType().IsPrimitive || name.NameValue is double || name.NameValue is decimal))
-					{
-						elem.InnerText = Convert.ToDouble(name.NameValue, CultureInfo.InvariantCulture).ToString("R15", CultureInfo.InvariantCulture);
-					}
-					else if (name.NameValue is DateTime)
-					{
-						elem.InnerText = ((DateTime)name.NameValue).ToOADate().ToString(CultureInfo.InvariantCulture);
-					}
-					else
-					{
-						elem.InnerText = "\"" + name.NameValue.ToString() + "\"";
-					}
+					elem.InnerText = Convert.ToDouble(name.NameValue, CultureInfo.InvariantCulture).ToString("R15", CultureInfo.InvariantCulture);
+				}
+				else if (name.NameValue is DateTime)
+				{
+					elem.InnerText = ((DateTime)name.NameValue).ToOADate().ToString(CultureInfo.InvariantCulture);
 				}
 				else
 				{
-					elem.InnerText = name.NameFormula;
+					elem.InnerText = "\"" + name.NameValue.ToString() + "\"";
 				}
 			}
 			else
 			{
-				elem.InnerText = name.FullAddress;
+				elem.InnerText = name.NameFormula;
 			}
+			// TODO: May need to set elem.InnerText = name.FullAddress;
 		}
 
 		/// <summary>

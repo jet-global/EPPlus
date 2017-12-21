@@ -112,7 +112,7 @@ namespace OfficeOpenXml.FormulaParsing
 
 		private static void GetChain(DependencyChain depChain, ILexer lexer, ExcelNamedRange name, ExcelCalculationOption options)
 		{
-			var ws = name.Worksheet;
+			var ws = name.LocalSheet;
 			var id = ExcelCellBase.GetCellID(ws == null ? 0 : ws.SheetID, name.Index, 0);
 			if (!depChain.Index.ContainsKey(id))
 			{
@@ -123,14 +123,14 @@ namespace OfficeOpenXml.FormulaParsing
 					f.Tokens = lexer.Tokenize(f.Formula, (ws == null ? null : ws.Name)).ToList();
 					if (ws == null)
 					{
-						name.myWorkbook.FormulaTokens.SetValue(name.Index, 0, f.Tokens);
+						name.Workbook.FormulaTokens.SetValue(name.Index, 0, f.Tokens);
 					}
 					else
 					{
 						ws._formulaTokens.SetValue(name.Index, 0, f.Tokens);
 					}
 					depChain.Add(f);
-					FollowChain(depChain, lexer, name.myWorkbook, ws, f, options);
+					FollowChain(depChain, lexer, name.Workbook, ws, f, options);
 				}
 			}
 		}
@@ -300,10 +300,9 @@ namespace OfficeOpenXml.FormulaParsing
 						//else
 						//{
 						var nameFormulaTokens = name.GetRelativeNameFormula(f.Row, f.Column)?.ToList();
-						if (nameFormulaTokens.Count == 0 && name.Value != null)
+						if (nameFormulaTokens.Count == 0 && name.NameFormula != null)
 						{
-							// TODO: This probably won't handle array values correctly.
-							nameFormulaTokens = name.myWorkbook.FormulaParser.Lexer.Tokenize(name.Value.ToString())?.ToList();
+							nameFormulaTokens = name.Workbook.FormulaParser.Lexer.Tokenize(name.NameFormula.ToString())?.ToList();
 						}
 						f.Tokens.RemoveAt(f.tokenIx);
 						f.Tokens.InsertRange(f.tokenIx, nameFormulaTokens);

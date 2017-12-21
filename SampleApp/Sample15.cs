@@ -226,10 +226,12 @@ namespace EPPlusSamples
 
 			chrt.Title.Text = "Hit ratio";
 
-			var n1 = rng.Worksheet.Names.Add(prefix + "Misses", rng.Offset(2, 2));
-			n1.Value = 0;
-			var n2 = rng.Worksheet.Names.Add(prefix + "Hits", rng.Offset(2, 3));
-			n2.Value = 0;
+			var range = rng.Offset(2, 2);
+			var n1 = rng.Worksheet.Names.Add(prefix + "Misses", range);
+			range.Value = 0;
+			range = rng.Offset(2, 3);
+			var n2 = rng.Worksheet.Names.Add(prefix + "Hits", range);
+			range.Value = 0;
 			rng.Offset(1, 2).Value = "Misses";
 			rng.Offset(1, 3).Value = "Hits";
 		}

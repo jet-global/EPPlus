@@ -207,7 +207,7 @@ namespace OfficeOpenXml
 				}
 				if (originalWorksheet.Names.Count > 0)
 				{
-					this.CopySheetNames(originalWorksheet, added);
+					this.CopySheetNamedRanges(originalWorksheet, added);
 				}
 				if (originalWorksheet.SparklineGroups.SparklineGroups.Count > 0)
 				{
@@ -699,31 +699,12 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private void CopySheetNames(ExcelWorksheet originalWorksheet, ExcelWorksheet addedWorksheet)
+		private void CopySheetNamedRanges(ExcelWorksheet originalWorksheet, ExcelWorksheet addedWorksheet)
 		{
-			foreach (var name in originalWorksheet.Names)
+			foreach (var namedRange in originalWorksheet.Names)
 			{
-				ExcelNamedRange newName;
-				if (!name.IsName)
-				{
-					if (name.WorkSheet == originalWorksheet.Name)
-					{
-						newName = addedWorksheet.Names.Add(name.Name, addedWorksheet.Cells[name.FirstAddress]);
-					}
-					else
-					{
-						newName = addedWorksheet.Names.Add(name.Name, addedWorksheet.Workbook.Worksheets[name.WorkSheet].Cells[name.FirstAddress]);
-					}
-				}
-				else if (!string.IsNullOrEmpty(name.NameFormula))
-				{
-					newName = addedWorksheet.Names.AddFormula(name.Name, name.Formula);
-				}
-				else
-				{
-					newName = addedWorksheet.Names.AddValue(name.Name, name.Value);
-				}
-				newName.NameComment = name.NameComment;
+				string updatedFormula = namedRange.UpdateFormulaSheetReferences(originalWorksheet.Name, addedWorksheet.Name);
+				addedWorksheet.Names.Add(namedRange.Name, updatedFormula, namedRange.IsNameHidden, namedRange.NameComment);
 			}
 		}
 

@@ -152,7 +152,7 @@ namespace EPPlusTest
 
 				sheet.InsertRow(1, 1);
 
-				Assert.AreEqual("'NEW'!$A$3:$C$4", namedRange.Address);
+				Assert.AreEqual("'NEW'!$A$3:$C$4", namedRange.NameFormula);
 			}
 		}
 
@@ -167,7 +167,7 @@ namespace EPPlusTest
 
 				sheet.InsertRow(4, 1);
 
-				Assert.AreEqual("A2:C3", namedRange.Address);
+				Assert.AreEqual("A2:C3", namedRange.NameFormula);
 			}
 		}
 
@@ -182,7 +182,7 @@ namespace EPPlusTest
 
 				sheet.InsertRow(3, 1);
 
-				Assert.AreEqual("'NEW'!$A$2:$C$4", namedRange.Address);
+				Assert.AreEqual("'NEW'!$A$2:$C$4", namedRange.NameFormula);
 			}
 		}
 
@@ -196,7 +196,7 @@ namespace EPPlusTest
 
 				sheet.InsertColumn(1, 1);
 
-				Assert.AreEqual("'NEW'!$C$2:$E$3", namedRange.Address);
+				Assert.AreEqual("'NEW'!$C$2:$E$3", namedRange.NameFormula);
 			}
 		}
 
@@ -211,7 +211,7 @@ namespace EPPlusTest
 
 				sheet.InsertColumn(5, 1);
 
-				Assert.AreEqual("B2:D3", namedRange.Address);
+				Assert.AreEqual("B2:D3", namedRange.NameFormula);
 			}
 		}
 
@@ -225,7 +225,7 @@ namespace EPPlusTest
 
 				sheet.InsertColumn(3, 1);
 
-				Assert.AreEqual("'NEW'!$B$2:$E$3", namedRange.Address);
+				Assert.AreEqual("'NEW'!$B$2:$E$3", namedRange.NameFormula);
 			}
 		}
 
@@ -240,7 +240,7 @@ namespace EPPlusTest
 
 				sheet.InsertRow(1, 1);
 
-				Assert.AreEqual("'NEW'!$A$3:$C$4", namedRange.Address);
+				Assert.AreEqual("'NEW'!$A$3:$C$4", namedRange.NameFormula);
 			}
 		}
 
@@ -255,7 +255,7 @@ namespace EPPlusTest
 
 				sheet.InsertColumn(1, 1);
 
-				Assert.AreEqual("'NEW'!$C$2:$D$3", namedRange.Address);
+				Assert.AreEqual("'NEW'!$C$2:$D$3", namedRange.NameFormula);
 			}
 		}
 
@@ -271,7 +271,7 @@ namespace EPPlusTest
 
 				sheet1.InsertColumn(1, 1);
 
-				Assert.AreEqual("'NEW2'!$B$2:$C$3", namedRange.FullAddress);
+				Assert.AreEqual("'NEW2'!$B$2:$C$3", namedRange.NameFormula);
 			}
 		}
 	}

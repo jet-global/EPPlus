@@ -69,9 +69,10 @@ namespace EPPlusSamples
 
 				worksheet.Cells["E2:E6"].FormulaR1C1 = "RC[-2]*RC[-1]";
 
-				var name = worksheet.Names.Add("SubTotalName", worksheet.Cells["C7:E7"]);
-				name.Style.Font.Italic = true;
-				name.Formula = "SUBTOTAL(9,C2:C6)";
+				var range = worksheet.Cells["C7:E7"];
+				var name = worksheet.Names.Add("SubTotalName", range);
+				range.Style.Font.Italic = true;
+				name.NameFormula = "SUBTOTAL(9,C2:C6)";
 
 				//Format the new rows
 				worksheet.Cells["C5:C6"].Style.Numberformat.Format = "#,##0";

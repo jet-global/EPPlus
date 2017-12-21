@@ -59,7 +59,7 @@ namespace OfficeOpenXml
 		#endregion
 		#region "Indexers"
 		/// <summary>
-		/// Access the range using an address
+		/// Access the range using an address.
 		/// </summary>
 		/// <param name="Address">The address</param>
 		/// <returns>A range object</returns>
@@ -69,14 +69,10 @@ namespace OfficeOpenXml
 			{
 				if (myWorksheet.Names.ContainsKey(Address))
 				{
-					if (myWorksheet.Names[Address].IsName)
-					{
-						return null;
-					}
+					if (myWorksheet.Names[Address].TryGetAddress(out ExcelRange nameAddress))
+						base.Address = nameAddress.FullAddress;
 					else
-					{
-						base.Address = myWorksheet.Names[Address].Address;
-					}
+						return null;
 				}
 				else
 				{
@@ -96,10 +92,6 @@ namespace OfficeOpenXml
 				if (ixStart >= 0 & ixEnd >= 0)
 				{
 					var external = address.Substring(ixStart + 1, ixEnd - 1);
-					//if (Worksheet.Workbook._externalReferences.Count < external)
-					//{
-					//foreach(var 
-					//}
 				}
 			}
 			return null;

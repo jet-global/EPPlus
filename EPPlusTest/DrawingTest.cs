@@ -1412,9 +1412,9 @@ namespace EPPlusTest
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
-				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names[0].Address);
-				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names[1].Address);
-				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names[2].Address);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names[0].NameFormula);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names[1].NameFormula);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names[2].NameFormula);
 			}
 		}
 
@@ -1465,9 +1465,9 @@ namespace EPPlusTest
 			using (var package = new ExcelPackage(file))
 			{
 				// Excel 2016 Chart Series are stored in named ranges.
-				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names[0].Address);
-				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names[1].Address);
-				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names[2].Address);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names[0].NameFormula);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names[1].NameFormula);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names[2].NameFormula);
 			}
 		}
 

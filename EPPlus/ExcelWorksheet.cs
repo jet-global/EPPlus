@@ -1369,8 +1369,7 @@ namespace OfficeOpenXml
 				this._hyperLinks.Insert(rowFrom, 0, rows, 0);
 				this._flags.Insert(rowFrom, 0, rows, 0);
 				this.Comments.Insert(rowFrom, 0, rows, 0);
-				this.Names.Insert(rowFrom, 0, rows, 0);
-				this.Workbook.Names.Insert(rowFrom, 0, rows, 0, n => n.Worksheet == this);
+				this.Names.Insert(rowFrom, 0, rows, 0, this);
 
 				foreach (var f in this._sharedFormulas.Values)
 				{
@@ -1423,6 +1422,8 @@ namespace OfficeOpenXml
 				{
 					if (rowFrom <= ptbl.Address.End.Row)
 						ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
+
+					// TODO: Consider consolidating these named range updates to the FormulaManager, changing SourceRange to be a NamedRange.
 					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
 						ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
 						ptbl.CacheDefinition.SourceRange.IsName == false &&
@@ -1436,6 +1437,7 @@ namespace OfficeOpenXml
 					sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
 					foreach (var ptbl in sheet.PivotTables)
 					{
+						// TODO: Consider consolidating these named range updates to the FormulaManager, changing SourceRange to be a NamedRange.
 						if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
 							ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
 							ptbl.CacheDefinition.SourceRange.IsName == false &&
@@ -1486,9 +1488,8 @@ namespace OfficeOpenXml
 				this._formulas.Insert(0, columnFrom, 0, columns);
 				this._hyperLinks.Insert(0, columnFrom, 0, columns);
 				this._flags.Insert(0, columnFrom, 0, columns);
-				this.Names.Insert(0, columnFrom, 0, columns);
 				this.Comments.Insert(0, columnFrom, 0, columns);
-				this.Workbook.Names.Insert(0, columnFrom, 0, columns, n => n.Worksheet == this);
+				this.Names.Insert(0, columnFrom, 0, columns, this);
 
 				foreach (var f in _sharedFormulas.Values)
 				{
@@ -1668,10 +1669,9 @@ namespace OfficeOpenXml
 				this._formulas.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this._flags.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this._hyperLinks.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
-				this.Names.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Comments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.VmlDrawingsComments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
-				this.Workbook.Names.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns, n => n.Worksheet == this);
+				this.Names.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns, this);
 
 				this.AdjustFormulasRow(rowFrom, rows);
 				this.FixMergedCellsRow(rowFrom, rows, true);
@@ -1751,10 +1751,9 @@ namespace OfficeOpenXml
 				this._formulas.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._flags.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._hyperLinks.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
-				this._names.Delete(0, columnFrom, 0, columns);
 				this.Comments.Delete(0, columnFrom, 0, columns);
 				this.VmlDrawingsComments.Delete(0, columnFrom, 0, columns);
-				this.Workbook.Names.Delete(0, columnFrom, 0, columns, n => n.Worksheet == this);
+				this._names.Delete(0, columnFrom, 0, columns, this);
 
 				this.AdjustFormulasColumn(columnFrom, columns);
 				this.FixMergedCellsColumn(columnFrom, columns, true);
@@ -3086,24 +3085,18 @@ namespace OfficeOpenXml
 		private void ChangeNames(string value)
 		{
 			//Renames name in this Worksheet;
-			foreach (var n in Workbook.Names)
+			foreach (var namedRange in this.Workbook.Names)
 			{
-				if (string.IsNullOrEmpty(n.NameFormula) && n.NameValue == null)
-				{
-					n.ChangeWorksheet(_name, value);
-				}
+				namedRange.NameFormula = namedRange.UpdateFormulaSheetReferences(this._name, value);
 			}
 			this.ChangeSparklineSheetNames(value);
-			foreach (var ws in Workbook.Worksheets)
+			foreach (var ws in this.Workbook.Worksheets)
 			{
 				if (!(ws is ExcelChartsheet))
 				{
-					foreach (var n in ws.Names)
+					foreach (var namedRange in ws.Names)
 					{
-						if (string.IsNullOrEmpty(n.NameFormula) && n.NameValue == null)
-						{
-							n.ChangeWorksheet(_name, value);
-						}
+						namedRange.UpdateFormulaSheetReferences(this._name, value);
 					}
 					ws.UpdateCrossSheetReferenceNames(_name, value);
 				}

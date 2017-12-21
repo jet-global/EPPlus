@@ -30,7 +30,9 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-27
  *******************************************************************************/
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 
 namespace OfficeOpenXml
@@ -38,7 +40,7 @@ namespace OfficeOpenXml
 	/// <summary>
 	/// A named range.
 	/// </summary>
-	public sealed class ExcelNamedRange : ExcelRangeBase
+	public sealed class ExcelNamedRange
 	{
 		#region Properties
 		/// <summary>
@@ -84,6 +86,11 @@ namespace OfficeOpenXml
 		internal ExcelWorksheet LocalSheet { get; private set; }
 
 		/// <summary>
+		/// Gets the <see cref="ExcelWorkbook"/> that contains this named range.
+		/// </summary>
+		internal ExcelWorkbook Workbook { get; private set; }
+
+		/// <summary>
 		/// Gets or sets the index value of this named range in its parent <see cref="ExcelNamedRangeCollection"/>.
 		/// </summary>
 		internal int Index { get; set; }
@@ -96,7 +103,7 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Gets or sets the formula of this Named Range.
 		/// </summary>
-		internal string NameFormula { get; set; }
+		public string NameFormula { get; set; }
 		#endregion
 
 		#region Constructors
@@ -104,50 +111,32 @@ namespace OfficeOpenXml
 		/// A named range
 		/// </summary>
 		/// <param name="name">The name of the range.</param>
+		/// <param name="workbook">The workbook that contains this named range.</param>
 		/// <param name="nameSheet">The sheet this named range is local to, or null for a global named range.</param>
-		/// <param name="sheet">The sheet where the target address of the named range exists.</param>
-		/// <param name="address">The address (range) this named range refers to.</param>
+		/// <param name="formula">The address (range) this named range refers to.</param>
 		/// <param name="index">The index of this named range in the parent <see cref="ExcelNamedRangeCollection"/>.</param>
-		public ExcelNamedRange(string name, ExcelWorksheet nameSheet, ExcelWorksheet sheet, string address, int index) :
-			 base(sheet, address)
+		public ExcelNamedRange(string name, ExcelWorkbook workbook, ExcelWorksheet nameSheet, string formula, int index)
 		{
+			if (workbook == null)
+				throw new ArgumentNullException(nameof(workbook));
 			this.Name = name;
+			this.Workbook = workbook;
 			this.LocalSheet = nameSheet;
+			this.NameFormula = formula;
 			this.Index = index;
 		}
 
-		internal ExcelNamedRange(string name, ExcelWorkbook wb, ExcelWorksheet nameSheet, int index) :
-			 base(wb, nameSheet, name, true)
+		internal ExcelNamedRange(string name, ExcelWorkbook workbook, ExcelWorksheet nameSheet, int index)
 		{
-			this.Name = name;
+			if (workbook == null)
+				throw new ArgumentNullException(nameof(workbook)); this.Name = name;
+			this.Workbook = workbook;
 			this.LocalSheet = nameSheet;
 			this.Index = index;
 		}
 		#endregion
 
 		#region Public Methods
-		/// <summary>
-		/// Gets the address relative to the specified row and column.
-		/// </summary>
-		/// <param name="relativeRow">The row from which the named range is used.</param>
-		/// <param name="relativeColumn">The column from which the named range is used.</param>
-		/// <returns>The address relative to the specified row and column.</returns>
-		public string GetRelativeAddress(int relativeRow, int relativeColumn)
-		{
-			// Relative references are relative to cell A1. Offsets that cause the 
-			// relative address to exceed the maximum row or column will wrap around.
-			// Examples:
-			//	$B2 means on column B and down one row from the relative address.
-			//	D$5 means on row 5 and right three columns from the relative address.
-			//	C3 means right two and down three from the relative address.
-			int fromRow = this.GetRelativeLocation(_fromRowFixed, _fromRow, relativeRow, ExcelPackage.MaxRows);
-			int fromColumn = this.GetRelativeLocation(_fromColFixed, _fromCol, relativeColumn, ExcelPackage.MaxColumns);
-			int toRow = this.GetRelativeLocation(_toRowFixed, _toRow, relativeRow, ExcelPackage.MaxRows);
-			int toColumn = this.GetRelativeLocation(_toColFixed, _toCol, relativeColumn, ExcelPackage.MaxColumns);
-			var address = ExcelCellBase.GetAddress(fromRow, fromColumn, toRow, toColumn, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
-			return ExcelCellBase.GetFullAddress(this.Worksheet.Name, address);
-		}
-
 		/// <summary>
 		/// Gets the formula of a named range relative to the specified <paramref name="relativeRow"/> and <paramref name="relativeColumn"/>.
 		/// </summary>
@@ -156,7 +145,7 @@ namespace OfficeOpenXml
 		/// <returns>The updated formula relative to the specified <paramref name="relativeRow"/> and <paramref name="relativeColumn"/>.</returns>
 		public IEnumerable<Token> GetRelativeNameFormula(int relativeRow, int relativeColumn)
 		{
-			var tokens = this.myWorkbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
+			var tokens = this.Workbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
 			foreach (var token in tokens)
 			{
 				if (token.TokenType == TokenType.ExcelAddress)
@@ -171,6 +160,51 @@ namespace OfficeOpenXml
 				}
 			}
 			return tokens;
+		}
+
+		/// <summary>
+		/// Returns the named range's formula updated with worksheet references from the specified <paramref name="originalWorksheetName"/> 
+		/// to the specified <paramref name="newWorksheetName"/>.
+		/// </summary>
+		/// <param name="originalWorksheetName">The worksheet name to update references from.</param>
+		/// <param name="newWorksheetName">The worksheet name to update references to.</param>
+		/// <returns>The updated formula string.</returns>
+		public string UpdateFormulaSheetReferences(string originalWorksheetName, string newWorksheetName)
+		{
+			var tokens = this.Workbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
+			foreach (var token in tokens)
+			{
+				if (token.TokenType == TokenType.ExcelAddress)
+				{
+					var address = new ExcelAddress(token.Value);
+					address.ChangeWorksheet(originalWorksheetName, newWorksheetName);
+					token.Value = address.ToString();
+				}
+			}
+			return string.Join(string.Empty, tokens.Select(t => t.Value.ToString()));
+		}
+
+		/// <summary>
+		/// Attempts to get the named range's formula as an address.
+		/// </summary>
+		/// <param name="address">The <see cref="ExcelRange"/> address if the formula is an address.</param>
+		/// <returns>True if the formula is an address, false otherwise.</returns>
+		public bool TryGetAddress(out ExcelRange address)
+		{
+			address = null;
+			var tokens = this.Workbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
+			// TODO: Probably won't work for addresses such as "'Sheet'!C3,'Sheet'!D3:D5,'Sheet'!E5". Should it?
+			if (tokens.Count() == 1)
+			{
+				var token = tokens.ElementAt(0);
+				if (token.TokenType == TokenType.ExcelAddress)
+				{
+					var excelAddress = new ExcelAddress(token.Value);
+					address = new ExcelRange(this.Workbook.Worksheets[excelAddress.WorkSheet], excelAddress.Address);
+					return true;
+				}
+			}
+			return false;
 		}
 		#endregion
 

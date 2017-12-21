@@ -339,7 +339,6 @@ namespace OfficeOpenXml.FormulaParsing
 				}
 			}
 			id = ExcelAddressBase.GetCellID(nameItem.LocalSheetID, nameItem.Index, 0);
-
 			if (_names.ContainsKey(id))
 			{
 				return _names[id];
@@ -350,21 +349,14 @@ namespace OfficeOpenXml.FormulaParsing
 				{
 					Id = id,
 					Name = name,
-					Worksheet = nameItem.Worksheet == null ? nameItem._ws : nameItem.Worksheet.Name,
-					Formula = nameItem.Formula
+					Worksheet = nameItem.LocalSheet?.Name,
+					Formula = nameItem.NameFormula
 				};
-				if (nameItem._fromRow > 0)
-				{
-					ni.Value = new RangeInfo(nameItem.Worksheet ?? ws, nameItem);
-				}
-				else
-				{
-					ni.Value = nameItem.Value;
-				}
 				_names.Add(id, ni);
 				return ni;
 			}
 		}
+
 		public override IEnumerable<object> GetRangeValues(string address)
 		{
 			SetCurrentWorksheet(ExcelAddressInfo.Parse(address));

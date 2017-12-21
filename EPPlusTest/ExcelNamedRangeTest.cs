@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 
 namespace EPPlusTest
@@ -10,17 +11,22 @@ namespace EPPlusTest
 		[TestMethod]
 		public void SettingAddressHandlesMultiAddresses()
 		{
+
 			using (ExcelPackage package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				var name = package.Workbook.Names.Add("Test", worksheet.Cells[3, 3]);
-				name.Address = "Sheet1!C3";
-				name.Address = "Sheet1!D3";
-				Assert.IsNull(name.Addresses);
-				name.Address = "C3:D3,E3:F3";
-				Assert.IsNotNull(name.Addresses);
-				name.Address = "Sheet1!C3";
-				Assert.IsNull(name.Addresses);
+				name.NameFormula = "Sheet1!C3";
+				name.NameFormula = "Sheet1!D3";
+				
+				// TODO: Rewrite this test for new NamedRange changes.
+				Assert.Fail("Test needs to be rewritten for new NamedRange changes.");
+			
+				//Assert.IsNull(name.Addresses);
+				//name.Address = "C3:D3,E3:F3";
+				//Assert.IsNotNull(name.Addresses);
+				//name.Address = "Sheet1!C3";
+				//Assert.IsNull(name.Addresses);
 			}
 		}
 		#endregion
@@ -82,16 +88,16 @@ namespace EPPlusTest
 				//	D$5 means on row 5 and right three columns from the relative address.
 				//	C3 means right two and down three from the relative address.
 				var expected = $"'{sheetName1}'!$D4";
-				string actual = package.Workbook.Names["Name1"].GetRelativeAddress(2, 2);
+				string actual = string.Join(string.Empty, package.Workbook.Names["Name1"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
 				expected = $"'{sheetName1}'!H$5";
-				actual = package.Workbook.Names["Name2"].GetRelativeAddress(2, 2);
+				actual = string.Join(string.Empty, package.Workbook.Names["Name2"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
 				expected = $"'{sheetName2}'!F6";
-				actual = package.Workbook.Names["Name3"].GetRelativeAddress(2, 2);
+				actual = string.Join(string.Empty, package.Workbook.Names["Name3"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
 				expected = $"'{sheetName2}'!$C$8";
-				actual = package.Workbook.Names["Name4"].GetRelativeAddress(2, 2);
+				actual = string.Join(string.Empty, package.Workbook.Names["Name4"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
 			}
 		}
