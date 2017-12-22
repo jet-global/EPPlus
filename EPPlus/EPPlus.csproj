@@ -825,6 +825,7 @@
     <Compile Include="Packaging\ZipPackageRelationship.cs" />
     <Compile Include="Packaging\ZipPackageRelationshipCollection.cs" />
     <Compile Include="Packaging\ZipPackageRelationshipBase.cs" />
+    <Compile Include="ZCellStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Drawing\Chart\ExcelLineChart.cs" />
