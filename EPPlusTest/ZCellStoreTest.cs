@@ -5,66 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
+using static OfficeOpenXml.ZCellStore<int>;
 
 namespace EPPlusTest
 {
 	[TestClass]
 	public class ZCellStoreTest
 	{
-		#region GetRowCoordinates Tests
-		[TestMethod]
-		public void GetRowCoordinates()
-		{
-			// First cell
-			Assert.IsTrue(ZCellStore<object>.GetRowCoordinates(1, out int rowPage, out int pageIndex));
-			Assert.AreEqual(0, rowPage);
-			Assert.AreEqual(0, pageIndex);
-			// Last Cell
-			Assert.IsTrue(ZCellStore<object>.GetRowCoordinates(ExcelPackage.MaxRows, out rowPage, out pageIndex));
-			Assert.AreEqual(1023, rowPage);
-			Assert.AreEqual(1023, pageIndex);
-			// 2nd Page First Cell
-			Assert.IsTrue(ZCellStore<object>.GetRowCoordinates(1024 + 1, out rowPage, out pageIndex));
-			Assert.AreEqual(1, rowPage);
-			Assert.AreEqual(0, pageIndex);
-			// 4th Page 245 Cell
-			Assert.IsTrue(ZCellStore<object>.GetRowCoordinates(1024 + 1024 + 1024 + 245, out rowPage, out pageIndex));
-			Assert.AreEqual(3, rowPage);
-			Assert.AreEqual(244, pageIndex);
-			// Row too small
-			Assert.IsFalse(ZCellStore<object>.GetRowCoordinates(0, out rowPage, out pageIndex));
-			// Row too large
-			Assert.IsFalse(ZCellStore<object>.GetRowCoordinates(ExcelPackage.MaxRows + 1, out rowPage, out pageIndex));
-		}
-		#endregion
-
-		#region GetColumnCoordinates Tests
-		[TestMethod]
-		public void GetColumnCoordinates()
-		{
-			// First column
-			Assert.IsTrue(ZCellStore<object>.GetColumnCoordinates(1, out int columnPage, out int pageIndex));
-			Assert.AreEqual(0, columnPage);
-			Assert.AreEqual(0, pageIndex);
-			// Last column
-			Assert.IsTrue(ZCellStore<object>.GetColumnCoordinates(ExcelPackage.MaxColumns, out columnPage, out pageIndex));
-			Assert.AreEqual(127, columnPage);
-			Assert.AreEqual(127, pageIndex);
-			// 2nd Page First column
-			Assert.IsTrue(ZCellStore<object>.GetColumnCoordinates(128 + 1, out columnPage, out pageIndex));
-			Assert.AreEqual(1, columnPage);
-			Assert.AreEqual(0, pageIndex);
-			// 4th Page 100 column
-			Assert.IsTrue(ZCellStore<object>.GetColumnCoordinates(128 + 128 + 128 + 100, out columnPage, out pageIndex));
-			Assert.AreEqual(3, columnPage);
-			Assert.AreEqual(99, pageIndex);
-			// Column too small
-			Assert.IsFalse(ZCellStore<object>.GetColumnCoordinates(0, out columnPage, out pageIndex));
-			// Column too large
-			Assert.IsFalse(ZCellStore<object>.GetColumnCoordinates(ExcelPackage.MaxColumns + 1, out columnPage, out pageIndex));
-		}
-		#endregion
-
 		#region GetValue Tests
 		[TestMethod]
 		public void GetValue()
@@ -298,23 +245,974 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region PrevCell Tests
+		[TestMethod]
+		public void PrevCellEmptyStore()
+		{
+			var cellStore = new ZCellStore<int>();
+			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
+			Assert.IsFalse(cellStore.PrevCell(ref row, ref column));
+		}
 
 		[TestMethod]
-		public void DELME()
+		public void PrevCellStartsWithMaxRowAndColumn()
 		{
-			var cellstore = new CellStore<int>();
-			cellstore.SetValue(1, 1, 1);
-			cellstore.SetValue(1, 2, 2);
-			cellstore.SetValue(1, 3, 3);
-			cellstore.SetValue(2, 2, 4);
-			cellstore.SetValue(3, 3, 5);
-			int row = 0, column = 0;
-			var found = cellstore.NextCell(ref row, ref column);
-			found = cellstore.NextCell(ref row, ref column);
-			found = cellstore.NextCell(ref row, ref column);
-			found = cellstore.NextCell(ref row, ref column);
-			found = cellstore.NextCell(ref row, ref column);
-			found = cellstore.NextCell(ref row, ref column);
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 1);
+			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(1, row);
+			Assert.AreEqual(1, column);
 		}
+
+		[TestMethod]
+		public void PrevCellFindsNextInRowAcrossPages()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 1);
+			cellStore.SetValue(1, 2, 1); // Next on same page
+			cellStore.SetValue(1, 128 + 1, 1); // Next on next page
+			cellStore.SetValue(1, 128 + 128 + 128 + 128 + 50, 1); // Next several pages later
+			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(1, row);
+			Assert.AreEqual(562, column);
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(1, row);
+			Assert.AreEqual(129, column);
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(1, row);
+			Assert.AreEqual(2, column);
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(1, row);
+			Assert.AreEqual(1, column);
+			Assert.IsFalse(cellStore.PrevCell(ref row, ref column));
+		}
+
+		[TestMethod]
+		public void PrevCellFindsNextInColumnAcrossPages()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 1);
+			cellStore.SetValue(2, 1, 1); // Next on same page
+			cellStore.SetValue(1024 + 1, 1, 1); // Next on next page
+			cellStore.SetValue(1024 + 1024 + 1024 + 238, 1, 1); // Next several pages later
+			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(3310, row);
+			Assert.AreEqual(1, column);
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(1025, row);
+			Assert.AreEqual(1, column);
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(2, row);
+			Assert.AreEqual(1, column);
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(1, row);
+			Assert.AreEqual(1, column);
+			Assert.IsFalse(cellStore.PrevCell(ref row, ref column));
+		}
+
+		[TestMethod]
+		public void PrevCellFindsNextDiagonallyAcrossPages()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 1);
+			cellStore.SetValue(2, 2, 1); // Next on same page
+			cellStore.SetValue(1024 + 1, 128 + 1, 1); // Next on next page
+			cellStore.SetValue(1024 + 1024 + 1024 + 238, 128 + 128 + 128 + 1, 1); // Next several pages later
+			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(3310, row);
+			Assert.AreEqual(385, column);
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(1025, row);
+			Assert.AreEqual(129, column);
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(2, row);
+			Assert.AreEqual(2, column);
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(1, row);
+			Assert.AreEqual(1, column);
+			Assert.IsFalse(cellStore.PrevCell(ref row, ref column));
+		}
+		#endregion
+
+		#region Delete Tests
+		[TestMethod]
+		public void DeleteRowsWithShiftNoPageShifting()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(10, 1, 14);
+			cellStore.SetValue(1024 + 1024 + 1024 + 500, 128 + 3, 15);
+			cellStore.SetValue(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, 20);
+			cellStore.Delete(2, 0, 3, 0, true);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(7, 1, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsFalse(cellStore.Exists(10, 1, out value));
+			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 497, 128 + 3, out value));
+			Assert.AreEqual(15, value);
+			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 500, 128 + 3, out value));
+			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 297, 128 + 6, out value));
+			Assert.AreEqual(20, value);
+			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, out value));
+		}
+
+		[TestMethod]
+		public void DeleteRowsWithShiftWithSinglePageShifting()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(10, 1, 14);
+			cellStore.SetValue(1024 + 1024 + 1024 + 500, 128 + 3, 15);
+			cellStore.SetValue(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, 20);
+			cellStore.Delete(1000, 0, 750, 0, true);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(10, 1, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 774, 128 + 3, out value));
+			Assert.AreEqual(15, value);
+			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 500, 128 + 3, out value));
+			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 574, 128 + 6, out value));
+			Assert.AreEqual(20, value);
+			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, out value));
+		}
+
+		[TestMethod]
+		public void DeleteRowsWithShiftWithMultiplePageShifting()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(10, 1, 14);
+			cellStore.SetValue(1024 + 1024 + 1024 + 500, 128 + 3, 15);
+			cellStore.SetValue(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, 20);
+			cellStore.Delete(1000, 0, 1024 + 1024 + 250, 0, true);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(10, 1, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsTrue(cellStore.Exists(1024 + 250, 128 + 3, out value));
+			Assert.AreEqual(15, value);
+			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 500, 128 + 3, out value));
+			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 50, 128 + 6, out value));
+			Assert.AreEqual(20, value);
+			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, out value));
+		}
+
+		[TestMethod]
+		public void DeleteRowsWithoutShiftSinglePage()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(10, 1, 14);
+			cellStore.SetValue(1024 + 1024 + 1024 + 500, 128 + 3, 15);
+			cellStore.SetValue(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, 20);
+			cellStore.Delete(2, 0, 20, 0, false);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsFalse(cellStore.Exists(10, 1, out value));
+			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 500, 128 + 3, out value));
+			Assert.AreEqual(15, value);
+			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, out value));
+			Assert.AreEqual(20, value);
+		}
+
+		[TestMethod]
+		public void DeleteRowsWithoutShiftMultiplePages()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(10, 1, 14);
+			cellStore.SetValue(1024 + 1024 + 1024 + 500, 128 + 3, 15);
+			cellStore.SetValue(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, 20);
+			cellStore.Delete(2, 0, 1024 + 1024 + 1024 + 1024 + 500, 0, false);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsFalse(cellStore.Exists(10, 1, out value));
+			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 500, 128 + 3, out value));
+			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, out value));
+			Assert.AreEqual(20, value);
+		}
+
+		[TestMethod]
+		public void DeleteColumnsWithShift()
+		{
+
+		}
+
+		[TestMethod]
+		public void DeleteColumnsWithoutShift()
+		{
+
+		}
+		#endregion
+
+		#region Nested Class Tests
+
+		#region PagedStructure Tests
+		#region Constructor Tests
+		[TestMethod]
+		public void ConstructorSetsPageDimensions()
+		{
+			var pagedStructure = new PagedStructure<int>(10);
+			Assert.AreEqual(10, pagedStructure.PageBits);
+			Assert.AreEqual(1024, pagedStructure.PageSize);
+			Assert.AreEqual(1023, pagedStructure.PageMask);
+			Assert.AreEqual(ExcelPackage.MaxRows - 1, pagedStructure.MaximumIndex);
+			pagedStructure = new PagedStructure<int>(4);
+			Assert.AreEqual(4, pagedStructure.PageBits);
+			Assert.AreEqual(16, pagedStructure.PageSize);
+			Assert.AreEqual(15, pagedStructure.PageMask);
+			Assert.AreEqual(255, pagedStructure.MaximumIndex);
+		}
+		#endregion
+
+		#region GetItem Tests
+		[TestMethod]
+		public void GetItemFirstItem()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 13, null, null, null },
+				{ 3, null, null, null },
+				{ null, null, 7, null },
+				{ null, null, null, 15 }
+			};
+			pagedStructure.LoadPages(items);
+			Assert.AreEqual(13, pagedStructure.GetItem(0));
+		}
+
+		[TestMethod]
+		public void GetItemLastItem()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 13, null, null, null },
+				{ 3, null, null, null },
+				{ null, null, 7, null },
+				{ null, null, null, 15 }
+			};
+			pagedStructure.LoadPages(items);
+			Assert.AreEqual(15, pagedStructure.GetItem(15));
+		}
+
+		[TestMethod]
+		public void GetItemInnerPageInnerIndex()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 13, null, null, null },
+				{ 3, null, null, null },
+				{ null, null, 7, null },
+				{ null, null, null, 15 }
+			};
+			pagedStructure.LoadPages(items);
+			Assert.AreEqual(7, pagedStructure.GetItem(10));
+		}
+
+		[TestMethod]
+		public void GetItemInnerPageFirstIndex()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 13, null, null, null },
+				{ 3, null, null, null },
+				{ null, null, 7, null },
+				{ null, null, null, 15 }
+			};
+			pagedStructure.LoadPages(items);
+			Assert.AreEqual(3, pagedStructure.GetItem(4));
+		}
+
+		//[TestMethod]
+		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		//public void GetItemIndexOutOfBoundsTooLow()
+		//{
+		//	var pagedStructure = new PagedStructure<int>(2);
+		//	pagedStructure.GetItem(-1);
+		//}
+
+		//[TestMethod]
+		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		//public void GetItemIndexOutOfBoundsTooHigh()
+		//{
+		//	var pagedStructure = new PagedStructure<int>(2);
+		//	pagedStructure.GetItem(16);
+		//}
+		#endregion
+
+		#region SetItem Tests
+		[TestMethod]
+		public void SetItemFirstItem()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			pagedStructure.SetItem(0, 13);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(0, pagedStructure.MaximumUsedIndex);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 13, null, null, null },
+				{ null, null, null, null },
+				{ null, null, null, null },
+				{ null, null, null, null }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void SetItemLastItem()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			pagedStructure.SetItem(15, 13);
+			Assert.AreEqual(15, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ null, null, null, null },
+				{ null, null, null, null },
+				{ null, null, null, null },
+				{ null, null, null, 13 }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void SetItemInnerPageInnerIndex()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			pagedStructure.SetItem(10, 13);
+			Assert.AreEqual(10, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(10, pagedStructure.MaximumUsedIndex);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ null, null, null, null },
+				{ null, null, null, null },
+				{ null, null, 13, null },
+				{ null, null, null, null }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void SetItemInnerPageFirstIndex()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			pagedStructure.SetItem(4, 13);
+			Assert.AreEqual(4, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(4, pagedStructure.MaximumUsedIndex);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ null, null, null, null },
+				{ 13, null, null, null },
+				{ null, null, null, null },
+				{ null, null, null, null }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		//[TestMethod]
+		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		//public void SetItemIndexOutOfBoundsTooLow()
+		//{
+		//	var pagedStructure = new PagedStructure<int>(2);
+		//	pagedStructure.SetItem(-1, 13);
+		//}
+
+		//[TestMethod]
+		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		//public void SetItemIndexOutOfBoundsTooHigh()
+		//{
+		//	var pagedStructure = new PagedStructure<int>(2);
+		//	pagedStructure.SetItem(16, 13);
+		//}
+		#endregion
+
+		#region ShiftItems Tests
+		[TestMethod]
+		public void ShiftItemsZeroDoesNothing()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(0, 0);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+			pagedStructure.ShiftItems(7, 0);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ShiftItemsFromStartPositiveShiftGoesForward()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(0, 1);
+			Assert.AreEqual(1, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ null, 1, 2, 3 },
+				{ 4, 5, 6, 7 },
+				{ 8, 9, 10, 11 },
+				{ 12, 13, 14, 15 }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ShiftItemsFromMiddlePositiveShiftGoesForward()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(5, 5);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, null, null, null },
+				{ null, null, 6, 7 },
+				{ 8, 9, 10, 11 }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ShiftItemsFromMiddleMultiplePagesPositiveShiftGoesForward()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(5, 10);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, null, null, null },
+				{ null, null, null, null },
+				{ null, null, null, 6 },
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ShiftItemsForwardAmountTooHighIsResolvedSilently()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(0, 100);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(0, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ null, null, null, null },
+				{ null, null, null, null },
+				{ null, null, null, null },
+				{ null, null, null, null }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ShiftItemsFromStartNegativeShiftGoesBackwards()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(0, -1);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(14, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 2, 3, 4, 5 },
+				{ 6, 7, 8, 9 },
+				{ 10, 11, 12, 13 },
+				{ 14, 15, 16, null }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ShiftItemsFromMiddleNegativeShiftGoesBackwards()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(5, -3);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(12, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 9, 10, 11 },
+				{ 12, 13, 14, 15 },
+				{ 16, null, null, null }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ShiftItemsFromMiddleMultiplePagesNegativeShiftGoesBackwards()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(5, -10);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(5, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 16, null, null },
+				{ null, null, null, null },
+				{ null, null, null, null }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ShiftItemsBackwardAmountTooHighIsResolvedSilently()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(0, -100);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(0, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ null, null, null, null },
+				{ null, null, null, null },
+				{ null, null, null, null },
+				{ null, null, null, null }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		//[TestMethod]
+		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		//public void ShiftItemsIndexOutOfBoundsTooLow()
+		//{
+		//	var pagedStructure = new PagedStructure<int>(2);
+		//	pagedStructure.ShiftItems(-1, 13);
+		//}
+
+		//[TestMethod]
+		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		//public void ShiftItemsIndexOutOfBoundsTooHigh()
+		//{
+		//	var pagedStructure = new PagedStructure<int>(2);
+		//	pagedStructure.ShiftItems(16, 13);
+		//}
+		#endregion
+
+		#region ClearItems Tests
+		[TestMethod]
+		public void ClearItemsFromStart()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ClearItems(0, 2);
+			Assert.AreEqual(2, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ null, null, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ClearItemsFromMiddle()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ClearItems(7, 5);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, null },
+				{ null, null, null, null },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ClearItemsCountTooHighIsResolvedSilently()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ClearItems(7, 100);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(6, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, null },
+				{ null, null, null, null },
+				{ null, null, null, null }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ClearItemsZeroDoesNothing()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ClearItems(0, 0);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		public void ClearItemsNegativeAmountDoesNothing()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ClearItems(0, -10);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		//[TestMethod]
+		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		//public void ClearItemsIndexOutOfBoundsTooLow()
+		//{
+		//	var pagedStructure = new PagedStructure<int>(2);
+		//	pagedStructure.ClearItems(-1, 2);
+		//}
+
+		//[TestMethod]
+		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		//public void ClearItemsIndexOutOfBoundsTooHigh()
+		//{
+		//	var pagedStructure = new PagedStructure<int>(2);
+		//	pagedStructure.ClearItems(16, 2);
+		//}
+		#endregion
+
+		#region NextItem Tests
+		[TestMethod]
+		public void NextItemFromStart()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = 0;
+			Assert.IsTrue(pagedStructure.NextItem(ref index));
+			Assert.AreEqual(1, index);
+		}
+
+		[TestMethod]
+		public void NextItemFromMiddle()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = 7;
+			Assert.IsTrue(pagedStructure.NextItem(ref index));
+			Assert.AreEqual(8, index);
+		}
+
+		[TestMethod]
+		public void NextItemFromEnd()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = 15;
+			Assert.IsFalse(pagedStructure.NextItem(ref index));
+			Assert.AreEqual(16, index);
+		}
+
+		[TestMethod]
+		public void NextItemSkipsMissingItems()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, null, null },
+				{ null, null, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = 5;
+			Assert.IsTrue(pagedStructure.NextItem(ref index));
+			Assert.AreEqual(10, index);
+		}
+
+		[TestMethod]
+		public void NextItemIndexTooLowFindsFirstItem()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, null, null },
+				{ null, null, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = -3;
+			Assert.IsTrue(pagedStructure.NextItem(ref index));
+			Assert.AreEqual(0, index);
+		}
+
+		[TestMethod]
+		public void NextItemIndexTooHighFindsNothing()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, null, null },
+				{ null, null, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = 23;
+			Assert.IsFalse(pagedStructure.NextItem(ref index));
+			Assert.AreEqual(24, index);
+		}
+		#endregion
+
+		#region PreviousItem Tests
+		[TestMethod]
+		public void PreviousItemFromStart()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = 0;
+			Assert.IsFalse(pagedStructure.PreviousItem(ref index));
+			Assert.AreEqual(-1, index);
+		}
+
+		[TestMethod]
+		public void PreviousItemFromMiddle()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = 7;
+			Assert.IsTrue(pagedStructure.PreviousItem(ref index));
+			Assert.AreEqual(6, index);
+		}
+
+		[TestMethod]
+		public void PreviousItemFromEnd()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = 15;
+			Assert.IsTrue(pagedStructure.PreviousItem(ref index));
+			Assert.AreEqual(14, index);
+		}
+
+		[TestMethod]
+		public void PreviousItemSkipsMissingItems()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, null, null },
+				{ null, null, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = 10;
+			Assert.IsTrue(pagedStructure.PreviousItem(ref index));
+			Assert.AreEqual(5, index);
+		}
+
+		[TestMethod]
+		public void PreviousItemIndexTooLowFindsNothing()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, null, null },
+				{ null, null, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = -3;
+			Assert.IsFalse(pagedStructure.PreviousItem(ref index));
+			Assert.AreEqual(-4, index);
+		}
+
+		[TestMethod]
+		public void PreviousItemIndexTooHighFindsLastItem()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, null, null },
+				{ null, null, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			int index = 23;
+			Assert.IsTrue(pagedStructure.PreviousItem(ref index));
+			Assert.AreEqual(15, index);
+		}
+		#endregion
+		#endregion
+
+		#endregion
 	}
 }

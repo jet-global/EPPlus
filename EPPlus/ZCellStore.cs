@@ -8,35 +8,199 @@ namespace OfficeOpenXml
 {
 	internal class ZCellStore<T> : ICellStore<T>
 	{
-		private class Sheet
-		{
-			// contains 128 pages of columns
-			public ColumnsPage[] Pages { get; } = new ColumnsPage[ZCellStore<T>.ColumnPageSize];
-		}
 
-		internal class ColumnsPage
+		// This structure is 0-indexed
+		internal class PagedStructure<S> 
 		{
-			// contains 128 columns from a page 
-			public Column[] Columns { get; } = new Column[ZCellStore<T>.ColumnPageSize];
-		}
+			internal struct ValueHolder
+			{
+				public S Value { get; set; }
+				static public implicit operator ValueHolder(S value)
+				{
+					return new ValueHolder { Value = value };
+				}
+			}
 
-		internal class Column
-		{
-			// contains 1024 pages of rows
-			public RowsPage[] Pages { get; } = new RowsPage[ZCellStore<T>.RowPageSize];
-		}
+			public int PageBits { get; } // Defines a bit shift to retrive the primary index
+			public int PageSize { get; } // Defines the max index of a single page
+			public int PageMask { get; } // Defines a bit mask to retrieve the secondary index
+			public int MaximumIndex { get; }
 
-		internal class RowsPage
-		{
-			// Contains 1024 rows from a page in the column
-			public DataWrapper[] Data { get; } = new DataWrapper[ZCellStore<T>.RowPageSize];
-		}
+			private ValueHolder?[][] Pages { get; } // protected to enable a test helper to get visibility in here
 
-		internal class DataWrapper // TODO -- Consider making this a struct
-		{
-			public T Item { get; set; }
-		}
+			public int MinimumUsedIndex { get; private set; }
 
+			public int MaximumUsedIndex { get; private set; }
+
+			public PagedStructure(int pageBits)
+			{
+				this.PageBits = pageBits;
+				this.PageSize = 1 << pageBits;
+				this.PageMask = this.PageSize - 1;
+				this.MaximumIndex = (this.PageSize << pageBits) - 1;
+				this.Pages = new ValueHolder?[this.PageSize][];
+				this.MinimumUsedIndex = -1;
+				this.MaximumUsedIndex = -1;
+			}
+
+			public ValueHolder? GetItem(int index)
+			{
+				if (index < 0 || index > this.MaximumIndex)
+					return null;
+				var page = index >> this.PageBits;
+				var innerIndex = index & this.PageMask;
+				var pageArray = this.Pages[page];
+				if (null == pageArray)
+					return null;
+				return pageArray[innerIndex];
+			}
+
+			public void SetItem(int index, ValueHolder? item)
+			{
+				this.SetItem(index, item, true);
+			}
+
+			private void SetItem(int index, ValueHolder? item, bool doBoundsUpdate)
+			{
+				if (index < 0 || index > this.MaximumIndex)
+					return;
+				var page = index >> this.PageBits;
+				var innerIndex = index & this.PageMask;
+				var pageArray = this.Pages[page];
+				if (null == pageArray)
+					this.Pages[page] = pageArray = new ValueHolder?[this.PageSize];
+				pageArray[innerIndex] = item;
+				if (doBoundsUpdate)
+					this.UpdateBounds();
+			}
+
+			public void ShiftItems(int index, int amount)
+			{
+				if (index < 0 || index > this.MaximumIndex)
+					return;
+				if (amount > 0)
+				{
+					for (int i = this.MaximumUsedIndex; i >= index; --i)
+					{
+						var target = i + amount;
+						if (target <= this.MaximumIndex)
+							this.SetItem(target, this.GetItem(i), false);
+						this.SetItem(i, null, false);
+					}
+				}
+				else if (amount < 0)
+				{
+					amount = -amount;
+					for (int i = index; i <= this.MaximumUsedIndex; ++i)
+					{
+						var source = i + amount;
+						if (source <= this.MaximumIndex)
+							this.SetItem(i, this.GetItem(source), false);
+						else
+							this.SetItem(i, null, false);
+					}
+				}
+				this.UpdateBounds();
+			}
+
+			public void ClearItems(int index, int amount)
+			{
+				if (index < 0 || index > this.MaximumIndex)
+					return;
+				var target = Math.Min(index + amount - 1, this.MaximumUsedIndex);
+				for (; index <= target; ++index)
+				{
+					this.SetItem(index, null, false);
+				}
+				this.UpdateBounds();
+			}
+
+			public bool NextItem(ref int index)
+			{
+				if (index++ < this.MinimumUsedIndex)
+					index = this.MinimumUsedIndex;
+				for (; index <= this.MaximumUsedIndex; ++index)
+				{
+					if (this.GetItem(index).HasValue)
+						return true;
+				}
+				return false;
+			}
+
+			public bool PreviousItem(ref int index)
+			{
+				if (index-- > this.MaximumUsedIndex)
+					index = this.MaximumUsedIndex;
+				for (; index >= 0; --index)
+				{
+					if (this.GetItem(index).HasValue)
+						return true;
+				}
+				return false;
+			}
+
+			private void UpdateBounds()
+			{
+				this.MinimumUsedIndex = this.MaximumUsedIndex = 0;
+				for (int i = this.MaximumIndex; i >= 0; --i)
+				{
+					if (this.GetItem(i).HasValue)
+					{
+						this.MaximumUsedIndex = i;
+						break;
+					}
+				}
+				for (int i = 0; i <= this.MaximumIndex; ++i)
+				{
+					if (this.GetItem(i).HasValue)
+					{
+						this.MinimumUsedIndex = i;
+						break;
+					}
+				}
+			}
+
+			#region Test Helpers
+			/// <summary>
+			/// This is included for testing purposes: DO NOT USE
+			/// </summary>
+			/// <returns></returns>
+			public ValueHolder?[][] GetPages()
+			{
+				return this.Pages;
+			}
+
+			public void LoadPages(ValueHolder?[,] pageData)
+			{
+				for (int row = 0; row <= pageData.GetUpperBound(0); ++row)
+				{
+					for (int column = 0; column <= pageData.GetUpperBound(1); ++column)
+					{
+						var pageArray = this.Pages[row];
+						if (null == pageArray)
+							this.Pages[row] = pageArray = new ValueHolder?[this.PageSize];
+						pageArray[column] = pageData[row, column];
+					}
+				}
+				this.UpdateBounds();
+			}
+
+			public void ValidatePages(ValueHolder?[,] pageData, Action<int, int, string> invalidIndex)
+			{
+				for (int row = 0; row <= pageData.GetUpperBound(0); ++row)
+				{
+					for (int column = 0; column <= pageData.GetUpperBound(1); ++column)
+					{
+						var item = this.Pages[row]?[column];
+						var data = pageData[row, column];
+						if (data.HasValue != item.HasValue || (data.HasValue && !data.Value.Value.Equals(item.Value.Value)))
+							invalidIndex(row, column, $"Expected: {(data?.ToString() ?? "null")}");
+					}
+				}
+			}
+			#endregion
+		}
+		
 		#region Constants
 		private const int RowPageSize = 1024; // The number of rows in a row page
 		private const int ColumnPageSize = 128; // The number of columns in a column page
@@ -45,43 +209,64 @@ namespace OfficeOpenXml
 		private const int RowShift = 10; // 2 ^ 10 = 1024 so right-shifting by 10 bits divides by 1024
 		private const int ColumnShift = 7; // 2 ^ 7 = 128 so right-shifting by 7 bits divides by 128
 		#endregion
+		
+#if DEBUG
+		public Tuple<int, int, T>[] GetDump()
+		{
+			return null;
+		}
 
-		private Sheet SheetInternal { get; } = new Sheet();
+		public void Initialize(Tuple<int, int, T>[] data)
+		{
+			foreach (var datum in data)
+			{
+				var rowValue = datum.Item1;
+				var columnValue = datum.Item2;
+				var dataValue = datum.Item3;
+				this.SetValue(rowValue, columnValue, dataValue);
+			}
+		}
+#endif
 
-		private int MaxUsedColumn = 0;
-		private int MaxUsedRow = 0;
+		private PagedStructure<PagedStructure<T>> Data { get; } = new PagedStructure<PagedStructure<T>>(ZCellStore<T>.ColumnShift);
 
-		#region ICellStore<T> Methods
 		public T GetValue(int row, int column)
 		{
-			this.Exists(row, column, out T value);
-			return value;
+			if (row < 1 || row > ExcelPackage.MaxRows || column < 1 || column > ExcelPackage.MaxColumns)
+				return default(T);
+			var columnItem = this.Data.GetItem(column - 1)?.Value;
+			if (columnItem != null)
+			{
+				var rowItem = columnItem.GetItem(row - 1);
+				if (rowItem.HasValue)
+					return rowItem.Value.Value;
+			}
+			return default(T);
 		}
 
 		public void SetValue(int row, int column, T value)
 		{
-			if (ZCellStore<T>.GetRowCoordinates(row, out int rowPage, out int rowPageIndex) &&
-					ZCellStore<T>.GetColumnCoordinates(column, out int columnPage, out int columnPageIndex))
+			if (row < 1 || row > ExcelPackage.MaxRows || column < 1 || column > ExcelPackage.MaxColumns)
+				return;
+			column--;
+			var columnStructure = this.Data.GetItem(column);
+			if (columnStructure == null)
 			{
-				var columnObj = this.GetColumn(columnPage, columnPageIndex, true);
-				var cell = this.GetRow(columnObj, rowPage, rowPageIndex, true);
-				cell.Item = value;
+				columnStructure =  new PagedStructure<T>(ZCellStore<T>.RowShift);
+				this.Data.SetItem(column, columnStructure);
 			}
+			columnStructure?.Value.SetItem(row - 1, value);
 		}
 
 		public bool Exists(int row, int column, out T value)
 		{
 			value = default(T);
-			if (ZCellStore<T>.GetRowCoordinates(row, out int rowPage, out int rowPageIndex) &&
-					ZCellStore<T>.GetColumnCoordinates(column, out int columnPage, out int columnPageIndex))
+			if (row < 1 || row > ExcelPackage.MaxRows || column < 1 || column > ExcelPackage.MaxColumns)
+				return false;
+			var item = this.Data.GetItem(column - 1)?.Value.GetItem(row - 1);
+			if (item.HasValue)
 			{
-				var columnObj = this.GetColumn(columnPage, columnPageIndex, false);
-				if (null == columnObj)
-					return false;
-				var cell = this.GetRow(columnObj, rowPage, rowPageIndex, false);
-				if (null == cell)
-					return false;
-				value = cell.Item;
+				value = item.Value.Value;
 				return true;
 			}
 			return false;
@@ -89,53 +274,85 @@ namespace OfficeOpenXml
 
 		public bool NextCell(ref int row, ref int column)
 		{
-			while (row <= this.MaxUsedRow)
+			int localRow = row - 1, localColumn = column - 1;
+			do
 			{
-				while (++column <= this.MaxUsedColumn)
+				while (this.Data.NextItem(ref localColumn))
 				{
-					if (ZCellStore<T>.GetColumnCoordinates(column, out int columnPage, out int columnPageIndex))
+					var item = this.Data.GetItem(localColumn)?.Value.GetItem(localRow);
+					if (item.HasValue)
 					{
-						var columnObj = this.GetColumn(columnPage, columnPageIndex, false);
-						if (null != columnObj)
-						{
-							if (ZCellStore<T>.GetRowCoordinates(row, out int rowPage, out int rowPageIndex))
-							{
-								var cell = this.GetRow(columnObj, rowPage, rowPageIndex, false);
-								if (cell != null)
-									return true;
-							}
-						}
+						row = localRow + 1;
+						column = localColumn + 1;
+						return true;
 					}
 				}
-				column = -1;
-				++row;
-			}
+				localColumn = -1;
+			} while (++localRow < ExcelPackage.MaxRows);
 			return false;
 		}
 
 		public bool PrevCell(ref int row, ref int column)
 		{
-			throw new NotImplementedException();
+			int localRow = row - 1, localColumn = column - 1;
+			do
+			{
+				while (this.Data.PreviousItem(ref localColumn))
+				{
+					var item = this.Data.GetItem(localColumn)?.Value.GetItem(localRow);
+					if (item.HasValue)
+					{
+						row = localRow + 1;
+						column = localColumn + 1;
+						return true;
+					}
+				}
+				localColumn = ExcelPackage.MaxColumns + 1;
+			} while (--localRow >= 0);
+			return false;
 		}
 
 		public void Delete(int fromRow, int fromCol, int rows, int columns)
 		{
-			throw new NotImplementedException();
+			this.Delete(fromRow, fromCol, rows, columns, true);
 		}
 
 		public void Delete(int fromRow, int fromCol, int rows, int columns, bool shift)
 		{
-			throw new NotImplementedException();
+			if (shift)
+			{
+				if (fromCol > 0)
+					this.Data.ShiftItems(fromCol, -columns);
+				if (fromRow > 0)
+				{
+					int column = -1;
+					while(this.Data.NextItem(ref column))
+					{
+						this.Data.GetItem(column)?.Value.ShiftItems(fromRow, -rows);
+					}
+				}
+			}
+			else
+				this.Clear(fromRow, fromCol, rows, columns);
 		}
 
 		public bool Exists(int row, int column)
 		{
-			return this.Exists(row, column, out T value);
+			return this.Exists(row, column, out _);
 		}
 
-		public void Clear(int _fromRow, int _fromCol, int toRow, int toCol)
+		public void Clear(int fromRow, int fromCol, int rows, int columns)
 		{
-			throw new NotImplementedException();
+			if (fromCol > 0)
+				this.Data.ClearItems(fromCol, columns);
+			if (fromRow > 0)
+			{
+				int column = -1;
+				while (this.Data.NextItem(ref column))
+				{
+					this.Data.GetItem(column)?.Value.ClearItems(fromRow, rows);
+				}
+			}
 		}
 
 		public bool GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol)
@@ -152,117 +369,6 @@ namespace OfficeOpenXml
 		{
 			throw new NotImplementedException();
 		}
-		#endregion
-
-		#region Private Methods
-
-		private Column GetColumn(int columnPage, int columnPageIndex, bool create)
-		{
-			var page = this.SheetInternal.Pages[columnPage];
-			if (null == page)
-			{
-				if (create)
-					this.SheetInternal.Pages[columnPage] = page = new ColumnsPage();
-				else
-					return null;
-			}
-			var columnObj = page.Columns[columnPageIndex];
-			if (null == columnObj && create)
-			{
-				page.Columns[columnPageIndex] = columnObj = new Column();
-				var column = ZCellStore<T>.RebuildColumn(columnPage, columnPageIndex);
-				if (column > this.MaxUsedColumn)
-					this.MaxUsedColumn = column;
-			}
-			return columnObj;
-		}
-
-		private DataWrapper GetRow(Column column, int rowPage, int rowPageIndex, bool create)
-		{
-			var page = column.Pages[rowPage];
-			if (null == page)
-			{
-				if (create)
-					column.Pages[rowPage] = page = new RowsPage();
-				else
-					return null;
-			}
-			var cell = page.Data[rowPageIndex];
-			if (null == cell && create)
-			{
-				page.Data[rowPageIndex] = cell = new DataWrapper();
-				var row = ZCellStore<T>.RebuildRow(rowPage, rowPageIndex);
-				if (row > this.MaxUsedRow)
-					this.MaxUsedRow = row;
-			}
-			return cell;
-		}
-		#endregion
-
-#if DEBUG
-		public Tuple<int, int, T>[] GetDump()
-		{
-			return null;
-		}
-
-		public void Initialize(Tuple<int, int, T>[] data)
-		{
-			foreach (var datum in data)
-			{
-				var rowValue = datum.Item1;
-				var columnValue = datum.Item2;
-				var dataValue = datum.Item3;
-				ZCellStore<T>.GetColumnCoordinates(columnValue, out int columnPage, out int columnPageIndex);
-				var column = this.GetColumn(columnPage, columnPageIndex, true);
-				ZCellStore<T>.GetRowCoordinates(rowValue, out int rowPage, out int rowPageIndex);
-				var cell = this.GetRow(column, rowPage, rowPageIndex, true);
-				cell.Item = dataValue;
-			}
-		}
-#endif
-
-		#region Internal Static Methods
-		internal static bool GetRowCoordinates(int row, out int rowPage, out int pageIndex)
-		{
-			rowPage = pageIndex = 0;
-			if (row < 1 || row > ExcelPackage.MaxRows)
-				return false;
-			// Rows are 1-index in Excel so let's shift down by one to get into our array-space
-			--row;
-			// Since row pages are in an array of 1024 of we can identify the page by right-shifting 10 (dividing by 1024)
-			rowPage = row >> ZCellStore<T>.RowShift;
-			// Since each page contains 1024 rows, we can take the least significant bits and bitwise AND them to get the index into the actual page.
-			pageIndex = row & ZCellStore<T>.RowMask;
-			return true;
-		}
-
-		internal static bool GetColumnCoordinates(int column, out int columnPage, out int pageIndex)
-		{
-			columnPage = pageIndex = 0;
-			if (column < 1 || column > ExcelPackage.MaxColumns)
-				return false;
-			// Columns are 1-index in Excel so let's shift down by one to get into our array-space
-			--column;
-			// Since column pages are in an array of 128 of we can identify the page by right-shifting 7 (dividing by 128)
-			columnPage = column >> ZCellStore<T>.ColumnShift;
-			// Since each page contains 128 columns, we can take the least significant bits and bitwise AND them to get the index into the actual page.
-			pageIndex = column & ZCellStore<T>.ColumnMask;
-			return true;
-		}
-
-		internal static int RebuildColumn(int columnPage, int pageIndex)
-		{
-			int column = columnPage << ZCellStore<T>.ColumnShift;
-			column = column | ZCellStore<T>.ColumnMask;
-			return column;
-		}
-
-		internal static int RebuildRow(int rowPage, int pageIndex)
-		{
-			int row = rowPage << ZCellStore<T>.RowShift;
-			row = row | ZCellStore<T>.RowMask;
-			return row;
-		}
-		#endregion
+		
 	}
 }
