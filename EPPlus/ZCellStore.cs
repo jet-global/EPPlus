@@ -1,4 +1,35 @@
-﻿using System;
+﻿/*******************************************************************************
+ * You may amend and distribute as you like, but don't remove this header!
+ *
+ * EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+ * See http://www.codeplex.com/EPPlus for details.
+ *
+ * Copyright (C) 2017  Zachary Faltersack
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * See the GNU Lesser General Public License for more details.
+ *
+ * The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+ * If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+ *
+ * All code and executables are provided "as is" with no warranty either express or implied. 
+ * The author accepts no liability for any damage or loss of business that this product may cause.
+ *
+ * Code change notes:
+ * 
+ * Author							   Change									Date
+ * ******************************************************************************
+ * Zachary Faltersack    Added       		        2017-12-22
+ *******************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -149,7 +180,22 @@ namespace OfficeOpenXml
 
 		public bool GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol)
 		{
-			throw new NotImplementedException();
+			fromCol = this.Data.MinimumUsedIndex + 1;
+			toCol = this.Data.MaximumUsedIndex + 1;
+			fromRow = ExcelPackage.MaxRows + 1;
+			toRow = 0;
+			int searchIndex = 0;
+			while(this.Data.NextItem(ref searchIndex))
+			{
+				var column = this.Data.GetItem(searchIndex);
+				var localMinRow = column?.Value.MinimumUsedIndex + 1;
+				if (localMinRow < fromRow)
+					fromRow = localMinRow ?? 0;
+				var localMaxRow = column?.Value.MaximumUsedIndex + 1;
+				if (localMaxRow > toRow)
+					toRow = localMaxRow ?? 0;
+			}
+			return fromRow != ExcelPackage.MaxRows + 1 && toRow != 0 && fromCol != 0 && toCol != 0;
 		}
 
 		public void Insert(int rowFrom, int columnFrom, int rows, int columns)

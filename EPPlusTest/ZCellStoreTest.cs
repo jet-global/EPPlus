@@ -745,6 +745,55 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region GetDimension Tests
+		[TestMethod]
+		public void GetDimensionEmptyCellStore()
+		{
+			var cellStore = new ZCellStore<int>();
+			Assert.IsFalse(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
+		}
+
+		[TestMethod]
+		public void GetDimensionSingleItem()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(400, 6000, 5);
+			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
+			Assert.AreEqual(400, fromRow);
+			Assert.AreEqual(6000, fromCol);
+			Assert.AreEqual(400, toRow);
+			Assert.AreEqual(6000, toCol);
+		}
+
+		[TestMethod]
+		public void GetDimensionTwoItems()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(20, 300, 5);
+			cellStore.SetValue(400, 6000, 5);
+			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
+			Assert.AreEqual(20, fromRow);
+			Assert.AreEqual(300, fromCol);
+			Assert.AreEqual(400, toRow);
+			Assert.AreEqual(6000, toCol);
+		}
+
+		[TestMethod]
+		public void GetDimensionFourItems()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(20, 100, 5);
+			cellStore.SetValue(15, 300, 5);
+			cellStore.SetValue(400, 6000, 5);
+			cellStore.SetValue(500, 5000, 5);
+			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
+			Assert.AreEqual(15, fromRow);
+			Assert.AreEqual(100, fromCol);
+			Assert.AreEqual(500, toRow);
+			Assert.AreEqual(6000, toCol);
+		}
+		#endregion
+
 		#region Nested Class Tests
 
 		#region PagedStructure Tests
