@@ -117,31 +117,75 @@ namespace OfficeOpenXml
 
 			public bool NextItem(ref int index)
 			{
+				if (this.MinimumUsedIndex == -1 || this.MaximumUsedIndex == -1)
+					return false;
+
 				if (index++ < this.MinimumUsedIndex)
 					index = this.MinimumUsedIndex;
-				for (; index <= this.MaximumUsedIndex; ++index)
+
+				var minimumPage = index >> this.PageBits;
+				var minimumInnerIndex = index & this.PageMask;
+				var maximumPage = this.MaximumUsedIndex >> this.PageBits;
+				var maximumInnerIndex = this.MaximumUsedIndex & this.PageMask;
+
+				for (int page = minimumPage; page <= maximumPage; ++page)
 				{
-					if (this.GetItem(index).HasValue)
-						return true;
+					var currentPage = this.Pages[page];
+					if (currentPage != null)
+					{
+						for (; minimumInnerIndex < this.PageSize; ++minimumInnerIndex)
+						{
+							var currentItem = currentPage[minimumInnerIndex];
+							if (currentItem.HasValue)
+							{
+								index = page << this.PageBits;
+								index = index | minimumInnerIndex;
+								return true;
+							}
+						}
+					}
+					minimumInnerIndex = 0;
 				}
 				return false;
 			}
 
 			public bool PreviousItem(ref int index)
 			{
+				if (this.MinimumUsedIndex == -1 || this.MaximumUsedIndex == -1)
+					return false;
+
 				if (index-- > this.MaximumUsedIndex)
 					index = this.MaximumUsedIndex;
-				for (; index >= 0; --index)
+
+				var minimumPage = this.MinimumUsedIndex >> this.PageBits;
+				var minimumInnerIndex = this.MinimumUsedIndex & this.PageMask;
+				var maximumPage = index >> this.PageBits;
+				var maximumInnerIndex = index & this.PageMask;
+
+				for (int page = maximumPage; page >= minimumPage; --page)
 				{
-					if (this.GetItem(index).HasValue)
-						return true;
+					var currentPage = this.Pages[page];
+					if (currentPage != null)
+					{
+						for (; maximumInnerIndex >= 0; --maximumInnerIndex)
+						{
+							var currentItem = currentPage[maximumInnerIndex];
+							if (currentItem.HasValue)
+							{
+								index = page << this.PageBits;
+								index = index | maximumInnerIndex;
+								return true;
+							}
+						}
+					}
+					maximumInnerIndex = this.PageSize - 1;
 				}
 				return false;
 			}
 
 			private void UpdateBounds()
 			{
-				this.MinimumUsedIndex = this.MaximumUsedIndex = 0;
+				this.MinimumUsedIndex = this.MaximumUsedIndex = -1;
 				for (int i = this.MaximumIndex; i >= 0; --i)
 				{
 					if (this.GetItem(i).HasValue)
