@@ -12,28 +12,40 @@ namespace EPPlusTest
 	[TestClass]
 	public class ZCellStoreTest
 	{
+		/*
+		 * How to read these tests:
+		 * 
+		 * There are two helper methods called BuildRow and BuildColumn.
+		 * Since we know the static internal structure of this cell store 
+		 * we can use these to explicitly target an internal page and an index on that page.
+		 * 
+		 * This is helpful because the nature of this data structure makes it hard to picture
+		 * where your data is going. With this technique you actually get coordinates into the 
+		 * associated page structures.
+		 * 
+		 * 
+		 */
+
+		
 		#region GetValue Tests
 		[TestMethod]
 		public void GetValue()
 		{
 			var cellStore = new ZCellStore<int>();
-			cellStore.Initialize(new[]
-			{
-				new Tuple<int, int, int>(1, 1, 1),
-				new Tuple<int, int, int>(2, 2, 2),
-				new Tuple<int, int, int>(1024, 10, 3),
-				new Tuple<int, int, int>(1024 + 1024 + 3, 128 + 4, 4),
-				new Tuple<int, int, int>(1024 + 1024 + 1024 + 500, 128 + 128 + 100, 5),
-			});
-			var value = cellStore.GetValue(1, 1);
+			cellStore.SetValue(this.BuildRow(0, 1), this.BuildColumn(0, 1), 1);
+			cellStore.SetValue(this.BuildRow(0, 2), this.BuildColumn(0, 2), 2);
+			cellStore.SetValue(this.BuildRow(0, 1024), this.BuildColumn(0, 10), 3);
+			cellStore.SetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4), 4);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(2, 100), 5);
+			var value = cellStore.GetValue(this.BuildRow(0, 1), this.BuildColumn(0, 1));
 			Assert.AreEqual(1, value);
-			value = cellStore.GetValue(2, 2);
+			value = cellStore.GetValue(this.BuildRow(0, 2), this.BuildColumn(0, 2));
 			Assert.AreEqual(2, value);
-			value = cellStore.GetValue(1024, 10);
+			value = cellStore.GetValue(this.BuildRow(0, 1024), this.BuildColumn(0, 10));
 			Assert.AreEqual(3, value);
-			value = cellStore.GetValue(1024 + 1024 + 3, 128 + 4);
+			value = cellStore.GetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4));
 			Assert.AreEqual(4, value);
-			value = cellStore.GetValue(1024 + 1024 + 1024 + 500, 128 + 128 + 100);
+			value = cellStore.GetValue(this.BuildRow(3, 500), this.BuildColumn(2, 100));
 			Assert.AreEqual(5, value);
 			// Non-existent value returns default(T)
 			value = cellStore.GetValue(12345, 12345);
@@ -64,14 +76,11 @@ namespace EPPlusTest
 		public void SetValue()
 		{
 			var cellStore = new ZCellStore<int>();
-			cellStore.Initialize(new[]
-			{
-				new Tuple<int, int, int>(1024 + 1024 + 3, 128 + 4, 4),
-			});
-			var value = cellStore.GetValue(1024 + 1024 + 3, 128 + 4);
+			cellStore.SetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4), 4);
+			var value = cellStore.GetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4));
 			Assert.AreEqual(4, value);
-			cellStore.SetValue(1024 + 1024 + 3, 128 + 4, 9);
-			value = cellStore.GetValue(1024 + 1024 + 3, 128 + 4);
+			cellStore.SetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4), 9);
+			value = cellStore.GetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4));
 			Assert.AreEqual(9, value);
 			// Non-existent value returns default(T)
 			value = cellStore.GetValue(12345, 12345);
@@ -178,8 +187,8 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 1);
 			cellStore.SetValue(1, 2, 1); // Next on same page
-			cellStore.SetValue(1, 128 + 1, 1); // Next on next page
-			cellStore.SetValue(1, 128 + 128 + 128 + 128 + 50, 1); // Next several pages later
+			cellStore.SetValue(1, this.BuildColumn(1, 1), 1); // Next on next page
+			cellStore.SetValue(1, this.BuildColumn(4, 50), 1); // Next several pages later
 			int row = 0, column = 0;
 			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
 			Assert.AreEqual(1, row);
@@ -189,10 +198,10 @@ namespace EPPlusTest
 			Assert.AreEqual(2, column);
 			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
 			Assert.AreEqual(1, row);
-			Assert.AreEqual(129, column);
+			Assert.AreEqual(this.BuildColumn(1, 1), column);
 			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
 			Assert.AreEqual(1, row);
-			Assert.AreEqual(562, column);
+			Assert.AreEqual(this.BuildColumn(4, 50), column);
 			Assert.IsFalse(cellStore.NextCell(ref row, ref column));
 		}
 
@@ -202,8 +211,8 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 1);
 			cellStore.SetValue(2, 1, 1); // Next on same page
-			cellStore.SetValue(1024 + 1, 1, 1); // Next on next page
-			cellStore.SetValue(1024 + 1024 + 1024 + 238, 1, 1); // Next several pages later
+			cellStore.SetValue(this.BuildRow(1, 1), 1, 1); // Next on next page
+			cellStore.SetValue(this.BuildRow(3, 238), 1, 1); // Next several pages later
 			int row = 0, column = 0;
 			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
 			Assert.AreEqual(1, row);
@@ -212,10 +221,10 @@ namespace EPPlusTest
 			Assert.AreEqual(2, row);
 			Assert.AreEqual(1, column);
 			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(1025, row);
+			Assert.AreEqual(this.BuildRow(1, 1), row);
 			Assert.AreEqual(1, column);
 			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(3310, row);
+			Assert.AreEqual(this.BuildRow(3, 238), row);
 			Assert.AreEqual(1, column);
 			Assert.IsFalse(cellStore.NextCell(ref row, ref column));
 		}
@@ -226,8 +235,8 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 1);
 			cellStore.SetValue(2, 2, 1); // Next on same page
-			cellStore.SetValue(1024 + 1, 128 + 1, 1); // Next on next page
-			cellStore.SetValue(1024 + 1024 + 1024 + 238, 128 + 128 + 128 + 1, 1); // Next several pages later
+			cellStore.SetValue(this.BuildRow(1, 1), this.BuildColumn(1, 1), 1); // Next on next page
+			cellStore.SetValue(this.BuildRow(3, 238), this.BuildColumn(3, 1), 1); // Next several pages later
 			int row = 0, column = 0;
 			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
 			Assert.AreEqual(1, row);
@@ -236,11 +245,11 @@ namespace EPPlusTest
 			Assert.AreEqual(2, row);
 			Assert.AreEqual(2, column);
 			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(1025, row);
-			Assert.AreEqual(129, column);
+			Assert.AreEqual(this.BuildRow(1, 1), row);
+			Assert.AreEqual(this.BuildColumn(1, 1), column);
 			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(3310, row);
-			Assert.AreEqual(385, column);
+			Assert.AreEqual(this.BuildRow(3, 238), row);
+			Assert.AreEqual(this.BuildColumn(3, 1), column);
 			Assert.IsFalse(cellStore.NextCell(ref row, ref column));
 		}
 		#endregion
@@ -271,15 +280,15 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 1);
 			cellStore.SetValue(1, 2, 1); // Next on same page
-			cellStore.SetValue(1, 128 + 1, 1); // Next on next page
-			cellStore.SetValue(1, 128 + 128 + 128 + 128 + 50, 1); // Next several pages later
+			cellStore.SetValue(1, this.BuildColumn(1, 1), 1); // Next on next page
+			cellStore.SetValue(1, this.BuildColumn(4, 50), 1); // Next several pages later
 			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
 			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
 			Assert.AreEqual(1, row);
-			Assert.AreEqual(562, column);
+			Assert.AreEqual(this.BuildColumn(4, 50), column);
 			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
 			Assert.AreEqual(1, row);
-			Assert.AreEqual(129, column);
+			Assert.AreEqual(this.BuildColumn(1, 1), column);
 			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
 			Assert.AreEqual(1, row);
 			Assert.AreEqual(2, column);
@@ -295,14 +304,14 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 1);
 			cellStore.SetValue(2, 1, 1); // Next on same page
-			cellStore.SetValue(1024 + 1, 1, 1); // Next on next page
-			cellStore.SetValue(1024 + 1024 + 1024 + 238, 1, 1); // Next several pages later
+			cellStore.SetValue(this.BuildRow(1, 1), 1, 1); // Next on next page
+			cellStore.SetValue(this.BuildRow(3, 238), 1, 1); // Next several pages later
 			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
 			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(3310, row);
+			Assert.AreEqual(this.BuildRow(3, 238), row);
 			Assert.AreEqual(1, column);
 			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(1025, row);
+			Assert.AreEqual(this.BuildRow(1, 1), row);
 			Assert.AreEqual(1, column);
 			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
 			Assert.AreEqual(2, row);
@@ -319,15 +328,15 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 1);
 			cellStore.SetValue(2, 2, 1); // Next on same page
-			cellStore.SetValue(1024 + 1, 128 + 1, 1); // Next on next page
-			cellStore.SetValue(1024 + 1024 + 1024 + 238, 128 + 128 + 128 + 1, 1); // Next several pages later
+			cellStore.SetValue(this.BuildRow(1, 1), this.BuildColumn(1, 1), 1); // Next on next page
+			cellStore.SetValue(this.BuildRow(3, 238), this.BuildColumn(3, 1), 1); // Next several pages later
 			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
 			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(3310, row);
-			Assert.AreEqual(385, column);
+			Assert.AreEqual(this.BuildRow(3, 238), row);
+			Assert.AreEqual(this.BuildColumn(3, 1), column);
 			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(1025, row);
-			Assert.AreEqual(129, column);
+			Assert.AreEqual(this.BuildRow(1, 1), row);
+			Assert.AreEqual(this.BuildColumn(1, 1), column);
 			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
 			Assert.AreEqual(2, row);
 			Assert.AreEqual(2, column);
@@ -340,25 +349,153 @@ namespace EPPlusTest
 
 		#region Delete Tests
 		[TestMethod]
+		public void DeleteRowsNoPageShifting()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(10, 1, 14);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
+			cellStore.Delete(2, 0, 3, 0);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(7, 1, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsFalse(cellStore.Exists(10, 1, out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(3, 497), this.BuildColumn(1, 3), out value));
+			Assert.AreEqual(15, value);
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 297), this.BuildColumn(1, 6), out value));
+			Assert.AreEqual(20, value);
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
+		}
+
+		[TestMethod]
+		public void DeleteRowsWithSinglePageShifting()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(10, 1, 14);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
+			cellStore.Delete(1000, 0, 750, 0);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(10, 1, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(2, 774), this.BuildColumn(1, 3), out value));
+			Assert.AreEqual(15, value);
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(4, 574), this.BuildColumn(1, 6), out value));
+			Assert.AreEqual(20, value);
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
+		}
+
+		[TestMethod]
+		public void DeleteRowsWithMultiplePageShifting()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(10, 1, 14);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
+			cellStore.Delete(1000, 0, this.BuildRow(2, 250), 0);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(10, 1, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(1, 250), this.BuildColumn(1, 3), out value));
+			Assert.AreEqual(15, value);
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(3, 50), this.BuildColumn(1, 6), out value));
+			Assert.AreEqual(20, value);
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
+		}
+
+		[TestMethod]
+		public void DeleteColumnsNoPageShifting()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(1, 10, 14);
+			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
+			cellStore.Delete(0, 2, 0, 2);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(1, 8, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsFalse(cellStore.Exists(1, 10, out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 1), out value));
+			Assert.AreEqual(15, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 4), out value));
+			Assert.AreEqual(20, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
+		}
+
+		[TestMethod]
+		public void DeleteColumnsWithSinglePageShifting()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(1, 10, 14);
+			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
+			cellStore.Delete(0, this.BuildColumn(1, 1), 0, 75);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(1, 10, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 59), out value));
+			Assert.AreEqual(20, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
+		}
+
+		[TestMethod]
+		public void DeleteColumnsWithMultiplePageShifting()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(1, 10, 14);
+			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
+			cellStore.SetValue(1, this.BuildColumn(5, 37), 25);
+			cellStore.Delete(0, 100, 0, this.BuildColumn(3, 1));
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(1, 10, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 36), out value));
+			Assert.AreEqual(25, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(5, 37), out value));
+		}
+		#endregion
+
+		#region Delete (with Shift flag) Tests
+		[TestMethod]
 		public void DeleteRowsWithShiftNoPageShifting()
 		{
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 13);
 			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(1024 + 1024 + 1024 + 500, 128 + 3, 15);
-			cellStore.SetValue(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, 20);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
 			cellStore.Delete(2, 0, 3, 0, true);
 			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
 			Assert.AreEqual(13, value);
 			Assert.IsTrue(cellStore.Exists(7, 1, out value));
 			Assert.AreEqual(14, value);
 			Assert.IsFalse(cellStore.Exists(10, 1, out value));
-			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 497, 128 + 3, out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(3, 497), this.BuildColumn(1, 3), out value));
 			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 500, 128 + 3, out value));
-			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 297, 128 + 6, out value));
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 297), this.BuildColumn(1, 6), out value));
 			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, out value));
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
 		}
 
 		[TestMethod]
@@ -367,19 +504,19 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 13);
 			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(1024 + 1024 + 1024 + 500, 128 + 3, 15);
-			cellStore.SetValue(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, 20);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
 			cellStore.Delete(1000, 0, 750, 0, true);
 			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
 			Assert.AreEqual(13, value);
 			Assert.IsTrue(cellStore.Exists(10, 1, out value));
 			Assert.AreEqual(14, value);
-			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 774, 128 + 3, out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(2, 774), this.BuildColumn(1, 3), out value));
 			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 500, 128 + 3, out value));
-			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 574, 128 + 6, out value));
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(4, 574), this.BuildColumn(1, 6), out value));
 			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, out value));
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
 		}
 
 		[TestMethod]
@@ -388,19 +525,19 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 13);
 			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(1024 + 1024 + 1024 + 500, 128 + 3, 15);
-			cellStore.SetValue(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, 20);
-			cellStore.Delete(1000, 0, 1024 + 1024 + 250, 0, true);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
+			cellStore.Delete(1000, 0, this.BuildRow(2, 250), 0, true); 
 			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
 			Assert.AreEqual(13, value);
 			Assert.IsTrue(cellStore.Exists(10, 1, out value));
 			Assert.AreEqual(14, value);
-			Assert.IsTrue(cellStore.Exists(1024 + 250, 128 + 3, out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(1, 250), this.BuildColumn(1, 3), out value));
 			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 500, 128 + 3, out value));
-			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 50, 128 + 6, out value));
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(3, 50), this.BuildColumn(1, 6), out value));
 			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, out value));
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
 		}
 
 		[TestMethod]
@@ -409,15 +546,15 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 13);
 			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(1024 + 1024 + 1024 + 500, 128 + 3, 15);
-			cellStore.SetValue(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, 20);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
 			cellStore.Delete(2, 0, 20, 0, false);
 			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
 			Assert.AreEqual(13, value);
 			Assert.IsFalse(cellStore.Exists(10, 1, out value));
-			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 500, 128 + 3, out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(3,500), this.BuildColumn(1, 3), out value));
 			Assert.AreEqual(15, value);
-			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
 			Assert.AreEqual(20, value);
 		}
 
@@ -427,27 +564,184 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 13);
 			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(1024 + 1024 + 1024 + 500, 128 + 3, 15);
-			cellStore.SetValue(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, 20);
-			cellStore.Delete(2, 0, 1024 + 1024 + 1024 + 1024 + 500, 0, false);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
+			cellStore.Delete(2, 0, this.BuildRow(4, 500), 0, false); 
 			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
 			Assert.AreEqual(13, value);
 			Assert.IsFalse(cellStore.Exists(10, 1, out value));
-			Assert.IsFalse(cellStore.Exists(1024 + 1024 + 1024 + 500, 128 + 3, out value));
-			Assert.IsTrue(cellStore.Exists(1024 + 1024 + 1024 + 1024 + 1024 + 300, 128 + 6, out value));
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
 			Assert.AreEqual(20, value);
 		}
 
 		[TestMethod]
-		public void DeleteColumnsWithShift()
+		public void DeleteColumnsWithShiftNoPageShifting()
 		{
-
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(1, 10, 14);
+			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
+			cellStore.Delete(0, 2, 0, 2, true);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(1, 8, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsFalse(cellStore.Exists(1, 10, out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 1), out value));
+			Assert.AreEqual(15, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 4), out value));
+			Assert.AreEqual(20, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
 		}
 
 		[TestMethod]
-		public void DeleteColumnsWithoutShift()
+		public void DeleteColumnsWithShiftWithSinglePageShifting()
 		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(1, 10, 14);
+			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
+			cellStore.Delete(0, this.BuildColumn(1, 1), 0, 75, true); 
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(1, 10, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 59), out value));
+			Assert.AreEqual(20, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
+		}
 
+		[TestMethod]
+		public void DeleteColumnsWithShiftWithMultiplePageShifting()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(1, 10, 14);
+			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
+			cellStore.SetValue(1, this.BuildColumn(5, 37), 25);
+			cellStore.Delete(0, 100, 0, this.BuildColumn(3, 1), true); 
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsTrue(cellStore.Exists(1, 10, out value));
+			Assert.AreEqual(14, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 36), out value));
+			Assert.AreEqual(25, value);
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(5, 37), out value));
+		}
+
+		[TestMethod]
+		public void DeleteColumnsWithoutShiftSinglePage()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(1, 10, 14);
+			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(1, this.BuildColumn(1, 6), 20);
+			cellStore.Delete(0, 2, 0, 20, false);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsFalse(cellStore.Exists(1, 10, out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
+			Assert.AreEqual(15, value);
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 6), out value));
+			Assert.AreEqual(20, value);
+		}
+
+		[TestMethod]
+		public void DeleteColumnsWithoutShiftMultiplePages()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(1, 10, 14);
+			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
+			cellStore.Delete(0, 2, 0, this.BuildColumn(1, 30), false); 
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsFalse(cellStore.Exists(1, 10, out value));
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
+			Assert.AreEqual(20, value);
+		}
+		#endregion
+
+		#region Clear Tests
+		[TestMethod]
+		public void ClearRowsSinglePage()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(10, 1, 14);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
+			cellStore.Clear(2, 0, 20, 0);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsFalse(cellStore.Exists(10, 1, out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
+			Assert.AreEqual(15, value);
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
+			Assert.AreEqual(20, value);
+		}
+
+		[TestMethod]
+		public void ClearRowsMultiplePages()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(10, 1, 14);
+			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
+			cellStore.Clear(2, 0, this.BuildRow(4, 500), 0);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsFalse(cellStore.Exists(10, 1, out value));
+			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
+			Assert.AreEqual(20, value);
+		}
+		
+		[TestMethod]
+		public void ClearColumnsSinglePage()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(1, 10, 14);
+			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(1, this.BuildColumn(1, 6), 20);
+			cellStore.Clear(0, 2, 0, 20);
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsFalse(cellStore.Exists(1, 10, out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
+			Assert.AreEqual(15, value);
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 6), out value));
+			Assert.AreEqual(20, value);
+		}
+
+		[TestMethod]
+		public void ClearColumnsMultiplePages()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 13);
+			cellStore.SetValue(1, 10, 14);
+			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
+			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
+			cellStore.Clear(0, 2, 0, this.BuildColumn(1, 30));
+			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
+			Assert.AreEqual(13, value);
+			Assert.IsFalse(cellStore.Exists(1, 10, out value));
+			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
+			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
+			Assert.AreEqual(20, value);
 		}
 		#endregion
 
@@ -1213,6 +1507,26 @@ namespace EPPlusTest
 		#endregion
 		#endregion
 
+		#endregion
+
+		#region Helper Methods
+		private int BuildRow(int page, int indexOnPage)
+		{
+			if (indexOnPage < 1 || indexOnPage > 1024)
+				throw new InvalidOperationException("Row pages take indices between 1 and 1024.");
+			if (page < 0 || page > 1023)
+				throw new InvalidOperationException("Pages are 0-indexed and can be between 0 and 1023.");
+			return page * 1024 + indexOnPage;
+		}
+
+		private int BuildColumn(int page, int indexOnPage)
+		{
+			if (indexOnPage < 1 || indexOnPage > 128)
+				throw new InvalidOperationException("Column pages take indices between 1 and 128.");
+			if (page < 0 || page > 127)
+				throw new InvalidOperationException("Pages are 0-indexed and can be between 0 and 127.");
+			return page * 128 + indexOnPage;
+		}
 		#endregion
 	}
 }
