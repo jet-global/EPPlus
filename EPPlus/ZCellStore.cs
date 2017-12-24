@@ -442,16 +442,97 @@ namespace OfficeOpenXml
 				{
 					return new ValueHolder { Value = value };
 				}
+				static public implicit operator S(ValueHolder valueHolder)
+				{
+					return valueHolder.Value;
+				}
 			}
 			#endregion
 
 			#region Nested Classes
 			public class Page
 			{
+				#region Properties
 				public int MinimumUsedIndex { get; set; }
+
 				public int MaximumUsedIndex { get; set; }
+				
+				public ValueHolder? this[int index]
+				{
+					get { return this.Values[index]; }
+					set
+					{
+						this.Values[index] = value;
+						this.UpdateIndices(null == value, index);
+					}
+				}
+
+				public bool IsEmpty
+				{
+					get { return this.MinimumUsedIndex == this.Values.Length && this.MaximumUsedIndex == -1; }
+				}
 
 				private ValueHolder?[] Values { get; }
+				#endregion
+
+				#region Constructors
+				public Page(int size)
+				{
+					this.Values = new ValueHolder?[size];
+					this.SetEmptyIndices();
+				}
+				#endregion
+
+				#region Private Methods
+				private void UpdateIndices(bool nulled, int index)
+				{
+					if (nulled)
+					{
+						var equalsMinimum = index == this.MinimumUsedIndex;
+						var equalsMaximum = index == this.MaximumUsedIndex;
+						if (equalsMinimum)
+						{
+							if (equalsMaximum)
+								this.SetEmptyIndices();
+							else
+								this.UpdateMinimumIndex();
+						}
+						else if (equalsMaximum)
+							this.UpdateMaximumIndex();
+					}
+					else
+					{
+						if (index < this.MinimumUsedIndex)
+							this.MinimumUsedIndex = index;
+						if (index > this.MaximumUsedIndex)
+							this.MaximumUsedIndex = index;
+					}
+				}
+
+				private void UpdateMaximumIndex()
+				{
+					while (--this.MaximumUsedIndex >= 0)
+					{
+						if (null != this.Values[this.MaximumUsedIndex])
+							return;
+					}
+				}
+
+				private void UpdateMinimumIndex()
+				{
+					while (++this.MinimumUsedIndex < this.Values.Length)
+					{
+						if (null != this.Values[this.MinimumUsedIndex])
+							return;
+					}
+				}
+
+				private void SetEmptyIndices()
+				{
+					this.MinimumUsedIndex = this.Values.Length;
+					this.MaximumUsedIndex = -1;
+				}
+				#endregion
 			}
 			#endregion
 

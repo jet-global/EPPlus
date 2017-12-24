@@ -1554,6 +1554,71 @@ namespace EPPlusTest
 			Assert.AreEqual(15, index);
 		}
 		#endregion
+
+		#region Nested Class Tests
+		#region Indexer Tests
+		[TestMethod]
+		public void PageIndexerReturnsNullForNonExistentItems()
+		{
+			var page = new ZCellStore<int>.PagedStructure<int>.Page(10);
+			Assert.AreEqual(-1, page.MinimumUsedIndex);
+			Assert.AreEqual(-1, page.MaximumUsedIndex);
+			Assert.IsNull(page[0]);
+			Assert.IsNull(page[4]);
+			Assert.IsNull(page[9]);
+		}
+
+		[TestMethod]
+		public void PageIndexerSetsUsedIndices()
+		{
+			var page = new ZCellStore<int>.PagedStructure<int>.Page(10);
+			Assert.AreEqual(10, page.MinimumUsedIndex);
+			Assert.AreEqual(-1, page.MaximumUsedIndex);
+			Assert.IsTrue(page.IsEmpty);
+			Assert.IsNull(page[0]);
+			page[0] = 5;
+			Assert.AreEqual(0, page.MinimumUsedIndex);
+			Assert.AreEqual(0, page.MaximumUsedIndex);
+			Assert.IsFalse(page.IsEmpty);
+			Assert.AreEqual(5, page[0]);
+			page[7] = 13;
+			Assert.AreEqual(0, page.MinimumUsedIndex);
+			Assert.AreEqual(7, page.MaximumUsedIndex);
+			Assert.IsFalse(page.IsEmpty);
+			Assert.AreEqual(13, page[7]);
+			page[0] = null;
+			Assert.AreEqual(7, page.MinimumUsedIndex);
+			Assert.AreEqual(7, page.MaximumUsedIndex);
+			Assert.IsFalse(page.IsEmpty);
+			Assert.IsNull(page[0]);
+			page[3] = 13;
+			Assert.AreEqual(3, page.MinimumUsedIndex);
+			Assert.AreEqual(7, page.MaximumUsedIndex);
+			Assert.IsFalse(page.IsEmpty);
+			Assert.AreEqual(13, page[3]);
+			page[9] = 20;
+			Assert.AreEqual(3, page.MinimumUsedIndex);
+			Assert.AreEqual(9, page.MaximumUsedIndex);
+			Assert.IsFalse(page.IsEmpty);
+			Assert.AreEqual(20, page[9]);
+			page[9] = null;
+			Assert.AreEqual(3, page.MinimumUsedIndex);
+			Assert.AreEqual(7, page.MaximumUsedIndex);
+			Assert.IsFalse(page.IsEmpty);
+			Assert.IsNull(page[9]);
+			page[7] = null;
+			Assert.AreEqual(3, page.MinimumUsedIndex);
+			Assert.AreEqual(3, page.MaximumUsedIndex);
+			Assert.IsFalse(page.IsEmpty);
+			Assert.IsNull(page[7]);
+			page[3] = null;
+			Assert.AreEqual(10, page.MinimumUsedIndex);
+			Assert.AreEqual(-1, page.MaximumUsedIndex);
+			Assert.IsTrue(page.IsEmpty);
+			Assert.IsNull(page[3]);
+		}
+		#endregion
+		#endregion
 		#endregion
 
 		#endregion
