@@ -1089,7 +1089,7 @@ namespace EPPlusTest
 			};
 			pagedStructure.LoadPages(items);
 			pagedStructure.ShiftItems(0, 100);
-			Assert.AreEqual(-1, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(16, pagedStructure.MinimumUsedIndex);
 			Assert.AreEqual(-1, pagedStructure.MaximumUsedIndex);
 			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
 			{
@@ -1189,7 +1189,7 @@ namespace EPPlusTest
 			};
 			pagedStructure.LoadPages(items);
 			pagedStructure.ShiftItems(0, -100);
-			Assert.AreEqual(-1, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(16, pagedStructure.MinimumUsedIndex);
 			Assert.AreEqual(-1, pagedStructure.MaximumUsedIndex);
 			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
 			{

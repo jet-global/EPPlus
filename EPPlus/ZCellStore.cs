@@ -336,10 +336,8 @@ namespace OfficeOpenXml
 				if (index++ < this.MinimumUsedIndex)
 					index = this.MinimumUsedIndex;
 
-				var minimumPage = index >> this.PageBits;
-				var minimumInnerIndex = index & this.PageMask;
-				var maximumPage = this.MaximumUsedIndex >> this.PageBits;
-				var maximumInnerIndex = this.MaximumUsedIndex & this.PageMask;
+				this.DeConstructIndex(index, out int minimumPage, out int minimumInnerIndex);
+				this.DeConstructIndex(this.MaximumUsedIndex, out int maximumPage, out int maximumInnerIndex);
 
 				for (int page = minimumPage; page <= maximumPage; ++page)
 				{
@@ -351,8 +349,7 @@ namespace OfficeOpenXml
 							var currentItem = currentPage[minimumInnerIndex];
 							if (currentItem.HasValue)
 							{
-								index = page << this.PageBits;
-								index = index | minimumInnerIndex;
+								index = this.ReConstructIndex(page, minimumInnerIndex);
 								return true;
 							}
 						}
@@ -370,10 +367,8 @@ namespace OfficeOpenXml
 				if (index-- > this.MaximumUsedIndex)
 					index = this.MaximumUsedIndex;
 
-				var minimumPage = this.MinimumUsedIndex >> this.PageBits;
-				var minimumInnerIndex = this.MinimumUsedIndex & this.PageMask;
-				var maximumPage = index >> this.PageBits;
-				var maximumInnerIndex = index & this.PageMask;
+				this.DeConstructIndex(this.MinimumUsedIndex, out int minimumPage, out int minimumInnerIndex);
+				this.DeConstructIndex(index, out int maximumPage, out int maximumInnerIndex);
 
 				for (int page = maximumPage; page >= minimumPage; --page)
 				{
@@ -385,8 +380,7 @@ namespace OfficeOpenXml
 							var currentItem = currentPage[maximumInnerIndex];
 							if (currentItem.HasValue)
 							{
-								index = page << this.PageBits;
-								index = index | maximumInnerIndex;
+								index = this.ReConstructIndex(page, maximumInnerIndex);
 								return true;
 							}
 						}
@@ -400,20 +394,21 @@ namespace OfficeOpenXml
 			#region Private Methods
 			private void UpdateBounds()
 			{
-				this.MinimumUsedIndex = this.MaximumUsedIndex = -1;
-				for (int i = this.MaximumIndex; i >= 0; --i)
+				this.MinimumUsedIndex = this.MaximumIndex + 1;
+				this.MaximumUsedIndex = -1;
+				for (int i = 0; i < this.PageSize; i++)
 				{
-					if (this.GetItem(i).HasValue)
+					if (this.Pages[i]?.IsEmpty == false)
 					{
-						this.MaximumUsedIndex = i;
+						this.MinimumUsedIndex = this.ReConstructIndex(i, this.Pages[i].MinimumUsedIndex);
 						break;
 					}
 				}
-				for (int i = 0; i <= this.MaximumIndex; ++i)
+				for (int i = this.PageSize - 1; i >= 0; i--)
 				{
-					if (this.GetItem(i).HasValue)
+					if (this.Pages[i]?.IsEmpty == false)
 					{
-						this.MinimumUsedIndex = i;
+						this.MaximumUsedIndex = this.ReConstructIndex(i, this.Pages[i].MaximumUsedIndex);
 						break;
 					}
 				}
@@ -423,14 +418,26 @@ namespace OfficeOpenXml
 			{
 				if (index < 0 || index > this.MaximumIndex)
 					return;
-				var page = index >> this.PageBits;
-				var innerIndex = index & this.PageMask;
+				this.DeConstructIndex(index, out int page, out int innerIndex);
 				var pageArray = this.Pages[page];
 				if (null == pageArray)
 					this.Pages[page] = pageArray = new Page(this.PageSize);
 				pageArray[innerIndex] = item;
 				if (doBoundsUpdate)
 					this.UpdateBounds();
+			}
+
+			private void DeConstructIndex(int index, out int page, out int innerIndex)
+			{
+				page = index >> this.PageBits;
+				innerIndex = index & this.PageMask;
+			}
+
+			private int ReConstructIndex(int page, int innerIndex)
+			{
+				var index = page << this.PageBits;
+				index = index | innerIndex;
+				return index;
 			}
 			#endregion
 
