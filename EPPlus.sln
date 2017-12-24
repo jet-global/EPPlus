@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{84BB37E9-CE27-48E0-88F6-A741A46D5883}"
 	ProjectSection(SolutionItems) = preProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPPlusExcelCalculationDemo", "EPPlusExcelCalculationSample\EPPlusExcelCalculationDemo.csproj", "{94CBCEFC-DDBF-4F54-8AEA-4C40BBD2881B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPPlus", "EPPlus\EPPlus.csproj", "{BE4A6343-F411-44A3-8D6F-F40747ED7BA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZCellStoreProfilerApplication", "ZCellStoreProfilerApplication\ZCellStoreProfilerApplication.csproj", "{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,12 +85,25 @@ Global
 		{BE4A6343-F411-44A3-8D6F-F40747ED7BA5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BE4A6343-F411-44A3-8D6F-F40747ED7BA5}.Release|x86.ActiveCfg = Release|Any CPU
 		{BE4A6343-F411-44A3-8D6F-F40747ED7BA5}.Release|x86.Build.0 = Release|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Debug|x86.Build.0 = Debug|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Release|x86.ActiveCfg = Release|Any CPU
+		{7EF4EE74-2822-4E4B-A5C2-FE7A0A20849F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		VisualSVNWorkingCopyRoot = .
+		SolutionGuid = {9580F668-EE01-4760-A342-1A3C906D10E7}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = ExcelPackage.vsmdi

@@ -75,7 +75,7 @@ namespace OfficeOpenXml
 			var columnStructure = this.Data.GetItem(column);
 			if (columnStructure == null)
 			{
-				columnStructure =  new PagedStructure<T>(ZCellStore<T>.RowPageBits);
+				columnStructure = new PagedStructure<T>(ZCellStore<T>.RowPageBits);
 				this.Data.SetItem(column, columnStructure);
 			}
 			columnStructure?.Value.SetItem(row - 1, value);
@@ -102,42 +102,65 @@ namespace OfficeOpenXml
 
 		public bool NextCell(ref int row, ref int column)
 		{
-			int localRow = row - 1, localColumn = column - 1;
-			do
+			int localRow = row - 2, localColumn = column - 1;
+			var columnSearch = localColumn;
+			int currentColumn = localColumn;
+			int lastRow = localRow;
+			int betaRow = ExcelPackage.MaxRows + 1;
+			int betaColumn = 0;
+
+			for (int i = 0; i < 2; ++i) // This still over-enumerates
 			{
-				while (this.Data.NextItem(ref localColumn, columnItem => columnItem?.Value.MaximumUsedIndex >= localRow))
+				while (this.Data.NextItem(ref columnSearch))
 				{
-					var item = this.Data.GetItem(localColumn)?.Value.GetItem(localRow);
-					if (item.HasValue)
+					var rowSearch = localRow;
+					if (this.Data.GetItem(columnSearch)?.Value.NextItem(ref rowSearch) == true)
 					{
-						row = localRow + 1;
-						column = localColumn + 1;
-						return true;
+						if (rowSearch < betaRow)
+						{
+							betaRow = rowSearch;
+							betaColumn = columnSearch;
+						}
 					}
 				}
-				localColumn = -1;
-			} while (++localRow < ExcelPackage.MaxRows);
-			return false;
+				columnSearch = -1;
+				localRow++;
+			}
+			row = betaRow + 1;
+			column = betaColumn + 1;
+			return betaRow != ExcelPackage.MaxRows + 1;
 		}
 
 		public bool PrevCell(ref int row, ref int column)
 		{
-			int localRow = row - 1, localColumn = column - 1;
-			do
+			int localRow = row, localColumn = column - 1;
+			var columnSearch = localColumn;
+			int currentColumn = localColumn;
+			int lastRow = localRow;
+			int betaRow = -1;
+			int betaColumn = 0;
+
+			for (int i = 0; i < 2; ++i) // This still over-enumerates
 			{
-				while (this.Data.PreviousItem(ref localColumn, columnItem => columnItem?.Value.MinimumUsedIndex <= localRow))
+				while (this.Data.PreviousItem(ref columnSearch))
 				{
-					var item = this.Data.GetItem(localColumn)?.Value.GetItem(localRow);
-					if (item.HasValue)
+					var rowSearch = localRow;
+					if (this.Data.GetItem(columnSearch)?.Value.PreviousItem(ref rowSearch) == true)
 					{
-						row = localRow + 1;
-						column = localColumn + 1;
-						return true;
+						if (rowSearch > betaRow)
+						{
+							betaRow = rowSearch;
+							betaColumn = columnSearch;
+						}
 					}
+
 				}
-				localColumn = ExcelPackage.MaxColumns + 1;
-			} while (--localRow >= 0);
-			return false;
+				columnSearch = ExcelPackage.MaxColumns;
+				localRow--;
+			}
+			row = betaRow + 1;
+			column = betaColumn + 1;
+			return betaRow != -1;
 		}
 
 		public void Delete(int fromRow, int fromCol, int rows, int columns)
@@ -154,7 +177,7 @@ namespace OfficeOpenXml
 				if (fromRow > 0)
 				{
 					int column = -1;
-					while(this.Data.NextItem(ref column))
+					while (this.Data.NextItem(ref column))
 					{
 						this.Data.GetItem(column)?.Value.ShiftItems(fromRow, -rows);
 					}
@@ -185,7 +208,7 @@ namespace OfficeOpenXml
 			fromRow = ExcelPackage.MaxRows + 1;
 			toRow = 0;
 			int searchIndex = 0;
-			while(this.Data.NextItem(ref searchIndex))
+			while (this.Data.NextItem(ref searchIndex))
 			{
 				var column = this.Data.GetItem(searchIndex);
 				var localMinRow = column?.Value.MinimumUsedIndex + 1;
@@ -200,7 +223,16 @@ namespace OfficeOpenXml
 
 		public void Insert(int rowFrom, int columnFrom, int rows, int columns)
 		{
-			throw new NotImplementedException();
+			if (columnFrom > 0)
+				this.Data.ShiftItems(columnFrom, columns);
+			if (rowFrom > 0)
+			{
+				int column = -1;
+				while (this.Data.NextItem(ref column))
+				{
+					this.Data.GetItem(column)?.Value.ShiftItems(rowFrom, rows);
+				}
+			}
 		}
 
 		public void Dispose()
@@ -296,7 +328,7 @@ namespace OfficeOpenXml
 				this.UpdateBounds();
 			}
 
-			public bool NextItem(ref int index, Func<ValueHolder?, bool> selector = null)
+			public bool NextItem(ref int index)
 			{
 				if (this.MinimumUsedIndex == -1 || this.MaximumUsedIndex == -1)
 					return false;
@@ -317,7 +349,7 @@ namespace OfficeOpenXml
 						for (; minimumInnerIndex < this.PageSize; ++minimumInnerIndex)
 						{
 							var currentItem = currentPage[minimumInnerIndex];
-							if (currentItem.HasValue && (selector == null || selector(currentItem)))
+							if (currentItem.HasValue)
 							{
 								index = page << this.PageBits;
 								index = index | minimumInnerIndex;
@@ -330,7 +362,7 @@ namespace OfficeOpenXml
 				return false;
 			}
 
-			public bool PreviousItem(ref int index, Func<ValueHolder?, bool> selector = null)
+			public bool PreviousItem(ref int index)
 			{
 				if (this.MinimumUsedIndex == -1 || this.MaximumUsedIndex == -1)
 					return false;
@@ -351,7 +383,7 @@ namespace OfficeOpenXml
 						for (; maximumInnerIndex >= 0; --maximumInnerIndex)
 						{
 							var currentItem = currentPage[maximumInnerIndex];
-							if (currentItem.HasValue && (selector == null || selector(currentItem)))
+							if (currentItem.HasValue)
 							{
 								index = page << this.PageBits;
 								index = index | maximumInnerIndex;
@@ -410,6 +442,16 @@ namespace OfficeOpenXml
 				{
 					return new ValueHolder { Value = value };
 				}
+			}
+			#endregion
+
+			#region Nested Classes
+			public class Page
+			{
+				public int MinimumUsedIndex { get; set; }
+				public int MaximumUsedIndex { get; set; }
+
+				private ValueHolder?[] Values { get; }
 			}
 			#endregion
 
