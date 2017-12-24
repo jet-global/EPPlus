@@ -253,6 +253,11 @@ namespace OfficeOpenXml
 			public int MinimumUsedIndex { get; private set; }
 			public int MaximumUsedIndex { get; private set; }
 
+			public bool IsEmpty
+			{
+				get { return this.MinimumUsedIndex == this.MaximumIndex + 1 && this.MaximumUsedIndex == -1; }
+			}
+
 			private Page[] Pages { get; } 
 			#endregion
 
@@ -264,7 +269,7 @@ namespace OfficeOpenXml
 				this.PageMask = this.PageSize - 1;
 				this.MaximumIndex = (this.PageSize << pageBits) - 1;
 				this.Pages = new Page[this.PageSize];
-				this.MinimumUsedIndex = -1;
+				this.MinimumUsedIndex = this.MaximumIndex + 1;
 				this.MaximumUsedIndex = -1;
 			}
 			#endregion
@@ -274,8 +279,7 @@ namespace OfficeOpenXml
 			{
 				if (index < 0 || index > this.MaximumIndex)
 					return null;
-				var page = index >> this.PageBits;
-				var innerIndex = index & this.PageMask;
+				this.DeConstructIndex(index, out int page, out int innerIndex);
 				var pageArray = this.Pages[page];
 				if (null == pageArray)
 					return null;
@@ -330,62 +334,68 @@ namespace OfficeOpenXml
 
 			public bool NextItem(ref int index)
 			{
-				if (this.MinimumUsedIndex == -1 || this.MaximumUsedIndex == -1)
+				if (this.IsEmpty || index > this.MaximumUsedIndex)
 					return false;
-
-				if (index++ < this.MinimumUsedIndex)
+				if (index < this.MinimumUsedIndex)
+				{
 					index = this.MinimumUsedIndex;
+					return true;
+				}
 
 				this.DeConstructIndex(index, out int minimumPage, out int minimumInnerIndex);
 				this.DeConstructIndex(this.MaximumUsedIndex, out int maximumPage, out int maximumInnerIndex);
 
-				for (int page = minimumPage; page <= maximumPage; ++page)
+				int nextIndex = minimumInnerIndex;
+				if (this.Pages[minimumPage]?.TryGetNextIndex(minimumInnerIndex, out nextIndex) == true)
 				{
-					var currentPage = this.Pages[page];
-					if (currentPage != null)
+					index = this.ReConstructIndex(minimumPage, nextIndex);
+					return true;
+				}
+				else
+				{
+					for (int page = minimumPage + 1; page <= maximumPage; ++page)
 					{
-						for (; minimumInnerIndex < this.PageSize; ++minimumInnerIndex)
+						var currentPage = this.Pages[page];
+						if (currentPage?.IsEmpty == false)
 						{
-							var currentItem = currentPage[minimumInnerIndex];
-							if (currentItem.HasValue)
-							{
-								index = this.ReConstructIndex(page, minimumInnerIndex);
-								return true;
-							}
+							index = this.ReConstructIndex(page, currentPage.MinimumUsedIndex);
+							return true;
 						}
 					}
-					minimumInnerIndex = 0;
 				}
 				return false;
 			}
 
 			public bool PreviousItem(ref int index)
 			{
-				if (this.MinimumUsedIndex == -1 || this.MaximumUsedIndex == -1)
+				if (this.IsEmpty || index < this.MinimumUsedIndex)
 					return false;
-
-				if (index-- > this.MaximumUsedIndex)
+				if (index > this.MaximumUsedIndex)
+				{
 					index = this.MaximumUsedIndex;
+					return true;
+				}
 
 				this.DeConstructIndex(this.MinimumUsedIndex, out int minimumPage, out int minimumInnerIndex);
 				this.DeConstructIndex(index, out int maximumPage, out int maximumInnerIndex);
 
-				for (int page = maximumPage; page >= minimumPage; --page)
+				int previousIndex = maximumInnerIndex;
+				if (this.Pages[maximumPage]?.TryGetPreviousIndex(maximumInnerIndex, out previousIndex) == true)
 				{
-					var currentPage = this.Pages[page];
-					if (currentPage != null)
+					index = this.ReConstructIndex(maximumPage, previousIndex);
+					return true;
+				}
+				else
+				{
+					for (int page = maximumPage - 1; page >= minimumPage; --page)
 					{
-						for (; maximumInnerIndex >= 0; --maximumInnerIndex)
+						var currentPage = this.Pages[page];
+						if (currentPage?.IsEmpty == false)
 						{
-							var currentItem = currentPage[maximumInnerIndex];
-							if (currentItem.HasValue)
-							{
-								index = this.ReConstructIndex(page, maximumInnerIndex);
-								return true;
-							}
+							index = this.ReConstructIndex(page, currentPage.MaximumUsedIndex);
+							return true;
 						}
 					}
-					maximumInnerIndex = this.PageSize - 1;
 				}
 				return false;
 			}
@@ -470,7 +480,10 @@ namespace OfficeOpenXml
 					set
 					{
 						this.Values[index] = value;
-						this.UpdateIndices(null == value, index);
+						if (null == value)
+							this.UpdatedNulledIndex(index);
+						else
+							this.UpdateIndex(index);
 					}
 				}
 
@@ -496,48 +509,54 @@ namespace OfficeOpenXml
 					return this.Values; ;
 				}
 
+				public bool TryGetNextIndex(int fromIndex, out int foundIndex)
+				{
+					for (foundIndex = fromIndex + 1; foundIndex < this.Values.Length; ++foundIndex)
+					{
+						if (this.Values[foundIndex].HasValue)
+							return true;
+					}
+					return false;
+				}
+
+				public bool TryGetPreviousIndex(int fromIndex, out int foundIndex)
+				{
+					for (foundIndex = fromIndex - 1; foundIndex >= 0; --foundIndex)
+					{
+						if (this.Values[foundIndex].HasValue)
+							return true;
+					}
+					return false;
+				}
+
 				#region Private Methods
-				private void UpdateIndices(bool nulled, int index)
+				private void UpdatedNulledIndex(int index)
 				{
-					if (nulled)
+					var equalsMinimum = index == this.MinimumUsedIndex;
+					var equalsMaximum = index == this.MaximumUsedIndex;
+					if (equalsMinimum)
 					{
-						var equalsMinimum = index == this.MinimumUsedIndex;
-						var equalsMaximum = index == this.MaximumUsedIndex;
-						if (equalsMinimum)
+						if (equalsMaximum)
+							this.SetEmptyIndices();
+						else
 						{
-							if (equalsMaximum)
-								this.SetEmptyIndices();
-							else
-								this.UpdateMinimumIndex();
-						}
-						else if (equalsMaximum)
-							this.UpdateMaximumIndex();
-					}
-					else
-					{
-						if (index < this.MinimumUsedIndex)
+							this.TryGetNextIndex(index, out index);
 							this.MinimumUsedIndex = index;
-						if (index > this.MaximumUsedIndex)
-							this.MaximumUsedIndex = index;
+						}
+					}
+					else if (equalsMaximum)
+					{
+						this.TryGetPreviousIndex(index, out index);
+						this.MaximumUsedIndex = index;
 					}
 				}
 
-				private void UpdateMaximumIndex()
+				private void UpdateIndex(int index)
 				{
-					while (--this.MaximumUsedIndex >= 0)
-					{
-						if (null != this.Values[this.MaximumUsedIndex])
-							return;
-					}
-				}
-
-				private void UpdateMinimumIndex()
-				{
-					while (++this.MinimumUsedIndex < this.Values.Length)
-					{
-						if (null != this.Values[this.MinimumUsedIndex])
-							return;
-					}
+					if (index < this.MinimumUsedIndex)
+						this.MinimumUsedIndex = index;
+					if (index > this.MaximumUsedIndex)
+						this.MaximumUsedIndex = index;
 				}
 
 				private void SetEmptyIndices()

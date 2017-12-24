@@ -806,11 +806,18 @@ namespace EPPlusTest
 			Assert.AreEqual(1024, pagedStructure.PageSize);
 			Assert.AreEqual(1023, pagedStructure.PageMask);
 			Assert.AreEqual(ExcelPackage.MaxRows - 1, pagedStructure.MaximumIndex);
+			Assert.AreEqual(ExcelPackage.MaxRows, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(-1, pagedStructure.MaximumUsedIndex);
+			Assert.IsTrue(pagedStructure.IsEmpty);
+			Assert.AreEqual(-1, pagedStructure.MaximumUsedIndex);
 			pagedStructure = new PagedStructure<int>(4);
 			Assert.AreEqual(4, pagedStructure.PageBits);
 			Assert.AreEqual(16, pagedStructure.PageSize);
 			Assert.AreEqual(15, pagedStructure.PageMask);
 			Assert.AreEqual(255, pagedStructure.MaximumIndex);
+			Assert.AreEqual(256, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(-1, pagedStructure.MaximumUsedIndex);
+			Assert.IsTrue(pagedStructure.IsEmpty);
 		}
 		#endregion
 
@@ -1396,7 +1403,6 @@ namespace EPPlusTest
 			pagedStructure.LoadPages(items);
 			int index = 15;
 			Assert.IsFalse(pagedStructure.NextItem(ref index));
-			Assert.AreEqual(16, index);
 		}
 
 		[TestMethod]
@@ -1447,7 +1453,6 @@ namespace EPPlusTest
 			pagedStructure.LoadPages(items);
 			int index = 23;
 			Assert.IsFalse(pagedStructure.NextItem(ref index));
-			Assert.AreEqual(24, index);
 		}
 		#endregion
 
@@ -1466,7 +1471,6 @@ namespace EPPlusTest
 			pagedStructure.LoadPages(items);
 			int index = 0;
 			Assert.IsFalse(pagedStructure.PreviousItem(ref index));
-			Assert.AreEqual(-1, index);
 		}
 
 		[TestMethod]
@@ -1534,7 +1538,6 @@ namespace EPPlusTest
 			pagedStructure.LoadPages(items);
 			int index = -3;
 			Assert.IsFalse(pagedStructure.PreviousItem(ref index));
-			Assert.AreEqual(-4, index);
 		}
 
 		[TestMethod]
@@ -1556,6 +1559,7 @@ namespace EPPlusTest
 		#endregion
 
 		#region Nested Class Tests
+		#region Page Tests
 		#region Indexer Tests
 		[TestMethod]
 		public void PageIndexerReturnsNullForNonExistentItems()
@@ -1618,7 +1622,41 @@ namespace EPPlusTest
 			Assert.IsNull(page[3]);
 		}
 		#endregion
+
+		#region TryGetNextIndex Tests
+		[TestMethod]
+		public void TryGetNextIndex()
+		{
+			var page = new ZCellStore<int>.PagedStructure<int>.Page(10);
+			Assert.IsFalse(page.TryGetNextIndex(3, out int nextIndex));
+			page[4] = 45;
+			Assert.IsTrue(page.TryGetNextIndex(3, out nextIndex));
+			Assert.AreEqual(4, nextIndex);
+			page[9] = 13;
+			Assert.IsTrue(page.TryGetNextIndex(4, out nextIndex));
+			Assert.AreEqual(9, nextIndex);
+			Assert.IsFalse(page.TryGetNextIndex(9, out nextIndex));
+		}
 		#endregion
+
+		#region TryGetPreviousIndex Tests
+		[TestMethod]
+		public void TryGetPreviousIndex()
+		{
+			var page = new ZCellStore<int>.PagedStructure<int>.Page(10);
+			Assert.IsFalse(page.TryGetPreviousIndex(7, out int previousIndex));
+			page[4] = 45;
+			Assert.IsTrue(page.TryGetPreviousIndex(7, out previousIndex));
+			Assert.AreEqual(4, previousIndex);
+			page[2] = 13;
+			Assert.IsTrue(page.TryGetPreviousIndex(4, out previousIndex));
+			Assert.AreEqual(2, previousIndex);
+			Assert.IsFalse(page.TryGetPreviousIndex(0, out previousIndex));
+		}
+		#endregion
+		#endregion
+		#endregion
+
 		#endregion
 
 		#endregion
