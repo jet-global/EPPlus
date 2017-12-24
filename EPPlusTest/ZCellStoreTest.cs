@@ -1561,7 +1561,7 @@ namespace EPPlusTest
 		public void PageIndexerReturnsNullForNonExistentItems()
 		{
 			var page = new ZCellStore<int>.PagedStructure<int>.Page(10);
-			Assert.AreEqual(-1, page.MinimumUsedIndex);
+			Assert.AreEqual(10, page.MinimumUsedIndex);
 			Assert.AreEqual(-1, page.MaximumUsedIndex);
 			Assert.IsNull(page[0]);
 			Assert.IsNull(page[4]);

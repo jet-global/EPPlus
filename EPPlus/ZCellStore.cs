@@ -253,7 +253,7 @@ namespace OfficeOpenXml
 			public int MinimumUsedIndex { get; private set; }
 			public int MaximumUsedIndex { get; private set; }
 
-			private ValueHolder?[][] Pages { get; } // protected to enable a test helper to get visibility in here
+			private Page[] Pages { get; } 
 			#endregion
 
 			#region Constructors
@@ -263,7 +263,7 @@ namespace OfficeOpenXml
 				this.PageSize = 1 << pageBits;
 				this.PageMask = this.PageSize - 1;
 				this.MaximumIndex = (this.PageSize << pageBits) - 1;
-				this.Pages = new ValueHolder?[this.PageSize][];
+				this.Pages = new Page[this.PageSize];
 				this.MinimumUsedIndex = -1;
 				this.MaximumUsedIndex = -1;
 			}
@@ -427,7 +427,7 @@ namespace OfficeOpenXml
 				var innerIndex = index & this.PageMask;
 				var pageArray = this.Pages[page];
 				if (null == pageArray)
-					this.Pages[page] = pageArray = new ValueHolder?[this.PageSize];
+					this.Pages[page] = pageArray = new Page(this.PageSize);
 				pageArray[innerIndex] = item;
 				if (doBoundsUpdate)
 					this.UpdateBounds();
@@ -482,6 +482,12 @@ namespace OfficeOpenXml
 					this.SetEmptyIndices();
 				}
 				#endregion
+
+				// TODO cleanup? Only used for test setup/validation.
+				public ValueHolder?[] GetValues()
+				{
+					return this.Values; ;
+				}
 
 				#region Private Methods
 				private void UpdateIndices(bool nulled, int index)
@@ -543,7 +549,7 @@ namespace OfficeOpenXml
 			/// <returns></returns>
 			public ValueHolder?[][] GetPages()
 			{
-				return this.Pages;
+				return this.Pages.Select(p => p.GetValues()).ToArray();
 			}
 
 			public void LoadPages(ValueHolder?[,] pageData)
@@ -554,7 +560,7 @@ namespace OfficeOpenXml
 					{
 						var pageArray = this.Pages[row];
 						if (null == pageArray)
-							this.Pages[row] = pageArray = new ValueHolder?[this.PageSize];
+							this.Pages[row] = pageArray = new Page(this.PageSize);
 						pageArray[column] = pageData[row, column];
 					}
 				}
