@@ -299,6 +299,16 @@ namespace ZCellStoreProfilerApplication
 			this.CellStoreTimer.Stop();
 			this.Log.AppendLine($"SetValue,{(zcellstoreExcepted ? "exception" : this.ZCellStoreTimer.ElapsedTicks.ToString())},{(cellstoreExcepted ? "exception" : this.CellStoreTimer.ElapsedTicks.ToString())}");
 		}
+
+		public ICellStoreEnumerator<T> GetEnumerator()
+		{
+			throw new NotImplementedException();
+		}
+
+		public ICellStoreEnumerator<T> GetEnumerator(int startRow, int startColumn, int endRow, int endColumn)
+		{
+			throw new NotImplementedException();
+		}
 		#endregion
 	}
 }

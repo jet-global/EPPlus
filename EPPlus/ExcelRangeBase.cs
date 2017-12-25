@@ -318,7 +318,7 @@ namespace OfficeOpenXml
 					column.StyleName = value;
 					column.StyleID = this.myStyleId;
 
-					var cols = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(this.myWorksheet._values, 0, this._fromCol + 1, 0, this._toCol);
+					var cols = this.myWorksheet._values.GetEnumerator(0, this._fromCol + 1, 0, this._toCol);
 					if (cols.MoveNext())
 					{
 						col = this._fromCol;
@@ -350,7 +350,7 @@ namespace OfficeOpenXml
 
 					if (this._fromCol == 1 && this._toCol == ExcelPackage.MaxColumns) //FullRow
 					{
-						var rows = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(this.myWorksheet._values, 1, 0, ExcelPackage.MaxRows, 0);
+						var rows = this.myWorksheet._values.GetEnumerator(1, 0, ExcelPackage.MaxRows, 0);
 						rows.MoveNext();
 						while (rows.Value._value != null)
 						{
@@ -381,7 +381,7 @@ namespace OfficeOpenXml
 				}
 				else // Only set name on created cells. (uncreated cells is set on full row or full column).
 				{
-					var cells = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(this.myWorksheet._values, this._fromRow, this._fromCol, this._toRow, this._toCol);
+					var cells = this.myWorksheet._values.GetEnumerator(this._fromRow, this._fromCol, this._toRow, this._toCol);
 					while (cells.MoveNext())
 					{
 						this.myWorksheet.SetStyleInner(cells.Row, cells.Column, this.myStyleId);
@@ -1050,7 +1050,7 @@ namespace OfficeOpenXml
 
 		private void SetMinWidth(double minimumWidth, int fromCol, int toCol)
 		{
-			var iterator = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(this.myWorksheet._values, 0, fromCol, 0, toCol);
+			var iterator = this.myWorksheet._values.GetEnumerator(0, fromCol, 0, toCol);
 			var prevCol = fromCol;
 			foreach (ExcelCoreValue val in iterator)
 			{
@@ -1964,7 +1964,7 @@ namespace OfficeOpenXml
 			Uri hl = null;
 
 			var excludeFormulas = excelRangeCopyOptionFlags.HasValue && (excelRangeCopyOptionFlags.Value & ExcelRangeCopyOptionFlags.ExcludeFormulas) == ExcelRangeCopyOptionFlags.ExcludeFormulas;
-			var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(this.myWorksheet._values, this._fromRow, this._fromCol, this._toRow, this._toCol);
+			var cse = this.myWorksheet._values.GetEnumerator(this._fromRow, this._fromCol, this._toRow, this._toCol);
 
 			var copiedValue = new List<CopiedCell>();
 			while (cse.MoveNext())
@@ -2012,7 +2012,7 @@ namespace OfficeOpenXml
 			}
 
 			//Copy styles with no cell value
-			var cses = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(this.myWorksheet._values, this._fromRow, this._fromCol, this._toRow, this._toCol);
+			var cses = this.myWorksheet._values.GetEnumerator(this._fromRow, this._fromCol, this._toRow, this._toCol);
 			while (cses.MoveNext())
 			{
 				if (!this.myWorksheet.ExistsValueInner(cses.Row, cses.Column))
@@ -2046,7 +2046,7 @@ namespace OfficeOpenXml
 				}
 			}
 			var copiedMergedCells = new Dictionary<int, ExcelAddress>();
-			var csem = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.myWorksheet.MergedCells.Cells, this._fromRow, this._fromCol, this._toRow, this._toCol);
+			var csem = this.myWorksheet.MergedCells.Cells.GetEnumerator(this._fromRow, this._fromCol, this._toRow, this._toCol);
 			while (csem.MoveNext())
 			{
 				if (!copiedMergedCells.ContainsKey(csem.Value))
@@ -2068,7 +2068,7 @@ namespace OfficeOpenXml
 				}
 			}
 			var copiedCommentCells = new List<CopiedCell>();
-			var csec = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.myWorksheet._commentsStore, this._fromRow, this._fromCol, this._toRow, this._toCol);
+			var csec = this.myWorksheet._commentsStore.GetEnumerator(this._fromRow, this._fromCol, this._toRow, this._toCol);
 			while (csec.MoveNext())
 			{
 				var row = destination._fromRow + (csec.Row - this._fromRow);
@@ -2421,7 +2421,7 @@ namespace OfficeOpenXml
 				this._enumAddressIx++;
 				if (this._enumAddressIx < this._addresses.Count)
 				{
-					this.cellEnum = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(this.myWorksheet._values,
+					this.cellEnum = this.myWorksheet._values.GetEnumerator(
 						this._addresses[this._enumAddressIx]._fromRow,
 						this._addresses[this._enumAddressIx]._fromCol,
 						this._addresses[this._enumAddressIx]._toRow,
@@ -2440,7 +2440,7 @@ namespace OfficeOpenXml
 		public void Reset()
 		{
 			this._enumAddressIx = -1;
-			this.cellEnum = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(this.myWorksheet._values, this._fromRow, this._fromCol, this._toRow, this._toCol);
+			this.cellEnum = this.myWorksheet._values.GetEnumerator(this._fromRow, this._fromCol, this._toRow, this._toCol);
 		}
 
 		/// <summary>

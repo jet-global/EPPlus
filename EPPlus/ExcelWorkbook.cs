@@ -480,7 +480,7 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Gets or sets a cellstore containing the formula tokens on the workbook.
 		/// </summary>
-		internal CellStore<List<Token>> FormulaTokens { get; set; }
+		internal ICellStore<List<Token>> FormulaTokens { get; set; }
 
 		/// <summary>
 		/// Gets or sets the next ID number to use for a drawing.

@@ -27,7 +27,7 @@ namespace OfficeOpenXml.FormulaParsing
 				_toCol = toCol;
 				_address = new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol);
 				_address._ws = ws.Name;
-				_values = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(ws._values, _fromRow, _fromCol, _toRow, _toCol);
+				_values = ws._values.GetEnumerator(_fromRow, _fromCol, _toRow, _toCol);
 				_cell = new CellInfo(_ws, _values);
 			}
 
@@ -40,7 +40,7 @@ namespace OfficeOpenXml.FormulaParsing
 				_toCol = address._toCol;
 				_address = address;
 				_address._ws = ws.Name;
-				_values = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(ws._values, _fromRow, _fromCol, _toRow, _toCol);
+				_values = ws._values.GetEnumerator(_fromRow, _fromCol, _toRow, _toCol);
 				_cell = new CellInfo(_ws, _values);
 			}
 
@@ -371,7 +371,7 @@ namespace OfficeOpenXml.FormulaParsing
 			var addr = new ExcelAddress(address);
 			var wsName = string.IsNullOrEmpty(addr.WorkSheet) ? _currentWorksheet.Name : addr.WorkSheet;
 			var ws = _package.Workbook.Worksheets[wsName];
-			return (IEnumerable<object>)(CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(ws._values, addr._fromRow, addr._fromCol, addr._toRow, addr._toCol));
+			return (IEnumerable<object>)(ws._values.GetEnumerator(addr._fromRow, addr._fromCol, addr._toRow, addr._toCol));
 		}
 
 

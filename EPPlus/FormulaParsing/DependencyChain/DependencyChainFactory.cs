@@ -149,7 +149,7 @@ namespace OfficeOpenXml.FormulaParsing
 		private static void GetChain(DependencyChain depChain, ILexer lexer, ExcelRangeBase Range, ExcelCalculationOption options)
 		{
 			var ws = Range.Worksheet;
-			var fs = CellStoreEnumeratorFactory<object>.GetNewEnumerator(ws._formulas, Range.Start.Row, Range.Start.Column, Range.End.Row, Range.End.Column);
+			var fs = ws._formulas.GetEnumerator(Range.Start.Row, Range.Start.Column, Range.End.Row, Range.End.Column);
 			while (fs.MoveNext())
 			{
 				if (fs.Value == null || fs.Value.ToString().Trim() == "") continue;
@@ -226,7 +226,7 @@ namespace OfficeOpenXml.FormulaParsing
 
 						if (f.ws != null)
 						{
-							f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
+							f.iterator = f.ws._formulas.GetEnumerator(adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
 							goto iterateCells;
 						}
 					}
@@ -281,8 +281,7 @@ namespace OfficeOpenXml.FormulaParsing
 									address = new ExcelAddress(name.GetRelativeAddress(f.Row, f.Column));
 								else
 									address = new ExcelAddress(name.FullAddress);
-								f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, address._fromRow,
-									 address._fromCol, address._toRow, address._toCol);
+								f.iterator = f.ws._formulas.GetEnumerator(address._fromRow, address._fromCol, address._toRow, address._toCol);
 								goto iterateCells;
 							}
 						}
@@ -350,7 +349,7 @@ namespace OfficeOpenXml.FormulaParsing
 					ExcelAddress adr = new ExcelAddress((string)ws.Calculate(addressOffsetFormula, f.Row, f.Column));
 					cell.Formula = originalFormula;
 					f.ws = string.IsNullOrEmpty(adr.WorkSheet) ? ws : wb.Worksheets[adr.WorkSheet];
-					f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
+					f.iterator = f.ws._formulas.GetEnumerator(adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
 					goto iterateCells;
 				}
 				f.tokenIx++;

@@ -339,7 +339,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 	/// This enumerator allows for partial enumeration of an <see cref="ICellStore{T}"/>.
 	/// </summary>
 	/// <typeparam name="S">The type of the <see cref="ICellStore{T}"/> being enumerated.</typeparam>
-	public class CellsStoreEnumerator<S> : ICellStoreEnumerator<S>
+	private class CellsStoreEnumerator<S> : ICellStoreEnumerator<S>
 	{
 		#region Class Variables
 		private CellStore<S> _cellStore;
@@ -1041,6 +1041,16 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 #if DEBUGGING
 		this.AssertInvariants();
 #endif
+	}
+
+	public ICellStoreEnumerator<T> GetEnumerator()
+	{
+		return new CellStore<T>.CellsStoreEnumerator<T>(this);
+	}
+
+	public ICellStoreEnumerator<T> GetEnumerator(int startRow, int startColumn, int endRow, int endColumn)
+	{
+		return new CellStore<T>.CellsStoreEnumerator<T>(this, startRow, startColumn, endRow, endColumn);
 	}
 	#endregion
 
@@ -2024,6 +2034,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 
 internal class FlagCellStore : CellStore<byte>
 {
+	// TODO -- ZPF -- Get rid of this eventually
 	#region Internal Methods
 	internal void SetFlagValue(int Row, int Col, bool value, CellFlags cellFlags)
 	{

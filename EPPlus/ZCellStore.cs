@@ -30,6 +30,7 @@
  *******************************************************************************/
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -195,6 +196,16 @@ namespace OfficeOpenXml
 		public void Dispose()
 		{
 			throw new NotImplementedException();
+		}
+
+		public ICellStoreEnumerator<T> GetEnumerator()
+		{
+			return new ZCellStoreEnumerator(this);
+		}
+
+		public ICellStoreEnumerator<T> GetEnumerator(int startRow, int startColumn, int endRow, int endColumn)
+		{
+			return new ZCellStoreEnumerator(this, startRow, startColumn, endRow, endColumn);
 		}
 		#endregion
 
@@ -620,6 +631,73 @@ namespace OfficeOpenXml
 							invalidIndex(row, column, $"Expected: {(data?.ToString() ?? "null")}");
 					}
 				}
+			}
+			#endregion
+		}
+
+		private class ZCellStoreEnumerator : ICellStoreEnumerator<T>
+		{
+			#region Properties
+			private ZCellStore<T> CellStore { get; }
+			private int StartRow { get; }
+			private int StartColumn{ get; }
+			private int EndRow { get; }
+			private int Endcolumn { get; }
+			#endregion
+
+			#region Constructors
+			public ZCellStoreEnumerator(ZCellStore<T> zCellStore) :
+				this(zCellStore, 1, 1, ExcelPackage.MaxRows, ExcelPackage.MaxColumns)
+			{
+			}
+			
+			public ZCellStoreEnumerator(ZCellStore<T> zCellStore, int startRow, int startColumn, int endRow, int endColumn)
+			{
+				this.CellStore = zCellStore;
+
+				this.StartRow = startRow;
+				this.StartColumn = startColumn;
+				this.EndRow = endRow;
+				this.Endcolumn = endColumn;
+			}
+			#endregion
+
+			#region ICellStorEnumerator Members
+			public string CellAddress => throw new NotImplementedException();
+
+			public int Column => throw new NotImplementedException();
+
+			public int Row => throw new NotImplementedException();
+
+			public T Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+			public T Current => throw new NotImplementedException();
+
+			object IEnumerator.Current => throw new NotImplementedException();
+
+			public void Dispose()
+			{
+				throw new NotImplementedException();
+			}
+
+			public IEnumerator<T> GetEnumerator()
+			{
+				throw new NotImplementedException();
+			}
+
+			public bool MoveNext()
+			{
+				throw new NotImplementedException();
+			}
+
+			public void Reset()
+			{
+				throw new NotImplementedException();
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				throw new NotImplementedException();
 			}
 			#endregion
 		}

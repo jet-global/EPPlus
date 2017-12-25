@@ -3,13 +3,6 @@ using System.Collections.Generic;
 
 namespace OfficeOpenXml
 {
-	internal static class CellStoreDelegates<T>
-	{
-		internal delegate void SetRangeValueDelegate(List<T> list, int index, int row, int column, object value);
-
-		internal delegate void SetValueDelegate(List<T> list, int index, object value);
-	}
-
 	/// <summary>
 	/// Represents a generic interface that defines how a CellStore data structure can be accessed and updated. 
 	/// </summary>
@@ -115,6 +108,9 @@ namespace OfficeOpenXml
 		/// <param name="rows">The number of rows being inserted.</param>
 		/// <param name="columns">The number of columns being inserted.</param>
 		void Insert(int rowFrom, int columnFrom, int rows, int columns);
+
+		ICellStoreEnumerator<T> GetEnumerator();
+		ICellStoreEnumerator<T> GetEnumerator(int startRow, int startColumn, int endRow, int endColumn);
 	}
 
 	/// <summary>
@@ -144,40 +140,14 @@ namespace OfficeOpenXml
 		T Value { get; set; }
 	}
 
-	/// <summary>
-	/// A factory class for generating CellStoreEnumerators for a given <see cref="ICellStore{T}"/>.
-	/// </summary>
-	/// <typeparam name="T">The type of the value being stored in the <see cref="ICellStore{T}"/>.</typeparam>
-	internal class CellStoreEnumeratorFactory<T>
+	internal static class CellStore
 	{
-		/// <summary>
-		/// Enumerate the entire CellStore.
-		/// </summary>
-		/// <param name="cellStore">The CellStore to enumerate.</param>
-		/// <returns>An <see cref="ICellStoreEnumerator{T}"/> that enumerates the entire <paramref name="cellStore"/>.</returns>
-		public static ICellStoreEnumerator<T> GetNewEnumerator(ICellStore<T> cellStore)
+		static bool UseZCellStore { get; } = false;
+		public static ICellStore<T> Build<T>()
 		{
-			var specificCellStore = cellStore as CellStore<T>;
-			if (specificCellStore != null)
-				return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore);
-			throw new NotImplementedException($"No CellStoreEnumerator accepts the type {cellStore.GetType()}.");
-		}
-
-		/// <summary>
-		/// Enumerate only the part of the <paramref name="cellStore"/> that lie within the given bounds.
-		/// </summary>
-		/// <param name="cellStore">The <see cref="ICellStore{T}"/> to partially enumerate.</param>
-		/// <param name="startRow">The minimum row of cells to enumerate.</param>
-		/// <param name="startColumn">The minimum column of cells to enumerate.</param>
-		/// <param name="endRow">The maximum row to enumerate.</param>
-		/// <param name="endColumn">The maximum column to enumerate.</param>
-		/// <returns>An enumerator that only returns values within the given range.</returns>
-		public static ICellStoreEnumerator<T> GetNewEnumerator(ICellStore<T> cellStore, int startRow, int startColumn, int endRow, int endColumn)
-		{
-			var specificCellStore = cellStore as CellStore<T>;
-			if (specificCellStore != null)
-				return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore, startRow, startColumn, endRow, endColumn);
-			throw new NotImplementedException($"No CellStoreEnumerator accepts the type {cellStore.GetType()}.");
+			if (CellStore.UseZCellStore)
+				return new ZCellStore<T>();
+			return new CellStore<T>();
 		}
 	}
 }
