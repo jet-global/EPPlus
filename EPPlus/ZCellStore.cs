@@ -637,10 +637,15 @@ namespace OfficeOpenXml
 
 		private class ZCellStoreEnumerator : ICellStoreEnumerator<T>
 		{
+			#region Class Variables
+			private int myColumn;
+			private int myRow;
+			#endregion
+			
 			#region Properties
 			private ZCellStore<T> CellStore { get; }
 			private int StartRow { get; }
-			private int StartColumn{ get; }
+			private int StartColumn { get; }
 			private int EndRow { get; }
 			private int Endcolumn { get; }
 			#endregion
@@ -650,54 +655,75 @@ namespace OfficeOpenXml
 				this(zCellStore, 1, 1, ExcelPackage.MaxRows, ExcelPackage.MaxColumns)
 			{
 			}
-			
+
 			public ZCellStoreEnumerator(ZCellStore<T> zCellStore, int startRow, int startColumn, int endRow, int endColumn)
 			{
 				this.CellStore = zCellStore;
-
+				
 				this.StartRow = startRow;
 				this.StartColumn = startColumn;
 				this.EndRow = endRow;
 				this.Endcolumn = endColumn;
+				this.Reset();
 			}
 			#endregion
 
 			#region ICellStorEnumerator Members
-			public string CellAddress => throw new NotImplementedException();
+			public string CellAddress => ExcelAddressBase.GetAddress(this.Row, this.Column);
 
-			public int Column => throw new NotImplementedException();
+			public int Column => myColumn;
 
-			public int Row => throw new NotImplementedException();
+			public int Row => myRow;
 
-			public T Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+			public T Value
+			{
+				get { return this.CellStore.GetValue(this.Row, this.Column); }
+				set { this.CellStore.SetValue(this.Row, this.Column, value); }
+			}
 
-			public T Current => throw new NotImplementedException();
+			public T Current => this.Value;
 
-			object IEnumerator.Current => throw new NotImplementedException();
+			object IEnumerator.Current
+			{
+				get
+				{
+					this.Reset();
+					return this;
+				}
+			}
 
 			public void Dispose()
 			{
-				throw new NotImplementedException();
+				// TODO ZPF Can we just take this off of the interfact?...
 			}
 
 			public IEnumerator<T> GetEnumerator()
 			{
-				throw new NotImplementedException();
+				this.Reset();
+				return this;
 			}
 
 			public bool MoveNext()
-			{
-				throw new NotImplementedException();
+			{ 
+				int betaRow = ExcelPackage.MaxRows + 1, betaColumn = -1;
+				bool found = this.CellStore.TryFindNextCell(myColumn, this.Endcolumn, myRow, ref betaRow, ref betaColumn) ||
+										 this.CellStore.TryFindNextCell(this.StartColumn - 1, myColumn, myRow + 1, ref betaRow, ref betaColumn);
+				myRow = betaRow + 1;
+				myColumn = betaColumn + 1;
+				// TODO ZPF This validation can likely be optimized
+				return myRow >= this.StartRow && myRow <= this.EndRow && myColumn >= this.StartColumn && myColumn <= this.Endcolumn; 
 			}
 
 			public void Reset()
 			{
-				throw new NotImplementedException();
+				myRow = this.StartRow;
+				myColumn = this.StartColumn - 1;
 			}
 
 			IEnumerator IEnumerable.GetEnumerator()
 			{
-				throw new NotImplementedException();
+				this.Reset();
+				return this;
 			}
 			#endregion
 		}

@@ -1659,6 +1659,431 @@ namespace EPPlusTest
 
 		#endregion
 
+		#region ZCellStoreEnumerator Tests
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumerateEmptySet()
+		{
+			var cellStore = new ZCellStore<int>();
+			var enumerator = cellStore.GetEnumerator();
+			Assert.AreEqual(1, enumerator.Row);
+			Assert.AreEqual(0, enumerator.Column);
+			Assert.IsFalse(enumerator.MoveNext());
+		}
+
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesAllValues()
+		{
+			var cellStore = new ZCellStore<int>();
+			int value = 1;
+			for (int row = 1; row <= 10; row++)
+			{
+				for (int column = 1; column <= 10; column++)
+				{
+					cellStore.SetValue(row, column, value++);
+				}
+			}
+			var enumerator = cellStore.GetEnumerator();
+			for (value = 1; value <= 100; value++)
+			{
+				Assert.IsTrue(enumerator.MoveNext());
+				Assert.AreEqual(value, enumerator.Value);
+			}
+			Assert.IsFalse(enumerator.MoveNext());
+		}
+
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesBlockTopRows()
+		{
+			var cellStore = new ZCellStore<int>();
+			int value = 1;
+			for (int row = 1; row <= 10; row++)
+			{
+				for (int column = 1; column <= 10; column++)
+				{
+					cellStore.SetValue(row, column, value++);
+				}
+			}
+			var enumerator = cellStore.GetEnumerator(1, 1, 2, 10);
+			for (value = 1; value <= 20; value++)
+			{
+				Assert.IsTrue(enumerator.MoveNext());
+				Assert.AreEqual(value, enumerator.Value);
+			}
+			Assert.IsFalse(enumerator.MoveNext());
+		}
+
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesBlockBottomRows()
+		{
+			var cellStore = new ZCellStore<int>();
+			int value = 1;
+			for (int row = 1; row <= 10; row++)
+			{
+				for (int column = 1; column <= 10; column++)
+				{
+					cellStore.SetValue(row, column, value++);
+				}
+			}
+			var enumerator = cellStore.GetEnumerator(7, 1, 10, 10);
+			for (value = 61; value <= 100; value++)
+			{
+				Assert.IsTrue(enumerator.MoveNext());
+				Assert.AreEqual(value, enumerator.Value);
+			}
+			Assert.IsFalse(enumerator.MoveNext());
+		}
+
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesBlockBottomRowsHandlesLargeBlock()
+		{
+			var cellStore = new ZCellStore<int>();
+			int value = 1;
+			for (int row = 1; row <= 10; row++)
+			{
+				for (int column = 1; column <= 10; column++)
+				{
+					cellStore.SetValue(row, column, value++);
+				}
+			}
+			var enumerator = cellStore.GetEnumerator(7, 1, 100, 100);
+			for (value = 61; value <= 100; value++)
+			{
+				Assert.IsTrue(enumerator.MoveNext());
+				Assert.AreEqual(value, enumerator.Value);
+			}
+			Assert.IsFalse(enumerator.MoveNext());
+		}
+
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesBlockLeftColumns()
+		{
+			var cellStore = new ZCellStore<int>();
+			int value = 1;
+			for (int row = 1; row <= 10; row++)
+			{
+				for (int column = 1; column <= 10; column++)
+				{
+					cellStore.SetValue(row, column, value++);
+				}
+			}
+			var enumerator = cellStore.GetEnumerator(1, 1, 10, 2);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(1, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(2, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(11, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(12, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(21, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(22, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(31, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(32, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(41, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(42, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(51, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(52, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(61, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(62, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(71, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(72, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(81, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(82, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(91, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(92, enumerator.Value);
+
+			Assert.IsFalse(enumerator.MoveNext());
+		}
+
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesBlockRightColumns()
+		{
+			var cellStore = new ZCellStore<int>();
+			int value = 1;
+			for (int row = 1; row <= 10; row++)
+			{
+				for (int column = 1; column <= 10; column++)
+				{
+					cellStore.SetValue(row, column, value++);
+				}
+			}
+			var enumerator = cellStore.GetEnumerator(1, 7, 10, 10);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(7, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(8, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(9, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(10, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(17, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(18, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(19, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(20, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(27, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(28, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(29, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(30, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(37, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(38, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(39, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(40, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(47, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(48, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(49, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(50, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(57, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(58, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(59, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(60, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(67, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(68, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(69, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(70, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(77, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(78, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(79, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(80, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(87, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(88, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(89, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(90, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(97, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(98, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(99, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(100, enumerator.Value);
+
+			Assert.IsFalse(enumerator.MoveNext());
+		}
+
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesBlockRightColumnsHandlesLargeBlock()
+		{
+			var cellStore = new ZCellStore<int>();
+			int value = 1;
+			for (int row = 1; row <= 10; row++)
+			{
+				for (int column = 1; column <= 10; column++)
+				{
+					cellStore.SetValue(row, column, value++);
+				}
+			}
+			var enumerator = cellStore.GetEnumerator(1, 7, 100, 100);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(7, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(8, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(9, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(10, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(17, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(18, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(19, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(20, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(27, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(28, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(29, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(30, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(37, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(38, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(39, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(40, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(47, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(48, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(49, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(50, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(57, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(58, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(59, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(60, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(67, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(68, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(69, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(70, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(77, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(78, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(79, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(80, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(87, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(88, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(89, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(90, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(97, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(98, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(99, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(100, enumerator.Value);
+
+			Assert.IsFalse(enumerator.MoveNext());
+		}
+
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesInternalBlock()
+		{
+			var cellStore = new ZCellStore<int>();
+			int value = 1;
+			for (int row = 1; row <= 10; row++)
+			{
+				for (int column = 1; column <= 10; column++)
+				{
+					cellStore.SetValue(row, column, value++);
+				}
+			}
+			var enumerator = cellStore.GetEnumerator(4, 4, 7, 7);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(34, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(35, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(36, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(37, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(44, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(45, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(46, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(47, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(54, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(55, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(56, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(57, enumerator.Value);
+
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(64, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(65, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(66, enumerator.Value);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(67, enumerator.Value);
+
+			Assert.IsFalse(enumerator.MoveNext());
+		}
+		#endregion
 		#endregion
 
 		#region Helper Methods
