@@ -102,65 +102,22 @@ namespace OfficeOpenXml
 
 		public bool NextCell(ref int row, ref int column)
 		{
-			int localRow = row - 2, localColumn = column - 1;
-			var columnSearch = localColumn;
-			int currentColumn = localColumn;
-			int lastRow = localRow;
-			int betaRow = ExcelPackage.MaxRows + 1;
-			int betaColumn = 0;
-
-			for (int i = 0; i < 2; ++i) // This still over-enumerates
-			{
-				while (this.Data.NextItem(ref columnSearch))
-				{
-					var rowSearch = localRow;
-					if (this.Data.GetItem(columnSearch)?.Value.NextItem(ref rowSearch) == true)
-					{
-						if (rowSearch < betaRow)
-						{
-							betaRow = rowSearch;
-							betaColumn = columnSearch;
-						}
-					}
-				}
-				columnSearch = -1;
-				localRow++;
-			}
+			int betaRow = ExcelPackage.MaxRows + 1, betaColumn = -1;
+			bool found = this.TryFindNextCell(column, ExcelPackage.MaxColumns, row, ref betaRow, ref betaColumn) ||
+									 this.TryFindNextCell(0, column, row + 1, ref betaRow, ref betaColumn);
 			row = betaRow + 1;
 			column = betaColumn + 1;
-			return betaRow != ExcelPackage.MaxRows + 1;
+			return found || betaRow != ExcelPackage.MaxRows + 1;
 		}
 
 		public bool PrevCell(ref int row, ref int column)
 		{
-			int localRow = row, localColumn = column - 1;
-			var columnSearch = localColumn;
-			int currentColumn = localColumn;
-			int lastRow = localRow;
-			int betaRow = -1;
-			int betaColumn = 0;
-
-			for (int i = 0; i < 2; ++i) // This still over-enumerates
-			{
-				while (this.Data.PreviousItem(ref columnSearch))
-				{
-					var rowSearch = localRow;
-					if (this.Data.GetItem(columnSearch)?.Value.PreviousItem(ref rowSearch) == true)
-					{
-						if (rowSearch > betaRow)
-						{
-							betaRow = rowSearch;
-							betaColumn = columnSearch;
-						}
-					}
-
-				}
-				columnSearch = ExcelPackage.MaxColumns;
-				localRow--;
-			}
+			int betaRow = -1, betaColumn = -1;
+			bool found = this.TryFindPreviousCell(column, 1, row, ref betaRow, ref betaColumn) ||
+									 this.TryFindPreviousCell(ExcelPackage.MaxColumns + 1, column, row - 1, ref betaRow, ref betaColumn);
 			row = betaRow + 1;
 			column = betaColumn + 1;
-			return betaRow != -1;
+			return found || betaRow != -1;
 		}
 
 		public void Delete(int fromRow, int fromCol, int rows, int columns)
@@ -238,6 +195,62 @@ namespace OfficeOpenXml
 		public void Dispose()
 		{
 			throw new NotImplementedException();
+		}
+		#endregion
+
+		#region Private Methods
+		private bool TryFindNextCell(int startColumn, int endColumn, int targetRow, ref int betaRow, ref int betaColumn)
+		{
+			startColumn--; // 1-indexing offset
+			endColumn--; // 1-indexing offset
+			targetRow--; // 1-indexing offset
+			while (this.Data.NextItem(ref startColumn) && startColumn <= endColumn)
+			{
+				var page = this.Data.GetItem(startColumn);
+				int rowSearch = targetRow - 1;
+				if (page?.Value.NextItem(ref rowSearch) == true)
+				{
+					if (rowSearch == targetRow || targetRow < 0)
+					{
+						betaRow = rowSearch;
+						betaColumn = startColumn;
+						return true;
+					}
+					else if (rowSearch < betaRow)
+					{
+						betaRow = rowSearch;
+						betaColumn = startColumn;
+					}
+				}
+			}
+			return false;
+		}
+
+		private bool TryFindPreviousCell(int startColumn, int endColumn, int targetRow, ref int betaRow, ref int betaColumn)
+		{
+			startColumn--; // 1-indexing offset
+			endColumn--; // 1-indexing offset
+			targetRow--; // 1-indexing offset
+			while (this.Data.PreviousItem(ref startColumn) && startColumn >= endColumn)
+			{
+				var page = this.Data.GetItem(startColumn);
+				int rowSearch = targetRow + 1;
+				if (page?.Value.PreviousItem(ref rowSearch) == true)
+				{
+					if (rowSearch == targetRow || targetRow >= ExcelPackage.MaxRows)
+					{
+						betaRow = rowSearch;
+						betaColumn = startColumn;
+						return true;
+					}
+					else if (rowSearch > betaRow)
+					{
+						betaRow = rowSearch;
+						betaColumn = startColumn;
+					}
+				}
+			}
+			return false;
 		}
 		#endregion
 
@@ -503,6 +516,7 @@ namespace OfficeOpenXml
 				}
 				#endregion
 
+				#region Public Methods
 				// TODO cleanup? Only used for test setup/validation.
 				public ValueHolder?[] GetValues()
 				{
@@ -528,6 +542,7 @@ namespace OfficeOpenXml
 					}
 					return false;
 				}
+				#endregion
 
 				#region Private Methods
 				private void UpdatedNulledIndex(int index)
