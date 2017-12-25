@@ -56,30 +56,31 @@ namespace OfficeOpenXml
 		#region ICellStore<T> Members
 		public T GetValue(int row, int column)
 		{
-			if (row < 1 || row > ExcelPackage.MaxRows || column < 1 || column > ExcelPackage.MaxColumns)
-				return default(T);
-			var columnItem = this.Data.GetItem(column - 1)?.Value;
-			if (columnItem != null)
+			if (this.TryUpdateIndices(ref row, ref column, true))
 			{
-				var rowItem = columnItem.GetItem(row - 1);
-				if (rowItem.HasValue)
-					return rowItem.Value.Value;
+				var columnItem = this.Data.GetItem(column)?.Value;
+				if (columnItem != null)
+				{
+					var rowItem = columnItem.GetItem(row);
+					if (rowItem.HasValue)
+						return rowItem.Value.Value;
+				}
 			}
 			return default(T);
 		}
 
 		public void SetValue(int row, int column, T value)
 		{
-			if (row < 1 || row > ExcelPackage.MaxRows || column < 1 || column > ExcelPackage.MaxColumns)
-				return;
-			column--;
-			var columnStructure = this.Data.GetItem(column);
-			if (columnStructure == null)
+			if (this.TryUpdateIndices(ref row, ref column, true))
 			{
-				columnStructure = new PagedStructure<T>(ZCellStore<T>.RowPageBits);
-				this.Data.SetItem(column, columnStructure);
+				var columnStructure = this.Data.GetItem(column);
+				if (columnStructure == null)
+				{
+					columnStructure = new PagedStructure<T>(ZCellStore<T>.RowPageBits);
+					this.Data.SetItem(column, columnStructure);
+				}
+				columnStructure?.Value.SetItem(row, value);
 			}
-			columnStructure?.Value.SetItem(row - 1, value);
 		}
 
 		public bool Exists(int row, int column)
@@ -90,13 +91,14 @@ namespace OfficeOpenXml
 		public bool Exists(int row, int column, out T value)
 		{
 			value = default(T);
-			if (row < 1 || row > ExcelPackage.MaxRows || column < 1 || column > ExcelPackage.MaxColumns)
-				return false;
-			var item = this.Data.GetItem(column - 1)?.Value.GetItem(row - 1);
-			if (item.HasValue)
+			if (this.TryUpdateIndices(ref row, ref column, true))
 			{
-				value = item.Value.Value;
-				return true;
+				var item = this.Data.GetItem(column)?.Value.GetItem(row);
+				if (item.HasValue)
+				{
+					value = item.Value.Value;
+					return true;
+				}
 			}
 			return false;
 		}
@@ -130,14 +132,17 @@ namespace OfficeOpenXml
 		{
 			if (shift)
 			{
-				if (fromCol > 0)
-					this.Data.ShiftItems(fromCol, -columns);
-				if (fromRow > 0)
+				if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
 				{
-					int column = -1;
-					while (this.Data.NextItem(ref column))
+					if (fromCol >= 0)
+						this.Data.ShiftItems(fromCol, -columns);
+					if (fromRow >= 0)
 					{
-						this.Data.GetItem(column)?.Value.ShiftItems(fromRow, -rows);
+						int column = -1;
+						while (this.Data.NextItem(ref column))
+						{
+							this.Data.GetItem(column)?.Value.ShiftItems(fromRow, -rows);
+						}
 					}
 				}
 			}
@@ -147,14 +152,17 @@ namespace OfficeOpenXml
 
 		public void Clear(int fromRow, int fromCol, int rows, int columns)
 		{
-			if (fromCol > 0)
-				this.Data.ClearItems(fromCol, columns);
-			if (fromRow > 0)
+			if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
 			{
-				int column = -1;
-				while (this.Data.NextItem(ref column))
+				if (fromCol >= 0)
+					this.Data.ClearItems(fromCol, columns);
+				if (fromRow >= 0)
 				{
-					this.Data.GetItem(column)?.Value.ClearItems(fromRow, rows);
+					int column = -1;
+					while (this.Data.NextItem(ref column))
+					{
+						this.Data.GetItem(column)?.Value.ClearItems(fromRow, rows);
+					}
 				}
 			}
 		}
@@ -179,23 +187,26 @@ namespace OfficeOpenXml
 			return fromRow != ExcelPackage.MaxRows + 1 && toRow != 0 && fromCol != 0 && toCol != 0;
 		}
 
-		public void Insert(int rowFrom, int columnFrom, int rows, int columns)
+		public void Insert(int fromRow, int fromCol, int rows, int columns)
 		{
-			if (columnFrom > 0)
-				this.Data.ShiftItems(columnFrom, columns);
-			if (rowFrom > 0)
+			if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
 			{
-				int column = -1;
-				while (this.Data.NextItem(ref column))
+				if (fromCol >= 0)
+					this.Data.ShiftItems(fromCol, columns);
+				if (fromRow >= 0)
 				{
-					this.Data.GetItem(column)?.Value.ShiftItems(rowFrom, rows);
+					int column = -1;
+					while (this.Data.NextItem(ref column))
+					{
+						this.Data.GetItem(column)?.Value.ShiftItems(fromRow, rows);
+					}
 				}
 			}
 		}
 
 		public void Dispose()
 		{
-			throw new NotImplementedException();
+			// TODO ZPF do we really need this?...
 		}
 
 		public ICellStoreEnumerator<T> GetEnumerator()
@@ -262,6 +273,15 @@ namespace OfficeOpenXml
 				}
 			}
 			return false;
+		}
+
+		private bool TryUpdateIndices(ref int row, ref int column, bool validate)
+		{
+			if (validate && (row < 1 || row > ExcelPackage.MaxRows || column < 1 || column > ExcelPackage.MaxColumns))
+				return false;
+			row--;
+			column--;
+			return true;
 		}
 		#endregion
 

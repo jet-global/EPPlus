@@ -142,7 +142,8 @@ namespace OfficeOpenXml
 
 	internal static class CellStore
 	{
-		static bool UseZCellStore { get; } = false;
+		static bool UseZCellStore { get; } = true;
+
 		public static ICellStore<T> Build<T>()
 		{
 			if (CellStore.UseZCellStore)
