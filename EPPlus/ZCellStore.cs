@@ -125,27 +125,25 @@ namespace OfficeOpenXml
 
 		public void Delete(int fromRow, int fromCol, int rows, int columns)
 		{
-			this.Delete(fromRow, fromCol, rows, columns, true);
+			if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
+			{
+				if (fromCol >= 0)
+					this.Data.ShiftItems(fromCol, -columns);
+				if (fromRow >= 0)
+				{
+					int column = fromCol - 1; // Only from the column forward // TODO ZPF test this
+					while (this.Data.NextItem(ref column))
+					{
+						this.Data.GetItem(column)?.Value.ShiftItems(fromRow, -rows);
+					}
+				}
+			}
 		}
 
 		public void Delete(int fromRow, int fromCol, int rows, int columns, bool shift)
 		{
 			if (shift)
-			{
-				if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
-				{
-					if (fromCol >= 0)
-						this.Data.ShiftItems(fromCol, -columns);
-					if (fromRow >= 0)
-					{
-						int column = -1;
-						while (this.Data.NextItem(ref column))
-						{
-							this.Data.GetItem(column)?.Value.ShiftItems(fromRow, -rows);
-						}
-					}
-				}
-			}
+				this.Delete(fromRow, fromCol, rows, columns);
 			else
 				this.Clear(fromRow, fromCol, rows, columns);
 		}
@@ -158,7 +156,7 @@ namespace OfficeOpenXml
 					this.Data.ClearItems(fromCol, columns);
 				if (fromRow >= 0)
 				{
-					int column = -1;
+					int column = fromCol - 1; // Only from the column forward // TODO ZPF test this
 					while (this.Data.NextItem(ref column))
 					{
 						this.Data.GetItem(column)?.Value.ClearItems(fromRow, rows);
@@ -195,7 +193,7 @@ namespace OfficeOpenXml
 					this.Data.ShiftItems(fromCol, columns);
 				if (fromRow >= 0)
 				{
-					int column = -1;
+					int column = fromCol - 1; // Only from the column forward // TODO ZPF test this
 					while (this.Data.NextItem(ref column))
 					{
 						this.Data.GetItem(column)?.Value.ShiftItems(fromRow, rows);
