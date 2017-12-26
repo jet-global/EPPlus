@@ -1707,6 +1707,8 @@ namespace OfficeOpenXml
 				this.UpdateSparkLines(-rows, rowFrom, 0, 0);
 				this.UpdateCharts(-rows, 0, rowFrom, 0);
 				this.UpdateDataValidationRanges(rowFrom, -rows, 0, 0);
+				this.ConditionalFormatting.RemoveAll(f => f.Address.Start.Row >= rowFrom && f.Address.End.Row <= rowFrom + rows - 1);
+				this.X14ConditionalFormatting.X14Rules.RemoveAll(f => new ExcelAddress(f.Address).Start.Row >= rowFrom && new ExcelAddress(f.Address).End.Row <= rowFrom + rows - 1);
 			}
 		}
 
@@ -1817,6 +1819,8 @@ namespace OfficeOpenXml
 				this.UpdateCharts(0, -columns, 0, columnFrom);
 				this.UpdateSparkLines(0, 0, -columns, columnFrom);
 				this.UpdateDataValidationRanges(0, 0, columnFrom, -columns);
+				this.ConditionalFormatting.RemoveAll(f => f.Address.Start.Column >= columnFrom && f.Address.End.Column <= columnFrom + columns - 1);
+				this.X14ConditionalFormatting.X14Rules.RemoveAll(f => new ExcelAddress(f.Address).Start.Column >= columnFrom && new ExcelAddress(f.Address).End.Column <= columnFrom + columns - 1);
 			}
 		}
 
