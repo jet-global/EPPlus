@@ -4774,6 +4774,10 @@ namespace EPPlusTest
 				worksheet.DeleteRow(87, 1);
 				Assert.AreEqual(20, worksheet.ConditionalFormatting.Count);
 				Assert.AreEqual(1, worksheet.ConditionalFormatting.Count(f => f.Type == eExcelConditionalFormattingRuleType.Expression));
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Expression);
+				Assert.AreEqual("C87", nextRowRule.Address.ToString());
+				var previousRowValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DuplicateValues);
+				Assert.AreEqual("C71:C83", previousRowValue.Address.ToString());
 			}
 		}
 
@@ -4791,6 +4795,8 @@ namespace EPPlusTest
 				worksheet.DeleteRow(87, 2);
 				Assert.AreEqual(19, worksheet.ConditionalFormatting.Count);
 				Assert.AreEqual(0, worksheet.ConditionalFormatting.Count(f => f.Type == eExcelConditionalFormattingRuleType.Expression));
+				var previousRowValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DuplicateValues);
+				Assert.AreEqual("C71:C83", previousRowValue.Address.ToString());
 			}
 		}
 
@@ -4814,6 +4820,10 @@ namespace EPPlusTest
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.TopPercent));
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Bottom));
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.AboveAverage);
+				Assert.AreEqual("C43:C54", nextRowRule.Address.ToString());
+				var previousRowValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("C22:C33", previousRowValue.Address.ToString());
 			}
 		}
 
@@ -4837,6 +4847,10 @@ namespace EPPlusTest
 				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.TopPercent));
 				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Bottom));
 				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.AboveAverage);
+				Assert.AreEqual("C44:C55", nextRowRule.Address.ToString());
+				var previousRowValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("C22:C33", previousRowValue.Address.ToString());
 			}
 		}
 
@@ -4860,6 +4874,10 @@ namespace EPPlusTest
 				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.TopPercent));
 				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Bottom));
 				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.AboveAverage);
+				Assert.AreEqual("C43:C54", nextRowRule.Address.ToString());
+				var previousRowValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("C22:C33", previousRowValue.Address.ToString());
 			}
 		}
 
@@ -4877,6 +4895,8 @@ namespace EPPlusTest
 				worksheet.DeleteRow(5, 12);
 				Assert.AreEqual(1, worksheet.X14ConditionalFormatting.X14Rules.Count);
 				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("C10:C21", nextRowRule.Address.ToString());
 			}
 		}
 
@@ -4893,7 +4913,10 @@ namespace EPPlusTest
 				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
 				worksheet.DeleteRow(5, 11);
 				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
-				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				var transformedRule = worksheet.X14ConditionalFormatting.X14Rules.First(r => r.Address == "G5");
+				Assert.IsNotNull(transformedRule);
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("C11:C22", nextRowRule.Address.ToString());
 			}
 		}
 		#endregion
@@ -5753,6 +5776,10 @@ namespace EPPlusTest
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.FiveIconSet));
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks));
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.NotContainsBlanks);
+				Assert.AreEqual("J22:J33", nextColumnRule.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DataBar);
+				Assert.AreEqual("G5:G16", previousColumnValue.Address.ToString());
 			}
 		}
 
@@ -5776,6 +5803,10 @@ namespace EPPlusTest
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks));
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.NotContainsBlanks));
+				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ContainsErrors);
+				Assert.AreEqual("J22:J33", nextColumnRule.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DataBar);
+				Assert.AreEqual("G5:G16", previousColumnValue.Address.ToString());
 			}
 		}
 
@@ -5793,6 +5824,10 @@ namespace EPPlusTest
 				worksheet.DeleteColumn(10, 1);
 				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
 				Assert.AreEqual(original, worksheet.ConditionalFormatting);
+				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.NotContainsBlanks);
+				Assert.AreEqual("J22:J33", nextColumnRule.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DataBar);
+				Assert.AreEqual("G5:G16", previousColumnValue.Address.ToString());
 			}
 		}
 
@@ -5810,6 +5845,10 @@ namespace EPPlusTest
 				worksheet.DeleteColumn(7, 1);
 				Assert.AreEqual(1, worksheet.X14ConditionalFormatting.X14Rules.Count);
 				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks);
+				Assert.AreEqual("H22:H33", nextColumnRule.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ThreeColorScale);
+				Assert.AreEqual("E5:E16", previousColumnValue.Address.ToString());
 			}
 		}
 
@@ -5827,6 +5866,10 @@ namespace EPPlusTest
 				worksheet.DeleteColumn(5, 3);
 				Assert.AreEqual(0, worksheet.X14ConditionalFormatting.X14Rules.Count);
 				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any());
+				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks);
+				Assert.AreEqual("F22:F33", nextColumnRule.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.TwoColorScale);
+				Assert.AreEqual("C5:C16", previousColumnValue.Address.ToString());
 			}
 		}
 		#endregion
