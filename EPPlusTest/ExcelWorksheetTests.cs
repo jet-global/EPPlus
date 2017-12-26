@@ -5795,6 +5795,40 @@ namespace EPPlusTest
 				Assert.AreEqual(original, worksheet.ConditionalFormatting);
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteColumnsWithConditionalFormattingX14()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				worksheet.DeleteColumn(7, 1);
+				Assert.AreEqual(1, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteColumnsWithConditionalFormattingX14Multiples()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				worksheet.DeleteColumn(5, 3);
+				Assert.AreEqual(0, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any());
+			}
+		}
 		#endregion
 
 
