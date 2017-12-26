@@ -264,24 +264,6 @@ namespace OfficeOpenXml.ConditionalFormatting
 		}
 
 		/// <summary>
-		/// Removes all <see cref="IExcelConditionalFormattingRule"/>s that match the condition from the collection and from the XML.
-		/// </summary>
-		/// <param name="match">The condition to remove <see cref="IExcelConditionalFormattingRule"/>s.</param>
-		public void RemoveAll(Func<IExcelConditionalFormattingRule, bool> match)
-		{
-			var rulesToRemove = new List<IExcelConditionalFormattingRule>();
-			foreach(var rule in this.ConditionalFormattingRules)
-			{
-				if (match(rule))
-					rulesToRemove.Add(rule);
-			}
-			foreach(var rule in rulesToRemove)
-			{
-				this.Remove(rule);
-			}
-		}
-
-		/// <summary>
 		/// Remove a Conditional Formatting Rule by its object.
 		/// </summary>
 		/// <param name="item">The item to remove.</param>
