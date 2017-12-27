@@ -217,5 +217,122 @@ namespace EPPlusTest
 			}
 		}
 		#endregion
+
+		#region TransformFormulaReferences Test
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void TransformFormulaReferencesValAttributeTest()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				var twoColorScale = (ExcelConditionalFormattingTwoColorScale)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.TwoColorScale);
+				Assert.AreEqual("colorScale", twoColorScale.Node.Attributes["type"].Value);
+				var innerNodes = twoColorScale.Node.ChildNodes[0].ChildNodes;
+				var minNode = innerNodes[0];
+				var maxNode = innerNodes[1];
+				Assert.AreEqual("$K$6", minNode.Attributes["val"].Value);
+				Assert.AreEqual("$K$7", maxNode.Attributes["val"].Value);
+
+				formattings.TransformFormulaReferences(s => { try { return new ExcelAddress(s).AddColumn(1, 2).Address; } catch { return s; } });
+
+				formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				twoColorScale = (ExcelConditionalFormattingTwoColorScale)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.TwoColorScale);
+				Assert.AreEqual("colorScale", twoColorScale.Node.Attributes["type"].Value);
+				innerNodes = twoColorScale.Node.ChildNodes[0].ChildNodes;
+				minNode = innerNodes[0];
+				maxNode = innerNodes[1];
+				Assert.AreEqual("$M$6", minNode.Attributes["val"].Value);
+				Assert.AreEqual("$M$7", maxNode.Attributes["val"].Value);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void TransformFormulaReferencesFiveIconListTest()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				var iconSet = (ExcelConditionalFormattingFiveIconSet)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.FiveIconSet);
+				Assert.AreEqual("iconSet", iconSet.Node.Attributes["type"].Value);
+				Assert.AreEqual("0", iconSet.Icon1.Formula);
+				Assert.AreEqual("$Q$7", iconSet.Icon2.Formula);
+				Assert.AreEqual("$Q$8", iconSet.Icon3.Formula);
+				Assert.AreEqual("$Q$9", iconSet.Icon4.Formula);
+				Assert.AreEqual("$Q$10", iconSet.Icon5.Formula);
+
+				formattings.TransformFormulaReferences(s => { try { return new ExcelAddress(s).AddColumn(1, 2).AddRow(1, 3).Address; } catch { return s; } });
+
+				formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				iconSet = (ExcelConditionalFormattingFiveIconSet)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.FiveIconSet);
+				Assert.AreEqual("iconSet", iconSet.Node.Attributes["type"].Value);
+				Assert.AreEqual("0", iconSet.Icon1.Formula);
+				Assert.AreEqual("$S$10", iconSet.Icon2.Formula);
+				Assert.AreEqual("$S$11", iconSet.Icon3.Formula);
+				Assert.AreEqual("$S$12", iconSet.Icon4.Formula);
+				Assert.AreEqual("$S$13", iconSet.Icon5.Formula);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void TransformFormulaReferencesFormulaTagTest()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				var between = (ExcelConditionalFormattingBetween)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("cellIs", between.Node.Attributes["type"].Value);
+				Assert.AreEqual(between.Type, eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("$Q$22", between.Formula);
+				Assert.AreEqual("$Q$23", between.Formula2);
+				
+				formattings.TransformFormulaReferences(s => $"IF({s},1,0)");
+
+				formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
+				between = (ExcelConditionalFormattingBetween)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("cellIs", between.Node.Attributes["type"].Value);
+				Assert.AreEqual(between.Type, eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("IF($Q$22,1,0)", between.Formula);
+				Assert.AreEqual("IF($Q$23,1,0)", between.Formula2);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void TransformFormulaReferencesX14Test()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var formattings = package.Workbook.Worksheets.First().X14ConditionalFormatting;
+				Assert.AreEqual(2, formattings.X14Rules.Count);
+				var dataBarRule = formattings.X14Rules.First();
+				Assert.AreEqual(1, dataBarRule.Formulae.Count);
+				Assert.AreEqual("$O$6", dataBarRule.Formulae.First().Formula);
+				var containsTextRule = formattings.X14Rules[1];
+				Assert.AreEqual(2, containsTextRule.Formulae.Count);
+				Assert.AreEqual("NOT(ISERROR(SEARCH($S$22,E22)))", containsTextRule.Formulae.First().Formula);
+				Assert.AreEqual("$S$22", containsTextRule.Formulae[1].Formula);
+
+				formattings.TransformFormulaReferences(s => $"IF({s},1,0)");
+
+				formattings = package.Workbook.Worksheets.First().X14ConditionalFormatting;
+				dataBarRule = formattings.X14Rules.First();
+				Assert.AreEqual(1, dataBarRule.Formulae.Count);
+				Assert.AreEqual("IF($O$6,1,0)", dataBarRule.Formulae.First().Formula);
+				Assert.AreEqual("IF(NOT(ISERROR(SEARCH($S$22,E22))),1,0)", containsTextRule.Formulae.First().Formula);
+				Assert.AreEqual("IF($S$22,1,0)", containsTextRule.Formulae[1].Formula);
+			}
+		}
+		#endregion
 	}
 }

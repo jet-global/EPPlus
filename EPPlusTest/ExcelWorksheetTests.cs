@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
+using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Drawing.Vml;
@@ -4758,6 +4759,169 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region ConditionalFormatting
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteRowsWithConditionalFormattingContainedShouldDeleteConditionalFormattingSingleRow()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				Assert.AreEqual(2, worksheet.ConditionalFormatting.Count(f => f.Type == eExcelConditionalFormattingRuleType.Expression));
+				worksheet.DeleteRow(87, 1);
+				Assert.AreEqual(20, worksheet.ConditionalFormatting.Count);
+				Assert.AreEqual(1, worksheet.ConditionalFormatting.Count(f => f.Type == eExcelConditionalFormattingRuleType.Expression));
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Expression);
+				Assert.AreEqual("C87", nextRowRule.Address.ToString());
+				var previousRowValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DuplicateValues);
+				Assert.AreEqual("C71:C83", previousRowValue.Address.ToString());
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteRowsWithConditionalFormattingContainedShouldDeleteConditionalFormattingSingleRowMultiples()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				Assert.AreEqual(2, worksheet.ConditionalFormatting.Count(f => f.Type == eExcelConditionalFormattingRuleType.Expression));
+				worksheet.DeleteRow(87, 2);
+				Assert.AreEqual(19, worksheet.ConditionalFormatting.Count);
+				Assert.AreEqual(0, worksheet.ConditionalFormatting.Count(f => f.Type == eExcelConditionalFormattingRuleType.Expression));
+				var previousRowValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DuplicateValues);
+				Assert.AreEqual("C71:C83", previousRowValue.Address.ToString());
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteRowsWithConditionalFormattingContainedShouldDeleteConditionalFormatting()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Top));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.TopPercent));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Bottom));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				worksheet.DeleteRow(39, 12);
+				Assert.AreEqual(17, worksheet.ConditionalFormatting.Count);
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Top));
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.TopPercent));
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Bottom));
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.AboveAverage);
+				Assert.AreEqual("C43:C54", nextRowRule.Address.ToString());
+				var previousRowValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("C22:C33", previousRowValue.Address.ToString());
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteRowsWithConditionalFormattingPartiallyContainedShouldNotDeleteConditionalFormatting()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Top));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.TopPercent));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Bottom));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				worksheet.DeleteRow(39, 11);
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Top));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.TopPercent));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Bottom));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.AboveAverage);
+				Assert.AreEqual("C44:C55", nextRowRule.Address.ToString());
+				var previousRowValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("C22:C33", previousRowValue.Address.ToString());
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteRowsWithConditionalFormattingEndContainedShouldNotDeleteConditionalFormatting()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Top));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.TopPercent));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Bottom));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				worksheet.DeleteRow(40, 12);
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Top));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.TopPercent));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.Bottom));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.AboveAverage);
+				Assert.AreEqual("C43:C54", nextRowRule.Address.ToString());
+				var previousRowValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("C22:C33", previousRowValue.Address.ToString());
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteRowsWithConditionalFormattingX14()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				worksheet.DeleteRow(5, 12);
+				Assert.AreEqual(1, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("C10:C21", nextRowRule.Address.ToString());
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteRowsWithConditionalFormattingX14PartiallyContainedShouldNotDelete()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				worksheet.DeleteRow(5, 11);
+				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				var transformedRule = worksheet.X14ConditionalFormatting.X14Rules.First(r => r.Address == "G5");
+				Assert.IsNotNull(transformedRule);
+				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
+				Assert.AreEqual("C11:C22", nextRowRule.Address.ToString());
+			}
+		}
+		#endregion
+
+		#region Sparkline
 		[TestMethod]
 		public void DeleteRowWithSparklineContainingNullFormula()
 		{
@@ -4794,6 +4958,7 @@ namespace EPPlusTest
 				tempWorkbook.Delete();
 			}
 		}
+		#endregion
 		#endregion
 
 		#region DeleteColumn Tests
@@ -5592,6 +5757,125 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region ConditionalFormatting
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteColumnsWithConditionalFormattingContainedShouldDeleteConditionalFormatting()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.FiveIconSet));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				worksheet.DeleteColumn(9, 1);
+				Assert.AreEqual(18, worksheet.ConditionalFormatting.Count);
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.FiveIconSet));
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks));
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.NotContainsBlanks);
+				Assert.AreEqual("J22:J33", nextColumnRule.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DataBar);
+				Assert.AreEqual("G5:G16", previousColumnValue.Address.ToString());
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteColumnsWithConditionalFormattingContainedShouldDeleteConditionalFormattingMultipleColumns()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.FiveIconSet));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				Assert.IsTrue(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.NotContainsBlanks));
+				worksheet.DeleteColumn(9, 3);
+				Assert.AreEqual(17, worksheet.ConditionalFormatting.Count);
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.FiveIconSet));
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks));
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
+				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.NotContainsBlanks));
+				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ContainsErrors);
+				Assert.AreEqual("J22:J33", nextColumnRule.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DataBar);
+				Assert.AreEqual("G5:G16", previousColumnValue.Address.ToString());
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteColumnsWithConditionalFormattingNotContainedShouldNotDelete()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				var original = worksheet.ConditionalFormatting;
+				worksheet.DeleteColumn(10, 1);
+				Assert.AreEqual(21, worksheet.ConditionalFormatting.Count);
+				Assert.AreEqual(original, worksheet.ConditionalFormatting);
+				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.NotContainsBlanks);
+				Assert.AreEqual("J22:J33", nextColumnRule.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DataBar);
+				Assert.AreEqual("G5:G16", previousColumnValue.Address.ToString());
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteColumnsWithConditionalFormattingX14()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				worksheet.DeleteColumn(7, 1);
+				Assert.AreEqual(1, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks);
+				Assert.AreEqual("H22:H33", nextColumnRule.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ThreeColorScale);
+				Assert.AreEqual("E5:E16", previousColumnValue.Address.ToString());
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteColumnsWithConditionalFormattingX14Multiples()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				worksheet.DeleteColumn(5, 3);
+				Assert.AreEqual(0, worksheet.X14ConditionalFormatting.X14Rules.Count);
+				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any());
+				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks);
+				Assert.AreEqual("F22:F33", nextColumnRule.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.TwoColorScale);
+				Assert.AreEqual("C5:C16", previousColumnValue.Address.ToString());
+			}
+		}
+		#endregion
+
+
+		#region Sparkline
 		[TestMethod]
 		public void DeleteColumnWithSparklineContainingNullFormula()
 		{
@@ -5628,6 +5912,7 @@ namespace EPPlusTest
 				tempWorkbook.Delete();
 			}
 		}
+		#endregion
 		#endregion
 
 		#region PivotTable Tests
