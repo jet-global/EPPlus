@@ -4832,9 +4832,7 @@ namespace OfficeOpenXml
 				if (this.EntirelyInRemovedRows(rule.Address.ToString(), rowFrom, rows) || this.EntirelyInRemovedColumns(rule.Address.ToString(), columnFrom, columns))
 					rulesToDelete.Add(rule);
 				else
-				{
 					rule.Address = new ExcelAddress(this.UpdateAddresses(rule.Address.ToString(), rowFrom, rows, columnFrom, columns));
-				}
 			}
 			this.ConditionalFormatting.TransformFormulaReferences(f => this.UpdateAddresses(f, rowFrom, rows, columnFrom, columns));
 			foreach (var rule in rulesToDelete)
@@ -4851,9 +4849,7 @@ namespace OfficeOpenXml
 				if (this.EntirelyInRemovedRows(rule.Address, rowFrom, rows) || this.EntirelyInRemovedColumns(rule.Address, columnFrom, columns))
 					rulesToDelete.Add(rule);
 				else
-				{
 					rule.Address = this.UpdateAddresses(rule.Address, rowFrom, rows, columnFrom, columns);
-				}
 			}
 			this.X14ConditionalFormatting.TransformFormulaReferences(f => this.UpdateAddresses(f, rowFrom, rows, columnFrom, columns));
 			foreach (var rule in rulesToDelete)
@@ -4862,7 +4858,7 @@ namespace OfficeOpenXml
 			}
 		}
 
-		public string UpdateAddresses(string originalAddress, int rowFrom, int rows, int columnFrom, int columns)
+		private string UpdateAddresses(string originalAddress, int rowFrom, int rows, int columnFrom, int columns)
 		{
 			List<string> movedAddresses = new List<string>();
 			foreach(var stringAddress in originalAddress.ToString().Split(' '))
