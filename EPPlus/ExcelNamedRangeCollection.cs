@@ -206,12 +206,17 @@ namespace OfficeOpenXml
 			{
 				foreach (var namedRange in sheet.Names)
 				{
-					this.UpdateNameFormulaInsert(rowFrom, colFrom, rows, cols, namedRange, worksheet);
+					namedRange.NameFormula = this._wb.Package.FormulaManager.UpdateFormulaReferences(
+						namedRange.NameFormula, rows, cols, rowFrom, colFrom, worksheet.Name, worksheet.Name);
+					//this.UpdateNameFormulaInsert(rowFrom, colFrom, rows, cols, namedRange, worksheet);
 				}
 			}
 			foreach (var namedRange in this._wb.Names)
 			{
-				this.UpdateNameFormulaInsert(rowFrom, colFrom, rows, cols, namedRange, worksheet);
+
+				this._wb.Package.FormulaManager.UpdateFormulaReferences(namedRange.NameFormula, rows, cols,
+					rowFrom, colFrom, worksheet.Name, worksheet.Name);
+				//this.UpdateNameFormulaInsert(rowFrom, colFrom, rows, cols, namedRange, worksheet);
 			}
 		}
 

@@ -21,19 +21,48 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO: 
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B2, Sheet2!$B$2)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
-					//  - Copy Sheet1
-					//  - Verify that there are two new named ranges scoped to the new sheet: formula is updated on first, unchanged on second. All others unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B2, Sheet2!$B$2)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					var sheet1Copy = excelPackage.Workbook.Worksheets.Copy("Sheet1", "Sheet1 copy");
+					Assert.AreEqual(0, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(2, sheet1Copy.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("name1", sheet1Copy.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(sheet1Copy!B2, sheet1Copy!$B$2)", sheet1Copy.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1Copy.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", sheet1Copy.Names[1].NameFormula);
+					Assert.AreEqual("name3", sheet1Copy.Names[0].Name);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that there are two new named ranges scoped to the new sheet: formula is updated on first, unchanged on second. All others unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet1Copy = excelPackage.Workbook.Worksheets["Sheet1 copy"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(0, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(2, sheet1Copy.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("name1", sheet1Copy.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(sheet1Copy!B2, sheet1Copy!$B$2)", sheet1Copy.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1Copy.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", sheet1Copy.Names[1].NameFormula);
+					Assert.AreEqual("name3", sheet1Copy.Names[0].Name);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -54,18 +83,33 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO: 
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B2, Sheet2!$B$2)
-					//  - Copy Sheet1
-					//  - Verify that named ranges are unchanged.
+					excelPackage.Workbook.Names.Add("name1", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					excelPackage.Workbook.Names.Add("name2", "CONCATENATE(Sheet2!B2, Sheet2!$B$2)");
+					var sheet1Copy = excelPackage.Workbook.Worksheets.Copy("Sheet1", "Sheet1 copy");
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(0, sheet1.Names.Count);
+					Assert.AreEqual(0, sheet1Copy.Names.Count);
+					Assert.AreEqual(0, sheet2.Names.Count);
+					Assert.AreEqual("name1", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name2", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that named ranges are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet1Copy = excelPackage.Workbook.Worksheets["Sheet1 copy"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(0, sheet1.Names.Count);
+					Assert.AreEqual(0, sheet1Copy.Names.Count);
+					Assert.AreEqual(0, sheet2.Names.Count);
+					Assert.AreEqual("name1", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name2", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -86,19 +130,23 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO: 
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B2, Sheet2!$B$2)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
-					//  - Delete Sheet1
-					//  - Verify that only the last one remains and the formula is updated with #REFs.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B2, Sheet2!$B$2)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					excelPackage.Workbook.Worksheets.Delete(sheet1);
+					Assert.AreEqual(0, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(#REF!B2, #REF!$B$2)", sheet2.Names[0].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that only the last one remains and the formula is updated with #REFs.
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(#REF!B2, #REF!$B$2)", sheet2.Names[0].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -119,18 +167,27 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B2, Sheet1!$B$2)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B2, Sheet2!$B$2)
-					//  - Delete Sheet1
-					//  - Verify that the first named range formula #REFs and the second is unchanged.
+					excelPackage.Workbook.Names.Add("name1", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					excelPackage.Workbook.Names.Add("name2", "CONCATENATE(Sheet2!B2, Sheet2!$B$2)");
+					excelPackage.Workbook.Worksheets.Delete(sheet1);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(0, sheet2.Names.Count);
+					Assert.AreEqual("name3", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(#REF!B2, #REF!$B$2)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name3", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that the first named range formula #REFs and the second is unchanged.
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(0, sheet2.Names.Count);
+					Assert.AreEqual("name3", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(#REF!B2, #REF!$B$2)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name3", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -153,21 +210,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Insert row at Sheet1, row 4.
-					//  - Verify that only "Sheet1!$B$5" references are changed to "Sheet1!$B$6", all others are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.InsertRow(4, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$6)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$6)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$6)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that only "Sheet1!$B$5" references are changed to "Sheet1!$B$6", all others are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$6)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$6)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$6)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -188,21 +273,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Insert 3 rows at Sheet1, row 4.
-					//  - Verify that only "Sheet1!$B$5" references are changed to "Sheet1!$B$8", all others are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.InsertRow(4, 3);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$8)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$8)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$8)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that only "Sheet1!$B$5" references are changed to "Sheet1!$B$8", all others are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$8)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$8)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$8)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -223,21 +336,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Insert row at Sheet1, row 6.
-					//  - Verify that all formulas are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.InsertRow(6, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that all formulas are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -260,21 +401,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
-					//  - Insert column at Sheet1, column B.
-					//  - Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$E$5", all others are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet1.InsertColumn(2, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$E$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$E$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$E$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$E$5", all others are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$E$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$E$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$E$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -295,21 +464,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
-					//  - Insert 3 columns at Sheet1, column B.
-					//  - Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$G$5", all others are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet1.InsertColumn(2, 3);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$G$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$G$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$G$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$G$5", all others are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$G$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$G$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$G$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -330,21 +527,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Insert column at Sheet1, column F.
-					//  - Verify that all formulas are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.InsertColumn(6, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that all formulas are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -367,21 +592,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
-					//  - Delete Row at Sheet1, Row 3.
-					//  - Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$D$4", all others are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet1.DeleteRow(3, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$D$4)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$D$4)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$D$4)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$D$4", all others are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$D$4)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$D$4)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$D$4)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -402,21 +655,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!F5, Sheet2!$F$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!F5, Sheet2!$F$5)
-					//  - Delete 3 rows at Sheet1, row 2.
-					//  - Verify that only "Sheet1!$F$5" references are changed to "Sheet1!$F$2", all others are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!F5, Sheet2!$F$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!F5, Sheet2!$F$5)");
+					sheet1.DeleteRow(2, 3);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$F$2)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!F5, Sheet2!$F$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$F$2)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$F$2)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!F5, Sheet2!$F$2)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that only "Sheet1!$F$5" references are changed to "Sheet1!$F$2", all others are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$F$2)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!F5, Sheet2!$F$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$F$2)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$F$2)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!F5, Sheet2!$F$2)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -437,21 +718,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Delete row at Sheet1, row 7.
-					//  - Verify that all formulas are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.DeleteRow(7, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$2)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$2)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$2)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that all formulas are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$2)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$2)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$2)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -474,21 +783,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!D5, Sheet1!$D$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!D5, Sheet2!$D$5)
-					//  - Delete column at Sheet1, column B.
-					//  - Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$C$5", all others are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet1.DeleteColumn(2, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$C$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$C$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$C$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$C$5)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that only "Sheet1!$D$5" references are changed to "Sheet1!$C$5", all others are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$C$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$C$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!D5, Sheet1!$C$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!D5, Sheet2!$C$5)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -509,21 +846,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!F5, Sheet2!$F$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!F5, Sheet1!$F$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!F5, Sheet2!$F$5)
-					//  - Delete 3 columns at Sheet1, column B.
-					//  - Verify that only "Sheet1!$F$5" references are changed to "Sheet1!$C$5", all others are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!F5, Sheet2!$F$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!F5, Sheet2!$F$5)");
+					sheet1.DeleteColumn(2, 3);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$C$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!F5, Sheet2!$F$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$F$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$C$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!F5, Sheet2!$C$5)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that only "Sheet1!$F$5" references are changed to "Sheet1!$C$5", all others are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$C$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!F5, Sheet2!$F$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$F$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!F5, Sheet1!$C$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!F5, Sheet2!$C$5)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
@@ -544,21 +909,49 @@ namespace EPPlusTest
 				{
 					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
 					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
-					// TODO:
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add Sheet1-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Add Sheet2-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet1!B5, Sheet1!$B$5)
-					//  - Add workbook-scoped named range with formula: CONCATENATE(Sheet2!B5, Sheet2!$B$5)
-					//  - Delete column at Sheet1, column F.
-					//  - Verify that all formulas are unchanged.
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.InsertColumn(6, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
-					// TODO: Verify that all formulas are unchanged.
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name1", sheet1.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet1.Names[0].NameFormula);
+					Assert.AreEqual("name2", sheet1.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("name3", sheet2.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
+					Assert.AreEqual("CONCATENATE(Sheet1!B5, Sheet1!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
+					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
+					Assert.AreEqual("CONCATENATE(Sheet2!B5, Sheet2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
 				}
-				Assert.Fail("This test is not implemented yet.");
 			}
 			finally
 			{
