@@ -48,6 +48,11 @@ namespace OfficeOpenXml
 		#region Properties
 		private PagedStructure<PagedStructure<T>> Data { get; } 
 
+		private PagedStructure<T> ColumnData { get; }
+
+		private PagedStructure<T> RowData { get; }
+
+
 		private int RowPageBits { get; }
 		private int ColumnPageBits { get; }
 		#endregion
@@ -60,13 +65,27 @@ namespace OfficeOpenXml
 			this.RowPageBits = rowPageBits;
 			this.ColumnPageBits = columnPageBits;
 			this.Data = new PagedStructure<PagedStructure<T>>(this.ColumnPageBits);
+			this.ColumnData = new PagedStructure<T>(this.ColumnPageBits);
+			this.RowData = new PagedStructure<T>(this.RowPageBits);
 		}
 		#endregion
 
 		#region ICellStore<T> Members
 		public T GetValue(int row, int column)
 		{
-			if (this.TryUpdateIndices(ref row, ref column, true))
+			if (row == 0)
+			{
+				var item = this.ColumnData.GetItem(column);
+				if (item.HasValue)
+					return item.Value;
+			}
+			else if (column == 0)
+			{
+				var item = this.RowData.GetItem(row);
+				if (item.HasValue)
+					return item.Value;
+			}
+			else if (this.TryUpdateIndices(ref row, ref column, true))
 			{
 				var columnItem = this.Data.GetItem(column)?.Value;
 				if (columnItem != null)
@@ -81,7 +100,11 @@ namespace OfficeOpenXml
 
 		public void SetValue(int row, int column, T value)
 		{
-			if (this.TryUpdateIndices(ref row, ref column, true))
+			if (row == 0)
+				this.ColumnData.SetItem(column, value);
+			else if (column == 0)
+				this.RowData.SetItem(row, value);
+			else if (this.TryUpdateIndices(ref row, ref column, true))
 			{
 				var columnStructure = this.Data.GetItem(column);
 				if (columnStructure == null)
@@ -138,7 +161,10 @@ namespace OfficeOpenXml
 			if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
 			{
 				if (fromCol >= 0)
+				{
 					this.Data.ShiftItems(fromCol, -columns);
+					this.ColumnData.ShiftItems(fromCol, -columns);
+				}
 				if (fromRow >= 0)
 				{
 					int column = -1;
@@ -146,6 +172,7 @@ namespace OfficeOpenXml
 					{
 						this.Data.GetItem(column)?.Value.ShiftItems(fromRow, -rows);
 					}
+					this.RowData.ShiftItems(fromRow, -rows);
 				}
 			}
 		}
@@ -163,7 +190,10 @@ namespace OfficeOpenXml
 			if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
 			{
 				if (fromCol >= 0)
+				{
 					this.Data.ClearItems(fromCol, columns);
+					this.ColumnData.ClearItems(fromCol, columns);
+				}
 				if (fromRow >= 0)
 				{
 					int column = fromCol - 1; // Only from the column forward // TODO ZPF test this
@@ -171,6 +201,7 @@ namespace OfficeOpenXml
 					{
 						this.Data.GetItem(column)?.Value.ClearItems(fromRow, rows);
 					}
+					this.RowData.ClearItems(fromRow, rows);
 				}
 			}
 		}
@@ -200,7 +231,10 @@ namespace OfficeOpenXml
 			if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
 			{
 				if (fromCol >= 0)
+				{
 					this.Data.ShiftItems(fromCol, columns);
+					this.ColumnData.ShiftItems(fromCol, columns);
+				}
 				if (fromRow >= 0)
 				{
 					int column = -1; 
@@ -208,6 +242,7 @@ namespace OfficeOpenXml
 					{
 						this.Data.GetItem(column)?.Value.ShiftItems(fromRow, rows);
 					}
+					this.RowData.ShiftItems(fromRow, rows);
 				}
 			}
 		}
