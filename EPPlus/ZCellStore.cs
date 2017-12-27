@@ -41,16 +41,26 @@ namespace OfficeOpenXml
 	internal class ZCellStore<T> : ICellStore<T>
 	{
 		#region Constants
-		private const int RowPageSize = 1024; // The number of rows in a row page
-		private const int ColumnPageSize = 128; // The number of columns in a column page
-		private const int RowMask = 1023; // 111111111 ( 9 1's )
-		private const int ColumnMask = 127; // 111111 ( 6 1's)
-		private const int RowPageBits = 10; // 2 ^ 10 = 1024 so right-shifting by 10 bits divides by 1024
-		private const int ColumnPageBits = 7; // 2 ^ 7 = 128 so right-shifting by 7 bits divides by 128
+		private const int DefaultRowPageBits = 10; // 2 ^ 10 = 1024 so right-shifting by 10 bits divides by 1024
+		private const int DefaultColumnPageBits = 7; // 2 ^ 7 = 128 so right-shifting by 7 bits divides by 128
 		#endregion
 
 		#region Properties
-		private PagedStructure<PagedStructure<T>> Data { get; } = new PagedStructure<PagedStructure<T>>(ZCellStore<T>.ColumnPageBits);
+		private PagedStructure<PagedStructure<T>> Data { get; } 
+
+		private int RowPageBits { get; }
+		private int ColumnPageBits { get; }
+		#endregion
+
+		#region Constructors
+		public ZCellStore() : this(ZCellStore<T>.DefaultRowPageBits, ZCellStore<T>.DefaultColumnPageBits) { }
+
+		public ZCellStore(int rowPageBits, int columnPageBits)
+		{
+			this.RowPageBits = rowPageBits;
+			this.ColumnPageBits = columnPageBits;
+			this.Data = new PagedStructure<PagedStructure<T>>(this.ColumnPageBits);
+		}
 		#endregion
 
 		#region ICellStore<T> Members
@@ -76,7 +86,7 @@ namespace OfficeOpenXml
 				var columnStructure = this.Data.GetItem(column);
 				if (columnStructure == null)
 				{
-					columnStructure = new PagedStructure<T>(ZCellStore<T>.RowPageBits);
+					columnStructure = new PagedStructure<T>(this.RowPageBits);
 					this.Data.SetItem(column, columnStructure);
 				}
 				columnStructure?.Value.SetItem(row, value);
@@ -131,7 +141,7 @@ namespace OfficeOpenXml
 					this.Data.ShiftItems(fromCol, -columns);
 				if (fromRow >= 0)
 				{
-					int column = fromCol - 1; // Only from the column forward // TODO ZPF test this
+					int column = -1;
 					while (this.Data.NextItem(ref column))
 					{
 						this.Data.GetItem(column)?.Value.ShiftItems(fromRow, -rows);
@@ -193,7 +203,7 @@ namespace OfficeOpenXml
 					this.Data.ShiftItems(fromCol, columns);
 				if (fromRow >= 0)
 				{
-					int column = fromCol - 1; // Only from the column forward // TODO ZPF test this
+					int column = -1; 
 					while (this.Data.NextItem(ref column))
 					{
 						this.Data.GetItem(column)?.Value.ShiftItems(fromRow, rows);

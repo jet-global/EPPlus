@@ -31,43 +31,28 @@ namespace EPPlusTest
 		[TestMethod]
 		public void GetValue()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(this.BuildRow(0, 1), this.BuildColumn(0, 1), 1);
-			cellStore.SetValue(this.BuildRow(0, 2), this.BuildColumn(0, 2), 2);
-			cellStore.SetValue(this.BuildRow(0, 1024), this.BuildColumn(0, 10), 3);
-			cellStore.SetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4), 4);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(2, 100), 5);
-			var value = cellStore.GetValue(this.BuildRow(0, 1), this.BuildColumn(0, 1));
-			Assert.AreEqual(1, value);
-			value = cellStore.GetValue(this.BuildRow(0, 2), this.BuildColumn(0, 2));
-			Assert.AreEqual(2, value);
-			value = cellStore.GetValue(this.BuildRow(0, 1024), this.BuildColumn(0, 10));
-			Assert.AreEqual(3, value);
-			value = cellStore.GetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4));
-			Assert.AreEqual(4, value);
-			value = cellStore.GetValue(this.BuildRow(3, 500), this.BuildColumn(2, 100));
-			Assert.AreEqual(5, value);
+			var cellStore = this.GetCellStore();
+			Assert.AreEqual(1, cellStore.GetValue(1, 1));
+			Assert.AreEqual(103, cellStore.GetValue(7, 7));
+			Assert.AreEqual(122, cellStore.GetValue(8, 10));
+			Assert.AreEqual(219, cellStore.GetValue(14, 11));
+			Assert.AreEqual(256, cellStore.GetValue(16, 16));
 			// Non-existent value returns default(T)
-			value = cellStore.GetValue(12345, 12345);
-			Assert.AreEqual(0, value);
+			Assert.AreEqual(0, cellStore.GetValue(25, 25));
 		}
 
 		[TestMethod]
 		public void GetValueReturnsDefaultForInvalidCoordinates()
 		{
-			var cellStore = new ZCellStore<int>();
+			var cellStore = this.GetCellStore();
 			// Invalid row too small returns default(T)
-			var value = cellStore.GetValue(0, 10);
-			Assert.AreEqual(0, value);
+			Assert.AreEqual(0, cellStore.GetValue(0, 10));
 			// Invalid row too large returns default(T)
-			value = cellStore.GetValue(ExcelPackage.MaxRows + 1, 10);
-			Assert.AreEqual(0, value);
+			Assert.AreEqual(0, cellStore.GetValue(20, 10));
 			// Invalid column too small returns default(T)
-			value = cellStore.GetValue(10, 0);
-			Assert.AreEqual(0, value);
+			Assert.AreEqual(0, cellStore.GetValue(10, 0));
 			// Invalid column too large returns default(T)
-			value = cellStore.GetValue(10, ExcelPackage.MaxColumns + 1);
-			Assert.AreEqual(0, value);
+			Assert.AreEqual(0, cellStore.GetValue(10, 20));
 		}
 		#endregion
 
@@ -75,33 +60,31 @@ namespace EPPlusTest
 		[TestMethod]
 		public void SetValue()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4), 4);
-			var value = cellStore.GetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4));
-			Assert.AreEqual(4, value);
-			cellStore.SetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4), 9);
-			value = cellStore.GetValue(this.BuildRow(2, 3), this.BuildColumn(1, 4));
-			Assert.AreEqual(9, value);
-			// Non-existent value returns default(T)
-			value = cellStore.GetValue(12345, 12345);
-			Assert.AreEqual(0, value);
-			cellStore.SetValue(12345, 12345, 123);
-			value = cellStore.GetValue(12345, 12345);
-			Assert.AreEqual(123, value);
+			var cellStore = this.GetCellStore(false);
+			cellStore.SetValue(1, 1, 1);
+			Assert.AreEqual(1, cellStore.GetValue(1, 1));
+			cellStore.SetValue(7, 7, 103);
+			Assert.AreEqual(103, cellStore.GetValue(7, 7));
+			cellStore.SetValue(8, 10, 122);
+			Assert.AreEqual(122, cellStore.GetValue(8, 10));
+			cellStore.SetValue(14, 11, 219);
+			Assert.AreEqual(219, cellStore.GetValue(14, 11));
+			cellStore.SetValue(16, 16, 256);
+			Assert.AreEqual(256, cellStore.GetValue(16, 16));
 		}
 
 		[TestMethod]
 		public void SetValueIgnoresInvalidCoordinates()
 		{
-			var cellStore = new ZCellStore<int>();
+			var cellStore = this.GetCellStore(false);
 			// row too small is ignored
 			cellStore.SetValue(0, 1, 13);
 			// row too large is ignored
-			cellStore.SetValue(ExcelPackage.MaxRows + 1, 1, 13);
+			cellStore.SetValue(20, 1, 13);
 			// column too small is ignored
 			cellStore.SetValue(1, 0, 13);
 			// column too large is ignored
-			cellStore.SetValue(1, ExcelPackage.MaxColumns + 1, 13);
+			cellStore.SetValue(1, 20, 13);
 		}
 		#endregion
 
@@ -2104,6 +2087,67 @@ namespace EPPlusTest
 				throw new InvalidOperationException("Pages are 0-indexed and can be between 0 and 127.");
 			return page * 128 + indexOnPage;
 		}
+
+		private ZCellStore<int> GetCellStore(bool fill = true)
+		{
+			var cellStore = new ZCellStore<int>(4, 4);
+			if (fill)
+			{
+				var currentStore = new int[,]
+				{
+/*1*/			{  1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16},
+/*2*/			{ 17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32},
+/*3*/			{ 33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48},
+/*4*/			{ 49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64},
+/*5*/			{ 65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80},
+/*6*/			{ 81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96},
+/*7*/			{ 97,  98,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112},
+/*8*/			{113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128},
+/*9*/			{129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144},
+/*10*/		{145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160},
+/*11*/		{161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176},
+/*12*/		{177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192},
+/*13*/		{193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208},
+/*14*/		{209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224},
+/*15*/		{225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240},
+/*16*/		{241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256}
+				};
+				this.LoadCellStore(currentStore, cellStore);
+			}
+			return cellStore;
+		}
+
+		private void LoadCellStore(int[,] sheet, ZCellStore<int> cellStore)
+		{
+			for (int row = 0; row <= sheet.GetUpperBound(0); ++row)
+			{
+				for (int column = 0; column <= sheet.GetUpperBound(1); ++column)
+				{
+					cellStore.SetValue(row + 1, column + 1, sheet[row, column]);
+				}
+			}
+		}
+
+		private void ValidateCellStore(int[,] sheet, ZCellStore<int> cellStore)
+		{
+			for (int row = 0; row <= sheet.GetUpperBound(0); ++row)
+			{
+				for (int column = 0; column <= sheet.GetUpperBound(1); ++column)
+				{
+					var data = sheet[row, column];
+					var item = cellStore.GetValue(row + 1, column + 1);
+					Assert.AreEqual(data, item);
+				}
+			}
+		}
 		#endregion
+
+		[TestMethod]
+		public void DELME()
+		{
+			var ogCellStore = new CellStore<int>();
+			ogCellStore.SetValue(0, 1, 3);
+
+		}
 	}
 }
