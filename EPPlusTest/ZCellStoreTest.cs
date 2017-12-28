@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using static OfficeOpenXml.ZCellStore<int>;
@@ -165,75 +161,123 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		public void NextCellFindsNextInRowAcrossPages()
+		public void NextCellEnumeratesFullSheet()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 1);
-			cellStore.SetValue(1, 2, 1); // Next on same page
-			cellStore.SetValue(1, this.BuildColumn(1, 1), 1); // Next on next page
-			cellStore.SetValue(1, this.BuildColumn(4, 50), 1); // Next several pages later
-			int row = 0, column = 0;
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(1, column);
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(2, column);
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(this.BuildColumn(1, 1), column);
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(this.BuildColumn(4, 50), column);
-			Assert.IsFalse(cellStore.NextCell(ref row, ref column));
+			var cellStore = this.GetCellStore();
+			int row = 0, column = 0, value = 0;
+			while (cellStore.NextCell(ref row, ref column))
+			{
+				value++;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(((value - 1) / 16) + 1, row);
+				Assert.AreEqual(((value - 1) % 16) + 1, column);
+			}
+			Assert.AreEqual(256, value);
 		}
 
 		[TestMethod]
-		public void NextCellFindsNextInColumnAcrossPages()
+		public void NextCellEnumeratesDiagonal()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 1);
-			cellStore.SetValue(2, 1, 1); // Next on same page
-			cellStore.SetValue(this.BuildRow(1, 1), 1, 1); // Next on next page
-			cellStore.SetValue(this.BuildRow(3, 238), 1, 1); // Next several pages later
-			int row = 0, column = 0;
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(1, column);
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(2, row);
-			Assert.AreEqual(1, column);
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(this.BuildRow(1, 1), row);
-			Assert.AreEqual(1, column);
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(this.BuildRow(3, 238), row);
-			Assert.AreEqual(1, column);
-			Assert.IsFalse(cellStore.NextCell(ref row, ref column));
+			var cellStore = this.GetCellStore(false);
+			var currentStore = new int?[,]
+			{
+/*1*/		{    1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null,    2, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null,    3, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null,    4, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null,    5, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null,    6, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null,    7, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null,    8, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null, null, null, null, null,    9, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null, null, null,   10, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null,   11, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null,   12, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null,   13, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null,   14, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null,   15, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,   16 }
+			};
+			this.LoadCellStore(currentStore, cellStore);
+			int row = 0, column = 0, value = 0;
+			while (cellStore.NextCell(ref row, ref column))
+			{
+				value++;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(value, row);
+				Assert.AreEqual(value, column);
+			}
+			Assert.AreEqual(16, value);
 		}
 
 		[TestMethod]
-		public void NextCellFindsNextDiagonallyAcrossPages()
+		public void NextCellEnumeratesColumn()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 1);
-			cellStore.SetValue(2, 2, 1); // Next on same page
-			cellStore.SetValue(this.BuildRow(1, 1), this.BuildColumn(1, 1), 1); // Next on next page
-			cellStore.SetValue(this.BuildRow(3, 238), this.BuildColumn(3, 1), 1); // Next several pages later
-			int row = 0, column = 0;
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(1, column);
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(2, row);
-			Assert.AreEqual(2, column);
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(this.BuildRow(1, 1), row);
-			Assert.AreEqual(this.BuildColumn(1, 1), column);
-			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
-			Assert.AreEqual(this.BuildRow(3, 238), row);
-			Assert.AreEqual(this.BuildColumn(3, 1), column);
-			Assert.IsFalse(cellStore.NextCell(ref row, ref column));
+			var cellStore = this.GetCellStore(false);
+			var currentStore = new int?[,]
+			{
+/*1*/		{ null, null, null, null,  1, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null,  2, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null,  3, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null,  4, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null,  5, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null,  6, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null,  7, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null,  8, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null,  9, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, 10, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, 11, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, 12, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, 13, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, 14, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, 15, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, 16, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(currentStore, cellStore);
+			int row = 0, column = 0, value = 0;
+			while (cellStore.NextCell(ref row, ref column))
+			{
+				value++;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(value, row);
+				Assert.AreEqual(5, column);
+			}
+			Assert.AreEqual(16, value);
+		}
+
+		[TestMethod]
+		public void NextCellEnumeratesRow()
+		{
+			var cellStore = this.GetCellStore(false);
+			var currentStore = new int?[,]
+			{
+/*1*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(currentStore, cellStore);
+			int row = 0, column = 0, value = 0;
+			while (cellStore.NextCell(ref row, ref column))
+			{
+				value++;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(9, row);
+				Assert.AreEqual(value, column);
+			}
+			Assert.AreEqual(16, value);
 		}
 		#endregion
 
@@ -258,473 +302,319 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		public void PrevCellFindsNextInRowAcrossPages()
+		public void PrevCellEnumeratesFullSheet()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 1);
-			cellStore.SetValue(1, 2, 1); // Next on same page
-			cellStore.SetValue(1, this.BuildColumn(1, 1), 1); // Next on next page
-			cellStore.SetValue(1, this.BuildColumn(4, 50), 1); // Next several pages later
-			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(this.BuildColumn(4, 50), column);
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(this.BuildColumn(1, 1), column);
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(2, column);
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(1, column);
-			Assert.IsFalse(cellStore.PrevCell(ref row, ref column));
+			var cellStore = this.GetCellStore();
+			int row = 17, column = 17, value = 257;
+			while (cellStore.PrevCell(ref row, ref column))
+			{
+				value--;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(((value - 1) / 16) + 1, row);
+				Assert.AreEqual(((value - 1) % 16) + 1, column);
+			}
+			Assert.AreEqual(1, value);
 		}
 
 		[TestMethod]
-		public void PrevCellFindsNextInColumnAcrossPages()
+		public void PrevCellEnumeratesDiagonal()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 1);
-			cellStore.SetValue(2, 1, 1); // Next on same page
-			cellStore.SetValue(this.BuildRow(1, 1), 1, 1); // Next on next page
-			cellStore.SetValue(this.BuildRow(3, 238), 1, 1); // Next several pages later
-			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(this.BuildRow(3, 238), row);
-			Assert.AreEqual(1, column);
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(this.BuildRow(1, 1), row);
-			Assert.AreEqual(1, column);
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(2, row);
-			Assert.AreEqual(1, column);
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(1, column);
-			Assert.IsFalse(cellStore.PrevCell(ref row, ref column));
+			var cellStore = this.GetCellStore(false);
+			var currentStore = new int?[,]
+			{
+/*1*/		{    1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null,    2, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null,    3, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null,    4, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null,    5, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null,    6, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null,    7, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null,    8, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null, null, null, null, null,    9, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null, null, null,   10, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null,   11, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null,   12, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null,   13, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null,   14, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null,   15, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,   16 }
+			};
+			this.LoadCellStore(currentStore, cellStore);
+			int row = 17, column = 17, value = 17;
+			while (cellStore.PrevCell(ref row, ref column))
+			{
+				value--;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(value, row);
+				Assert.AreEqual(value, column);
+			}
+			Assert.AreEqual(1, value);
 		}
 
 		[TestMethod]
-		public void PrevCellFindsNextDiagonallyAcrossPages()
+		public void PrevCellEnumeratesColumn()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 1);
-			cellStore.SetValue(2, 2, 1); // Next on same page
-			cellStore.SetValue(this.BuildRow(1, 1), this.BuildColumn(1, 1), 1); // Next on next page
-			cellStore.SetValue(this.BuildRow(3, 238), this.BuildColumn(3, 1), 1); // Next several pages later
-			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(this.BuildRow(3, 238), row);
-			Assert.AreEqual(this.BuildColumn(3, 1), column);
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(this.BuildRow(1, 1), row);
-			Assert.AreEqual(this.BuildColumn(1, 1), column);
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(2, row);
-			Assert.AreEqual(2, column);
-			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
-			Assert.AreEqual(1, row);
-			Assert.AreEqual(1, column);
-			Assert.IsFalse(cellStore.PrevCell(ref row, ref column));
+			var cellStore = this.GetCellStore(false);
+			var currentStore = new int?[,]
+			{
+/*1*/		{ null, null, null, null,  1, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null,  2, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null,  3, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null,  4, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null,  5, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null,  6, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null,  7, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null,  8, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null,  9, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, 10, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, 11, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, 12, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, 13, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, 14, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, 15, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, 16, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(currentStore, cellStore);
+			int row = 17, column = 17, value = 17;
+			while (cellStore.PrevCell(ref row, ref column))
+			{
+				value--;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(value, row);
+				Assert.AreEqual(5, column);
+			}
+			Assert.AreEqual(1, value);
+		}
+
+		[TestMethod]
+		public void PrevCellEnumeratesRow()
+		{
+			var cellStore = this.GetCellStore(false);
+			var currentStore = new int?[,]
+			{
+/*1*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(currentStore, cellStore);
+			int row = 17, column = 17, value = 17;
+			while (cellStore.PrevCell(ref row, ref column))
+			{
+				value--;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(9, row);
+				Assert.AreEqual(value, column);
+			}
+			Assert.AreEqual(1, value);
 		}
 		#endregion
 
 		#region Delete Tests
 		[TestMethod]
-		public void DeleteRowsNoPageShifting()
+		public void DeleteRowsAcrossAllColumns()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
-			cellStore.Delete(2, 0, 3, 0);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(7, 1, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsFalse(cellStore.Exists(10, 1, out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(3, 497), this.BuildColumn(1, 3), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 297), this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
+			var cellStore = this.GetCellStore();
+			cellStore.Delete(2, 0, 5, 0);
+			var expectedStore = new int?[,]
+			{
+/*1*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*2*/		{   97,   98,   99,  100,  101,  102,  103,  104,  105,  106,  107,  108,  109,  110,  111,  112 },
+/*3*/		{  113,  114,  115,  116,  117,  118,  119,  120,  121,  122,  123,  124,  125,  126,  127,  128 },
+/*4*/		{  129,  130,  131,  132,  133,  134,  135,  136,  137,  138,  139,  140,  141,  142,  143,  144 },
+/*5*/		{  145,  146,  147,  148,  149,  150,  151,  152,  153,  154,  155,  156,  157,  158,  159,  160 },
+/*6*/		{  161,  162,  163,  164,  165,  166,  167,  168,  169,  170,  171,  172,  173,  174,  175,  176 },
+/*7*/		{  177,  178,  179,  180,  181,  182,  183,  184,  185,  186,  187,  188,  189,  190,  191,  192 },
+/*8*/		{  193,  194,  195,  196,  197,  198,  199,  200,  201,  202,  203,  204,  205,  206,  207,  208 },
+/*9*/		{  209,  210,  211,  212,  213,  214,  215,  216,  217,  218,  219,  220,  221,  222,  223,  224 },
+/*10*/	{  225,  226,  227,  228,  229,  230,  231,  232,  233,  234,  235,  236,  237,  238,  239,  240 },
+/*11*/	{  241,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255,  256 },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.ValidateCellStore(expectedStore, cellStore);
 		}
-
+		
 		[TestMethod]
-		public void DeleteRowsWithSinglePageShifting()
+		public void DeleteColumnsAcrossAllRows()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
-			cellStore.Delete(1000, 0, 750, 0);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(10, 1, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(2, 774), this.BuildColumn(1, 3), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(4, 574), this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
+			var cellStore = this.GetCellStore();
+			cellStore.Delete(0, 2, 0, 5);
+			var expectedStore = new int?[,]
+			{
+/*1*/		{   1,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16, null, null, null, null, null },
+/*2*/		{  17,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32, null, null, null, null, null },
+/*3*/		{  33,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48, null, null, null, null, null },
+/*4*/		{  49,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64, null, null, null, null, null },
+/*5*/		{  65,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80, null, null, null, null, null },
+/*6*/		{  81,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96, null, null, null, null, null },
+/*7*/		{  97, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, null, null, null, null, null },
+/*8*/		{ 113, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, null, null, null, null, null },
+/*9*/		{ 129, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, null, null, null, null, null },
+/*10*/	{ 145, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, null, null, null, null, null },
+/*11*/	{ 161, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, null, null, null, null, null },
+/*12*/	{ 177, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, null, null, null, null, null },
+/*13*/	{ 193, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, null, null, null, null, null },
+/*14*/	{ 209, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, null, null, null, null, null },
+/*15*/	{ 225, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, null, null, null, null, null },
+/*16*/	{ 241, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, null, null, null, null, null }
+			};
+			this.ValidateCellStore(expectedStore, cellStore);
 		}
-
+		
 		[TestMethod]
-		public void DeleteRowsWithMultiplePageShifting()
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void DeleteAllButFirstAndLastRowsAndColumns()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
-			cellStore.Delete(1000, 0, this.BuildRow(2, 250), 0);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(10, 1, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(1, 250), this.BuildColumn(1, 3), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(3, 50), this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
-		}
-
-		[TestMethod]
-		public void DeleteColumnsNoPageShifting()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(1, 10, 14);
-			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
-			cellStore.Delete(0, 2, 0, 2);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(1, 8, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsFalse(cellStore.Exists(1, 10, out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 1), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 4), out value));
-			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
-		}
-
-		[TestMethod]
-		public void DeleteColumnsWithSinglePageShifting()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(1, 10, 14);
-			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
-			cellStore.Delete(0, this.BuildColumn(1, 1), 0, 75);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(1, 10, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 59), out value));
-			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
-		}
-
-		[TestMethod]
-		public void DeleteColumnsWithMultiplePageShifting()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(1, 10, 14);
-			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
-			cellStore.SetValue(1, this.BuildColumn(5, 37), 25);
-			cellStore.Delete(0, 100, 0, this.BuildColumn(3, 1));
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(1, 10, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 36), out value));
-			Assert.AreEqual(25, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(5, 37), out value));
-		}
-		#endregion
-
-		#region Delete (with Shift flag) Tests
-		[TestMethod]
-		public void DeleteRowsWithShiftNoPageShifting()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
-			cellStore.Delete(2, 0, 3, 0, true);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(7, 1, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsFalse(cellStore.Exists(10, 1, out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(3, 497), this.BuildColumn(1, 3), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 297), this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
-		}
-
-		[TestMethod]
-		public void DeleteRowsWithShiftWithSinglePageShifting()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
-			cellStore.Delete(1000, 0, 750, 0, true);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(10, 1, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(2, 774), this.BuildColumn(1, 3), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(4, 574), this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
-		}
-
-		[TestMethod]
-		public void DeleteRowsWithShiftWithMultiplePageShifting()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
-			cellStore.Delete(1000, 0, this.BuildRow(2, 250), 0, true); 
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(10, 1, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(1, 250), this.BuildColumn(1, 3), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(3, 50), this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
-		}
-
-		[TestMethod]
-		public void DeleteRowsWithoutShiftSinglePage()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
-			cellStore.Delete(2, 0, 20, 0, false);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsFalse(cellStore.Exists(10, 1, out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(3,500), this.BuildColumn(1, 3), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
-		}
-
-		[TestMethod]
-		public void DeleteRowsWithoutShiftMultiplePages()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
-			cellStore.Delete(2, 0, this.BuildRow(4, 500), 0, false); 
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsFalse(cellStore.Exists(10, 1, out value));
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
-		}
-
-		[TestMethod]
-		public void DeleteColumnsWithShiftNoPageShifting()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(1, 10, 14);
-			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
-			cellStore.Delete(0, 2, 0, 2, true);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(1, 8, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsFalse(cellStore.Exists(1, 10, out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 1), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 4), out value));
-			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
-		}
-
-		[TestMethod]
-		public void DeleteColumnsWithShiftWithSinglePageShifting()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(1, 10, 14);
-			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
-			cellStore.Delete(0, this.BuildColumn(1, 1), 0, 75, true); 
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(1, 10, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 59), out value));
-			Assert.AreEqual(20, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
-		}
-
-		[TestMethod]
-		public void DeleteColumnsWithShiftWithMultiplePageShifting()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(1, 10, 14);
-			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
-			cellStore.SetValue(1, this.BuildColumn(5, 37), 25);
-			cellStore.Delete(0, 100, 0, this.BuildColumn(3, 1), true); 
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsTrue(cellStore.Exists(1, 10, out value));
-			Assert.AreEqual(14, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 36), out value));
-			Assert.AreEqual(25, value);
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(5, 37), out value));
-		}
-
-		[TestMethod]
-		public void DeleteColumnsWithoutShiftSinglePage()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(1, 10, 14);
-			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(1, this.BuildColumn(1, 6), 20);
-			cellStore.Delete(0, 2, 0, 20, false);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsFalse(cellStore.Exists(1, 10, out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
-		}
-
-		[TestMethod]
-		public void DeleteColumnsWithoutShiftMultiplePages()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(1, 10, 14);
-			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
-			cellStore.Delete(0, 2, 0, this.BuildColumn(1, 30), false); 
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsFalse(cellStore.Exists(1, 10, out value));
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
-			Assert.AreEqual(20, value);
+			var cellStore = this.GetCellStore();
+			cellStore.Delete(2, 2, 14, 14);
+			var expectedStore = new int?[,]
+			{
+/*1*/		{   1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,  16 },
+/*2*/		{  17,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255,  32 },
+/*3*/		{  33, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  48 },
+/*4*/		{  49, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  64 },
+/*5*/		{  65, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  80 },
+/*6*/		{  81, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  96 },
+/*7*/		{  97, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 112 },
+/*8*/		{ 113, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 128 },
+/*9*/		{ 129, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 144 },
+/*10*/	{ 145, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 160 },
+/*11*/	{ 161, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 176 },
+/*12*/	{ 177, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 192 },
+/*13*/	{ 193, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 208 },
+/*14*/	{ 209, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 224 },
+/*15*/	{ 225, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 240 },
+/*16*/	{ 241, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 256 }
+			};
+			this.ValidateCellStore(expectedStore, cellStore);
 		}
 		#endregion
 
 		#region Clear Tests
+		// TODO ZPF-- Handle 0 rows and 0 columns?
+
 		[TestMethod]
-		public void ClearRowsSinglePage()
+		public void ClearRows()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
-			cellStore.Clear(2, 0, 20, 0);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsFalse(cellStore.Exists(10, 1, out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
+			var cellStore = this.GetCellStore();
+			cellStore.Clear(2, 0, 5, ExcelPackage.MaxColumns);
+			var expectedStore = new int?[,]
+			{
+/*1*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{   97,   98,   99,  100,  101,  102,  103,  104,  105,  106,  107,  108,  109,  110,  111,  112 },
+/*8*/		{  113,  114,  115,  116,  117,  118,  119,  120,  121,  122,  123,  124,  125,  126,  127,  128 },
+/*9*/		{  129,  130,  131,  132,  133,  134,  135,  136,  137,  138,  139,  140,  141,  142,  143,  144 },
+/*10*/	{  145,  146,  147,  148,  149,  150,  151,  152,  153,  154,  155,  156,  157,  158,  159,  160 },
+/*11*/	{  161,  162,  163,  164,  165,  166,  167,  168,  169,  170,  171,  172,  173,  174,  175,  176 },
+/*12*/	{  177,  178,  179,  180,  181,  182,  183,  184,  185,  186,  187,  188,  189,  190,  191,  192 },
+/*13*/	{  193,  194,  195,  196,  197,  198,  199,  200,  201,  202,  203,  204,  205,  206,  207,  208 },
+/*14*/	{  209,  210,  211,  212,  213,  214,  215,  216,  217,  218,  219,  220,  221,  222,  223,  224 },
+/*15*/	{  225,  226,  227,  228,  229,  230,  231,  232,  233,  234,  235,  236,  237,  238,  239,  240 },
+/*16*/	{  241,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255,  256 }
+			};
+			this.ValidateCellStore(expectedStore, cellStore);
 		}
 
 		[TestMethod]
-		public void ClearRowsMultiplePages()
+		public void ClearColumns()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(10, 1, 14);
-			cellStore.SetValue(this.BuildRow(3, 500), this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(this.BuildRow(5, 300), this.BuildColumn(1, 6), 20);
-			cellStore.Clear(2, 0, this.BuildRow(4, 500), 0);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsFalse(cellStore.Exists(10, 1, out value));
-			Assert.IsFalse(cellStore.Exists(this.BuildRow(3, 500), this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(this.BuildRow(5, 300), this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
-		}
-		
-		[TestMethod]
-		public void ClearColumnsSinglePage()
-		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(1, 10, 14);
-			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(1, this.BuildColumn(1, 6), 20);
-			cellStore.Clear(0, 2, 0, 20);
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsFalse(cellStore.Exists(1, 10, out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
-			Assert.AreEqual(15, value);
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(1, 6), out value));
-			Assert.AreEqual(20, value);
+			var cellStore = this.GetCellStore();
+			cellStore.Clear(0, 2, ExcelPackage.MaxRows, 5);
+			var expectedStore = new int?[,]
+			{
+/*1*/		{   1, null, null, null, null, null,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16 },
+/*2*/		{  17, null, null, null, null, null,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32 },
+/*3*/		{  33, null, null, null, null, null,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48 },
+/*4*/		{  49, null, null, null, null, null,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64 },
+/*5*/		{  65, null, null, null, null, null,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80 },
+/*6*/		{  81, null, null, null, null, null,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96 },
+/*7*/		{  97, null, null, null, null, null, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112 },
+/*8*/		{ 113, null, null, null, null, null, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128 },
+/*9*/		{ 129, null, null, null, null, null, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144 },
+/*10*/	{ 145, null, null, null, null, null, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160 },
+/*11*/	{ 161, null, null, null, null, null, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176 },
+/*12*/	{ 177, null, null, null, null, null, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192 },
+/*13*/	{ 193, null, null, null, null, null, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208 },
+/*14*/	{ 209, null, null, null, null, null, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224 },
+/*15*/	{ 225, null, null, null, null, null, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240 },
+/*16*/	{ 241, null, null, null, null, null, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
+			};
+			this.ValidateCellStore(expectedStore, cellStore);
 		}
 
 		[TestMethod]
-		public void ClearColumnsMultiplePages()
+		public void ClearRowsAndColumns()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(1, 1, 13);
-			cellStore.SetValue(1, 10, 14);
-			cellStore.SetValue(1, this.BuildColumn(1, 3), 15);
-			cellStore.SetValue(1, this.BuildColumn(2, 6), 20);
-			cellStore.Clear(0, 2, 0, this.BuildColumn(1, 30));
-			Assert.IsTrue(cellStore.Exists(1, 1, out int value));
-			Assert.AreEqual(13, value);
-			Assert.IsFalse(cellStore.Exists(1, 10, out value));
-			Assert.IsFalse(cellStore.Exists(1, this.BuildColumn(1, 3), out value));
-			Assert.IsTrue(cellStore.Exists(1, this.BuildColumn(2, 6), out value));
-			Assert.AreEqual(20, value);
+			var cellStore = this.GetCellStore();
+			cellStore.Clear(2, 2, 5, 5);
+			var expectedStore = new int?[,]
+			{
+/*1*/		{   1,    2,    3,    4,    5,    6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16 },
+/*2*/		{  17, null, null, null, null, null,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32 },
+/*3*/		{  33, null, null, null, null, null,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48 },
+/*4*/		{  49, null, null, null, null, null,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64 },
+/*5*/		{  65, null, null, null, null, null,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80 },
+/*6*/		{  81, null, null, null, null, null,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96 },
+/*7*/		{  97,   98,   99,  100,  101,  102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112 },
+/*8*/		{ 113,  114,  115,  116,  117,  118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128 },
+/*9*/		{ 129,  130,  131,  132,  133,  134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144 },
+/*10*/	{ 145,  146,  147,  148,  149,  150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160 },
+/*11*/	{ 161,  162,  163,  164,  165,  166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176 },
+/*12*/	{ 177,  178,  179,  180,  181,  182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192 },
+/*13*/	{ 193,  194,  195,  196,  197,  198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208 },
+/*14*/	{ 209,  210,  211,  212,  213,  214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224 },
+/*15*/	{ 225,  226,  227,  228,  229,  230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240 },
+/*16*/	{ 241,  242,  243,  244,  245,  246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
+			};
+			this.ValidateCellStore(expectedStore, cellStore);
+		}
+
+		[TestMethod]
+		public void ClearAllButFirstAndLastRowsAndColumns()
+		{
+			var cellStore = this.GetCellStore();
+			cellStore.Clear(2, 2, 14, 14);
+			var expectedStore = new int?[,]
+			{
+/*1*/		{   1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,  16 },
+/*2*/		{  17, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  32 },
+/*3*/		{  33, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  48 },
+/*4*/		{  49, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  64 },
+/*5*/		{  65, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  80 },
+/*6*/		{  81, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  96 },
+/*7*/		{  97, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 112 },
+/*8*/		{ 113, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 128 },
+/*9*/		{ 129, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 144 },
+/*10*/	{ 145, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 160 },
+/*11*/	{ 161, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 176 },
+/*12*/	{ 177, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 192 },
+/*13*/	{ 193, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 208 },
+/*14*/	{ 209, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 224 },
+/*15*/	{ 225, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 240 },
+/*16*/	{ 241,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255, 256 }
+			};
+			this.ValidateCellStore(expectedStore, cellStore);
 		}
 		#endregion
 
@@ -739,41 +629,269 @@ namespace EPPlusTest
 		[TestMethod]
 		public void GetDimensionSingleItem()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(400, 6000, 5);
+			var cellStore = this.GetCellStore(false);
+			var contents = new int?[,]
+			{
+/*1*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null,   13, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(contents, cellStore);
 			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
-			Assert.AreEqual(400, fromRow);
-			Assert.AreEqual(6000, fromCol);
-			Assert.AreEqual(400, toRow);
-			Assert.AreEqual(6000, toCol);
+			Assert.AreEqual(6, fromRow);
+			Assert.AreEqual(6, fromCol);
+			Assert.AreEqual(6, toRow);
+			Assert.AreEqual(6, toCol);
 		}
 
 		[TestMethod]
 		public void GetDimensionTwoItems()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(20, 300, 5);
-			cellStore.SetValue(400, 6000, 5);
+			var cellStore = this.GetCellStore(false);
+			var contents = new int?[,]
+			{
+/*1*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null,   13, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null,   14, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(contents, cellStore);
 			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
-			Assert.AreEqual(20, fromRow);
-			Assert.AreEqual(300, fromCol);
-			Assert.AreEqual(400, toRow);
-			Assert.AreEqual(6000, toCol);
+			Assert.AreEqual(6, fromRow);
+			Assert.AreEqual(6, fromCol);
+			Assert.AreEqual(12, toRow);
+			Assert.AreEqual(10, toCol);
+		}
+
+		[TestMethod]
+		public void GetDimensionThreeItems()
+		{
+			var cellStore = this.GetCellStore(false);
+			var contents = new int?[,]
+			{
+/*1*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null,   15, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null,   13, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null,   14, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(contents, cellStore);
+			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
+			Assert.AreEqual(2, fromRow);
+			Assert.AreEqual(6, fromCol);
+			Assert.AreEqual(12, toRow);
+			Assert.AreEqual(12, toCol);
 		}
 
 		[TestMethod]
 		public void GetDimensionFourItems()
 		{
-			var cellStore = new ZCellStore<int>();
-			cellStore.SetValue(20, 100, 5);
-			cellStore.SetValue(15, 300, 5);
-			cellStore.SetValue(400, 6000, 5);
-			cellStore.SetValue(500, 5000, 5);
+			var cellStore = this.GetCellStore(false);
+			var contents = new int?[,]
+			{
+/*1*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null,   15, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null,   13, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null,   16, null },
+/*9*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null,   14, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(contents, cellStore);
 			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
-			Assert.AreEqual(15, fromRow);
-			Assert.AreEqual(100, fromCol);
-			Assert.AreEqual(500, toRow);
-			Assert.AreEqual(6000, toCol);
+			Assert.AreEqual(2, fromRow);
+			Assert.AreEqual(6, fromCol);
+			Assert.AreEqual(12, toRow);
+			Assert.AreEqual(15, toCol);
+		}
+		#endregion
+
+		#region Insert Tests
+		[TestMethod]
+		public void InsertRowsAcrossAllColumns()
+		{
+			var cellStore = this.GetCellStore(false);
+			var originalStore = new int?[,]
+			{
+/*1*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*2*/		{   17,   18,   19,   20,   21,   22,   23,   24,   25,   26,   27,   28,   29,   30,   31,   32 },
+/*3*/		{   33,   34,   35,   36,   37,   38,   39,   40,   41,   42,   43,   44,   45,   46,   47,   48 },
+/*4*/		{   49,   50,   51,   52,   53,   54,   55,   56,   57,   58,   59,   60,   61,   62,   63,   64 },
+/*5*/		{   65,   66,   67,   68,   69,   70,   71,   72,   73,   74,   75,   76,   77,   78,   79,   80 },
+/*6*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(originalStore, cellStore);
+			cellStore.Insert(2, 0, 5, cellStore.MaximumColumn);
+			var expectedStore = new int?[,]
+			{
+/*1*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{   17,   18,   19,   20,   21,   22,   23,   24,   25,   26,   27,   28,   29,   30,   31,   32 },
+/*8*/		{   33,   34,   35,   36,   37,   38,   39,   40,   41,   42,   43,   44,   45,   46,   47,   48 },
+/*9*/		{   49,   50,   51,   52,   53,   54,   55,   56,   57,   58,   59,   60,   61,   62,   63,   64 },
+/*10*/	{   65,   66,   67,   68,   69,   70,   71,   72,   73,   74,   75,   76,   77,   78,   79,   80 },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.ValidateCellStore(expectedStore, cellStore);
+		}
+		
+		[TestMethod]
+		public void InsertColumnsAcrossAllRows()
+		{
+			var cellStore = this.GetCellStore(false);
+			var originalStore = new int?[,]
+			{
+/*1*/		{   1,    2,    3,    4,    5,    6, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{  17,   18,   19,   20,   21,   22, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{  33,   34,   35,   36,   37,   38, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{  49,   50,   51,   52,   53,   54, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{  65,   66,   67,   68,   69,   70, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{  81,   82,   83,   84,   85,   86, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{  97,   98,   99,  100,  101,  102, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ 113,  114,  115,  116,  117,  118, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ 129,  130,  131,  132,  133,  134, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ 145,  146,  147,  148,  149,  150, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ 161,  162,  163,  164,  165,  166, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ 177,  178,  179,  180,  181,  182, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ 193,  194,  195,  196,  197,  198, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ 209,  210,  211,  212,  213,  214, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ 225,  226,  227,  228,  229,  230, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ 241,  242,  243,  244,  245,  246, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(originalStore, cellStore);
+			cellStore.Insert(0, 2, cellStore.MaximumRow, 5);
+			var expectedStore = new int?[,]
+			{
+/*1*/		{   1, null, null, null, null, null,    2,    3,    4,    5,    6, null, null, null, null, null },
+/*2*/		{  17, null, null, null, null, null,   18,   19,   20,   21,   22, null, null, null, null, null },
+/*3*/		{  33, null, null, null, null, null,   34,   35,   36,   37,   38, null, null, null, null, null },
+/*4*/		{  49, null, null, null, null, null,   50,   51,   52,   53,   54, null, null, null, null, null },
+/*5*/		{  65, null, null, null, null, null,   66,   67,   68,   69,   70, null, null, null, null, null },
+/*6*/		{  81, null, null, null, null, null,   82,   83,   84,   85,   86, null, null, null, null, null },
+/*7*/		{  97, null, null, null, null, null,   98,   99,  100,  101,  102, null, null, null, null, null },
+/*8*/		{ 113, null, null, null, null, null,  114,  115,  116,  117,  118, null, null, null, null, null },
+/*9*/		{ 129, null, null, null, null, null,  130,  131,  132,  133,  134, null, null, null, null, null },
+/*10*/	{ 145, null, null, null, null, null,  146,  147,  148,  149,  150, null, null, null, null, null },
+/*11*/	{ 161, null, null, null, null, null,  162,  163,  164,  165,  166, null, null, null, null, null },
+/*12*/	{ 177, null, null, null, null, null,  178,  179,  180,  181,  182, null, null, null, null, null },
+/*13*/	{ 193, null, null, null, null, null,  194,  195,  196,  197,  198, null, null, null, null, null },
+/*14*/	{ 209, null, null, null, null, null,  210,  211,  212,  213,  214, null, null, null, null, null },
+/*15*/	{ 225, null, null, null, null, null,  226,  227,  228,  229,  230, null, null, null, null, null },
+/*16*/	{ 241, null, null, null, null, null,  242,  243,  244,  245,  246, null, null, null, null, null }
+			};
+			this.ValidateCellStore(expectedStore, cellStore);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void InsertInsideShiftsBlock()
+		{
+			var cellStore = this.GetCellStore(false);
+			var originalStore = new int?[,]
+			{
+/*1*/		{    1,    2,    3,    4,    5,    6, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{   17,   18,   19,   20,   21,   22, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{   33,   34,   35,   36,   37,   38, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{   49,   50,   51,   52,   53,   54, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{   65,   66,   67,   68,   69,   70, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{   81,   82,   83,   84,   85,   86, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{   97,   98,   99,  100,  101,  102, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{  113,  114,  113,  114,  115,  116, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(originalStore, cellStore);
+			cellStore.Insert(2, 2, 5, 6);
+			var expectedStore = new int?[,]
+			{
+/*1*/		{    1,    2,    3,    4,    5,    6, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{   17, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{   33, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{   49, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{   65, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{   81, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{   97, null, null, null, null, null, null,   18,   19,   20,   21,   22, null, null, null, null },
+/*8*/		{  113, null, null, null, null, null, null,   34,   35,   36,   37,   38, null, null, null, null },
+/*9*/		{ null, null, null, null, null, null, null,   50,   51,   52,   53,   54, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null,   66,   67,   68,   69,   70, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null,   82,   83,   84,   85,   86, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null,   98,   99,  100,  101,  102, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null,  114,  113,  114,  115,  116, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.ValidateCellStore(expectedStore, cellStore);
 		}
 		#endregion
 
@@ -1000,7 +1118,7 @@ namespace EPPlusTest
 				{ 1, 2, 3, 4 },
 				{ 5, 6, 7, 8 },
 				{ 9, 10, 11, 12 },
-				{ 13, 14, 15, 16 }
+				{ 13, 14, 15, null }
 			};
 			pagedStructure.LoadPages(items);
 			pagedStructure.ShiftItems(0, 1);
@@ -1024,8 +1142,8 @@ namespace EPPlusTest
 			{
 				{ 1, 2, 3, 4 },
 				{ 5, 6, 7, 8 },
-				{ 9, 10, 11, 12 },
-				{ 13, 14, 15, 16 }
+				{ 9, 10, 11, null },
+				{ null, null, null, null }
 			};
 			pagedStructure.LoadPages(items);
 			pagedStructure.ShiftItems(5, 5);
@@ -1048,9 +1166,9 @@ namespace EPPlusTest
 			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
 			{
 				{ 1, 2, 3, 4 },
-				{ 5, 6, 7, 8 },
-				{ 9, 10, 11, 12 },
-				{ 13, 14, 15, 16 }
+				{ 5, 6, null, null },
+				{ null, null, null, null },
+				{ null, null, null, null }
 			};
 			pagedStructure.LoadPages(items);
 			pagedStructure.ShiftItems(5, 10);
@@ -1067,6 +1185,7 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ShiftItemsForwardAmountTooHighIsResolvedSilently()
 		{
 			var pagedStructure = new PagedStructure<int>(2);
@@ -1079,16 +1198,6 @@ namespace EPPlusTest
 			};
 			pagedStructure.LoadPages(items);
 			pagedStructure.ShiftItems(0, 100);
-			Assert.AreEqual(16, pagedStructure.MinimumUsedIndex);
-			Assert.AreEqual(-1, pagedStructure.MaximumUsedIndex);
-			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
-			{
-				{ null, null, null, null },
-				{ null, null, null, null },
-				{ null, null, null, null },
-				{ null, null, null, null }
-			};
-			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
 		}
 
 		[TestMethod]
@@ -2088,47 +2197,49 @@ namespace EPPlusTest
 			return page * 128 + indexOnPage;
 		}
 
-		private ZCellStore<int> GetCellStore(bool fill = true)
+		private ICellStore<int> GetCellStore(bool fill = true)
 		{
 			var cellStore = new ZCellStore<int>(4, 4);
 			if (fill)
 			{
-				var currentStore = new int[,]
+				var currentStore = new int?[,]
 				{
-/*1*/			{  1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16},
-/*2*/			{ 17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32},
-/*3*/			{ 33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48},
-/*4*/			{ 49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64},
-/*5*/			{ 65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80},
-/*6*/			{ 81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96},
-/*7*/			{ 97,  98,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112},
-/*8*/			{113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128},
-/*9*/			{129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144},
-/*10*/		{145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160},
-/*11*/		{161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176},
-/*12*/		{177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192},
-/*13*/		{193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208},
-/*14*/		{209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224},
-/*15*/		{225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240},
-/*16*/		{241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256}
+/*1*/			{   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16 },
+/*2*/			{  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32 },
+/*3*/			{  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48 },
+/*4*/			{  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64 },
+/*5*/			{  65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80 },
+/*6*/			{  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96 },
+/*7*/			{  97,  98,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112 },
+/*8*/			{ 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128 },
+/*9*/			{ 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144 },
+/*10*/		{ 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160 },
+/*11*/		{ 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176 },
+/*12*/		{ 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192 },
+/*13*/		{ 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208 },
+/*14*/		{ 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224 },
+/*15*/		{ 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240 },
+/*16*/		{ 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
 				};
 				this.LoadCellStore(currentStore, cellStore);
 			}
 			return cellStore;
 		}
 
-		private void LoadCellStore(int[,] sheet, ZCellStore<int> cellStore)
+		private void LoadCellStore(int?[,] sheet, ICellStore<int> cellStore)
 		{
 			for (int row = 0; row <= sheet.GetUpperBound(0); ++row)
 			{
 				for (int column = 0; column <= sheet.GetUpperBound(1); ++column)
 				{
-					cellStore.SetValue(row + 1, column + 1, sheet[row, column]);
+					var data = sheet[row, column];
+					if (data.HasValue)
+						cellStore.SetValue(row + 1, column + 1, data.Value);
 				}
 			}
 		}
 
-		private void ValidateCellStore(int[,] sheet, ZCellStore<int> cellStore)
+		private void ValidateCellStore(int?[,] sheet, ICellStore<int> cellStore)
 		{
 			for (int row = 0; row <= sheet.GetUpperBound(0); ++row)
 			{
@@ -2136,18 +2247,13 @@ namespace EPPlusTest
 				{
 					var data = sheet[row, column];
 					var item = cellStore.GetValue(row + 1, column + 1);
-					Assert.AreEqual(data, item);
+					if (data.HasValue)
+						Assert.AreEqual(data.Value, item, $"Data mismatch row: {row} column: {column}");
+					else
+						Assert.AreEqual(default(int), item, $"Data mismatch row: {row} column: {column}");
 				}
 			}
 		}
 		#endregion
-
-		[TestMethod]
-		public void DELME()
-		{
-			var ogCellStore = new CellStore<int>();
-			ogCellStore.SetValue(0, 1, 3);
-
-		}
 	}
 }

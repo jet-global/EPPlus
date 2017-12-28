@@ -37,11 +37,11 @@ namespace ZCellStoreProfilerApplication
 						cellStoreProfiler.Delete(random.Next(ExcelPackage.MaxRows), random.Next(ExcelPackage.MaxColumns), random.Next(ExcelPackage.MaxRows), random.Next(ExcelPackage.MaxColumns));
 						Console.WriteLine($"ZCellStore Completed in: {cellStoreProfiler.ZCellStoreTimer.ElapsedTicks}; CellStore Completed in: {cellStoreProfiler.CellStoreTimer.ElapsedTicks}");
 						break;
-					case 3:
-						Console.Write("Deleting with shift... ");
-						cellStoreProfiler.Delete(random.Next(ExcelPackage.MaxRows), random.Next(ExcelPackage.MaxColumns), random.Next(ExcelPackage.MaxRows), random.Next(ExcelPackage.MaxColumns), random.Next(2) == 1);
-						Console.WriteLine($"ZCellStore Completed in: {cellStoreProfiler.ZCellStoreTimer.ElapsedTicks}; CellStore Completed in: {cellStoreProfiler.CellStoreTimer.ElapsedTicks}");
-						break;
+					//case 3:
+					//	Console.Write("Deleting with shift... ");
+					//	cellStoreProfiler.Delete(random.Next(ExcelPackage.MaxRows), random.Next(ExcelPackage.MaxColumns), random.Next(ExcelPackage.MaxRows), random.Next(ExcelPackage.MaxColumns), random.Next(2) == 1);
+					//	Console.WriteLine($"ZCellStore Completed in: {cellStoreProfiler.ZCellStoreTimer.ElapsedTicks}; CellStore Completed in: {cellStoreProfiler.CellStoreTimer.ElapsedTicks}");
+					//	break;
 					case 4:
 						Console.Write("Exists with value... ");
 						cellStoreProfiler.Exists(random.Next(ExcelPackage.MaxRows), random.Next(ExcelPackage.MaxColumns), out _);

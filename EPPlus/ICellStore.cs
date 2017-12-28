@@ -9,6 +9,19 @@ namespace OfficeOpenXml
 	/// <typeparam name="T">The type of object being stored in the CellStore.</typeparam>
 	internal interface ICellStore<T> : IDisposable
 	{
+		#region Properties
+		/// <summary>
+		/// Gets the maximum row of the cellstore.
+		/// </summary>
+		int MaximumRow { get; }
+
+		/// <summary>
+		/// Gets the maximum column of the cellstore.
+		/// </summary>
+		int MaximumColumn { get; }
+		#endregion
+
+		#region Methods
 		/// <summary>
 		/// Get the value at a particular location.
 		/// </summary>
@@ -60,19 +73,7 @@ namespace OfficeOpenXml
 		/// <param name="rows">The number of rows to delete.</param>
 		/// <param name="columns">The number of columns to delete.</param>
 		void Delete(int fromRow, int fromCol, int rows, int columns);
-
-
-		/// <summary>
-		/// Deletes rows and/or columns from the workbook. This deletes all existing nodes in the specified range.
-		/// If <paramref name="shift"/> is set to true, all subsequent keys will be updated to reflect their new position after being shifted into the newly-vacated space.
-		/// </summary>
-		/// <param name="fromRow">The first row to delete.</param>
-		/// <param name="fromCol">The first column to delete.</param>
-		/// <param name="rows">The number of rows to delete.</param>
-		/// <param name="columns">The number of columns to delete.</param>
-		/// <param name="shift">Whether or not subsequent rows and columns should be shifted up / left to fill the space that was deleted, or left where they are.</param>
-		void Delete(int fromRow, int fromCol, int rows, int columns, bool shift);
-
+		
 		/// <summary>
 		/// Determine if a value exists at the given location.
 		/// </summary>
@@ -109,8 +110,22 @@ namespace OfficeOpenXml
 		/// <param name="columns">The number of columns being inserted.</param>
 		void Insert(int rowFrom, int columnFrom, int rows, int columns);
 
+		/// <summary>
+		/// Gets a default enumerator for the cellstore.
+		/// </summary>
+		/// <returns>The default enumerator for the cellstore.</returns>
 		ICellStoreEnumerator<T> GetEnumerator();
+
+		/// <summary>
+		/// Gets a contained enumerator for the cellstore.
+		/// </summary>
+		/// <param name="startRow">The minimum row to enumerate.</param>
+		/// <param name="startColumn">The minimum column to enumerate.</param>
+		/// <param name="endRow">The maximum row to enumerate.</param>
+		/// <param name="endColumn">The maximum column to enumerate.</param>
+		/// <returns>The constrained enumerator for the cellstore.</returns>
 		ICellStoreEnumerator<T> GetEnumerator(int startRow, int startColumn, int endRow, int endColumn);
+		#endregion
 	}
 
 	/// <summary>

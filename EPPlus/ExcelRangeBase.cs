@@ -2145,7 +2145,7 @@ namespace OfficeOpenXml
 		/// </summary>
 		public void Clear()
 		{
-			Delete(this, false);
+			Clear(this);
 		}
 
 		/// <summary>
@@ -2159,7 +2159,7 @@ namespace OfficeOpenXml
 			SetSharedFormula(this, arrayFormula, this, true);
 		}
 
-		internal void Delete(ExcelAddressBase range, bool shift)
+		internal void Clear(ExcelAddressBase range)
 		{
 			this.myWorksheet.MergedCells.Clear(range);
 			//First find the start cell
@@ -2177,20 +2177,20 @@ namespace OfficeOpenXml
 			var rows = range._toRow - fromRow + 1;
 			var cols = range._toCol - fromCol + 1;
 
-			this.myWorksheet._values.Delete(fromRow, fromCol, rows, cols, shift);
+			this.myWorksheet._values.Clear(fromRow, fromCol, rows, cols);
 			//_worksheet._types.Delete(fromRow, fromCol, rows, cols, shift);
 			//_worksheet._styles.Delete(fromRow, fromCol, rows, cols, shift);
-			this.myWorksheet._formulas.Delete(fromRow, fromCol, rows, cols, shift);
-			this.myWorksheet._hyperLinks.Delete(fromRow, fromCol, rows, cols, shift);
-			this.myWorksheet._flags.Delete(fromRow, fromCol, rows, cols, shift);
-			this.myWorksheet._commentsStore.Delete(fromRow, fromCol, rows, cols, shift);
+			this.myWorksheet._formulas.Clear(fromRow, fromCol, rows, cols);
+			this.myWorksheet._hyperLinks.Clear(fromRow, fromCol, rows, cols);
+			this.myWorksheet._flags.Clear(fromRow, fromCol, rows, cols);
+			this.myWorksheet._commentsStore.Clear(fromRow, fromCol, rows, cols);
 
 			//Clear multi addresses as well
 			if (this.Addresses != null)
 			{
 				foreach (var sub in this.Addresses)
 				{
-					Delete(sub, shift);
+					Clear(sub);
 				}
 			}
 		}

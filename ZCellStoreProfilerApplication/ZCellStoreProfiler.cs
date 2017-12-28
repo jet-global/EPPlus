@@ -54,6 +54,9 @@ namespace ZCellStoreProfilerApplication
 		#endregion
 
 		#region ICellStore<T> Members
+		public int MaximumRow => this.ZCellStore.MaximumRow;
+		public int MaximumColumn => this.ZCellStore.MaximumColumn;
+
 		public void Clear(int _fromRow, int _fromCol, int toRow, int toCol)
 		{
 			bool zcellstoreExcepted = false;
@@ -96,26 +99,26 @@ namespace ZCellStoreProfilerApplication
 			this.Log.AppendLine($"Delete,{(zcellstoreExcepted ? "exception" : this.ZCellStoreTimer.ElapsedTicks.ToString())},{(cellstoreExcepted ? "exception" : this.CellStoreTimer.ElapsedTicks.ToString())}");
 		}
 
-		public void Delete(int fromRow, int fromCol, int rows, int columns, bool shift)
-		{
-			bool zcellstoreExcepted = false;
-			bool cellstoreExcepted = false;
-			this.ZCellStoreTimer.Start();
-			try
-			{
-				this.ZCellStore.Delete(fromRow, fromCol, rows, columns, shift);
-			}
-			catch { zcellstoreExcepted = true; }
-			this.ZCellStoreTimer.Stop();
-			this.CellStoreTimer.Start();
-			try
-			{
-				this.CellStore.Delete(fromRow, fromCol, rows, columns, shift);
-			}
-			catch { cellstoreExcepted = true; }
-			this.CellStoreTimer.Stop();
-			this.Log.AppendLine($"Delete_{shift},{(zcellstoreExcepted ? "exception" : this.ZCellStoreTimer.ElapsedTicks.ToString())},{(cellstoreExcepted ? "exception" : this.CellStoreTimer.ElapsedTicks.ToString())}");
-		}
+		//public void Delete(int fromRow, int fromCol, int rows, int columns, bool shift)
+		//{
+		//	bool zcellstoreExcepted = false;
+		//	bool cellstoreExcepted = false;
+		//	this.ZCellStoreTimer.Start();
+		//	try
+		//	{
+		//		this.ZCellStore.Delete(fromRow, fromCol, rows, columns, shift);
+		//	}
+		//	catch { zcellstoreExcepted = true; }
+		//	this.ZCellStoreTimer.Stop();
+		//	this.CellStoreTimer.Start();
+		//	try
+		//	{
+		//		this.CellStore.Delete(fromRow, fromCol, rows, columns, shift);
+		//	}
+		//	catch { cellstoreExcepted = true; }
+		//	this.CellStoreTimer.Stop();
+		//	this.Log.AppendLine($"Delete_{shift},{(zcellstoreExcepted ? "exception" : this.ZCellStoreTimer.ElapsedTicks.ToString())},{(cellstoreExcepted ? "exception" : this.CellStoreTimer.ElapsedTicks.ToString())}");
+		//}
 
 		public void Dispose()
 		{

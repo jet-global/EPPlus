@@ -564,6 +564,18 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 	}
 	#endregion
 
+	#region Properties
+	/// <summary>
+	/// Gets the maximum row of the cellstore.
+	/// </summary>
+	public int MaximumRow => ExcelPackage.MaxRows;
+
+	/// <summary>
+	/// Gets the maximum column of the cellstore.
+	/// </summary>
+	public int MaximumColumn => ExcelPackage.MaxColumns;
+	#endregion
+
 	#region Public Methods
 	/// <summary>
 	/// Dispose of the objects allocated by this CellStore.
@@ -740,108 +752,6 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 	public void Delete(int fromRow, int fromCol, int rows, int columns)
 	{
 		this.Delete(fromRow, fromCol, rows, columns, true);
-	}
-
-	/// <summary>
-	/// Delete the values between the specified row and columns.
-	/// </summary>
-	/// <param name="fromRow">The row to start deleting from.</param>
-	/// <param name="fromCol">The column to start deleting at.</param>
-	/// <param name="rows">The number of rows to be deleted.</param>
-	/// <param name="columns">The number of columns to be deleted.</param>
-	/// <param name="shift">Whether or not values below / to the right of the deleted region should be shifted towards the recently-vacated space.</param>
-	public void Delete(int fromRow, int fromCol, int rows, int columns, bool shift)
-	{
-		lock (this._columnIndex)
-		{
-			if (columns > 0 && fromRow == 0 && rows >= ExcelPackage.MaxRows)
-			{
-				this.DeleteColumns(fromCol, columns, shift);
-			}
-			else
-			{
-				var toCol = fromCol + columns - 1;
-				var pageFromRow = fromRow >> pageBits;
-				for (int c = 0; c < this.ColumnCount; c++)
-				{
-					int rowsToDelete = rows;
-					var column = this._columnIndex[c];
-					if (column.Index >= fromCol)
-					{
-						if (column.Index > toCol)
-							break;
-						var pagePos = column.GetPosition(fromRow);
-						if (pagePos < 0) pagePos = ~pagePos;
-						if (pagePos < column.PageCount)
-						{
-							var page = column._pages[pagePos];
-							if (shift && page.RowCount > 0 && page.MinIndex > fromRow && page.MaxIndex >= fromRow + rowsToDelete)
-							{
-								// The entire page is being shifted.
-								var o = page.MinIndex - fromRow;
-								if (o < rowsToDelete)
-								{
-									rowsToDelete -= o;
-									page.Offset -= o;
-									this.UpdatePageOffset(column, pagePos, o);
-								}
-								else
-								{
-									page.Offset -= rowsToDelete;
-									this.UpdatePageOffset(column, pagePos, rowsToDelete);
-									continue;
-								}
-							}
-							if (page.RowCount > 0 && page.MinIndex <= fromRow + rowsToDelete - 1 && page.MaxIndex >= fromRow) 
-							{
-								// The range starts within a page: shift rows within the page. 
-								var endRow = fromRow + rowsToDelete;
-								var delEndRow = this.DeleteCells(column._pages[pagePos], fromRow, endRow, shift);
-								if (shift && delEndRow != fromRow)
-									this.UpdatePageOffset(column, pagePos, delEndRow - fromRow);
-								if (endRow > delEndRow && pagePos < column.PageCount && column._pages[pagePos].MinIndex < endRow)
-								{
-									pagePos = (delEndRow == fromRow ? pagePos : pagePos + 1);
-									var rowsLeft = this.DeletePage(shift ? fromRow : delEndRow, endRow - delEndRow, column, pagePos, shift);
-									//if (shift) UpdatePageOffset(column, pagePos, endRow - fromRow - rowsLeft);
-									if (rowsLeft > 0)
-									{
-										var fr = shift ? fromRow : endRow - rowsLeft;
-										pagePos = column.GetPosition(fr);
-										// This should never be the same page we deleted from earlier in this method.
-										// Rather, it should be the next [remaining] page.
-										// The only valid same-index case is when the entire original page was deleted. 
-										if (page == column._pages[pagePos] && column._pages[pagePos + 1] != null)
-											pagePos++;
-										delEndRow = this.DeleteCells(column._pages[pagePos], fr, shift ? fr + rowsLeft : endRow, shift);
-										if (shift)
-											this.UpdatePageOffset(column, pagePos, rowsLeft);
-									}
-								}
-							}
-							else if (pagePos > 0 && column._pages[pagePos].IndexOffset > fromRow) //The row is on the page before.
-							{
-								int offset = fromRow + rowsToDelete - 1 - ((pageFromRow - 1) << pageBits);
-								var rowPos = column._pages[pagePos - 1].GetPosition(offset);
-								if (rowPos > 0 && pagePos > 0)
-								{
-									if (shift)
-										this.UpdateIndexOffset(column, pagePos - 1, rowPos, fromRow + rowsToDelete - 1, -rowsToDelete);
-								}
-							}
-							else
-							{
-								if (shift && pagePos + 1 < column.PageCount)
-									this.UpdateIndexOffset(column, pagePos + 1, 0, column._pages[pagePos + 1].MinIndex, -rowsToDelete);
-							}
-						}
-					}
-				}
-			}
-		}
-#if DEBUGGING
-		this.AssertInvariants();
-#endif
 	}
 
 	/// <summary>
@@ -1043,11 +953,23 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 #endif
 	}
 
+	/// <summary>
+	/// Gets a default enumerator for the cellstore.
+	/// </summary>
+	/// <returns>The default enumerator for the cellstore.</returns>
 	public ICellStoreEnumerator<T> GetEnumerator()
 	{
 		return new CellStore<T>.CellsStoreEnumerator<T>(this);
 	}
 
+	/// <summary>
+	/// Gets a contained enumerator for the cellstore.
+	/// </summary>
+	/// <param name="startRow">The minimum row to enumerate.</param>
+	/// <param name="startColumn">The minimum column to enumerate.</param>
+	/// <param name="endRow">The maximum row to enumerate.</param>
+	/// <param name="endColumn">The maximum column to enumerate.</param>
+	/// <returns>The constrained enumerator for the cellstore.</returns>
 	public ICellStoreEnumerator<T> GetEnumerator(int startRow, int startColumn, int endRow, int endColumn)
 	{
 		return new CellStore<T>.CellsStoreEnumerator<T>(this, startRow, startColumn, endRow, endColumn);
@@ -1055,6 +977,100 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 	#endregion
 
 	#region Private Methods
+	private void Delete(int fromRow, int fromCol, int rows, int columns, bool shift)
+	{
+		lock (this._columnIndex)
+		{
+			if (columns > 0 && fromRow == 0 && rows >= ExcelPackage.MaxRows)
+			{
+				this.DeleteColumns(fromCol, columns, shift);
+			}
+			else
+			{
+				var toCol = fromCol + columns - 1;
+				var pageFromRow = fromRow >> pageBits;
+				for (int c = 0; c < this.ColumnCount; c++)
+				{
+					int rowsToDelete = rows;
+					var column = this._columnIndex[c];
+					if (column.Index >= fromCol)
+					{
+						if (column.Index > toCol)
+							break;
+						var pagePos = column.GetPosition(fromRow);
+						if (pagePos < 0) pagePos = ~pagePos;
+						if (pagePos < column.PageCount)
+						{
+							var page = column._pages[pagePos];
+							if (shift && page.RowCount > 0 && page.MinIndex > fromRow && page.MaxIndex >= fromRow + rowsToDelete)
+							{
+								// The entire page is being shifted.
+								var o = page.MinIndex - fromRow;
+								if (o < rowsToDelete)
+								{
+									rowsToDelete -= o;
+									page.Offset -= o;
+									this.UpdatePageOffset(column, pagePos, o);
+								}
+								else
+								{
+									page.Offset -= rowsToDelete;
+									this.UpdatePageOffset(column, pagePos, rowsToDelete);
+									continue;
+								}
+							}
+							if (page.RowCount > 0 && page.MinIndex <= fromRow + rowsToDelete - 1 && page.MaxIndex >= fromRow)
+							{
+								// The range starts within a page: shift rows within the page. 
+								var endRow = fromRow + rowsToDelete;
+								var delEndRow = this.DeleteCells(column._pages[pagePos], fromRow, endRow, shift);
+								if (shift && delEndRow != fromRow)
+									this.UpdatePageOffset(column, pagePos, delEndRow - fromRow);
+								if (endRow > delEndRow && pagePos < column.PageCount && column._pages[pagePos].MinIndex < endRow)
+								{
+									pagePos = (delEndRow == fromRow ? pagePos : pagePos + 1);
+									var rowsLeft = this.DeletePage(shift ? fromRow : delEndRow, endRow - delEndRow, column, pagePos, shift);
+									//if (shift) UpdatePageOffset(column, pagePos, endRow - fromRow - rowsLeft);
+									if (rowsLeft > 0)
+									{
+										var fr = shift ? fromRow : endRow - rowsLeft;
+										pagePos = column.GetPosition(fr);
+										// This should never be the same page we deleted from earlier in this method.
+										// Rather, it should be the next [remaining] page.
+										// The only valid same-index case is when the entire original page was deleted. 
+										if (page == column._pages[pagePos] && column._pages[pagePos + 1] != null)
+											pagePos++;
+										delEndRow = this.DeleteCells(column._pages[pagePos], fr, shift ? fr + rowsLeft : endRow, shift);
+										if (shift)
+											this.UpdatePageOffset(column, pagePos, rowsLeft);
+									}
+								}
+							}
+							else if (pagePos > 0 && column._pages[pagePos].IndexOffset > fromRow) //The row is on the page before.
+							{
+								int offset = fromRow + rowsToDelete - 1 - ((pageFromRow - 1) << pageBits);
+								var rowPos = column._pages[pagePos - 1].GetPosition(offset);
+								if (rowPos > 0 && pagePos > 0)
+								{
+									if (shift)
+										this.UpdateIndexOffset(column, pagePos - 1, rowPos, fromRow + rowsToDelete - 1, -rowsToDelete);
+								}
+							}
+							else
+							{
+								if (shift && pagePos + 1 < column.PageCount)
+									this.UpdateIndexOffset(column, pagePos + 1, 0, column._pages[pagePos + 1].MinIndex, -rowsToDelete);
+							}
+						}
+					}
+				}
+			}
+		}
+#if DEBUGGING
+		this.AssertInvariants();
+#endif
+	}
+
 	private int GetPointer(int Row, int Column)
 	{
 		var col = GetPosition(Column);

@@ -55,7 +55,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="EPPlusTest.snk" />
-    <None Include="OpenOfficeXml.snk" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EPPlus\EPPlus.csproj">
