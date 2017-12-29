@@ -163,25 +163,18 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Returns the named range's formula updated with worksheet references from the specified <paramref name="originalWorksheetName"/> 
-		/// to the specified <paramref name="newWorksheetName"/>.
+		/// Updates the named range's <see cref="NameFormula"/> references according to the 
+		/// rows and or columns being inserted and or deleted on the specified <paramref name="worksheet"/>.
 		/// </summary>
-		/// <param name="originalWorksheetName">The worksheet name to update references from.</param>
-		/// <param name="newWorksheetName">The worksheet name to update references to.</param>
-		/// <returns>The updated formula string.</returns>
-		public string UpdateFormulaSheetReferences(string originalWorksheetName, string newWorksheetName)
+		/// <param name="rowFrom">The starting row to perform the operation at.</param>
+		/// <param name="colFrom">The ending row to perform the operation at.</param>
+		/// <param name="rows">The number of rows being inserted.</param>
+		/// <param name="cols">The number of columns being inserted.</param>
+		/// <param name="worksheet">The worksheet to update.</param>
+		public void UpdateFormula(int rowFrom, int colFrom, int rows, int cols, ExcelWorksheet worksheet)
 		{
-			var tokens = this.Workbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
-			foreach (var token in tokens)
-			{
-				if (token.TokenType == TokenType.ExcelAddress)
-				{
-					var address = new ExcelAddress(token.Value);
-					address.ChangeWorksheet(originalWorksheetName, newWorksheetName);
-					token.Value = address.ToString();
-				}
-			}
-			return string.Join(string.Empty, tokens.Select(t => t.Value.ToString()));
+			this.NameFormula = this.Workbook.Package.FormulaManager.UpdateFormulaReferences(
+				this.NameFormula, rows, cols, rowFrom, colFrom, worksheet.Name, worksheet.Name, updateOnlyFixed: true);
 		}
 
 		/// <summary>
@@ -223,7 +216,7 @@ namespace OfficeOpenXml
 		#region System.Object Overrides
 		public override string ToString()
 		{
-			return Name;
+			return this.Name;
 		}
 		#endregion
 	}

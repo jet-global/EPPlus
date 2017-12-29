@@ -1179,7 +1179,6 @@ namespace OfficeOpenXml
 			this.CreateXml();
 			this.TopNode = _worksheetXml.DocumentElement;
 		}
-
 		#endregion
 
 		#region Public Methods
@@ -1414,11 +1413,11 @@ namespace OfficeOpenXml
 					}
 				}
 				this.UpdateSparkLines(rows, rowFrom, 0, 0);
-				foreach (var tbl in Tables)
+				foreach (var tbl in this.Tables)
 				{
 					tbl.Address = tbl.Address.AddRow(rowFrom, rows);
 				}
-				foreach (var ptbl in PivotTables)
+				foreach (var ptbl in this.PivotTables)
 				{
 					if (rowFrom <= ptbl.Address.End.Row)
 						ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
@@ -1432,8 +1431,9 @@ namespace OfficeOpenXml
 				}
 				this.UpdateCharts(rows, 0, rowFrom, 0);
 				// Update cross-sheet references.
-				foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+				foreach (var sheet in this.Workbook.Worksheets.Where(sheet => sheet != this))
 				{
+					sheet.Names.Insert(rowFrom, 0, rows, 0, this);
 					sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
 					foreach (var ptbl in sheet.PivotTables)
 					{
@@ -1445,6 +1445,7 @@ namespace OfficeOpenXml
 							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
 					}
 				}
+				this.Workbook.Names.Insert(rowFrom, 0, rows, 0, this);
 				this.UpdateDataValidationRanges(rowFrom, rows, 0, 0);
 			}
 		}
@@ -1605,7 +1606,7 @@ namespace OfficeOpenXml
 				}
 				this.UpdateSparkLines(0, 0, columns, columnFrom);
 				//Adjust tables
-				foreach (var tbl in Tables)
+				foreach (var tbl in this.Tables)
 				{
 					if (columnFrom > tbl.Address.Start.Column && columnFrom <= tbl.Address.End.Column)
 					{
@@ -1614,7 +1615,7 @@ namespace OfficeOpenXml
 
 					tbl.Address = tbl.Address.AddColumn(columnFrom, columns);
 				}
-				foreach (var ptbl in PivotTables)
+				foreach (var ptbl in this.PivotTables)
 				{
 					if (columnFrom <= ptbl.Address.End.Column)
 						ptbl.Address = ptbl.Address.AddColumn(columnFrom, columns);
@@ -1626,8 +1627,9 @@ namespace OfficeOpenXml
 				}
 				this.UpdateCharts(0, columns, 0, columnFrom);
 				// Update cross-sheet references.
-				foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+				foreach (var sheet in this.Workbook.Worksheets.Where(sheet => sheet != this))
 				{
+					sheet.Names.Insert(0, columnFrom, 0, columns, this);
 					sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
 					foreach (var ptbl in sheet.PivotTables)
 					{
@@ -1638,6 +1640,7 @@ namespace OfficeOpenXml
 							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
 					}
 				}
+				this.Workbook.Names.Insert(0, columnFrom, 0, columns, this);
 				this.UpdateDataValidationRanges(0, 0, columnFrom, columns);
 			}
 		}
@@ -1671,12 +1674,12 @@ namespace OfficeOpenXml
 				this._hyperLinks.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Comments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.VmlDrawingsComments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
-				this.Names.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns, this);
+				this.Names.Delete(rowFrom, 0, rows, 0, this);
 
 				this.AdjustFormulasRow(rowFrom, rows);
 				this.FixMergedCellsRow(rowFrom, rows, true);
 
-				foreach (var table in Tables)
+				foreach (var table in this.Tables)
 				{
 					table.Address = table.Address.DeleteRow(rowFrom, rows);
 				}
@@ -1693,6 +1696,7 @@ namespace OfficeOpenXml
 				}
 				foreach (var sheet in this.Workbook.Worksheets.Where(sheet => sheet != this))
 				{
+					sheet.Names.Delete(rowFrom, 0, rows, 0, this);
 					sheet.UpdateCrossSheetReferences(this.Name, rowFrom, -rows, 0, 0);
 					foreach (var pivotTable in sheet.PivotTables)
 					{
@@ -1704,6 +1708,7 @@ namespace OfficeOpenXml
 							pivotTable.CacheDefinition.SourceRange.Address = pivotTable.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows)?.Address ?? ExcelErrorValue.Values.Ref;
 					}
 				}
+				this.Workbook.Names.Delete(rowFrom, 0, rows, 0, this);
 				this.UpdateSparkLines(-rows, rowFrom, 0, 0);
 				this.UpdateCharts(-rows, 0, rowFrom, 0);
 				this.UpdateDataValidationRanges(rowFrom, -rows, 0, 0);
@@ -1753,7 +1758,7 @@ namespace OfficeOpenXml
 				this._hyperLinks.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this.Comments.Delete(0, columnFrom, 0, columns);
 				this.VmlDrawingsComments.Delete(0, columnFrom, 0, columns);
-				this._names.Delete(0, columnFrom, 0, columns, this);
+				this.Names.Delete(0, columnFrom, 0, columns, this);
 
 				this.AdjustFormulasColumn(columnFrom, columns);
 				this.FixMergedCellsColumn(columnFrom, columns, true);
@@ -1773,7 +1778,7 @@ namespace OfficeOpenXml
 					}
 				}
 
-				foreach (var tbl in Tables)
+				foreach (var tbl in this.Tables)
 				{
 					if (columnFrom >= tbl.Address.Start.Column && columnFrom <= tbl.Address.End.Column)
 					{
@@ -1791,7 +1796,7 @@ namespace OfficeOpenXml
 
 					tbl.Address = tbl.Address.DeleteColumn(columnFrom, columns);
 				}
-				foreach (var ptbl in PivotTables)
+				foreach (var ptbl in this.PivotTables)
 				{
 					if (columnFrom <= ptbl.Address.End.Column)
 						ptbl.Address = ptbl.Address.DeleteColumn(columnFrom, columns);
@@ -1801,8 +1806,9 @@ namespace OfficeOpenXml
 						columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
 						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns).Address;
 				}
-				foreach (var sheet in Workbook.Worksheets.Where(sheet => sheet != this))
+				foreach (var sheet in this.Workbook.Worksheets.Where(sheet => sheet != this))
 				{
+					sheet.Names.Delete(0, columnFrom, 0, columns, this);
 					sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, -columns);
 					foreach (var ptbl in sheet.PivotTables)
 					{
@@ -1813,6 +1819,7 @@ namespace OfficeOpenXml
 							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns)?.Address ?? ExcelErrorValue.Values.Ref;
 					}
 				}
+				this.Workbook.Names.Delete(0, columnFrom, 0, columns, this);
 				this.UpdateCharts(0, -columns, 0, columnFrom);
 				this.UpdateSparkLines(0, 0, -columns, columnFrom);
 				this.UpdateDataValidationRanges(0, 0, columnFrom, -columns);
@@ -3087,7 +3094,7 @@ namespace OfficeOpenXml
 			//Renames name in this Worksheet;
 			foreach (var namedRange in this.Workbook.Names)
 			{
-				namedRange.NameFormula = namedRange.UpdateFormulaSheetReferences(this._name, value);
+				namedRange.NameFormula = this.Package.FormulaManager.UpdateFormulaSheetReferences(namedRange.NameFormula, this._name, value);
 			}
 			this.ChangeSparklineSheetNames(value);
 			foreach (var ws in this.Workbook.Worksheets)
@@ -3096,7 +3103,7 @@ namespace OfficeOpenXml
 				{
 					foreach (var namedRange in ws.Names)
 					{
-						namedRange.UpdateFormulaSheetReferences(this._name, value);
+						namedRange.NameFormula = this.Package.FormulaManager.UpdateFormulaSheetReferences(namedRange.NameFormula, this._name, value);
 					}
 					ws.UpdateCrossSheetReferenceNames(_name, value);
 				}

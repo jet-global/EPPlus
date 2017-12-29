@@ -1,4 +1,5 @@
 ﻿using System;
+using OfficeOpenXml.Extensions;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
@@ -23,8 +24,9 @@ namespace OfficeOpenXml
 		/// <param name="currentSheet">The sheet that contains the formula currently being processed.</param>
 		/// <param name="modifiedSheet">The sheet where cells are being inserted or deleted.</param>
 		/// <param name="setFixed">Fixed address</param>
+		/// <param name="updateOnlyFixed">Indicates whether or not to only update fixed (absolute) references. Used for named range formula references.</param>
 		/// <returns>The updated version of the <paramref name="formula"/>.</returns>
-		string UpdateFormulaReferences(string formula, int rowIncrement, int colIncrement, int afterRow, int afterColumn, string currentSheet, string modifiedSheet, bool setFixed = false);
+		string UpdateFormulaReferences(string formula, int rowIncrement, int colIncrement, int afterRow, int afterColumn, string currentSheet, string modifiedSheet, bool setFixed = false, bool updateOnlyFixed = false);
 
 		/// <summary>
 		/// Updates all the references to a renamed sheet in a formula.
@@ -34,10 +36,13 @@ namespace OfficeOpenXml
 		/// <param name="newSheetName">The new sheet name.</param>
 		/// <returns>The formula with all cross-sheet references updated.</returns>
 		string UpdateFormulaSheetReferences(string formula, string oldSheetName, string newSheetName);
-	}
 
+		string UpdateFormulaDeletedSheetReferences(string formula, string deleteSheetName);
+	}
+	
 	internal class FormulaManager : IFormulaManager
 	{
+		#region IFormulaManager Overrides
 		/// <summary>
 		/// Updates the Excel formula so that all the cellAddresses are incremented by the row and column increments
 		/// if they fall after the afterRow and afterColumn.
@@ -51,20 +56,21 @@ namespace OfficeOpenXml
 		/// <param name="currentSheet">The sheet that contains the formula currently being processed.</param>
 		/// <param name="modifiedSheet">The sheet where cells are being inserted or deleted.</param>
 		/// <param name="setFixed">Fixed address</param>
+		/// <param name="updateOnlyFixed">Indicates whether or not to only update fixed (absolute) references. Used for named range formula references.</param>
 		/// <returns>The updated version of the <paramref name="originalFormula"/>.</returns>
-		public string UpdateFormulaReferences(string originalFormula, int rowIncrement, int colIncrement, int afterRow, int afterColumn, string currentSheet, string modifiedSheet, bool setFixed = false)
+		public string UpdateFormulaReferences(string originalFormula, int rowIncrement, int colIncrement, int afterRow, int afterColumn, string currentSheet, string modifiedSheet, bool setFixed = false, bool updateOnlyFixed = false)
 		{
 			try
 			{
 				var sct = new SourceCodeTokenizer(FunctionNameProvider.Empty, NameValueProvider.Empty);
 				var tokens = sct.Tokenize(originalFormula);
-				String formula = "";
+				string formula = string.Empty;
 				foreach (var t in tokens)
 				{
 					if (t.TokenType == TokenType.ExcelAddress)
 					{
 						var address = new ExcelAddressBase(t.Value);
-						var referencesModifiedWorksheet = (string.IsNullOrEmpty(address._ws) && currentSheet.Equals(modifiedSheet, StringComparison.CurrentCultureIgnoreCase)) || modifiedSheet.Equals(address._ws, StringComparison.CurrentCultureIgnoreCase);
+						var referencesModifiedWorksheet = (string.IsNullOrEmpty(address._ws) && currentSheet.IsEquivalentTo(modifiedSheet)) || modifiedSheet.IsEquivalentTo(address._ws);
 
 						if (!setFixed && (!string.IsNullOrEmpty(address._wb) || !referencesModifiedWorksheet))
 						{
@@ -79,19 +85,19 @@ namespace OfficeOpenXml
 						}
 						if (rowIncrement > 0)
 						{
-							address = address?.AddRow(afterRow, rowIncrement, setFixed);
+							address = address?.AddRow(afterRow, rowIncrement, setFixed, updateOnlyFixed);
 						}
 						else if (rowIncrement < 0)
 						{
-							address = address?.DeleteRow(afterRow, -rowIncrement, setFixed);
+							address = address?.DeleteRow(afterRow, -rowIncrement, setFixed, updateOnlyFixed);
 						}
 						if (colIncrement > 0)
 						{
-							address = address?.AddColumn(afterColumn, colIncrement, setFixed);
+							address = address?.AddColumn(afterColumn, colIncrement, setFixed, updateOnlyFixed);
 						}
 						else if (colIncrement < 0)
 						{
-							address = address?.DeleteColumn(afterColumn, -colIncrement, setFixed);
+							address = address?.DeleteColumn(afterColumn, -colIncrement, setFixed, updateOnlyFixed);
 						}
 						if (address == null || !address.IsValidRowCol())
 						{
@@ -136,30 +142,47 @@ namespace OfficeOpenXml
 				throw new ArgumentNullException(nameof(oldSheetName));
 			if (string.IsNullOrEmpty(newSheetName))
 				throw new ArgumentNullException(nameof(newSheetName));
+			return this.UpdateFormulaWorksheetReferences(originalFormula, oldSheetName, newSheetName);
+		}
+
+		/// <summary>
+		/// Updates <paramref name="deletedSheetName"/> references in the specified <paramref name="originalFormula"/> to #REF!.
+		/// </summary>
+		/// <param name="originalFormula">The formula to update.</param>
+		/// <param name="deletedSheetName">The name of the worksheet being deleted.</param>
+		/// <returns>The updated formula.</returns>
+		public string UpdateFormulaDeletedSheetReferences(string originalFormula, string deletedSheetName)
+		{
+			if (string.IsNullOrEmpty(deletedSheetName))
+				throw new ArgumentNullException(nameof(deletedSheetName));
+			return this.UpdateFormulaWorksheetReferences(originalFormula, deletedSheetName, null);
+		}
+		#endregion
+
+		#region Private Methods
+		private string UpdateFormulaWorksheetReferences(string originalFormula, string originalSheetName, string newSheetName)
+		{
 			try
 			{
 				var sct = new SourceCodeTokenizer(FunctionNameProvider.Empty, NameValueProvider.Empty);
 				var tokens = sct.Tokenize(originalFormula);
-				String formula = "";
+				string formula = string.Empty;
 				foreach (var t in tokens)
 				{
 					if (t.TokenType == TokenType.ExcelAddress)
 					{
 						var address = new ExcelAddressBase(t.Value);
 						if (address == null || !address.IsValidRowCol())
-						{
 							formula += "#REF!";
-						}
 						else
 						{
-							address.ChangeWorksheet(oldSheetName, newSheetName);
+							// A null value for newSheetName is treated as a deletion of the originalSheetName worksheet.
+							address.ChangeWorksheet(originalSheetName, newSheetName);
 							formula += address.Address;
 						}
 					}
 					else
-					{
 						formula += t.Value;
-					}
 				}
 				return formula;
 			}
@@ -168,5 +191,6 @@ namespace OfficeOpenXml
 				return originalFormula;
 			}
 		}
+		#endregion
 	}
 }

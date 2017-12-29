@@ -32,8 +32,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 
 namespace OfficeOpenXml
 {
@@ -87,9 +85,11 @@ namespace OfficeOpenXml
 		/// <returns>The newly-added named named range.</returns>
 		public ExcelNamedRange Add(string name, string formula, bool isHidden = false, string comments = null)
 		{
-			var namedRange = new ExcelNamedRange(name, this._wb, this._ws, formula, this._dic.Count);
-			namedRange.IsNameHidden = isHidden;
-			namedRange.NameComment = comments;
+			var namedRange = new ExcelNamedRange(name, this._wb, this._ws, formula, this._dic.Count)
+			{
+				IsNameHidden = isHidden,
+				NameComment = comments
+			};
 			this.AddName(name, namedRange);
 			return namedRange;
 		}
@@ -149,6 +149,11 @@ namespace OfficeOpenXml
 			}
 		}
 
+		/// <summary>
+		/// Retrieves the <see cref="ExcelNamedRange"/> at the specified <paramref name="Index"/>.
+		/// </summary>
+		/// <param name="Index">The index at which to retrieve the <see cref="ExcelNamedRange"/>.</param>
+		/// <returns>The <see cref="ExcelNamedRange"/> at the specified <paramref name="Index"/>.</returns>
 		public ExcelNamedRange this[int Index]
 		{
 			get
@@ -186,72 +191,38 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Internal Methods
-		//internal void Insert(int rowFrom, int colFrom, int rows, int cols)
-		//{
-		//	//Insert(rowFrom, colFrom, rows, cols, n => true);
-		//}
-
 		/// <summary>
-		/// Updates all named range formulas in all named range collections to reflect the 
-		/// specified row and/or column insertion.
+		/// Updates all named range formulas in this collection to reflect the specified
+		/// row and/or column insertion on the specified <paramref name="worksheet"/>.
 		/// </summary>
-		/// <param name="rowFrom">The row at which the insertion starts.</param>
+		/// <param name="rowFrom">The row at which the insert starts.</param>
 		/// <param name="colFrom">The column at which the insert starts.</param>
 		/// <param name="rows">The number of rows to insert.</param>
 		/// <param name="cols">The number of columns to insert.</param>
 		/// <param name="worksheet">The worksheet on which the insert is occurring.</param>
 		internal void Insert(int rowFrom, int colFrom, int rows, int cols, ExcelWorksheet worksheet)
 		{
-			foreach (var sheet in this._wb.Worksheets)
+			foreach (var namedRange in this)
 			{
-				foreach (var namedRange in sheet.Names)
-				{
-					namedRange.NameFormula = this._wb.Package.FormulaManager.UpdateFormulaReferences(
-						namedRange.NameFormula, rows, cols, rowFrom, colFrom, worksheet.Name, worksheet.Name);
-					//this.UpdateNameFormulaInsert(rowFrom, colFrom, rows, cols, namedRange, worksheet);
-				}
-			}
-			foreach (var namedRange in this._wb.Names)
-			{
-
-				this._wb.Package.FormulaManager.UpdateFormulaReferences(namedRange.NameFormula, rows, cols,
-					rowFrom, colFrom, worksheet.Name, worksheet.Name);
-				//this.UpdateNameFormulaInsert(rowFrom, colFrom, rows, cols, namedRange, worksheet);
+				namedRange.UpdateFormula(rowFrom, colFrom, rows, cols, worksheet);
 			}
 		}
 
-		//internal void Delete(int rowFrom, int colFrom, int rows, int cols)
-		//{
-		//	Delete(rowFrom, colFrom, rows, cols, n => true);
-		//}
-
+		/// <summary>
+		/// Updates all named range formulas in this collection to reflect the specified
+		/// row and/or column deletion on the specified <paramref name="worksheet"/>.
+		/// </summary>
+		/// <param name="rowFrom">The row at which the delete starts.</param>
+		/// <param name="colFrom">The column at which the delete starts.</param>
+		/// <param name="rows">The number of rows to delete.</param>
+		/// <param name="cols">The number of columns to delete.</param>
+		/// <param name="worksheet">The worksheet on which the delete is occurring.</param>
 		internal void Delete(int rowFrom, int colFrom, int rows, int cols, ExcelWorksheet worksheet)
 		{
-			// TODO: Update references in NameFormula.
-			//  - See insert method for similar logic.
-
-			throw new NotImplementedException("Row/Col delete has not been implemented for named ranges.");
-			//var namedRanges = this._list.Where(filter);
-			//foreach (var namedRange in namedRanges)
-			//{
-			//	ExcelAddressBase adr;
-			//	if (rows == 0)
-			//	{
-			//		adr = namedRange.DeleteColumn(colFrom, cols);
-			//	}
-			//	else
-			//	{
-			//		adr = namedRange.DeleteRow(rowFrom, rows);
-			//	}
-			//	if (adr == null)
-			//	{
-			//		namedRange.Address = "#REF!";
-			//	}
-			//	else
-			//	{
-			//		namedRange.Address = adr.Address;
-			//	}
-			//}
+			foreach (var namedRange in this)
+			{
+				namedRange.UpdateFormula(rowFrom, colFrom, -rows, -cols, worksheet);
+			}
 		}
 
 		internal void Clear()
@@ -268,215 +239,6 @@ namespace OfficeOpenXml
 		{
 			_dic.Add(Name, _list.Count);
 			_list.Add(item);
-		}
-
-		private void InsertColumns(int colFrom, int cols, ExcelNamedRange namedRange)
-		{
-			//if (colFrom > 0)
-			//{
-			//	if (namedRange.Addresses?.Any() == true)
-			//	{
-			//		string worksheetPrefix = namedRange.FullAddress.Contains("!") ? this.ExtractWorksheetPrefix(namedRange.FullAddress) : string.Empty;
-			//		var addressBuilder = new StringBuilder();
-			//		foreach (var address in namedRange.Addresses)
-			//		{
-			//			//try
-			//			//{
-			//			//	if (address._fromColFixed && (address.Start.Column == 1 && address.End.Column == ExcelPackage.MaxColumns) == false)
-			//			//	{
-			//			//		if (colFrom <= address.Start.Column)
-			//			//			addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column + cols, address.End.Row, address.End.Column + cols, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)},");
-			//			//		else if (colFrom <= address.End.Column)
-			//			//			addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column, address.End.Row, address.End.Column + cols, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)},");
-			//			//		else
-			//			//			addressBuilder.Append($"{worksheetPrefix}{address.Address},");
-			//			//	}
-			//			//	else
-			//			//		addressBuilder.Append($"{worksheetPrefix}{address.Address},");
-			//			//}
-			//			//catch (ArgumentOutOfRangeException)
-			//			//{
-			//			//	addressBuilder.Append($"{worksheetPrefix}{address.Address},");
-			//			//}
-			//			addressBuilder.Append(this.UpdateAddressInsertColumns(colFrom, cols, address, worksheetPrefix));
-			//			addressBuilder.Append(",");
-			//		}
-			//		addressBuilder.Length--;
-			//		namedRange.Address = addressBuilder.ToString();
-			//	}
-			//	else
-			//	{
-			//		try
-			//		{
-			//			if (namedRange._fromColFixed && (namedRange.Start.Column == 1 && namedRange.End.Column == ExcelPackage.MaxColumns) == false)
-			//			{
-			//				if (colFrom <= namedRange.Start.Column)
-			//				{
-			//					var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column + cols, namedRange.End.Row, namedRange.End.Column + cols, namedRange._fromRowFixed, namedRange._fromColFixed, namedRange._toRowFixed, namedRange._toColFixed);
-			//					namedRange.Address = BuildNewAddress(namedRange, newAddress);
-			//				}
-			//				else if (colFrom <= namedRange.End.Column)
-			//				{
-			//					var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row, namedRange.End.Column + cols, namedRange._fromRowFixed, namedRange._fromColFixed, namedRange._toRowFixed, namedRange._toColFixed);
-			//					namedRange.Address = BuildNewAddress(namedRange, newAddress);
-			//				}
-			//			}
-			//		}
-			//		catch (ArgumentOutOfRangeException) { /* This means the named range has an invalid address in it, so just ignore the problem. */ }
-			//	}
-			//}
-			throw new NotImplementedException("This method is probably not needed.");
-		}
-
-		private void UpdateNameFormulaInsert(int rowFrom, int colFrom, int rows, int columns, ExcelNamedRange namedRange, ExcelWorksheet worksheet)
-		{
-			var tokens = namedRange.Workbook.FormulaParser.Lexer.Tokenize(namedRange.NameFormula);
-			var formulaBuilder = new StringBuilder();
-			foreach (var token in tokens)
-			{
-				if (token.TokenType == TokenType.ExcelAddress)
-				{
-					var excelAddress = new ExcelAddress(token.Value);
-					if (excelAddress.WorkSheet.ToLower() == worksheet.Name.ToLower())
-					{
-						string updatedAddress = this.UpdateAddressInsertRows(rowFrom, rows, excelAddress);
-						updatedAddress = this.UpdateAddressInsertColumns(colFrom, columns, new ExcelAddress(updatedAddress));
-						formulaBuilder.Append(updatedAddress);
-					}
-					else
-						formulaBuilder.Append(token.Value);
-				}
-				else
-					formulaBuilder.Append(token.Value.ToString());
-			}
-			namedRange.NameFormula = formulaBuilder.ToString();
-		}
-
-		private string UpdateAddressInsertColumns(int colFrom, int columns, ExcelAddress address, string worksheetPrefix = null)
-		{
-			if (columns < 1)
-				return address.Address;
-			string updatedAddress = string.Empty;
-			try
-			{
-				if (address._fromColFixed && (address.Start.Column == 1 && address.End.Column == ExcelPackage.MaxColumns) == false)
-				{
-					if (colFrom <= address.Start.Column)
-						updatedAddress = $"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column + columns, address.End.Row, address.End.Column + columns, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)}";
-					else if (colFrom <= address.End.Column)
-						updatedAddress = $"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column, address.End.Row, address.End.Column + columns, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)}";
-					else
-						updatedAddress = $"{worksheetPrefix}{address.Address}";
-				}
-				else
-					updatedAddress = $"{worksheetPrefix}{address.Address}";
-			}
-			catch (ArgumentOutOfRangeException)
-			{
-				updatedAddress = $"{worksheetPrefix}{address.Address}";
-			}
-			return updatedAddress;
-		}
-
-		private string ExtractWorksheetPrefix(string address)
-		{
-			var worksheetPart = address.Split('!')[0];
-			worksheetPart = worksheetPart.Trim('\'');
-			return $"'{worksheetPart}'!";
-		}
-
-		//private static string BuildNewAddress(ExcelNamedRange namedRange, string newAddress)
-		//{
-		//	if (namedRange.FullAddress.Contains("!"))
-		//	{
-		//		var worksheet = namedRange.FullAddress.Split('!')[0];
-		//		worksheet = worksheet.Trim('\'');
-		//		newAddress = ExcelCellBase.GetFullAddress(worksheet, newAddress);
-		//	}
-		//	return newAddress;
-		//}
-
-		private void InsertRows(int rowFrom, int rows, ExcelNamedRange namedRange)
-		{
-			//if (rows < 1)
-			//	return;
-			//if (namedRange.Addresses?.Any() == true)
-			//{
-			//	string worksheetPrefix = namedRange.FullAddress.Contains("!") ? this.ExtractWorksheetPrefix(namedRange.FullAddress) : string.Empty;
-			//	var addressBuilder = new StringBuilder();
-			//	foreach (var address in namedRange.Addresses)
-			//	{
-			//		//try
-			//		//{
-			//		//	if (address._fromRowFixed)
-			//		//	{
-			//		//		if (rowFrom <= address.Start.Row)
-			//		//			addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row + rows, address.Start.Column, address.End.Row + rows, address.End.Column, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)},");
-			//		//		else if (rowFrom <= address.End.Row)
-			//		//			addressBuilder.Append($"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column, address.End.Row + rows, address.End.Column, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)},");
-			//		//		else
-			//		//			addressBuilder.Append($"{worksheetPrefix}{address.Address},");
-			//		//	}
-			//		//	else
-			//		//		addressBuilder.Append($"{worksheetPrefix}{address.Address},");
-			//		//}
-			//		//catch (ArgumentOutOfRangeException)
-			//		//{
-			//		//	addressBuilder.Append($"{worksheetPrefix}{address.Address},");
-			//		//}
-			//		addressBuilder.Append(this.UpdateAddressInsertRows(rowFrom, rows, address, worksheetPrefix));
-			//		addressBuilder.Append(",");
-			//	}
-			//	addressBuilder.Length--;
-			//	namedRange.Address = addressBuilder.ToString();
-			//}
-			//else
-			//{
-			//	try
-			//	{
-			//		if (namedRange._fromRowFixed)
-			//		{
-			//			if (rowFrom <= namedRange.Start.Row)
-			//			{
-			//				var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row + rows, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column, namedRange._fromRowFixed, namedRange._fromColFixed, namedRange._toRowFixed, namedRange._toColFixed);
-			//				namedRange.Address = BuildNewAddress(namedRange, newAddress);
-			//			}
-			//			else if (rowFrom <= namedRange.End.Row)
-			//			{
-			//				var newAddress = ExcelCellBase.GetAddress(namedRange.Start.Row, namedRange.Start.Column, namedRange.End.Row + rows, namedRange.End.Column, namedRange._fromRowFixed, namedRange._fromColFixed, namedRange._toRowFixed, namedRange._toColFixed);
-			//				namedRange.Address = BuildNewAddress(namedRange, newAddress);
-			//			}
-			//		}
-			//	}
-			//	catch (ArgumentOutOfRangeException) { /* This means the named range has an invalid address in it, so just ignore the problem. */ }
-			//}
-			throw new NotImplementedException("This method is probably not needed.");
-		}
-
-		private string UpdateAddressInsertRows(int rowFrom, int rows, ExcelAddress address, string worksheetPrefix = null)
-		{
-			if (rows < 1)
-				return address.Address;
-			string updatedAddress = string.Empty;
-			try
-			{
-				if (address._fromRowFixed)
-				{
-					if (rowFrom <= address.Start.Row)
-						updatedAddress = $"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row + rows, address.Start.Column, address.End.Row + rows, address.End.Column, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)}";
-					else if (rowFrom <= address.End.Row)
-						updatedAddress = $"{worksheetPrefix}{ExcelCellBase.GetAddress(address.Start.Row, address.Start.Column, address.End.Row + rows, address.End.Column, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed)}";
-					else
-						updatedAddress = $"{worksheetPrefix}{address.Address}";
-				}
-				else
-					updatedAddress = $"{worksheetPrefix}{address.Address}";
-			}
-			catch (ArgumentOutOfRangeException)
-			{
-				updatedAddress = $"{worksheetPrefix}{address.Address}";
-			}
-			return updatedAddress;
 		}
 		#endregion
 

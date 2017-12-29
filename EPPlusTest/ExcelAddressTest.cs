@@ -244,6 +244,24 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void ChangeWorksheetErrorsWorksheetReference()
+		{
+			var excelAddress = new ExcelAddressBase("Sheet!C3");
+			Assert.AreEqual("Sheet!C3", excelAddress.Address);
+			excelAddress.ChangeWorksheet("Sheet", null);
+			Assert.AreEqual("#REF!C3", excelAddress.Address);
+		}
+
+		[TestMethod]
+		public void ChangeWorksheetIgnoresSheetNameCase()
+		{
+			var excelAddress = new ExcelAddressBase("'SHEET1'!B2");
+			Assert.AreEqual("'SHEET1'!B2", excelAddress.Address);
+			excelAddress.ChangeWorksheet("Sheet1", "Sheet1 Copy");
+			Assert.AreEqual("'Sheet1 Copy'!B2", excelAddress.Address);
+		}
+
+		[TestMethod]
 		public void ChangeWorksheetAppliesToNestedAddressesMultiSheetList()
 		{
 			Assert.Fail("This test will fail. We suspect that the true error is that " +
@@ -369,6 +387,76 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddRow(4, 3, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void AddRowBeforeFixedFromRowFullColumnUpdateOnlyFixed()
+		{
+			// Update address as a reference in a named range formula.
+			// $C$1:$E$1048576 => insert 3 rows at row 1 => $C$1:$E$1048576 (no change).
+			var excelAddress = new ExcelAddressBase(1, 3, ExcelPackage.MaxRows, 5, true, true, true, true);
+			var newAddress = excelAddress.AddRow(1, 3, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(1, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(ExcelPackage.MaxRows, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void AddRowBeforeFixedFromRowUpdateOnlyFixed()
+		{
+			// Update address as a reference in a named range formula.
+			// $C$3:$E$5 => insert 3 rows at row 2 => $F$3:$H$8.
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
+			var newAddress = excelAddress.AddRow(2, 3, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(6, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(8, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void AddRowBeforeRelativeFromRowUpdateOnlyFixed()
+		{
+			// Update address as a reference in a named range formula.
+			// $C3:$E$5 => insert 3 rows at row 2 => $C3:$E$8.
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, false, true, true, true);
+			var newAddress = excelAddress.AddRow(2, 3, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(8, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void AddRowBeforeFixedToRowUpdateOnlyFixedAddresses()
+		{
+			// Update address as a reference in a named range formula.
+			// $C$3:$E$5 => insert 3 rows at row 4 => $C$3:$E$8.
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
+			var newAddress = excelAddress.AddRow(4, 3, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(8, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void AddRowBeforeRelativeToRowUpdateOnlyFixed()
+		{
+			// Update address as a reference in a named range formula.
+			// $C$3:$E5 => insert 3 rows at row 4 => $C$3:$E5.
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, false, true);
+			var newAddress = excelAddress.AddRow(4, 3, false, true);
 			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
@@ -847,6 +935,18 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void DeleteRowRangeExtendsBeyondFixedRange()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 6, 6, true, true, true, true);
+			var newAddress = excelAddress.DeleteRow(5, 10);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(4, newAddress.End.Row);
+			Assert.AreEqual(6, newAddress.End.Column);
+		}
+
+		[TestMethod]
 		public void DeleteRowPartialAfterFromRowFixedAndSetFixed()
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
@@ -868,6 +968,159 @@ namespace EPPlusTest
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
 			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowBeforeFixedUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
+			var newAddress = excelAddress.DeleteRow(2, 2, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(2, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(3, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowBeforeRelativeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, false, true, false, true);
+			var newAddress = excelAddress.DeleteRow(2, 2, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowBeforeRelativeFromColumnUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, false, true);
+			var newAddress = excelAddress.DeleteRow(2, 2, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(2, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowBeforeRelativeToColumnUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, false, true, true, true);
+			var newAddress = excelAddress.DeleteRow(2, 1, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(4, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowInFixedRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 6, 6, true, true, true, true);
+			var newAddress = excelAddress.DeleteRow(4, 1, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(6, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowInRelativeRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 6, 6, false, true, false, true);
+			var newAddress = excelAddress.DeleteRow(4, 1, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(6, newAddress.End.Row);
+			Assert.AreEqual(6, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowRangeExtendsBeyondFixedRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 6, 6, true, true, true, true);
+			var newAddress = excelAddress.DeleteRow(5, 10, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(4, newAddress.End.Row);
+			Assert.AreEqual(6, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowRangeExtendsBeyondRelativeRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 6, 6, false, true, false, true);
+			var newAddress = excelAddress.DeleteRow(5, 10, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(6, newAddress.End.Row);
+			Assert.AreEqual(6, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowAfterFixedUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
+			var newAddress = excelAddress.DeleteRow(6, 2, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowAfterRelativeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, false, true, false, true);
+			var newAddress = excelAddress.DeleteRow(6, 2, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowEntireRelativeRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, false, true, false, true);
+			var newAddress = excelAddress.DeleteRow(2, 10, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteRowEntireFixedFromRowRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, false, true);
+			Assert.IsNull(excelAddress.DeleteRow(2, 10, false, true));
+		}
+
+		[TestMethod]
+		public void DeleteRowEntireFixedToRowRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, false, true, true, true);
+			Assert.IsNull(excelAddress.DeleteRow(2, 10, false, true));
+		}
+
+		[TestMethod]
+		public void DeleteRowEntireFixedRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
+			Assert.IsNull(excelAddress.DeleteRow(2, 10, false, true));
 		}
 		#endregion
 
@@ -973,6 +1226,76 @@ namespace EPPlusTest
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
 			var newAddress = excelAddress.AddColumn(4, 3, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void AddColumnBeforeFixedFromColumnFullRowUpdateOnlyFixed()
+		{
+			// Update address as a reference in a named range formula.
+			// $A$3:$XFD$5 => insert 3 columns at column 1 => $A$3:$XFD$5 (no change).
+			var excelAddress = new ExcelAddressBase(3, 1, 5, ExcelPackage.MaxColumns, true, true, true, true);
+			var newAddress = excelAddress.AddColumn(1, 3, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(1, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(ExcelPackage.MaxColumns, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void AddColumnBeforeFixedFromColumnUpdateOnlyFixed()
+		{
+			// Update address as a reference in a named range formula.
+			// $C$3:$E$5 => insert 3 columns at column 2 => $F$3:$H$5.
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
+			var newAddress = excelAddress.AddColumn(2, 3, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(6, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(8, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void AddColumnBeforeRelativeFromColumnUpdateOnlyFixed()
+		{
+			// Update address as a reference in a named range formula.
+			// $C3:$E$5 => insert 3 columns at column 2 => $C3:$H$5.
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, false, true, true);
+			var newAddress = excelAddress.AddColumn(2, 3, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(8, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void AddColumnBeforeFixedToColumnUpdateOnlyFixed()
+		{
+			// Update address as a reference in a named range formula.
+			// $C$3:$E$5 => insert 3 columns at column 4 => $C$3:$H$5.
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
+			var newAddress = excelAddress.AddColumn(4, 3, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(8, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void AddColumnBeforeRelativeToColumnUpdateOnlyFixed()
+		{
+			// Update address as a reference in a named range formula.
+			// $C$3:$E5 => insert 3 columns at column 4 => $C$3:$E5.
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, false);
+			var newAddress = excelAddress.AddColumn(4, 3, false, true);
 			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
 			Assert.AreEqual(3, newAddress.Start.Row);
 			Assert.AreEqual(3, newAddress.Start.Column);
@@ -1119,6 +1442,18 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void DeleteColumnRangeExtendsBeyondFixedRange()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 6, 6, true, true, true, true);
+			var newAddress = excelAddress.DeleteColumn(5, 10);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(6, newAddress.End.Row);
+			Assert.AreEqual(4, newAddress.End.Column);
+		}
+
+		[TestMethod]
 		public void DeleteColumnAfterToColumnFixedAndSetFixed()
 		{
 			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
@@ -1184,6 +1519,159 @@ namespace EPPlusTest
 			Assert.AreEqual(3, newAddress.Start.Column);
 			Assert.AreEqual(5, newAddress.End.Row);
 			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnBeforeFixedUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
+			var newAddress = excelAddress.DeleteColumn(2, 2, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(2, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(3, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnBeforeRelativeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, false, true, false);
+			var newAddress = excelAddress.DeleteColumn(2, 2, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnBeforeRelativeFromColumnUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, false);
+			var newAddress = excelAddress.DeleteColumn(2, 2, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(2, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnBeforeRelativeToColumnUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, false, true, true);
+			var newAddress = excelAddress.DeleteColumn(2, 1, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(4, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnInFixedRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 6, 6, true, true, true, true);
+			var newAddress = excelAddress.DeleteColumn(4, 1, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(6, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnInRelativeRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 6, 6, true, false, true, false);
+			var newAddress = excelAddress.DeleteColumn(4, 1, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(6, newAddress.End.Row);
+			Assert.AreEqual(6, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnRangeExtendsBeyondFixedRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 6, 6, true, true, true, true);
+			var newAddress = excelAddress.DeleteColumn(5, 10, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(6, newAddress.End.Row);
+			Assert.AreEqual(4, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnRangeExtendsBeyondRelativeRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 6, 6, true, false, true, false);
+			var newAddress = excelAddress.DeleteColumn(5, 10, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(6, newAddress.End.Row);
+			Assert.AreEqual(6, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnAfterFixedUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
+			var newAddress = excelAddress.DeleteColumn(6, 2, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnAfterRelativeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, false, true, false);
+			var newAddress = excelAddress.DeleteColumn(6, 2, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnEntireRelativeRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, false, true, false);
+			var newAddress = excelAddress.DeleteColumn(2, 10, false, true);
+			Assert.AreEqual(excelAddress.WorkSheet, newAddress.WorkSheet);
+			Assert.AreEqual(3, newAddress.Start.Row);
+			Assert.AreEqual(3, newAddress.Start.Column);
+			Assert.AreEqual(5, newAddress.End.Row);
+			Assert.AreEqual(5, newAddress.End.Column);
+		}
+
+		[TestMethod]
+		public void DeleteColumnEntireFixedFromRowRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, false);
+			Assert.IsNull(excelAddress.DeleteColumn(2, 10, false, true));
+		}
+
+		[TestMethod]
+		public void DeleteColumnEntireFixedToRowRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, false, true, true);
+			Assert.IsNull(excelAddress.DeleteColumn(2, 10, false, true));
+		}
+
+		[TestMethod]
+		public void DeleteColumnEntireFixedRangeUpdateOnlyFixed()
+		{
+			var excelAddress = new ExcelAddressBase(3, 3, 5, 5, true, true, true, true);
+			Assert.IsNull(excelAddress.DeleteColumn(2, 10, false, true));
 		}
 		#endregion
 

@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using OfficeOpenXml.Extensions;
 
 namespace OfficeOpenXml
 {
@@ -172,10 +173,10 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				if (Addresses == null)
+				if (this.Addresses == null)
 					return GetFullAddress(_ws, _address);
 				string fullAddress = string.Empty;
-				foreach (var a in Addresses)
+				foreach (var a in this.Addresses)
 				{
 					fullAddress += GetFullAddress(_ws, a.Address) + ",";
 				}
@@ -321,24 +322,28 @@ namespace OfficeOpenXml
 
 		#region Public methods
 		/// <summary>
-		/// Changes the worksheet this range is associated with if the original sheet matches <paramref name="wsName"/>.
+		/// Changes the worksheet this range is associated with if the original sheet matches <paramref name="worksheetName"/>.
+		/// Updates the worksheet reference to #REF if the specified <paramref name="newWorksheetName"/> is null.
 		/// </summary>
-		/// <param name="wsName">The original worksheet name.</param>
-		/// <param name="newWs">The new worksheet name.</param>
-		public void ChangeWorksheet(string wsName, string newWs)
+		/// <param name="worksheetName">The original worksheet name.</param>
+		/// <param name="newWorksheetName">The new worksheet name. Updates matching references to #REF if null.</param>
+		public void ChangeWorksheet(string worksheetName, string newWorksheetName)
 		{
-			if (_ws == wsName) _ws = newWs;
-			if (Addresses == null)
-				_address = this.GetAddress();
+			bool isWorksheetChanged = _ws.IsEquivalentTo(worksheetName);
+			if (isWorksheetChanged)
+				_ws = newWorksheetName;
+			bool sheetReferenceError = newWorksheetName == null;
+			if (this.Addresses == null)
+				_address = this.GetAddress(sheetReferenceError && isWorksheetChanged);
 			else
 			{
 				_address = string.Empty;
-				foreach (var a in Addresses)
+				foreach (var a in this.Addresses)
 				{
-					if (a._ws == wsName)
+					if (a._ws.IsEquivalentTo(worksheetName))
 					{
-						a._ws = newWs;
-						_address += a.GetAddress() + ",";
+						a._ws = newWorksheetName;
+						_address += a.GetAddress(sheetReferenceError) + ",";
 					}
 					else
 						_address += a._address + ",";
@@ -354,8 +359,9 @@ namespace OfficeOpenXml
 		/// <param name="row">The row to shift after.</param>
 		/// <param name="rows">The number of rows to shift.</param>
 		/// <param name="setFixed">Indicates whether or not treat the reference as fixed.</param>
+		/// <param name="updateOnlyFixed">Indicates whether or not to only update fixed (absolute) references. Used for named range formula references.</param>
 		/// <returns>A modified <see cref="ExcelAddressBase"/>.</returns>
-		public ExcelAddressBase AddRow(int row, int rows, bool setFixed = false)
+		public ExcelAddressBase AddRow(int row, int rows, bool setFixed = false, bool updateOnlyFixed = false)
 		{
 			// We're forced to assume full column here and so no change should be applied because we may exceed valid dimensions.
 			// And because of how this function is used we should return a new instance of ExcelAddressBase.
@@ -363,10 +369,22 @@ namespace OfficeOpenXml
 				return new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
 			if (row > _toRow)
 				return this;
-			else if (row <= _fromRow)
-				return new ExcelAddressBase((setFixed && _fromRowFixed ? _fromRow : Math.Min(_fromRow + rows, ExcelPackage.MaxRows)), _fromCol, (setFixed && _toRowFixed ? _toRow : Math.Min(_toRow + rows, ExcelPackage.MaxRows)), _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
+
+			int updatedToRow = _toRow;
+			int updatedFromRow = _fromRow;
+			bool isRowBeforeFromRow = row <= _fromRow;
+			if (updateOnlyFixed)
+			{
+				updatedFromRow = isRowBeforeFromRow && _fromRowFixed ? Math.Min(_fromRow + rows, ExcelPackage.MaxRows) : _fromRow;
+				updatedToRow = _toRowFixed ? Math.Min(_toRow + rows, ExcelPackage.MaxRows) : _toRow;
+			}
 			else
-				return new ExcelAddressBase(_fromRow, _fromCol, (setFixed && _toRowFixed ? _toRow : Math.Min(_toRow + rows, ExcelPackage.MaxRows)), _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
+			{
+				if (isRowBeforeFromRow && !(setFixed && _fromRowFixed))
+					updatedFromRow = Math.Min(_fromRow + rows, ExcelPackage.MaxRows);
+				updatedToRow = setFixed && _toRowFixed ? _toRow : Math.Min(_toRow + rows, ExcelPackage.MaxRows);
+			}
+			return new ExcelAddressBase(updatedFromRow, _fromCol, updatedToRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
 		}
 
 		/// <summary>
@@ -375,21 +393,62 @@ namespace OfficeOpenXml
 		/// <param name="row">The row to shift after.</param>
 		/// <param name="rows">The number of rows to shift.</param>
 		/// <param name="setFixed">Indicates whether or not treat the reference as fixed.</param>
+		/// <param name="updateOnlyFixed">Indicates whether or not to only update fixed (absolute) references. Used for named range formula references.</param>
 		/// <returns>A modified <see cref="ExcelAddressBase"/>.</returns>
-		public ExcelAddressBase DeleteRow(int row, int rows, bool setFixed = false)
+		public ExcelAddressBase DeleteRow(int row, int rows, bool setFixed = false, bool updateOnlyFixed = false)
 		{
 			if (row > _toRow) //After
 				return this;
-			else if (row + rows <= _fromRow) //Before
-				return new ExcelAddressBase((setFixed && _fromRowFixed ? _fromRow : _fromRow - rows), _fromCol, (setFixed && _toRowFixed ? _toRow : _toRow - rows), _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
-			else if (row <= _fromRow && row + rows > _toRow) //Inside
-				return null;
-			else  //Partly
+
+			int updatedFromRow = _fromRow;
+			int updatedToRow = _toRow;
+			if (updateOnlyFixed)
 			{
-				if (row <= _fromRow)
-					return new ExcelAddressBase(row, _fromCol, (setFixed && _toRowFixed ? _toRow : _toRow - rows), _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
-				else
-					return new ExcelAddressBase(_fromRow, _fromCol, (setFixed && _toRowFixed ? _toRow : _toRow - rows < row ? row - 1 : _toRow - rows), _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
+				if (row + rows <= _fromRow) //Before
+				{
+					updatedFromRow = _fromRowFixed ? _fromRow - rows : _fromRow;
+					updatedToRow = _toRowFixed ? _toRow - rows : _toRow;
+				}
+				else if (row <= _fromRow && row + rows > _toRow) //Entire range
+				{
+					return _fromRowFixed || _toRowFixed ? null : this;
+				}
+				else  //Partly
+				{
+					if (row <= _fromRow)
+					{
+						updatedFromRow = _fromRowFixed ? row : _fromRow;
+						updatedToRow = _toRowFixed ? _toRow - rows : _toRow;
+					}
+					else
+					{
+						updatedToRow = _toRowFixed ? _toRow - rows < row ? row - 1 : _toRow - rows : _toRow;
+					}
+				}
+				return new ExcelAddressBase(updatedFromRow, _fromCol, updatedToRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
+			}
+			else
+			{
+				if (row + rows <= _fromRow) //Before
+				{
+					updatedFromRow = setFixed && _fromRowFixed ? _fromRow : _fromRow - rows;
+					updatedToRow = setFixed && _toRowFixed ? _toRow : _toRow - rows;
+				}
+				else if (row <= _fromRow && row + rows > _toRow) //Entire range
+					return null;
+				else  //Partly
+				{
+					if (row <= _fromRow)
+					{
+						updatedFromRow = row;
+						updatedToRow = setFixed && _toRowFixed ? _toRow : _toRow - rows;
+					}
+					else
+					{
+						updatedToRow = (setFixed && _toRowFixed ? _toRow : _toRow - rows < row ? row - 1 : _toRow - rows);
+					}
+				}
+				return new ExcelAddressBase(updatedFromRow, _fromCol, updatedToRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
 			}
 		}
 
@@ -399,8 +458,9 @@ namespace OfficeOpenXml
 		/// <param name="col">The column to shift after.</param>
 		/// <param name="cols">The number of columns to shift.</param>
 		/// <param name="setFixed">Indicates whether or not treat the reference as fixed.</param>
+		/// <param name="updateOnlyFixed">Indicates whether or not to only update fixed (absolute) references. Used for named range formula references.</param>
 		/// <returns>A modified <see cref="ExcelAddressBase"/>.</returns>
-		public ExcelAddressBase AddColumn(int col, int cols, bool setFixed = false)
+		public ExcelAddressBase AddColumn(int col, int cols, bool setFixed = false, bool updateOnlyFixed = false)
 		{
 			// We're forced to assume full row here and so no change should be applied because we may exceed valid dimensions.
 			// And because of how this function is used we should return a new instance of ExcelAddressBase.
@@ -408,10 +468,22 @@ namespace OfficeOpenXml
 				return new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
 			if (col > _toCol)
 				return this;
-			else if (col <= _fromCol)
-				return new ExcelAddressBase(_fromRow, (setFixed && _fromColFixed ? _fromCol : Math.Min(_fromCol + cols, ExcelPackage.MaxColumns)), _toRow, (setFixed && _toColFixed ? _toCol : Math.Min(_toCol + cols, ExcelPackage.MaxColumns)), _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
+
+			int updatedFromColumn = _fromCol;
+			int updatedToColumn = _toCol;
+			bool isBeforeFromColumn = col <= _fromCol;
+			if (updateOnlyFixed)
+			{
+				updatedFromColumn = isBeforeFromColumn && _fromColFixed ? Math.Min(_fromCol + cols, ExcelPackage.MaxColumns) : _fromCol;
+				updatedToColumn = _toColFixed ? Math.Min(_toCol + cols, ExcelPackage.MaxColumns) : _toCol;
+			}
 			else
-				return new ExcelAddressBase(_fromRow, _fromCol, _toRow, (setFixed && _toColFixed ? _toCol : Math.Min(_toCol + cols, ExcelPackage.MaxColumns)), _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
+			{
+				if (isBeforeFromColumn && !(setFixed && _fromColFixed))
+					updatedFromColumn = Math.Min(_fromCol + cols, ExcelPackage.MaxColumns);
+				updatedToColumn = setFixed && _toColFixed ? _toCol : Math.Min(_toCol + cols, ExcelPackage.MaxColumns);
+			}
+			return new ExcelAddressBase(_fromRow, updatedFromColumn, _toRow, updatedToColumn, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
 		}
 
 		/// <summary>
@@ -420,21 +492,66 @@ namespace OfficeOpenXml
 		/// <param name="col">The column to shift after.</param>
 		/// <param name="cols">The number of columns to shift.</param>
 		/// <param name="setFixed">Indicates whether or not treat the reference as fixed.</param>
+		/// <param name="updateOnlyFixed">Indicates whether or not to only update fixed (absolute) references. Used for named range formula references.</param>
 		/// <returns>A modified <see cref="ExcelAddressBase"/>.</returns>
-		public ExcelAddressBase DeleteColumn(int col, int cols, bool setFixed = false)
+		public ExcelAddressBase DeleteColumn(int col, int cols, bool setFixed = false, bool updateOnlyFixed = false)
 		{
-			if (col > _toCol) //After
+			if (col > _toCol) // After
 				return this;
-			else if (col + cols <= _fromCol) //Before
-				return new ExcelAddressBase(_fromRow, (setFixed && _fromColFixed ? _fromCol : _fromCol - cols), _toRow, (setFixed && _toColFixed ? _toCol : _toCol - cols), _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
-			else if (col <= _fromCol && col + cols > _toCol) //Inside
-				return null;
-			else  //Partly
+
+			int updatedFromColumn = _fromCol;
+			int updatedToColumn = _toCol;
+			if (updateOnlyFixed)
 			{
-				if (col <= _fromCol)
-					return new ExcelAddressBase(_fromRow, col, _toRow, (setFixed && _toColFixed ? _toCol : _toCol - cols), _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
-				else
-					return new ExcelAddressBase(_fromRow, _fromCol, _toRow, (setFixed && _toColFixed ? _toCol : _toCol - cols < col ? col - 1 : _toCol - cols), _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
+				if (col + cols <= _fromCol) // Before
+				{
+					updatedFromColumn = _fromColFixed ? _fromCol - cols : _fromCol;
+					updatedToColumn = _toColFixed ? _toCol - cols : _toCol;
+				}
+				else if (col <= _fromCol && col + cols > _toCol) // Entire range
+				{
+					return _fromColFixed || _toColFixed ? null : this;
+				}
+				else  // Partly
+				{
+					if (col <= _fromCol)
+					{
+						updatedFromColumn = _fromColFixed ? col : _fromCol;
+						updatedToColumn = _toColFixed ? _toCol - cols : _toCol;
+					}
+					else
+					{
+						// TODO: Clean this up >:(
+						int temp = _toCol - cols < col ? col - 1 : _toCol - cols;
+						updatedToColumn = _toColFixed ? temp : _toCol;
+					}
+				}
+				return new ExcelAddressBase(_fromRow, updatedFromColumn, _toRow, updatedToColumn, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
+			}
+			else
+			{
+				if (col + cols <= _fromCol) // Before
+				{
+					updatedFromColumn = setFixed && _fromColFixed ? _fromCol : _fromCol - cols;
+					updatedToColumn = setFixed && _toColFixed ? _toCol : _toCol - cols;
+				}
+				else if (col <= _fromCol && col + cols > _toCol) // Entire range
+				{
+					return null;
+				}
+				else  // Partly
+				{
+					if (col <= _fromCol)
+					{
+						updatedFromColumn = col;
+						updatedToColumn = setFixed && _toColFixed ? _toCol : _toCol - cols;
+					}
+					else
+					{
+						updatedToColumn = setFixed && _toColFixed ? _toCol : _toCol - cols < col ? col - 1 : _toCol - cols;
+					}
+				}
+				return new ExcelAddressBase(_fromRow, updatedFromColumn, _toRow, updatedToColumn, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
 			}
 		}
 
@@ -681,22 +798,16 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private string GetAddress()
+		private string GetAddress(bool sheetReferenceError = false)
 		{
-			var adr = "";
+			string adr = string.Empty;
 			if (!string.IsNullOrEmpty(_wb))
-			{
 				adr = "[" + _wb + "]";
-			}
-
-			if (!string.IsNullOrEmpty(_ws))
-			{
+			if (sheetReferenceError)
+				adr += "#REF!";
+			else if (!string.IsNullOrEmpty(_ws))
 				adr += string.Format("'{0}'!", _ws);
-			}
-			if (IsName)
-				adr += GetAddress(_fromRow, _fromCol, _toRow, _toCol);
-			else
-				adr += GetAddress(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
+			adr += ExcelCellBase.GetAddress(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
 			return adr;
 		}
 

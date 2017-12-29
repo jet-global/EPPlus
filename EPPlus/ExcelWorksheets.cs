@@ -40,6 +40,7 @@ using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Drawing.Slicers;
 using OfficeOpenXml.Drawing.Sparkline;
 using OfficeOpenXml.Drawing.Vml;
+using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Utils;
 using OfficeOpenXml.VBA;
 
@@ -296,13 +297,22 @@ namespace OfficeOpenXml
 
 			ExcelWorksheet worksheet = this.Worksheets[Index];
 			if (worksheet.Drawings.Count > 0)
-			{
 				worksheet.Drawings.ClearDrawings();
+			if (!(worksheet is ExcelChartsheet) && worksheet.Comments.Count > 0)
+				worksheet.Comments.Clear();
+
+			// Update all named ranges referencing this sheet to #REF. 
+			foreach (var namedRange in this.Package.Workbook.Names)
+			{
+				namedRange.NameFormula = this.Package.FormulaManager.UpdateFormulaDeletedSheetReferences(namedRange.NameFormula, worksheet.Name);
 			}
 
-			if (!(worksheet is ExcelChartsheet) && worksheet.Comments.Count > 0)
+			foreach (var sheet in this.Worksheets.Where(w => !w.Value.Name.IsEquivalentTo(worksheet.Name)))
 			{
-				worksheet.Comments.Clear();
+				foreach (var namedRange in sheet.Value.Names)
+				{
+					namedRange.NameFormula = this.Package.FormulaManager.UpdateFormulaDeletedSheetReferences(namedRange.NameFormula, worksheet.Name);
+				}
 			}
 
 			//Delete any parts still with relations to the Worksheet.
@@ -703,7 +713,7 @@ namespace OfficeOpenXml
 		{
 			foreach (var namedRange in originalWorksheet.Names)
 			{
-				string updatedFormula = namedRange.UpdateFormulaSheetReferences(originalWorksheet.Name, addedWorksheet.Name);
+				string updatedFormula = this.Package.FormulaManager.UpdateFormulaSheetReferences(namedRange.NameFormula, originalWorksheet.Name, addedWorksheet.Name);
 				addedWorksheet.Names.Add(namedRange.Name, updatedFormula, namedRange.IsNameHidden, namedRange.NameComment);
 			}
 		}

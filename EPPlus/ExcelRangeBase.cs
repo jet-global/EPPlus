@@ -445,6 +445,8 @@ namespace OfficeOpenXml
 			{
 				if (this.IsName)
 				{
+					// TODO: Remove IsName usages.
+					throw new NotImplementedException("IsName should no longer be used.");
 					if (this.myWorksheet == null)
 						return this.myWorkbook.Names[this._address].NameValue;
 					else
@@ -462,6 +464,8 @@ namespace OfficeOpenXml
 			{
 				if (this.IsName)
 				{
+					// TODO: Remove IsName usages.
+					throw new NotImplementedException("IsName should no longer be used.");
 					if (this.myWorksheet == null)
 						this.myWorkbook.Names[this._address].NameValue = value;
 					else
@@ -492,6 +496,8 @@ namespace OfficeOpenXml
 			{
 				if (this.IsName)
 				{
+					// TODO: Remove IsName usages.
+					throw new NotImplementedException("IsName should no longer be used.");
 					if (this.myWorksheet == null)
 						return this.myWorkbook.Names[this._address].NameFormula;
 					else
@@ -1914,6 +1920,8 @@ namespace OfficeOpenXml
 				formula = formula.Substring(1);
 			if (this.IsName)
 			{
+				// TODO: Remove IsName usages.
+				throw new NotImplementedException("IsName should no longer be used.");
 				if (this.myWorksheet == null)
 					this.myWorkbook.Names[this._address].NameFormula = formula;
 				else
