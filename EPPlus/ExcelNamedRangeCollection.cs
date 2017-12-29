@@ -40,39 +40,73 @@ namespace OfficeOpenXml
 	/// </summary>
 	public class ExcelNamedRangeCollection : IEnumerable<ExcelNamedRange>
 	{
-		#region Class Variables
-		internal ExcelWorksheet _ws;
-		internal ExcelWorkbook _wb;
-		List<ExcelNamedRange> _list = new List<ExcelNamedRange>();
-		Dictionary<string, int> _dic = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
+		#region Properties
+		/// <summary>
+		/// The current number of named ranges in the collection.
+		/// </summary>
+		public int Count
+		{
+			get
+			{
+				return this.NamedRanges.Count;
+			}
+		}
+
+		/// <summary>
+		/// Gets the <see cref="ExcelNamedRange"/> associated with the specified <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">The name of a named range to retrieve.</param>
+		/// <returns>A reference to the named range found.</returns>
+		/// <exception cref="KeyNotFoundException">Thrown if a named range with the specified <paramref name="name"/> was not in the collection.</exception>
+		public ExcelNamedRange this[string name]
+		{
+			get
+			{
+				return this.NamedRanges[name];
+			}
+		}
+
+		private ExcelWorkbook Workbook { get; }
+		private ExcelWorksheet Worksheet { get; }
+		private Dictionary<string, ExcelNamedRange> NamedRanges { get; } = new Dictionary<string, ExcelNamedRange>(StringComparer.InvariantCultureIgnoreCase);
 		#endregion
 
 		#region Constructors
-		internal ExcelNamedRangeCollection(ExcelWorkbook wb)
+		/// <summary>
+		/// Instantiates a new <see cref="ExcelNamedRangeCollection"/> for the specified <paramref name="workbook"/>.
+		/// </summary>
+		/// <param name="workbook">The <see cref="ExcelWorkbook"/> that this named range collection is scoped to.</param>
+		internal ExcelNamedRangeCollection(ExcelWorkbook workbook)
 		{
-			_wb = wb;
-			_ws = null;
+			this.Workbook = workbook;
+			this.Worksheet = null;
 		}
 
-		internal ExcelNamedRangeCollection(ExcelWorkbook wb, ExcelWorksheet ws)
+		/// <summary>
+		/// Instantiates a new <see cref="ExcelNamedRangeCollection"/> for the specified <paramref name="workbook"/>
+		/// and <paramref name="worksheet"/>.
+		/// </summary>
+		/// <param name="workbook">The <see cref="ExcelWorkbook"/> that this named range collection belongs to.</param>
+		/// <param name="worksheet">The <see cref="ExcelWorksheet"/> that this named range collection is scoped to.</param>
+		internal ExcelNamedRangeCollection(ExcelWorkbook workbook, ExcelWorksheet worksheet)
 		{
-			_wb = wb;
-			_ws = ws;
+			this.Workbook = workbook;
+			this.Worksheet = worksheet;
 		}
 		#endregion
 
 		#region Public Methods
 		/// <summary>
-		/// Add a new named range to the collection.
+		/// Adds a new named range to the collection.
 		/// </summary>
-		/// <param name="Name">The name</param>
-		/// <param name="range">The range</param>
-		/// <returns></returns>
-		public ExcelNamedRange Add(string Name, ExcelRangeBase range)
+		/// <param name="name">The name of the named range to add.</param>
+		/// <param name="range">The range that the named range references.</param>
+		/// <returns>The named range that was added to the collection.</returns>
+		public ExcelNamedRange Add(string name, ExcelRangeBase range)
 		{
-			ExcelNamedRange item = new ExcelNamedRange(Name, this._wb, _ws, range.FullAddress, _dic.Count);
-			AddName(Name, item);
-			return item;
+			ExcelNamedRange namedRange = new ExcelNamedRange(name, this.Workbook, this.Worksheet, range.FullAddress, this.NamedRanges.Count);
+			this.NamedRanges.Add(name, namedRange);
+			return namedRange;
 		}
 
 		/// <summary>
@@ -85,108 +119,38 @@ namespace OfficeOpenXml
 		/// <returns>The newly-added named named range.</returns>
 		public ExcelNamedRange Add(string name, string formula, bool isHidden = false, string comments = null)
 		{
-			var namedRange = new ExcelNamedRange(name, this._wb, this._ws, formula, this._dic.Count)
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentNullException(nameof(name));
+			if (string.IsNullOrEmpty(formula))
+				throw new ArgumentNullException(nameof(formula));
+			var namedRange = new ExcelNamedRange(name, this.Workbook, this.Worksheet, formula, this.NamedRanges.Count)
 			{
 				IsNameHidden = isHidden,
 				NameComment = comments
 			};
-			this.AddName(name, namedRange);
+			this.NamedRanges.Add(name, namedRange);
 			return namedRange;
 		}
 
 		/// <summary>
-		/// Remove a defined name from the collection
+		/// Removes an <see cref="ExcelNamedRange"/> with the specified <paramref name="name"/> from the collection 
+		/// if it exists.
 		/// </summary>
-		/// <param name="Name">The name</param>
-		public void Remove(string Name)
+		/// <param name="name">The name of the <see cref="ExcelNamedRange"/> to remove.</param>
+		/// <returns>True if a named range with the specified <paramref name="name"/> exists, false otherwise.</returns>
+		public bool Remove(string name)
 		{
-			if (_dic.ContainsKey(Name))
-			{
-				var ix = _dic[Name];
-
-				for (int i = ix + 1; i < _list.Count; i++)
-				{
-					_dic.Remove(_list[i].Name);
-					_list[i].Index--;
-					_dic.Add(_list[i].Name, _list[i].Index);
-				}
-				_dic.Remove(Name);
-				_list.RemoveAt(ix);
-			}
-		}
-		/// <summary>
-		/// Checks collection for the presence of a key
-		/// </summary>
-		/// <param name="key">key to search for</param>
-		/// <returns>true if the key is in the collection</returns>
-		public bool ContainsKey(string key)
-		{
-			return _dic.ContainsKey(key);
-		}
-		/// <summary>
-		/// The current number of items in the collection
-		/// </summary>
-		public int Count
-		{
-			get
-			{
-				return _dic.Count;
-			}
-		}
-		/// <summary>
-		/// Name indexer
-		/// </summary>
-		/// <param name="Name">The name (key) for a Named range</param>
-		/// <returns>a reference to the range</returns>
-		/// <remarks>
-		/// Throws a KeyNotFoundException if the key is not in the collection.
-		/// </remarks>
-		public ExcelNamedRange this[string Name]
-		{
-			get
-			{
-				return _list[_dic[Name]];
-			}
+			return this.NamedRanges.Remove(name);
 		}
 
 		/// <summary>
-		/// Retrieves the <see cref="ExcelNamedRange"/> at the specified <paramref name="Index"/>.
+		/// Checks collection for the presence of a named range with the specified <paramref name="name"/>.
 		/// </summary>
-		/// <param name="Index">The index at which to retrieve the <see cref="ExcelNamedRange"/>.</param>
-		/// <returns>The <see cref="ExcelNamedRange"/> at the specified <paramref name="Index"/>.</returns>
-		public ExcelNamedRange this[int Index]
+		/// <param name="name">The name of the named range.</param>
+		/// <returns>True if the named range is in the collection.</returns>
+		public bool ContainsKey(string name)
 		{
-			get
-			{
-				return _list[Index];
-			}
-		}
-
-		/// <summary>
-		/// Add a defined name referencing value
-		/// </summary>
-		/// <param name="Name"></param>
-		/// <param name="value"></param>
-		/// <returns></returns>
-		public ExcelNamedRange AddValue(string Name, object value)
-		{
-			var item = new ExcelNamedRange(Name, _wb, _ws, _dic.Count);
-			item.NameValue = value;
-			AddName(Name, item);
-			return item;
-		}
-
-		/// <summary>
-		/// Add a defined name referencing a formula
-		/// </summary>
-		/// <param name="Name"></param>
-		/// <param name="formula"></param>
-		/// <returns></returns>
-		public ExcelNamedRange AddFormula(string Name, string formula)
-		{
-			var item = new ExcelNamedRange(Name, _wb, _ws, formula, _dic.Count);
-			AddName(Name, item);
-			return item;
+			return this.NamedRanges.ContainsKey(name);
 		}
 		#endregion
 
@@ -224,43 +188,29 @@ namespace OfficeOpenXml
 				namedRange.UpdateFormula(rowFrom, colFrom, -rows, -cols, worksheet);
 			}
 		}
-
-		internal void Clear()
-		{
-			while (this.Count > 0)
-			{
-				Remove(_list[0].Name);
-			}
-		}
 		#endregion
 
-		#region Private Methods
-		private void AddName(string Name, ExcelNamedRange item)
-		{
-			_dic.Add(Name, _list.Count);
-			_list.Add(item);
-		}
-		#endregion
-
-		#region "IEnumerable"
+		#region IEnumerable Overrides
 		#region IEnumerable<ExcelNamedRange> Members
 		/// <summary>
-		/// Implement interface method IEnumerator&lt;ExcelNamedRange&gt; GetEnumerator()
+		/// Implement interface method IEnumerator&lt;ExcelNamedRange&gt; GetEnumerator().
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>An enumerator of <see cref="ExcelNamedRange"/>s for the current collection.</returns>
 		public IEnumerator<ExcelNamedRange> GetEnumerator()
 		{
-			return _list.GetEnumerator();
+			return this.NamedRanges.Values.GetEnumerator();
 		}
 		#endregion
+
 		#region IEnumerable Members
+		// TODO: Is this needed?
 		/// <summary>
-		/// Implement interface method IEnumeratable GetEnumerator()
+		/// Implement interface method IEnumeratable GetEnumerator().
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>An enumerator for the current collection.</returns>
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return _list.GetEnumerator();
+			return this.NamedRanges.Values.GetEnumerator();
 		}
 		#endregion
 		#endregion

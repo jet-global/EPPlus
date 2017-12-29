@@ -164,10 +164,8 @@ namespace EPPlusTest
 				var sheet = package.Workbook.Worksheets.Add("NEW");
 				var range = sheet.Cells[2, 1, 3, 3];
 				var namedRange = sheet.Names.Add("NewNamedRange", range);
-
 				sheet.InsertRow(4, 1);
-
-				Assert.AreEqual("A2:C3", namedRange.NameFormula);
+				Assert.AreEqual("'NEW'!A2:C3", namedRange.NameFormula);
 			}
 		}
 
@@ -208,10 +206,8 @@ namespace EPPlusTest
 				var sheet = package.Workbook.Worksheets.Add("NEW");
 				var range = sheet.Cells[2, 2, 3, 4];
 				var namedRange = sheet.Names.Add("NewNamedRange", range);
-
 				sheet.InsertColumn(5, 1);
-
-				Assert.AreEqual("B2:D3", namedRange.NameFormula);
+				Assert.AreEqual("'NEW'!B2:D3", namedRange.NameFormula);
 			}
 		}
 

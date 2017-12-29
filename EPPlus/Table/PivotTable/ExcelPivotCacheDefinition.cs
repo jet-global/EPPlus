@@ -192,32 +192,36 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				if (_sourceRange == null)
 				{
-					if (CacheSource == eSourceType.Worksheet)
+					if (this.CacheSource == eSourceType.Worksheet)
 					{
-						var ws = PivotTable.WorkSheet.Workbook.Worksheets[GetXmlNodeString(_sourceWorksheetPath)];
+						var ws = this.PivotTable.WorkSheet.Workbook.Worksheets[GetXmlNodeString(_sourceWorksheetPath)];
 						if (ws == null)
 						{
 							var name = GetXmlNodeString(_sourceNamePath);
-							foreach (var n in PivotTable.WorkSheet.Workbook.Names)
+							foreach (var namedRange in this.PivotTable.WorkSheet.Workbook.Names)
 							{
-								if (name.Equals(n.Name, StringComparison.InvariantCultureIgnoreCase))
+								if (name.Equals(namedRange.Name, StringComparison.InvariantCultureIgnoreCase))
 								{
-									_sourceRange = new ExcelRange(n.LocalSheet, n.NameFormula);
+									ExcelRangeBase.SplitAddress(namedRange.NameFormula, out string workbook, out string worksheetName, out string address);
+									var worksheet = this.PivotTable.WorkSheet.Workbook.Worksheets[worksheetName];
+									if (worksheet == null)
+										throw new InvalidOperationException($"The named range reference '{namedRange.NameFormula}' must be a fully qualified excel address.");
+									_sourceRange = new ExcelRange(worksheet, namedRange.NameFormula);
 									return _sourceRange;
 								}
 							}
-							foreach (var w in PivotTable.WorkSheet.Workbook.Worksheets)
+							foreach (var worksheet in this.PivotTable.WorkSheet.Workbook.Worksheets)
 							{
-								if (w.Tables.TableNames.ContainsKey(name))
+								if (worksheet.Tables.TableNames.ContainsKey(name))
 								{
-									_sourceRange = new ExcelRangeBase(w.Workbook, w, name, true);
+									_sourceRange = new ExcelRangeBase(worksheet.Workbook, worksheet, name, true);
 									break;
 								}
-								foreach (var n in w.Names)
+								foreach (var namedRange in worksheet.Names)
 								{
-									if (name.Equals(n.Name, StringComparison.InvariantCultureIgnoreCase))
+									if (name.Equals(namedRange.Name, StringComparison.InvariantCultureIgnoreCase))
 									{
-										_sourceRange = new ExcelRange(n.LocalSheet, n.NameFormula);
+										_sourceRange = new ExcelRange(namedRange.LocalSheet, namedRange.NameFormula);
 										break;
 									}
 								}
@@ -237,12 +241,12 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			set
 			{
-				if (PivotTable.WorkSheet.Workbook != value.Worksheet.Workbook)
+				if (this.PivotTable.WorkSheet.Workbook != value.Worksheet.Workbook)
 				{
 					throw (new ArgumentException("Range must be in the same package as the pivottable"));
 				}
 
-				var sr = SourceRange;
+				var sr = this.SourceRange;
 				if (value.End.Column - value.Start.Column != sr.End.Column - sr.Start.Column)
 				{
 					throw (new ArgumentException("Can not change the number of columns(fields) in the SourceRange"));

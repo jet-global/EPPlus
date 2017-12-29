@@ -105,6 +105,10 @@ namespace OfficeOpenXml
 			{
 				return _address;
 			}
+			set
+			{
+				_address = value;
+			}
 		}
 
 		/// <summary>
@@ -174,7 +178,7 @@ namespace OfficeOpenXml
 			get
 			{
 				if (this.Addresses == null)
-					return GetFullAddress(_ws, _address);
+					return GetFullAddress(_ws, this.Address);
 				string fullAddress = string.Empty;
 				foreach (var a in this.Addresses)
 				{
@@ -1399,7 +1403,7 @@ namespace OfficeOpenXml
 		/// The address for the range
 		/// </summary>
 		/// <remarks>Examples of addresses are "A1" "B1:C2" "A:A" "1:1" "A1:E2,G3:G5" </remarks>
-		public new string Address
+		public override string Address
 		{
 			get
 			{

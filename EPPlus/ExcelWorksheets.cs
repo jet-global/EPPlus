@@ -1127,7 +1127,7 @@ namespace OfficeOpenXml
 						var slicer = newWorksheet.Slicers.Slicers.First(excelSlicer => excelSlicer.Name == draw.Name);
 						slicer.Name += $" {newSlicerNumber}";
 						slicer.SlicerCache.Name += newSlicerNumber.ToString();
-						this.Package.Workbook.Names.AddFormula(slicer.SlicerCache.Name, "#N/A");
+						this.Package.Workbook.Names.Add(slicer.SlicerCache.Name, "#N/A");
 
 						newSlicerDrawing.Slicer = slicer;
 						newSlicerDrawing.Name = newSlicerDrawing.Slicer.Name;

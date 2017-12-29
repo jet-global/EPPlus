@@ -50,17 +50,7 @@ namespace OfficeOpenXml.FormulaParsing
 			foreach (var ws in wb.Worksheets)
 			{
 				if (!(ws is ExcelChartsheet))
-				{
 					GetChain(depChain, wb.FormulaParser.Lexer, ws.Cells, options);
-					GetWorksheetNames(ws, depChain, options);
-				}
-			}
-			foreach (var name in wb.Names)
-			{
-				if (name.NameValue == null)
-				{
-					GetChain(depChain, wb.FormulaParser.Lexer, name, options);
-				}
 			}
 			return depChain;
 		}
@@ -69,11 +59,7 @@ namespace OfficeOpenXml.FormulaParsing
 		{
 			ws.CheckSheetType();
 			var depChain = new DependencyChain();
-
 			GetChain(depChain, ws.Workbook.FormulaParser.Lexer, ws.Cells, options);
-
-			GetWorksheetNames(ws, depChain, options);
-
 			return depChain;
 		}
 
@@ -99,17 +85,6 @@ namespace OfficeOpenXml.FormulaParsing
 		#endregion
 
 		#region Private Static Methods
-		private static void GetWorksheetNames(ExcelWorksheet ws, DependencyChain depChain, ExcelCalculationOption options)
-		{
-			foreach (var name in ws.Names)
-			{
-				if (!string.IsNullOrEmpty(name.NameFormula))
-				{
-					GetChain(depChain, ws.Workbook.FormulaParser.Lexer, name, options);
-				}
-			}
-		}
-
 		private static void GetChain(DependencyChain depChain, ILexer lexer, ExcelNamedRange name, ExcelCalculationOption options)
 		{
 			var ws = name.LocalSheet;
@@ -234,42 +209,6 @@ namespace OfficeOpenXml.FormulaParsing
 				}
 				else if (t.TokenType == TokenType.NameValue)
 				{
-					//string adrWb, adrWs, adrName;
-					//ExcelNamedRange name;
-					//ExcelAddressBase.SplitAddress(t.Value, out adrWb, out adrWs, out adrName, f.ws == null ? "" : f.ws.Name);
-					//if (!string.IsNullOrEmpty(adrWs))
-					//{
-					//	if (f.ws == null)
-					//	{
-					//		f.ws = wb.Worksheets[adrWs];
-					//	}
-					//	if (f.ws.Names.ContainsKey(t.Value))
-					//	{
-					//		name = f.ws.Names[adrName];
-					//	}
-					//	else if (wb.Names.ContainsKey(adrName))
-					//	{
-					//		name = wb.Names[adrName];
-					//	}
-					//	else
-					//	{
-					//		name = null;
-					//	}
-					//	if (name != null) f.ws = name.Worksheet;
-					//}
-					//else if (wb.Names.ContainsKey(adrName))
-					//{
-					//	name = wb.Names[t.Value];
-					//	if (string.IsNullOrEmpty(adrWs))
-					//	{
-					//		f.ws = name.Worksheet;
-					//	}
-					//}
-					//else
-					//{
-					//	name = null;
-					//}
-
 					ExcelNamedRange name = null;
 					var worksheet = f.ws ?? ws;
 					// Worksheet-scoped named ranges take precedence over workbook-scoped named ranges.
@@ -279,69 +218,13 @@ namespace OfficeOpenXml.FormulaParsing
 						name = wb.Names[t.Value];
 					if (name != null)
 					{
-						//if (string.IsNullOrEmpty(name.NameFormula))
-						//{
-						//	if (name.NameValue == null)
-						//	{
-						//		ExcelAddress address;
-						//		if (!name._fromRowFixed || !name._fromColFixed)
-						//			address = new ExcelAddress(name.GetRelativeAddress(f.Row, f.Column));
-						//		else
-						//			address = new ExcelAddress(name.FullAddress);
-						//		f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, address._fromRow,
-						//			 address._fromCol, address._toRow, address._toCol);
-						//		goto iterateCells;
-						//	}
-						//}
-						//if (name.NameValue != null && string.IsNullOrEmpty(name.NameFormula))
-						//{
-						//	f.Tokens[f.tokenIx] = name.myWorkbook.FormulaParser.Lexer.Tokenize(Convert.ToString(name.NameValue)).FirstOrDefault();
-						//}
-						//else
-						//{
 						var nameFormulaTokens = name.GetRelativeNameFormula(f.Row, f.Column)?.ToList();
-						if (nameFormulaTokens.Count == 0 && name.NameFormula != null)
-						{
+						if (nameFormulaTokens.Count == 0 && !string.IsNullOrEmpty(name.NameFormula))
 							nameFormulaTokens = name.Workbook.FormulaParser.Lexer.Tokenize(name.NameFormula.ToString())?.ToList();
-						}
+						// Remove the current named range token and replace it with the named range's formula.
 						f.Tokens.RemoveAt(f.tokenIx);
 						f.Tokens.InsertRange(f.tokenIx, nameFormulaTokens);
-
 						goto iterateToken;
-							//var id = ExcelAddressBase.GetCellID(name.LocalSheetID, name.Index, 0);
-
-							//if (!depChain.Index.ContainsKey(id))
-							//{
-							//	var rf = new FormulaCell() { SheetID = name.ActualSheetID, Row = name.Index, Column = 0 };
-							//	rf.Tokens = name.GetRelativeFormula(f.Row, f.Column)?.ToList();
-								
-							//	// TODO: is it necessary to set rf.Formula here?
-							//	//rf.Formula = name.NameFormula;
-							//	//if (name.ActualSheetID == -1)
-							//	//	rf.Tokens = lexer.Tokenize(rf.Formula)?.ToList();
-							//	//else
-							//	//	rf.Tokens = lexer.Tokenize(rf.Formula, name.LocalSheet.Name)?.ToList();
-
-							//	depChain.Add(rf);
-							//	stack.Push(f);
-							//	f = rf;
-							//  goto iterateToken;
-							//  }
-							//else
-							//{
-							//	if (stack.Count > 0)
-							//	{
-							//		//Check for circular references
-							//		foreach (var par in stack)
-							//		{
-							//			if (ExcelAddressBase.GetCellID(par.SheetID, par.Row, par.Column) == id && !options.AllowCircularReferences)
-							//			{
-							//				throw (new CircularReferenceException(string.Format("Circular Reference in name {0}", name.Name)));
-							//			}
-							//		}
-							//	}
-							//}
-						//}
 					}
 				}
 				else if (t.TokenType == TokenType.Function && t.Value.ToUpper() == Offset.Name)

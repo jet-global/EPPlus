@@ -1699,11 +1699,10 @@ namespace EPPlusTest
 
 			ws.Names.Add("Address", ws.Cells["A2:A3"]);
 			ws.Cells["Address"].Value = 1;
-			ws.Names.AddValue("Value", 5);
+			ws.Names.Add("Value", "5");
 			ws.Names.Add("FullRow", ws.Cells["2:2"]);
 			ws.Names.Add("FullCol", ws.Cells["A:A"]);
-			//ws.Names["Value"].Style.Border.Bottom.Color.SetColor(Color.Black);
-			ws.Names.AddFormula("Formula", "Names!A2+Names!A3+Names!Value");
+			ws.Names.Add("Formula", "Names!A2+Names!A3+Names!Value");
 		}
 
 		[Ignore]
@@ -4689,10 +4688,9 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$4:$Z$26"));
 
 				worksheet1.DeleteRow(1, 26);
-				Assert.AreEqual("#REF!", range0.NameFormula);
-				Assert.AreEqual("#REF!", range1.NameFormula);
-				ExcelRangeBase.SplitAddress(range2.NameFormula, out string workbook, out string worksheet, out string address);
-				Assert.AreEqual("$A$4:$Z$26", address);
+				Assert.AreEqual("'SHEET1'!#REF!", range0.NameFormula);
+				Assert.AreEqual("'SHEET1'!#REF!", range1.NameFormula);
+				Assert.AreEqual("SHEET2!$A$4:$Z$26", range2.NameFormula);
 			}
 		}
 
@@ -4844,7 +4842,6 @@ namespace EPPlusTest
 				var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$1:$Z$26"));
 				var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
-
 				worksheet2.DeleteColumn(10, 10);
 				ExcelRangeBase.SplitAddress(range0.NameFormula, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$26", address);
@@ -4866,12 +4863,9 @@ namespace EPPlusTest
 				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
 				var range0 = worksheet2.Names.Add("myNamedRange", new ExcelRangeBase(worksheet1, "$A$1:$Z$26"));
 				var range1 = package.Workbook.Names.Add("workbookNamedRange", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
-
 				worksheet2.DeleteColumn(10, 10);
-				ExcelRangeBase.SplitAddress(range0.NameFormula, out string workbook, out string worksheet, out string address);
-				Assert.AreEqual("$A$1:$P$26", address);
-				ExcelRangeBase.SplitAddress(range1.NameFormula, out workbook, out worksheet, out address);
-				Assert.AreEqual("$A$1:$P$26", address);
+				Assert.AreEqual("'Sheet1'!$A$1:$Z$26", range0.NameFormula);
+				Assert.AreEqual("'SHEET2'!$A$1:$P$26", range1.NameFormula);
 			}
 		}
 
@@ -5407,8 +5401,8 @@ namespace EPPlusTest
 				worksheet2.DeleteColumn(1, 26);
 				ExcelRangeBase.SplitAddress(range0.NameFormula, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$26", address);
-				Assert.AreEqual("#REF!", range1.NameFormula);
-				Assert.AreEqual("#REF!", range2.NameFormula);
+				Assert.AreEqual("'SHEET2'!#REF!", range1.NameFormula);
+				Assert.AreEqual("'SHEET2'!#REF!", range2.NameFormula);
 			}
 		}
 

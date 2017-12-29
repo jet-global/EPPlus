@@ -133,26 +133,17 @@ namespace EPPlusTest
 			var pck = new ExcelPackage();
 			var ws = pck.Workbook.Worksheets.Add("CalcTest");
 
-			Assert.Fail("Test needs to be rewritten for new NamedRange changes.");
-			// TODO: Rewrite this test for new NamedRange changes.
+			ws.Names.Add("PRICE", "10");
+			ws.Names.Add("QUANTITY", "30");
+			ws.Cells["A1"].Formula = "PRICE*QUANTITY";
+			ws.Names.Add("AMOUNT", "PRICE*QUANTITY");
+			ws.Calculate();
+			Assert.AreEqual(300D, ws.Cells["A1"].Value);
 
-			//ws.Names.AddValue("PRICE", 10);
-			//ws.Names.AddValue("QUANTITY", 11);
-			//ws.Cells["A1"].Formula = "PRICE*QUANTITY";
-			//ws.Names.AddFormula("AMOUNT", "PRICE*QUANTITY");
-
-			//ws.Names["PRICE"].Value = 30;
-			//ws.Names["QUANTITY"].Value = 10;
-
-			//ws.Calculate();
-			//Assert.AreEqual(300D, ws.Cells["A1"].Value);
-			//Assert.AreEqual(300D, ws.Names["AMOUNT"].Value);
-			//ws.Names["PRICE"].Value = 40;
-			//ws.Names["QUANTITY"].Value = 20;
-
-			//ws.Calculate();
-			//Assert.AreEqual(800D, ws.Cells["A1"].Value);
-			//Assert.AreEqual(800D, ws.Names["AMOUNT"].Value);
+			ws.Names["PRICE"].NameFormula = "40";
+			ws.Names["QUANTITY"].NameFormula = "20";
+			ws.Calculate();
+			Assert.AreEqual(800D, ws.Cells["A1"].Value);
 		}
 
 		[TestMethod]

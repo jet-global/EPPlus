@@ -42,6 +42,10 @@ namespace OfficeOpenXml
 	/// </summary>
 	public sealed class ExcelNamedRange
 	{
+		#region Class Variables
+		private string myFormula;
+		#endregion
+
 		#region Properties
 		/// <summary>
 		/// Gets or set the name of this <see cref="ExcelNamedRange"/>.
@@ -60,17 +64,6 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Returns the worksheet's actual "SheetID" property, or -1 if it is not a local named range.
-		/// </summary>
-		public int ActualSheetID
-		{
-			get
-			{
-				return this.LocalSheet == null ? -1 : this.LocalSheet.SheetID;
-			}
-		}
-
-		/// <summary>
 		/// A comment for the Name
 		/// </summary>
 		public string NameComment { get; set; }
@@ -81,7 +74,7 @@ namespace OfficeOpenXml
 		public bool IsNameHidden { get; set; }
 
 		/// <summary>
-		/// Gets the <see cref="ExcelWorksheet"/> that this named range is local to, or null if the named range has a workbook scope.
+		/// Gets the <see cref="ExcelWorksheet"/> that this named range is local to. Null if the named range is workbook scoped.
 		/// </summary>
 		internal ExcelWorksheet LocalSheet { get; private set; }
 
@@ -90,20 +83,31 @@ namespace OfficeOpenXml
 		/// </summary>
 		internal ExcelWorkbook Workbook { get; private set; }
 
+		// TODO: Is Index needed anymore? Dependency chain IDs for named ranges may not be correct
+		// because of the case where a relative named range can actually be many different formulas depending on where 
+		// it is referenced from. The changes to named ranges in dependency chains may not actually need IDs for named ranges anymore.
 		/// <summary>
 		/// Gets or sets the index value of this named range in its parent <see cref="ExcelNamedRangeCollection"/>.
+		/// This is used to create ID values for dependency chains.
 		/// </summary>
 		internal int Index { get; set; }
 
 		/// <summary>
-		/// Gets or sets the value of this Named Range.
-		/// </summary>
-		internal object NameValue { get; set; }
-
-		/// <summary>
 		/// Gets or sets the formula of this Named Range.
 		/// </summary>
-		public string NameFormula { get; set; }
+		public string NameFormula
+		{
+			get
+			{
+				return myFormula;
+			}
+			set
+			{
+				if (string.IsNullOrEmpty(value))
+					throw new InvalidOperationException($"{nameof(this.NameFormula)} cannot be null or empty");
+				myFormula = value;
+			}
+		}
 		#endregion
 
 		#region Constructors
@@ -119,19 +123,14 @@ namespace OfficeOpenXml
 		{
 			if (workbook == null)
 				throw new ArgumentNullException(nameof(workbook));
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentNullException(nameof(name));
+			if (string.IsNullOrEmpty(formula))
+				throw new ArgumentNullException(nameof(formula));
 			this.Name = name;
 			this.Workbook = workbook;
 			this.LocalSheet = nameSheet;
 			this.NameFormula = formula;
-			this.Index = index;
-		}
-
-		internal ExcelNamedRange(string name, ExcelWorkbook workbook, ExcelWorksheet nameSheet, int index)
-		{
-			if (workbook == null)
-				throw new ArgumentNullException(nameof(workbook)); this.Name = name;
-			this.Workbook = workbook;
-			this.LocalSheet = nameSheet;
 			this.Index = index;
 		}
 		#endregion
@@ -186,7 +185,7 @@ namespace OfficeOpenXml
 		{
 			address = null;
 			var tokens = this.Workbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
-			// TODO: Probably won't work for addresses such as "'Sheet'!C3,'Sheet'!D3:D5,'Sheet'!E5". Should it?
+			// TODO: Test for addresses such as "'Sheet'!C3,'Sheet'!D3:D5,'Sheet'!E5".
 			if (tokens.Count() == 1)
 			{
 				var token = tokens.ElementAt(0);

@@ -443,36 +443,14 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				if (this.IsName)
-				{
-					// TODO: Remove IsName usages.
-					throw new NotImplementedException("IsName should no longer be used.");
-					if (this.myWorksheet == null)
-						return this.myWorkbook.Names[this._address].NameValue;
-					else
-						return this.myWorksheet.Names[this._address].NameValue;
-				}
+				if (this._fromRow == this._toRow && this._fromCol == this._toCol)
+					return this.myWorksheet.GetValue(this._fromRow, this._fromCol);
 				else
-				{
-					if (this._fromRow == this._toRow && this._fromCol == this._toCol)
-						return this.myWorksheet.GetValue(this._fromRow, this._fromCol);
-					else
-						return GetValueArray();
-				}
+					return GetValueArray();
 			}
 			set
 			{
-				if (this.IsName)
-				{
-					// TODO: Remove IsName usages.
-					throw new NotImplementedException("IsName should no longer be used.");
-					if (this.myWorksheet == null)
-						this.myWorkbook.Names[this._address].NameValue = value;
-					else
-						this.myWorksheet.Names[this._address].NameValue = value;
-				}
-				else
-					this.myChangePropMethod(this, _setValueDelegate, value);
+				this.myChangePropMethod(this, _setValueDelegate, value);
 			}
 		}
 
@@ -494,17 +472,7 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				if (this.IsName)
-				{
-					// TODO: Remove IsName usages.
-					throw new NotImplementedException("IsName should no longer be used.");
-					if (this.myWorksheet == null)
-						return this.myWorkbook.Names[this._address].NameFormula;
-					else
-						return this.myWorksheet.Names[this._address].NameFormula;
-				}
-				else
-					return this.myWorksheet.GetFormula(this._fromRow, this._fromCol);
+				return this.myWorksheet.GetFormula(this._fromRow, this._fromCol);
 			}
 			set
 			{
@@ -1918,30 +1886,18 @@ namespace OfficeOpenXml
 		{
 			if (!string.IsNullOrEmpty(formula) && formula[0] == '=')
 				formula = formula.Substring(1);
-			if (this.IsName)
-			{
-				// TODO: Remove IsName usages.
-				throw new NotImplementedException("IsName should no longer be used.");
-				if (this.myWorksheet == null)
-					this.myWorkbook.Names[this._address].NameFormula = formula;
-				else
-					this.myWorksheet.Names[this._address].NameFormula = formula;
-			}
+			if ((formula == null || formula.Trim() == string.Empty) && clearValue)
+				this.Value = null;
+			else if (this._fromRow == this._toRow && this._fromCol == this._toCol)
+				SetFormula(this, formula, this._fromRow, this._fromCol, clearValue);
 			else
 			{
-				if ((formula == null || formula.Trim() == string.Empty) && clearValue)
-					this.Value = null;
-				else if (this._fromRow == this._toRow && this._fromCol == this._toCol)
-					SetFormula(this, formula, this._fromRow, this._fromCol, clearValue);
-				else
+				SetSharedFormula(this, formula, this, false, clearValue);
+				if (this.Addresses != null)
 				{
-					SetSharedFormula(this, formula, this, false, clearValue);
-					if (this.Addresses != null)
+					foreach (var address in this.Addresses)
 					{
-						foreach (var address in this.Addresses)
-						{
-							SetSharedFormula(this, formula, address, false, clearValue);
-						}
+						SetSharedFormula(this, formula, address, false, clearValue);
 					}
 				}
 			}

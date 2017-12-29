@@ -1144,25 +1144,8 @@ namespace OfficeOpenXml
 		private void SetNameElement(ExcelNamedRange name, XmlElement elem)
 		{
 			if (string.IsNullOrEmpty(name.NameFormula))
-			{
-				if ((name.NameValue.GetType().IsPrimitive || name.NameValue is double || name.NameValue is decimal))
-				{
-					elem.InnerText = Convert.ToDouble(name.NameValue, CultureInfo.InvariantCulture).ToString("R15", CultureInfo.InvariantCulture);
-				}
-				else if (name.NameValue is DateTime)
-				{
-					elem.InnerText = ((DateTime)name.NameValue).ToOADate().ToString(CultureInfo.InvariantCulture);
-				}
-				else
-				{
-					elem.InnerText = "\"" + name.NameValue.ToString() + "\"";
-				}
-			}
-			else
-			{
-				elem.InnerText = name.NameFormula;
-			}
-			// TODO: May need to set elem.InnerText = name.FullAddress;
+				throw new InvalidOperationException("Named range formulas cannot be blank.");
+			elem.InnerText = name.NameFormula;
 		}
 
 		/// <summary>

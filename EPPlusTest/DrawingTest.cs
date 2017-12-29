@@ -1412,9 +1412,13 @@ namespace EPPlusTest
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
-				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names[0].NameFormula);
-				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names[1].NameFormula);
-				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names[2].NameFormula);
+				Assert.AreEqual(6, package.Workbook.Names.Count);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names["_xlchart.v1.0"].NameFormula);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names["_xlchart.v1.1"].NameFormula);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names["_xlchart.v1.2"].NameFormula);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names["_xlchart.v1.3"].NameFormula);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names["_xlchart.v1.4"].NameFormula);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names["_xlchart.v1.5"].NameFormula);
 			}
 		}
 
@@ -1465,9 +1469,16 @@ namespace EPPlusTest
 			using (var package = new ExcelPackage(file))
 			{
 				// Excel 2016 Chart Series are stored in named ranges.
-				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names[0].NameFormula);
-				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names[1].NameFormula);
-				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names[2].NameFormula);
+				Assert.AreEqual(9, package.Workbook.Names.Count);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names["_xlchart.v1.0"].NameFormula);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names["_xlchart.v1.1"].NameFormula);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names["_xlchart.v1.2"].NameFormula);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names["_xlchart.v1.3"].NameFormula);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names["_xlchart.v1.4"].NameFormula);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names["_xlchart.v1.5"].NameFormula);
+				Assert.AreEqual("Sheet1!$B$20:$B$42", package.Workbook.Names["_xlchart.v1.6"].NameFormula);
+				Assert.AreEqual("Sheet1!$C$20:$C$42", package.Workbook.Names["_xlchart.v1.7"].NameFormula);
+				Assert.AreEqual("Sheet1!$D$20:$D$42", package.Workbook.Names["_xlchart.v1.8"].NameFormula);
 			}
 		}
 

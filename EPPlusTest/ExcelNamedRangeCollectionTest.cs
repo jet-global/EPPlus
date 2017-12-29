@@ -29,16 +29,11 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(2, sheet1Copy.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", sheet1.Names[1].NameFormula);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet2.Names[0].NameFormula);
-					Assert.AreEqual("name1", sheet1Copy.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('Sheet1 copy'!B2,'Sheet1 copy'!$B$2)", sheet1Copy.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1Copy.Names[1].Name);
-					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet1Copy.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual("CONCATENATE('Sheet1 copy'!B2,'Sheet1 copy'!$B$2)", sheet1Copy.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet1Copy.Names["name2"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -50,16 +45,11 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(2, sheet1Copy.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", sheet1.Names[1].NameFormula);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet2.Names[0].NameFormula);
-					Assert.AreEqual("name1", sheet1Copy.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('Sheet1 copy'!B2,'Sheet1 copy'!$B$2)", sheet1Copy.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1Copy.Names[1].Name);
-					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet1Copy.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual("CONCATENATE('Sheet1 copy'!B2,'Sheet1 copy'!$B$2)", sheet1Copy.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet1Copy.Names["name2"].NameFormula);
 				}
 			}
 			finally
@@ -88,10 +78,8 @@ namespace EPPlusTest
 					Assert.AreEqual(0, sheet1.Names.Count);
 					Assert.AreEqual(0, sheet1Copy.Names.Count);
 					Assert.AreEqual(0, sheet2.Names.Count);
-					Assert.AreEqual("name1", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name2", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", excelPackage.Workbook.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", excelPackage.Workbook.Names["name2"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -103,10 +91,8 @@ namespace EPPlusTest
 					Assert.AreEqual(0, sheet1.Names.Count);
 					Assert.AreEqual(0, sheet1Copy.Names.Count);
 					Assert.AreEqual(0, sheet2.Names.Count);
-					Assert.AreEqual("name1", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name2", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", excelPackage.Workbook.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", excelPackage.Workbook.Names["name2"].NameFormula);
 				}
 			}
 			finally
@@ -135,20 +121,16 @@ namespace EPPlusTest
 					excelPackage.Workbook.Worksheets.Delete(sheet1);
 					Assert.AreEqual(0, excelPackage.Workbook.Names.Count);
 					Assert.AreEqual(2, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", sheet2.Names[0].NameFormula);
-					Assert.AreEqual("name4", sheet2.Names[1].Name);
-					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet2.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet2.Names["name4"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
 				{
 					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
 					Assert.AreEqual(2, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", sheet2.Names[0].NameFormula);
-					Assert.AreEqual("name4", sheet2.Names[1].Name);
-					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet2.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet2.Names["name4"].NameFormula);
 				}
 			}
 			finally
@@ -175,10 +157,8 @@ namespace EPPlusTest
 					excelPackage.Workbook.Worksheets.Delete(sheet1);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
 					Assert.AreEqual(0, sheet2.Names.Count);
-					Assert.AreEqual("name1", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name2", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", excelPackage.Workbook.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", excelPackage.Workbook.Names["name2"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -186,10 +166,8 @@ namespace EPPlusTest
 					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
 					Assert.AreEqual(0, sheet2.Names.Count);
-					Assert.AreEqual("name1", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name2", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", excelPackage.Workbook.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", excelPackage.Workbook.Names["name2"].NameFormula);
 				}
 			}
 			finally
@@ -222,18 +200,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -243,18 +216,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -285,18 +253,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -306,18 +269,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -348,18 +306,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -369,18 +322,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -413,18 +361,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -434,18 +377,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -476,18 +414,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -497,18 +430,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -539,18 +467,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -560,18 +483,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -604,18 +522,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -625,18 +538,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -667,18 +575,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -688,18 +591,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -730,18 +628,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -751,18 +644,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -795,18 +683,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -816,18 +699,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -858,18 +736,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -879,18 +752,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -921,18 +789,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 					excelPackage.SaveAs(tempFile);
 				}
 				using (var excelPackage = new ExcelPackage(tempFile))
@@ -942,18 +805,13 @@ namespace EPPlusTest
 					Assert.AreEqual(2, sheet1.Names.Count);
 					Assert.AreEqual(1, sheet2.Names.Count);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name1", sheet1.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names[0].NameFormula);
-					Assert.AreEqual("name2", sheet1.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
 					Assert.AreEqual(1, sheet2.Names.Count);
-					Assert.AreEqual("name3", sheet2.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names[0].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
 					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
-					Assert.AreEqual("name4", excelPackage.Workbook.Names[0].Name);
-					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names[0].NameFormula);
-					Assert.AreEqual("name5", excelPackage.Workbook.Names[1].Name);
-					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names[1].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
 				}
 			}
 			finally
@@ -977,7 +835,6 @@ namespace EPPlusTest
 				namedRangeCollection.Insert(1, 0, 3, 0, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
 				Assert.AreEqual("'Sheet'!$C$6", namedRange.NameFormula);
-				Assert.AreEqual(-1, namedRange.ActualSheetID);
 				Assert.AreEqual(-1, namedRange.LocalSheetID);
 			}
 		}
