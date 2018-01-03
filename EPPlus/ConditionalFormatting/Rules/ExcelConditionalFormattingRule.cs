@@ -83,14 +83,15 @@ namespace OfficeOpenXml.ConditionalFormatting
 			{
 				if (this.Address.Address != value.Address)
 				{
-					XmlNode parentNode = this.Node.ParentNode;
-					if (parentNode.ChildNodes.Count > 1)
+					XmlNode conditionalFormattingNode = this.Node.ParentNode;
+					if (conditionalFormattingNode.ChildNodes.Count > 1)
 					{
-						XmlNode newParentNode = this.Node.ParentNode.CloneNode(false);
-						this.TopNode = newParentNode.AppendChild(this.Node);
-						parentNode = newParentNode;
+						XmlNode clonedConditionalFormattingNode = conditionalFormattingNode.CloneNode(false);
+						conditionalFormattingNode.ParentNode.InsertBefore(clonedConditionalFormattingNode, conditionalFormattingNode);
+						conditionalFormattingNode.RemoveChild(this.Node);
+						clonedConditionalFormattingNode.AppendChild(this.Node);
 					}
-					XmlHelper.SetAttribute(parentNode, ExcelConditionalFormattingConstants.Attributes.Sqref, value.AddressSpaceSeparated);
+					XmlHelper.SetAttribute(this.Node.ParentNode, ExcelConditionalFormattingConstants.Attributes.Sqref, value.AddressSpaceSeparated);
 				}
 			}
 		}

@@ -333,6 +333,70 @@ namespace EPPlusTest
 				Assert.AreEqual("IF($S$22,1,0)", containsTextRule.Formulae[1].Formula);
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\MultipleConditionalFormattingAtSameAddress.xlsx")]
+		public void ExcelConditionalFormattingRuleTransformTwoFormulasWithSameAddressInSameXmlConditionalFormattingNode()
+		{
+			FileInfo tempFile = new FileInfo(Path.GetTempFileName());
+			ExcelAddress originalAddress = new ExcelAddress("C4");
+			ExcelAddress newAddress = new ExcelAddress("D8");
+			FileInfo file = new FileInfo(@"MultipleConditionalFormattingAtSameAddress.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var sheet = package.Workbook.Worksheets["Sheet1"];
+				var conditionalFormattingNodes = sheet.ConditionalFormatting.TopNode.SelectNodes(".//d:conditionalFormatting", sheet.NameSpaceManager);
+				Assert.AreEqual(1, conditionalFormattingNodes.Count);
+				Assert.AreEqual(2, conditionalFormattingNodes.Item(0).ChildNodes.Count);
+
+				Assert.AreEqual(2, sheet.ConditionalFormatting.Count);
+				var format1 = sheet.ConditionalFormatting.First();
+				var format2 = sheet.ConditionalFormatting[1];
+				Assert.IsTrue(format1 is ExcelConditionalFormattingEqual);
+				Assert.IsTrue(format2 is ExcelConditionalFormattingEqual);
+				Assert.IsTrue(format1 is ExcelConditionalFormattingRule);
+				Assert.IsTrue(format2 is ExcelConditionalFormattingRule);
+				Assert.AreEqual(originalAddress.ToString(), format1.Address.ToString());
+				Assert.AreEqual(originalAddress.ToString(), format2.Address.ToString());
+				format1.Address = newAddress;
+				package.SaveAs(tempFile);
+			}
+			using (var package = new ExcelPackage(tempFile))
+			{
+				var sheet = package.Workbook.Worksheets["Sheet1"];
+				var conditionalFormattingNodes = sheet.ConditionalFormatting.TopNode.SelectNodes(".//d:conditionalFormatting", sheet.NameSpaceManager);
+				Assert.AreEqual(2, conditionalFormattingNodes.Count);
+				Assert.AreEqual(1, conditionalFormattingNodes.Item(0).ChildNodes.Count);
+				Assert.AreEqual(1, conditionalFormattingNodes.Item(1).ChildNodes.Count);
+
+				Assert.AreEqual(2, sheet.ConditionalFormatting.Count);
+				var format1 = sheet.ConditionalFormatting.First();
+				var format2 = sheet.ConditionalFormatting[1];
+				Assert.IsTrue(format1 is ExcelConditionalFormattingEqual);
+				Assert.IsTrue(format2 is ExcelConditionalFormattingEqual);
+				Assert.IsTrue(format1 is ExcelConditionalFormattingRule);
+				Assert.IsTrue(format2 is ExcelConditionalFormattingRule);
+				Assert.AreEqual(newAddress.ToString(), format1.Address.ToString());
+				Assert.AreEqual(originalAddress.ToString(), format2.Address.ToString());
+				format2.Address = newAddress;
+				package.SaveAs(tempFile);
+			}
+			using (var package = new ExcelPackage(tempFile))
+			{
+				var sheet = package.Workbook.Worksheets["Sheet1"];
+				Assert.AreEqual(2, sheet.ConditionalFormatting.Count);
+				var format1 = sheet.ConditionalFormatting.First();
+				var format2 = sheet.ConditionalFormatting[1];
+				Assert.IsTrue(format1 is ExcelConditionalFormattingEqual);
+				Assert.IsTrue(format2 is ExcelConditionalFormattingEqual);
+				Assert.IsTrue(format1 is ExcelConditionalFormattingRule);
+				Assert.IsTrue(format2 is ExcelConditionalFormattingRule);
+				Assert.AreEqual(newAddress.ToString(), format1.Address.ToString());
+				Assert.AreEqual(newAddress.ToString(), format2.Address.ToString());
+			}
+			File.Delete(tempFile.ToString());
+		}
 		#endregion
 	}
 }
