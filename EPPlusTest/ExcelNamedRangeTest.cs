@@ -210,6 +210,19 @@ namespace EPPlusTest
 			}
 		}
 
+
+		[TestMethod]
+		public void UpdateFormulaAbsolutePartialFixedRangeUpdatesReference()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "sheet1!$E5:U$7", 0);
+				namedRange.UpdateFormula(3, 3, 2, 4, worksheet);
+				Assert.AreEqual("'SHEET1'!$I5:U$9", namedRange.NameFormula);
+			}
+		}
+
 		[TestMethod]
 		public void UpdateFormulaSpaceSeparatedColumnDeleteUpdatesReferences()
 		{

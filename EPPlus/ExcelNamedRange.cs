@@ -76,7 +76,7 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Gets the <see cref="ExcelWorksheet"/> that this named range is local to. Null if the named range is workbook scoped.
 		/// </summary>
-		internal ExcelWorksheet LocalSheet { get; private set; }
+		public ExcelWorksheet LocalSheet { get; private set; }
 
 		/// <summary>
 		/// Gets the <see cref="ExcelWorkbook"/> that contains this named range.
