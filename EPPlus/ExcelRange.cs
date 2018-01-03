@@ -69,15 +69,14 @@ namespace OfficeOpenXml
 			{
 				if (myWorksheet.Names.ContainsKey(Address))
 				{
-					if (myWorksheet.Names[Address].TryGetAddress(out ExcelRange nameAddress))
+					throw new InvalidOperationException("Invalid attempt to index into a range with a defined name.");
+					if (myWorksheet.Names[Address].TryGetAsAddress(out ExcelRange nameAddress))
 						base.Address = nameAddress.FullAddress;
 					else
 						return null;
 				}
 				else
-				{
 					base.Address = Address;
-				}
 				myExcelRichTextCollection = null;
 				return this;
 			}

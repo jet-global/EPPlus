@@ -34,7 +34,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Utils;
+
 namespace OfficeOpenXml.Table.PivotTable
 {
 	public enum eSourceType
@@ -219,7 +221,7 @@ namespace OfficeOpenXml.Table.PivotTable
 								}
 								foreach (var namedRange in worksheet.Names)
 								{
-									if (name.Equals(namedRange.Name, StringComparison.InvariantCultureIgnoreCase))
+									if (name.IsEquivalentTo(namedRange.Name))
 									{
 										_sourceRange = new ExcelRange(namedRange.LocalSheet, namedRange.NameFormula);
 										break;

@@ -367,28 +367,10 @@ namespace OfficeOpenXml
 		/// <returns>A modified <see cref="ExcelAddressBase"/>.</returns>
 		public ExcelAddressBase AddRow(int row, int rows, bool setFixed = false, bool updateOnlyFixed = false)
 		{
-			// We're forced to assume full column here and so no change should be applied because we may exceed valid dimensions.
-			// And because of how this function is used we should return a new instance of ExcelAddressBase.
-			if (_fromRow == 1 && _toRow == ExcelPackage.MaxRows)
-				return new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
-			if (row > _toRow)
+			var rowTuple = this.InsertSpace(row, rows, a => a.Row, ExcelPackage.MaxRows, _fromRowFixed, _toRowFixed, setFixed, updateOnlyFixed);
+			if (rowTuple == null)
 				return this;
-
-			int updatedToRow = _toRow;
-			int updatedFromRow = _fromRow;
-			bool isRowBeforeFromRow = row <= _fromRow;
-			if (updateOnlyFixed)
-			{
-				updatedFromRow = isRowBeforeFromRow && _fromRowFixed ? Math.Min(_fromRow + rows, ExcelPackage.MaxRows) : _fromRow;
-				updatedToRow = _toRowFixed ? Math.Min(_toRow + rows, ExcelPackage.MaxRows) : _toRow;
-			}
-			else
-			{
-				if (isRowBeforeFromRow && !(setFixed && _fromRowFixed))
-					updatedFromRow = Math.Min(_fromRow + rows, ExcelPackage.MaxRows);
-				updatedToRow = setFixed && _toRowFixed ? _toRow : Math.Min(_toRow + rows, ExcelPackage.MaxRows);
-			}
-			return new ExcelAddressBase(updatedFromRow, _fromCol, updatedToRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
+			return new ExcelAddressBase(rowTuple.Item1, _fromCol, rowTuple.Item2, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
 		}
 
 		/// <summary>
@@ -466,28 +448,10 @@ namespace OfficeOpenXml
 		/// <returns>A modified <see cref="ExcelAddressBase"/>.</returns>
 		public ExcelAddressBase AddColumn(int col, int cols, bool setFixed = false, bool updateOnlyFixed = false)
 		{
-			// We're forced to assume full row here and so no change should be applied because we may exceed valid dimensions.
-			// And because of how this function is used we should return a new instance of ExcelAddressBase.
-			if (_fromCol == 1 && _toCol == ExcelPackage.MaxColumns)
-				return new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
-			if (col > _toCol)
+			var columnTuple = this.InsertSpace(col, cols, a => a.Column, ExcelPackage.MaxColumns, _fromColFixed, _toColFixed, setFixed, updateOnlyFixed);
+			if (columnTuple == null)
 				return this;
-
-			int updatedFromColumn = _fromCol;
-			int updatedToColumn = _toCol;
-			bool isBeforeFromColumn = col <= _fromCol;
-			if (updateOnlyFixed)
-			{
-				updatedFromColumn = isBeforeFromColumn && _fromColFixed ? Math.Min(_fromCol + cols, ExcelPackage.MaxColumns) : _fromCol;
-				updatedToColumn = _toColFixed ? Math.Min(_toCol + cols, ExcelPackage.MaxColumns) : _toCol;
-			}
-			else
-			{
-				if (isBeforeFromColumn && !(setFixed && _fromColFixed))
-					updatedFromColumn = Math.Min(_fromCol + cols, ExcelPackage.MaxColumns);
-				updatedToColumn = setFixed && _toColFixed ? _toCol : Math.Min(_toCol + cols, ExcelPackage.MaxColumns);
-			}
-			return new ExcelAddressBase(_fromRow, updatedFromColumn, _toRow, updatedToColumn, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
+			return new ExcelAddressBase(_fromRow, columnTuple.Item1, _toRow, columnTuple.Item2, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
 		}
 
 		/// <summary>
@@ -525,7 +489,6 @@ namespace OfficeOpenXml
 					}
 					else
 					{
-						// TODO: Clean this up >:(
 						int temp = _toCol - cols < col ? col - 1 : _toCol - cols;
 						updatedToColumn = _toColFixed ? temp : _toCol;
 					}
@@ -768,6 +731,34 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Private Methods
+		private Tuple<int, int> InsertSpace(int insertAt, int insertSpace, Func<ExcelCellAddress, int> dimension, int maximum, bool startFixed, bool endFixed, bool setFixed = false, bool updateOnlyFixed = false)
+		{
+			// We're forced to assume a full dimension here and so no change should be applied because we may exceed valid dimensions.
+			// And because of how this function is used we should return a new instance of ExcelAddressBase.
+			int start = dimension(this.Start);
+			int end = dimension(this.End);
+			if (start == 1 && end == maximum)
+				return new Tuple<int, int>(start, end);
+			else if (insertAt > end)
+				return null;
+
+			int updatedStart = start;
+			int updatedEnd = end;
+			bool isBeforeStart = insertAt <= start;
+			if (updateOnlyFixed)
+			{
+				updatedStart = isBeforeStart && startFixed ? Math.Min(start + insertSpace, maximum) : start;
+				updatedEnd = endFixed ? Math.Min(end + insertSpace, maximum) : end;
+			}
+			else
+			{
+				if (isBeforeStart && !(setFixed && startFixed))
+					updatedStart = Math.Min(start + insertSpace, maximum);
+				updatedEnd = setFixed && endFixed ? end : Math.Min(end + insertSpace, maximum);
+			}
+			return new Tuple<int, int>(updatedStart, updatedEnd);
+		}
+
 		private void SetAddress(ref string first, ref string second, ref bool hasSheet, bool isMulti)
 		{
 			string ws, address;

@@ -1422,7 +1422,6 @@ namespace OfficeOpenXml
 					if (rowFrom <= ptbl.Address.End.Row)
 						ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
 
-					// TODO: Consider consolidating these named range updates to the FormulaManager, changing SourceRange to be a NamedRange.
 					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
 						ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
 						ptbl.CacheDefinition.SourceRange.IsName == false &&
@@ -1437,7 +1436,6 @@ namespace OfficeOpenXml
 					sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
 					foreach (var ptbl in sheet.PivotTables)
 					{
-						// TODO: Consider consolidating these named range updates to the FormulaManager, changing SourceRange to be a NamedRange.
 						if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
 							ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
 							ptbl.CacheDefinition.SourceRange.IsName == false &&

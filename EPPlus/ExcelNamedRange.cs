@@ -124,9 +124,9 @@ namespace OfficeOpenXml
 			if (workbook == null)
 				throw new ArgumentNullException(nameof(workbook));
 			if (string.IsNullOrEmpty(name))
-				throw new ArgumentNullException(nameof(name));
+				throw new ArgumentException(nameof(name));
 			if (string.IsNullOrEmpty(formula))
-				throw new ArgumentNullException(nameof(formula));
+				throw new ArgumentException(nameof(formula));
 			this.Name = name;
 			this.Workbook = workbook;
 			this.LocalSheet = nameSheet;
@@ -181,8 +181,10 @@ namespace OfficeOpenXml
 		/// </summary>
 		/// <param name="address">The <see cref="ExcelRange"/> address if the formula is an address.</param>
 		/// <returns>True if the formula is an address, false otherwise.</returns>
-		public bool TryGetAddress(out ExcelRange address)
+		public bool TryGetAsAddress(out ExcelRange address)
 		{
+			// TODO: Is this method necessary? See ExcelRange indexer, attempts to resolve as named range.
+			// If this functionality is not necessary, this method can be removed.
 			address = null;
 			var tokens = this.Workbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
 			// TODO: Test for addresses such as "'Sheet'!C3,'Sheet'!D3:D5,'Sheet'!E5".

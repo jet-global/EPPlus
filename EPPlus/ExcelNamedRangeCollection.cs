@@ -203,7 +203,6 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region IEnumerable Members
-		// TODO: Is this needed?
 		/// <summary>
 		/// Implement interface method IEnumeratable GetEnumerator().
 		/// </summary>

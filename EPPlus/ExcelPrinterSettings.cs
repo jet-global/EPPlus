@@ -553,7 +553,6 @@ namespace OfficeOpenXml
 			{
 				if (_ws.Names.ContainsKey("_xlnm.Print_Titles"))
 				{
-					// TODO: Consider changing RepeatRows to a NamedRange instead of an ExcelAddress.
 					var namedRange = _ws.Names["_xlnm.Print_Titles"];
 					ExcelRangeBase r = new ExcelRange(namedRange.LocalSheet, namedRange.NameFormula);
 					if (r.Start.Column == 1 && r.End.Column == ExcelPackage.MaxColumns)
@@ -590,7 +589,6 @@ namespace OfficeOpenXml
 			{
 				if (_ws.Names.ContainsKey("_xlnm.Print_Titles"))
 				{
-					// TODO: Consider changing RepeatColumns to a NamedRange instead of an ExcelAddress.
 					var namedRange = _ws.Names["_xlnm.Print_Titles"];
 					ExcelRangeBase r = new ExcelRange(namedRange.LocalSheet, namedRange.NameFormula);
 					if (r.Start.Row == 1 && r.End.Row == ExcelPackage.MaxRows)
