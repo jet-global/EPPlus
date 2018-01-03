@@ -75,7 +75,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 			double value,
 			string formula,
 			eExcelConditionalFormattingRuleType ruleType,
-		ExcelAddress address,
+		ExcelAddressBase address,
 		int priority,
 			ExcelWorksheet worksheet,
 			XmlNode itemElementNode,
@@ -174,7 +174,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 			double value,
 			string formula,
 			eExcelConditionalFormattingRuleType ruleType,
-		ExcelAddress address,
+		ExcelAddressBase address,
 		int priority,
 			ExcelWorksheet worksheet,
 			XmlNamespaceManager namespaceManager)
@@ -209,7 +209,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 			eExcelConditionalFormattingValueObjectType type,
 			Color color,
 			eExcelConditionalFormattingRuleType ruleType,
-		ExcelAddress address,
+		ExcelAddressBase address,
 		int priority,
 			ExcelWorksheet worksheet,
 			XmlNamespaceManager namespaceManager)

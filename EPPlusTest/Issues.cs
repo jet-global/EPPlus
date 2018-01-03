@@ -1101,10 +1101,10 @@ namespace EPPlusTest
 			using (ExcelPackage excelPackage = new ExcelPackage(file))
 			{
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet 1");
-				var equalsRule = worksheet.ConditionalFormatting.AddEqual(new ExcelAddress(2, 3, 6, 3));
+				var equalsRule = worksheet.ConditionalFormatting.AddEqual(new ExcelAddressBase(2, 3, 6, 3));
 				equalsRule.Formula = "0";
 				equalsRule.Style.Fill.BackgroundColor.Color = Color.Blue;
-				worksheet.ConditionalFormatting.AddDatabar(new ExcelAddress(4, 4, 4, 4), Color.Red);
+				worksheet.ConditionalFormatting.AddDatabar(new ExcelAddressBase(4, 4, 4, 4), Color.Red);
 				excelPackage.Save();
 			}
 			using (ExcelPackage excelPackage = new ExcelPackage(file))
@@ -1113,7 +1113,7 @@ namespace EPPlusTest
 				int i = 0;
 				foreach (var conditionalFormat in worksheet.ConditionalFormatting)
 				{
-					conditionalFormat.Address = new ExcelAddress(5 + i++, 5, 6, 6);
+					conditionalFormat.Address = new ExcelAddressBase(5 + i++, 5, 6, 6);
 				}
 				excelPackage.SaveAs(new FileInfo(@"c:\temp\error.xlsx"));
 			}

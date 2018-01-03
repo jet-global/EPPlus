@@ -141,7 +141,7 @@ namespace OfficeOpenXml.Drawing.Chart
 
 		internal void GenerateLit()
 		{
-			var s = new ExcelAddress(Series);
+			var s = new ExcelAddressBase(Series);
 			var ix = 0;
 			var sb = new StringBuilder();
 			for (int row = s._fromRow; row <= s._toRow; row++)

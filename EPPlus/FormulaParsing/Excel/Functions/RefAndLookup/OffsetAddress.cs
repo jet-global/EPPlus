@@ -28,7 +28,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
 			if (this.ArgumentsAreValid(functionArguments, 3, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			ExcelAddress offset = base.CalculateOffset(functionArguments, context);
+			ExcelAddressBase offset = base.CalculateOffset(functionArguments, context);
 			if (offset == null)
 				return new CompileResult(eErrorType.Ref);
 			return new CompileResult(offset.FullAddress, DataType.String);

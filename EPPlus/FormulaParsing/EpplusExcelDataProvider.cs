@@ -294,7 +294,7 @@ namespace OfficeOpenXml.FormulaParsing
 		}
 		public override IRangeInfo GetRange(string worksheet, int row, int column, string address)
 		{
-			var addr = new ExcelAddress(worksheet, address);
+			var addr = new ExcelAddressBase(worksheet, address);
 			if (addr.IsTableAddress)
 			{
 				addr.SetRCFromTable(_package, new ExcelAddressBase(row, column, row, column));
@@ -360,7 +360,7 @@ namespace OfficeOpenXml.FormulaParsing
 		public override IEnumerable<object> GetRangeValues(string address)
 		{
 			SetCurrentWorksheet(ExcelAddressInfo.Parse(address));
-			var addr = new ExcelAddress(address);
+			var addr = new ExcelAddressBase(address);
 			var wsName = string.IsNullOrEmpty(addr.WorkSheet) ? _currentWorksheet.Name : addr.WorkSheet;
 			var ws = _package.Workbook.Worksheets[wsName];
 			return (IEnumerable<object>)(CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(ws._values, addr._fromRow, addr._fromCol, addr._toRow, addr._toCol));

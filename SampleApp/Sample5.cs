@@ -85,7 +85,7 @@ namespace EPPlusSamples
 				chart.SetPosition(0, 0, 5, 5);
 				chart.SetSize(600, 300);
 
-				ExcelAddress valueAddress = new ExcelAddress(2, 5, 6, 5);
+				ExcelAddressBase valueAddress = new ExcelAddressBase(2, 5, 6, 5);
 				var ser = (chart.Series.Add(valueAddress.Address, "B2:B6") as ExcelPieChartSerie);
 				chart.DataLabel.ShowCategory = true;
 				chart.DataLabel.ShowPercent = true;

@@ -91,7 +91,7 @@ namespace EPPlusSamples
 				worksheet.Cells["A5:E5"].Style.Border.Top.Style = ExcelBorderStyle.Thin;
 				worksheet.Cells["A5:E5"].Style.Font.Bold = true;
 
-				worksheet.Cells[5, 3, 5, 5].Formula = string.Format("SUBTOTAL(9,{0})", new ExcelAddress(2, 3, 4, 3).Address);
+				worksheet.Cells[5, 3, 5, 5].Formula = string.Format("SUBTOTAL(9,{0})", new ExcelAddressBase(2, 3, 4, 3).Address);
 				worksheet.Cells["C2:C5"].Style.Numberformat.Format = "#,##0";
 				worksheet.Cells["D2:E5"].Style.Numberformat.Format = "#,##0.00";
 

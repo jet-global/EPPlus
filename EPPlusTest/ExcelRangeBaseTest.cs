@@ -293,7 +293,7 @@ namespace EPPlusTest
 
 					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
 					// Use NULL for Formula
-					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddressBase("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
 					sparklineGroup.Sparklines.Add(sparkline);
 					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
 					package.SaveAs(tempWorkbook);

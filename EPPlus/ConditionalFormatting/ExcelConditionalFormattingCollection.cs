@@ -103,7 +103,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 					string sqref = conditionalFormattingNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref]?.Value;
 					if (string.IsNullOrEmpty(sqref))
 						continue;
-					ExcelAddress address = new ExcelAddress(sqref);
+					ExcelAddressBase address = new ExcelAddressBase(sqref);
 
 					// Check for all the <cfRules> nodes and load them.
 					var cfRuleNodes = conditionalFormattingNode.SelectNodes(
@@ -176,8 +176,8 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// Validates address that the given address is not null.
 		/// </summary>
 		/// <param name="address">The address to validate.</param>
-		/// <returns>Returns the given <see cref="ExcelAddress"/> if it is valid.</returns>
-		private ExcelAddress ValidateAddress(ExcelAddress address)
+		/// <returns>Returns the given <see cref="ExcelAddressBase"/> if it is valid.</returns>
+		private ExcelAddressBase ValidateAddress(ExcelAddressBase address)
 		{
 			Require.Argument(address).IsNotNull("address");
 			//TODO: Are there any other validation we need to do?
@@ -326,9 +326,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// Add rule (internal)
 		/// </summary>
 		/// <param name="type">The <see cref="eExcelConditionalFormattingRuleType"/> of the rule to add.</param>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added to the collection.</returns>
-		internal IExcelConditionalFormattingRule AddRule(eExcelConditionalFormattingRuleType type, ExcelAddress address)
+		internal IExcelConditionalFormattingRule AddRule(eExcelConditionalFormattingRuleType type, ExcelAddressBase address)
 		{
 			Require.Argument(address).IsNotNull("address");
 			address = ValidateAddress(address);
@@ -346,9 +346,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add AboveAverage Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingAverageGroup AddAboveAverage(ExcelAddress address)
+		public IExcelConditionalFormattingAverageGroup AddAboveAverage(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingAverageGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.AboveAverage,
@@ -358,10 +358,10 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add AboveOrEqualAverage Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
 		public IExcelConditionalFormattingAverageGroup AddAboveOrEqualAverage(
-		  ExcelAddress address)
+		  ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingAverageGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.AboveOrEqualAverage,
@@ -371,9 +371,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add BelowAverage Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingAverageGroup AddBelowAverage(ExcelAddress address)
+		public IExcelConditionalFormattingAverageGroup AddBelowAverage(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingAverageGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.BelowAverage,
@@ -383,9 +383,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add BelowOrEqualAverage Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingAverageGroup AddBelowOrEqualAverage(ExcelAddress address)
+		public IExcelConditionalFormattingAverageGroup AddBelowOrEqualAverage(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingAverageGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.BelowOrEqualAverage,
@@ -395,9 +395,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add AboveStdDev Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingStdDevGroup AddAboveStdDev(ExcelAddress address)
+		public IExcelConditionalFormattingStdDevGroup AddAboveStdDev(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingStdDevGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.AboveStdDev,
@@ -407,9 +407,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add BelowStdDev Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingStdDevGroup AddBelowStdDev(ExcelAddress address)
+		public IExcelConditionalFormattingStdDevGroup AddBelowStdDev(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingStdDevGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.BelowStdDev,
@@ -419,9 +419,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Bottom Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTopBottomGroup AddBottom(ExcelAddress address)
+		public IExcelConditionalFormattingTopBottomGroup AddBottom(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTopBottomGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Bottom,
@@ -431,9 +431,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add BottomPercent Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTopBottomGroup AddBottomPercent(ExcelAddress address)
+		public IExcelConditionalFormattingTopBottomGroup AddBottomPercent(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTopBottomGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.BottomPercent,
@@ -443,9 +443,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Top Rule
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTopBottomGroup AddTop(ExcelAddress address)
+		public IExcelConditionalFormattingTopBottomGroup AddTop(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTopBottomGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Top,
@@ -455,9 +455,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add TopPercent Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTopBottomGroup AddTopPercent(ExcelAddress address)
+		public IExcelConditionalFormattingTopBottomGroup AddTopPercent(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTopBottomGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.TopPercent,
@@ -467,9 +467,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Last7Days Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddLast7Days(ExcelAddress address)
+		public IExcelConditionalFormattingTimePeriodGroup AddLast7Days(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Last7Days,
@@ -479,9 +479,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add LastMonth Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddLastMonth(ExcelAddress address)
+		public IExcelConditionalFormattingTimePeriodGroup AddLastMonth(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.LastMonth,
@@ -491,9 +491,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add LastWeek Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddLastWeek(ExcelAddress address)
+		public IExcelConditionalFormattingTimePeriodGroup AddLastWeek(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.LastWeek,
@@ -503,9 +503,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add NextMonth Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddNextMonth(ExcelAddress address)
+		public IExcelConditionalFormattingTimePeriodGroup AddNextMonth(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.NextMonth,
@@ -515,9 +515,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add NextWeek Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddNextWeek(ExcelAddress address)
+		public IExcelConditionalFormattingTimePeriodGroup AddNextWeek(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.NextWeek,
@@ -527,9 +527,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add ThisMonth Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddThisMonth(ExcelAddress address)
+		public IExcelConditionalFormattingTimePeriodGroup AddThisMonth(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.ThisMonth,
@@ -539,9 +539,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add ThisWeek Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddThisWeek(ExcelAddress address)
+		public IExcelConditionalFormattingTimePeriodGroup AddThisWeek(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.ThisWeek,
@@ -551,9 +551,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Today Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddToday(ExcelAddress address)
+		public IExcelConditionalFormattingTimePeriodGroup AddToday(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Today,
@@ -563,9 +563,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Tomorrow Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddTomorrow(ExcelAddress address)
+		public IExcelConditionalFormattingTimePeriodGroup AddTomorrow(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Tomorrow,
@@ -575,9 +575,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Yesterday Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTimePeriodGroup AddYesterday(ExcelAddress address)
+		public IExcelConditionalFormattingTimePeriodGroup AddYesterday(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTimePeriodGroup)AddRule(
 			  eExcelConditionalFormattingRuleType.Yesterday,
@@ -587,9 +587,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add BeginsWith Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingBeginsWith AddBeginsWith(ExcelAddress address)
+		public IExcelConditionalFormattingBeginsWith AddBeginsWith(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingBeginsWith)AddRule(
 			  eExcelConditionalFormattingRuleType.BeginsWith,
@@ -599,9 +599,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Between Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingBetween AddBetween(ExcelAddress address)
+		public IExcelConditionalFormattingBetween AddBetween(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingBetween)AddRule(
 			  eExcelConditionalFormattingRuleType.Between,
@@ -611,9 +611,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add ContainsBlanks Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingContainsBlanks AddContainsBlanks(ExcelAddress address)
+		public IExcelConditionalFormattingContainsBlanks AddContainsBlanks(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingContainsBlanks)AddRule(
 			  eExcelConditionalFormattingRuleType.ContainsBlanks,
@@ -623,9 +623,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add ContainsErrors Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingContainsErrors AddContainsErrors(ExcelAddress address)
+		public IExcelConditionalFormattingContainsErrors AddContainsErrors(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingContainsErrors)AddRule(
 			  eExcelConditionalFormattingRuleType.ContainsErrors,
@@ -635,9 +635,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add ContainsText Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingContainsText AddContainsText(ExcelAddress address)
+		public IExcelConditionalFormattingContainsText AddContainsText(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingContainsText)AddRule(
 			  eExcelConditionalFormattingRuleType.ContainsText,
@@ -647,9 +647,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add DuplicateValues Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingDuplicateValues AddDuplicateValues(ExcelAddress address)
+		public IExcelConditionalFormattingDuplicateValues AddDuplicateValues(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingDuplicateValues)AddRule(
 			  eExcelConditionalFormattingRuleType.DuplicateValues,
@@ -659,9 +659,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add EndsWith Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingEndsWith AddEndsWith(ExcelAddress address)
+		public IExcelConditionalFormattingEndsWith AddEndsWith(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingEndsWith)AddRule(
 			  eExcelConditionalFormattingRuleType.EndsWith,
@@ -671,9 +671,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Equal Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingEqual AddEqual(ExcelAddress address)
+		public IExcelConditionalFormattingEqual AddEqual(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingEqual)AddRule(
 			  eExcelConditionalFormattingRuleType.Equal,
@@ -683,9 +683,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Expression Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingExpression AddExpression(ExcelAddress address)
+		public IExcelConditionalFormattingExpression AddExpression(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingExpression)AddRule(
 			  eExcelConditionalFormattingRuleType.Expression,
@@ -695,9 +695,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add GreaterThan Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingGreaterThan AddGreaterThan(ExcelAddress address)
+		public IExcelConditionalFormattingGreaterThan AddGreaterThan(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingGreaterThan)AddRule(
 			  eExcelConditionalFormattingRuleType.GreaterThan,
@@ -707,9 +707,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add GreaterThanOrEqual Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingGreaterThanOrEqual AddGreaterThanOrEqual(ExcelAddress address)
+		public IExcelConditionalFormattingGreaterThanOrEqual AddGreaterThanOrEqual(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingGreaterThanOrEqual)AddRule(
 			  eExcelConditionalFormattingRuleType.GreaterThanOrEqual,
@@ -719,9 +719,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add LessThan Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingLessThan AddLessThan(ExcelAddress address)
+		public IExcelConditionalFormattingLessThan AddLessThan(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingLessThan)AddRule(
 			  eExcelConditionalFormattingRuleType.LessThan,
@@ -731,9 +731,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add LessThanOrEqual Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingLessThanOrEqual AddLessThanOrEqual(ExcelAddress address)
+		public IExcelConditionalFormattingLessThanOrEqual AddLessThanOrEqual(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingLessThanOrEqual)AddRule(
 			  eExcelConditionalFormattingRuleType.LessThanOrEqual,
@@ -743,9 +743,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add NotBetween Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingNotBetween AddNotBetween(ExcelAddress address)
+		public IExcelConditionalFormattingNotBetween AddNotBetween(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingNotBetween)AddRule(
 			  eExcelConditionalFormattingRuleType.NotBetween,
@@ -755,9 +755,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add NotContainsBlanks Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingNotContainsBlanks AddNotContainsBlanks(ExcelAddress address)
+		public IExcelConditionalFormattingNotContainsBlanks AddNotContainsBlanks(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingNotContainsBlanks)AddRule(
 			  eExcelConditionalFormattingRuleType.NotContainsBlanks,
@@ -767,9 +767,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add NotContainsErrors Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingNotContainsErrors AddNotContainsErrors(ExcelAddress address)
+		public IExcelConditionalFormattingNotContainsErrors AddNotContainsErrors(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingNotContainsErrors)AddRule(
 			  eExcelConditionalFormattingRuleType.NotContainsErrors,
@@ -779,9 +779,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add NotContainsText Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingNotContainsText AddNotContainsText(ExcelAddress address)
+		public IExcelConditionalFormattingNotContainsText AddNotContainsText(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingNotContainsText)AddRule(
 			  eExcelConditionalFormattingRuleType.NotContainsText,
@@ -791,9 +791,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add NotEqual Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingNotEqual AddNotEqual(ExcelAddress address)
+		public IExcelConditionalFormattingNotEqual AddNotEqual(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingNotEqual)AddRule(
 			  eExcelConditionalFormattingRuleType.NotEqual,
@@ -803,9 +803,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add Unique Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingUniqueValues AddUniqueValues(ExcelAddress address)
+		public IExcelConditionalFormattingUniqueValues AddUniqueValues(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingUniqueValues)AddRule(
 			  eExcelConditionalFormattingRuleType.UniqueValues,
@@ -815,9 +815,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add ThreeColorScale Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingThreeColorScale AddThreeColorScale(ExcelAddress address)
+		public IExcelConditionalFormattingThreeColorScale AddThreeColorScale(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingThreeColorScale)AddRule(
 			  eExcelConditionalFormattingRuleType.ThreeColorScale,
@@ -827,9 +827,9 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add TwoColorScale Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingTwoColorScale AddTwoColorScale(ExcelAddress address)
+		public IExcelConditionalFormattingTwoColorScale AddTwoColorScale(ExcelAddressBase address)
 		{
 			return (IExcelConditionalFormattingTwoColorScale)AddRule(
 			  eExcelConditionalFormattingRuleType.TwoColorScale,
@@ -839,10 +839,10 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Add ThreeIconSet Rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <param name="iconSet">Type of iconset</param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingThreeIconSet<eExcelconditionalFormatting3IconsSetType> AddThreeIconSet(ExcelAddress address, eExcelconditionalFormatting3IconsSetType iconSet)
+		public IExcelConditionalFormattingThreeIconSet<eExcelconditionalFormatting3IconsSetType> AddThreeIconSet(ExcelAddressBase address, eExcelconditionalFormatting3IconsSetType iconSet)
 		{
 			var icon = (IExcelConditionalFormattingThreeIconSet<eExcelconditionalFormatting3IconsSetType>)AddRule(
 				 eExcelConditionalFormattingRuleType.ThreeIconSet,
@@ -854,10 +854,10 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Adds a FourIconSet rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <param name="iconSet"></param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingFourIconSet<eExcelconditionalFormatting4IconsSetType> AddFourIconSet(ExcelAddress address, eExcelconditionalFormatting4IconsSetType iconSet)
+		public IExcelConditionalFormattingFourIconSet<eExcelconditionalFormatting4IconsSetType> AddFourIconSet(ExcelAddressBase address, eExcelconditionalFormatting4IconsSetType iconSet)
 		{
 			var icon = (IExcelConditionalFormattingFourIconSet<eExcelconditionalFormatting4IconsSetType>)AddRule(
 				 eExcelConditionalFormattingRuleType.FourIconSet,
@@ -869,10 +869,10 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Adds a FiveIconSet rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <param name="iconSet"></param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingFiveIconSet AddFiveIconSet(ExcelAddress address, eExcelconditionalFormatting5IconsSetType iconSet)
+		public IExcelConditionalFormattingFiveIconSet AddFiveIconSet(ExcelAddressBase address, eExcelconditionalFormatting5IconsSetType iconSet)
 		{
 			var icon = (IExcelConditionalFormattingFiveIconSet)AddRule(
 				 eExcelConditionalFormattingRuleType.FiveIconSet,
@@ -884,10 +884,10 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <summary>
 		/// Adds a databar rule.
 		/// </summary>
-		/// <param name="address">The <see cref="ExcelAddress"/> of the rule to add.</param>
+		/// <param name="address">The <see cref="ExcelAddressBase"/> of the rule to add.</param>
 		/// <param name="color"></param>
 		/// <returns>Returns the rule added.</returns>
-		public IExcelConditionalFormattingDataBarGroup AddDatabar(ExcelAddress address, Color color)
+		public IExcelConditionalFormattingDataBarGroup AddDatabar(ExcelAddressBase address, Color color)
 		{
 			var dataBar = (IExcelConditionalFormattingDataBarGroup)AddRule(
 				 eExcelConditionalFormattingRuleType.DataBar,

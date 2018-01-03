@@ -1297,7 +1297,7 @@ namespace OfficeOpenXml
 		/// Make the current worksheet active.
 		/// </summary>
 		/// <param name="address">An address range</param>
-		public void Select(ExcelAddress address)
+		public void Select(ExcelAddressBase address)
 		{
 			this.CheckSheetType();
 			this.Select(address, true);
@@ -1308,7 +1308,7 @@ namespace OfficeOpenXml
 		/// </summary>
 		/// <param name="address">A range of cells</param>
 		/// <param name="selectSheet">Make the sheet active</param>
-		public void Select(ExcelAddress address, bool selectSheet)
+		public void Select(ExcelAddressBase address, bool selectSheet)
 		{
 
 			this.CheckSheetType();
@@ -2630,7 +2630,7 @@ namespace OfficeOpenXml
 			var delSF = new List<int>();
 			foreach (var sf in _sharedFormulas.Values)
 			{
-				var a = new ExcelAddress(sf.Address).DeleteRow(rowFrom, rows);
+				var a = new ExcelAddressBase(sf.Address).DeleteRow(rowFrom, rows);
 				if (a == null)
 				{
 					delSF.Add(sf.Index);
@@ -2666,7 +2666,7 @@ namespace OfficeOpenXml
 			var delSF = new List<int>();
 			foreach (var sf in this._sharedFormulas.Values)
 			{
-				var a = new ExcelAddress(sf.Address).DeleteColumn(columnFrom, columns);
+				var a = new ExcelAddressBase(sf.Address).DeleteColumn(columnFrom, columns);
 				if (a == null)
 				{
 					delSF.Add(sf.Index);
@@ -3721,7 +3721,7 @@ namespace OfficeOpenXml
 					if (xr.NodeType == XmlNodeType.Element)
 					{
 						string address = xr.GetAttribute("ref");
-						this.MergedCells.Add(new ExcelAddress(address), false);
+						this.MergedCells.Add(new ExcelAddressBase(address), false);
 					}
 				}
 			}
@@ -4830,7 +4830,7 @@ namespace OfficeOpenXml
 				if (this.EntirelyInRemovedRows(rule.Address.ToString(), rowFrom, rows) || this.EntirelyInRemovedColumns(rule.Address.ToString(), columnFrom, columns))
 					rulesToDelete.Add(rule);
 				else
-					rule.Address = new ExcelAddress(this.UpdateAddresses(rule.Address.ToString(), rowFrom, rows, columnFrom, columns));
+					rule.Address = new ExcelAddressBase(this.UpdateAddresses(rule.Address.ToString(), rowFrom, rows, columnFrom, columns));
 			}
 			this.ConditionalFormatting.TransformFormulaReferences(f => this.UpdateAddresses(f, rowFrom, rows, columnFrom, columns));
 			foreach (var rule in rulesToDelete)
@@ -4870,7 +4870,7 @@ namespace OfficeOpenXml
 		{
 			return originalAddress.Split(' ').All(addressString => 
 			{
-				var address = new ExcelAddress(addressString);
+				var address = new ExcelAddressBase(addressString);
 				return address.Start.Row >= rowFrom && address.End.Row <= rowFrom + rows - 1;
 			});
 		}
@@ -4879,7 +4879,7 @@ namespace OfficeOpenXml
 		{
 			return originalAddress.Split(' ').All(addressString =>
 			{
-				var address = new ExcelAddress(addressString);
+				var address = new ExcelAddressBase(addressString);
 				return address.Start.Column >= columnFrom && address.End.Column <= columnFrom + columns - 1;
 			});
 		}
@@ -4936,7 +4936,7 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private static bool IsInRange(ExcelAddress address, int rows, int rowFrom, int columns, int columnFrom)
+		private static bool IsInRange(ExcelAddressBase address, int rows, int rowFrom, int columns, int columnFrom)
 		{
 			if (rows != 0 && address.Start.Row >= rowFrom && address.Start.Row <= rows - 1 + rowFrom)
 				return true;

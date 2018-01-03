@@ -1781,7 +1781,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void ExcelAddress_Address()
 		{
-			var excelAddress = new ExcelAddress("C3");
+			var excelAddress = new ExcelAddressBase("C3");
 			Assert.AreEqual("C3", excelAddress.Address);
 			Assert.IsNull(excelAddress.Addresses);
 			excelAddress.Address = "C3";
@@ -1792,7 +1792,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void ExcelAddress_AddressWithWorksheet()
 		{
-			var excelAddress = new ExcelAddress("worksheet!C3");
+			var excelAddress = new ExcelAddressBase("worksheet!C3");
 			Assert.AreEqual("worksheet!C3", excelAddress.Address);
 			Assert.IsNull(excelAddress.Addresses);
 			excelAddress.Address = "worksheet!C3";
@@ -1803,7 +1803,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void ExcelAddress_AddressWithQuotedWorksheet()
 		{
-			var excelAddress = new ExcelAddress("'worksheet'!C3");
+			var excelAddress = new ExcelAddressBase("'worksheet'!C3");
 			Assert.AreEqual("'worksheet'!C3", excelAddress.Address);
 			Assert.IsNull(excelAddress.Addresses);
 			excelAddress.Address = "'worksheet'!C3";
@@ -1814,7 +1814,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void ExcelAddress_AddressList()
 		{
-			var excelAddress = new ExcelAddress("C3,D4,E5");
+			var excelAddress = new ExcelAddressBase("C3,D4,E5");
 			Assert.AreEqual("C3,D4,E5", excelAddress.Address);
 			Assert.AreEqual(3, excelAddress.Addresses.Count);
 			Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
@@ -1831,7 +1831,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void ExcelAddress_AddressListWithWorksheets()
 		{
-			var excelAddress = new ExcelAddress("worksheet!C3,worksheet!D4,worksheet!E5");
+			var excelAddress = new ExcelAddressBase("worksheet!C3,worksheet!D4,worksheet!E5");
 			Assert.AreEqual("worksheet!C3,worksheet!D4,worksheet!E5", excelAddress.Address);
 			Assert.AreEqual(3, excelAddress.Addresses.Count);
 			Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
@@ -1848,7 +1848,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void ExcelAddress_AddressListWithQuotedWorksheets()
 		{
-			var excelAddress = new ExcelAddress("'worksheet'!C3,'worksheet'!D4,'worksheet'!E5");
+			var excelAddress = new ExcelAddressBase("'worksheet'!C3,'worksheet'!D4,'worksheet'!E5");
 			Assert.AreEqual("'worksheet'!C3,'worksheet'!D4,'worksheet'!E5", excelAddress.Address);
 			Assert.AreEqual(3, excelAddress.Addresses.Count);
 			Assert.AreEqual("C3", excelAddress.Addresses[0].Address);

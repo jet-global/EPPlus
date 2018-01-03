@@ -34,7 +34,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var address = ArgToString(arguments, 0);
-			var adr = new ExcelAddress(address);
+			var adr = new ExcelAddressBase(address);
 			var ws = adr.WorkSheet;
 			if (string.IsNullOrEmpty(ws))
 			{

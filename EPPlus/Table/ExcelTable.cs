@@ -437,11 +437,11 @@ namespace OfficeOpenXml.Table
 				{
 					if (value)
 					{
-						Address = new ExcelAddress(WorkSheet.Name, ExcelAddressBase.GetAddress(Address.Start.Row, Address.Start.Column, Address.End.Row + 1, Address.End.Column));
+						Address = new ExcelAddressBase(WorkSheet.Name, ExcelAddressBase.GetAddress(Address.Start.Row, Address.Start.Column, Address.End.Row + 1, Address.End.Column));
 					}
 					else
 					{
-						Address = new ExcelAddress(WorkSheet.Name, ExcelAddressBase.GetAddress(Address.Start.Row, Address.Start.Column, Address.End.Row - 1, Address.End.Column));
+						Address = new ExcelAddressBase(WorkSheet.Name, ExcelAddressBase.GetAddress(Address.Start.Row, Address.Start.Column, Address.End.Row - 1, Address.End.Column));
 					}
 					SetXmlNodeString("@ref", Address.Address);
 					if (value)

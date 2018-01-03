@@ -70,7 +70,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 			double value,
 			string formula,
 			eExcelConditionalFormattingRuleType ruleType,
-				ExcelAddress address,
+				ExcelAddressBase address,
 				int priority,
 			ExcelWorksheet worksheet,
 			XmlNode itemElementNode,
@@ -145,7 +145,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="namespaceManager"></param>
 		internal ExcelConditionalFormattingIconDataBarValue(
 			 eExcelConditionalFormattingRuleType ruleType,
-			 ExcelAddress address,
+			 ExcelAddressBase address,
 			 ExcelWorksheet worksheet,
 			 XmlNode itemElementNode,
 			 XmlNamespaceManager namespaceManager)

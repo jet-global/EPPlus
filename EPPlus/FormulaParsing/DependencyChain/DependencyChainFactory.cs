@@ -228,7 +228,7 @@ namespace OfficeOpenXml.FormulaParsing
 							stringBuilder.Append(f.Tokens[i].Value);
 					}
 					cell.Formula = stringBuilder.ToString();
-					ExcelAddress adr = new ExcelAddress((string)ws.Calculate(addressOffsetFormula, f.Row, f.Column));
+					ExcelAddressBase adr = new ExcelAddressBase((string)ws.Calculate(addressOffsetFormula, f.Row, f.Column));
 					cell.Formula = originalFormula;
 					f.ws = string.IsNullOrEmpty(adr.WorkSheet) ? ws : wb.Worksheets[adr.WorkSheet];
 					f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
@@ -281,7 +281,7 @@ namespace OfficeOpenXml.FormulaParsing
 							{
 								if (options.AllowCircularReferences == false)
 								{
-									throw (new CircularReferenceException(string.Format("Circular Reference in cell {0}!{1}", par.ws.Name, ExcelAddress.GetAddress(f.Row, f.Column))));
+									throw (new CircularReferenceException(string.Format("Circular Reference in cell {0}!{1}", par.ws.Name, ExcelAddressBase.GetAddress(f.Row, f.Column))));
 								}
 								else
 								{

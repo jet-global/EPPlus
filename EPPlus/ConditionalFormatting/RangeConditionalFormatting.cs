@@ -38,13 +38,13 @@ namespace OfficeOpenXml.ConditionalFormatting
 	{
 		#region Public Properties
 		public ExcelWorksheet _worksheet;
-		public ExcelAddress _address;
+		public ExcelAddressBase _address;
 		#endregion Public Properties
 
 		#region Constructors
 		public RangeConditionalFormatting(
 		  ExcelWorksheet worksheet,
-		  ExcelAddress address)
+		  ExcelAddressBase address)
 		{
 			Require.Argument(worksheet).IsNotNull("worksheet");
 			Require.Argument(address).IsNotNull("address");

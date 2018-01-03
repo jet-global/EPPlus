@@ -321,7 +321,7 @@ namespace EPPlusTest
 			{
 				var ws = pck.Workbook.Worksheets["Names"];
 
-				var address = new ExcelAddress(ws.Names["FullCol"].NameFormula);
+				var address = new ExcelAddressBase(ws.Names["FullCol"].NameFormula);
 				Assert.AreEqual(1, address.Start.Row);
 				Assert.AreEqual(ExcelPackage.MaxRows, address.End.Row);
 				pck.SaveAs(stream);
@@ -589,7 +589,7 @@ namespace EPPlusTest
 			Assert.AreEqual(range.End.Row, 100);
 			Assert.AreEqual(range.End.Address, "D100");
 
-			ExcelAddress addr = new ExcelAddress("B1:D3");
+			ExcelAddressBase addr = new ExcelAddressBase("B1:D3");
 
 			Assert.AreEqual(addr.Start.Column, 2);
 			Assert.AreEqual(addr.Start.Row, 1);
@@ -645,7 +645,7 @@ namespace EPPlusTest
 			//Assert.AreEqual(range.End.Row, 100);
 			//Assert.AreEqual(range.End.Address, "D100");
 
-			//ExcelAddress addr = new ExcelAddress("B1:D3");
+			//ExcelAddress addr = new ExcelAddressBase("B1:D3");
 
 			//Assert.AreEqual(addr.Start.Column, 2);
 			//Assert.AreEqual(addr.Start.Row, 1);
@@ -970,8 +970,8 @@ namespace EPPlusTest
 			ws.PrinterSettings.ShowHeaders = true;
 			ws.PrinterSettings.PaperSize = ePaperSize.A4;
 
-			ws.PrinterSettings.RepeatRows = new ExcelAddress("1:1");
-			ws.PrinterSettings.RepeatColumns = new ExcelAddress("A:A");
+			ws.PrinterSettings.RepeatRows = new ExcelAddressBase("1:1");
+			ws.PrinterSettings.RepeatColumns = new ExcelAddressBase("A:A");
 
 			ws.PrinterSettings.Draft = true;
 			var r = ws.Cells["A26"];
@@ -981,7 +981,7 @@ namespace EPPlusTest
 			ws.PrinterSettings.HorizontalCentered = true;
 			ws.PrinterSettings.VerticalCentered = true;
 
-			ws.Select(new ExcelAddress("3:4,E5:F6"));
+			ws.Select(new ExcelAddressBase("3:4,E5:F6"));
 
 			ws = _pck.Workbook.Worksheets["RichText"];
 			ws.PrinterSettings.RepeatColumns = ws.Cells["A:B"];
@@ -1901,8 +1901,8 @@ namespace EPPlusTest
 
 			var w = p.Workbook.Worksheets.Add("RepeatRowsAndColumnsTest");
 
-			w.PrinterSettings.RepeatColumns = new ExcelAddress("A:A");
-			w.PrinterSettings.RepeatRows = new ExcelAddress("1:1");
+			w.PrinterSettings.RepeatColumns = new ExcelAddressBase("A:A");
+			w.PrinterSettings.RepeatRows = new ExcelAddressBase("1:1");
 
 			Assert.IsNotNull(w.PrinterSettings.RepeatColumns);
 			Assert.IsNotNull(w.PrinterSettings.RepeatRows); // Fails!
@@ -3164,7 +3164,7 @@ namespace EPPlusTest
 
 					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
 					// Use NULL for Formula
-					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddressBase("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
 					sparklineGroup.Sparklines.Add(sparkline);
 					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
 					package.SaveAs(tempWorkbook);
@@ -3551,7 +3551,7 @@ namespace EPPlusTest
 
 					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
 					// Use NULL for Formula
-					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddressBase("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
 					sparklineGroup.Sparklines.Add(sparkline);
 					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
 					package.SaveAs(tempWorkbook);
@@ -3777,7 +3777,7 @@ namespace EPPlusTest
 
 					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
 					// Use NULL for Formula
-					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddressBase("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
 					sparklineGroup.Sparklines.Add(sparkline);
 					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
 					package.SaveAs(tempWorkbook);
@@ -4934,7 +4934,7 @@ namespace EPPlusTest
 
 					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
 					// Use NULL for Formula
-					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddressBase("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
 					sparklineGroup.Sparklines.Add(sparkline);
 					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
 					package.SaveAs(tempWorkbook);
@@ -5884,7 +5884,7 @@ namespace EPPlusTest
 
 					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
 					// Use NULL for Formula
-					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddressBase("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
 					sparklineGroup.Sparklines.Add(sparkline);
 					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
 					package.SaveAs(tempWorkbook);
@@ -6129,7 +6129,7 @@ namespace EPPlusTest
 
 					var sparklineGroup = new OfficeOpenXml.Drawing.Sparkline.ExcelSparklineGroup(worksheet, worksheet.NameSpaceManager);
 					// Use NULL for Formula
-					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddress("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
+					var sparkline = new OfficeOpenXml.Drawing.Sparkline.ExcelSparkline(new ExcelAddressBase("C3"), null, sparklineGroup, worksheet.NameSpaceManager);
 					sparklineGroup.Sparklines.Add(sparkline);
 					worksheet.SparklineGroups.SparklineGroups.Add(sparklineGroup);
 					package.SaveAs(tempWorkbook);

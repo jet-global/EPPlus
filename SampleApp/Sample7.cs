@@ -49,7 +49,7 @@ namespace EPPlusSamples
 				ws.Cells[1, 5, Rows, 5].FormulaR1C1 = "RC[-4]+RC[-1]";
 
 				//Add a sum at the end
-				ws.Cells[Rows + 1, 5].Formula = string.Format("Sum({0})", new ExcelAddress(1, 5, Rows, 5).Address);
+				ws.Cells[Rows + 1, 5].Formula = string.Format("Sum({0})", new ExcelAddressBase(1, 5, Rows, 5).Address);
 				ws.Cells[Rows + 1, 5].Style.Font.Bold = true;
 				ws.Cells[Rows + 1, 5].Style.Numberformat.Format = "#,##0.00";
 

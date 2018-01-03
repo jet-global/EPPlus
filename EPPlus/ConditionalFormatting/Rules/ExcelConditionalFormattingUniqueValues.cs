@@ -52,7 +52,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="itemElementNode"></param>
 		/// <param name="namespaceManager"></param>
 		internal ExcelConditionalFormattingUniqueValues(
-		  ExcelAddress address,
+		  ExcelAddressBase address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode,
@@ -75,7 +75,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="worksheet"></param>
 		/// <param name="itemElementNode"></param>
 		internal ExcelConditionalFormattingUniqueValues(
-		  ExcelAddress address,
+		  ExcelAddressBase address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode)
@@ -95,7 +95,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="address"></param>
 		/// <param name="worksheet"></param>
 		internal ExcelConditionalFormattingUniqueValues(
-		  ExcelAddress address,
+		  ExcelAddressBase address,
 		  int priority,
 		  ExcelWorksheet worksheet)
 		  : this(

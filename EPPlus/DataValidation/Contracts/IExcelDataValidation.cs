@@ -40,7 +40,7 @@ namespace OfficeOpenXml.DataValidation.Contracts
 		/// <summary>
 		/// Address of data validation
 		/// </summary>
-		ExcelAddress Address { get; }
+		ExcelAddressBase Address { get; }
 		/// <summary>
 		/// Validation type
 		/// </summary>

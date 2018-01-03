@@ -53,7 +53,7 @@ namespace OfficeOpenXml
 		protected ExcelCellAddress _start = null;
 		protected ExcelCellAddress _end = null;
 		private string _firstAddress;
-		internal protected List<ExcelAddress> _addresses = null;
+		internal protected List<ExcelAddressBase> _addresses = null;
 
 		private static readonly HashSet<char> FormulaCharacters = new HashSet<char>(new char[] { '(', ')', '+', '-', '*', '/', '=', '^', '&', '%', '\"' });
 		#endregion
@@ -99,15 +99,22 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// The address for the range
 		/// </summary>
+		/// <remarks>Examples of addresses are "A1" "B1:C2" "A:A" "1:1" "A1:E2,G3:G5" </remarks>
 		public virtual string Address
 		{
 			get
 			{
+				if (string.IsNullOrEmpty(_address) && _fromRow > 0)
+				{
+					_address = GetAddress(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
+				}
 				return _address;
 			}
 			set
 			{
-				_address = value;
+				this.Addresses?.Clear();
+				SetAddress(value);
+				ChangeAddress();
 			}
 		}
 
@@ -215,7 +222,7 @@ namespace OfficeOpenXml
 			}
 		}
 
-		internal virtual List<ExcelAddress> Addresses
+		internal virtual List<ExcelAddressBase> Addresses
 		{
 			get
 			{
@@ -232,6 +239,19 @@ namespace OfficeOpenXml
 		/// DO NOT DELETE: used by subclasses.
 		/// </summary>
 		public ExcelAddressBase() { }
+
+		public ExcelAddressBase(string worksheet, int fromRow, int fromColumn, int toRow, int toColumn)
+			: this(fromRow, fromColumn, toRow, toColumn)
+		{
+			if (string.IsNullOrEmpty(this._ws))
+				this._ws = worksheet;
+		}
+
+		internal ExcelAddressBase(string ws, string address)
+			: this(address)
+		{
+			if (string.IsNullOrEmpty(_ws)) _ws = ws;
+		}
 
 		/// <summary>
 		/// Creates an Address object
@@ -784,8 +804,8 @@ namespace OfficeOpenXml
 			}
 			if (isMulti)
 			{
-				if (_addresses == null) _addresses = new List<ExcelAddress>();
-				_addresses.Add(new ExcelAddress(_ws, address));
+				if (_addresses == null) _addresses = new List<ExcelAddressBase>();
+				_addresses.Add(new ExcelAddressBase(_ws, address));
 			}
 			else
 			{
@@ -1379,112 +1399,6 @@ namespace OfficeOpenXml
 			InternalName,
 			ExternalName,
 			Formula
-		}
-		#endregion
-	}
-
-	/// <summary>
-	/// Range address with the address property readonly.
-	/// NOTE:: This class is dumb and should be deleted whenever a motivated soul reads this.
-	/// </summary>
-	public class ExcelAddress : ExcelAddressBase
-	{
-		#region Properties
-		/// <summary>
-		/// The address for the range
-		/// </summary>
-		/// <remarks>Examples of addresses are "A1" "B1:C2" "A:A" "1:1" "A1:E2,G3:G5" </remarks>
-		public override string Address
-		{
-			get
-			{
-				if (string.IsNullOrEmpty(_address) && _fromRow > 0)
-				{
-					_address = GetAddress(_fromRow, _fromCol, _toRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
-				}
-				return _address;
-			}
-			set
-			{
-				this.Addresses?.Clear();
-				SetAddress(value);
-				ChangeAddress();
-			}
-		}
-		#endregion
-
-		#region Constructors
-		/// <summary>
-		/// Creates an instance of <see cref="ExcelAddress"/>.
-		/// </summary>
-		public ExcelAddress() { }
-
-		/// <summary>
-		/// Creates an instance of <see cref="ExcelAddress"/>.
-		/// </summary>
-		/// <param name="fromRow">start row</param>
-		/// <param name="fromCol">start column</param>
-		/// <param name="toRow">End row</param>
-		/// <param name="toColumn">End column</param>
-		public ExcelAddress(int fromRow, int fromCol, int toRow, int toColumn)
-			: base(fromRow, fromCol, toRow, toColumn)
-		{
-			_ws = string.Empty;
-		}
-
-		/// <summary>
-		/// Creates an instance of <see cref="ExcelAddress"/>.
-		/// </summary>
-		/// <param name="worksheet">A worksheet to assign the address.</param>
-		/// <param name="fromRow">start row</param>
-		/// <param name="fromCol">start column</param>
-		/// <param name="toRow">End row</param>
-		/// <param name="toColumn">End column</param>
-		public ExcelAddress(string worksheet, int fromRow, int fromCol, int toRow, int toColumn)
-			: base(fromRow, fromCol, toRow, toColumn)
-		{
-			if (string.IsNullOrEmpty(this._ws)) this._ws = worksheet;
-		}
-
-		/// <summary>
-		/// Creates an instance of <see cref="ExcelAddress"/>.
-		/// </summary>
-		/// <remarks>Examples of addresses are "A1" "B1:C2" "A:A" "1:1" "A1:E2,G3:G5" </remarks>
-		/// <param name="address">The Excel Address</param>
-		public ExcelAddress(string address) : base(address) { }
-
-		/// <summary>
-		/// Creates an instance of <see cref="ExcelAddress"/>.
-		/// </summary>
-		/// <remarks>Examples of addresses are "A1" "B1:C2" "A:A" "1:1" "A1:E2,G3:G5" </remarks>
-		/// <param name="address">The Excel Address</param>
-		/// <param name="package">Reference to the package to find information about tables and names</param>
-		/// <param name="referenceAddress">The address</param>
-		public ExcelAddress(string address, ExcelPackage package, ExcelAddressBase referenceAddress) :
-			base(address, package, referenceAddress)
-		{ }
-
-		/// <summary>
-		/// Creates an instance of <see cref="ExcelAddress"/>.
-		/// </summary>
-		/// <param name="ws">A worksheet to assign the address.</param>
-		/// <param name="address">The address to parse.</param>
-		internal ExcelAddress(string ws, string address)
-			: base(address)
-		{
-			if (string.IsNullOrEmpty(_ws)) _ws = ws;
-		}
-
-		/// <summary>
-		/// Creates an instance of <see cref="ExcelAddress"/>.
-		/// </summary>
-		/// <param name="ws">A worksheet name ot assign the addres..</param>
-		/// <param name="address">The address to parse.</param>
-		/// <param name="isName">Indicates whether or not this is a named range.</param>
-		internal ExcelAddress(string ws, string address, bool isName)
-			: base(address, isName)
-		{
-			if (string.IsNullOrEmpty(_ws)) _ws = ws;
 		}
 		#endregion
 	}

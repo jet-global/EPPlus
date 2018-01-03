@@ -184,7 +184,7 @@ namespace OfficeOpenXml
 				nextComment.CommentHelper.TopNode.ParentNode.InsertBefore(element, nextComment.CommentHelper.TopNode);
 			}
 			ExcelComment comment = new ExcelComment(this.NameSpaceManager, element, cell);
-			comment.Reference = new ExcelAddress(cell._fromRow, cell._fromCol, cell._fromRow, cell._fromCol).Address;
+			comment.Reference = new ExcelAddressBase(cell._fromRow, cell._fromCol, cell._fromRow, cell._fromCol).Address;
 			comment.RichText.Add(text);
 			if (author != string.Empty)
 				comment.Author = author;
@@ -220,7 +220,7 @@ namespace OfficeOpenXml
 			string author = copyComment.Author;
 			if (string.IsNullOrEmpty(author))
 				author = Thread.CurrentPrincipal.Identity.Name;
-			comment.Reference = new ExcelAddress(cell._fromRow, cell._fromCol, cell._fromRow, cell._fromCol).Address;
+			comment.Reference = new ExcelAddressBase(cell._fromRow, cell._fromCol, cell._fromRow, cell._fromCol).Address;
 			comment.Author = author;
 			comment.Height = copyComment.Height;
 			comment.Width = copyComment.Width;

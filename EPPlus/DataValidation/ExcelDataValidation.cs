@@ -102,7 +102,7 @@ namespace OfficeOpenXml.DataValidation
 			}
 			TopNode = itemElementNode;
 			ValidationType = validationType;
-			Address = new ExcelAddress(address);
+			Address = new ExcelAddressBase(address);
 			Init();
 		}
 
@@ -182,11 +182,11 @@ namespace OfficeOpenXml.DataValidation
 		/// <summary>
 		/// Address of data validation
 		/// </summary>
-		public ExcelAddress Address
+		public ExcelAddressBase Address
 		{
 			get
 			{
-				return new ExcelAddress(GetXmlNodeString(_sqrefPath));
+				return new ExcelAddressBase(GetXmlNodeString(_sqrefPath));
 			}
 			private set
 			{

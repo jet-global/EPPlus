@@ -53,7 +53,7 @@ namespace OfficeOpenXml.ConditionalFormatting.Contracts
 		/// <para>The possible values for this attribute are defined by the
 		/// ST_Sqref simple type (§18.18.76).</para>
 		/// </summary>
-		ExcelAddress Address { get; set; }
+		ExcelAddressBase Address { get; set; }
 
 		/// <summary>
 		/// The priority of this conditional formatting rule. This value is used to determine

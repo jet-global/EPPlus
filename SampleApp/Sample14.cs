@@ -73,7 +73,7 @@ namespace EPPlusSamples
 				// -------------------------------------------------------------------
 				// TwoColorScale Conditional Formatting example
 				// -------------------------------------------------------------------
-				ExcelAddress cfAddress1 = new ExcelAddress("A2:A10");
+				ExcelAddressBase cfAddress1 = new ExcelAddressBase("A2:A10");
 				var cfRule1 = worksheet.ConditionalFormatting.AddTwoColorScale(cfAddress1);
 
 				// Now, lets change some properties:
@@ -91,7 +91,7 @@ namespace EPPlusSamples
 				// -------------------------------------------------------------------
 				// ThreeColorScale Conditional Formatting example
 				// -------------------------------------------------------------------
-				ExcelAddress cfAddress2 = new ExcelAddress(2, 2, 10, 2);  //="B2:B10"
+				ExcelAddressBase cfAddress2 = new ExcelAddressBase(2, 2, 10, 2);  //="B2:B10"
 				var cfRule2 = worksheet.ConditionalFormatting.AddThreeColorScale(cfAddress2);
 
 				// Changing some properties again
@@ -105,7 +105,7 @@ namespace EPPlusSamples
 				var cfRule2_1 = worksheet.ConditionalFormatting.RulesByPriority(cfRule2Priority);
 
 				// And you can even change the rule's Address
-				cfRule2_1.Address = new ExcelAddress("Z1:Z3");
+				cfRule2_1.Address = new ExcelAddressBase("Z1:Z3");
 
 				// -------------------------------------------------------------------
 				// Adding another ThreeColorScale in a different way (observe that we are
@@ -126,7 +126,7 @@ namespace EPPlusSamples
 				// Create an Above Average rule
 				// -------------------------------------------------------------------
 				var cfRule5 = worksheet.ConditionalFormatting.AddAboveAverage(
-				  new ExcelAddress("B11:B20"));
+				  new ExcelAddressBase("B11:B20"));
 				cfRule5.Style.Font.Bold = true;
 				cfRule5.Style.Font.Color.Color = Color.Red;
 				cfRule5.Style.Font.Strike = true;
@@ -135,32 +135,32 @@ namespace EPPlusSamples
 				// Create an Above Or Equal Average rule
 				// -------------------------------------------------------------------
 				var cfRule6 = worksheet.ConditionalFormatting.AddAboveOrEqualAverage(
-				  new ExcelAddress("B11:B20"));
+				  new ExcelAddressBase("B11:B20"));
 
 				// -------------------------------------------------------------------
 				// Create a Below Average rule
 				// -------------------------------------------------------------------
 				var cfRule7 = worksheet.ConditionalFormatting.AddBelowAverage(
-				  new ExcelAddress("B11:B20"));
+				  new ExcelAddressBase("B11:B20"));
 
 				// -------------------------------------------------------------------
 				// Create a Below Or Equal Average rule
 				// -------------------------------------------------------------------
 				var cfRule8 = worksheet.ConditionalFormatting.AddBelowOrEqualAverage(
-				  new ExcelAddress("B11:B20"));
+				  new ExcelAddressBase("B11:B20"));
 
 				// -------------------------------------------------------------------
 				// Create a Above StdDev rule
 				// -------------------------------------------------------------------
 				var cfRule9 = worksheet.ConditionalFormatting.AddAboveStdDev(
-				  new ExcelAddress("B11:B20"));
+				  new ExcelAddressBase("B11:B20"));
 				cfRule9.StdDev = 0;
 
 				// -------------------------------------------------------------------
 				// Create a Below StdDev rule
 				// -------------------------------------------------------------------
 				var cfRule10 = worksheet.ConditionalFormatting.AddBelowStdDev(
-				  new ExcelAddress("B11:B20"));
+				  new ExcelAddressBase("B11:B20"));
 
 				cfRule10.StdDev = 2;
 
@@ -168,7 +168,7 @@ namespace EPPlusSamples
 				// Create a Bottom rule
 				// -------------------------------------------------------------------
 				var cfRule11 = worksheet.ConditionalFormatting.AddBottom(
-				  new ExcelAddress("B11:B20"));
+				  new ExcelAddressBase("B11:B20"));
 
 				cfRule11.Rank = 4;
 
@@ -176,7 +176,7 @@ namespace EPPlusSamples
 				// Create a Bottom Percent rule
 				// -------------------------------------------------------------------
 				var cfRule12 = worksheet.ConditionalFormatting.AddBottomPercent(
-				  new ExcelAddress("B11:B20"));
+				  new ExcelAddressBase("B11:B20"));
 
 				cfRule12.Rank = 15;
 
@@ -184,13 +184,13 @@ namespace EPPlusSamples
 				// Create a Top rule
 				// -------------------------------------------------------------------
 				var cfRule13 = worksheet.ConditionalFormatting.AddTop(
-				  new ExcelAddress("B11:B20"));
+				  new ExcelAddressBase("B11:B20"));
 
 				// -------------------------------------------------------------------
 				// Create a Top Percent rule
 				// -------------------------------------------------------------------
 				var cfRule14 = worksheet.ConditionalFormatting.AddTopPercent(
-				  new ExcelAddress("B11:B20"));
+				  new ExcelAddressBase("B11:B20"));
 
 				cfRule14.Style.Border.Left.Style = ExcelBorderStyle.Thin;
 				cfRule14.Style.Border.Left.Color.Theme = 3;
@@ -203,8 +203,8 @@ namespace EPPlusSamples
 
 				// -------------------------------------------------------------------
 				// Create a Last 7 Days rule
-				// -------------------------------------------------------------------
-				ExcelAddress timePeriodAddress = new ExcelAddress("D21:G34 C11:C20");
+				// ExcelAddressBase
+				ExcelAddressBase timePeriodAddress = new ExcelAddressBase("D21:G34 C11:C20");
 				var cfRule15 = worksheet.ConditionalFormatting.AddLast7Days(
 				  timePeriodAddress);
 
@@ -271,7 +271,7 @@ namespace EPPlusSamples
 				// -------------------------------------------------------------------
 				// Create a BeginsWith rule
 				// -------------------------------------------------------------------
-				ExcelAddress cellIsAddress = new ExcelAddress("E11:E20");
+				ExcelAddressBase cellIsAddress = new ExcelAddressBase("E11:E20");
 				var cfRule25 = worksheet.ConditionalFormatting.AddBeginsWith(
 				  cellIsAddress);
 
@@ -405,10 +405,10 @@ namespace EPPlusSamples
 
 				cfRule42.Formula = "14";
 
-				ExcelAddress cfAddress43 = new ExcelAddress("G2:G10");
+				ExcelAddressBase cfAddress43 = new ExcelAddressBase("G2:G10");
 				var cfRule43 = worksheet.ConditionalFormatting.AddThreeIconSet(cfAddress43, eExcelconditionalFormatting3IconsSetType.TrafficLights1);
 
-				ExcelAddress cfAddress44 = new ExcelAddress("H2:H10");
+				ExcelAddressBase cfAddress44 = new ExcelAddressBase("H2:H10");
 				var cfRule44 = worksheet.ConditionalFormatting.AddDatabar(cfAddress44, Color.DarkBlue);
 
 				// -----------------------------------------------------------

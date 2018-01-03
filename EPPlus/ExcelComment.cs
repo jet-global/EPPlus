@@ -130,7 +130,7 @@ namespace OfficeOpenXml
 				textElem = commentTopNode.OwnerDocument.CreateElement("text", ExcelPackage.schemaMain);
 				commentTopNode.AppendChild(textElem);
 			}
-			if (!cell.Worksheet.VmlDrawingsComments.ContainsKey(ExcelAddress.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)))
+			if (!cell.Worksheet.VmlDrawingsComments.ContainsKey(ExcelAddressBase.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)))
 				cell.Worksheet.VmlDrawingsComments.Add(cell, drawingTopNode);
 			this.TopNode = cell.Worksheet.VmlDrawingsComments[ExcelCellBase.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)].TopNode;
 			this.RichText = new ExcelRichTextCollection(ns, textElem);

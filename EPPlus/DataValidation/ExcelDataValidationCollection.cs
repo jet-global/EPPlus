@@ -160,7 +160,7 @@ namespace OfficeOpenXml.DataValidation
 			Require.Argument(address).IsNotNullOrEmpty("address");
 
 			// ensure that the new address does not collide with an existing validation.
-			var newAddress = new ExcelAddress(address);
+			var newAddress = new ExcelAddressBase(address);
 			if (_validations.Count > 0)
 			{
 				foreach (var validation in _validations)
@@ -362,7 +362,7 @@ namespace OfficeOpenXml.DataValidation
 		{
 			get
 			{
-				var searchedAddress = new ExcelAddress(address);
+				var searchedAddress = new ExcelAddressBase(address);
 				return _validations.Find(x => x.Address.Collide(searchedAddress) != ExcelAddressBase.eAddressCollition.No);
 			}
 		}

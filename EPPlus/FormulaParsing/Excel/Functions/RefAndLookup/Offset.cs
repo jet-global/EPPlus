@@ -49,7 +49,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
 			if (this.ArgumentsAreValid(functionArguments, 3, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			ExcelAddress offset = base.CalculateOffset(functionArguments, context);
+			ExcelAddressBase offset = base.CalculateOffset(functionArguments, context);
 			if (offset == null)
 				return new CompileResult(eErrorType.Ref);
 			var newRange = context.ExcelDataProvider.GetRange(offset.WorkSheet, offset._fromRow, offset._fromCol, offset._toRow, offset._toCol);

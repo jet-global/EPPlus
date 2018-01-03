@@ -41,7 +41,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 	{
 		public static ExcelConditionalFormattingRule Create(
 			eExcelConditionalFormattingRuleType type,
-		ExcelAddress address,
+		ExcelAddressBase address,
 		int priority,
 			ExcelWorksheet worksheet,
 			XmlNode itemElementNode)

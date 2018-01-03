@@ -66,14 +66,14 @@ namespace OfficeOpenXml
 				SetXmlNodeString("@name", value);
 			}
 		}
-		ExcelAddress _address = null;
-		public ExcelAddress Address
+		ExcelAddressBase _address = null;
+		public ExcelAddressBase Address
 		{
 			get
 			{
 				if (_address == null)
 				{
-					_address = new ExcelAddress(GetXmlNodeString("@sqref"));
+					_address = new ExcelAddressBase(GetXmlNodeString("@sqref"));
 				}
 				return _address;
 			}
@@ -84,7 +84,7 @@ namespace OfficeOpenXml
 			}
 		}
 
-		internal ExcelProtectedRange(string name, ExcelAddress address, XmlNamespaceManager ns, XmlNode topNode) :
+		internal ExcelProtectedRange(string name, ExcelAddressBase address, XmlNamespaceManager ns, XmlNode topNode) :
 			 base(ns, topNode)
 		{
 			Name = name;
