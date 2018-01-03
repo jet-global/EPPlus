@@ -89,7 +89,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 						XmlNode clonedConditionalFormattingNode = conditionalFormattingNode.CloneNode(false);
 						conditionalFormattingNode.ParentNode.InsertBefore(clonedConditionalFormattingNode, conditionalFormattingNode);
 						conditionalFormattingNode.RemoveChild(this.Node);
-						clonedConditionalFormattingNode.AppendChild(this.Node);
+						this.TopNode = clonedConditionalFormattingNode.AppendChild(this.Node);
 					}
 					XmlHelper.SetAttribute(this.Node.ParentNode, ExcelConditionalFormattingConstants.Attributes.Sqref, value.AddressSpaceSeparated);
 				}
