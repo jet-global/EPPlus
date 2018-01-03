@@ -347,6 +347,7 @@
     <Compile Include="VBA.cs" />
     <Compile Include="WorkbookTests.cs" />
     <Compile Include="WorksheetsTests.cs" />
+    <Compile Include="XmlHelperTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="EPPlusTest.snk" />

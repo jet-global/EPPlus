@@ -42,6 +42,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.DataValidation;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
@@ -1710,6 +1711,8 @@ namespace OfficeOpenXml
 				this.UpdateSparkLines(-rows, rowFrom, 0, 0);
 				this.UpdateCharts(-rows, 0, rowFrom, 0);
 				this.UpdateDataValidationRanges(rowFrom, -rows, 0, 0);
+				this.UpdateConditionalFormatting(rowFrom, rows, 0, 0);
+				this.UpdateX14ConditionalFormatting(rowFrom, rows, 0, 0);
 			}
 		}
 
@@ -1821,6 +1824,8 @@ namespace OfficeOpenXml
 				this.UpdateCharts(0, -columns, 0, columnFrom);
 				this.UpdateSparkLines(0, 0, -columns, columnFrom);
 				this.UpdateDataValidationRanges(0, 0, columnFrom, -columns);
+				this.UpdateConditionalFormatting(0, 0, columnFrom, columns);
+				this.UpdateX14ConditionalFormatting(0, 0, columnFrom, columns);
 			}
 		}
 
@@ -4815,6 +4820,68 @@ namespace OfficeOpenXml
 				}
 			}
 			return _worksheetXml.DocumentElement.InsertAfter(hl, prevNode);
+		}
+
+		private void UpdateConditionalFormatting(int rowFrom, int rows, int columnFrom, int columns)
+		{
+			var rulesToDelete = new List<IExcelConditionalFormattingRule>();
+			foreach (var rule in this.ConditionalFormatting)
+			{
+				if (this.EntirelyInRemovedRows(rule.Address.ToString(), rowFrom, rows) || this.EntirelyInRemovedColumns(rule.Address.ToString(), columnFrom, columns))
+					rulesToDelete.Add(rule);
+				else
+					rule.Address = new ExcelAddress(this.UpdateAddresses(rule.Address.ToString(), rowFrom, rows, columnFrom, columns));
+			}
+			this.ConditionalFormatting.TransformFormulaReferences(f => this.UpdateAddresses(f, rowFrom, rows, columnFrom, columns));
+			foreach (var rule in rulesToDelete)
+			{
+				this.ConditionalFormatting.Remove(rule);
+			}
+		}
+
+		private void UpdateX14ConditionalFormatting(int rowFrom, int rows, int columnFrom, int columns)
+		{
+			var rulesToDelete = new List<X14CondtionalFormattingRule>();
+			foreach (var rule in this.X14ConditionalFormatting.X14Rules)
+			{
+				if (this.EntirelyInRemovedRows(rule.Address, rowFrom, rows) || this.EntirelyInRemovedColumns(rule.Address, columnFrom, columns))
+					rulesToDelete.Add(rule);
+				else
+					rule.Address = this.UpdateAddresses(rule.Address, rowFrom, rows, columnFrom, columns);
+			}
+			this.X14ConditionalFormatting.TransformFormulaReferences(f => this.UpdateAddresses(f, rowFrom, rows, columnFrom, columns));
+			foreach (var rule in rulesToDelete)
+			{
+				this.X14ConditionalFormatting.X14Rules.Remove(rule);
+			}
+		}
+
+		private string UpdateAddresses(string originalAddress, int rowFrom, int rows, int columnFrom, int columns)
+		{
+			List<string> movedAddresses = new List<string>();
+			foreach(var stringAddress in originalAddress.ToString().Split(' '))
+			{
+				movedAddresses.Add(this.Package.FormulaManager.UpdateFormulaReferences(stringAddress, -rows, -columns, rowFrom, columnFrom, this.Name, this.Name));
+			}
+			return string.Join(" ", movedAddresses);
+		}
+
+		private bool EntirelyInRemovedRows(string originalAddress, int rowFrom, int rows)
+		{
+			return originalAddress.Split(' ').All(addressString => 
+			{
+				var address = new ExcelAddress(addressString);
+				return address.Start.Row >= rowFrom && address.End.Row <= rowFrom + rows - 1;
+			});
+		}
+
+		private bool EntirelyInRemovedColumns(string originalAddress, int columnFrom, int columns)
+		{
+			return originalAddress.Split(' ').All(addressString =>
+			{
+				var address = new ExcelAddress(addressString);
+				return address.Start.Column >= columnFrom && address.End.Column <= columnFrom + columns - 1;
+			});
 		}
 
 		private void UpdateDataValidationRanges(int rowFrom, int rows, int columnFrom, int columns)

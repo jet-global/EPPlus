@@ -29,7 +29,6 @@
  * Eyal Seagull        Added       		  2012-04-03
  *******************************************************************************/
 using System;
-using System.Drawing;
 using System.Globalization;
 using System.Xml;
 using OfficeOpenXml.Utils;
@@ -182,69 +181,6 @@ namespace OfficeOpenXml.ConditionalFormatting
 			}
 			RuleType = ruleType;
 		}
-		/// <summary>
-		/// Initialize the <see cref="ExcelConditionalFormattingColorScaleValue"/>
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="value"></param>
-		/// <param name="formula"></param>
-		/// <param name="ruleType"></param>
-		/// <param name="priority"></param>
-		/// <param name="address"></param>
-		/// <param name="worksheet"></param>
-		/// <param name="namespaceManager"></param>
-		internal ExcelConditionalFormattingIconDataBarValue(
-			eExcelConditionalFormattingValueObjectType type,
-			double value,
-			string formula,
-			eExcelConditionalFormattingRuleType ruleType,
-				ExcelAddress address,
-				int priority,
-			ExcelWorksheet worksheet,
-			XmlNamespaceManager namespaceManager)
-			: this(
-				type,
-				value,
-				formula,
-				ruleType,
-					 address,
-					 priority,
-				worksheet,
-				null,
-				namespaceManager)
-		{
-
-		}
-		/// <summary>
-		/// Initialize the <see cref="ExcelConditionalFormattingColorScaleValue"/>
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="color"></param>
-		/// <param name="ruleType"></param>
-		/// <param name="priority"></param>
-		/// <param name="address"></param>
-		/// <param name="worksheet"></param>
-		/// <param name="namespaceManager"></param>
-		internal ExcelConditionalFormattingIconDataBarValue(
-			eExcelConditionalFormattingValueObjectType type,
-			Color color,
-			eExcelConditionalFormattingRuleType ruleType,
-				ExcelAddress address,
-				int priority,
-			ExcelWorksheet worksheet,
-			XmlNamespaceManager namespaceManager)
-			: this(
-				type,
-				0,
-				null,
-				ruleType,
-					 address,
-					 priority,
-				worksheet,
-				null,
-				namespaceManager)
-		{
-		}
 		#endregion Constructors
 
 		/****************************************************************************************/
@@ -294,30 +230,15 @@ namespace OfficeOpenXml.ConditionalFormatting
 		{
 			get
 			{
-				if ((Type == eExcelConditionalFormattingValueObjectType.Num)
-					 || (Type == eExcelConditionalFormattingValueObjectType.Percent)
-					 || (Type == eExcelConditionalFormattingValueObjectType.Percentile))
-				{
-					return GetXmlNodeDouble(ExcelConditionalFormattingConstants.Paths.ValAttribute);
-				}
-				else
-				{
+				if (string.IsNullOrEmpty(this.Formula))
 					return 0;
-				}
+				var calculatedResult = _worksheet.Calculate(this.Formula);
+				ConvertUtil.TryParseObjectToDecimal(calculatedResult, out var doubleResult);
+				return doubleResult;
 			}
 			set
 			{
-				string valueToStore = string.Empty;
-
-				// Only some types use the @val attribute
-				if ((Type == eExcelConditionalFormattingValueObjectType.Num)
-					|| (Type == eExcelConditionalFormattingValueObjectType.Percent)
-					|| (Type == eExcelConditionalFormattingValueObjectType.Percentile))
-				{
-					valueToStore = value.ToString(CultureInfo.InvariantCulture);
-				}
-
-				SetXmlNodeString(ExcelConditionalFormattingConstants.Paths.ValAttribute, valueToStore);
+				this.Formula = value.ToString();
 			}
 		}
 
@@ -328,22 +249,12 @@ namespace OfficeOpenXml.ConditionalFormatting
 		{
 			get
 			{
-				// Return empty if the Object Value type is not Formula
-				if (Type != eExcelConditionalFormattingValueObjectType.Formula)
-				{
-					return string.Empty;
-				}
-
 				// Excel stores the formula in the @val attribute
 				return GetXmlNodeString(ExcelConditionalFormattingConstants.Paths.ValAttribute);
 			}
 			set
 			{
-				// Only store the formula if the Object Value type is Formula
-				if (Type == eExcelConditionalFormattingValueObjectType.Formula)
-				{
-					SetXmlNodeString(ExcelConditionalFormattingConstants.Paths.ValAttribute, value);
-				}
+				SetXmlNodeString(ExcelConditionalFormattingConstants.Paths.ValAttribute, value);
 			}
 		}
 		#endregion Exposed Properties

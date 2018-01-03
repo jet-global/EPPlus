@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Xml;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
+using static OfficeOpenXml.ConditionalFormatting.ExcelConditionalFormattingConstants;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.ConditionalFormatting
@@ -895,5 +896,17 @@ namespace OfficeOpenXml.ConditionalFormatting
 			return dataBar;
 		}
 		#endregion Conditional Formatting Rules
+
+		#region Virtual Methods
+		/// <summary>
+		/// Applies the <paramref name="transformer"/> to all formulas in the <see cref="ExcelConditionalFormattingCollection"/>.
+		/// </summary>
+		/// <param name="transformer">The transformation to apply.</param>
+		public virtual void TransformFormulaReferences(Func<string, string> transformer)
+		{
+			XmlHelper.TransformValuesInNode(this.TopNode, this.NameSpaceManager, transformer, ".//d:conditionalFormatting//d:formula");
+			XmlHelper.TransformAttributesInNode(this.TopNode, this.NameSpaceManager, transformer, ".//d:conditionalFormatting//d:cfvo", Attributes.Val);
+		}
+		#endregion
 	}
 }
