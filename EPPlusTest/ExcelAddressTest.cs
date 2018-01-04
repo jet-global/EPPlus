@@ -1866,89 +1866,89 @@ namespace EPPlusTest
 
 		#region ExcelFormulaAddress Tests
 		#region Address Tests
-		//[TestMethod]
-		//public void ExcelFormulaAddress_Address()
-		//{
-		//	var excelAddress = new ExcelFormulaAddress("C3");
-		//	Assert.AreEqual("C3", excelAddress.Address);
-		//	Assert.IsNull(excelAddress.Addresses);
-		//	excelAddress.Address = "C3";
-		//	Assert.AreEqual("C3", excelAddress.Address);
-		//	Assert.IsNull(excelAddress.Addresses);
-		//}
+		[TestMethod]
+		public void ExcelFormulaAddress_Address()
+		{
+			var excelAddress = new ExcelFormulaAddress("C3");
+			Assert.AreEqual("C3", excelAddress.Address);
+			Assert.IsNull(excelAddress.Addresses);
+			excelAddress.Address = "C3";
+			Assert.AreEqual("C3", excelAddress.Address);
+			Assert.IsNull(excelAddress.Addresses);
+		}
 
-		//[TestMethod]
-		//public void ExcelFormulaAddress_AddressWithWorksheet()
-		//{
-		//	var excelAddress = new ExcelFormulaAddress("worksheet!C3");
-		//	Assert.AreEqual("worksheet!C3", excelAddress.Address);
-		//	Assert.IsNull(excelAddress.Addresses);
-		//	excelAddress.Address = "worksheet!C3";
-		//	Assert.AreEqual("worksheet!C3", excelAddress.Address);
-		//	Assert.IsNull(excelAddress.Addresses);
-		//}
+		[TestMethod]
+		public void ExcelFormulaAddress_AddressWithWorksheet()
+		{
+			var excelAddress = new ExcelFormulaAddress("worksheet!C3");
+			Assert.AreEqual("worksheet!C3", excelAddress.Address);
+			Assert.IsNull(excelAddress.Addresses);
+			excelAddress.Address = "worksheet!C3";
+			Assert.AreEqual("worksheet!C3", excelAddress.Address);
+			Assert.IsNull(excelAddress.Addresses);
+		}
 
-		//[TestMethod]
-		//public void ExcelFormulaAddress_AddressWithQuotedWorksheet()
-		//{
-		//	var excelAddress = new ExcelFormulaAddress("'worksheet'!C3");
-		//	Assert.AreEqual("'worksheet'!C3", excelAddress.Address);
-		//	Assert.IsNull(excelAddress.Addresses);
-		//	excelAddress.Address = "'worksheet'!C3";
-		//	Assert.AreEqual("'worksheet'!C3", excelAddress.Address);
-		//	Assert.IsNull(excelAddress.Addresses);
-		//}
+		[TestMethod]
+		public void ExcelFormulaAddress_AddressWithQuotedWorksheet()
+		{
+			var excelAddress = new ExcelFormulaAddress("'worksheet'!C3");
+			Assert.AreEqual("'worksheet'!C3", excelAddress.Address);
+			Assert.IsNull(excelAddress.Addresses);
+			excelAddress.Address = "'worksheet'!C3";
+			Assert.AreEqual("'worksheet'!C3", excelAddress.Address);
+			Assert.IsNull(excelAddress.Addresses);
+		}
 
-		//[TestMethod]
-		//public void ExcelFormulaAddress_AddressList()
-		//{
-		//	var excelAddress = new ExcelFormulaAddress("C3,D4,E5");
-		//	Assert.AreEqual("C3,D4,E5", excelAddress.Address);
-		//	Assert.AreEqual(3, excelAddress.Addresses.Count);
-		//	Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
-		//	Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
-		//	Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
-		//	excelAddress.Address = "C3,D4,E5";
-		//	Assert.AreEqual("C3,D4,E5", excelAddress.Address);
-		//	Assert.AreEqual(3, excelAddress.Addresses.Count);
-		//	Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
-		//	Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
-		//	Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
-		//}
+		[TestMethod]
+		public void ExcelFormulaAddress_AddressList()
+		{
+			var excelAddress = new ExcelFormulaAddress("C3,D4,E5");
+			Assert.AreEqual("C3,D4,E5", excelAddress.Address);
+			Assert.AreEqual(3, excelAddress.Addresses.Count);
+			Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
+			Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
+			Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
+			excelAddress.Address = "C3,D4,E5";
+			Assert.AreEqual("C3,D4,E5", excelAddress.Address);
+			Assert.AreEqual(3, excelAddress.Addresses.Count);
+			Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
+			Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
+			Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
+		}
 
-		//[TestMethod]
-		//public void ExcelFormulaAddress_AddressListWithWorksheets()
-		//{
-		//	var excelAddress = new ExcelFormulaAddress("worksheet!C3,worksheet!D4,worksheet!E5");
-		//	Assert.AreEqual("worksheet!C3,worksheet!D4,worksheet!E5", excelAddress.Address);
-		//	Assert.AreEqual(3, excelAddress.Addresses.Count);
-		//	Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
-		//	Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
-		//	Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
-		//	excelAddress.Address = "worksheet!C3,worksheet!D4,worksheet!E5";
-		//	Assert.AreEqual("worksheet!C3,worksheet!D4,worksheet!E5", excelAddress.Address);
-		//	Assert.AreEqual(3, excelAddress.Addresses.Count);
-		//	Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
-		//	Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
-		//	Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
-		//}
+		[TestMethod]
+		public void ExcelFormulaAddress_AddressListWithWorksheets()
+		{
+			var excelAddress = new ExcelFormulaAddress("worksheet!C3,worksheet!D4,worksheet!E5");
+			Assert.AreEqual("worksheet!C3,worksheet!D4,worksheet!E5", excelAddress.Address);
+			Assert.AreEqual(3, excelAddress.Addresses.Count);
+			Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
+			Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
+			Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
+			excelAddress.Address = "worksheet!C3,worksheet!D4,worksheet!E5";
+			Assert.AreEqual("worksheet!C3,worksheet!D4,worksheet!E5", excelAddress.Address);
+			Assert.AreEqual(3, excelAddress.Addresses.Count);
+			Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
+			Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
+			Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
+		}
 
-		//[TestMethod]
-		//public void ExcelFormulaAddress_AddressListWithQuotedWorksheets()
-		//{
-		//	var excelAddress = new ExcelFormulaAddress("'worksheet'!C3,'worksheet'!D4,'worksheet'!E5");
-		//	Assert.AreEqual("'worksheet'!C3,'worksheet'!D4,'worksheet'!E5", excelAddress.Address);
-		//	Assert.AreEqual(3, excelAddress.Addresses.Count);
-		//	Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
-		//	Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
-		//	Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
-		//	excelAddress.Address = "'worksheet'!C3,'worksheet'!D4,'worksheet'!E5";
-		//	Assert.AreEqual("'worksheet'!C3,'worksheet'!D4,'worksheet'!E5", excelAddress.Address);
-		//	Assert.AreEqual(3, excelAddress.Addresses.Count);
-		//	Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
-		//	Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
-		//	Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
-		//}
+		[TestMethod]
+		public void ExcelFormulaAddress_AddressListWithQuotedWorksheets()
+		{
+			var excelAddress = new ExcelFormulaAddress("'worksheet'!C3,'worksheet'!D4,'worksheet'!E5");
+			Assert.AreEqual("'worksheet'!C3,'worksheet'!D4,'worksheet'!E5", excelAddress.Address);
+			Assert.AreEqual(3, excelAddress.Addresses.Count);
+			Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
+			Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
+			Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
+			excelAddress.Address = "'worksheet'!C3,'worksheet'!D4,'worksheet'!E5";
+			Assert.AreEqual("'worksheet'!C3,'worksheet'!D4,'worksheet'!E5", excelAddress.Address);
+			Assert.AreEqual(3, excelAddress.Addresses.Count);
+			Assert.AreEqual("C3", excelAddress.Addresses[0].Address);
+			Assert.AreEqual("D4", excelAddress.Addresses[1].Address);
+			Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
+		}
 		#endregion
 		#endregion
 	}

@@ -1424,6 +1424,13 @@ namespace OfficeOpenXml
 				}
 				return _address;
 			}
+			set
+			{
+				base.Addresses?.Clear();
+				SetAddress(value);
+				ChangeAddress();
+				SetFixed();
+			}
 		}
 		#endregion
 
