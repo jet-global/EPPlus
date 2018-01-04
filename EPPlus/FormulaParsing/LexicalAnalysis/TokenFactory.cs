@@ -146,12 +146,12 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 			{
 				return new Token(token, TokenType.Enumerable);
 			}
-			var at = OfficeOpenXml.ExcelAddressBase.IsValid(token);
-			if (at == ExcelAddressBase.AddressType.InternalAddress)
+			var at = OfficeOpenXml.ExcelAddress.IsValid(token);
+			if (at == ExcelAddress.AddressType.InternalAddress)
 			{
 				return new Token(token.ToUpper(CultureInfo.InvariantCulture), TokenType.ExcelAddress);
 			}
-			if (at == ExcelAddressBase.AddressType.ExternalAddress)
+			if (at == ExcelAddress.AddressType.ExternalAddress)
 			{
 				return new Token(token.ToUpper(CultureInfo.InvariantCulture), TokenType.InvalidReference);
 			}

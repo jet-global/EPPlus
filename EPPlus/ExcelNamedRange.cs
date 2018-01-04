@@ -149,7 +149,7 @@ namespace OfficeOpenXml
 			{
 				if (token.TokenType == TokenType.ExcelAddress)
 				{
-					var address = new ExcelAddressBase(token.Value);
+					var address = new ExcelAddress(token.Value);
 					int fromRow = this.GetRelativeLocation(address._fromRowFixed, address._fromRow, relativeRow, ExcelPackage.MaxRows);
 					int fromColumn = this.GetRelativeLocation(address._fromColFixed, address._fromCol, relativeColumn, ExcelPackage.MaxColumns);
 					int toRow = this.GetRelativeLocation(address._toRowFixed, address._toRow, relativeRow, ExcelPackage.MaxRows);
@@ -193,7 +193,7 @@ namespace OfficeOpenXml
 				var token = tokens.ElementAt(0);
 				if (token.TokenType == TokenType.ExcelAddress)
 				{
-					var excelAddress = new ExcelAddressBase(token.Value);
+					var excelAddress = new ExcelAddress(token.Value);
 					address = new ExcelRange(this.Workbook.Worksheets[excelAddress.WorkSheet], excelAddress.Address);
 					return true;
 				}

@@ -37,7 +37,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 	public class ExcelConditionalFormattingThreeIconSet : ExcelConditionalFormattingIconSetBase<eExcelconditionalFormatting3IconsSetType>
 	{
 		internal ExcelConditionalFormattingThreeIconSet(
-		ExcelAddressBase address,
+		ExcelAddress address,
 		int priority,
 		ExcelWorksheet worksheet,
 		XmlNode itemElementNode,
@@ -79,7 +79,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="namespaceManager"></param>
 		internal ExcelConditionalFormattingIconSetBase(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode,
@@ -201,7 +201,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="itemElementNode"></param>
 		internal ExcelConditionalFormattingIconSetBase(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode)
@@ -224,7 +224,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="worksheet"></param>
 		internal ExcelConditionalFormattingIconSetBase(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet)
 			 : this(

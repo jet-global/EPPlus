@@ -62,7 +62,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="namespaceManager"></param>
 		internal ExcelConditionalFormattingDataBar(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode,
@@ -151,7 +151,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="itemElementNode"></param>
 		internal ExcelConditionalFormattingDataBar(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode)
@@ -174,7 +174,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="worksheet"></param>
 		internal ExcelConditionalFormattingDataBar(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet)
 			 : this(

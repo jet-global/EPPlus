@@ -203,14 +203,14 @@ namespace OfficeOpenXml
 			}
 			set
 			{
-				var ac = new ExcelAddressBase(value);
+				var ac = new ExcelAddress(value);
 				if (ac.IsSingleCell == false)
 				{
 					throw (new InvalidOperationException("ActiveCell must be a single cell."));
 				}
 
 				/*** Active cell must be inside SelectedRange ***/
-				var sd = new ExcelAddressBase(SelectedRange.Replace(" ", ","));
+				var sd = new ExcelAddress(SelectedRange.Replace(" ", ","));
 				Panes[Panes.GetUpperBound(0)].ActiveCell = value;
 
 				if (IsActiveCellInSelection(ac, sd) == false)
@@ -233,10 +233,10 @@ namespace OfficeOpenXml
 			}
 			set
 			{
-				var ac = new ExcelAddressBase(ActiveCell);
+				var ac = new ExcelAddress(ActiveCell);
 
 				/*** Active cell must be inside SelectedRange ***/
-				var sd = new ExcelAddressBase(value.Replace(" ", ","));      //Space delimitered here, replace
+				var sd = new ExcelAddress(value.Replace(" ", ","));      //Space delimitered here, replace
 
 				Panes[Panes.GetUpperBound(0)].SelectedRange = value;
 				if (IsActiveCellInSelection(ac, sd) == false)
@@ -246,10 +246,10 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private bool IsActiveCellInSelection(ExcelAddressBase ac, ExcelAddressBase sd)
+		private bool IsActiveCellInSelection(ExcelAddress ac, ExcelAddress sd)
 		{
 			var c = sd.Collide(ac);
-			if (c == ExcelAddressBase.eAddressCollition.Equal || c == ExcelAddressBase.eAddressCollition.Inside)
+			if (c == ExcelAddress.eAddressCollition.Equal || c == ExcelAddress.eAddressCollition.Inside)
 			{
 				return true;
 			}
@@ -260,7 +260,7 @@ namespace OfficeOpenXml
 					foreach (var sds in sd.Addresses)
 					{
 						c = sds.Collide(ac);
-						if (c == ExcelAddressBase.eAddressCollition.Equal || c == ExcelAddressBase.eAddressCollition.Inside)
+						if (c == ExcelAddress.eAddressCollition.Equal || c == ExcelAddress.eAddressCollition.Inside)
 						{
 							return true;
 						}

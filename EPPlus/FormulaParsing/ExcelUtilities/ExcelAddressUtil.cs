@@ -61,7 +61,7 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 				}
 				token = token.Substring(token.IndexOf('!') + 1);
 			}
-			return OfficeOpenXml.ExcelAddressBase.IsValidAddress(token);
+			return OfficeOpenXml.ExcelAddress.IsValidAddress(token);
 		}
 	}
 }

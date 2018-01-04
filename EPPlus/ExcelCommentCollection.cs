@@ -184,7 +184,7 @@ namespace OfficeOpenXml
 				nextComment.CommentHelper.TopNode.ParentNode.InsertBefore(element, nextComment.CommentHelper.TopNode);
 			}
 			ExcelComment comment = new ExcelComment(this.NameSpaceManager, element, cell);
-			comment.Reference = new ExcelAddressBase(cell._fromRow, cell._fromCol, cell._fromRow, cell._fromCol).Address;
+			comment.Reference = new ExcelAddress(cell._fromRow, cell._fromCol, cell._fromRow, cell._fromCol).Address;
 			comment.RichText.Add(text);
 			if (author != string.Empty)
 				comment.Author = author;
@@ -220,7 +220,7 @@ namespace OfficeOpenXml
 			string author = copyComment.Author;
 			if (string.IsNullOrEmpty(author))
 				author = Thread.CurrentPrincipal.Identity.Name;
-			comment.Reference = new ExcelAddressBase(cell._fromRow, cell._fromCol, cell._fromRow, cell._fromCol).Address;
+			comment.Reference = new ExcelAddress(cell._fromRow, cell._fromCol, cell._fromRow, cell._fromCol).Address;
 			comment.Author = author;
 			comment.Height = copyComment.Height;
 			comment.Width = copyComment.Width;
@@ -274,10 +274,10 @@ namespace OfficeOpenXml
 		internal void Delete(int fromRow, int fromCol, int rows, int columns)
 		{
 			List<ExcelComment> deletedComments = new List<ExcelComment>();
-			ExcelAddressBase address = null;
+			ExcelAddress address = null;
 			foreach (ExcelComment comment in this.Comments)
 			{
-				address = new ExcelAddressBase(comment.Address);
+				address = new ExcelAddress(comment.Address);
 				if (fromCol > 0 && address._fromCol >= fromCol)
 				{
 					address = address.DeleteColumn(fromCol, columns);
@@ -325,7 +325,7 @@ namespace OfficeOpenXml
 		{
 			foreach (ExcelComment comment in this.Comments)
 			{
-				var address = new ExcelAddressBase(comment.Address);
+				var address = new ExcelAddress(comment.Address);
 				if (rows > 0 && address._fromRow >= fromRow)
 				{
 					comment.Reference = comment.Range.AddRow(fromRow, rows).Address;

@@ -149,12 +149,12 @@ namespace OfficeOpenXml.FormulaParsing
 					var adr = new ExcelFormulaAddress(t.Value);
 					if (adr.IsTableAddress)
 					{
-						adr.SetRCFromTable(ws.Package, new ExcelAddressBase(f.Row, f.Column, f.Row, f.Column));
+						adr.SetRCFromTable(ws.Package, new ExcelAddress(f.Row, f.Column, f.Row, f.Column));
 					}
 
-					if (adr.WorkSheet == null && adr.Collide(new ExcelAddressBase(f.Row, f.Column, f.Row, f.Column)) != ExcelAddressBase.eAddressCollition.No && !options.AllowCircularReferences)
+					if (adr.WorkSheet == null && adr.Collide(new ExcelAddress(f.Row, f.Column, f.Row, f.Column)) != ExcelAddress.eAddressCollition.No && !options.AllowCircularReferences)
 					{
-						throw (new CircularReferenceException(string.Format("Circular Reference in cell {0}", ExcelAddressBase.GetAddress(f.Row, f.Column))));
+						throw (new CircularReferenceException(string.Format("Circular Reference in cell {0}", ExcelAddress.GetAddress(f.Row, f.Column))));
 					}
 
 					if (adr._fromRow > 0 && adr._fromCol > 0)
@@ -228,7 +228,7 @@ namespace OfficeOpenXml.FormulaParsing
 							stringBuilder.Append(f.Tokens[i].Value);
 					}
 					cell.Formula = stringBuilder.ToString();
-					ExcelAddressBase adr = new ExcelAddressBase((string)ws.Calculate(addressOffsetFormula, f.Row, f.Column));
+					ExcelAddress adr = new ExcelAddress((string)ws.Calculate(addressOffsetFormula, f.Row, f.Column));
 					cell.Formula = originalFormula;
 					f.ws = string.IsNullOrEmpty(adr.WorkSheet) ? ws : wb.Worksheets[adr.WorkSheet];
 					f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
@@ -249,7 +249,7 @@ namespace OfficeOpenXml.FormulaParsing
 			{
 				var v = f.iterator.Value;
 				if (v == null || v.ToString().Trim() == "") continue;
-				var id = ExcelAddressBase.GetCellID(f.ws.SheetID, f.iterator.Row, f.iterator.Column);
+				var id = ExcelAddress.GetCellID(f.ws.SheetID, f.iterator.Row, f.iterator.Column);
 				if (!depChain.Index.ContainsKey(id))
 				{
 					var rf = new FormulaCell() { SheetID = f.ws.SheetID, Row = f.iterator.Row, Column = f.iterator.Column };
@@ -276,12 +276,12 @@ namespace OfficeOpenXml.FormulaParsing
 						//Check for circular references
 						foreach (var par in stack)
 						{
-							if (ExcelAddressBase.GetCellID(par.ws.SheetID, par.iterator.Row, par.iterator.Column) == id 
-								|| ExcelAddressBase.GetCellID(par.ws.SheetID, par.Row, par.Column) == id)
+							if (ExcelAddress.GetCellID(par.ws.SheetID, par.iterator.Row, par.iterator.Column) == id 
+								|| ExcelAddress.GetCellID(par.ws.SheetID, par.Row, par.Column) == id)
 							{
 								if (options.AllowCircularReferences == false)
 								{
-									throw (new CircularReferenceException(string.Format("Circular Reference in cell {0}!{1}", par.ws.Name, ExcelAddressBase.GetAddress(f.Row, f.Column))));
+									throw (new CircularReferenceException(string.Format("Circular Reference in cell {0}!{1}", par.ws.Name, ExcelAddress.GetAddress(f.Row, f.Column))));
 								}
 								else
 								{

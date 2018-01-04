@@ -14,13 +14,13 @@ namespace OfficeOpenXml
 			{
 				if (!(protectedRangeNode is XmlElement))
 					continue;
-				_baseList.Add(new ExcelProtectedRange(protectedRangeNode.Attributes["name"].Value, new ExcelAddressBase(SqRefUtility.FromSqRefAddress(protectedRangeNode.Attributes["sqref"].Value)), nsm, topNode));
+				_baseList.Add(new ExcelProtectedRange(protectedRangeNode.Attributes["name"].Value, new ExcelAddress(SqRefUtility.FromSqRefAddress(protectedRangeNode.Attributes["sqref"].Value)), nsm, topNode));
 			}
 		}
 
 		private List<ExcelProtectedRange> _baseList = new List<ExcelProtectedRange>();
 
-		public ExcelProtectedRange Add(string name, ExcelAddressBase address)
+		public ExcelProtectedRange Add(string name, ExcelAddress address)
 		{
 			if (!ExistNode("d:protectedRanges"))
 			{

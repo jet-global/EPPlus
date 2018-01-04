@@ -547,7 +547,7 @@ namespace OfficeOpenXml
 		/// Rows to be repeated after each pagebreak.
 		/// The address must be a full row address (ex. 1:1)
 		/// </summary>
-		public ExcelAddressBase RepeatRows
+		public ExcelAddress RepeatRows
 		{
 			get
 			{
@@ -556,7 +556,7 @@ namespace OfficeOpenXml
 					var namedRange = _ws.Names["_xlnm.Print_Titles"];
 					ExcelRangeBase r = new ExcelRange(namedRange.LocalSheet, namedRange.NameFormula);
 					if (r.Start.Column == 1 && r.End.Column == ExcelPackage.MaxColumns)
-						return new ExcelAddressBase(r.FirstAddress);
+						return new ExcelAddress(r.FirstAddress);
 					else if (r._addresses != null)
 						return r._addresses.FirstOrDefault(a => a.Start.Column == 1 && a.End.Column == ExcelPackage.MaxColumns);
 					else
@@ -583,7 +583,7 @@ namespace OfficeOpenXml
 		/// Columns to be repeated after each pagebreak.
 		/// The address must be a full column address (ex. A:A)
 		/// </summary>
-		public ExcelAddressBase RepeatColumns
+		public ExcelAddress RepeatColumns
 		{
 			get
 			{
@@ -592,7 +592,7 @@ namespace OfficeOpenXml
 					var namedRange = _ws.Names["_xlnm.Print_Titles"];
 					ExcelRangeBase r = new ExcelRange(namedRange.LocalSheet, namedRange.NameFormula);
 					if (r.Start.Row == 1 && r.End.Row == ExcelPackage.MaxRows)
-						return new ExcelAddressBase(r.FirstAddress);
+						return new ExcelAddress(r.FirstAddress);
 					else if (r._addresses != null)
 						return r._addresses.FirstOrDefault(a => a.Start.Row == 1 && a.End.Row == ExcelPackage.MaxRows);
 					else

@@ -72,11 +72,11 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// @sqref attribute. Excel (sometimes) groups rules that have the same address inside one node,
 		/// but there are cases when it doesn't such as in pivot table conditional formattings.
 		/// </remarks>
-		public ExcelAddressBase Address
+		public ExcelAddress Address
 		{
 			get
 			{
-				return new ExcelAddressBase(
+				return new ExcelAddress(
 				  this.Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value);
 			}
 			set
@@ -476,7 +476,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="namespaceManager">The <see cref="XmlNamespaceManager"/> for the cfRule.</param>
 		internal ExcelConditionalFormattingRule(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode,
@@ -539,7 +539,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="namespaceManager">The <see cref="XmlNamespaceManager"/> for the cfRule.</param>
 		internal ExcelConditionalFormattingRule(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNamespaceManager namespaceManager)

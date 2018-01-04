@@ -59,7 +59,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void InsertDeleteTest()
 		{
-			var addr = new ExcelAddressBase("A1:B3");
+			var addr = new ExcelAddress("A1:B3");
 
 			Assert.AreEqual(addr.AddRow(2, 4).Address, "A1:B7");
 			Assert.AreEqual(addr.AddColumn(2, 4).Address, "A1:F3");
@@ -73,20 +73,20 @@ namespace EPPlusTest
 		[TestMethod]
 		public void Addresses()
 		{
-			var a1 = new ExcelAddressBase("SalesData!$K$445");
-			var a2 = new ExcelAddressBase("SalesData!$K$445:$M$449,SalesData!$N$448:$Q$454,SalesData!$L$458:$O$464");
-			var a3 = new ExcelAddressBase("SalesData!$K$445:$L$448");
+			var a1 = new ExcelAddress("SalesData!$K$445");
+			var a2 = new ExcelAddress("SalesData!$K$445:$M$449,SalesData!$N$448:$Q$454,SalesData!$L$458:$O$464");
+			var a3 = new ExcelAddress("SalesData!$K$445:$L$448");
 			//var a4 = new ExcelAddressBase("'[1]Risk]TatTWRForm_TWRWEEKLY20130926090'!$N$527");
-			var a5 = new ExcelAddressBase("Table1[[#All],[Title]]");
-			var a6 = new ExcelAddressBase("Table1[#All]");
-			var a7 = new ExcelAddressBase("Table1[[#Headers],[FirstName]:[LastName]]");
-			var a8 = new ExcelAddressBase("Table1[#Headers]");
-			var a9 = new ExcelAddressBase("Table2[[#All],[SubTotal]]");
-			var a10 = new ExcelAddressBase("Table2[#All]");
-			var a11 = new ExcelAddressBase("Table1[[#All],[Freight]]");
-			var a12 = new ExcelAddressBase("[1]!Table1[[LastName]:[Name]]");
-			var a13 = new ExcelAddressBase("Table1[[#All],[Freight]]");
-			var a14 = new ExcelAddressBase("SalesData!$N$5+'test''1'!$J$33");
+			var a5 = new ExcelAddress("Table1[[#All],[Title]]");
+			var a6 = new ExcelAddress("Table1[#All]");
+			var a7 = new ExcelAddress("Table1[[#Headers],[FirstName]:[LastName]]");
+			var a8 = new ExcelAddress("Table1[#Headers]");
+			var a9 = new ExcelAddress("Table2[[#All],[SubTotal]]");
+			var a10 = new ExcelAddress("Table2[#All]");
+			var a11 = new ExcelAddress("Table1[[#All],[Freight]]");
+			var a12 = new ExcelAddress("[1]!Table1[[LastName]:[Name]]");
+			var a13 = new ExcelAddress("Table1[[#All],[Freight]]");
+			var a14 = new ExcelAddress("SalesData!$N$5+'test''1'!$J$33");
 		}
 
 		[TestMethod]
@@ -124,10 +124,10 @@ namespace EPPlusTest
 			string worksheetAddress = "'Sheet One'!$B$2:$B$3";
 			string worksheetAddress2 = "Sheet1!$B$2:$B$3";
 			string workbook, worksheet, address;
-			ExcelAddressBase.SplitAddress(worksheetAddress, out workbook, out worksheet, out address);
+			ExcelAddress.SplitAddress(worksheetAddress, out workbook, out worksheet, out address);
 			Assert.AreEqual("Sheet One", worksheet);
 			Assert.AreEqual("$B$2:$B$3", address);
-			ExcelAddressBase.SplitAddress(worksheetAddress2, out workbook, out worksheet, out address);
+			ExcelAddress.SplitAddress(worksheetAddress2, out workbook, out worksheet, out address);
 			Assert.AreEqual("Sheet1", worksheet);
 			Assert.AreEqual("$B$2:$B$3", address);
 		}
@@ -136,7 +136,7 @@ namespace EPPlusTest
 		public void ShouldHandleWorksheetSpec()
 		{
 			var address = "Sheet1!A1:Sheet1!A2";
-			var excelAddress = new ExcelAddressBase(address);
+			var excelAddress = new ExcelAddress(address);
 			Assert.AreEqual("Sheet1", excelAddress.WorkSheet);
 			Assert.AreEqual(1, excelAddress._fromRow);
 			Assert.AreEqual(2, excelAddress._toRow);

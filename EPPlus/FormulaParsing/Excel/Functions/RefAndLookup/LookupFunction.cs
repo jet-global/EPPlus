@@ -103,7 +103,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			return lookupArgs.RangeLookup ? _compileResultFactory.Create(lastLookupValue) : new CompileResult(eErrorType.NA);
 		}
 
-		protected ExcelAddressBase CalculateOffset(FunctionArgument[] arguments, ParsingContext context)
+		protected ExcelAddress CalculateOffset(FunctionArgument[] arguments, ParsingContext context)
 		{
 			var startRange = ArgToString(arguments, 0);
 			var rowOffset = ArgToInt(arguments, 1);
@@ -115,7 +115,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				width = ArgToInt(arguments, 4);
 			if ((arguments.Length > 3 && height == 0) || (arguments.Length > 4 && width == 0))
 				return null;
-			var address = new ExcelAddressBase(startRange);
+			var address = new ExcelAddress(startRange);
 			string targetWorksheetName;
 			if (string.IsNullOrEmpty(address.WorkSheet))
 				targetWorksheetName = context.Scopes?.Current?.Address?.Worksheet;
@@ -125,7 +125,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			var fromCol = address._fromCol + columnOffset;
 			var toRow = (height != 0 ? height : address._toRow) + rowOffset;
 			var toCol = (width != 0 ? width : address._toCol) + columnOffset;
-			return new ExcelAddressBase(targetWorksheetName, fromRow, fromCol, toRow, toCol);
+			return new ExcelAddress(targetWorksheetName, fromRow, fromCol, toRow, toCol);
 		}
 	}
 }

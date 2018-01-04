@@ -698,10 +698,10 @@ namespace OfficeOpenXml
 				group.Sparklines.Clear();
 				foreach (var originalSparkline in originalWorksheet.SparklineGroups.SparklineGroups[i].Sparklines)
 				{
-					ExcelAddressBase newFormula = null;
+					ExcelAddress newFormula = null;
 					if (originalSparkline.Formula != null)
-						newFormula = new ExcelAddressBase(originalSparkline.Formula.Address);
-					ExcelAddressBase newHostCell = new ExcelAddressBase(originalSparkline.HostCell.Address);
+						newFormula = new ExcelAddress(originalSparkline.Formula.Address);
+					ExcelAddress newHostCell = new ExcelAddress(originalSparkline.HostCell.Address);
 					var sparkline = new ExcelSparkline(newHostCell, newFormula, group, group.NameSpaceManager);
 					sparkline.Formula?.ChangeWorksheet(originalWorksheet.Name, addedWorksheet.Name);
 					group.Sparklines.Add(sparkline);

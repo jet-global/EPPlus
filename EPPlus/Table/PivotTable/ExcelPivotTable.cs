@@ -55,7 +55,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			LoadXmlSafe(PivotTableXml, Part.GetStream());
 			init();
 			TopNode = PivotTableXml.DocumentElement;
-			Address = new ExcelAddressBase(GetXmlNodeString("d:location/@ref"));
+			Address = new ExcelAddress(GetXmlNodeString("d:location/@ref"));
 
 			_cacheDefinition = new ExcelPivotCacheDefinition(sheet.NameSpaceManager, this);
 			LoadFields();
@@ -122,7 +122,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="sourceAddress">The address of the Source data</param>
 		/// <param name="name"></param>
 		/// <param name="tblId"></param>
-		internal ExcelPivotTable(ExcelWorksheet sheet, ExcelAddressBase address, ExcelRangeBase sourceAddress, string name, int tblId) :
+		internal ExcelPivotTable(ExcelWorksheet sheet, ExcelAddress address, ExcelRangeBase sourceAddress, string name, int tblId) :
 			 base(sheet.NameSpaceManager)
 		{
 			WorkSheet = sheet;
@@ -184,7 +184,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 
 		}
-		private string GetStartXml(string name, int id, ExcelAddressBase address, ExcelAddressBase sourceAddress)
+		private string GetStartXml(string name, int id, ExcelAddress address, ExcelAddress sourceAddress)
 		{
 			string xml = string.Format("<pivotTableDefinition xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" name=\"{0}\" cacheId=\"{1}\" dataOnRows=\"1\" applyNumberFormats=\"0\" applyBorderFormats=\"0\" applyFontFormats=\"0\" applyPatternFormats=\"0\" applyAlignmentFormats=\"0\" applyWidthHeightFormats=\"1\" dataCaption=\"Data\"  createdVersion=\"4\" showMemberPropertyTips=\"0\" useAutoFormatting=\"1\" itemPrintTitles=\"1\" indent=\"0\" compact=\"0\" compactData=\"0\" gridDropZones=\"1\">", name, id);
 
@@ -294,7 +294,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// The location of the pivot table
 		/// </summary>
-		public ExcelAddressBase Address
+		public ExcelAddress Address
 		{
 			get;
 			internal set;

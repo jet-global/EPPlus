@@ -57,7 +57,7 @@ namespace OfficeOpenXml
 	/// <summary>
 	/// A range of cells 
 	/// </summary>
-	public class ExcelRangeBase : ExcelAddressBase, IExcelCell, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
+	public class ExcelRangeBase : ExcelAddress, IExcelCell, IEnumerable<ExcelRangeBase>, IEnumerator<ExcelRangeBase>
 	{
 		#region Class Variables
 		/// <summary>
@@ -223,7 +223,7 @@ namespace OfficeOpenXml
 		/// <param name="address"></param>
 		/// <param name="valueMethod"></param>
 		/// <param name="value"></param>
-		private void SetValueAddress(ExcelAddressBase address, _setValue valueMethod, object value)
+		private void SetValueAddress(ExcelAddress address, _setValue valueMethod, object value)
 		{
 			IsRangeValid(string.Empty);
 			if (this._fromRow == 1 && this._fromCol == 1 && this._toRow == ExcelPackage.MaxRows && this._toCol == ExcelPackage.MaxColumns)  //Full sheet (ex ws.Cells.Value=0). Set value for A1 only to avoid hanging 
@@ -509,7 +509,7 @@ namespace OfficeOpenXml
 					SetSharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, this._fromRow, this._fromCol), this, false);
 				else
 				{
-					SetSharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, this._fromRow, this._fromCol), new ExcelAddressBase(this.WorkSheet, this.FirstAddress), false);
+					SetSharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, this._fromRow, this._fromCol), new ExcelAddress(this.WorkSheet, this.FirstAddress), false);
 					foreach (var address in this.Addresses)
 					{
 						SetSharedFormula(this, ExcelCellBase.TranslateFromR1C1(value, address.Start.Row, address.Start.Column), address, false);
@@ -558,7 +558,7 @@ namespace OfficeOpenXml
 				this.myWorksheet.MergedCells.Clear(this);
 				if (value)
 				{
-					this.myWorksheet.MergedCells.Add(new ExcelAddressBase(this.FirstAddress), true);
+					this.myWorksheet.MergedCells.Add(new ExcelAddress(this.FirstAddress), true);
 					if (this.Addresses != null)
 					{
 						foreach (var address in this.Addresses)
@@ -590,7 +590,7 @@ namespace OfficeOpenXml
 			get
 			{
 				IsRangeValid("autofilter");
-				ExcelAddressBase address = this.myWorksheet.AutoFilterAddress;
+				ExcelAddress address = this.myWorksheet.AutoFilterAddress;
 				if (address == null)
 					return false;
 				if (this._fromRow >= address.Start.Row
@@ -781,7 +781,7 @@ namespace OfficeOpenXml
 		/// <param name="address">The address of the formula</param>
 		/// <param name="IsArray">If the forumla is an array formula.</param>
 		/// <param name="clearValue">Whether or not setting the formula is allowed to clear the cell's value.</param>
-		private static void SetSharedFormula(ExcelRangeBase range, string value, ExcelAddressBase address, bool IsArray, bool clearValue = true)
+		private static void SetSharedFormula(ExcelRangeBase range, string value, ExcelAddress address, bool IsArray, bool clearValue = true)
 		{
 			if (range._fromRow == 1 && range._fromCol == 1 && range._toRow == ExcelPackage.MaxRows && range._toCol == ExcelPackage.MaxColumns)  //Full sheet (ex ws.Cells.Value=0). Set value for A1 only to avoid hanging 
 			{
@@ -873,7 +873,7 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private void CheckAndSplitSharedFormula(ExcelAddressBase address)
+		private void CheckAndSplitSharedFormula(ExcelAddress address)
 		{
 			for (int col = address._fromCol; col <= address._toCol; col++)
 			{
@@ -889,7 +889,7 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private void UpdateSharedFormulaAnchors(ExcelAddressBase address)
+		private void UpdateSharedFormulaAnchors(ExcelAddress address)
 		{
 			List<int> formulas = new List<int>();
 			for (int col = address._fromCol; col <= address._toCol; col++)
@@ -915,7 +915,7 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private void UpdateSharedFormulaAnchor(ExcelAddressBase address, int ix)
+		private void UpdateSharedFormulaAnchor(ExcelAddress address, int ix)
 		{
 			var sharedFormula = this.myWorksheet._sharedFormulas[ix];
 			var fRange = this.myWorksheet.Cells[sharedFormula.Address];
@@ -943,11 +943,11 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private bool TryFindNewAnchorCoordinates(ExcelWorksheet.Formulas currentFormula, ExcelAddressBase newAddress, out int row, out int column)
+		private bool TryFindNewAnchorCoordinates(ExcelWorksheet.Formulas currentFormula, ExcelAddress newAddress, out int row, out int column)
 		{
 			row = -1;
 			column = -1;
-			var currentAddress = new ExcelAddressBase(currentFormula.Address);
+			var currentAddress = new ExcelAddress(currentFormula.Address);
 			for (int r = currentAddress._fromRow; r <= currentAddress._toRow; r++)
 			{
 				for (int c = currentAddress._fromCol; c <= currentAddress._toCol; c++)
@@ -1023,7 +1023,7 @@ namespace OfficeOpenXml
 			var addresses = rule.Address.AddressSpaceSeparated.Split(' ');
 			foreach (var address in addresses)
 			{
-				var addressBase = new ExcelAddressBase(address);
+				var addressBase = new ExcelAddress(address);
 				var collision = addressBase.Collide(cell, true);
 				if (collision != eAddressCollition.No)
 					return true;
@@ -1217,7 +1217,7 @@ namespace OfficeOpenXml
 
 		private object GetValueArray()
 		{
-			ExcelAddressBase addr;
+			ExcelAddress addr;
 			if (this._fromRow == 1 && this._fromCol == 1 && this._toRow == ExcelPackage.MaxRows && this._toCol == ExcelPackage.MaxColumns)
 			{
 				addr = this.myWorksheet.Dimension;
@@ -1245,7 +1245,7 @@ namespace OfficeOpenXml
 			return v;
 		}
 
-		private ExcelAddressBase GetAddressDim(ExcelRangeBase addr)
+		private ExcelAddress GetAddressDim(ExcelRangeBase addr)
 		{
 			int fromRow, fromCol, toRow, toCol;
 			var d = this.myWorksheet.Dimension;
@@ -1262,7 +1262,7 @@ namespace OfficeOpenXml
 				if (this._fromRow > this._toRow || this._fromCol > this._toCol)
 					return null;
 				else
-					return new ExcelAddressBase(fromRow, fromCol, toRow, toCol);
+					return new ExcelAddress(fromRow, fromCol, toRow, toCol);
 			}
 		}
 
@@ -1274,12 +1274,12 @@ namespace OfficeOpenXml
 				return this.myWorksheet.GetValueInner(this._fromRow, this._fromCol);
 		}
 
-		private void DeleteCheckMergedCells(ExcelAddressBase range)
+		private void DeleteCheckMergedCells(ExcelAddress range)
 		{
 			var removeItems = new List<string>();
 			foreach (var addr in this.Worksheet.MergedCells)
 			{
-				var addrCol = range.Collide(new ExcelAddressBase(range.WorkSheet, addr));
+				var addrCol = range.Collide(new ExcelAddress(range.WorkSheet, addr));
 				if (addrCol != eAddressCollition.No)
 				{
 					if (addrCol == eAddressCollition.Inside)
@@ -1304,7 +1304,7 @@ namespace OfficeOpenXml
 				{
 					if (sparkline.HostCell.Collide(this) != eAddressCollition.No)
 					{
-						ExcelAddressBase newFormula = null;
+						ExcelAddress newFormula = null;
 						if (sparkline.Formula != null)
 						{
 							ExcelRangeBase.SplitAddress(sparkline.Formula.Address, out string workbook, out string worksheet, out string address);
@@ -1314,7 +1314,7 @@ namespace OfficeOpenXml
 								if (this.Worksheet.Name == worksheet)
 									worksheet = destination.Worksheet.Name;
 								newFormulaString = string.IsNullOrEmpty(worksheet) ? newFormulaString : ExcelRangeBase.GetFullAddress(worksheet, newFormulaString);
-								newFormula = new ExcelAddressBase(newFormulaString);
+								newFormula = new ExcelAddress(newFormulaString);
 							}
 						}
 						var newHostCellAddress = this.myWorkbook.Package.FormulaManager.UpdateFormulaReferences(sparkline.HostCell.Address, destination._fromRow - this._fromRow, destination._fromCol - this._fromCol, 0, 0, this.WorkSheet, this.WorkSheet, true);
@@ -1323,7 +1323,7 @@ namespace OfficeOpenXml
 							newGroup = new ExcelSparklineGroup(destination.Worksheet, group.NameSpaceManager);
 							newGroup.CopyNodeStyle(group.TopNode);
 						}
-						var newSparkline = new ExcelSparkline(new ExcelAddressBase(newHostCellAddress), newFormula, newGroup, sparkline.NameSpaceManager);
+						var newSparkline = new ExcelSparkline(new ExcelAddress(newHostCellAddress), newFormula, newGroup, sparkline.NameSpaceManager);
 						newGroup.Sparklines.Add(newSparkline);
 					}
 				}
@@ -1342,7 +1342,7 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				return new RangeConditionalFormatting(this.myWorksheet, new ExcelAddressBase(this.Address));
+				return new RangeConditionalFormatting(this.myWorksheet, new ExcelAddress(this.Address));
 			}
 		}
 
@@ -1371,7 +1371,7 @@ namespace OfficeOpenXml
 			int rows = range.Rows - 1;
 			if (rows >= 0 && range.Columns > 0)
 			{
-				var table = this.myWorksheet.Tables.Add(new ExcelAddressBase(this._fromRow, this._fromCol, this._fromRow + (rows <= 0 ? 1 : rows), this._fromCol + range.Columns - 1), tableName);
+				var table = this.myWorksheet.Tables.Add(new ExcelAddress(this._fromRow, this._fromCol, this._fromRow + (rows <= 0 ? 1 : rows), this._fromCol + range.Columns - 1), tableName);
 				table.ShowHeader = printHeaders;
 				table.TableStyle = tableStyle;
 			}
@@ -1425,7 +1425,7 @@ namespace OfficeOpenXml
 			int rows = (table.Rows.Count == 0 ? 1 : table.Rows.Count) + (printHeaders ? 1 : 0);
 			if (rows >= 0 && table.Columns.Count > 0)
 			{
-				var excelTable = this.myWorksheet.Tables.Add(new ExcelAddressBase(this._fromRow, this._fromCol, this._fromRow + rows - 1, this._fromCol + table.Columns.Count - 1), table.TableName);
+				var excelTable = this.myWorksheet.Tables.Add(new ExcelAddress(this._fromRow, this._fromCol, this._fromRow + rows - 1, this._fromCol + table.Columns.Count - 1), table.TableName);
 				excelTable.ShowHeader = printHeaders;
 				excelTable.TableStyle = tableStyle;
 			}
@@ -2018,16 +2018,16 @@ namespace OfficeOpenXml
 					copiedValue.Add(cell);
 				}
 			}
-			var copiedMergedCells = new Dictionary<int, ExcelAddressBase>();
+			var copiedMergedCells = new Dictionary<int, ExcelAddress>();
 			var csem = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.myWorksheet.MergedCells.Cells, this._fromRow, this._fromCol, this._toRow, this._toCol);
 			while (csem.MoveNext())
 			{
 				if (!copiedMergedCells.ContainsKey(csem.Value))
 				{
-					var adr = new ExcelAddressBase(this.myWorksheet.Name, this.myWorksheet.MergedCells.List[csem.Value]);
+					var adr = new ExcelAddress(this.myWorksheet.Name, this.myWorksheet.MergedCells.List[csem.Value]);
 					if (this.Collide(adr) == eAddressCollition.Inside)
 					{
-						copiedMergedCells.Add(csem.Value, new ExcelAddressBase(
+						copiedMergedCells.Add(csem.Value, new ExcelAddress(
 							destination._fromRow + (adr.Start.Row - this._fromRow),
 							destination._fromCol + (adr.Start.Column - this._fromCol),
 							destination._fromRow + (adr.End.Row - this._fromRow),
@@ -2132,7 +2132,7 @@ namespace OfficeOpenXml
 			SetSharedFormula(this, arrayFormula, this, true);
 		}
 
-		internal void Delete(ExcelAddressBase range, bool shift)
+		internal void Delete(ExcelAddress range, bool shift)
 		{
 			this.myWorksheet.MergedCells.Clear(range);
 			//First find the start cell
@@ -2228,10 +2228,10 @@ namespace OfficeOpenXml
 			}
 
 			//Get any autofilter to widen these columns
-			var afAddr = new List<ExcelAddressBase>();
+			var afAddr = new List<ExcelAddress>();
 			if (this.myWorksheet.AutoFilterAddress != null)
 			{
-				afAddr.Add(new ExcelAddressBase(this.myWorksheet.AutoFilterAddress._fromRow,
+				afAddr.Add(new ExcelAddress(this.myWorksheet.AutoFilterAddress._fromRow,
 													this.myWorksheet.AutoFilterAddress._fromCol,
 													this.myWorksheet.AutoFilterAddress._fromRow,
 													this.myWorksheet.AutoFilterAddress._toCol));
@@ -2241,7 +2241,7 @@ namespace OfficeOpenXml
 			{
 				if (table.AutoFilterAddress != null)
 				{
-					afAddr.Add(new ExcelAddressBase(table.AutoFilterAddress._fromRow,
+					afAddr.Add(new ExcelAddress(table.AutoFilterAddress._fromRow,
 																			table.AutoFilterAddress._fromCol,
 																			table.AutoFilterAddress._fromRow,
 																			table.AutoFilterAddress._toCol));
@@ -2360,7 +2360,7 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				return new ExcelRangeBase(this.myWorksheet, ExcelAddressBase.GetAddress(this.cellEnum.Row, this.cellEnum.Column));
+				return new ExcelRangeBase(this.myWorksheet, ExcelAddress.GetAddress(this.cellEnum.Row, this.cellEnum.Column));
 			}
 		}
 
@@ -2371,7 +2371,7 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				return ((new ExcelRangeBase(this.myWorksheet, ExcelAddressBase.GetAddress(this.cellEnum.Row, this.cellEnum.Column))));
+				return ((new ExcelRangeBase(this.myWorksheet, ExcelAddress.GetAddress(this.cellEnum.Row, this.cellEnum.Column))));
 			}
 		}
 

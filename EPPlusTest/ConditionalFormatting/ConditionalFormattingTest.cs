@@ -84,7 +84,7 @@ namespace EPPlusTest
 			var cf = ws.ConditionalFormatting.AddDatabar(ws.Cells["A1:A5"], Color.BlueViolet);
 			Assert.AreEqual("sheetData", cf.Node.ParentNode.PreviousSibling.LocalName);
 			Assert.AreEqual("headerFooter", cf.Node.ParentNode.NextSibling.LocalName);
-			cf.Address = new ExcelAddressBase("C3");
+			cf.Address = new ExcelAddress("C3");
 			Assert.AreEqual("sheetData", cf.Node.ParentNode.PreviousSibling.LocalName);
 			Assert.AreEqual("headerFooter", cf.Node.ParentNode.NextSibling.LocalName);
 		}
@@ -144,8 +144,8 @@ namespace EPPlusTest
 				var twoColor = (ExcelConditionalFormattingTwoColorScale)sheet.ConditionalFormatting.First(cf => cf is ExcelConditionalFormattingTwoColorScale);
 				var threeColor = (ExcelConditionalFormattingThreeColorScale)sheet.ConditionalFormatting.First(cf => cf is ExcelConditionalFormattingThreeColorScale);
 
-				var defaultTwoColorScale = new ExcelConditionalFormattingTwoColorScale(new ExcelAddressBase("A1"), 2, sheet);
-				var defaultThreeColorScale = new ExcelConditionalFormattingThreeColorScale(new ExcelAddressBase("A1"), 2, sheet);
+				var defaultTwoColorScale = new ExcelConditionalFormattingTwoColorScale(new ExcelAddress("A1"), 2, sheet);
+				var defaultThreeColorScale = new ExcelConditionalFormattingThreeColorScale(new ExcelAddress("A1"), 2, sheet);
 
 				Assert.IsNull(twoColor.HighValue);
 				Assert.IsNull(twoColor.LowValue);
@@ -183,7 +183,7 @@ namespace EPPlusTest
 				worksheet.ConditionalFormatting.AddGreaterThan(worksheet.Cells["A1:A5"]);
 				var format = worksheet.ConditionalFormatting.ElementAt(0);
 				Assert.AreEqual("A1:A5", format.Address.Address);
-				format.Address = new ExcelAddressBase("C2");
+				format.Address = new ExcelAddress("C2");
 				Assert.AreEqual("C2", format.Address.Address);
 			}
 		}
@@ -205,7 +205,7 @@ namespace EPPlusTest
 				Assert.AreEqual(format1.Address.Address, format2.Address.Address);
 				Assert.AreNotEqual(format2.Address, format3.Address);
 				Assert.AreEqual(2, format1.Node.ParentNode.ChildNodes.Count);
-				format2.Address = new ExcelAddressBase("A2");
+				format2.Address = new ExcelAddress("A2");
 				Assert.AreNotEqual(format1.Node.ParentNode, format2.Node.ParentNode);
 				Assert.AreNotEqual(format2.Node.ParentNode, format3.Node.ParentNode);
 				Assert.AreNotEqual(format1.Address.Address, format2.Address.Address);
@@ -236,7 +236,7 @@ namespace EPPlusTest
 				Assert.AreEqual("$K$6", minNode.Attributes["val"].Value);
 				Assert.AreEqual("$K$7", maxNode.Attributes["val"].Value);
 
-				formattings.TransformFormulaReferences(s => { try { return new ExcelAddressBase(s).AddColumn(1, 2).Address; } catch { return s; } });
+				formattings.TransformFormulaReferences(s => { try { return new ExcelAddress(s).AddColumn(1, 2).Address; } catch { return s; } });
 
 				formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
 				twoColorScale = (ExcelConditionalFormattingTwoColorScale)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.TwoColorScale);
@@ -266,7 +266,7 @@ namespace EPPlusTest
 				Assert.AreEqual("$Q$9", iconSet.Icon4.Formula);
 				Assert.AreEqual("$Q$10", iconSet.Icon5.Formula);
 
-				formattings.TransformFormulaReferences(s => { try { return new ExcelAddressBase(s).AddColumn(1, 2).AddRow(1, 3).Address; } catch { return s; } });
+				formattings.TransformFormulaReferences(s => { try { return new ExcelAddress(s).AddColumn(1, 2).AddRow(1, 3).Address; } catch { return s; } });
 
 				formattings = package.Workbook.Worksheets.First().ConditionalFormatting;
 				iconSet = (ExcelConditionalFormattingFiveIconSet)formattings.First(x => x.Type == eExcelConditionalFormattingRuleType.FiveIconSet);

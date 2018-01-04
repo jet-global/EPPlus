@@ -118,20 +118,20 @@ namespace EPPlusTest
 			chart1 = firstSheet.Drawings[0] as ExcelBarChart;
 			string workbook, worksheet, range;
 			var serie1 = chart1.Series[0];
-			ExcelAddressBase.SplitAddress(serie1.Series, out workbook, out worksheet, out range);
+			ExcelAddress.SplitAddress(serie1.Series, out workbook, out worksheet, out range);
 			Assert.AreEqual("Sheet1", worksheet);
 			Assert.AreEqual("$B$1:$B$16", range);
-			ExcelAddressBase.SplitAddress(serie1.XSeries, out workbook, out worksheet, out range);
+			ExcelAddress.SplitAddress(serie1.XSeries, out workbook, out worksheet, out range);
 			Assert.AreEqual("Sheet1", worksheet);
 			Assert.AreEqual("$A$1:$A$16", range);
 
 			Assert.AreEqual(1, secondSheet.Drawings.Count);
 			var chart2 = secondSheet.Drawings[0] as ExcelBarChart;
 			var serie2 = chart2.Series[0];
-			ExcelAddressBase.SplitAddress(serie2.Series, out workbook, out worksheet, out range);
+			ExcelAddress.SplitAddress(serie2.Series, out workbook, out worksheet, out range);
 			Assert.AreEqual("Sheet2", worksheet);
 			Assert.AreEqual("$B$1:$B$16", range);
-			ExcelAddressBase.SplitAddress(serie2.XSeries, out workbook, out worksheet, out range);
+			ExcelAddress.SplitAddress(serie2.XSeries, out workbook, out worksheet, out range);
 			Assert.AreEqual("Sheet2", worksheet);
 			Assert.AreEqual("$A$1:$A$16", range);
 		}
@@ -154,7 +154,7 @@ namespace EPPlusTest
 			chart1 = firstSheet.Drawings[0] as ExcelBarChart;
 			string workbook, worksheet, range;
 			var serie1 = chart1.Series[0];
-			ExcelAddressBase.SplitAddress(serie1.Series, out workbook, out worksheet, out range);
+			ExcelAddress.SplitAddress(serie1.Series, out workbook, out worksheet, out range);
 			Assert.AreEqual("Sheet1", worksheet);
 			Assert.AreEqual("$B$1:$B$16", range);
 			Assert.AreEqual(string.Empty, serie1.XSeries);
@@ -162,7 +162,7 @@ namespace EPPlusTest
 			Assert.AreEqual(1, secondSheet.Drawings.Count);
 			var chart2 = secondSheet.Drawings[0] as ExcelBarChart;
 			var serie2 = chart2.Series[0];
-			ExcelAddressBase.SplitAddress(serie2.Series, out workbook, out worksheet, out range);
+			ExcelAddress.SplitAddress(serie2.Series, out workbook, out worksheet, out range);
 			Assert.AreEqual("Sheet2", worksheet);
 			Assert.AreEqual("$B$1:$B$16", range);
 			Assert.AreEqual(string.Empty, serie1.XSeries);

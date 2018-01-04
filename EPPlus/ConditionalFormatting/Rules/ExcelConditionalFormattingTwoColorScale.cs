@@ -67,7 +67,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="itemElementNode"></param>
 		/// <param name="namespaceManager"></param>
 		internal ExcelConditionalFormattingTwoColorScale(
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode,
@@ -120,7 +120,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="worksheet"></param>
 		/// <param name="itemElementNode"></param>
 		internal ExcelConditionalFormattingTwoColorScale(
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode)
@@ -140,7 +140,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="address"></param>
 		/// <param name="worksheet"></param>
 		internal ExcelConditionalFormattingTwoColorScale(
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet)
 		  : this(

@@ -43,12 +43,12 @@ namespace OfficeOpenXml.Drawing.Sparkline
 		/// <summary>
 		///  Optional, gets or sets a value that corresponds to the XSD Schema's "F" argument.
 		/// </summary>
-		public ExcelAddressBase Formula { get; set; }
+		public ExcelAddress Formula { get; set; }
 
 		/// <summary>
 		/// Required, gets or sets a value that corresponds to the XSD Schema's "SqRef" argument.
 		/// </summary>
-		public ExcelAddressBase HostCell { get; set; }
+		public ExcelAddress HostCell { get; set; }
 
 		/// <summary>
 		/// Gets the <see cref="ExcelSparklineGroup"/> this <see cref="ExcelSparkline"/> belongs to.
@@ -72,18 +72,18 @@ namespace OfficeOpenXml.Drawing.Sparkline
 			this.Group = group;
 			var formulaNode = topNode.SelectSingleNode("xm:f", nameSpaceManager);
 			var hostNode = topNode.SelectSingleNode("xm:sqref", nameSpaceManager);
-			this.Formula = formulaNode != null ? new ExcelAddressBase(formulaNode.InnerText) : null;
+			this.Formula = formulaNode != null ? new ExcelAddress(formulaNode.InnerText) : null;
 			this.HostCell = group.Worksheet.Cells[hostNode.InnerText];
 		}
 
 		/// <summary>
 		/// Create a new <see cref="ExcelSparkline"/> from scratch (without using an existing XML Node).
 		/// </summary>
-		/// <param name="hostCell">The <see cref="ExcelAddressBase"/> that hosts the sparkline.</param>
-		/// <param name="formula">The <see cref="ExcelAddressBase"/> that the sparkline references. Can be null.</param>
+		/// <param name="hostCell">The <see cref="ExcelAddress"/> that hosts the sparkline.</param>
+		/// <param name="formula">The <see cref="ExcelAddress"/> that the sparkline references. Can be null.</param>
 		/// <param name="group">The <see cref="ExcelSparklineGroup"/> that this line will belong to.</param>
 		/// <param name="nameSpaceManager">The namespace manager for the object.</param>
-		public ExcelSparkline(ExcelAddressBase hostCell, ExcelAddressBase formula, ExcelSparklineGroup group, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
+		public ExcelSparkline(ExcelAddress hostCell, ExcelAddress formula, ExcelSparklineGroup group, XmlNamespaceManager nameSpaceManager) : base(nameSpaceManager)
 		{
 			if (hostCell == null)
 				throw new ArgumentNullException(nameof(hostCell));

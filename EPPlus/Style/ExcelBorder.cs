@@ -144,7 +144,7 @@ namespace OfficeOpenXml.Style
 		/// <param name="Style">The border style</param>
 		public void BorderAround(ExcelBorderStyle Style)
 		{
-			var addr = new ExcelAddressBase(_address);
+			var addr = new ExcelAddress(_address);
 			SetBorderAroundStyle(Style, addr);
 		}
 		/// <summary>
@@ -154,21 +154,21 @@ namespace OfficeOpenXml.Style
 		/// <param name="Color">The color of the border</param>
 		public void BorderAround(ExcelBorderStyle Style, System.Drawing.Color Color)
 		{
-			var addr = new ExcelAddressBase(_address);
+			var addr = new ExcelAddress(_address);
 			SetBorderAroundStyle(Style, addr);
 
-			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderTop, eStyleProperty.Color, Color.ToArgb().ToString("X"), _positionID, new ExcelAddressBase(addr._fromRow, addr._fromCol, addr._fromRow, addr._toCol).Address));
-			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderBottom, eStyleProperty.Color, Color.ToArgb().ToString("X"), _positionID, new ExcelAddressBase(addr._toRow, addr._fromCol, addr._toRow, addr._toCol).Address));
-			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderLeft, eStyleProperty.Color, Color.ToArgb().ToString("X"), _positionID, new ExcelAddressBase(addr._fromRow, addr._fromCol, addr._toRow, addr._fromCol).Address));
-			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderRight, eStyleProperty.Color, Color.ToArgb().ToString("X"), _positionID, new ExcelAddressBase(addr._fromRow, addr._toCol, addr._toRow, addr._toCol).Address));
+			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderTop, eStyleProperty.Color, Color.ToArgb().ToString("X"), _positionID, new ExcelAddress(addr._fromRow, addr._fromCol, addr._fromRow, addr._toCol).Address));
+			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderBottom, eStyleProperty.Color, Color.ToArgb().ToString("X"), _positionID, new ExcelAddress(addr._toRow, addr._fromCol, addr._toRow, addr._toCol).Address));
+			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderLeft, eStyleProperty.Color, Color.ToArgb().ToString("X"), _positionID, new ExcelAddress(addr._fromRow, addr._fromCol, addr._toRow, addr._fromCol).Address));
+			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderRight, eStyleProperty.Color, Color.ToArgb().ToString("X"), _positionID, new ExcelAddress(addr._fromRow, addr._toCol, addr._toRow, addr._toCol).Address));
 		}
 
-		private void SetBorderAroundStyle(ExcelBorderStyle Style, ExcelAddressBase addr)
+		private void SetBorderAroundStyle(ExcelBorderStyle Style, ExcelAddress addr)
 		{
-			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderTop, eStyleProperty.Style, Style, _positionID, new ExcelAddressBase(addr._fromRow, addr._fromCol, addr._fromRow, addr._toCol).Address));
-			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderBottom, eStyleProperty.Style, Style, _positionID, new ExcelAddressBase(addr._toRow, addr._fromCol, addr._toRow, addr._toCol).Address));
-			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderLeft, eStyleProperty.Style, Style, _positionID, new ExcelAddressBase(addr._fromRow, addr._fromCol, addr._toRow, addr._fromCol).Address));
-			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderRight, eStyleProperty.Style, Style, _positionID, new ExcelAddressBase(addr._fromRow, addr._toCol, addr._toRow, addr._toCol).Address));
+			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderTop, eStyleProperty.Style, Style, _positionID, new ExcelAddress(addr._fromRow, addr._fromCol, addr._fromRow, addr._toCol).Address));
+			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderBottom, eStyleProperty.Style, Style, _positionID, new ExcelAddress(addr._toRow, addr._fromCol, addr._toRow, addr._toCol).Address));
+			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderLeft, eStyleProperty.Style, Style, _positionID, new ExcelAddress(addr._fromRow, addr._fromCol, addr._toRow, addr._fromCol).Address));
+			_ChangedEvent(this, new StyleChangeEventArgs(eStyleClass.BorderRight, eStyleProperty.Style, Style, _positionID, new ExcelAddress(addr._fromRow, addr._toCol, addr._toRow, addr._toCol).Address));
 		}
 	}
 }

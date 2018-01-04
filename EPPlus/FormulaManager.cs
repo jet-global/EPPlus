@@ -69,7 +69,7 @@ namespace OfficeOpenXml
 				{
 					if (t.TokenType == TokenType.ExcelAddress)
 					{
-						var address = new ExcelAddressBase(t.Value);
+						var address = new ExcelAddress(t.Value);
 						var referencesModifiedWorksheet = (string.IsNullOrEmpty(address._ws) && currentSheet.IsEquivalentTo(modifiedSheet)) || modifiedSheet.IsEquivalentTo(address._ws);
 
 						if (!setFixed && (!string.IsNullOrEmpty(address._wb) || !referencesModifiedWorksheet))
@@ -171,7 +171,7 @@ namespace OfficeOpenXml
 				{
 					if (t.TokenType == TokenType.ExcelAddress)
 					{
-						var address = new ExcelAddressBase(t.Value);
+						var address = new ExcelAddress(t.Value);
 						if (address == null || !address.IsValidRowCol())
 							formula += "#REF!";
 						else

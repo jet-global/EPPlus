@@ -54,7 +54,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="namespaceManager"></param>
 		internal ExcelConditionalFormattingAverageGroup(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode,
@@ -79,7 +79,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="itemElementNode"></param>
 		internal ExcelConditionalFormattingAverageGroup(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet,
 		  XmlNode itemElementNode)
@@ -102,7 +102,7 @@ namespace OfficeOpenXml.ConditionalFormatting
 		/// <param name="worksheet"></param>
 		internal ExcelConditionalFormattingAverageGroup(
 		  eExcelConditionalFormattingRuleType type,
-		  ExcelAddressBase address,
+		  ExcelAddress address,
 		  int priority,
 		  ExcelWorksheet worksheet)
 		  : this(
