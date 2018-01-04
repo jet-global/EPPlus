@@ -645,7 +645,7 @@ namespace EPPlusTest
 			//Assert.AreEqual(range.End.Row, 100);
 			//Assert.AreEqual(range.End.Address, "D100");
 
-			//ExcelAddress addr = new ExcelAddress("B1:D3");
+			//ExcelAddress addr = new ExcelAddressBase("B1:D3");
 
 			//Assert.AreEqual(addr.Start.Column, 2);
 			//Assert.AreEqual(addr.Start.Row, 1);
@@ -2581,7 +2581,7 @@ namespace EPPlusTest
 			{
 				for (int row = 1; row < 30; row++)
 				{
-					ws.SetValue(row, col, "cell " + ExcelAddressBase.GetAddress(row, col));
+					ws.SetValue(row, col, "cell " + ExcelAddress.GetAddress(row, col));
 				}
 			}
 			ws.Cells["A1:P30"].Copy(ws.Cells["B1"]);
@@ -6268,7 +6268,7 @@ namespace EPPlusTest
 				using (var package = new ExcelPackage(file))
 				{
 					var sheet = package.Workbook.Worksheets.Add("Sheet1");
-					sheet.AutoFilterAddress = new ExcelAddressBase("B2:D4");
+					sheet.AutoFilterAddress = new ExcelAddress("B2:D4");
 					Assert.IsTrue(sheet.HasAutoFilters);
 					package.Save();
 				}

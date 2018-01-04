@@ -15,7 +15,7 @@ namespace OfficeOpenXml.FormulaParsing
 			ICellStoreEnumerator<ExcelCoreValue> _values = null;
 			int _fromRow, _toRow, _fromCol, _toCol;
 			int _cellCount = 0;
-			ExcelAddressBase _address;
+			ExcelAddress _address;
 			ICellInfo _cell;
 
 			public RangeInfo(ExcelWorksheet ws, int fromRow, int fromCol, int toRow, int toCol)
@@ -25,13 +25,13 @@ namespace OfficeOpenXml.FormulaParsing
 				_fromCol = fromCol;
 				_toRow = toRow;
 				_toCol = toCol;
-				_address = new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol);
+				_address = new ExcelAddress(_fromRow, _fromCol, _toRow, _toCol);
 				_address._ws = ws.Name;
 				_values = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(ws._values, _fromRow, _fromCol, _toRow, _toCol);
 				_cell = new CellInfo(_ws, _values);
 			}
 
-			public RangeInfo(ExcelWorksheet ws, ExcelAddressBase address)
+			public RangeInfo(ExcelWorksheet ws, ExcelAddress address)
 			{
 				_ws = ws;
 				_fromRow = address._fromRow;
@@ -147,7 +147,7 @@ namespace OfficeOpenXml.FormulaParsing
 				return this;
 			}
 
-			public ExcelAddressBase Address
+			public ExcelAddress Address
 			{
 				get { return _address; }
 			}
@@ -297,7 +297,7 @@ namespace OfficeOpenXml.FormulaParsing
 			var addr = new ExcelAddress(worksheet, address);
 			if (addr.IsTableAddress)
 			{
-				addr.SetRCFromTable(_package, new ExcelAddressBase(row, column, row, column));
+				addr.SetRCFromTable(_package, new ExcelAddress(row, column, row, column));
 			}
 			//SetCurrentWorksheet(addr.WorkSheet);
 			var wsName = string.IsNullOrEmpty(addr.WorkSheet) ? _currentWorksheet.Name : addr.WorkSheet;
@@ -338,7 +338,7 @@ namespace OfficeOpenXml.FormulaParsing
 					return null;
 				}
 			}
-			id = ExcelAddressBase.GetCellID(nameItem.LocalSheetID, nameItem.Index, 0);
+			id = ExcelAddress.GetCellID(nameItem.LocalSheetID, nameItem.Index, 0);
 			if (_names.ContainsKey(id))
 			{
 				return _names[id];

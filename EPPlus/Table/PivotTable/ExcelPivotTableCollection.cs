@@ -74,7 +74,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="Source">The Source data range address</param>
 		/// <param name="Name">The name of the table. Must be unique </param>
 		/// <returns>The pivottable object</returns>
-		public ExcelPivotTable Add(ExcelAddressBase Range, ExcelRangeBase Source, string Name)
+		public ExcelPivotTable Add(ExcelAddress Range, ExcelRangeBase Source, string Name)
 		{
 			if (string.IsNullOrEmpty(Name))
 			{
@@ -90,7 +90,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			foreach (var t in _pivotTables)
 			{
-				if (t.Address.Collide(Range) != ExcelAddressBase.eAddressCollition.No)
+				if (t.Address.Collide(Range) != ExcelAddress.eAddressCollition.No)
 				{
 					throw (new ArgumentException(string.Format("Table range collides with table {0}", t.Name)));
 				}

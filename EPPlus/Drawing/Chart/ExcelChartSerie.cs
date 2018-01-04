@@ -120,7 +120,7 @@ namespace OfficeOpenXml.Drawing.Chart
 		/// <summary>
 		/// Header address for the serie.
 		/// </summary>
-		public ExcelAddressBase HeaderAddress
+		public ExcelAddress HeaderAddress
 		{
 			get
 			{
@@ -131,7 +131,7 @@ namespace OfficeOpenXml.Drawing.Chart
 				}
 				else
 				{
-					return new ExcelAddressBase(address);
+					return new ExcelAddress(address);
 				}
 			}
 			set

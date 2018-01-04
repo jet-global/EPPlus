@@ -357,7 +357,7 @@ namespace OfficeOpenXml
 			}
 			set
 			{
-				_worksheet.MergedCells.Add(new ExcelAddressBase(Row, 1, Row, ExcelPackage.MaxColumns), true);
+				_worksheet.MergedCells.Add(new ExcelAddress(Row, 1, Row, ExcelPackage.MaxColumns), true);
 			}
 		}
 		internal static ulong GetRowID(int sheetID, int row)

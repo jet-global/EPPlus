@@ -59,7 +59,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void InsertDeleteTest()
 		{
-			var addr = new ExcelAddressBase("A1:B3");
+			var addr = new ExcelAddress("A1:B3");
 
 			Assert.AreEqual(addr.AddRow(2, 4).Address, "A1:B7");
 			Assert.AreEqual(addr.AddColumn(2, 4).Address, "A1:F3");
@@ -76,7 +76,7 @@ namespace EPPlusTest
 			var a1 = new ExcelAddress("SalesData!$K$445");
 			var a2 = new ExcelAddress("SalesData!$K$445:$M$449,SalesData!$N$448:$Q$454,SalesData!$L$458:$O$464");
 			var a3 = new ExcelAddress("SalesData!$K$445:$L$448");
-			//var a4 = new ExcelAddress("'[1]Risk]TatTWRForm_TWRWEEKLY20130926090'!$N$527");
+			//var a4 = new ExcelAddressBase("'[1]Risk]TatTWRForm_TWRWEEKLY20130926090'!$N$527");
 			var a5 = new ExcelAddress("Table1[[#All],[Title]]");
 			var a6 = new ExcelAddress("Table1[#All]");
 			var a7 = new ExcelAddress("Table1[[#Headers],[FirstName]:[LastName]]");
@@ -124,10 +124,10 @@ namespace EPPlusTest
 			string worksheetAddress = "'Sheet One'!$B$2:$B$3";
 			string worksheetAddress2 = "Sheet1!$B$2:$B$3";
 			string workbook, worksheet, address;
-			ExcelAddressBase.SplitAddress(worksheetAddress, out workbook, out worksheet, out address);
+			ExcelAddress.SplitAddress(worksheetAddress, out workbook, out worksheet, out address);
 			Assert.AreEqual("Sheet One", worksheet);
 			Assert.AreEqual("$B$2:$B$3", address);
-			ExcelAddressBase.SplitAddress(worksheetAddress2, out workbook, out worksheet, out address);
+			ExcelAddress.SplitAddress(worksheetAddress2, out workbook, out worksheet, out address);
 			Assert.AreEqual("Sheet1", worksheet);
 			Assert.AreEqual("$B$2:$B$3", address);
 		}

@@ -241,7 +241,7 @@ namespace OfficeOpenXml
 			#endregion
 
 			#region Internal Methods
-			internal void Add(ExcelAddressBase address, bool doValidate)
+			internal void Add(ExcelAddress address, bool doValidate)
 			{
 				int ix = 0;
 
@@ -258,7 +258,7 @@ namespace OfficeOpenXml
 				}
 			}
 
-			internal void SetIndex(ExcelAddressBase address, int ix)
+			internal void SetIndex(ExcelAddress address, int ix)
 			{
 				if (address._fromRow == 1 && address._toRow == ExcelPackage.MaxRows) //Entire row
 				{
@@ -290,7 +290,7 @@ namespace OfficeOpenXml
 				this.List.Remove(Item);
 			}
 
-			internal void Clear(ExcelAddressBase Destination)
+			internal void Clear(ExcelAddress Destination)
 			{
 				var cse = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.Cells, Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
 				var used = new HashSet<int>();
@@ -299,8 +299,8 @@ namespace OfficeOpenXml
 					var v = cse.Value;
 					if (!used.Contains(v) && this.List[v] != null)
 					{
-						var adr = new ExcelAddressBase(this.List[v]);
-						if (!(Destination.Collide(adr) == ExcelAddressBase.eAddressCollition.Inside || Destination.Collide(adr) == ExcelAddressBase.eAddressCollition.Equal))
+						var adr = new ExcelAddress(this.List[v]);
+						if (!(Destination.Collide(adr) == ExcelAddress.eAddressCollition.Inside || Destination.Collide(adr) == ExcelAddress.eAddressCollition.Equal))
 						{
 							throw (new InvalidOperationException(string.Format("Can't delete/overwrite merged cells. A range is partly merged with the another merged range. {0}", adr._address)));
 						}
@@ -317,7 +317,7 @@ namespace OfficeOpenXml
 			#endregion
 
 			#region Private Methods
-			private bool Validate(ExcelAddressBase address)
+			private bool Validate(ExcelAddress address)
 			{
 				int ix = 0;
 				if (this.Cells.Exists(address._fromRow, address._fromCol, out ix))
@@ -522,7 +522,7 @@ namespace OfficeOpenXml
 		/// Address for autofilter
 		/// <seealso cref="ExcelRangeBase.AutoFilter" />
 		/// </summary>
-		public ExcelAddressBase AutoFilterAddress
+		public ExcelAddress AutoFilterAddress
 		{
 			get
 			{
@@ -534,7 +534,7 @@ namespace OfficeOpenXml
 				}
 				else
 				{
-					return new ExcelAddressBase(address);
+					return new ExcelAddress(address);
 				}
 			}
 			internal set
@@ -964,7 +964,7 @@ namespace OfficeOpenXml
 		/// Top left cell to Bottom right.
 		/// If the worksheet has no cells, null is returned
 		/// </summary>
-		public ExcelAddressBase Dimension
+		public ExcelAddress Dimension
 		{
 			get
 			{
@@ -972,7 +972,7 @@ namespace OfficeOpenXml
 				int fromRow, fromCol, toRow, toCol;
 				if (this._values.GetDimension(out fromRow, out fromCol, out toRow, out toCol))
 				{
-					var addr = new ExcelAddressBase(fromRow, fromCol, toRow, toCol);
+					var addr = new ExcelAddress(fromRow, fromCol, toRow, toCol);
 					addr._ws = Name;
 					return addr;
 				}
@@ -1374,7 +1374,7 @@ namespace OfficeOpenXml
 				foreach (var f in this._sharedFormulas.Values)
 				{
 					if (f.StartRow >= rowFrom) f.StartRow += rows;
-					var a = new ExcelAddressBase(f.Address);
+					var a = new ExcelAddress(f.Address);
 					if (a._fromRow >= rowFrom)
 					{
 						a._fromRow += rows;
@@ -1384,7 +1384,7 @@ namespace OfficeOpenXml
 					{
 						a._toRow += rows;
 					}
-					f.Address = ExcelAddressBase.GetAddress(a._fromRow, a._fromCol, a._toRow, a._toCol);
+					f.Address = ExcelAddress.GetAddress(a._fromRow, a._fromCol, a._toRow, a._toCol);
 					f.Formula = this.Package.FormulaManager.UpdateFormulaReferences(f.Formula, rows, 0, rowFrom, 0, this.Name, this.Name);
 				}
 				var cse = CellStoreEnumeratorFactory<object>.GetNewEnumerator(_formulas);
@@ -1494,7 +1494,7 @@ namespace OfficeOpenXml
 				foreach (var f in _sharedFormulas.Values)
 				{
 					if (f.StartCol >= columnFrom) f.StartCol += columns;
-					var a = new ExcelAddressBase(f.Address);
+					var a = new ExcelAddress(f.Address);
 					if (a._fromCol >= columnFrom)
 					{
 						a._fromCol += columns;
@@ -1504,7 +1504,7 @@ namespace OfficeOpenXml
 					{
 						a._toCol += columns;
 					}
-					f.Address = ExcelAddressBase.GetAddress(a._fromRow, a._fromCol, a._toRow, a._toCol);
+					f.Address = ExcelAddress.GetAddress(a._fromRow, a._fromCol, a._toRow, a._toCol);
 					f.Formula = this.Package.FormulaManager.UpdateFormulaReferences(f.Formula, 0, columns, 0, columnFrom, this.Name, this.Name);
 				}
 
@@ -2041,7 +2041,7 @@ namespace OfficeOpenXml
 		{
 			CheckSheetType();
 			int row, col;
-			ExcelAddressBase.GetRowCol(Address, out row, out col, true);
+			ExcelAddress.GetRowCol(Address, out row, out col, true);
 			if (row < 1 || col < 1 || row > ExcelPackage.MaxRows && col > ExcelPackage.MaxColumns)
 			{
 				throw new ArgumentOutOfRangeException("Address is invalid or out of range");
@@ -2837,7 +2837,7 @@ namespace OfficeOpenXml
 			{
 				if (!string.IsNullOrEmpty(_mergedCells[i]))
 				{
-					ExcelAddressBase addr = new ExcelAddressBase(_mergedCells[i]), newAddr;
+					ExcelAddress addr = new ExcelAddress(_mergedCells[i]), newAddr;
 					if (delete)
 					{
 						newAddr = addr.DeleteRow(row, rows);
@@ -2889,7 +2889,7 @@ namespace OfficeOpenXml
 			{
 				if (!string.IsNullOrEmpty(_mergedCells[i]))
 				{
-					ExcelAddressBase addr = new ExcelAddressBase(_mergedCells[i]), newAddr;
+					ExcelAddress addr = new ExcelAddress(_mergedCells[i]), newAddr;
 					if (delete)
 					{
 						newAddr = addr.DeleteColumn(column, columns);
@@ -3543,7 +3543,7 @@ namespace OfficeOpenXml
 		private void LoadCells(XmlTextReader xr)
 		{
 			this.ReadUntil(xr, "sheetData", "mergeCells", "hyperlinks", "rowBreaks", "colBreaks");
-			ExcelAddressBase address = null;
+			ExcelAddress address = null;
 			string type = "";
 			int style = 0;
 			int row = 0;
@@ -3586,11 +3586,11 @@ namespace OfficeOpenXml
 					{
 						//Handle cells with no reference
 						col++;
-						address = new ExcelAddressBase(row, col, row, col);
+						address = new ExcelAddress(row, col, row, col);
 					}
 					else
 					{
-						address = new ExcelAddressBase(r);
+						address = new ExcelAddress(r);
 						col = address._fromCol;
 					}
 

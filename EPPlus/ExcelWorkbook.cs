@@ -669,7 +669,7 @@ namespace OfficeOpenXml
 									string externalReference = this.ExternalReferences.References[index - 1].Name;
 									if (externalReference.StartsWith("file:///", StringComparison.InvariantCultureIgnoreCase))
 										externalReference = externalReference.Substring(8);
-									var address = new ExcelAddressBase(nameFormula.Substring(end + 1));
+									var address = new ExcelAddress(nameFormula.Substring(end + 1));
 									string cellAddress = address.Address.Substring(address.Address.LastIndexOf('!'));
 									nameFormula = $"{nameFormula.Substring(0, start)}'[{externalReference}]{address.WorkSheet}'{cellAddress}";
 								}

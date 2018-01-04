@@ -103,7 +103,7 @@ namespace EPPlusTest
 			{
 				for (int col = 1; col < 30; col++)
 				{
-					code.AppendLine(string.Format("VBASetData.Cells({0},{1}).Value=\"Cell {2}\"", row, col, new ExcelAddressBase(row, col, row, col).Address));
+					code.AppendLine(string.Format("VBASetData.Cells({0},{1}).Value=\"Cell {2}\"", row, col, new ExcelAddress(row, col, row, col).Address));
 				}
 			}
 			code.AppendLine("End Sub");
