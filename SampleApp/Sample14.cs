@@ -203,7 +203,7 @@ namespace EPPlusSamples
 
 				// -------------------------------------------------------------------
 				// Create a Last 7 Days rule
-				// ExcelAddressBase
+				// -------------------------------------------------------------------
 				ExcelAddress timePeriodAddress = new ExcelAddress("D21:G34 C11:C20");
 				var cfRule15 = worksheet.ConditionalFormatting.AddLast7Days(
 				  timePeriodAddress);
