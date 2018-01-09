@@ -151,6 +151,10 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 			{
 				return new Token(token.ToUpper(CultureInfo.InvariantCulture), TokenType.ExcelAddress);
 			}
+			if (at == ExcelAddressBase.AddressType.ExternalAddress)
+			{
+				return new Token(token.ToUpper(CultureInfo.InvariantCulture), TokenType.InvalidReference);
+			}
 			return new Token(token, TokenType.Unrecognized);
 
 		}

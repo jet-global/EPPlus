@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace OfficeOpenXml.ConditionalFormatting
@@ -30,6 +31,17 @@ namespace OfficeOpenXml.ConditionalFormatting
 				if (!string.IsNullOrEmpty(x14Rule.Address))
 					this.X14Rules.Add(x14Rule);
 			}
+		}
+		#endregion
+
+		#region Virtual Methods
+		/// <summary>
+		/// Applies the <paramref name="transformer"/> to all formulas in the <see cref="X14ConditionalFormattingCollection"/>.
+		/// </summary>
+		/// <param name="transformer">The transformation to apply.</param>
+		public virtual void TransformFormulaReferences(Func<string, string> transformer)
+		{
+			XmlHelper.TransformValuesInNode(this.TopNode, this.NameSpaceManager, transformer, ".//x14:cfRule//xm:f");
 		}
 		#endregion
 	}

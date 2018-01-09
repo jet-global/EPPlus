@@ -842,5 +842,42 @@ namespace OfficeOpenXml
 			}
 			node.Value = value;
 		}
+
+		/// <summary>
+		/// Applies a transformation to all of the values in the <see cref="XmlNode"/>s document selected by the <paramref name="selector"/>.
+		/// </summary>
+		/// <param name="topNode">The <see cref="XmlNode"/>.</param>
+		/// <param name="namespaceManager">The <see cref="XmlNamespaceManager"/>.</param>
+		/// <param name="transformer">The transformation to be applied.</param>
+		/// <param name="selector">The node selector to use.</param>
+		internal static void TransformValuesInNode(XmlNode topNode, XmlNamespaceManager namespaceManager, Func<string, string> transformer, string selector)
+		{
+			var nodesToUpdate = topNode.SelectNodes(selector, namespaceManager);
+			foreach (XmlNode node in nodesToUpdate)
+			{
+				var oldValue = node.InnerText;
+				if (!string.IsNullOrEmpty(oldValue))
+					node.InnerText = transformer(oldValue);
+			}
+		}
+
+		/// <summary>
+		/// Applies a transformation to all of the <paramref name="attributeName"/> attributes in the <see cref="XmlNode"/>s document selected by the <paramref name="selector"/>.
+		/// </summary>
+		/// <param name="topNode">The <see cref="XmlNode"/>.</param>
+		/// <param name="namespaceManager">The <see cref="XmlNamespaceManager"/>.</param>
+		/// <param name="transformer">The transformation to be applied.</param>
+		/// <param name="selector">The node selector to use.</param>
+		/// <param name="attributeName">The name of the attribute to be updated.</param>
+		internal static void TransformAttributesInNode(XmlNode topNode, XmlNamespaceManager namespaceManager, Func<string, string> transformer, string selector, string attributeName)
+		{
+			var nodesToUpdate = topNode.SelectNodes(selector, namespaceManager);
+			foreach (XmlNode node in nodesToUpdate)
+			{
+				var oldValue = node.Attributes.GetNamedItem(attributeName)?.Value;
+				if (!string.IsNullOrEmpty(oldValue))
+					node.Attributes[attributeName].Value = transformer(oldValue);
+			}
+		}
 	}
 }
