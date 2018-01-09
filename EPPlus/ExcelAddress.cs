@@ -403,59 +403,12 @@ namespace OfficeOpenXml
 		/// <returns>A modified <see cref="ExcelAddress"/>.</returns>
 		public ExcelAddress DeleteRow(int row, int rows, bool setFixed = false, bool updateOnlyFixed = false)
 		{
-			if (row > _toRow) //After
+			var rowTuple = this.DeleteSpace(row, rows, a => a.Row, _fromRowFixed, _toRowFixed, setFixed, updateOnlyFixed);
+			if (rowTuple == null)
 				return this;
-
-			int updatedFromRow = _fromRow;
-			int updatedToRow = _toRow;
-			if (updateOnlyFixed)
-			{
-				if (row + rows <= _fromRow) //Before
-				{
-					updatedFromRow = _fromRowFixed ? _fromRow - rows : _fromRow;
-					updatedToRow = _toRowFixed ? _toRow - rows : _toRow;
-				}
-				else if (row <= _fromRow && row + rows > _toRow) //Entire range
-				{
-					return _fromRowFixed || _toRowFixed ? null : this;
-				}
-				else  //Partly
-				{
-					if (row <= _fromRow)
-					{
-						updatedFromRow = _fromRowFixed ? row : _fromRow;
-						updatedToRow = _toRowFixed ? _toRow - rows : _toRow;
-					}
-					else
-					{
-						updatedToRow = _toRowFixed ? _toRow - rows < row ? row - 1 : _toRow - rows : _toRow;
-					}
-				}
-				return new ExcelAddress(updatedFromRow, _fromCol, updatedToRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
-			}
-			else
-			{
-				if (row + rows <= _fromRow) //Before
-				{
-					updatedFromRow = setFixed && _fromRowFixed ? _fromRow : _fromRow - rows;
-					updatedToRow = setFixed && _toRowFixed ? _toRow : _toRow - rows;
-				}
-				else if (row <= _fromRow && row + rows > _toRow) //Entire range
-					return null;
-				else  //Partly
-				{
-					if (row <= _fromRow)
-					{
-						updatedFromRow = row;
-						updatedToRow = setFixed && _toRowFixed ? _toRow : _toRow - rows;
-					}
-					else
-					{
-						updatedToRow = (setFixed && _toRowFixed ? _toRow : _toRow - rows < row ? row - 1 : _toRow - rows);
-					}
-				}
-				return new ExcelAddress(updatedFromRow, _fromCol, updatedToRow, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
-			}
+			else if (rowTuple.Item1 < 1 || rowTuple.Item2 < 1)
+				return null;
+			return new ExcelAddress(rowTuple.Item1, _fromCol, rowTuple.Item2, _toCol, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
 		}
 
 		/// <summary>
@@ -484,62 +437,12 @@ namespace OfficeOpenXml
 		/// <returns>A modified <see cref="ExcelAddress"/>.</returns>
 		public ExcelAddress DeleteColumn(int col, int cols, bool setFixed = false, bool updateOnlyFixed = false)
 		{
-			if (col > _toCol) // After
+			Tuple<int, int> columnTuple = this.DeleteSpace(col, cols, a => a.Column, _fromColFixed, _toColFixed, setFixed, updateOnlyFixed);
+			if (columnTuple == null)
 				return this;
-
-			int updatedFromColumn = _fromCol;
-			int updatedToColumn = _toCol;
-			if (updateOnlyFixed)
-			{
-				if (col + cols <= _fromCol) // Before
-				{
-					updatedFromColumn = _fromColFixed ? _fromCol - cols : _fromCol;
-					updatedToColumn = _toColFixed ? _toCol - cols : _toCol;
-				}
-				else if (col <= _fromCol && col + cols > _toCol) // Entire range
-				{
-					return _fromColFixed || _toColFixed ? null : this;
-				}
-				else  // Partly
-				{
-					if (col <= _fromCol)
-					{
-						updatedFromColumn = _fromColFixed ? col : _fromCol;
-						updatedToColumn = _toColFixed ? _toCol - cols : _toCol;
-					}
-					else
-					{
-						int temp = _toCol - cols < col ? col - 1 : _toCol - cols;
-						updatedToColumn = _toColFixed ? temp : _toCol;
-					}
-				}
-				return new ExcelAddress(_fromRow, updatedFromColumn, _toRow, updatedToColumn, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
-			}
-			else
-			{
-				if (col + cols <= _fromCol) // Before
-				{
-					updatedFromColumn = setFixed && _fromColFixed ? _fromCol : _fromCol - cols;
-					updatedToColumn = setFixed && _toColFixed ? _toCol : _toCol - cols;
-				}
-				else if (col <= _fromCol && col + cols > _toCol) // Entire range
-				{
-					return null;
-				}
-				else  // Partly
-				{
-					if (col <= _fromCol)
-					{
-						updatedFromColumn = col;
-						updatedToColumn = setFixed && _toColFixed ? _toCol : _toCol - cols;
-					}
-					else
-					{
-						updatedToColumn = setFixed && _toColFixed ? _toCol : _toCol - cols < col ? col - 1 : _toCol - cols;
-					}
-				}
-				return new ExcelAddress(_fromRow, updatedFromColumn, _toRow, updatedToColumn, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
-			}
+			else if (columnTuple.Item1 < 1 || columnTuple.Item2 < 1)
+				return null;
+			return new ExcelAddress(_fromRow, columnTuple.Item1, _toRow, columnTuple.Item2, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed) { _ws = _ws };
 		}
 
 		/// <summary>
@@ -751,7 +654,7 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Private Methods
-		private Tuple<int, int> InsertSpace(int insertAt, int insertSpace, Func<ExcelCellAddress, int> dimension, int maximum, bool startFixed, bool endFixed, bool setFixed = false, bool updateOnlyFixed = false)
+		private Tuple<int, int> InsertSpace(int insertAt, int insertSpace, Func<ExcelCellAddress, int> dimension, int maximum, bool startFixed, bool endFixed, bool setFixed, bool updateOnlyFixed)
 		{
 			// We're forced to assume a full dimension here and so no change should be applied because we may exceed valid dimensions.
 			// And because of how this function is used we should return a new instance of ExcelAddressBase.
@@ -775,6 +678,58 @@ namespace OfficeOpenXml
 				if (isBeforeStart && !(setFixed && startFixed))
 					updatedStart = Math.Min(start + insertSpace, maximum);
 				updatedEnd = setFixed && endFixed ? end : Math.Min(end + insertSpace, maximum);
+			}
+			return new Tuple<int, int>(updatedStart, updatedEnd);
+		}
+
+		private Tuple<int, int> DeleteSpace(int deleteAt, int deleteSpace, Func<ExcelCellAddress, int> dimension, bool startFixed, bool endFixed, bool setFixed, bool updateOnlyFixed)
+		{
+			int start = dimension(this.Start);
+			int end = dimension(this.End);
+			if (deleteAt > end)
+				return null;
+
+			int updatedStart = start;
+			int updatedEnd = end;
+			if (updateOnlyFixed)
+			{
+				if (deleteAt + deleteSpace <= start) // Before.
+				{
+					updatedStart = startFixed ? start - deleteSpace : start;
+					updatedEnd = endFixed ? end - deleteSpace : end;
+				}
+				else if (deleteAt <= start && deleteAt + deleteSpace > end) // Entire range.
+					return startFixed || endFixed ? new Tuple<int, int>(-1, -1) : null;
+				else // Partly.
+				{
+					if (deleteAt <= start)
+					{
+						updatedStart = startFixed ? deleteAt : start;
+						updatedEnd = endFixed ? end - deleteSpace : end;
+					}
+					else if (endFixed)
+						updatedEnd = end - deleteSpace < deleteAt ? deleteAt - 1 : end - deleteSpace;
+				}
+			}
+			else
+			{
+				if (deleteAt + deleteSpace <= start) // Before.
+				{
+					updatedStart = setFixed && startFixed ? start : start - deleteSpace;
+					updatedEnd = setFixed && endFixed ? end : end - deleteSpace;
+				}
+				else if (deleteAt <= start && deleteAt + deleteSpace > end) // Entire range.
+					return new Tuple<int, int>(-1, -1);
+				else  // Partly.
+				{
+					if (deleteAt <= start)
+					{
+						updatedStart = deleteAt;
+						updatedEnd = setFixed && endFixed ? end : end - deleteSpace;
+					}
+					else
+						updatedEnd = setFixed && endFixed ? end : end - deleteSpace < deleteAt ? deleteAt - 1 : end - deleteSpace;
+				}
 			}
 			return new Tuple<int, int>(updatedStart, updatedEnd);
 		}

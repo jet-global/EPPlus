@@ -228,11 +228,20 @@ namespace OfficeOpenXml.FormulaParsing
 							stringBuilder.Append(f.Tokens[i].Value);
 					}
 					cell.Formula = stringBuilder.ToString();
-					ExcelAddress adr = new ExcelAddress((string)ws.Calculate(addressOffsetFormula, f.Row, f.Column));
+					var offsetResult = ws.Calculate(addressOffsetFormula, f.Row, f.Column);
 					cell.Formula = originalFormula;
-					f.ws = string.IsNullOrEmpty(adr.WorkSheet) ? ws : wb.Worksheets[adr.WorkSheet];
-					f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
-					goto iterateCells;
+					if (offsetResult is string resultString)
+					{
+						ExcelAddress adr = new ExcelAddress(resultString);
+						var worksheet = string.IsNullOrEmpty(adr.WorkSheet) ? ws : wb.Worksheets[adr.WorkSheet];
+						// Only complete the OFFSET's dependency chain if a valid existing address was successfully parsed.
+						if (worksheet != null)
+						{
+							f.ws = worksheet;
+							f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
+							goto iterateCells;
+						}
+					}
 				}
 				f.tokenIx++;
 			}

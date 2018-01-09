@@ -37,6 +37,43 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		}
 		#endregion
 
+		#region Integration Offset Tests
+		[TestMethod]
+		public void OffsetWithInvalidAddressDependencyChainCompletesCalculation()
+		{
+			const string formula = "OFFSET('not a sheet'!G6, 5, 4)";
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Formula = "C3";
+				worksheet.Cells[3, 3].Formula = formula;
+				worksheet.Cells[2, 2].Calculate();
+				var result = worksheet.Cells[2, 2].Value;
+				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));
+				Assert.AreEqual(ExcelErrorValue.Values.Value, result.ToString());
+				Assert.AreEqual(formula, worksheet.Cells[3, 3].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void OffsetWithArgumentErrorDependencyChainCompletesCalculation()
+		{
+			const string formula = "OFFSET('Sheet1'!G6, 5, C2)";
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Formula = "C3";
+				worksheet.Cells[2, 3].Value = "NOTAFUNCTION(1,2,3)";
+				worksheet.Cells[3, 3].Formula = formula;
+				worksheet.Cells[2, 2].Calculate();
+				var result = worksheet.Cells[2, 2].Value;
+				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));
+				Assert.AreEqual(ExcelErrorValue.Values.Value, result.ToString());
+				Assert.AreEqual(formula, worksheet.Cells[3, 3].Formula);
+			}
+		}
+		#endregion
+
 		#region Helper Methods
 		private void ValidateOffsetAndOffsetAddress(IEnumerable<FunctionArgument> arguments, ParsingContext context, object expectedOffsetResult, object expectedOffsetAddressResult, bool errorExpected = false)
 		{
