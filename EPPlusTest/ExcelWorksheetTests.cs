@@ -4882,6 +4882,75 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void DeleteRowsWithCombinedAddressConditionalFormatting()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet 1");
+				var address = new ExcelAddress("B2:D5,F6:G7,Z10,Z11");
+				var conditionalFormatting = worksheet.ConditionalFormatting.AddContainsBlanks(address);
+				Assert.AreEqual("B2:D5,F6:G7,Z10,Z11", conditionalFormatting.Address.ToString());
+				var sqrefValue = conditionalFormatting.Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value;
+				Assert.AreEqual("B2:D5 F6:G7 Z10 Z11", sqrefValue);
+
+				worksheet.DeleteRow(6, 5);
+				Assert.AreEqual("B2:D5,Z6", conditionalFormatting.Address.ToString());
+				sqrefValue = conditionalFormatting.Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value;
+				Assert.AreEqual("B2:D5 Z6", sqrefValue);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowsWithCombinedAddressConditionalFormattingMany()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet 1");
+				var address1 = new ExcelAddress("B2:D5,F6:G7,Z10,Z11");
+				var address2 = new ExcelAddress("F7,G8,J11:K12");
+				var conditionalFormatting1 = worksheet.ConditionalFormatting.AddContainsBlanks(address1);
+				var conditionalFormatting2 = worksheet.ConditionalFormatting.AddContainsErrors(address2);
+				Assert.AreEqual("B2:D5,F6:G7,Z10,Z11", conditionalFormatting1.Address.ToString());
+				var sqrefValue = conditionalFormatting1.Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value;
+				Assert.AreEqual("B2:D5 F6:G7 Z10 Z11", sqrefValue);
+				Assert.AreEqual("F7,G8,J11:K12", conditionalFormatting2.Address.ToString());
+				var sqrefValue2 = conditionalFormatting2.Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value;
+				Assert.AreEqual("F7 G8 J11:K12", sqrefValue2);
+
+				worksheet.DeleteRow(6, 5);
+				Assert.AreEqual("B2:D5,Z6", conditionalFormatting1.Address.ToString());
+				sqrefValue = conditionalFormatting1.Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value;
+				Assert.AreEqual("B2:D5 Z6", sqrefValue);
+				Assert.AreEqual("J6:K7", conditionalFormatting2.Address.ToString());
+				sqrefValue2 = conditionalFormatting2.Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value;
+				Assert.AreEqual("J6:K7", sqrefValue2);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteRowsWithCombinedAddressConditionalFormattingX14()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var rule = worksheet.X14ConditionalFormatting.X14Rules.First(r => r.TopNode.ChildNodes[0].Attributes["type"].Value == "dataBar");
+				Assert.AreEqual("G5:G16,S6:S8", rule.Address);
+				Assert.AreEqual("G5:G16 S6:S8", rule.GetXmlNodeString("xm:sqref"));
+
+				worksheet.DeleteRow(6, 1);
+				Assert.AreEqual("G5:G15,S6:S7", rule.Address);
+				Assert.AreEqual("G5:G15 S6:S7", rule.GetXmlNodeString("xm:sqref"));
+
+				worksheet.DeleteRow(6, 2);
+				Assert.AreEqual("G5:G13", rule.Address);
+				Assert.AreEqual("G5:G13", rule.GetXmlNodeString("xm:sqref"));
+			}
+		}
+
+		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
 		public void DeleteRowsWithConditionalFormattingX14()
 		{
@@ -4891,10 +4960,10 @@ namespace EPPlusTest
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
-				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16,S6:S8"));
 				worksheet.DeleteRow(5, 12);
 				Assert.AreEqual(1, worksheet.X14ConditionalFormatting.X14Rules.Count);
-				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16,S6:S8"));
 				var nextRowRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Between);
 				Assert.AreEqual("C10:C21", nextRowRule.Address.ToString());
 			}
@@ -4910,7 +4979,7 @@ namespace EPPlusTest
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
-				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16,S6:S8"));
 				worksheet.DeleteRow(5, 11);
 				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
 				var transformedRule = worksheet.X14ConditionalFormatting.X14Rules.First(r => r.Address == "G5");
@@ -5778,8 +5847,8 @@ namespace EPPlusTest
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.BottomPercent));
 				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.NotContainsBlanks);
 				Assert.AreEqual("J22:J33", nextColumnRule.Address.ToString());
-				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DataBar);
-				Assert.AreEqual("G5:G16", previousColumnValue.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Bottom);
+				Assert.AreEqual("G39:G50", previousColumnValue.Address.ToString());
 			}
 		}
 
@@ -5805,8 +5874,8 @@ namespace EPPlusTest
 				Assert.IsFalse(worksheet.ConditionalFormatting.Any(f => f.Type == eExcelConditionalFormattingRuleType.NotContainsBlanks));
 				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ContainsErrors);
 				Assert.AreEqual("J22:J33", nextColumnRule.Address.ToString());
-				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DataBar);
-				Assert.AreEqual("G5:G16", previousColumnValue.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Bottom);
+				Assert.AreEqual("G39:G50", previousColumnValue.Address.ToString());
 			}
 		}
 
@@ -5826,8 +5895,8 @@ namespace EPPlusTest
 				Assert.AreEqual(original, worksheet.ConditionalFormatting);
 				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.NotContainsBlanks);
 				Assert.AreEqual("J22:J33", nextColumnRule.Address.ToString());
-				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.DataBar);
-				Assert.AreEqual("G5:G16", previousColumnValue.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.Bottom);
+				Assert.AreEqual("G39:G50", previousColumnValue.Address.ToString());
 			}
 		}
 
@@ -5841,14 +5910,14 @@ namespace EPPlusTest
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
-				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
-				worksheet.DeleteColumn(7, 1);
+				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "E22:E33"));
+				worksheet.DeleteColumn(5, 1);
 				Assert.AreEqual(1, worksheet.X14ConditionalFormatting.X14Rules.Count);
-				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "E22:E33"));
 				var nextColumnRule = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ContainsBlanks);
 				Assert.AreEqual("H22:H33", nextColumnRule.Address.ToString());
-				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.ThreeColorScale);
-				Assert.AreEqual("E5:E16", previousColumnValue.Address.ToString());
+				var previousColumnValue = worksheet.ConditionalFormatting.First(f => f.Type == eExcelConditionalFormattingRuleType.TwoColorScale);
+				Assert.AreEqual("C5:C16", previousColumnValue.Address.ToString());
 			}
 		}
 
@@ -5862,7 +5931,8 @@ namespace EPPlusTest
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				Assert.AreEqual(2, worksheet.X14ConditionalFormatting.X14Rules.Count);
-				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "G5:G16"));
+				Assert.IsTrue(worksheet.X14ConditionalFormatting.X14Rules.Any(f => f.Address == "E22:E33"));
+				worksheet.DeleteColumn(19, 1);
 				worksheet.DeleteColumn(5, 3);
 				Assert.AreEqual(0, worksheet.X14ConditionalFormatting.X14Rules.Count);
 				Assert.IsFalse(worksheet.X14ConditionalFormatting.X14Rules.Any());
@@ -5872,8 +5942,50 @@ namespace EPPlusTest
 				Assert.AreEqual("C5:C16", previousColumnValue.Address.ToString());
 			}
 		}
-		#endregion
 
+		[TestMethod]
+		public void DeleteColumnsWithCombinedAddressConditionalFormatting()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet 1");
+				var address = new ExcelAddress("B2:D5,F6:G7,Z10,Z11");
+				var conditionalFormatting = worksheet.ConditionalFormatting.AddContainsBlanks(address);
+				Assert.AreEqual("B2:D5,F6:G7,Z10,Z11", conditionalFormatting.Address.ToString());
+				var sqrefValue = conditionalFormatting.Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value;
+				Assert.AreEqual("B2:D5 F6:G7 Z10 Z11", sqrefValue);
+
+				worksheet.DeleteColumn(6, 5);
+				Assert.AreEqual("B2:D5,U10,U11", conditionalFormatting.Address.ToString());
+				sqrefValue = conditionalFormatting.Node.ParentNode.Attributes[ExcelConditionalFormattingConstants.Attributes.Sqref].Value;
+				Assert.AreEqual("B2:D5 U10 U11", sqrefValue);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\AllConditionalFormatting.xlsx")]
+		public void DeleteColumnsWithCombinedAddressConditionalFormattingX14()
+		{
+			var file = new FileInfo(@"AllConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var rule = worksheet.X14ConditionalFormatting.X14Rules.First(r => r.TopNode.ChildNodes[0].Attributes["type"].Value == "dataBar");
+				Assert.AreEqual("G5:G16,S6:S8", rule.Address);
+				Assert.AreEqual("G5:G16 S6:S8", rule.GetXmlNodeString("xm:sqref"));
+
+				worksheet.DeleteColumn(6, 1);
+				Assert.AreEqual("F5:F16,R6:R8", rule.Address);
+				Assert.AreEqual("F5:F16 R6:R8", rule.GetXmlNodeString("xm:sqref"));
+
+				worksheet.DeleteColumn(6, 1);
+				Assert.AreEqual("Q6:Q8", rule.Address);
+				Assert.AreEqual("Q6:Q8", rule.GetXmlNodeString("xm:sqref"));
+			}
+		}
+
+		#endregion
 
 		#region Sparkline
 		[TestMethod]
