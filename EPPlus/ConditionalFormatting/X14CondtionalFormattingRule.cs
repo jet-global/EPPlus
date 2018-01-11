@@ -20,11 +20,12 @@ namespace OfficeOpenXml.ConditionalFormatting
 		{
 			get
 			{
-				return this.GetXmlNodeString("xm:sqref");
+				var sqref = this.GetXmlNodeString("xm:sqref");
+				return sqref.Replace(" ", ",");
 			}
 			set
 			{
-				this.SetXmlNodeString("xm:sqref", value);
+				this.SetXmlNodeString("xm:sqref", new ExcelAddress(value).AddressSpaceSeparated);
 			}
 		}
 
