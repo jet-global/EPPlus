@@ -26,14 +26,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
 	/// <summary>
 	/// This class contains the formula for calculating the minimum value in a set of arguments. 
 	/// </summary>
-	public class Min : HiddenValuesHandlingFunction
+	public class Min : MinMaxBase
 	{
 		/// <summary>
 		/// Takes the user specified arguments and returns the minimum value.
@@ -43,49 +42,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>The minimum item in the user specified argument list.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ArgumentsAreValid(arguments, 1, out eErrorType errorValue) == false)
-				return new CompileResult(errorValue);
-			var args = arguments.ElementAt(0);
-			var argumentValueList = this.ArgsToObjectEnumerable(false, new List<FunctionArgument> { args }, context);
-			var values = argumentValueList.Where(arg => ((arg.GetType().IsPrimitive && (arg is bool == false))));
-			foreach (var item in argumentValueList)
+			var argsList = this.GroupArguments(arguments, context, out eErrorType? error);
+			if (argsList == null)
+				return new CompileResult(error ?? eErrorType.Value);
+			else
 			{
-				if (item is ExcelErrorValue)
-					return new CompileResult((ExcelErrorValue)item);
+				double result = argsList.Any() ? Convert.ToDouble(argsList.Min()) : 0;
+				return new CompileResult(result, DataType.Decimal);
 			}
-			//If the input to the Min Function is not an excel range logical values and string representations of numbers
-			//are allowed, even though they are not counted in a cell reference.
-			if (!arguments.ElementAt(0).IsExcelRange)
-			{
-				if(arguments.Count() == 1)
-					return this.CreateResult(Convert.ToDouble(values.Min()), DataType.Decimal);
-
-				var doublesList = new List<double> { };
-				foreach (var item in arguments)
-				{
-					if (item.ExcelStateFlagIsSet(ExcelCellState.HiddenCell))
-						continue;
-					if (item.Value is string)
-					{
-						if (ConvertUtil.TryParseNumericString(item.Value, out double result))
-							doublesList.Add(result);
-						else if (ConvertUtil.TryParseDateString(item.Value, out System.DateTime dateResult))
-							doublesList.Add(dateResult.ToOADate());
-						else
-							return new CompileResult(eErrorType.Value);
-					}
-					else
-						doublesList.Add(this.ArgToDecimal(item.Value));
-				}
-				if (doublesList.Count() == 0)
-					return new CompileResult(eErrorType.Value);
-				if (doublesList.Count() > 255)
-					return new CompileResult(eErrorType.NA);
-				return this.CreateResult(doublesList.Min(), DataType.Decimal);
-			}
-				if (values.Count() > 255)
-				return new CompileResult(eErrorType.NA);
-			return this.CreateResult(Convert.ToDouble(values.Min()), DataType.Decimal);
 		}
 	}
 }
