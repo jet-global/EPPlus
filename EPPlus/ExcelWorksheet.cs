@@ -44,6 +44,9 @@ using System.Xml;
 using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.DataValidation;
+using OfficeOpenXml.DataValidation.Contracts;
+using OfficeOpenXml.DataValidation.Formulas.Contracts;
+using OfficeOpenXml.DataValidation.X14DataValidation;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Drawing.Slicers;
@@ -416,6 +419,7 @@ namespace OfficeOpenXml
 		private ExcelConditionalFormattingCollection _conditionalFormatting = null;
 		private X14ConditionalFormattingCollection _x14ConditionalFormatting = null;
 		private ExcelDataValidationCollection _dataValidation = null;
+		private ExcelX14DataValidationCollection _x14dataValidation = null;
 		private ExcelBackgroundImage _backgroundImage = null;
 		private bool? _customHeight;
 		#endregion
@@ -1113,6 +1117,19 @@ namespace OfficeOpenXml
 					this._dataValidation = new ExcelDataValidationCollection(this);
 				}
 				return this._dataValidation;
+			}
+		}
+
+		public ExcelX14DataValidationCollection X14DataValidations
+		{
+			get
+			{
+				this.CheckSheetType();
+				if (this._x14dataValidation == null)
+				{
+					this._x14dataValidation = new ExcelX14DataValidationCollection(this);
+				}
+				return this._x14dataValidation;
 			}
 		}
 
@@ -2618,7 +2635,15 @@ namespace OfficeOpenXml
 		/// </summary>
 		internal void ClearValidations()
 		{
-			this._dataValidation = null;
+			this._dataValidation.Clear();
+		}
+
+		/// <summary>
+		/// Clear the Data Validation indicator.
+		/// </summary>
+		internal void ClearX14Validations()
+		{
+			this._x14dataValidation.Clear();
 		}
 
 		internal void AdjustFormulasRow(int rowFrom, int rows)
@@ -4886,6 +4911,7 @@ namespace OfficeOpenXml
 			});
 		}
 
+		// TODO: Cleanup this method
 		private void UpdateDataValidationRanges(int rowFrom, int rows, int columnFrom, int columns)
 		{
 			if (rows < 0 || columns < 0)
@@ -4894,15 +4920,25 @@ namespace OfficeOpenXml
 			{
 				for (int i = sheet.DataValidations.Count - 1; i >= 0; i--)
 				{
-					if (sheet.DataValidations.ElementAt(i) is DataValidation.Contracts.IExcelDataValidationList validation)
+					var validation = sheet.DataValidations.ElementAt(i);
+					var newAddress = this.Package.FormulaManager.UpdateFormulaReferences(validation.Address.Address, rows, columns, rowFrom, columnFrom, sheet.Name, sheet.Name);
+					validation.Address = new ExcelAddress(newAddress);
+					if (validation is IExcelDataValidationWithFormula<IExcelDataValidationFormula> validationWithFormula)
+						validationWithFormula.Formula.ExcelFormula = this.Package.FormulaManager.UpdateFormulaReferences(validationWithFormula.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
+					if (validation is IExcelDataValidationWithFormula2<IExcelDataValidationFormula> validationWithFormula2)
+						validationWithFormula2.Formula2.ExcelFormula =  this.Package.FormulaManager.UpdateFormulaReferences(validationWithFormula2.Formula2.ExcelFormula, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
+				}
+				for (int i = sheet.X14DataValidations.Count - 1; i >= 0; i--)
+				{
+					var validation = sheet.X14DataValidations.ElementAt(i);
+					var newAddress  = this.Package.FormulaManager.UpdateFormulaReferences(validation.Address.Address, rows, columns, rowFrom, columnFrom, sheet.Name, sheet.Name);
+					validation.Address = new ExcelAddress(newAddress);
+					if (validation is ExcelX14DataValidation x14Validation)
 					{
-						string worksheetName = "!";
-						if (sheet.Name?.ToUpper() == this.Name.ToUpper()) // This formula references the sheet it is on.
-							worksheetName = sheet.Name;
-						else if (validation.Address.WorkSheet != null && validation.Address.WorkSheet.ToUpper() == this.Name.ToUpper()) // This formula references another sheet in the workbook.
-							worksheetName = validation.Address.WorkSheet;
-						if (!worksheetName.Equals("!")) // Only update the formula if we have a valid reference to a worksheet.
-							validation.Formula.ExcelFormula = this.Package.FormulaManager.UpdateFormulaReferences(validation.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, worksheetName, this.Name);
+						if (!string.IsNullOrEmpty(x14Validation.Formula))
+							x14Validation.Formula = this.Package.FormulaManager.UpdateFormulaReferences(x14Validation.Formula, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
+						if (!string.IsNullOrEmpty(x14Validation.Formula2))
+							x14Validation.Formula2 = this.Package.FormulaManager.UpdateFormulaReferences(x14Validation.Formula2, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
 					}
 				}
 			}
