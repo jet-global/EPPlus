@@ -58,6 +58,7 @@ using OfficeOpenXml.Style.XmlAccess;
 using OfficeOpenXml.Table;
 using OfficeOpenXml.Table.PivotTable;
 using OfficeOpenXml.Utils;
+using static OfficeOpenXml.ExcelErrorValue;
 
 namespace OfficeOpenXml
 {
@@ -4890,17 +4891,20 @@ namespace OfficeOpenXml
 
 		private string UpdateAddresses(string originalAddress, int rowFrom, int rows, int columnFrom, int columns)
 		{
+			const char seperator = ',';
 			List<string> movedAddresses = new List<string>();
-			foreach(var stringAddress in originalAddress.ToString().Split(' '))
+			foreach (var stringAddress in originalAddress.ToString().Split(seperator))
 			{
-				movedAddresses.Add(this.Package.FormulaManager.UpdateFormulaReferences(stringAddress, -rows, -columns, rowFrom, columnFrom, this.Name, this.Name));
+				var newAddress = this.Package.FormulaManager.UpdateFormulaReferences(stringAddress, -rows, -columns, rowFrom, columnFrom, this.Name, this.Name);
+				if(newAddress != Values.Ref)
+					movedAddresses.Add(newAddress);
 			}
-			return string.Join(" ", movedAddresses);
+			return string.Join(seperator.ToString(), movedAddresses);
 		}
 
 		private bool EntirelyInRemovedRows(string originalAddress, int rowFrom, int rows)
 		{
-			return originalAddress.Split(' ').All(addressString => 
+			return originalAddress.Split(',').All(addressString => 
 			{
 				var address = new ExcelAddress(addressString);
 				return address.Start.Row >= rowFrom && address.End.Row <= rowFrom + rows - 1;
@@ -4909,7 +4913,7 @@ namespace OfficeOpenXml
 
 		private bool EntirelyInRemovedColumns(string originalAddress, int columnFrom, int columns)
 		{
-			return originalAddress.Split(' ').All(addressString =>
+			return originalAddress.Split(',').All(addressString =>
 			{
 				var address = new ExcelAddress(addressString);
 				return address.Start.Column >= columnFrom && address.End.Column <= columnFrom + columns - 1;
