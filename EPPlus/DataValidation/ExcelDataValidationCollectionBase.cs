@@ -48,13 +48,12 @@ namespace OfficeOpenXml.DataValidation
 
 		protected void OnValidationCountChanged()
 		{
-			// todo combine and move this method to base
 			var dvNode = this.GetRootNode();
 			if (_validations.Count == 0)
 			{
 				if (dvNode != null)
 					_worksheet.WorksheetXml.DocumentElement.RemoveChild(dvNode);
-				this.Clear();
+				this.ClearWorksheetValidations();
 			}
 			else
 			{
@@ -64,6 +63,8 @@ namespace OfficeOpenXml.DataValidation
 				dvNode.Attributes["count"].Value = _validations.Count.ToString(CultureInfo.InvariantCulture);
 			}
 		}
+
+		protected abstract void ClearWorksheetValidations();
 		#endregion
 
 		#region Internal Methods

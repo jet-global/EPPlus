@@ -51,5 +51,12 @@ namespace OfficeOpenXml.DataValidation
 		//	return item;
 		//}
 		#endregion
+
+		#region ExcelDataValidationCollectionBase Overrides
+		protected override void ClearWorksheetValidations()
+		{
+			_worksheet.ClearX14Validations();
+		}
+		#endregion
 	}
 }

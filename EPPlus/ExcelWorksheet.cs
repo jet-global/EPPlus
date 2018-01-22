@@ -1462,6 +1462,7 @@ namespace OfficeOpenXml
 					}
 				}
 				this.UpdateDataValidationRanges(rowFrom, rows, 0, 0);
+				this.UpdateX14DataValidationRanges(rowFrom, rows, 0, 0);
 			}
 		}
 
@@ -1656,6 +1657,7 @@ namespace OfficeOpenXml
 					}
 				}
 				this.UpdateDataValidationRanges(0, 0, columnFrom, columns);
+				this.UpdateX14DataValidationRanges(0, 0, columnFrom, columns);
 			}
 		}
 
@@ -1725,6 +1727,7 @@ namespace OfficeOpenXml
 				this.UpdateSparkLines(-rows, rowFrom, 0, 0);
 				this.UpdateCharts(-rows, 0, rowFrom, 0);
 				this.UpdateDataValidationRanges(rowFrom, -rows, 0, 0);
+				this.UpdateX14DataValidationRanges(rowFrom, -rows, 0, 0);
 				this.UpdateConditionalFormatting(rowFrom, rows, 0, 0);
 				this.UpdateX14ConditionalFormatting(rowFrom, rows, 0, 0);
 			}
@@ -1837,6 +1840,7 @@ namespace OfficeOpenXml
 				this.UpdateCharts(0, -columns, 0, columnFrom);
 				this.UpdateSparkLines(0, 0, -columns, columnFrom);
 				this.UpdateDataValidationRanges(0, 0, columnFrom, -columns);
+				this.UpdateX14DataValidationRanges(0, 0, columnFrom, -columns);
 				this.UpdateConditionalFormatting(0, 0, columnFrom, columns);
 				this.UpdateX14ConditionalFormatting(0, 0, columnFrom, columns);
 			}
@@ -2130,6 +2134,7 @@ namespace OfficeOpenXml
 			this._vmlDrawings = null;
 			this._conditionalFormatting = null;
 			this._dataValidation = null;
+			this._x14dataValidation = null;
 			this._drawings = null;
 		}
 
@@ -2635,7 +2640,7 @@ namespace OfficeOpenXml
 		/// </summary>
 		internal void ClearValidations()
 		{
-			this._dataValidation.Clear();
+			this._dataValidation = null;
 		}
 
 		/// <summary>
@@ -2643,7 +2648,7 @@ namespace OfficeOpenXml
 		/// </summary>
 		internal void ClearX14Validations()
 		{
-			this._x14dataValidation.Clear();
+			this._x14dataValidation = null;
 		}
 
 		internal void AdjustFormulasRow(int rowFrom, int rows)
@@ -4911,7 +4916,6 @@ namespace OfficeOpenXml
 			});
 		}
 
-		// TODO: Cleanup this method
 		private void UpdateDataValidationRanges(int rowFrom, int rows, int columnFrom, int columns)
 		{
 			if (rows < 0 || columns < 0)
@@ -4920,28 +4924,47 @@ namespace OfficeOpenXml
 			{
 				for (int i = sheet.DataValidations.Count - 1; i >= 0; i--)
 				{
-					var validation = sheet.DataValidations.ElementAt(i);
-					var newAddress = this.Package.FormulaManager.UpdateFormulaReferences(validation.Address.Address, rows, columns, rowFrom, columnFrom, sheet.Name, sheet.Name);
-					validation.Address = new ExcelAddress(newAddress);
-					if (validation is IExcelDataValidationWithFormula<IExcelDataValidationFormula> validationWithFormula)
-						validationWithFormula.Formula.ExcelFormula = this.Package.FormulaManager.UpdateFormulaReferences(validationWithFormula.Formula.ExcelFormula, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
-					if (validation is IExcelDataValidationWithFormula2<IExcelDataValidationFormula> validationWithFormula2)
-						validationWithFormula2.Formula2.ExcelFormula =  this.Package.FormulaManager.UpdateFormulaReferences(validationWithFormula2.Formula2.ExcelFormula, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
+					if (sheet.DataValidations.ElementAt(i) is DataValidation.Contracts.IExcelDataValidationList validation)
+					{
+						validation.Formula.ExcelFormula = this.TranslateDataValidationFormula(sheet, validation.Address, validation.Formula.ExcelFormula, rowFrom, rows, columnFrom, columns);
+					}
 				}
+			}
+		}
+		private void UpdateX14DataValidationRanges(int rowFrom, int rows, int columnFrom, int columns)
+		{
+			if (rows < 0 || columns < 0)
+				this.X14DataValidations.RemoveAll(validation => this.RangeIsBeingDeleted(validation.Address._fromRow, validation.Address._toRow, validation.Address._fromCol, validation.Address._toCol, rowFrom, rows, columnFrom, columns));
+			foreach (var sheet in this.Workbook.Worksheets)
+			{
 				for (int i = sheet.X14DataValidations.Count - 1; i >= 0; i--)
 				{
 					var validation = sheet.X14DataValidations.ElementAt(i);
-					var newAddress  = this.Package.FormulaManager.UpdateFormulaReferences(validation.Address.Address, rows, columns, rowFrom, columnFrom, sheet.Name, sheet.Name);
+					var newAddress = this.Package.FormulaManager.UpdateFormulaReferences(validation.Address.Address, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
 					validation.Address = new ExcelAddress(newAddress);
 					if (validation is ExcelX14DataValidation x14Validation)
 					{
 						if (!string.IsNullOrEmpty(x14Validation.Formula))
-							x14Validation.Formula = this.Package.FormulaManager.UpdateFormulaReferences(x14Validation.Formula, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
+							x14Validation.Formula = this.TranslateDataValidationFormula(sheet, x14Validation.Address, x14Validation.Formula, rowFrom, rows, columnFrom, columns);
 						if (!string.IsNullOrEmpty(x14Validation.Formula2))
-							x14Validation.Formula2 = this.Package.FormulaManager.UpdateFormulaReferences(x14Validation.Formula2, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
+							x14Validation.Formula2 = this.TranslateDataValidationFormula(sheet, x14Validation.Address, x14Validation.Formula2, rowFrom, rows, columnFrom, columns);
 					}
 				}
 			}
+		}
+
+		private string TranslateDataValidationFormula(ExcelWorksheet validationSheet, ExcelAddress validationAddress, string validationFormula, int rowFrom, int rows, int columnFrom, int columns)
+		{
+			string worksheetName = "!";
+			if (validationSheet.Name?.ToUpper() == this.Name.ToUpper()) // This formula references the sheet it is on.
+				worksheetName = validationSheet.Name;
+			else if (validationAddress.WorkSheet != null && validationAddress.WorkSheet.ToUpper() == this.Name.ToUpper()) // This formula references another sheet in the workbook.
+				worksheetName = validationAddress.WorkSheet;
+			else if (string.IsNullOrEmpty(validationAddress.WorkSheet))
+				worksheetName = validationSheet.Name;
+			if (!worksheetName.Equals("!"))// Only update the formula if we have a valid reference to a worksheet.
+				return this.Package.FormulaManager.UpdateFormulaReferences(validationFormula, rows, columns, rowFrom, columnFrom, worksheetName, this.Name);
+			return validationFormula;
 		}
 
 		private bool RangeIsBeingDeleted(int rangeRowFrom, int rangeRowTo, int rangeColumnFrom, int rangeColumnTo, int rowFrom, int rows, int columnFrom, int columns)

@@ -37,7 +37,7 @@ using OfficeOpenXml.DataValidation.Contracts;
 
 namespace OfficeOpenXml.DataValidation
 {
-	
+
 
 	/// <summary>
 	/// <para>
@@ -217,6 +217,13 @@ namespace OfficeOpenXml.DataValidation
 			this._validations.Add(item);
 			this.OnValidationCountChanged();
 			return item;
+		}
+		#endregion
+
+		#region ExcelDataValidationCollectionBase Overrides
+		protected override void ClearWorksheetValidations()
+		{
+			_worksheet.ClearValidations();
 		}
 		#endregion
 	}

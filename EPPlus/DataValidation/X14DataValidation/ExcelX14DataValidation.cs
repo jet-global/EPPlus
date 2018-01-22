@@ -11,8 +11,8 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 		public const string DataValidationPath = "//x14:dataValidations";
 		public const string DataValidationItemsPath = "//x14:dataValidations/x14:dataValidation";
 		public const string SqrefLocalPath = ".//xm:sqref";
-		public const string Formula1LocalPath = ".//x14:formula1";
-		public const string Formula2LocalPath = ".//x14:formula2";
+		public const string Formula1LocalPath = ".//x14:formula1/xm:f";
+		public const string Formula2LocalPath = ".//x14:formula2/xm:f";
 		#endregion
 
 		#region Properties

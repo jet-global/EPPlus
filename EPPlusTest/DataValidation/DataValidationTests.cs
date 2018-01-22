@@ -175,7 +175,7 @@ namespace EPPlusTest.DataValidation
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\X14DataValidations.xlsx")]
-		public void TranslateX14DataValidations()
+		public void TranslateX14DataValidationFormulas()
 		{
 			var file = new FileInfo("X14DataValidations.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -191,8 +191,8 @@ namespace EPPlusTest.DataValidation
 					var worksheet = excelPackage.Workbook.Worksheets["Data Validation"];
 					ExcelX14DataValidation firstListValidation = (ExcelX14DataValidation)worksheet.X14DataValidations.First(d => d.ValidationType.Type == eDataValidationType.List);
 					ExcelX14DataValidation firstWholeValidation = (ExcelX14DataValidation)worksheet.X14DataValidations.First(d => d.ValidationType.Type == eDataValidationType.Whole);
-					Assert.AreEqual("D8,M8", firstListValidation.Address.Address);
-					Assert.AreEqual("I8", firstWholeValidation.Address.Address);
+					Assert.AreEqual("D7,J7", firstListValidation.Address.Address);
+					Assert.AreEqual("F7", firstWholeValidation.Address.Address);
 					Assert.AreEqual("'Source data'!$H$9:$H$10", firstListValidation.Formula);
 					Assert.AreEqual("'Source data'!$H$9", firstWholeValidation.Formula);
 					Assert.AreEqual("'Source data'!$H$10", firstWholeValidation.Formula2);
@@ -204,18 +204,63 @@ namespace EPPlusTest.DataValidation
 					var worksheet = excelPackage.Workbook.Worksheets["Data Validation"];
 					ExcelX14DataValidation firstListValidation = (ExcelX14DataValidation)worksheet.X14DataValidations.First(d => d.ValidationType.Type == eDataValidationType.List);
 					ExcelX14DataValidation firstWholeValidation = (ExcelX14DataValidation)worksheet.X14DataValidations.First(d => d.ValidationType.Type == eDataValidationType.Whole);
-					Assert.AreEqual("D8,M8", firstListValidation.Address.Address);
-					Assert.AreEqual("I8", firstWholeValidation.Address.Address);
+					Assert.AreEqual("D7,J7", firstListValidation.Address.Address);
+					Assert.AreEqual("F7", firstWholeValidation.Address.Address);
 					Assert.AreEqual("'Source data'!$H$9:$H$10", firstListValidation.Formula);
 					Assert.AreEqual("'Source data'!$H$9", firstWholeValidation.Formula);
 					Assert.AreEqual("'Source data'!$H$10", firstWholeValidation.Formula2);
+					var fNode = firstListValidation.TopNode.SelectSingleNode(".//x14:formula1", worksheet.NameSpaceManager).SelectSingleNode(".//xm:f", worksheet.NameSpaceManager);
+					Assert.AreEqual("'Source data'!$H$9:$H$10", fNode.InnerText);
 				}
 			}
 			finally
 			{
 				tempFile.Delete();
 			}
+		}
 
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\X14DataValidations.xlsx")]
+		public void TranslateX14DataValidationAddresses()
+		{
+			var file = new FileInfo("X14DataValidations.xlsx");
+			Assert.IsTrue(file.Exists);
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				using (var excelPackage = new ExcelPackage(file))
+				{
+					var worksheet = excelPackage.Workbook.Worksheets["Data Validation"];
+					worksheet.InsertColumn(5, 3);
+					worksheet.InsertRow(7, 1);
+					ExcelX14DataValidation firstListValidation = (ExcelX14DataValidation)worksheet.X14DataValidations.First(d => d.ValidationType.Type == eDataValidationType.List);
+					ExcelX14DataValidation firstWholeValidation = (ExcelX14DataValidation)worksheet.X14DataValidations.First(d => d.ValidationType.Type == eDataValidationType.Whole);
+					Assert.AreEqual("D8,M8", firstListValidation.Address.Address);
+					Assert.AreEqual("I8", firstWholeValidation.Address.Address);
+					Assert.AreEqual("'Source data'!$E$8:$E$9", firstListValidation.Formula);
+					Assert.AreEqual("'Source data'!$E$8", firstWholeValidation.Formula);
+					Assert.AreEqual("'Source data'!$E$9", firstWholeValidation.Formula2);
+					excelPackage.SaveAs(tempFile);
+				}
+
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var worksheet = excelPackage.Workbook.Worksheets["Data Validation"];
+					ExcelX14DataValidation firstListValidation = (ExcelX14DataValidation)worksheet.X14DataValidations.First(d => d.ValidationType.Type == eDataValidationType.List);
+					ExcelX14DataValidation firstWholeValidation = (ExcelX14DataValidation)worksheet.X14DataValidations.First(d => d.ValidationType.Type == eDataValidationType.Whole);
+					Assert.AreEqual("D8,M8", firstListValidation.Address.Address);
+					Assert.AreEqual("I8", firstWholeValidation.Address.Address);
+					Assert.AreEqual("'Source data'!$E$8:$E$9", firstListValidation.Formula);
+					Assert.AreEqual("'Source data'!$E$8", firstWholeValidation.Formula);
+					Assert.AreEqual("'Source data'!$E$9", firstWholeValidation.Formula2);
+					var fNode = firstListValidation.TopNode.SelectSingleNode(".//x14:formula1", worksheet.NameSpaceManager).SelectSingleNode(".//xm:f", worksheet.NameSpaceManager);
+					Assert.AreEqual("'Source data'!$E$8:$E$9", fNode.InnerText);
+				}
+			}
+			finally
+			{
+				tempFile.Delete();
+			}
 		}
 		#endregion
 	}
