@@ -188,7 +188,7 @@ namespace OfficeOpenXml.DataValidation
 			{
 				return new ExcelAddress(GetXmlNodeString(_sqrefPath));
 			}
-			private set
+			set
 			{
 				var address = AddressUtility.ParseEntireColumnSelections(value.Address);
 				SetXmlNodeString(_sqrefPath, address);
