@@ -233,6 +233,69 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void MaxWithDecimalArgumentTest()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "MAX(C3)";
+				worksheet.Cells["C3"].Value = (decimal)26.000;
+				worksheet.Calculate();
+				Assert.AreEqual(26d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MaxWithDecimalArgumentsRangeTest()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "MAX(C3:G3)";
+				worksheet.Cells["C3"].Value = (decimal)26.000;
+				worksheet.Cells["D3"].Value = (double)19.000;
+				worksheet.Cells["E3"].Value = (decimal)43.020;
+				worksheet.Cells["G3"].Value = (int)12;
+				worksheet.Calculate();
+				Assert.AreEqual(43.020d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MaxWithMultipleRangeArgumentsRangeTest()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "MAX(C3:E3, F3:H3)";
+				worksheet.Cells["C3"].Value = 1;
+				worksheet.Cells["D3"].Value = 2;
+				worksheet.Cells["E3"].Value = "34";
+				worksheet.Cells["F3"].Value = 4;
+				worksheet.Cells["G3"].Value = "15";
+				worksheet.Cells["H3"].Value = 6;
+				worksheet.Calculate();
+				Assert.AreEqual(6d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MaxWithDateTimeArgumentsRangeTest()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "MAX(C3:G3)";
+				worksheet.Cells["C3"].Value = (decimal)42500.00;
+				worksheet.Cells["D3"].Value = new DateTime(2016, 5, 23); // 42513 in OADate.
+				worksheet.Cells["E3"].Value = (double)42000.020;
+				worksheet.Cells["G3"].Value = (int)42512;
+				worksheet.Calculate();
+				Assert.AreEqual(42513d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void MaxWithArrayWithDatesAsStringsReturnsZero()
 		{
 			using (var package = new ExcelPackage())
@@ -267,11 +330,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void MaxWithMaxArgumentsReturnsCorrectResult()
+		public void MaxWithLargeRangeReturnsCorrectResult()
 		{
-			// This functionality is different from that of Excel's. Normally when too many arguments are entered
-			// into a function it won't let you calculate the function, however in EPPlus it will return a pound
-			// NA error instead. 
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -282,11 +342,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 						worksheet.Cells[i, j].Value = 4;
 					}
 				}
-				worksheet.Cells["C1"].Formula = "MAX(A1:A255)";
-				worksheet.Cells["C2"].Formula = "MAX(A1:A270)";
+				worksheet.Cells["C1"].Formula = "MAX(A1:A270)";
+				worksheet.Cells["C2"].Formula = "MAX(A1:A270, 1, 2, 3, 1.5)";
+				worksheet.Cells["C3"].Formula = "MAX(A1:A270, 1, 2, 37, 1.5)";
 				worksheet.Calculate();
 				Assert.AreEqual(4d, worksheet.Cells["C1"].Value);
-				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["C2"].Value).Type);
+				Assert.AreEqual(4d, worksheet.Cells["C2"].Value);
+				Assert.AreEqual(37d, worksheet.Cells["C3"].Value);
 			}
 		}
 

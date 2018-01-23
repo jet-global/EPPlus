@@ -145,31 +145,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <returns>Returns true if there are at least the <paramref name="minLength"/> number of arguments present, and returns false if otherwise.</returns>
 		protected bool ArgumentCountIsValid(IEnumerable<FunctionArgument> arguments, int minLength)
 		{
-			if (arguments == null)
-				return false;
-			else
-				return !this.TooFewArgs(arguments, minLength);
-		}
-
-		private bool TooFewArgs(IEnumerable<FunctionArgument> arguments, int minLength)
-		{
-			{
-				var nArgs = 0;
-				if (arguments.Any())
-				{
-					foreach (var arg in arguments)
-					{
-						nArgs++;
-						if (nArgs >= minLength) return false;
-						if (arg.IsExcelRange)
-						{
-							nArgs += arg.ValueAsRangeInfo.GetTotalCellCount();
-							if (nArgs >= minLength) return false;
-						}
-					}
-				}
-				return true;
-			}
+			return arguments?.Count() >= minLength;
 		}
 
 		/// <summary>
