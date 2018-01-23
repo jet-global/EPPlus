@@ -2,15 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Xml;
 using OfficeOpenXml.DataValidation.Contracts;
-using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.DataValidation
 {
+	/// <summary>
+	/// Base class for original-style and X14 style data validations.
+	/// </summary>
 	public abstract class ExcelDataValidationCollectionBase : XmlHelper, IEnumerable<IExcelDataValidation>
 	{
-		#region Constants
+		#region Properties
 		protected abstract string DataValidationPath { get; }
 		protected abstract string DataValidationItemsPath { get; }
 		#endregion
@@ -22,7 +25,7 @@ namespace OfficeOpenXml.DataValidation
 
 		#region Constructors
 		protected ExcelDataValidationCollectionBase(ExcelWorksheet worksheet)
-			 : base(worksheet.NameSpaceManager, worksheet.WorksheetXml.DocumentElement)
+			 : base(worksheet?.NameSpaceManager, worksheet?.WorksheetXml?.DocumentElement)
 		{
 			if (worksheet == null)
 				throw new ArgumentNullException(nameof(worksheet));
@@ -49,19 +52,24 @@ namespace OfficeOpenXml.DataValidation
 		protected void OnValidationCountChanged()
 		{
 			var dvNode = this.GetRootNode();
-			if (_validations.Count == 0)
-			{
-				if (dvNode != null)
-					_worksheet.WorksheetXml.DocumentElement.RemoveChild(dvNode);
-				this.ClearWorksheetValidations();
-			}
-			else
+			if (_validations.Any())
 			{
 				var attr = _worksheet.WorksheetXml.DocumentElement.SelectSingleNode(DataValidationPath + "[@count]", _worksheet.NameSpaceManager);
 				if (attr == null)
 					dvNode.Attributes.Append(_worksheet.WorksheetXml.CreateAttribute("count"));
 				dvNode.Attributes["count"].Value = _validations.Count.ToString(CultureInfo.InvariantCulture);
 			}
+			else
+			{
+				if (dvNode != null)
+					_worksheet.WorksheetXml.DocumentElement.RemoveChild(dvNode);
+				this.ClearWorksheetValidations();
+			}
+		}
+
+		protected void ValidateAddress(string address)
+		{
+			this.ValidateAddress(address, null);
 		}
 
 		protected abstract void ClearWorksheetValidations();
@@ -83,6 +91,43 @@ namespace OfficeOpenXml.DataValidation
 
 		#region Public Methods
 		/// <summary>
+		/// Number of validations
+		/// </summary>
+		public int Count
+		{
+			get { return _validations.Count; }
+		}
+
+		/// <summary>
+		/// Removes all validations from the collection.
+		/// </summary>
+		public void Clear()
+		{
+			DeleteAllNode(DataValidationItemsPath.TrimStart('/'));
+			_validations.Clear();
+		}
+
+		/// <summary>
+		/// Returns all validations that matches the supplied predicate <paramref name="match"/>.
+		/// </summary>
+		/// <param name="match">predicate to filter out matching validations</param>
+		/// <returns></returns>
+		public IEnumerable<IExcelDataValidation> FindAll(Predicate<IExcelDataValidation> match)
+		{
+			return _validations.FindAll(match);
+		}
+
+		/// <summary>
+		/// Returns the first matching validation.
+		/// </summary>
+		/// <param name="match"></param>
+		/// <returns></returns>
+		public IExcelDataValidation Find(Predicate<IExcelDataValidation> match)
+		{
+			return _validations.Find(match);
+		}
+
+		/// <summary>
 		/// Removes an <see cref="ExcelDataValidation"/> from the collection.
 		/// </summary>
 		/// <param name="item">The item to remove</param>
@@ -91,15 +136,14 @@ namespace OfficeOpenXml.DataValidation
 		public bool Remove(IExcelDataValidation item)
 		{
 			if (!(item is ExcelDataValidation))
-			{
 				throw new InvalidCastException("The supplied item must inherit OfficeOpenXml.DataValidation.ExcelDataValidation");
-			}
-			Require.Argument(item).IsNotNull("item");
-			//TopNode.RemoveChild(((ExcelDataValidation)item).TopNode);
+			if (item == null)
+				throw new ArgumentNullException(nameof(item));
 			var dvNode = _worksheet.WorksheetXml.DocumentElement.SelectSingleNode(DataValidationPath.TrimStart('/'), NameSpaceManager);
 			dvNode?.RemoveChild(((ExcelDataValidation)item).TopNode);
 			var retVal = _validations.Remove(item);
-			if (retVal) OnValidationCountChanged();
+			if (retVal)
+				this.OnValidationCountChanged();
 			return retVal;
 		}
 
@@ -113,27 +157,15 @@ namespace OfficeOpenXml.DataValidation
 			foreach (var m in matches)
 			{
 				if (!(m is ExcelDataValidation))
-				{
 					throw new InvalidCastException("The supplied item must inherit OfficeOpenXml.DataValidation.ExcelDataValidation");
-				}
 				TopNode.RemoveChild(((ExcelDataValidation)m).TopNode);
-				//var dvNode = TopNode.SelectSingleNode(DataValidationPath.TrimStart('/'), NameSpaceManager);
-				//if (dvNode != null)
-				//{
-				//    dvNode.RemoveChild(((ExcelDataValidation)m).TopNode);
-				//}
 			}
 			_validations.RemoveAll(match);
-			OnValidationCountChanged();
+			this.OnValidationCountChanged();
 		}
 		#endregion
 
 		#region Private Methods
-		protected void ValidateAddress(string address)
-		{
-			this.ValidateAddress(address, null);
-		}
-
 		private void ValidateAddress(string address, IExcelDataValidation validatingValidation)
 		{
 			if (string.IsNullOrEmpty(address))
@@ -182,43 +214,6 @@ namespace OfficeOpenXml.DataValidation
 		#endregion
 
 		#region IEnumerable Implementation
-		/// <summary>
-		/// Number of validations
-		/// </summary>
-		public int Count
-		{
-			get { return _validations.Count; }
-		}
-
-		/// <summary>
-		/// Removes all validations from the collection.
-		/// </summary>
-		public void Clear()
-		{
-			DeleteAllNode(DataValidationItemsPath.TrimStart('/'));
-			_validations.Clear();
-		}
-
-		/// <summary>
-		/// Returns all validations that matches the supplied predicate <paramref name="match"/>.
-		/// </summary>
-		/// <param name="match">predicate to filter out matching validations</param>
-		/// <returns></returns>
-		public IEnumerable<IExcelDataValidation> FindAll(Predicate<IExcelDataValidation> match)
-		{
-			return _validations.FindAll(match);
-		}
-
-		/// <summary>
-		/// Returns the first matching validation.
-		/// </summary>
-		/// <param name="match"></param>
-		/// <returns></returns>
-		public IExcelDataValidation Find(Predicate<IExcelDataValidation> match)
-		{
-			return _validations.Find(match);
-		}
-
 		IEnumerator<IExcelDataValidation> IEnumerable<IExcelDataValidation>.GetEnumerator()
 		{
 			return _validations.GetEnumerator();

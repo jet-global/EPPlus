@@ -5,6 +5,9 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.DataValidation.X14DataValidation
 {
+	/// <summary>
+	/// Represents an X14 Data Validation
+	/// </summary>
 	public class ExcelX14DataValidation : XmlHelper, IExcelDataValidation //WithFormula2<IExcelDataValidationFormula>
 	{
 		#region Constants
@@ -16,9 +19,18 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 		#endregion
 
 		#region Properties
+		/// <summary>
+		/// The <see cref="ExcelDataValidationType"/> for this Data Validation.
+		/// </summary>
 		public ExcelDataValidationType ValidationType { get; }
+		/// <summary>
+		/// True if the current validation type allows operator.
+		/// </summary>
 		public bool AllowsOperator => ValidationType.AllowOperator;
 
+		/// <summary>
+		/// The address of the <see cref="ExcelX14DataValidation"/>.
+		/// </summary>
 		public ExcelAddress Address
 		{
 			get
@@ -33,6 +45,10 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 				base.SetXmlNodeString(ExcelX14DataValidation.SqrefLocalPath, address);
 			}
 		}
+
+		/// <summary>
+		/// The first formula for the <see cref="ExcelX14DataValidation"/>
+		/// </summary>
 		public string Formula
 		{
 			get
@@ -45,6 +61,10 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 					base.SetXmlNodeString(ExcelX14DataValidation.Formula1LocalPath, value);
 			}
 		}
+
+		/// <summary>
+		/// The second formula for the <see cref="ExcelX14DataValidation"/>
+		/// </summary>
 		public string Formula2
 		{
 			get
@@ -58,7 +78,7 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 			}
 		}
 
-		// TODO: back these with xml
+		// TODO: Implement Xml backing for these properties.
 		public ExcelDataValidationWarningStyle ErrorStyle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool? AllowBlank { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool? ShowInputMessage { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -67,39 +87,16 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 		public string Error { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public string PromptTitle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public string Prompt { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-
 		#endregion
 
-		// todo refactor constructor
-		/// <summary>
-		/// Creates a new ExcelX14DataValidation and adds the node to the xml
-		/// </summary>
-		/// <param name="worksheet"></param>
-		/// <param name="address"></param>
-		/// <param name="validationType"></param>
-		//internal ExcelX14DataValidation(ExcelWorksheet worksheet, ExcelAddress address, eDataValidationType validationType)
-		//	: base(worksheet.NameSpaceManager)
-		//{
-		//	if (worksheet == null)
-		//		throw new ArgumentNullException(nameof(worksheet));
-		//	if (address == null)
-		//		throw new ArgumentNullException(nameof(address));
-		//	this.ValidationType = ExcelDataValidationType.GetByValidationType(validationType);
-		//	this.Address = address;
-		//	// TODO: create node and potentially parent node
-		//	//var datavalidationsNode = worksheet.WorksheetXml.SelectSingleNode("//d:dataValidations", worksheet.NameSpaceManager);
-		//	//var itemNode = this.TopNode.OwnerDocument.CreateElement("d:dataValidation");
-		//	// set TopNode
-		//}
-
+		#region Constructors
 		/// <summary>
 		/// Creates ExcelX14DataValidation from existing xml node
 		/// </summary>
-		/// <param name="worksheet"></param>
-		/// <param name="address"></param>
-		/// <param name="validationType"></param>
-		/// <param name="itemNode"></param>
+		/// <param name="worksheet">The <see cref="ExcelWorksheet"/> of the <see cref="ExcelX14DataValidation"/>.</param>
+		/// <param name="address">The address of the <see cref="ExcelX14DataValidation"/></param>
+		/// <param name="validationType">They data validation type.</param>
+		/// <param name="itemNode">The <see cref="XmlNode"/> of the <see cref="ExcelX14DataValidation"/>.</param>
 		internal ExcelX14DataValidation(ExcelWorksheet worksheet, string address, string validationType, XmlNode itemNode)
 			: base(worksheet.NameSpaceManager)
 		{
@@ -111,10 +108,20 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 			this.TopNode = itemNode;
 		}
 
+		// TODO: Create constructor for creating a new (non-pre-existing) ExcelX14DataValidation.
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// This method will validate the state of the validation
+		/// </summary>
+		/// <exception cref="InvalidOperationException">If the state breaks the rules of the validation</exception>
 		public void Validate()
 		{
-			// implement based on type
-			throw new NotImplementedException();
+			if (string.IsNullOrEmpty(this.Address?.Address))
+				throw new InvalidOperationException("Address cannot be empty");
+			// TODO: More validation based on type.
 		}
+		#endregion
 	}
 }

@@ -65,16 +65,16 @@ namespace OfficeOpenXml.DataValidation
 	/// </summary>
 	public class ExcelDataValidationCollection : ExcelDataValidationCollectionBase
 	{
-		#region Constants
+		#region Properties
 		protected override string DataValidationPath => "//d:dataValidations";
 		protected override string DataValidationItemsPath => string.Format("{0}/d:dataValidation", DataValidationPath);
 		#endregion
 
 		#region Constructors
 		/// <summary>
-		/// Constructor
+		/// Creates an <see cref="ExcelDataValidationCollection"/>. Loads any existing data validations from the <paramref name="worksheet"/>.
 		/// </summary>
-		/// <param name="worksheet"></param>
+		/// <param name="worksheet">The worksheet of the <see cref="ExcelDataValidationCollection"/>.</param>
 		internal ExcelDataValidationCollection(ExcelWorksheet worksheet)
 			 : base(worksheet)
 		{
@@ -95,9 +95,7 @@ namespace OfficeOpenXml.DataValidation
 				}
 			}
 			if (_validations.Count > 0)
-			{
 				base.OnValidationCountChanged();
-			}
 		}
 		#endregion
 

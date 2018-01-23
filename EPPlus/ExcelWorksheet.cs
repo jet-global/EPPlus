@@ -4928,6 +4928,7 @@ namespace OfficeOpenXml
 			{
 				for (int i = sheet.DataValidations.Count - 1; i >= 0; i--)
 				{
+					// TODO: Translate addresses, translate formula2, and do this all for more than just list validations.
 					if (sheet.DataValidations.ElementAt(i) is DataValidation.Contracts.IExcelDataValidationList validation)
 					{
 						validation.Formula.ExcelFormula = this.TranslateDataValidationFormula(sheet, validation.Address, validation.Formula.ExcelFormula, rowFrom, rows, columnFrom, columns);
@@ -4935,6 +4936,7 @@ namespace OfficeOpenXml
 				}
 			}
 		}
+
 		private void UpdateX14DataValidationRanges(int rowFrom, int rows, int columnFrom, int columns)
 		{
 			if (rows < 0 || columns < 0)
