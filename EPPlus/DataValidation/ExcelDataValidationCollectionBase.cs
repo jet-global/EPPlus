@@ -110,8 +110,8 @@ namespace OfficeOpenXml.DataValidation
 		/// <summary>
 		/// Returns all validations that matches the supplied predicate <paramref name="match"/>.
 		/// </summary>
-		/// <param name="match">predicate to filter out matching validations</param>
-		/// <returns></returns>
+		/// <param name="match">Predicate to filter out matching validations.</param>
+		/// <returns>List of <see cref="IExcelDataValidation"/> the match the <paramref name="match"/>.</returns>
 		public IEnumerable<IExcelDataValidation> FindAll(Predicate<IExcelDataValidation> match)
 		{
 			return _validations.FindAll(match);
@@ -120,8 +120,8 @@ namespace OfficeOpenXml.DataValidation
 		/// <summary>
 		/// Returns the first matching validation.
 		/// </summary>
-		/// <param name="match"></param>
-		/// <returns></returns>
+		/// <param name="match">Predicate to filter out matching validations.</param>
+		/// <returns>First <see cref="IExcelDataValidation"/> that matches the <paramref name="match"/>.</returns>
 		public IExcelDataValidation Find(Predicate<IExcelDataValidation> match)
 		{
 			return _validations.Find(match);
@@ -130,9 +130,9 @@ namespace OfficeOpenXml.DataValidation
 		/// <summary>
 		/// Removes an <see cref="ExcelDataValidation"/> from the collection.
 		/// </summary>
-		/// <param name="item">The item to remove</param>
-		/// <returns>True if remove succeeds, otherwise false</returns>
-		/// <exception cref="ArgumentNullException">if <paramref name="item"/> is null</exception>
+		/// <param name="item">The item to remove.</param>
+		/// <returns>True if remove succeeds, otherwise false.</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="item"/> is null</exception>
 		public bool Remove(IExcelDataValidation item)
 		{
 			if (!(item is ExcelDataValidation))
@@ -150,7 +150,7 @@ namespace OfficeOpenXml.DataValidation
 		/// <summary>
 		/// Removes the validations that matches the predicate
 		/// </summary>
-		/// <param name="match"></param>
+		/// <param name="match">Predicate to filter out matching validations.</param>
 		public void RemoveAll(Predicate<IExcelDataValidation> match)
 		{
 			var matches = _validations.FindAll(match);
@@ -188,10 +188,10 @@ namespace OfficeOpenXml.DataValidation
 
 		#region Indexing Overrides
 		/// <summary>
-		/// Index operator, returns by 0-based index
+		/// Index operator, returns by 0-based index.
 		/// </summary>
-		/// <param name="index"></param>
-		/// <returns></returns>
+		/// <param name="index">The 0-based index.</param>
+		/// <returns>The <see cref="IExcelDataValidation"/> at the <paramref name="index"/>.</returns>
 		public IExcelDataValidation this[int index]
 		{
 			get { return _validations[index]; }
