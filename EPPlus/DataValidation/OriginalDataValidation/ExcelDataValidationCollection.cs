@@ -104,7 +104,7 @@ namespace OfficeOpenXml.DataValidation
 		/// Adds a <see cref="ExcelDataValidationAny"/> to the worksheet.
 		/// </summary>
 		/// <param name="address">The range/address to validate</param>
-		/// <returns></returns>
+		/// <returns>The <see cref="IExcelDataValidationAny"/> that was added.</returns>
 		public IExcelDataValidationAny AddAnyValidation(string address)
 		{
 			this.ValidateAddress(address);
@@ -120,6 +120,7 @@ namespace OfficeOpenXml.DataValidation
 		/// are integer values.
 		/// </summary>
 		/// <param name="address">the range/address to validate</param>
+		/// <returns>The <see cref="IExcelDataValidationInt"/> that was added.</returns>
 		public IExcelDataValidationInt AddIntegerValidation(string address)
 		{
 			this.ValidateAddress(address);
@@ -135,7 +136,7 @@ namespace OfficeOpenXml.DataValidation
 		/// decimal values.
 		/// </summary>
 		/// <param name="address">The range/address to validate</param>
-		/// <returns></returns>
+		/// <returns>The <see cref="IExcelDataValidationDecimal"/> that was added.</returns>
 		public IExcelDataValidationDecimal AddDecimalValidation(string address)
 		{
 			this.ValidateAddress(address);
@@ -151,7 +152,7 @@ namespace OfficeOpenXml.DataValidation
 		/// in a list.
 		/// </summary>
 		/// <param name="address">The range/address to validate</param>
-		/// <returns></returns>
+		/// <returns>The <see cref="IExcelDataValidationList"/> that was added.</returns>
 		public IExcelDataValidationList AddListValidation(string address)
 		{
 			this.ValidateAddress(address);
@@ -166,7 +167,7 @@ namespace OfficeOpenXml.DataValidation
 		/// Adds an <see cref="IExcelDataValidationInt"/> regarding text length to the worksheet.
 		/// </summary>
 		/// <param name="address">The range/address to validate</param>
-		/// <returns></returns>
+		/// <returns>The <see cref="IExcelDataValidationInt"/> that was added.</returns>
 		public IExcelDataValidationInt AddTextLengthValidation(string address)
 		{
 			this.ValidateAddress(address);
@@ -181,7 +182,7 @@ namespace OfficeOpenXml.DataValidation
 		/// Adds an <see cref="IExcelDataValidationDateTime"/> to the worksheet.
 		/// </summary>
 		/// <param name="address">The range/address to validate</param>
-		/// <returns></returns>
+		/// <returns>The <see cref="IExcelDataValidationDateTime"/> that was added.</returns>
 		public IExcelDataValidationDateTime AddDateTimeValidation(string address)
 		{
 			this.ValidateAddress(address);
@@ -192,7 +193,11 @@ namespace OfficeOpenXml.DataValidation
 			return item;
 		}
 
-
+		/// <summary>
+		/// Adds an <see cref="IExcelDataValidationTime"/> to the worksheet.
+		/// </summary>
+		/// <param name="address">The range/address to validate</param>
+		/// <returns>The <see cref="IExcelDataValidationTime"/> that was added.</returns>
 		public IExcelDataValidationTime AddTimeValidation(string address)
 		{
 			this.ValidateAddress(address);
@@ -202,11 +207,12 @@ namespace OfficeOpenXml.DataValidation
 			this.OnValidationCountChanged();
 			return item;
 		}
+
 		/// <summary>
-		/// Adds a <see cref="ExcelDataValidationCustom"/> to the worksheet.
+		/// Adds a <see cref="IExcelDataValidationCustom"/> to the worksheet.
 		/// </summary>
 		/// <param name="address">The range/address to validate</param>
-		/// <returns></returns>
+		/// <returns>The <see cref="IExcelDataValidationCustom"/> that was added.</returns>
 		public IExcelDataValidationCustom AddCustomValidation(string address)
 		{
 			this.ValidateAddress(address);

@@ -41,11 +41,6 @@ namespace OfficeOpenXml.DataValidation
 		}
 		#endregion
 
-		#region Public Methods
-		// TODO: Implement the ability to add a data validation.
-		//public ExcelX14DataValidation AddValidation(string address, eDataValidationType type);
-		#endregion
-
 		#region ExcelDataValidationCollectionBase Overrides
 		protected override void ClearWorksheetValidations()
 		{

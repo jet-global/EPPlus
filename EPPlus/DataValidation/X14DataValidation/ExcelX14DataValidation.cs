@@ -6,15 +6,30 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.DataValidation.X14DataValidation
 {
 	/// <summary>
-	/// Represents an X14 Data Validation
+	/// Represents an X14 Data Validation.
 	/// </summary>
 	public class ExcelX14DataValidation : XmlHelper, IExcelDataValidation //WithFormula2<IExcelDataValidationFormula>
 	{
 		#region Constants
+		/// <summary>
+		/// The path of the x14:dataValidations node.
+		/// </summary>
 		public const string DataValidationPath = "//x14:dataValidations";
+		/// <summary>
+		/// The path of the x14:dataValidation nodes.
+		/// </summary>
 		public const string DataValidationItemsPath = "//x14:dataValidations/x14:dataValidation";
+		/// <summary>
+		/// The local path of the xm:sqref node.
+		/// </summary>
 		public const string SqrefLocalPath = ".//xm:sqref";
+		/// <summary>
+		/// The local path of the formula1 xm:f node.
+		/// </summary>
 		public const string Formula1LocalPath = ".//x14:formula1/xm:f";
+		/// <summary>
+		/// The local path of the formula2 xm:f node.
+		/// </summary>
 		public const string Formula2LocalPath = ".//x14:formula2/xm:f";
 		#endregion
 
@@ -78,7 +93,6 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 			}
 		}
 
-		// TODO: Implement Xml backing for these properties.
 		public ExcelDataValidationWarningStyle ErrorStyle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool? AllowBlank { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public bool? ShowInputMessage { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -91,7 +105,7 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 
 		#region Constructors
 		/// <summary>
-		/// Creates ExcelX14DataValidation from existing xml node
+		/// Creates ExcelX14DataValidation from the existing xml node.
 		/// </summary>
 		/// <param name="worksheet">The <see cref="ExcelWorksheet"/> of the <see cref="ExcelX14DataValidation"/>.</param>
 		/// <param name="address">The address of the <see cref="ExcelX14DataValidation"/></param>
@@ -107,8 +121,6 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 			this.ValidationType = ExcelDataValidationType.GetBySchemaName(validationType);
 			this.TopNode = itemNode;
 		}
-
-		// TODO: Create constructor for creating a new (non-pre-existing) ExcelX14DataValidation.
 		#endregion
 
 		#region Public Methods
@@ -120,7 +132,6 @@ namespace OfficeOpenXml.DataValidation.X14DataValidation
 		{
 			if (string.IsNullOrEmpty(this.Address?.Address))
 				throw new InvalidOperationException("Address cannot be empty");
-			// TODO: More validation based on type.
 		}
 		#endregion
 	}
