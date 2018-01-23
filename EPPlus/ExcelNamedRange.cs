@@ -175,31 +175,6 @@ namespace OfficeOpenXml
 			this.NameFormula = this.Workbook.Package.FormulaManager.UpdateFormulaReferences(
 				this.NameFormula, rows, cols, rowFrom, colFrom, worksheet.Name, worksheet.Name, updateOnlyFixed: true);
 		}
-
-		/// <summary>
-		/// Attempts to get the named range's formula as an address.
-		/// </summary>
-		/// <param name="address">The <see cref="ExcelRange"/> address if the formula is an address.</param>
-		/// <returns>True if the formula is an address, false otherwise.</returns>
-		public bool TryGetAsAddress(out ExcelRange address)
-		{
-			// TODO: Is this method necessary? See ExcelRange indexer, attempts to resolve as named range.
-			// If this functionality is not necessary, this method can be removed.
-			address = null;
-			var tokens = this.Workbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
-			// TODO: Test for addresses such as "'Sheet'!C3,'Sheet'!D3:D5,'Sheet'!E5".
-			if (tokens.Count() == 1)
-			{
-				var token = tokens.ElementAt(0);
-				if (token.TokenType == TokenType.ExcelAddress)
-				{
-					var excelAddress = new ExcelAddress(token.Value);
-					address = new ExcelRange(this.Workbook.Worksheets[excelAddress.WorkSheet], excelAddress.Address);
-					return true;
-				}
-			}
-			return false;
-		}
 		#endregion
 
 		#region Private Methods

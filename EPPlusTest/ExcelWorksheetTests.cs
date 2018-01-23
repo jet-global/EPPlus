@@ -401,12 +401,6 @@ namespace EPPlusTest
 			ws.Cells["D30"].Style.Font.Bold = true;
 			ws.Cells["D30"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Right;
 
-			ws.Workbook.Names.Add("TestName", ws.Cells["B30:E30"]);
-			Assert.IsTrue(ws.Workbook.Names["TestName"].TryGetAsAddress(out ExcelRange address));
-			address.Style.Font.Color.SetColor(Color.Red);
-			address.Offset(1, 0).Value = "Offset test 1";
-			address.Offset(2, -1, 2, 2).Value = "Offset test 2";
-
 			//Test vertical align
 			ws.Cells["E19"].Value = "Subscript";
 			ws.Cells["E19"].Style.Font.VerticalAlign = ExcelVerticalAlignmentFont.Subscript;
@@ -415,7 +409,6 @@ namespace EPPlusTest
 			ws.Cells["E21"].Value = "Superscript";
 			ws.Cells["E21"].Style.Font.VerticalAlign = ExcelVerticalAlignmentFont.Superscript;
 			ws.Cells["E21"].Style.Font.VerticalAlign = ExcelVerticalAlignmentFont.None;
-
 
 			ws.Cells["E22"].Value = "Indent 2";
 			ws.Cells["E22"].Style.Indent = 2;
@@ -431,7 +424,6 @@ namespace EPPlusTest
 			ws.Cells["e27"].Value = "Default Readingorder";
 
 			//Underline
-
 			ws.Cells["F1:F7"].Value = "Underlined";
 			ws.Cells["F1"].Style.Font.UnderLineType = ExcelUnderLineType.Single;
 			ws.Cells["F2"].Style.Font.UnderLineType = ExcelUnderLineType.Double;
@@ -457,7 +449,7 @@ namespace EPPlusTest
 				System.Diagnostics.Debug.WriteLine(cell.Address);
 			}
 
-			////Linq test
+			// Linq test
 			var res = from c in ws.Cells[ws.Dimension.Address] where c.Value != null && c.Value.ToString() == "Offset test 1" select c;
 
 			foreach (ExcelRangeBase cell in res)
@@ -1699,7 +1691,7 @@ namespace EPPlusTest
 			ws.Cells["A1"].Style.Font.Size = 8.5F;
 
 			ws.Names.Add("Address", ws.Cells["A2:A3"]);
-			ws.Cells["Address"].Value = 1;
+			ws.Names["Address"].NameFormula = "1";
 			ws.Names.Add("Value", "5");
 			ws.Names.Add("FullRow", ws.Cells["2:2"]);
 			ws.Names.Add("FullCol", ws.Cells["A:A"]);
@@ -2656,14 +2648,14 @@ namespace EPPlusTest
 			{
 				var ws1 = package.Workbook.Worksheets.Add("sheet1");
 				var ws2 = package.Workbook.Worksheets.Add("sheet2");
-				string cellValue = "sdfsdf";
+				const string cellValue = "sdfsdf";
 				ws2.Cells["B2"].Value = cellValue;
-				ws1.Cells["C3"].Formula = $"={ws2.Name}!B2";
+				ws1.Cells["C3"].Formula = "sheet2!B2";
 				ws1.Cells["C3"].Calculate();
 				package.Save();
 				Assert.AreEqual(cellValue, ws1.Cells["C3"].Value);
 				package.Workbook.Worksheets.Delete(ws2);
-				Assert.AreEqual("#REF!C7", ws1.Cells["C3"].Formula);
+				Assert.AreEqual("#REF!B2", ws1.Cells["C3"].Formula);
 			}
 		}
 

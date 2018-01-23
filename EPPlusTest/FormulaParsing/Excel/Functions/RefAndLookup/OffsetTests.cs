@@ -37,7 +37,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		}
 		#endregion
 
-		#region Integration Offset Tests
+		#region Offset Error Handling Tests
 		[TestMethod]
 		public void OffsetWithInvalidAddressDependencyChainCompletesCalculation()
 		{
@@ -63,13 +63,34 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 			{
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells[2, 2].Formula = "C3";
-				worksheet.Cells[2, 3].Value = "NOTAFUNCTION(1,2,3)";
+				worksheet.Cells[2, 3].Formula = "NOTAFUNCTION(1,2,3)";
 				worksheet.Cells[3, 3].Formula = formula;
 				worksheet.Cells[2, 2].Calculate();
 				var result = worksheet.Cells[2, 2].Value;
 				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));
 				Assert.AreEqual(ExcelErrorValue.Values.Value, result.ToString());
 				Assert.AreEqual(formula, worksheet.Cells[3, 3].Formula);
+			}
+		}
+
+		[TestMethod]
+		public void OffsetWithNAErrorDependencyChainCompletesCalculation()
+		{
+			const string formula = "OFFSET('Sheet1'!G6, 5, C2)";
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Formula = "C3";
+				worksheet.Cells[2, 3].Formula = "MATCH(2,F4:F9,0)"; // Should return #NA.
+				worksheet.Cells[3, 3].Formula = formula;
+				worksheet.Calculate();
+				var result = worksheet.Cells[2, 2].Value;
+				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));
+				Assert.AreEqual(ExcelErrorValue.Values.Value, result.ToString());
+				Assert.AreEqual(formula, worksheet.Cells[3, 3].Formula);
+				result = worksheet.Cells[2, 3].Value;
+				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));
+				Assert.AreEqual(ExcelErrorValue.Values.NA, result.ToString());
 			}
 		}
 		#endregion
