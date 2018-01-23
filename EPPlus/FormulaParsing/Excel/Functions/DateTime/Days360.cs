@@ -27,6 +27,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using OfficeOpenXml.Extensions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Utils;
 
@@ -79,7 +80,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				var european = false;
 				if (arguments.ElementAt(2).Value is string stringVal)
 				{
-					if (!stringVal.Equals("true", System.StringComparison.CurrentCultureIgnoreCase) && !stringVal.Equals("false", System.StringComparison.CurrentCultureIgnoreCase))
+					if (!stringVal.IsEquivalentTo("true") && !stringVal.IsEquivalentTo("false"))
 						return new CompileResult(eErrorType.Value);
 				}
 				if (arguments.ElementAt(2).Value is string && ConvertUtil.TryParseNumericString(arguments.ElementAt(2).Value, out double val))

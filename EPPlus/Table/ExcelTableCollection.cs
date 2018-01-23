@@ -85,7 +85,7 @@ namespace OfficeOpenXml.Table
 		/// <param name="range">The range address, including header and total row.</param>
 		/// <param name="tableName">The name of the table. Must be unique. If none is provided, a default table name will be applied.</param>
 		/// <returns>The <see cref="ExcelTable"/> object that represents the table.</returns>
-		public ExcelTable Add(ExcelAddressBase range, string tableName = null)
+		public ExcelTable Add(ExcelAddress range, string tableName = null)
 		{
 			if (range.WorkSheet != null && range.WorkSheet != this.Worksheet.Name)
 			{
@@ -105,7 +105,7 @@ namespace OfficeOpenXml.Table
 
 			foreach (var t in Tables)
 			{
-				if (t.Address.Collide(range) != ExcelAddressBase.eAddressCollition.No)
+				if (t.Address.Collide(range) != ExcelAddress.eAddressCollition.No)
 				{
 					throw (new ArgumentException(string.Format("Table range collides with table {0}", t.Name)));
 				}

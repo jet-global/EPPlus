@@ -12,7 +12,7 @@ indent_style = tab
 # Sort using directives with System.* appearing first
 dotnet_sort_system_directives_first = true
 # always require "this." 
-dotnet_style_qualification_for_field = true:suggestion
+dotnet_style_qualification_for_field = false:none
 dotnet_style_qualification_for_property = true:suggestion
 dotnet_style_qualification_for_method = true:suggestion
 dotnet_style_qualification_for_event = true:suggestion

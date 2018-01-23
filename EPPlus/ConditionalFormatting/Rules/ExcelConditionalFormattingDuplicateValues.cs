@@ -87,25 +87,6 @@ namespace OfficeOpenXml.ConditionalFormatting
 			 null)
 		{
 		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="priority"></param>
-		/// <param name="address"></param>
-		/// <param name="worksheet"></param>
-		internal ExcelConditionalFormattingDuplicateValues(
-		  ExcelAddress address,
-		  int priority,
-		  ExcelWorksheet worksheet)
-		  : this(
-			 address,
-			 priority,
-			 worksheet,
-			 null,
-			 null)
-		{
-		}
 		#endregion Constructors
 
 		/****************************************************************************************/

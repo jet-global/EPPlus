@@ -46,7 +46,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Database
 		public ExcelDatabase(ExcelDataProvider dataProvider, string range)
 		{
 			_dataProvider = dataProvider;
-			var address = new ExcelAddressBase(range);
+			var address = new ExcelAddress(range);
 			_fromCol = address._fromCol;
 			_toCol = address._toCol;
 			_fieldRow = address._fromRow;

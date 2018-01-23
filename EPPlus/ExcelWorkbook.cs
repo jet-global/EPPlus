@@ -643,16 +643,16 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Internal Methods
+		/// <summary>
+		/// Loads the defined names from the workbook XML.
+		/// </summary>
 		internal void GetDefinedNames()
 		{
-			XmlNodeList nl = this.WorkbookXml.SelectNodes("//d:definedNames/d:definedName", NameSpaceManager);
-			if (nl != null)
+			XmlNodeList nodeList = this.WorkbookXml.SelectNodes("//d:definedNames/d:definedName", this.NameSpaceManager);
+			if (nodeList != null)
 			{
-				foreach (XmlElement elem in nl)
+				foreach (XmlElement elem in nodeList)
 				{
-					//var addressType = ExcelAddressBase.IsValid(fullAddress);
-					//ExcelRangeBase range;
-					//ExcelNamedRange namedRange;
 					string nameFormula = elem.InnerText;
 					if (nameFormula.IndexOf("[") == 0)
 					{
@@ -661,91 +661,27 @@ namespace OfficeOpenXml
 						if (start >= 0 && end >= 0)
 						{
 							string externalIndex = nameFormula.Substring(start + 1, end - start - 1);
-							int index;
-							if (int.TryParse(externalIndex, out index) && this.ExternalReferences != null)
+							if (int.TryParse(externalIndex, out int index) && this.ExternalReferences != null)
 							{
 								if (index > 0 && index <= this.ExternalReferences.References.Count)
 								{
-									nameFormula = nameFormula.Substring(0, start) + "[" + this.ExternalReferences.References[index - 1].Name + "]" + nameFormula.Substring(end + 1);
+									// External workbook addresses are always fully qualified with a workbook, worksheet, and address.
+									string externalReference = this.ExternalReferences.References[index - 1].Name;
+									if (externalReference.StartsWith("file:///", StringComparison.InvariantCultureIgnoreCase))
+										externalReference = externalReference.Substring(8);
+									var address = new ExcelAddress(nameFormula.Substring(end + 1));
+									string cellAddress = address.Address.Substring(address.Address.LastIndexOf('!'));
+									nameFormula = $"{nameFormula.Substring(0, start)}'[{externalReference}]{address.WorkSheet}'{cellAddress}";
 								}
 							}
 						}
 					}
-					//ExcelNamedRange namedRange;
 					string comment = elem.GetAttribute("comment");
 					bool isHidden = elem.GetAttribute("hidden") == "1";
-					//if (elem.GetAttribute("hidden") == "1" && namedRange != null) namedRange.IsNameHidden = true;
 					if (int.TryParse(elem.GetAttribute("localSheetId"), out int localSheetID))
-					{
 						this.Worksheets[localSheetID + 1].Names.Add(elem.GetAttribute("name"), nameFormula, isHidden, comment);
-						//var range = new ExcelRangeBase(this, this.Worksheets[localSheetID + 1], elem.GetAttribute("name"), true);
-						//namedRange = this.Worksheets[localSheetID + 1].Names.Add(elem.GetAttribute("name"), range);
-					}
 					else
-					{
-						//var range = new ExcelRangeBase(this, null, elem.GetAttribute("name"), true);
-						//namedRange = this.Names.Add(elem.GetAttribute("name"), range);
 						this.Names.Add(elem.GetAttribute("name"), nameFormula, isHidden, comment);
-					}
-					//namedRange.NameFormula = nameFormula;
-
-					//if (addressType == ExcelAddressBase.AddressType.Invalid || addressType == ExcelAddressBase.AddressType.InternalName || addressType == ExcelAddressBase.AddressType.ExternalName || addressType == ExcelAddressBase.AddressType.Formula || addressType == ExcelAddressBase.AddressType.ExternalAddress)    //A value or a formula
-					//{
-					//	double value;
-					//	range = new ExcelRangeBase(this, nameWorksheet, elem.GetAttribute("name"), true);
-					//	if (nameWorksheet == null)
-					//	{
-					//		namedRange = this.Names.Add(elem.GetAttribute("name"), range);
-					//	}
-					//	else
-					//	{
-					//		namedRange = nameWorksheet.Names.Add(elem.GetAttribute("name"), range);
-					//	}
-
-					//	if (Utils.ConvertUtil._invariantCompareInfo.IsPrefix(fullAddress, "\"")) //String value
-					//	{
-					//		namedRange.NameValue = fullAddress.Substring(1, fullAddress.Length - 2);
-					//	}
-					//	else if (double.TryParse(fullAddress, NumberStyles.Any, CultureInfo.InvariantCulture, out value))
-					//	{
-					//		namedRange.NameValue = value;
-					//	}
-					//	else
-					//	{
-					//		if (addressType == ExcelAddressBase.AddressType.ExternalAddress || addressType == ExcelAddressBase.AddressType.ExternalName)
-					//		{
-					//			var r = new ExcelAddress(fullAddress);
-					//			string workbook = r._wb.StartsWith("file:///", StringComparison.InvariantCultureIgnoreCase) ? r._wb.Substring(8) : r._wb;
-					//			// External workbook addresses are always fully qualified with a workbook, worksheet, and address.
-					//			namedRange.NameFormula = "'[" + workbook + "]" + r.WorkSheet + "'" + r.Address.Substring(r.Address.LastIndexOf('!'));
-					//		}
-					//		else
-					//		{
-					//			namedRange.NameFormula = fullAddress;
-					//		}
-					//	}
-					//}
-					//else
-					//{
-					//	ExcelAddress addr = new ExcelAddress(fullAddress, Package, null);
-					//	if (localSheetID > -1)
-					//	{
-					//		if (string.IsNullOrEmpty(addr._ws))
-					//		{
-					//			namedRange = Worksheets[localSheetID + 1].Names.Add(elem.GetAttribute("name"), new ExcelRangeBase(this, Worksheets[localSheetID + 1], fullAddress, false));
-					//		}
-					//		else
-					//		{
-					//			namedRange = Worksheets[localSheetID + 1].Names.Add(elem.GetAttribute("name"), new ExcelRangeBase(this, Worksheets[addr._ws], fullAddress, false));
-					//		}
-					//	}
-					//	else
-					//	{
-					//		var ws = Worksheets[addr._ws];
-					//		namedRange = this.Names.Add(elem.GetAttribute("name"), new ExcelRangeBase(this, ws, fullAddress, false));
-					//	}
-					//}
-					
 				}
 			}
 		}
@@ -1143,32 +1079,9 @@ namespace OfficeOpenXml
 
 		private void SetNameElement(ExcelNamedRange name, XmlElement elem)
 		{
-			if (name.IsName)
-			{
-				if (string.IsNullOrEmpty(name.NameFormula))
-				{
-					if ((name.NameValue.GetType().IsPrimitive || name.NameValue is double || name.NameValue is decimal))
-					{
-						elem.InnerText = Convert.ToDouble(name.NameValue, CultureInfo.InvariantCulture).ToString("R15", CultureInfo.InvariantCulture);
-					}
-					else if (name.NameValue is DateTime)
-					{
-						elem.InnerText = ((DateTime)name.NameValue).ToOADate().ToString(CultureInfo.InvariantCulture);
-					}
-					else
-					{
-						elem.InnerText = "\"" + name.NameValue.ToString() + "\"";
-					}
-				}
-				else
-				{
-					elem.InnerText = name.NameFormula;
-				}
-			}
-			else
-			{
-				elem.InnerText = name.FullAddress;
-			}
+			if (string.IsNullOrEmpty(name.NameFormula))
+				throw new InvalidOperationException("Named range formulas cannot be blank.");
+			elem.InnerText = name.NameFormula;
 		}
 
 		/// <summary>

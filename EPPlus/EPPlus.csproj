@@ -234,6 +234,7 @@
     <Compile Include="Drawing\Sparkline\ExcelSparklineGroups.cs" />
     <Compile Include="Drawing\Sparkline\SparklineEnums.cs" />
     <Compile Include="ExcelChartsheet.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="ExternalReferenceCollection.cs" />
     <Compile Include="FontSize.cs" />
     <Compile Include="DataValidation\Contracts\IExcelDataValidation.cs" />

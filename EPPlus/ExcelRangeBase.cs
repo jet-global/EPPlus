@@ -109,8 +109,10 @@ namespace OfficeOpenXml
 		}
 
 		internal ExcelRangeBase(ExcelWorksheet xlWorksheet, string address) :
-			base(xlWorksheet == null ? string.Empty : xlWorksheet.Name, address)
+			base(address)
 		{
+			if (string.IsNullOrEmpty(xlWorksheet?.Name))
+				_ws = xlWorksheet.Name;
 			this.myWorksheet = xlWorksheet;
 			this.myWorkbook = this.myWorksheet.Workbook;
 			base.SetRCFromTable(this.myWorksheet.Package, null);
@@ -119,8 +121,10 @@ namespace OfficeOpenXml
 			SetDelegate();
 		}
 		internal ExcelRangeBase(ExcelWorkbook wb, ExcelWorksheet xlWorksheet, string address, bool isName) :
-			base(xlWorksheet == null ? string.Empty : xlWorksheet.Name, address, isName)
+			base(address, isName)
 		{
+			if (string.IsNullOrEmpty(xlWorksheet?.Name))
+				_ws = xlWorksheet.Name;
 			SetRCFromTable(wb.Package, null);
 			this.myWorksheet = xlWorksheet;
 			this.myWorkbook = wb;
@@ -443,32 +447,14 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				if (this.IsName)
-				{
-					if (this.myWorksheet == null)
-						return this.myWorkbook.Names[this._address].NameValue;
-					else
-						return this.myWorksheet.Names[this._address].NameValue;
-				}
+				if (this._fromRow == this._toRow && this._fromCol == this._toCol)
+					return this.myWorksheet.GetValue(this._fromRow, this._fromCol);
 				else
-				{
-					if (this._fromRow == this._toRow && this._fromCol == this._toCol)
-						return this.myWorksheet.GetValue(this._fromRow, this._fromCol);
-					else
-						return GetValueArray();
-				}
+					return GetValueArray();
 			}
 			set
 			{
-				if (this.IsName)
-				{
-					if (this.myWorksheet == null)
-						this.myWorkbook.Names[this._address].NameValue = value;
-					else
-						this.myWorksheet.Names[this._address].NameValue = value;
-				}
-				else
-					this.myChangePropMethod(this, _setValueDelegate, value);
+				this.myChangePropMethod(this, _setValueDelegate, value);
 			}
 		}
 
@@ -490,15 +476,7 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				if (this.IsName)
-				{
-					if (this.myWorksheet == null)
-						return this.myWorkbook.Names[this._address].NameFormula;
-					else
-						return this.myWorksheet.Names[this._address].NameFormula;
-				}
-				else
-					return this.myWorksheet.GetFormula(this._fromRow, this._fromCol);
+				return this.myWorksheet.GetFormula(this._fromRow, this._fromCol);
 			}
 			set
 			{
@@ -580,7 +558,7 @@ namespace OfficeOpenXml
 				this.myWorksheet.MergedCells.Clear(this);
 				if (value)
 				{
-					this.myWorksheet.MergedCells.Add(new ExcelAddressBase(this.FirstAddress), true);
+					this.myWorksheet.MergedCells.Add(new ExcelAddress(this.FirstAddress), true);
 					if (this.Addresses != null)
 					{
 						foreach (var address in this.Addresses)
@@ -612,7 +590,7 @@ namespace OfficeOpenXml
 			get
 			{
 				IsRangeValid("autofilter");
-				ExcelAddressBase address = this.myWorksheet.AutoFilterAddress;
+				ExcelAddress address = this.myWorksheet.AutoFilterAddress;
 				if (address == null)
 					return false;
 				if (this._fromRow >= address.Start.Row
@@ -895,7 +873,7 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private void CheckAndSplitSharedFormula(ExcelAddressBase address)
+		private void CheckAndSplitSharedFormula(ExcelAddress address)
 		{
 			for (int col = address._fromCol; col <= address._toCol; col++)
 			{
@@ -911,7 +889,7 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private void UpdateSharedFormulaAnchors(ExcelAddressBase address)
+		private void UpdateSharedFormulaAnchors(ExcelAddress address)
 		{
 			List<int> formulas = new List<int>();
 			for (int col = address._fromCol; col <= address._toCol; col++)
@@ -937,7 +915,7 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private void UpdateSharedFormulaAnchor(ExcelAddressBase address, int ix)
+		private void UpdateSharedFormulaAnchor(ExcelAddress address, int ix)
 		{
 			var sharedFormula = this.myWorksheet._sharedFormulas[ix];
 			var fRange = this.myWorksheet.Cells[sharedFormula.Address];
@@ -965,11 +943,11 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private bool TryFindNewAnchorCoordinates(ExcelWorksheet.Formulas currentFormula, ExcelAddressBase newAddress, out int row, out int column)
+		private bool TryFindNewAnchorCoordinates(ExcelWorksheet.Formulas currentFormula, ExcelAddress newAddress, out int row, out int column)
 		{
 			row = -1;
 			column = -1;
-			var currentAddress = new ExcelAddressBase(currentFormula.Address);
+			var currentAddress = new ExcelAddress(currentFormula.Address);
 			for (int r = currentAddress._fromRow; r <= currentAddress._toRow; r++)
 			{
 				for (int c = currentAddress._fromCol; c <= currentAddress._toCol; c++)
@@ -1045,7 +1023,7 @@ namespace OfficeOpenXml
 			var addresses = rule.Address.AddressSpaceSeparated.Split(' ');
 			foreach (var address in addresses)
 			{
-				var addressBase = new ExcelAddressBase(address);
+				var addressBase = new ExcelAddress(address);
 				var collision = addressBase.Collide(cell, true);
 				if (collision != eAddressCollition.No)
 					return true;
@@ -1239,7 +1217,7 @@ namespace OfficeOpenXml
 
 		private object GetValueArray()
 		{
-			ExcelAddressBase addr;
+			ExcelAddress addr;
 			if (this._fromRow == 1 && this._fromCol == 1 && this._toRow == ExcelPackage.MaxRows && this._toCol == ExcelPackage.MaxColumns)
 			{
 				addr = this.myWorksheet.Dimension;
@@ -1267,7 +1245,7 @@ namespace OfficeOpenXml
 			return v;
 		}
 
-		private ExcelAddressBase GetAddressDim(ExcelRangeBase addr)
+		private ExcelAddress GetAddressDim(ExcelRangeBase addr)
 		{
 			int fromRow, fromCol, toRow, toCol;
 			var d = this.myWorksheet.Dimension;
@@ -1284,7 +1262,7 @@ namespace OfficeOpenXml
 				if (this._fromRow > this._toRow || this._fromCol > this._toCol)
 					return null;
 				else
-					return new ExcelAddressBase(fromRow, fromCol, toRow, toCol);
+					return new ExcelAddress(fromRow, fromCol, toRow, toCol);
 			}
 		}
 
@@ -1296,7 +1274,7 @@ namespace OfficeOpenXml
 				return this.myWorksheet.GetValueInner(this._fromRow, this._fromCol);
 		}
 
-		private void DeleteCheckMergedCells(ExcelAddressBase range)
+		private void DeleteCheckMergedCells(ExcelAddress range)
 		{
 			var removeItems = new List<string>();
 			foreach (var addr in this.Worksheet.MergedCells)
@@ -1393,7 +1371,7 @@ namespace OfficeOpenXml
 			int rows = range.Rows - 1;
 			if (rows >= 0 && range.Columns > 0)
 			{
-				var table = this.myWorksheet.Tables.Add(new ExcelAddressBase(this._fromRow, this._fromCol, this._fromRow + (rows <= 0 ? 1 : rows), this._fromCol + range.Columns - 1), tableName);
+				var table = this.myWorksheet.Tables.Add(new ExcelAddress(this._fromRow, this._fromCol, this._fromRow + (rows <= 0 ? 1 : rows), this._fromCol + range.Columns - 1), tableName);
 				table.ShowHeader = printHeaders;
 				table.TableStyle = tableStyle;
 			}
@@ -1447,7 +1425,7 @@ namespace OfficeOpenXml
 			int rows = (table.Rows.Count == 0 ? 1 : table.Rows.Count) + (printHeaders ? 1 : 0);
 			if (rows >= 0 && table.Columns.Count > 0)
 			{
-				var excelTable = this.myWorksheet.Tables.Add(new ExcelAddressBase(this._fromRow, this._fromCol, this._fromRow + rows - 1, this._fromCol + table.Columns.Count - 1), table.TableName);
+				var excelTable = this.myWorksheet.Tables.Add(new ExcelAddress(this._fromRow, this._fromCol, this._fromRow + rows - 1, this._fromCol + table.Columns.Count - 1), table.TableName);
 				excelTable.ShowHeader = printHeaders;
 				excelTable.TableStyle = tableStyle;
 			}
@@ -1912,28 +1890,18 @@ namespace OfficeOpenXml
 		{
 			if (!string.IsNullOrEmpty(formula) && formula[0] == '=')
 				formula = formula.Substring(1);
-			if (this.IsName)
-			{
-				if (this.myWorksheet == null)
-					this.myWorkbook.Names[this._address].NameFormula = formula;
-				else
-					this.myWorksheet.Names[this._address].NameFormula = formula;
-			}
+			if ((formula == null || formula.Trim() == string.Empty) && clearValue)
+				this.Value = null;
+			else if (this._fromRow == this._toRow && this._fromCol == this._toCol)
+				SetFormula(this, formula, this._fromRow, this._fromCol, clearValue);
 			else
 			{
-				if ((formula == null || formula.Trim() == string.Empty) && clearValue)
-					this.Value = null;
-				else if (this._fromRow == this._toRow && this._fromCol == this._toCol)
-					SetFormula(this, formula, this._fromRow, this._fromCol, clearValue);
-				else
+				SetSharedFormula(this, formula, this, false, clearValue);
+				if (this.Addresses != null)
 				{
-					SetSharedFormula(this, formula, this, false, clearValue);
-					if (this.Addresses != null)
+					foreach (var address in this.Addresses)
 					{
-						foreach (var address in this.Addresses)
-						{
-							SetSharedFormula(this, formula, address, false, clearValue);
-						}
+						SetSharedFormula(this, formula, address, false, clearValue);
 					}
 				}
 			}
@@ -2164,7 +2132,7 @@ namespace OfficeOpenXml
 			SetSharedFormula(this, arrayFormula, this, true);
 		}
 
-		internal void Delete(ExcelAddressBase range, bool shift)
+		internal void Delete(ExcelAddress range, bool shift)
 		{
 			this.myWorksheet.MergedCells.Clear(range);
 			//First find the start cell
@@ -2260,10 +2228,10 @@ namespace OfficeOpenXml
 			}
 
 			//Get any autofilter to widen these columns
-			var afAddr = new List<ExcelAddressBase>();
+			var afAddr = new List<ExcelAddress>();
 			if (this.myWorksheet.AutoFilterAddress != null)
 			{
-				afAddr.Add(new ExcelAddressBase(this.myWorksheet.AutoFilterAddress._fromRow,
+				afAddr.Add(new ExcelAddress(this.myWorksheet.AutoFilterAddress._fromRow,
 													this.myWorksheet.AutoFilterAddress._fromCol,
 													this.myWorksheet.AutoFilterAddress._fromRow,
 													this.myWorksheet.AutoFilterAddress._toCol));
@@ -2273,7 +2241,7 @@ namespace OfficeOpenXml
 			{
 				if (table.AutoFilterAddress != null)
 				{
-					afAddr.Add(new ExcelAddressBase(table.AutoFilterAddress._fromRow,
+					afAddr.Add(new ExcelAddress(table.AutoFilterAddress._fromRow,
 																			table.AutoFilterAddress._fromCol,
 																			table.AutoFilterAddress._fromRow,
 																			table.AutoFilterAddress._toCol));
@@ -2392,7 +2360,7 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				return new ExcelRangeBase(this.myWorksheet, ExcelAddressBase.GetAddress(this.cellEnum.Row, this.cellEnum.Column));
+				return new ExcelRangeBase(this.myWorksheet, ExcelAddress.GetAddress(this.cellEnum.Row, this.cellEnum.Column));
 			}
 		}
 
@@ -2403,7 +2371,7 @@ namespace OfficeOpenXml
 		{
 			get
 			{
-				return ((new ExcelRangeBase(this.myWorksheet, ExcelAddressBase.GetAddress(this.cellEnum.Row, this.cellEnum.Column))));
+				return ((new ExcelRangeBase(this.myWorksheet, ExcelAddress.GetAddress(this.cellEnum.Row, this.cellEnum.Column))));
 			}
 		}
 

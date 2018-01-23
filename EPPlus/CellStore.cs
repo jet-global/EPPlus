@@ -357,7 +357,7 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 		{
 			get
 			{
-				return ExcelAddressBase.GetAddress(this.Row, this.Column);
+				return ExcelAddress.GetAddress(this.Row, this.Column);
 			}
 		}
 

@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 
 namespace EPPlusTest
@@ -6,21 +8,59 @@ namespace EPPlusTest
 	[TestClass]
 	public class ExcelNamedRangeTest
 	{
-		#region Address Tests
+		#region Constructor Tests
 		[TestMethod]
-		public void SettingAddressHandlesMultiAddresses()
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructExcelNamedRangeNullWorkbookThrowsException()
 		{
-			using (ExcelPackage package = new ExcelPackage())
+			using (var excelPackage = new ExcelPackage())
 			{
-				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				var name = package.Workbook.Names.Add("Test", worksheet.Cells[3, 3]);
-				name.Address = "Sheet1!C3";
-				name.Address = "Sheet1!D3";
-				Assert.IsNull(name.Addresses);
-				name.Address = "C3:D3,E3:F3";
-				Assert.IsNotNull(name.Addresses);
-				name.Address = "Sheet1!C3";
-				Assert.IsNull(name.Addresses);
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				new ExcelNamedRange("somename", null, worksheet, "Sheet1!B2", 0);
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void ConstructExcelNamedRangeNullNameThrowsException()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				new ExcelNamedRange(null, excelPackage.Workbook, worksheet, "Sheet1!B2", 0);
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void ConstructExcelNamedRangeEmptyNameThrowsException()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				new ExcelNamedRange(string.Empty, excelPackage.Workbook, worksheet, "Sheet1!B2", 0);
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void ConstructExcelNamedRangeNullFormulaThrowsException()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				new ExcelNamedRange("somename", excelPackage.Workbook, worksheet, null, 0);
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void ConstructExcelNamedRangeEmptyFormulaThrowsException()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				new ExcelNamedRange(string.Empty, excelPackage.Workbook, worksheet, string.Empty, 0);
 			}
 		}
 		#endregion
@@ -33,7 +73,6 @@ namespace EPPlusTest
 			{
 				var sheet = package.Workbook.Worksheets.Add("Sheet");
 				var name = package.Workbook.Names.Add("MyNamedRange", new ExcelRangeBase(sheet, "$A$1"));
-				Assert.AreEqual(-1, name.ActualSheetID);
 				Assert.AreEqual(-1, name.LocalSheetID);
 				Assert.IsNull(name.LocalSheet);
 			}
@@ -48,7 +87,6 @@ namespace EPPlusTest
 					package.Workbook.Worksheets.Add($"Sheet {i}");
 				var sheet = package.Workbook.Worksheets.Add("Test Sheet");
 				var name = sheet.Names.Add("MyNamedRange", new ExcelRangeBase(sheet, "$A$1"));
-				Assert.AreEqual(sheet.SheetID, name.ActualSheetID);
 				Assert.AreEqual(sheet.PositionID - 1, name.LocalSheetID);
 				Assert.AreSame(sheet, name.LocalSheet);
 			}
@@ -82,17 +120,130 @@ namespace EPPlusTest
 				//	D$5 means on row 5 and right three columns from the relative address.
 				//	C3 means right two and down three from the relative address.
 				var expected = $"'{sheetName1}'!$D4";
-				string actual = package.Workbook.Names["Name1"].GetRelativeAddress(2, 2);
+				string actual = string.Join(string.Empty, package.Workbook.Names["Name1"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
 				expected = $"'{sheetName1}'!H$5";
-				actual = package.Workbook.Names["Name2"].GetRelativeAddress(2, 2);
+				actual = string.Join(string.Empty, package.Workbook.Names["Name2"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
 				expected = $"'{sheetName2}'!F6";
-				actual = package.Workbook.Names["Name3"].GetRelativeAddress(2, 2);
+				actual = string.Join(string.Empty, package.Workbook.Names["Name3"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
 				expected = $"'{sheetName2}'!$C$8";
-				actual = package.Workbook.Names["Name4"].GetRelativeAddress(2, 2);
+				actual = string.Join(string.Empty, package.Workbook.Names["Name4"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
+			}
+		}
+		#endregion
+
+		#region UpdateFormula Tests
+		[TestMethod]
+		public void UpdateFormulaRelativeRowUpdateDoesNotChange()
+		{
+			const string formula = "Sheet1!E5";
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, formula, 0);
+				namedRange.UpdateFormula(2, 0, 4, 0, worksheet);
+				Assert.AreEqual("'SHEET1'!E5", namedRange.NameFormula);
+			}
+		}
+
+		[TestMethod]
+		public void UpdateFormulaAbsoluteRowUpdatesReference()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!E$5", 0);
+				namedRange.UpdateFormula(2, 0, 4, 0, worksheet);
+				Assert.AreEqual("'SHEET1'!E$9", namedRange.NameFormula);
+			}
+		}
+
+		[TestMethod]
+		public void UpdateFormulaAbsoluteRowDeleteUpdatesReference()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!E$5", 0);
+				namedRange.UpdateFormula(2, 0, -2, 0, worksheet);
+				Assert.AreEqual("'SHEET1'!E$3", namedRange.NameFormula);
+			}
+		}
+
+		[TestMethod]
+		public void UpdateFormulaRelativeColumnUpdateDoesNotChange()
+		{
+			const string formula = "Sheet1!E5";
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, formula, 0);
+				namedRange.UpdateFormula(0, 2, 0, 5, worksheet);
+				Assert.AreEqual("'SHEET1'!E5", namedRange.NameFormula);
+			}
+		}
+
+		[TestMethod]
+		public void UpdateFormulaAbsoluteColumnUpdatesReference()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!$E5", 0);
+				namedRange.UpdateFormula(0, 2, 0, 4, worksheet);
+				Assert.AreEqual("'SHEET1'!$I5", namedRange.NameFormula);
+			}
+		}
+
+		[TestMethod]
+		public void UpdateFormulaAbsoluteColumnDeleteUpdatesReference()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!$E5", 0);
+				namedRange.UpdateFormula(0, 2, 0, -2, worksheet);
+				Assert.AreEqual("'SHEET1'!$C5", namedRange.NameFormula);
+			}
+		}
+
+
+		[TestMethod]
+		public void UpdateFormulaAbsolutePartialFixedRangeUpdatesReference()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "sheet1!$E5:U$7", 0);
+				namedRange.UpdateFormula(3, 3, 2, 4, worksheet);
+				Assert.AreEqual("'SHEET1'!$I5:U$9", namedRange.NameFormula);
+			}
+		}
+
+		[TestMethod]
+		public void UpdateFormulaSpaceSeparatedColumnDeleteUpdatesReferences()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!$L$10 Sheet1!$E5 Sheet1!G$8 Sheet1!F12", 0);
+				namedRange.UpdateFormula(0, 2, 0, -2, worksheet);
+				Assert.AreEqual("'SHEET1'!$K$10 'SHEET1'!$C5 'SHEET1'!E$8 SHEET1!C12", namedRange.NameFormula);
+			}
+		}
+
+		[TestMethod]
+		public void UpdateFormulaCommaSeparatedColumnDeleteUpdatesReferences()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!$L$10,Sheet1!G$8,Sheet1!F12,Sheet1!$E5", 0);
+				namedRange.UpdateFormula(0, 2, 0, -2, worksheet);
+				Assert.AreEqual("'SHEET1'!$J$10,'SHEET1'!G$8,'SHEET1'!F12,'SHEET1'!$C5", namedRange.NameFormula);
 			}
 		}
 		#endregion

@@ -30,7 +30,9 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-27
  *******************************************************************************/
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 
 namespace OfficeOpenXml
@@ -38,8 +40,12 @@ namespace OfficeOpenXml
 	/// <summary>
 	/// A named range.
 	/// </summary>
-	public sealed class ExcelNamedRange : ExcelRangeBase
+	public sealed class ExcelNamedRange
 	{
+		#region Class Variables
+		private string myFormula;
+		#endregion
+
 		#region Properties
 		/// <summary>
 		/// Gets or set the name of this <see cref="ExcelNamedRange"/>.
@@ -58,17 +64,6 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Returns the worksheet's actual "SheetID" property, or -1 if it is not a local named range.
-		/// </summary>
-		public int ActualSheetID
-		{
-			get
-			{
-				return this.LocalSheet == null ? -1 : this.LocalSheet.SheetID;
-			}
-		}
-
-		/// <summary>
 		/// A comment for the Name
 		/// </summary>
 		public string NameComment { get; set; }
@@ -79,24 +74,40 @@ namespace OfficeOpenXml
 		public bool IsNameHidden { get; set; }
 
 		/// <summary>
-		/// Gets the <see cref="ExcelWorksheet"/> that this named range is local to, or null if the named range has a workbook scope.
+		/// Gets the <see cref="ExcelWorksheet"/> that this named range is local to. Null if the named range is workbook scoped.
 		/// </summary>
-		internal ExcelWorksheet LocalSheet { get; private set; }
+		public ExcelWorksheet LocalSheet { get; private set; }
 
 		/// <summary>
+		/// Gets the <see cref="ExcelWorkbook"/> that contains this named range.
+		/// </summary>
+		internal ExcelWorkbook Workbook { get; private set; }
+
+		// TODO: Is Index needed anymore? Dependency chain IDs for named ranges may not be correct
+		// because of the case where a relative named range can actually be many different formulas depending on where 
+		// it is referenced from. The changes to named ranges in dependency chains may not actually need IDs for named ranges anymore.
+		/// <summary>
 		/// Gets or sets the index value of this named range in its parent <see cref="ExcelNamedRangeCollection"/>.
+		/// This is used to create ID values for dependency chains.
 		/// </summary>
 		internal int Index { get; set; }
 
 		/// <summary>
-		/// Gets or sets the value of this Named Range.
-		/// </summary>
-		internal object NameValue { get; set; }
-
-		/// <summary>
 		/// Gets or sets the formula of this Named Range.
 		/// </summary>
-		internal string NameFormula { get; set; }
+		public string NameFormula
+		{
+			get
+			{
+				return myFormula;
+			}
+			set
+			{
+				if (string.IsNullOrEmpty(value))
+					throw new InvalidOperationException($"{nameof(this.NameFormula)} cannot be null or empty");
+				myFormula = value;
+			}
+		}
 		#endregion
 
 		#region Constructors
@@ -104,50 +115,27 @@ namespace OfficeOpenXml
 		/// A named range
 		/// </summary>
 		/// <param name="name">The name of the range.</param>
+		/// <param name="workbook">The workbook that contains this named range.</param>
 		/// <param name="nameSheet">The sheet this named range is local to, or null for a global named range.</param>
-		/// <param name="sheet">The sheet where the target address of the named range exists.</param>
-		/// <param name="address">The address (range) this named range refers to.</param>
+		/// <param name="formula">The address (range) this named range refers to.</param>
 		/// <param name="index">The index of this named range in the parent <see cref="ExcelNamedRangeCollection"/>.</param>
-		public ExcelNamedRange(string name, ExcelWorksheet nameSheet, ExcelWorksheet sheet, string address, int index) :
-			 base(sheet, address)
+		public ExcelNamedRange(string name, ExcelWorkbook workbook, ExcelWorksheet nameSheet, string formula, int index)
 		{
+			if (workbook == null)
+				throw new ArgumentNullException(nameof(workbook));
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentException(nameof(name));
+			if (string.IsNullOrEmpty(formula))
+				throw new ArgumentException(nameof(formula));
 			this.Name = name;
+			this.Workbook = workbook;
 			this.LocalSheet = nameSheet;
-			this.Index = index;
-		}
-
-		internal ExcelNamedRange(string name, ExcelWorkbook wb, ExcelWorksheet nameSheet, int index) :
-			 base(wb, nameSheet, name, true)
-		{
-			this.Name = name;
-			this.LocalSheet = nameSheet;
+			this.NameFormula = formula;
 			this.Index = index;
 		}
 		#endregion
 
 		#region Public Methods
-		/// <summary>
-		/// Gets the address relative to the specified row and column.
-		/// </summary>
-		/// <param name="relativeRow">The row from which the named range is used.</param>
-		/// <param name="relativeColumn">The column from which the named range is used.</param>
-		/// <returns>The address relative to the specified row and column.</returns>
-		public string GetRelativeAddress(int relativeRow, int relativeColumn)
-		{
-			// Relative references are relative to cell A1. Offsets that cause the 
-			// relative address to exceed the maximum row or column will wrap around.
-			// Examples:
-			//	$B2 means on column B and down one row from the relative address.
-			//	D$5 means on row 5 and right three columns from the relative address.
-			//	C3 means right two and down three from the relative address.
-			int fromRow = this.GetRelativeLocation(_fromRowFixed, _fromRow, relativeRow, ExcelPackage.MaxRows);
-			int fromColumn = this.GetRelativeLocation(_fromColFixed, _fromCol, relativeColumn, ExcelPackage.MaxColumns);
-			int toRow = this.GetRelativeLocation(_toRowFixed, _toRow, relativeRow, ExcelPackage.MaxRows);
-			int toColumn = this.GetRelativeLocation(_toColFixed, _toCol, relativeColumn, ExcelPackage.MaxColumns);
-			var address = ExcelCellBase.GetAddress(fromRow, fromColumn, toRow, toColumn, _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed);
-			return ExcelCellBase.GetFullAddress(this.Worksheet.Name, address);
-		}
-
 		/// <summary>
 		/// Gets the formula of a named range relative to the specified <paramref name="relativeRow"/> and <paramref name="relativeColumn"/>.
 		/// </summary>
@@ -156,7 +144,7 @@ namespace OfficeOpenXml
 		/// <returns>The updated formula relative to the specified <paramref name="relativeRow"/> and <paramref name="relativeColumn"/>.</returns>
 		public IEnumerable<Token> GetRelativeNameFormula(int relativeRow, int relativeColumn)
 		{
-			var tokens = this.myWorkbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
+			var tokens = this.Workbook.FormulaParser.Lexer.Tokenize(this.NameFormula);
 			foreach (var token in tokens)
 			{
 				if (token.TokenType == TokenType.ExcelAddress)
@@ -171,6 +159,21 @@ namespace OfficeOpenXml
 				}
 			}
 			return tokens;
+		}
+
+		/// <summary>
+		/// Updates the named range's <see cref="NameFormula"/> references according to the 
+		/// rows and or columns being inserted and or deleted on the specified <paramref name="worksheet"/>.
+		/// </summary>
+		/// <param name="rowFrom">The starting row to perform the operation at.</param>
+		/// <param name="colFrom">The ending row to perform the operation at.</param>
+		/// <param name="rows">The number of rows being inserted.</param>
+		/// <param name="cols">The number of columns being inserted.</param>
+		/// <param name="worksheet">The worksheet to update.</param>
+		public void UpdateFormula(int rowFrom, int colFrom, int rows, int cols, ExcelWorksheet worksheet)
+		{
+			this.NameFormula = this.Workbook.Package.FormulaManager.UpdateFormulaReferences(
+				this.NameFormula, rows, cols, rowFrom, colFrom, worksheet.Name, worksheet.Name, updateOnlyFixed: true);
 		}
 		#endregion
 
@@ -189,7 +192,7 @@ namespace OfficeOpenXml
 		#region System.Object Overrides
 		public override string ToString()
 		{
-			return Name;
+			return this.Name;
 		}
 		#endregion
 	}

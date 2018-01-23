@@ -320,8 +320,10 @@ namespace EPPlusTest
 			using (ExcelPackage pck = new ExcelPackage(instream))
 			{
 				var ws = pck.Workbook.Worksheets["Names"];
-				Assert.AreEqual(ws.Names["FullCol"].Start.Row, 1);
-				Assert.AreEqual(ws.Names["FullCol"].End.Row, ExcelPackage.MaxRows);
+
+				var address = new ExcelAddress(ws.Names["FullCol"].NameFormula);
+				Assert.AreEqual(1, address.Start.Row);
+				Assert.AreEqual(ExcelPackage.MaxRows, address.End.Row);
 				pck.SaveAs(stream);
 			}
 			instream.Close();
@@ -399,13 +401,6 @@ namespace EPPlusTest
 			ws.Cells["D30"].Style.Font.Bold = true;
 			ws.Cells["D30"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Right;
 
-			ws.Workbook.Names.Add("TestName", ws.Cells["B30:E30"]);
-			ws.Workbook.Names["TestName"].Style.Font.Color.SetColor(Color.Red);
-
-
-			ws.Workbook.Names["TestName"].Offset(1, 0).Value = "Offset test 1";
-			ws.Workbook.Names["TestName"].Offset(2, -1, 2, 2).Value = "Offset test 2";
-
 			//Test vertical align
 			ws.Cells["E19"].Value = "Subscript";
 			ws.Cells["E19"].Style.Font.VerticalAlign = ExcelVerticalAlignmentFont.Subscript;
@@ -414,7 +409,6 @@ namespace EPPlusTest
 			ws.Cells["E21"].Value = "Superscript";
 			ws.Cells["E21"].Style.Font.VerticalAlign = ExcelVerticalAlignmentFont.Superscript;
 			ws.Cells["E21"].Style.Font.VerticalAlign = ExcelVerticalAlignmentFont.None;
-
 
 			ws.Cells["E22"].Value = "Indent 2";
 			ws.Cells["E22"].Style.Indent = 2;
@@ -430,7 +424,6 @@ namespace EPPlusTest
 			ws.Cells["e27"].Value = "Default Readingorder";
 
 			//Underline
-
 			ws.Cells["F1:F7"].Value = "Underlined";
 			ws.Cells["F1"].Style.Font.UnderLineType = ExcelUnderLineType.Single;
 			ws.Cells["F2"].Style.Font.UnderLineType = ExcelUnderLineType.Double;
@@ -456,7 +449,7 @@ namespace EPPlusTest
 				System.Diagnostics.Debug.WriteLine(cell.Address);
 			}
 
-			////Linq test
+			// Linq test
 			var res = from c in ws.Cells[ws.Dimension.Address] where c.Value != null && c.Value.ToString() == "Offset test 1" select c;
 
 			foreach (ExcelRangeBase cell in res)
@@ -644,7 +637,7 @@ namespace EPPlusTest
 			//Assert.AreEqual(range.End.Row, 100);
 			//Assert.AreEqual(range.End.Address, "D100");
 
-			//ExcelAddress addr = new ExcelAddress("B1:D3");
+			//ExcelAddress addr = new ExcelAddressBase("B1:D3");
 
 			//Assert.AreEqual(addr.Start.Column, 2);
 			//Assert.AreEqual(addr.Start.Row, 1);
@@ -1698,12 +1691,11 @@ namespace EPPlusTest
 			ws.Cells["A1"].Style.Font.Size = 8.5F;
 
 			ws.Names.Add("Address", ws.Cells["A2:A3"]);
-			ws.Cells["Address"].Value = 1;
-			ws.Names.AddValue("Value", 5);
+			ws.Names["Address"].NameFormula = "1";
+			ws.Names.Add("Value", "5");
 			ws.Names.Add("FullRow", ws.Cells["2:2"]);
 			ws.Names.Add("FullCol", ws.Cells["A:A"]);
-			//ws.Names["Value"].Style.Border.Bottom.Color.SetColor(Color.Black);
-			ws.Names.AddFormula("Formula", "Names!A2+Names!A3+Names!Value");
+			ws.Names.Add("Formula", "Names!A2+Names!A3+Names!Value");
 		}
 
 		[Ignore]
@@ -2581,7 +2573,7 @@ namespace EPPlusTest
 			{
 				for (int row = 1; row < 30; row++)
 				{
-					ws.SetValue(row, col, "cell " + ExcelAddressBase.GetAddress(row, col));
+					ws.SetValue(row, col, "cell " + ExcelAddress.GetAddress(row, col));
 				}
 			}
 			ws.Cells["A1:P30"].Copy(ws.Cells["B1"]);
@@ -2656,14 +2648,14 @@ namespace EPPlusTest
 			{
 				var ws1 = package.Workbook.Worksheets.Add("sheet1");
 				var ws2 = package.Workbook.Worksheets.Add("sheet2");
-				string cellValue = "sdfsdf";
+				const string cellValue = "sdfsdf";
 				ws2.Cells["B2"].Value = cellValue;
-				ws1.Cells["C3"].Formula = $"={ws2.Name}!B2";
+				ws1.Cells["C3"].Formula = "sheet2!B2";
 				ws1.Cells["C3"].Calculate();
 				package.Save();
 				Assert.AreEqual(cellValue, ws1.Cells["C3"].Value);
 				package.Workbook.Worksheets.Delete(ws2);
-				Assert.AreEqual("#REF!C7", ws1.Cells["C3"].Formula);
+				Assert.AreEqual("#REF!B2", ws1.Cells["C3"].Formula);
 			}
 		}
 
@@ -3300,12 +3292,12 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
 				worksheet1.InsertRow(10, 10);
-				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				ExcelRangeBase.SplitAddress(range0.NameFormula, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$36", address);
-				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range1.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$Z$36", address);
 				address = null;
-				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range2.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$Z$26", address);
 			}
 		}
@@ -3615,12 +3607,12 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
 				worksheet2.InsertColumn(10, 10);
-				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				ExcelRangeBase.SplitAddress(range0.NameFormula, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$26", address);
-				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range1.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$AJ$26", address);
 				address = null;
-				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range2.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$AJ$26", address);
 			}
 		}
@@ -3980,12 +3972,12 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 
 				worksheet1.DeleteRow(10, 10);
-				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				ExcelRangeBase.SplitAddress(range0.NameFormula, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$16", address);
-				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range1.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$Z$16", address);
 				address = null;
-				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range2.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$Z$26", address);
 			}
 		}
@@ -4539,12 +4531,12 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$4:$Z$26"));
 
 				worksheet1.DeleteRow(1, 10);
-				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				ExcelRangeBase.SplitAddress(range0.NameFormula, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$16", address);
-				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range1.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$Z$16", address);
 				address = null;
-				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range2.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$4:$Z$26", address);
 			}
 		}
@@ -4689,10 +4681,9 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$4:$Z$26"));
 
 				worksheet1.DeleteRow(1, 26);
-				Assert.AreEqual("#REF!", range0.Address);
-				Assert.AreEqual("#REF!", range1.Address);
-				ExcelRangeBase.SplitAddress(range2.Address, out string workbook, out string worksheet, out string address);
-				Assert.AreEqual("$A$4:$Z$26", address);
+				Assert.AreEqual("'SHEET1'!#REF!", range0.NameFormula);
+				Assert.AreEqual("'SHEET1'!#REF!", range1.NameFormula);
+				Assert.AreEqual("SHEET2!$A$4:$Z$26", range2.NameFormula);
 			}
 		}
 
@@ -5008,14 +4999,13 @@ namespace EPPlusTest
 				var range0 = package.Workbook.Names.Add("_xlchart.0", new ExcelRangeBase(worksheet1, "Sheet1!$A$1:$Z$26"));
 				var range1 = package.Workbook.Names.Add("not_an_xlchart.0", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
-
 				worksheet2.DeleteColumn(10, 10);
-				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				ExcelRangeBase.SplitAddress(range0.NameFormula, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$26", address);
-				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range1.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$P$26", address);
 				address = null;
-				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range2.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$P$26", address);
 			}
 		}
@@ -5030,12 +5020,9 @@ namespace EPPlusTest
 				// Excel 2016 chart series must include a worksheet name and are stored as named ranges of the form "_xlchart.n", where n is a positive integer. 
 				var range0 = worksheet2.Names.Add("myNamedRange", new ExcelRangeBase(worksheet1, "$A$1:$Z$26"));
 				var range1 = package.Workbook.Names.Add("workbookNamedRange", new ExcelRangeBase(worksheet2, "Sheet2!$A$1:$Z$26"));
-
 				worksheet2.DeleteColumn(10, 10);
-				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
-				Assert.AreEqual("$A$1:$P$26", address);
-				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
-				Assert.AreEqual("$A$1:$P$26", address);
+				Assert.AreEqual("'Sheet1'!$A$1:$Z$26", range0.NameFormula);
+				Assert.AreEqual("'SHEET2'!$A$1:$P$26", range1.NameFormula);
 			}
 		}
 
@@ -5383,12 +5370,12 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$B$1:$Z$26"));
 
 				worksheet2.DeleteColumn(1, 10);
-				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				ExcelRangeBase.SplitAddress(range0.NameFormula, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$26", address);
-				ExcelRangeBase.SplitAddress(range1.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range1.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$P$26", address);
 				address = null;
-				ExcelRangeBase.SplitAddress(range2.Address, out workbook, out worksheet, out address);
+				ExcelRangeBase.SplitAddress(range2.NameFormula, out workbook, out worksheet, out address);
 				Assert.AreEqual("$A$1:$P$26", address);
 			}
 		}
@@ -5569,10 +5556,10 @@ namespace EPPlusTest
 				var range2 = package.Workbook.Names.Add("_xlchart.2", new ExcelRangeBase(worksheet2, "Sheet2!$B$1:$Z$26"));
 
 				worksheet2.DeleteColumn(1, 26);
-				ExcelRangeBase.SplitAddress(range0.Address, out string workbook, out string worksheet, out string address);
+				ExcelRangeBase.SplitAddress(range0.NameFormula, out string workbook, out string worksheet, out string address);
 				Assert.AreEqual("$A$1:$Z$26", address);
-				Assert.AreEqual("#REF!", range1.Address);
-				Assert.AreEqual("#REF!", range2.Address);
+				Assert.AreEqual("'SHEET2'!#REF!", range1.NameFormula);
+				Assert.AreEqual("'SHEET2'!#REF!", range2.NameFormula);
 			}
 		}
 
@@ -6273,7 +6260,7 @@ namespace EPPlusTest
 				using (var package = new ExcelPackage(file))
 				{
 					var sheet = package.Workbook.Worksheets.Add("Sheet1");
-					sheet.AutoFilterAddress = new ExcelAddressBase("B2:D4");
+					sheet.AutoFilterAddress = new ExcelAddress("B2:D4");
 					Assert.IsTrue(sheet.HasAutoFilters);
 					package.Save();
 				}
@@ -6387,6 +6374,822 @@ namespace EPPlusTest
 			}
 			Thread.CurrentThread.CurrentCulture = currentCulture;
 		}
+		#endregion
+
+		#region Named Range Formula Update Tests
+		#region Copy/Delete Worksheet Tests
+		[TestMethod]
+		public void CopyWorksheetWithWorksheetScopedNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B2, Sheet2!$B$2)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					var sheet1Copy = excelPackage.Workbook.Worksheets.Copy("Sheet1", "Sheet1 copy");
+					Assert.AreEqual(0, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(2, sheet1Copy.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual("CONCATENATE('Sheet1 copy'!B2,'Sheet1 copy'!$B$2)", sheet1Copy.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet1Copy.Names["name2"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet1Copy = excelPackage.Workbook.Worksheets["Sheet1 copy"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(0, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(2, sheet1Copy.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual("CONCATENATE('Sheet1 copy'!B2,'Sheet1 copy'!$B$2)", sheet1Copy.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet1Copy.Names["name2"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void CopyWorksheetWithWorkbookScopedNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					excelPackage.Workbook.Names.Add("name1", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					excelPackage.Workbook.Names.Add("name2", "CONCATENATE(Sheet2!B2, Sheet2!$B$2)");
+					var sheet1Copy = excelPackage.Workbook.Worksheets.Copy("Sheet1", "Sheet1 copy");
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(0, sheet1.Names.Count);
+					Assert.AreEqual(0, sheet1Copy.Names.Count);
+					Assert.AreEqual(0, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", excelPackage.Workbook.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", excelPackage.Workbook.Names["name2"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet1Copy = excelPackage.Workbook.Worksheets["Sheet1 copy"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(0, sheet1.Names.Count);
+					Assert.AreEqual(0, sheet1Copy.Names.Count);
+					Assert.AreEqual(0, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE(Sheet1!B2, Sheet1!$B$2)", excelPackage.Workbook.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(Sheet2!B2, Sheet2!$B$2)", excelPackage.Workbook.Names["name2"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteWorksheetWithWorksheetScopedNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B2, Sheet2!$B$2)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					sheet2.Names.Add("name4", "CONCATENATE(Sheet2!B2, Sheet2!$B$2)");
+					excelPackage.Workbook.Worksheets.Delete(sheet1);
+					Assert.AreEqual(0, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(2, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet2.Names["name4"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", sheet2.Names["name4"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteWorksheetWithWorkbookScopedNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					excelPackage.Workbook.Names.Add("name1", "CONCATENATE(Sheet1!B2, Sheet1!$B$2)");
+					excelPackage.Workbook.Names.Add("name2", "CONCATENATE(Sheet2!B2, Sheet2!$B$2)");
+					excelPackage.Workbook.Worksheets.Delete(sheet1);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(0, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", excelPackage.Workbook.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", excelPackage.Workbook.Names["name2"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual(0, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE(#REF!B2,#REF!$B$2)", excelPackage.Workbook.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE('SHEET2'!B2,'SHEET2'!$B$2)", excelPackage.Workbook.Names["name2"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
+
+		#region Insert Row(s) Tests
+		[TestMethod]
+		public void InsertRowBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.InsertRow(4, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$6)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void InsertMultipleRowsBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.InsertRow(4, 3);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$8)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void InsertRowAfterNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.InsertRow(6, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
+
+		#region Insert Column(s) Tests
+		[TestMethod]
+		public void InsertColumnBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet1.InsertColumn(2, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$E$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void InsertMultipleColumnsBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet1.InsertColumn(2, 3);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$G$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void InsertColumnAfterNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.InsertColumn(6, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
+
+		#region Delete Row(s) Tests
+		[TestMethod]
+		public void DeleteRowBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet1.DeleteRow(3, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$D$4)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteMultipleRowsBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!F5, Sheet2!$F$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!F5, Sheet2!$F$5)");
+					sheet1.DeleteRow(2, 3);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$F$2)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteRowAfterNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.DeleteRow(7, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
+
+		#region Delete Columnn(s) Tests
+		[TestMethod]
+		public void DeleteColumnBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!D5, Sheet1!$D$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!D5, Sheet2!$D$5)");
+					sheet1.DeleteColumn(2, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!D5,'SHEET1'!$C$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!D5,SHEET2!$D$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteMultipleColumnsBeforeNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!F5, Sheet2!$F$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!F5, Sheet1!$F$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!F5, Sheet2!$F$5)");
+					sheet1.DeleteColumn(2, 3);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!F5,'SHEET1'!$C$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!F5,SHEET2!$F$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void DeleteColumnAfterNamedRanges()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var excelPackage = new ExcelPackage())
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Names.Add("name1", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					sheet1.Names.Add("name2", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet2.Names.Add("name3", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name4", "CONCATENATE(Sheet1!B5, Sheet1!$B$5)");
+					excelPackage.Workbook.Names.Add("name5", "CONCATENATE(Sheet2!B5, Sheet2!$B$5)");
+					sheet1.InsertColumn(6, 1);
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+					excelPackage.SaveAs(tempFile);
+				}
+				using (var excelPackage = new ExcelPackage(tempFile))
+				{
+					var sheet1 = excelPackage.Workbook.Worksheets["Sheet1"];
+					var sheet2 = excelPackage.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual(2, sheet1.Names.Count);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet1.Names["name1"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", sheet1.Names["name2"].NameFormula);
+					Assert.AreEqual(1, sheet2.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", sheet2.Names["name3"].NameFormula);
+					Assert.AreEqual(2, excelPackage.Workbook.Names.Count);
+					Assert.AreEqual("CONCATENATE('SHEET1'!B5,'SHEET1'!$B$5)", excelPackage.Workbook.Names["name4"].NameFormula);
+					Assert.AreEqual("CONCATENATE(SHEET2!B5,SHEET2!$B$5)", excelPackage.Workbook.Names["name5"].NameFormula);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
 		#endregion
 	}
 }
