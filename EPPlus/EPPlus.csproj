@@ -216,6 +216,9 @@
     <Compile Include="ConditionalFormatting\X14ConditionalFormattingCollection.cs" />
     <Compile Include="ConditionalFormatting\X14ConditionalFormattingFormula.cs" />
     <Compile Include="ConditionalFormatting\X14CondtionalFormattingRule.cs" />
+    <Compile Include="DataValidation\ExcelDataValidationCollectionBase.cs" />
+    <Compile Include="DataValidation\X14DataValidation\ExcelX14DataValidation.cs" />
+    <Compile Include="DataValidation\X14DataValidation\ExcelX14DataValidationCollection.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicer.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerDrawing.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerCache.cs" />
@@ -303,7 +306,7 @@
     <Compile Include="Encryption\EncryptionVerifier.cs" />
     <Compile Include="ExcelBackgroundImage.cs" />
     <Compile Include="DataValidation\ExcelDataValidation.cs" />
-    <Compile Include="DataValidation\ExcelDataValidationCollection.cs" />
+    <Compile Include="DataValidation\OriginalDataValidation\ExcelDataValidationCollection.cs" />
     <Compile Include="DataValidation\ExcelDataValidationType.cs" />
     <Compile Include="ExcelEncryption.cs" />
     <Compile Include="ExcelProtectedRange.cs" />
@@ -481,6 +484,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\Median.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Min.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Mina.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Math\MinMaxBase.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Mod.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\MultipleRangeCriteriasFunction.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\Pi.cs" />

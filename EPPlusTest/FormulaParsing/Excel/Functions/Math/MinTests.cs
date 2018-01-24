@@ -112,11 +112,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
-		public void MinWithMaxArgumentsReturnsCorrectValue()
+		public void MinWithLargeRangeReturnsCorrectValue()
 		{
-			// This functionality is different from that of Excel's. Normally when too many arguments are entered
-			// into a function it won't let you calculate the function, however in EPPlus it will return a pound
-			// NA error instead. 
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
@@ -127,11 +124,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 						worksheet.Cells[i, j].Value = 4;
 					}
 				}
-				worksheet.Cells["C1"].Formula = "MIN(A1:A255)";
 				worksheet.Cells["C2"].Formula = "MIN(A1:A270)";
+				worksheet.Cells["C3"].Formula = "MIN(A1:A270, 5, 6, 7, 8)";
+				worksheet.Cells["C4"].Formula = "MIN(A1:A270, 5, 6, -3, 8)";
 				worksheet.Calculate();
-				Assert.AreEqual(4d, worksheet.Cells["C1"].Value);
-				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["C2"].Value).Type);
+				Assert.AreEqual(4d, worksheet.Cells["C2"].Value);
+				Assert.AreEqual(4d, worksheet.Cells["C3"].Value);
+				Assert.AreEqual(-3d, worksheet.Cells["C4"].Value);
 			}
 		}
 
