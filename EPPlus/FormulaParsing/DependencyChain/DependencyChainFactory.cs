@@ -195,7 +195,7 @@ namespace OfficeOpenXml.FormulaParsing
 					{
 						var nameFormulaTokens = name.GetRelativeNameFormula(f.Row, f.Column)?.ToList();
 						if (nameFormulaTokens.Count == 0 && !string.IsNullOrEmpty(name.NameFormula))
-							nameFormulaTokens = name.Workbook.FormulaParser.Lexer.Tokenize(name.NameFormula.ToString())?.ToList();
+							nameFormulaTokens = name.Workbook.FormulaParser.Lexer.Tokenize(name.NameFormula)?.ToList();
 						// Remove the current named range token and replace it with the named range's formula.
 						f.Tokens.RemoveAt(f.tokenIx);
 						f.Tokens.InsertRange(f.tokenIx, nameFormulaTokens);

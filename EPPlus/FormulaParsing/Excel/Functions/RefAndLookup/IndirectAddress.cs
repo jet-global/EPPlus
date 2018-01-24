@@ -24,39 +24,41 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System.Collections.Generic;
-using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
 	/// <summary>
-	/// A function which takes the same arguments as the OFFSET( ) function and calculates the address offset.
+	/// A function which takes the same arguments as the INDIRECT( ) function and calculates a reference.
 	/// </summary>
 	/// <remarks>
-	/// This function is used internally to calculate an OFFSET( ) function's dependencies before calculation.
+	/// This function is used internally to calculate an INDIRECT( ) function's dependencies before calculation.
 	/// </remarks>
-	public class OffsetAddress : LookupFunction
+	public class IndirectAddress : ExcelFunction
 	{
 		#region Constants
-		public const string Name = "OFFSETADDRESS";
+		/// <summary>
+		/// The name of the INDIRECTADDRESS function.
+		/// </summary>
+		public const string Name = "INDIRECTADDRESS";
 		#endregion
 
 		#region ExcelFunction Overrides
 		/// <summary>
 		/// Executes the function with the specified <paramref name="arguments"/> in the specified <paramref name="context"/>.
 		/// </summary>
-		/// <param name="arguments">The arguments with which to evaluate the function.</param>
-		/// <param name="context">The context in which to evaluate the function.</param>
-		/// <returns>An address range <see cref="CompileResult"/> if successful, otherwise an error result.</returns>
+		/// <param name="arguments">The arguments to evaluate the function with.</param>
+		/// <param name="context">The context with which to evaluate the function in.</param>
+		/// <returns>A <see cref="CompileResult"/> containing the result of evaluation.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
-			if (this.ArgumentsAreValid(functionArguments, 3, out eErrorType argumentError) == false)
+			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			ExcelAddress offset = base.CalculateOffset(functionArguments, context);
-			if (offset == null)
-				return new CompileResult(eErrorType.Ref);
-			return new CompileResult(offset.FullAddress, DataType.String);
+			var addressArgument = ArgToString(arguments, 0);
+			var address = new ExcelAddress(addressArgument);
+			if (string.IsNullOrEmpty(address.Address))
+				return new CompileResult(eErrorType.Value);
+			return new CompileResult(address.FullAddress, DataType.String);
 		}
 		#endregion
 	}

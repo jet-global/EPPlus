@@ -182,6 +182,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["choose"] = new Choose();
 			this.Functions["index"] = new Index();
 			this.Functions["indirect"] = new Indirect();
+			this.Functions["indirectaddress"] = new IndirectAddress();
 			this.Functions["offset"] = new Offset() { SkipArgumentEvaluation = true };
 			this.Functions["offsetaddress"] = new OffsetAddress() { SkipArgumentEvaluation = true };
 			// Date
