@@ -9,44 +9,57 @@ namespace EPPlusTest
 	public class ZCellStoreTest
 	{
 		/*
-		 * How to read these tests:
+		 * it is valid to use 0 for column and row coordinates.
+		 * These values are used for column and row metadata.
 		 * 
-		 * There are two helper methods called BuildRow and BuildColumn.
-		 * Since we know the static internal structure of this cell store 
-		 * we can use these to explicitly target an internal page and an index on that page.
-		 * 
-		 * This is helpful because the nature of this data structure makes it hard to picture
-		 * where your data is going. With this technique you actually get coordinates into the 
-		 * associated page structures.
+		 * [0,0] is NOT considered valid as far as I can tell.
 		 * 
 		 * 
-		 */
+		 * Assume the current invariant:
+		 * X : Invalid coordinate.
+		 * C : Column metadata.
+		 * R : Row metadata.
+		 * * : Cell content.
+		 * 
+		 *          XCCCCCCCC
+		 *          R********
+		 *          R********
+		 *          R********
+		 *          R********
+		 *          R********
+		 *          R********
+		 *          R********
+		 *          R********
+		 * 
+		 * */
 
-		
+
 		#region GetValue Tests
 		[TestMethod]
 		public void GetValue()
 		{
 			var cellStore = this.GetCellStore();
+			Assert.AreEqual(1001, cellStore.GetValue(0, 1));
+			Assert.AreEqual(2001, cellStore.GetValue(1, 0));
 			Assert.AreEqual(1, cellStore.GetValue(1, 1));
 			Assert.AreEqual(103, cellStore.GetValue(7, 7));
 			Assert.AreEqual(122, cellStore.GetValue(8, 10));
 			Assert.AreEqual(219, cellStore.GetValue(14, 11));
 			Assert.AreEqual(256, cellStore.GetValue(16, 16));
-			// Non-existent value returns default(T)
-			Assert.AreEqual(0, cellStore.GetValue(25, 25));
 		}
 
 		[TestMethod]
 		public void GetValueReturnsDefaultForInvalidCoordinates()
 		{
 			var cellStore = this.GetCellStore();
+			// [0,0] is not a real address
+			Assert.AreEqual(0, cellStore.GetValue(0, 0));
 			// Invalid row too small returns default(T)
-			Assert.AreEqual(0, cellStore.GetValue(0, 10));
+			Assert.AreEqual(0, cellStore.GetValue(-1, 10));
 			// Invalid row too large returns default(T)
 			Assert.AreEqual(0, cellStore.GetValue(20, 10));
 			// Invalid column too small returns default(T)
-			Assert.AreEqual(0, cellStore.GetValue(10, 0));
+			Assert.AreEqual(0, cellStore.GetValue(10, -1));
 			// Invalid column too large returns default(T)
 			Assert.AreEqual(0, cellStore.GetValue(10, 20));
 		}
@@ -57,6 +70,10 @@ namespace EPPlusTest
 		public void SetValue()
 		{
 			var cellStore = this.GetCellStore(false);
+			cellStore.SetValue(0, 1, 13);
+			Assert.AreEqual(13, cellStore.GetValue(0, 1));
+			cellStore.SetValue(1, 0, 14);
+			Assert.AreEqual(14, cellStore.GetValue(1, 0));
 			cellStore.SetValue(1, 1, 1);
 			Assert.AreEqual(1, cellStore.GetValue(1, 1));
 			cellStore.SetValue(7, 7, 103);
@@ -73,12 +90,14 @@ namespace EPPlusTest
 		public void SetValueIgnoresInvalidCoordinates()
 		{
 			var cellStore = this.GetCellStore(false);
+			// [0,0] is not a real address
+			cellStore.SetValue(0, 0, 13);
 			// row too small is ignored
-			cellStore.SetValue(0, 1, 13);
+			cellStore.SetValue(-1, 1, 13);
 			// row too large is ignored
 			cellStore.SetValue(20, 1, 13);
 			// column too small is ignored
-			cellStore.SetValue(1, 0, 13);
+			cellStore.SetValue(1, -1, 13);
 			// column too large is ignored
 			cellStore.SetValue(1, 20, 13);
 		}
@@ -89,6 +108,12 @@ namespace EPPlusTest
 		public void Exists()
 		{
 			var cellStore = new ZCellStore<int>();
+			Assert.IsFalse(cellStore.Exists(0, 1));
+			cellStore.SetValue(0, 1, 6);
+			Assert.IsTrue(cellStore.Exists(0, 1));
+			Assert.IsFalse(cellStore.Exists(1, 0));
+			cellStore.SetValue(1, 0, 7);
+			Assert.IsTrue(cellStore.Exists(1, 0));
 			Assert.IsFalse(cellStore.Exists(3, 3));
 			cellStore.SetValue(3, 3, 13);
 			Assert.IsTrue(cellStore.Exists(3, 3));
@@ -101,12 +126,14 @@ namespace EPPlusTest
 		public void ExistsInvalidCoordinatesReturnFalse()
 		{
 			var cellStore = new ZCellStore<int>();
+			// [0,0] is not a real address
+			Assert.IsFalse(cellStore.Exists(0, 0));
 			// row too small is false
-			Assert.IsFalse(cellStore.Exists(0, 1));
+			Assert.IsFalse(cellStore.Exists(-1, 1));
 			// row too large is false
 			Assert.IsFalse(cellStore.Exists(ExcelPackage.MaxRows + 1, 1));
 			// column too small is false
-			Assert.IsFalse(cellStore.Exists(1, 0));
+			Assert.IsFalse(cellStore.Exists(1, -1));
 			// column too large is false
 			Assert.IsFalse(cellStore.Exists(1, ExcelPackage.MaxColumns + 1));
 		}
@@ -115,7 +142,15 @@ namespace EPPlusTest
 		public void ExistsWithOutValue()
 		{
 			var cellStore = new ZCellStore<int>();
-			Assert.IsFalse(cellStore.Exists(3, 3, out int value));
+			Assert.IsFalse(cellStore.Exists(0, 1, out int value));
+			cellStore.SetValue(0, 1, 6);
+			Assert.IsTrue(cellStore.Exists(0, 1, out value));
+			Assert.AreEqual(6, value);
+			Assert.IsFalse(cellStore.Exists(1, 0, out value));
+			cellStore.SetValue(1, 0, 7);
+			Assert.IsTrue(cellStore.Exists(1, 0, out value));
+			Assert.AreEqual(7, value);
+			Assert.IsFalse(cellStore.Exists(3, 3, out value));
 			cellStore.SetValue(3, 3, 13);
 			Assert.IsTrue(cellStore.Exists(3, 3, out value));
 			Assert.AreEqual(13, value);
@@ -129,12 +164,14 @@ namespace EPPlusTest
 		public void ExistsWithOutValueInvalidCoordinatesReturnFalse()
 		{
 			var cellStore = new ZCellStore<int>();
+			// [0,0] is not a real address
+			Assert.IsFalse(cellStore.Exists(0, 0, out int value));
 			// row too small is false
-			Assert.IsFalse(cellStore.Exists(0, 1, out int value));
+			Assert.IsFalse(cellStore.Exists(-1, 1, out value));
 			// row too large is false
 			Assert.IsFalse(cellStore.Exists(ExcelPackage.MaxRows + 1, 1, out value));
 			// column too small is false
-			Assert.IsFalse(cellStore.Exists(1, 0, out value));
+			Assert.IsFalse(cellStore.Exists(1, -1, out value));
 			// column too large is false
 			Assert.IsFalse(cellStore.Exists(1, ExcelPackage.MaxColumns + 1, out value));
 		}
@@ -150,7 +187,29 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		public void NextCellStartsWithZero()
+		public void NextCellStartsWithZeroHitsColumnMetaData()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(0, 1, 1);
+			int row = 0, column = 0;
+			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
+			Assert.AreEqual(0, row);
+			Assert.AreEqual(1, column);
+		}
+
+		[TestMethod]
+		public void NextCellStartsWithZeroHitsRowMetaData()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 0, 1);
+			int row = 0, column = 0;
+			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
+			Assert.AreEqual(1, row);
+			Assert.AreEqual(0, column);
+		}
+
+		[TestMethod]
+		public void NextCellStartsWithZeroHitsCellData()
 		{
 			var cellStore = new ZCellStore<int>();
 			cellStore.SetValue(1, 1, 1);
@@ -161,18 +220,46 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void NextCellNormalizesStartSearchIndices()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 1, 1);
+			int row = -111, column = -111;
+			Assert.IsTrue(cellStore.NextCell(ref row, ref column));
+			Assert.AreEqual(1, row);
+			Assert.AreEqual(1, column);
+		}
+
+		[TestMethod]
 		public void NextCellEnumeratesFullSheet()
 		{
 			var cellStore = this.GetCellStore();
 			int row = 0, column = 0, value = 0;
+			int rowMetadata = 2001;
+			int columnMetadata = 1001;
 			while (cellStore.NextCell(ref row, ref column))
 			{
-				value++;
-				Assert.AreEqual(value, cellStore.GetValue(row, column));
-				Assert.AreEqual(((value - 1) / 16) + 1, row);
-				Assert.AreEqual(((value - 1) % 16) + 1, column);
+				if (row == 0)
+				{
+					Assert.AreEqual(columnMetadata % 100, column);
+					Assert.AreEqual(columnMetadata++, cellStore.GetValue(row, column));
+				}
+				else if (column == 0)
+				{
+					Assert.AreEqual(rowMetadata % 100, row);
+					Assert.AreEqual(rowMetadata++, cellStore.GetValue(row, column));
+				}
+				else
+				{
+					value++;
+					Assert.AreEqual(value, cellStore.GetValue(row, column));
+					Assert.AreEqual(((value - 1) / 16) + 1, row);
+					Assert.AreEqual(((value - 1) % 16) + 1, column);
+				}
 			}
 			Assert.AreEqual(256, value);
+			Assert.AreEqual(2017, rowMetadata);
+			Assert.AreEqual(1017, columnMetadata);
 		}
 
 		[TestMethod]
@@ -198,7 +285,7 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null,   15, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,   16 }
 			};
-			this.LoadCellStore(currentStore, cellStore);
+			this.LoadCellStore(null, null, currentStore, cellStore);
 			int row = 0, column = 0, value = 0;
 			while (cellStore.NextCell(ref row, ref column))
 			{
@@ -233,7 +320,7 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, 15, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, 16, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(currentStore, cellStore);
+			this.LoadCellStore(null, null, currentStore, cellStore);
 			int row = 0, column = 0, value = 0;
 			while (cellStore.NextCell(ref row, ref column))
 			{
@@ -243,6 +330,53 @@ namespace EPPlusTest
 				Assert.AreEqual(5, column);
 			}
 			Assert.AreEqual(16, value);
+		}
+
+		[TestMethod]
+		public void NextCellEnumeratesColumnWithMetadata()
+		{
+			var cellStore = this.GetCellStore(false);
+			var currentSheetData = new int?[,]
+			{
+/*1*/		{ null, null, null, null,  1, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null,  2, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null,  3, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null,  4, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null,  5, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null,  6, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null,  7, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null,  8, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null,  9, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, 10, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, 11, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, 12, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, 13, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, 14, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, 15, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, 16, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			var currentColumnData = new int?[] { null, null, null, null, 1005, null, null, null, null, null, null, null, null, null, null, null };
+			this.LoadCellStore(currentColumnData, null, currentSheetData, cellStore);
+			int row = 0, column = 0, value = 0;
+			bool hitMetadata = false;
+			while (cellStore.NextCell(ref row, ref column))
+			{
+				if (row == 0)
+				{
+					Assert.AreEqual(1005, cellStore.GetValue(row, column));
+					Assert.AreEqual(5, column);
+					hitMetadata = true;
+				}
+				else
+				{
+					value++;
+					Assert.AreEqual(value, cellStore.GetValue(row, column));
+					Assert.AreEqual(value, row);
+					Assert.AreEqual(5, column);
+				}
+			}
+			Assert.AreEqual(16, value);
+			Assert.IsTrue(hitMetadata);
 		}
 
 		[TestMethod]
@@ -268,7 +402,7 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(currentStore, cellStore);
+			this.LoadCellStore(null, null, currentStore, cellStore);
 			int row = 0, column = 0, value = 0;
 			while (cellStore.NextCell(ref row, ref column))
 			{
@@ -276,6 +410,87 @@ namespace EPPlusTest
 				Assert.AreEqual(value, cellStore.GetValue(row, column));
 				Assert.AreEqual(9, row);
 				Assert.AreEqual(value, column);
+			}
+			Assert.AreEqual(16, value);
+		}
+
+		[TestMethod]
+		public void NextCellEnumeratesRowWithMetadata()
+		{
+			var cellStore = this.GetCellStore(false);
+			var currentSheetData = new int?[,]
+			{
+/*1*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			var currentRowData = new int?[] { null, null, null, null, null, null, null, null, 2009, null, null, null, null, null, null, null };
+			this.LoadCellStore(null, currentRowData, currentSheetData, cellStore);
+			int row = 0, column = 0, value = 0;
+			bool hitMetadata = false;
+			while (cellStore.NextCell(ref row, ref column))
+			{
+				if (column == 0)
+				{
+					Assert.AreEqual(2009, cellStore.GetValue(row, column));
+					Assert.AreEqual(9, row);
+					hitMetadata = true;
+				}
+				else
+				{
+					value++;
+					Assert.AreEqual(value, cellStore.GetValue(row, column));
+					Assert.AreEqual(9, row);
+					Assert.AreEqual(value, column);
+				}
+			}
+			Assert.AreEqual(16, value);
+			Assert.IsTrue(hitMetadata);
+		}
+
+		[TestMethod]
+		public void NextCellEnumeratesColumnMetadata()
+		{
+			var cellStore = this.GetCellStore(false);
+			var columnMetadata = new int?[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+			this.LoadCellStore(columnMetadata, null, null, cellStore);
+			int row = 0, column = 0, value = 0;
+			while (cellStore.NextCell(ref row, ref column))
+			{
+				value++;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(0, row);
+				Assert.AreEqual(value, column);
+			}
+			Assert.AreEqual(16, value);
+		}
+
+		[TestMethod]
+		public void NextCellEnumeratesRowMetadata()
+		{
+			var cellStore = this.GetCellStore(false);
+			var rowMetadata = new int?[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+			this.LoadCellStore(null, rowMetadata, null, cellStore);
+			int row = 0, column = 0, value = 0;
+			while (cellStore.NextCell(ref row, ref column))
+			{
+				value++;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(value, row);
+				Assert.AreEqual(0, column);
 			}
 			Assert.AreEqual(16, value);
 		}
@@ -288,6 +503,28 @@ namespace EPPlusTest
 			var cellStore = new ZCellStore<int>();
 			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
 			Assert.IsFalse(cellStore.PrevCell(ref row, ref column));
+		}
+
+		[TestMethod]
+		public void PrevCellStartsWithZeroHitsColumnMetaData()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(0, 1, 1);
+			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(0, row);
+			Assert.AreEqual(1, column);
+		}
+
+		[TestMethod]
+		public void PrevCellStartsWithZeroHitsRowMetaData()
+		{
+			var cellStore = new ZCellStore<int>();
+			cellStore.SetValue(1, 0, 1);
+			int row = ExcelPackage.MaxRows + 1, column = ExcelPackage.MaxColumns + 1;
+			Assert.IsTrue(cellStore.PrevCell(ref row, ref column));
+			Assert.AreEqual(1, row);
+			Assert.AreEqual(0, column);
 		}
 
 		[TestMethod]
@@ -306,14 +543,31 @@ namespace EPPlusTest
 		{
 			var cellStore = this.GetCellStore();
 			int row = 17, column = 17, value = 257;
+			int rowMetadata = 2016;
+			int columnMetadata = 1016;
 			while (cellStore.PrevCell(ref row, ref column))
 			{
-				value--;
-				Assert.AreEqual(value, cellStore.GetValue(row, column));
-				Assert.AreEqual(((value - 1) / 16) + 1, row);
-				Assert.AreEqual(((value - 1) % 16) + 1, column);
+				if (row == 0)
+				{
+					Assert.AreEqual(columnMetadata % 100, column);
+					Assert.AreEqual(columnMetadata--, cellStore.GetValue(row, column));
+				}
+				else if (column == 0)
+				{
+					Assert.AreEqual(rowMetadata % 100, row);
+					Assert.AreEqual(rowMetadata--, cellStore.GetValue(row, column));
+				}
+				else
+				{
+					value--;
+					Assert.AreEqual(value, cellStore.GetValue(row, column));
+					Assert.AreEqual(((value - 1) / 16) + 1, row);
+					Assert.AreEqual(((value - 1) % 16) + 1, column);
+				}
 			}
 			Assert.AreEqual(1, value);
+			Assert.AreEqual(2000, rowMetadata);
+			Assert.AreEqual(1000, columnMetadata);
 		}
 
 		[TestMethod]
@@ -339,7 +593,7 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null,   15, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,   16 }
 			};
-			this.LoadCellStore(currentStore, cellStore);
+			this.LoadCellStore(null, null, currentStore, cellStore);
 			int row = 17, column = 17, value = 17;
 			while (cellStore.PrevCell(ref row, ref column))
 			{
@@ -374,7 +628,7 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, 15, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, 16, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(currentStore, cellStore);
+			this.LoadCellStore(null, null, currentStore, cellStore);
 			int row = 17, column = 17, value = 17;
 			while (cellStore.PrevCell(ref row, ref column))
 			{
@@ -384,6 +638,54 @@ namespace EPPlusTest
 				Assert.AreEqual(5, column);
 			}
 			Assert.AreEqual(1, value);
+		}
+
+		[TestMethod]
+		public void PrevCellEnumeratesColumnWithMetadata()
+		{
+			var cellStore = this.GetCellStore(false);
+			var currentSheetData = new int?[,]
+			{
+/*1*/		{ null, null, null, null,  1, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null,  2, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null,  3, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null,  4, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null,  5, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null,  6, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null,  7, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null,  8, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null,  9, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, 10, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, 11, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, 12, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, 13, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, 14, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, 15, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, 16, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			var currentColumnData = new int?[] { null, null, null, null, 1005, null, null, null, null, null, null, null, null, null, null, null };
+			this.LoadCellStore(currentColumnData, null, currentSheetData, cellStore);
+			int row = 17, column = 17, value = 17;
+			bool hitMetadata = false;
+			while (cellStore.PrevCell(ref row, ref column))
+			{
+				if (row == 0)
+				{
+					Assert.AreEqual(1005, cellStore.GetValue(row, column));
+					Assert.AreEqual(5, column);
+					hitMetadata = true;
+				}
+				else
+				{
+
+					value--;
+					Assert.AreEqual(value, cellStore.GetValue(row, column));
+					Assert.AreEqual(value, row);
+					Assert.AreEqual(5, column);
+				}
+			}
+			Assert.AreEqual(1, value);
+			Assert.IsTrue(hitMetadata);
 		}
 
 		[TestMethod]
@@ -409,7 +711,7 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(currentStore, cellStore);
+			this.LoadCellStore(null, null, currentStore, cellStore);
 			int row = 17, column = 17, value = 17;
 			while (cellStore.PrevCell(ref row, ref column))
 			{
@@ -417,6 +719,87 @@ namespace EPPlusTest
 				Assert.AreEqual(value, cellStore.GetValue(row, column));
 				Assert.AreEqual(9, row);
 				Assert.AreEqual(value, column);
+			}
+			Assert.AreEqual(1, value);
+		}
+
+		[TestMethod]
+		public void PrevCellEnumeratesRowWithMetadata()
+		{
+			var cellStore = this.GetCellStore(false);
+			var currentSheetData = new int?[,]
+			{
+/*1*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			var currentRowData = new int?[] { null, null, null, null, null, null, null, null, 2009, null, null, null, null, null, null, null };
+			this.LoadCellStore(null, currentRowData, currentSheetData, cellStore);
+			int row = 17, column = 17, value = 17;
+			bool hitMetadata = false;
+			while (cellStore.PrevCell(ref row, ref column))
+			{
+				if (column == 0)
+				{
+					Assert.AreEqual(2009, cellStore.GetValue(row, column));
+					Assert.AreEqual(9, row);
+					hitMetadata = true;
+				}
+				else
+				{
+					value--;
+					Assert.AreEqual(value, cellStore.GetValue(row, column));
+					Assert.AreEqual(9, row);
+					Assert.AreEqual(value, column);
+				}
+			}
+			Assert.AreEqual(1, value);
+			Assert.IsTrue(hitMetadata);
+		}
+
+		[TestMethod]
+		public void PrevCellEnumeratesColumnMetadata()
+		{
+			var cellStore = this.GetCellStore(false);
+			var columnMetadata = new int?[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+			this.LoadCellStore(columnMetadata, null, null, cellStore);
+			int row = 17, column = 17, value = 17;
+			while (cellStore.PrevCell(ref row, ref column))
+			{
+				value--;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(0, row);
+				Assert.AreEqual(value, column);
+			}
+			Assert.AreEqual(1, value);
+		}
+
+		[TestMethod]
+		public void PrevCellEnumeratesRowMetadata()
+		{
+			var cellStore = this.GetCellStore(false);
+			var rowMetadata = new int?[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+			this.LoadCellStore(null, rowMetadata, null, cellStore);
+			int row = 17, column = 17, value = 17;
+			while (cellStore.PrevCell(ref row, ref column))
+			{
+				value--;
+				Assert.AreEqual(value, cellStore.GetValue(row, column));
+				Assert.AreEqual(value, row);
+				Assert.AreEqual(0, column);
 			}
 			Assert.AreEqual(1, value);
 		}
@@ -428,7 +811,7 @@ namespace EPPlusTest
 		{
 			var cellStore = this.GetCellStore();
 			cellStore.Delete(2, 0, 5, 0);
-			var expectedStore = new int?[,]
+			var expectedSheetData = new int?[,]
 			{
 /*1*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
 /*2*/		{   97,   98,   99,  100,  101,  102,  103,  104,  105,  106,  107,  108,  109,  110,  111,  112 },
@@ -447,7 +830,9 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.ValidateCellStore(expectedStore, cellStore);
+			var expectedColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+			var expectedRowData = new int?[] { 2001, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, null, null, null, null, null };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedSheetData, cellStore);
 		}
 		
 		[TestMethod]
@@ -455,7 +840,7 @@ namespace EPPlusTest
 		{
 			var cellStore = this.GetCellStore();
 			cellStore.Delete(0, 2, 0, 5);
-			var expectedStore = new int?[,]
+			var expectedSheetData = new int?[,]
 			{
 /*1*/		{   1,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16, null, null, null, null, null },
 /*2*/		{  17,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32, null, null, null, null, null },
@@ -474,7 +859,9 @@ namespace EPPlusTest
 /*15*/	{ 225, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, null, null, null, null, null },
 /*16*/	{ 241, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, null, null, null, null, null }
 			};
-			this.ValidateCellStore(expectedStore, cellStore);
+			var expectedColumnData = new int?[] { 1001, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, null, null, null, null, null };
+			var expectedRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedSheetData, cellStore);
 		}
 		
 		[TestMethod]
@@ -483,32 +870,34 @@ namespace EPPlusTest
 		{
 			var cellStore = this.GetCellStore();
 			cellStore.Delete(2, 2, 14, 14);
-			var expectedStore = new int?[,]
-			{
-/*1*/		{   1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,  16 },
-/*2*/		{  17,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255,  32 },
-/*3*/		{  33, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  48 },
-/*4*/		{  49, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  64 },
-/*5*/		{  65, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  80 },
-/*6*/		{  81, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  96 },
-/*7*/		{  97, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 112 },
-/*8*/		{ 113, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 128 },
-/*9*/		{ 129, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 144 },
-/*10*/	{ 145, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 160 },
-/*11*/	{ 161, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 176 },
-/*12*/	{ 177, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 192 },
-/*13*/	{ 193, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 208 },
-/*14*/	{ 209, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 224 },
-/*15*/	{ 225, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 240 },
-/*16*/	{ 241, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 256 }
-			};
-			this.ValidateCellStore(expectedStore, cellStore);
+			#region Expected Result for if we decide to implement this.
+//			var expectedStore = new int?[,]
+//			{
+///*1*/		{   1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,  16 },
+///*2*/		{  17,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255,  32 },
+///*3*/		{  33, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  48 },
+///*4*/		{  49, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  64 },
+///*5*/		{  65, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  80 },
+///*6*/		{  81, null, null, null, null, null, null, null, null, null, null, null, null, null, null,  96 },
+///*7*/		{  97, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 112 },
+///*8*/		{ 113, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 128 },
+///*9*/		{ 129, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 144 },
+///*10*/	{ 145, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 160 },
+///*11*/	{ 161, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 176 },
+///*12*/	{ 177, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 192 },
+///*13*/	{ 193, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 208 },
+///*14*/	{ 209, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 224 },
+///*15*/	{ 225, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 240 },
+///*16*/	{ 241, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 256 }
+//			};
+//			var expectedColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+//			var expectedRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+//			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedStore, cellStore);
+			#endregion
 		}
 		#endregion
 
 		#region Clear Tests
-		// TODO ZPF-- Handle 0 rows and 0 columns?
-
 		[TestMethod]
 		public void ClearRows()
 		{
@@ -533,7 +922,9 @@ namespace EPPlusTest
 /*15*/	{  225,  226,  227,  228,  229,  230,  231,  232,  233,  234,  235,  236,  237,  238,  239,  240 },
 /*16*/	{  241,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255,  256 }
 			};
-			this.ValidateCellStore(expectedStore, cellStore);
+			var expectedColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+			var expectedRowData = new int?[] { 2001, null, null, null, null, null, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedStore, cellStore);
 		}
 
 		[TestMethod]
@@ -560,7 +951,9 @@ namespace EPPlusTest
 /*15*/	{ 225, null, null, null, null, null, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240 },
 /*16*/	{ 241, null, null, null, null, null, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
 			};
-			this.ValidateCellStore(expectedStore, cellStore);
+			var expectedColumnData = new int?[] { 1001, null, null, null, null, null, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+			var expectedRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedStore, cellStore);
 		}
 
 		[TestMethod]
@@ -587,7 +980,9 @@ namespace EPPlusTest
 /*15*/	{ 225,  226,  227,  228,  229,  230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240 },
 /*16*/	{ 241,  242,  243,  244,  245,  246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
 			};
-			this.ValidateCellStore(expectedStore, cellStore);
+			var expectedColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+			var expectedRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedStore, cellStore);
 		}
 
 		[TestMethod]
@@ -614,7 +1009,9 @@ namespace EPPlusTest
 /*15*/	{ 225, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 240 },
 /*16*/	{ 241,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255, 256 }
 			};
-			this.ValidateCellStore(expectedStore, cellStore);
+			var expectedColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+			var expectedRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedStore, cellStore);
 		}
 		#endregion
 
@@ -624,6 +1021,17 @@ namespace EPPlusTest
 		{
 			var cellStore = new ZCellStore<int>();
 			Assert.IsFalse(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
+		}
+
+		[TestMethod]
+		public void GetDimensionFullCellStoreIgnoresRowAndColumnMetadata()
+		{
+			var cellStore = this.GetCellStore();
+			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
+			Assert.AreEqual(1, fromRow);
+			Assert.AreEqual(1, fromCol);
+			Assert.AreEqual(16, toRow);
+			Assert.AreEqual(16, toCol);
 		}
 
 		[TestMethod]
@@ -649,7 +1057,7 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(contents, cellStore);
+			this.LoadCellStore(null, null, contents, cellStore);
 			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
 			Assert.AreEqual(6, fromRow);
 			Assert.AreEqual(6, fromCol);
@@ -680,7 +1088,7 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(contents, cellStore);
+			this.LoadCellStore(null, null, contents, cellStore);
 			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
 			Assert.AreEqual(6, fromRow);
 			Assert.AreEqual(6, fromCol);
@@ -711,7 +1119,7 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(contents, cellStore);
+			this.LoadCellStore(null, null, contents, cellStore);
 			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
 			Assert.AreEqual(2, fromRow);
 			Assert.AreEqual(6, fromCol);
@@ -742,7 +1150,7 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(contents, cellStore);
+			this.LoadCellStore(null, null, contents, cellStore);
 			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
 			Assert.AreEqual(2, fromRow);
 			Assert.AreEqual(6, fromCol);
@@ -756,7 +1164,7 @@ namespace EPPlusTest
 		public void InsertRowsAcrossAllColumns()
 		{
 			var cellStore = this.GetCellStore(false);
-			var originalStore = new int?[,]
+			var originalSheetData = new int?[,]
 			{
 /*1*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
 /*2*/		{   17,   18,   19,   20,   21,   22,   23,   24,   25,   26,   27,   28,   29,   30,   31,   32 },
@@ -775,9 +1183,11 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(originalStore, cellStore);
+			var originalColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+			var originalRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, null, null, null, null, null, null, null, null, null, null, null };
+			this.LoadCellStore(originalColumnData, originalRowData, originalSheetData, cellStore);
 			cellStore.Insert(2, 0, 5, cellStore.MaximumColumn);
-			var expectedStore = new int?[,]
+			var expectedSheetData = new int?[,]
 			{
 /*1*/		{    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
 /*2*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
@@ -796,14 +1206,16 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.ValidateCellStore(expectedStore, cellStore);
+			var expectedColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+			var expectedRowData = new int?[] { 2001, null, null, null, null, null, 2002, 2003, 2004, 2005, null, null, null, null, null, null };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedSheetData, cellStore);
 		}
 		
 		[TestMethod]
 		public void InsertColumnsAcrossAllRows()
 		{
 			var cellStore = this.GetCellStore(false);
-			var originalStore = new int?[,]
+			var originalSheetData = new int?[,]
 			{
 /*1*/		{   1,    2,    3,    4,    5,    6, null, null, null, null, null, null, null, null, null, null },
 /*2*/		{  17,   18,   19,   20,   21,   22, null, null, null, null, null, null, null, null, null, null },
@@ -822,9 +1234,11 @@ namespace EPPlusTest
 /*15*/	{ 225,  226,  227,  228,  229,  230, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ 241,  242,  243,  244,  245,  246, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(originalStore, cellStore);
+			var originalColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, null, null, null, null, null, null, null, null, null, null };
+			var originalRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+			this.LoadCellStore(originalColumnData, originalRowData, originalSheetData, cellStore);
 			cellStore.Insert(0, 2, cellStore.MaximumRow, 5);
-			var expectedStore = new int?[,]
+			var expectedSheetData = new int?[,]
 			{
 /*1*/		{   1, null, null, null, null, null,    2,    3,    4,    5,    6, null, null, null, null, null },
 /*2*/		{  17, null, null, null, null, null,   18,   19,   20,   21,   22, null, null, null, null, null },
@@ -843,7 +1257,9 @@ namespace EPPlusTest
 /*15*/	{ 225, null, null, null, null, null,  226,  227,  228,  229,  230, null, null, null, null, null },
 /*16*/	{ 241, null, null, null, null, null,  242,  243,  244,  245,  246, null, null, null, null, null }
 			};
-			this.ValidateCellStore(expectedStore, cellStore);
+			var expectedColumnData = new int?[] { 1001, null, null, null, null, null, 1002, 1003, 1004, 1005, 1006, null, null, null, null, null };
+			var expectedRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedSheetData, cellStore);
 		}
 
 		[TestMethod]
@@ -851,7 +1267,7 @@ namespace EPPlusTest
 		public void InsertInsideShiftsBlock()
 		{
 			var cellStore = this.GetCellStore(false);
-			var originalStore = new int?[,]
+			var originalSheetData = new int?[,]
 			{
 /*1*/		{    1,    2,    3,    4,    5,    6, null, null, null, null, null, null, null, null, null, null },
 /*2*/		{   17,   18,   19,   20,   21,   22, null, null, null, null, null, null, null, null, null, null },
@@ -870,33 +1286,36 @@ namespace EPPlusTest
 /*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
 /*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
 			};
-			this.LoadCellStore(originalStore, cellStore);
+			var originalColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, null, null, null, null, null, null, null, null, null, null };
+			var originalRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, null, null, null, null, null, null, null, null };
+			this.LoadCellStore(originalColumnData, originalRowData, originalSheetData, cellStore);
 			cellStore.Insert(2, 2, 5, 6);
-			var expectedStore = new int?[,]
-			{
-/*1*/		{    1,    2,    3,    4,    5,    6, null, null, null, null, null, null, null, null, null, null },
-/*2*/		{   17, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
-/*3*/		{   33, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
-/*4*/		{   49, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
-/*5*/		{   65, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
-/*6*/		{   81, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
-/*7*/		{   97, null, null, null, null, null, null,   18,   19,   20,   21,   22, null, null, null, null },
-/*8*/		{  113, null, null, null, null, null, null,   34,   35,   36,   37,   38, null, null, null, null },
-/*9*/		{ null, null, null, null, null, null, null,   50,   51,   52,   53,   54, null, null, null, null },
-/*10*/	{ null, null, null, null, null, null, null,   66,   67,   68,   69,   70, null, null, null, null },
-/*11*/	{ null, null, null, null, null, null, null,   82,   83,   84,   85,   86, null, null, null, null },
-/*12*/	{ null, null, null, null, null, null, null,   98,   99,  100,  101,  102, null, null, null, null },
-/*13*/	{ null, null, null, null, null, null, null,  114,  113,  114,  115,  116, null, null, null, null },
-/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
-/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
-/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
-			};
-			this.ValidateCellStore(expectedStore, cellStore);
+			#region Expected Result for if we decide to implement this.
+//			var expectedStore = new int?[,]
+//			{
+///*1*/		{    1,    2,    3,    4,    5,    6, null, null, null, null, null, null, null, null, null, null },
+///*2*/		{   17, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+///*3*/		{   33, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+///*4*/		{   49, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+///*5*/		{   65, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+///*6*/		{   81, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+///*7*/		{   97, null, null, null, null, null, null,   18,   19,   20,   21,   22, null, null, null, null },
+///*8*/		{  113, null, null, null, null, null, null,   34,   35,   36,   37,   38, null, null, null, null },
+///*9*/		{ null, null, null, null, null, null, null,   50,   51,   52,   53,   54, null, null, null, null },
+///*10*/	{ null, null, null, null, null, null, null,   66,   67,   68,   69,   70, null, null, null, null },
+///*11*/	{ null, null, null, null, null, null, null,   82,   83,   84,   85,   86, null, null, null, null },
+///*12*/	{ null, null, null, null, null, null, null,   98,   99,  100,  101,  102, null, null, null, null },
+///*13*/	{ null, null, null, null, null, null, null,  114,  113,  114,  115,  116, null, null, null, null },
+///*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+///*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+///*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+//			};
+//			this.ValidateCellStore(originalColumnData, originalRowData, expectedStore, cellStore);
+			#endregion
 		}
 		#endregion
 
 		#region Nested Class Tests
-
 		#region PagedStructure Tests
 		#region Constructor Tests
 		[TestMethod]
@@ -1748,7 +2167,6 @@ namespace EPPlusTest
 		#endregion
 		#endregion
 		#endregion
-
 		#endregion
 
 		#region ZCellStoreEnumerator Tests
@@ -2175,33 +2593,48 @@ namespace EPPlusTest
 
 			Assert.IsFalse(enumerator.MoveNext());
 		}
+
+		[TestMethod]
+		public void DELME()
+		{
+			var cellStore = new CellStore<int>();
+			var zCellStore = new ZCellStore<int>();
+			int i = 0;
+			for (int row = 0; row < 100; row++)
+			{
+				for (int column = 0; column < 100; column++)
+				{
+					cellStore.SetValue(row, column, i);
+					zCellStore.SetValue(row, column, i++);
+				}
+			}
+			var cellStoreEnumerator = cellStore.GetEnumerator();
+			//var zCellStoreEnumerator = zCellStore.GetEnumerator();
+
+			//while (cellStoreEnumerator.MoveNext() && zCellStoreEnumerator.MoveNext())
+			//{
+			//	Assert.AreEqual(cellStoreEnumerator.Row, zCellStoreEnumerator.Row);
+			//	Assert.AreEqual(cellStoreEnumerator.Column, zCellStoreEnumerator.Column);
+			//	Assert.AreEqual(cellStoreEnumerator.Value, zCellStoreEnumerator.Value);
+			//	Assert.AreEqual(cellStoreEnumerator.Current, zCellStoreEnumerator.Current);
+			//	Assert.AreEqual(cellStoreEnumerator.CellAddress, zCellStoreEnumerator.CellAddress);
+			//} 
+			while(cellStoreEnumerator.MoveNext())
+			{
+
+			}
+		}
 		#endregion
 		#endregion
 
 		#region Helper Methods
-		private int BuildRow(int page, int indexOnPage)
-		{
-			if (indexOnPage < 1 || indexOnPage > 1024)
-				throw new InvalidOperationException("Row pages take indices between 1 and 1024.");
-			if (page < 0 || page > 1023)
-				throw new InvalidOperationException("Pages are 0-indexed and can be between 0 and 1023.");
-			return page * 1024 + indexOnPage;
-		}
-
-		private int BuildColumn(int page, int indexOnPage)
-		{
-			if (indexOnPage < 1 || indexOnPage > 128)
-				throw new InvalidOperationException("Column pages take indices between 1 and 128.");
-			if (page < 0 || page > 127)
-				throw new InvalidOperationException("Pages are 0-indexed and can be between 0 and 127.");
-			return page * 128 + indexOnPage;
-		}
-
 		private ICellStore<int> GetCellStore(bool fill = true)
 		{
-			var cellStore = new ZCellStore<int>(4, 4);
+			var cellStore = new ZCellStore<int>(2, 2);
 			if (fill)
 			{
+				var columnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+				var rowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
 				var currentStore = new int?[,]
 				{
 /*1*/			{   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16 },
@@ -2221,36 +2654,82 @@ namespace EPPlusTest
 /*15*/		{ 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240 },
 /*16*/		{ 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
 				};
-				this.LoadCellStore(currentStore, cellStore);
+				this.LoadCellStore(columnData, rowData, currentStore, cellStore);
 			}
 			return cellStore;
 		}
 
-		private void LoadCellStore(int?[,] sheet, ICellStore<int> cellStore)
+		private void LoadCellStore(int?[] columnData, int?[] rowData, int?[,] sheetData, ICellStore<int> cellStore)
 		{
-			for (int row = 0; row <= sheet.GetUpperBound(0); ++row)
+			if (columnData != null)
 			{
-				for (int column = 0; column <= sheet.GetUpperBound(1); ++column)
+				for (int column = 0; column < columnData.Length; column++)
 				{
-					var data = sheet[row, column];
-					if (data.HasValue)
-						cellStore.SetValue(row + 1, column + 1, data.Value);
+					if (columnData[column].HasValue)
+						cellStore.SetValue(0, column + 1, columnData[column].Value);
+				}
+			}
+			if (rowData != null)
+			{
+				for (int row = 0; row < rowData.Length; row++)
+				{
+					if (rowData[row].HasValue)
+						cellStore.SetValue(row + 1, 0, rowData[row].Value);
+				}
+			}
+			if (sheetData != null)
+			{
+				for (int row = 0; row <= sheetData.GetUpperBound(0); ++row)
+				{
+					for (int column = 0; column <= sheetData.GetUpperBound(1); ++column)
+					{
+						var data = sheetData[row, column];
+						if (data.HasValue)
+							cellStore.SetValue(row + 1, column + 1, data.Value);
+					}
 				}
 			}
 		}
 
-		private void ValidateCellStore(int?[,] sheet, ICellStore<int> cellStore)
+		private void ValidateCellStore(int?[] columnData, int?[] rowData, int?[,] sheetData, ICellStore<int> cellStore)
 		{
-			for (int row = 0; row <= sheet.GetUpperBound(0); ++row)
+			if (columnData != null)
 			{
-				for (int column = 0; column <= sheet.GetUpperBound(1); ++column)
+				for (int column = 0; column < columnData.Length; column++)
 				{
-					var data = sheet[row, column];
-					var item = cellStore.GetValue(row + 1, column + 1);
+					var data = columnData[column];
+					var item = cellStore.GetValue(0, column + 1);
 					if (data.HasValue)
-						Assert.AreEqual(data.Value, item, $"Data mismatch row: {row} column: {column}");
+						Assert.AreEqual(data.Value, item, $"Data mismatch row: 0 column: {column}");
 					else
-						Assert.AreEqual(default(int), item, $"Data mismatch row: {row} column: {column}");
+						Assert.AreEqual(default(int), item, $"Data mismatch row: 0 column: {column}");
+				}
+			}
+			if (rowData != null)
+			{
+				for (int row = 0; row < rowData.Length; row++)
+				{
+					var data = rowData[row];
+					var item = cellStore.GetValue(row + 1, 0);
+					if (data.HasValue)
+						Assert.AreEqual(data.Value, item, $"Data mismatch row: {row} column: 0");
+					else
+						Assert.AreEqual(default(int), item, $"Data mismatch row: {row} column: 0");
+				}
+			}
+			if (sheetData != null)
+			{
+				for (int row = 0; row <= sheetData.GetUpperBound(0); ++row)
+				{
+					for (int column = 0; column <= sheetData.GetUpperBound(1); ++column)
+					{
+						var data = sheetData[row, column];
+						var item = cellStore.GetValue(row + 1, column + 1);
+						if (data.HasValue)
+							Assert.AreEqual(data.Value, item, $"Data mismatch row: {row} column: {column}");
+						else
+							Assert.AreEqual(default(int), item, $"Data mismatch row: {row} column: {column}");
+					}
 				}
 			}
 		}
