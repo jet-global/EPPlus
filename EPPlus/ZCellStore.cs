@@ -167,73 +167,7 @@ namespace OfficeOpenXml
 
 		public bool NextCell(ref int row, ref int column)
 		{
-			return this.NextCellBound(ref row, ref column, this.MaximumRow, 0, this.MaximumColumn);
-		}
-
-		private bool NextCellBound(ref int row, ref int column, int maxRow, int minColumn, int maxColumn)
-		{
-			// tests for this
-			if (row < 0)
-				row = 0;
-			if (column < -1)
-				column = -1;
-
-			int columnSearch, rowSearch;
-			// STEP 1:: Search column metadata if targeting row 0
-			if (row == 0)
-			{
-				columnSearch = column - 1; // 1-indexing
-				if (this.ColumnData.NextItem(ref columnSearch))
-				{
-					column = columnSearch + 1;
-					return true;
-				}
-				row++;
-				column = -1;
-			}
-			// STEP 2:: Finish searching current target row
-			if (column != -1)
-			{
-				columnSearch = column - 1;
-				while (this.CellData.NextItem(ref columnSearch))
-				{
-					var page = this.CellData.GetItem(columnSearch);
-					var item = page?.Value.GetItem(row - 1);
-					if (item.HasValue)
-					{
-						column = columnSearch + 1;
-						return true;
-					}
-				}
-				row++;
-				column = -1;
-			}
-			// STEP 3:: Search a full row from start
-			int currentRow = int.MaxValue;
-			int currentColumn = int.MaxValue;
-			rowSearch = row - 1 - 1; // 1-indexing - negative search offset
-			if (this.RowData.NextItem(ref rowSearch))
-			{
-				currentRow = rowSearch + 1;
-				currentColumn = 0;
-			}
-			columnSearch = column;
-			while (this.CellData.NextItem(ref columnSearch))
-			{
-				var page = this.CellData.GetItem(columnSearch);
-				rowSearch = row - 1 - 1; // 1-indexing - negative search offset
-				if (page?.Value.NextItem(ref rowSearch) == true)
-				{
-					if (rowSearch + 1 < currentRow)
-					{
-						currentRow = rowSearch + 1;
-						currentColumn = columnSearch + 1;
-					}
-				}
-			}
-			row = currentRow;
-			column = currentColumn;
-			return row != int.MaxValue && column != int.MaxValue;
+			return this.NextCellBound(ref row, ref column, 0, this.MaximumRow, 0, this.MaximumColumn);
 		}
 
 		public bool PrevCell(ref int row, ref int column)
@@ -461,61 +395,6 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Private Methods
-		private bool TryFindNextCell(int startColumn, int endColumn, int targetRow, ref int betaRow, ref int betaColumn)
-		{
-			startColumn--; // 1-indexing offset
-			endColumn--; // 1-indexing offset
-			targetRow--; // 1-indexing offset
-			int rowSearch = targetRow - 1;
-			while (this.CellData.NextItem(ref startColumn) && startColumn <= endColumn)
-			{
-				var page = this.CellData.GetItem(startColumn);
-				rowSearch = targetRow - 1;
-				if (page?.Value.NextItem(ref rowSearch) == true)
-				{
-					if (rowSearch == targetRow || targetRow < 0)
-					{
-						betaRow = rowSearch;
-						betaColumn = startColumn;
-						return true;
-					}
-					else if (rowSearch < betaRow)
-					{
-						betaRow = rowSearch;
-						betaColumn = startColumn;
-					}
-				}
-			}
-			return false;
-		}
-
-		private bool TryFindPreviousCell(int startColumn, int endColumn, int targetRow, ref int betaRow, ref int betaColumn)
-		{
-			startColumn--; // 1-indexing offset
-			endColumn--; // 1-indexing offset
-			targetRow--; // 1-indexing offset
-			while (this.CellData.PreviousItem(ref startColumn) && startColumn >= endColumn)
-			{
-				var page = this.CellData.GetItem(startColumn);
-				int rowSearch = targetRow + 1;
-				if (page?.Value.PreviousItem(ref rowSearch) == true)
-				{
-					if (rowSearch == targetRow || targetRow >= ExcelPackage.MaxRows)
-					{
-						betaRow = rowSearch;
-						betaColumn = startColumn;
-						return true;
-					}
-					else if (rowSearch > betaRow)
-					{
-						betaRow = rowSearch;
-						betaColumn = startColumn;
-					}
-				}
-			}
-			return false;
-		}
-
 		private bool TryUpdateIndices(ref int row, ref int column, bool validate)
 		{
 			if (validate && (row < 1 || row > ExcelPackage.MaxRows || column < 1 || column > ExcelPackage.MaxColumns))
@@ -523,6 +402,79 @@ namespace OfficeOpenXml
 			row--;
 			column--;
 			return true;
+		}
+
+		private bool NextCellBound(ref int row, ref int column, int minRow, int maxRow, int minColumn, int maxColumn)
+		{
+			// tests for this
+			if (row < minRow)
+				row = minRow;
+			if (column < minColumn - 1)
+				column = minColumn - 1;
+
+			int columnSearch, rowSearch;
+			// STEP 1:: Search column metadata if targeting row 0
+			if (row == 0)
+			{
+				columnSearch = column - 1; // 1-indexing
+				if (this.ColumnData.NextItem(ref columnSearch) && columnSearch < maxColumn)
+				{
+					column = columnSearch + 1;
+					return true;
+				}
+				row++;
+				if (row > maxRow)
+					return false;
+				column = minColumn - 1;
+			}
+			// STEP 2:: Finish searching current target row
+			if (column != -1)
+			{
+				columnSearch = column - 1;
+				while (this.CellData.NextItem(ref columnSearch) && columnSearch < maxColumn)
+				{
+					var page = this.CellData.GetItem(columnSearch);
+					var item = page?.Value.GetItem(row - 1);
+					if (item.HasValue)
+					{
+						column = columnSearch + 1;
+						return true;
+					}
+				}
+				row++;
+				if (row > maxRow)
+					return false;
+				column = minColumn - 1;
+			}
+			// STEP 3:: Search a full row from start
+			int currentRow = int.MaxValue;
+			int currentColumn = int.MaxValue;
+			if (minColumn == 0)
+			{
+				rowSearch = row - 1 - 1; // 1-indexing - negative search offset
+				if (this.RowData.NextItem(ref rowSearch) && rowSearch < maxRow)
+				{
+					currentRow = rowSearch + 1;
+					currentColumn = 0;
+				}
+			}
+			columnSearch = column - 1;
+			while (this.CellData.NextItem(ref columnSearch) && columnSearch < maxColumn)
+			{
+				var page = this.CellData.GetItem(columnSearch);
+				rowSearch = row - 1 - 1; // 1-indexing - negative search offset
+				if (page?.Value.NextItem(ref rowSearch) == true && rowSearch < maxRow)
+				{
+					if (rowSearch + 1 < currentRow)
+					{
+						currentRow = rowSearch + 1;
+						currentColumn = columnSearch + 1;
+					}
+				}
+			}
+			row = currentRow;
+			column = currentColumn;
+			return row != int.MaxValue && column != int.MaxValue;
 		}
 		#endregion
 
@@ -957,7 +909,7 @@ namespace OfficeOpenXml
 
 			public void Dispose()
 			{
-				// TODO ZPF Can we just take this off of the interfact?...
+				// TODO ZPF Can we just take this off of the interface?...
 			}
 
 			public IEnumerator<T> GetEnumerator()
@@ -967,14 +919,8 @@ namespace OfficeOpenXml
 			}
 
 			public bool MoveNext()
-			{ 
-				int betaRow = ExcelPackage.MaxRows + 1, betaColumn = -1;
-				bool found = this.CellStore.TryFindNextCell(myColumn, this.Endcolumn, myRow, ref betaRow, ref betaColumn) ||
-										 this.CellStore.TryFindNextCell(this.StartColumn - 1, myColumn, myRow + 1, ref betaRow, ref betaColumn);
-				myRow = betaRow + 1;
-				myColumn = betaColumn + 1;
-				// TODO ZPF This validation can likely be optimized
-				return myRow >= this.StartRow && myRow <= this.EndRow && myColumn >= this.StartColumn && myColumn <= this.Endcolumn; 
+			{
+				return this.CellStore.NextCellBound(ref myRow, ref myColumn, this.StartRow, this.EndRow, this.StartColumn, this.Endcolumn);
 			}
 
 			public void Reset()

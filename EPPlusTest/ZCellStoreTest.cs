@@ -2175,460 +2175,411 @@ namespace EPPlusTest
 		{
 			var cellStore = new ZCellStore<int>();
 			var enumerator = cellStore.GetEnumerator();
-			Assert.AreEqual(1, enumerator.Row);
-			Assert.AreEqual(0, enumerator.Column);
+			Assert.AreEqual(0, enumerator.Row);
+			Assert.AreEqual(-1, enumerator.Column);
 			Assert.IsFalse(enumerator.MoveNext());
 		}
 
 		[TestMethod]
 		public void ZCellStoreEnumeratorEnumeratesAllValues()
 		{
-			var cellStore = new ZCellStore<int>();
-			int value = 1;
-			for (int row = 1; row <= 10; row++)
+			var expectedData = new int?[,]
 			{
-				for (int column = 1; column <= 10; column++)
-				{
-					cellStore.SetValue(row, column, value++);
-				}
-			}
+					{ null, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 },
+/*1*/			{ 2001,    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*2*/			{ 2002,   17,   18,   19,   20,   21,   22,   23,   24,   25,   26,   27,   28,   29,   30,   31,   32 },
+/*3*/			{ 2003,   33,   34,   35,   36,   37,   38,   39,   40,   41,   42,   43,   44,   45,   46,   47,   48 },
+/*4*/			{ 2004,   49,   50,   51,   52,   53,   54,   55,   56,   57,   58,   59,   60,   61,   62,   63,   64 },
+/*5*/			{ 2005,   65,   66,   67,   68,   69,   70,   71,   72,   73,   74,   75,   76,   77,   78,   79,   80 },
+/*6*/			{ 2006,   81,   82,   83,   84,   85,   86,   87,   88,   89,   90,   91,   92,   93,   94,   95,   96 },
+/*7*/			{ 2007,   97,   98,   99,  100,  101,  102,  103,  104,  105,  106,  107,  108,  109,  110,  111,  112 },
+/*8*/			{ 2008,  113,  114,  115,  116,  117,  118,  119,  120,  121,  122,  123,  124,  125,  126,  127,  128 },
+/*9*/			{ 2009,  129,  130,  131,  132,  133,  134,  135,  136,  137,  138,  139,  140,  141,  142,  143,  144 },
+/*10*/		{ 2010,  145,  146,  147,  148,  149,  150,  151,  152,  153,  154,  155,  156,  157,  158,  159,  160 },
+/*11*/		{ 2011,  161,  162,  163,  164,  165,  166,  167,  168,  169,  170,  171,  172,  173,  174,  175,  176 },
+/*12*/		{ 2012,  177,  178,  179,  180,  181,  182,  183,  184,  185,  186,  187,  188,  189,  190,  191,  192 },
+/*13*/		{ 2013,  193,  194,  195,  196,  197,  198,  199,  200,  201,  202,  203,  204,  205,  206,  207,  208 },
+/*14*/		{ 2014,  209,  210,  211,  212,  213,  214,  215,  216,  217,  218,  219,  220,  221,  222,  223,  224 },
+/*15*/		{ 2015,  225,  226,  227,  228,  229,  230,  231,  232,  233,  234,  235,  236,  237,  238,  239,  240 },
+/*16*/		{ 2016,  241,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255,  256 }
+			};
+			var cellStore = this.GetCellStore();
 			var enumerator = cellStore.GetEnumerator();
-			for (value = 1; value <= 100; value++)
+			int resultCount = 0;
+			while (enumerator.MoveNext())
 			{
-				Assert.IsTrue(enumerator.MoveNext());
-				Assert.AreEqual(value, enumerator.Value);
+				resultCount++;
+				var item = expectedData[enumerator.Row, enumerator.Column];
+				Assert.IsTrue(item.HasValue);
+				Assert.AreEqual(item.Value, enumerator.Value);
 			}
-			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(288, resultCount);
 		}
 
 		[TestMethod]
-		public void ZCellStoreEnumeratorEnumeratesBlockTopRows()
+		public void ZCellStoreEnumeratorEnumeratesAllValuesSkipsEmptyCells()
 		{
-			var cellStore = new ZCellStore<int>();
-			int value = 1;
-			for (int row = 1; row <= 10; row++)
+			var nullCells = new Tuple<int, int>[]
 			{
-				for (int column = 1; column <= 10; column++)
-				{
-					cellStore.SetValue(row, column, value++);
-				}
-			}
-			var enumerator = cellStore.GetEnumerator(1, 1, 2, 10);
-			for (value = 1; value <= 20; value++)
+				new Tuple<int, int>(2, 8),
+				new Tuple<int, int>(3, 3),
+				new Tuple<int, int>(3, 8),
+				new Tuple<int, int>(4, 8),
+				new Tuple<int, int>(5, 8),
+				new Tuple<int, int>(6, 8),
+				new Tuple<int, int>(7, 0),
+				new Tuple<int, int>(7, 8),
+				new Tuple<int, int>(8, 8),
+				new Tuple<int, int>(9, 8),
+				new Tuple<int, int>(10, 8),
+				new Tuple<int, int>(13, 1),
+				new Tuple<int, int>(13, 4),
+				new Tuple<int, int>(13, 13)
+			};
+			var expectedData = new int?[,]
 			{
-				Assert.IsTrue(enumerator.MoveNext());
-				Assert.AreEqual(value, enumerator.Value);
+					{ null, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 },
+/*1*/			{ 2001,    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*2*/			{ 2002,   17,   18,   19,   20,   21,   22,   23, null,   25,   26,   27,   28,   29,   30,   31,   32 },
+/*3*/			{ 2003,   33,   34, null,   36,   37,   38,   39, null,   41,   42,   43,   44,   45,   46,   47,   48 },
+/*4*/			{ 2004,   49,   50,   51,   52,   53,   54,   55, null,   57,   58,   59,   60,   61,   62,   63,   64 },
+/*5*/			{ 2005,   65,   66,   67,   68,   69,   70,   71, null,   73,   74,   75,   76,   77,   78,   79,   80 },
+/*6*/			{ 2006,   81,   82,   83,   84,   85,   86,   87, null,   89,   90,   91,   92,   93,   94,   95,   96 },
+/*7*/			{ null,   97,   98,   99,  100,  101,  102,  103, null,  105,  106,  107,  108,  109,  110,  111,  112 },
+/*8*/			{ 2008,  113,  114,  115,  116,  117,  118,  119, null,  121,  122,  123,  124,  125,  126,  127,  128 },
+/*9*/			{ 2009,  129,  130,  131,  132,  133,  134,  135, null,  137,  138,  139,  140,  141,  142,  143,  144 },
+/*10*/		{ 2010,  145,  146,  147,  148,  149,  150,  151, null,  153,  154,  155,  156,  157,  158,  159,  160 },
+/*11*/		{ 2011,  161,  162,  163,  164,  165,  166,  167,  168,  169,  170,  171,  172,  173,  174,  175,  176 },
+/*12*/		{ 2012,  177,  178,  179,  180,  181,  182,  183,  184,  185,  186,  187,  188,  189,  190,  191,  192 },
+/*13*/		{ 2013, null,  194,  195, null,  197,  198,  199,  200,  201,  202,  203,  204, null,  206,  207,  208 },
+/*14*/		{ 2014,  209,  210,  211,  212,  213,  214,  215,  216,  217,  218,  219,  220,  221,  222,  223,  224 },
+/*15*/		{ 2015,  225,  226,  227,  228,  229,  230,  231,  232,  233,  234,  235,  236,  237,  238,  239,  240 },
+/*16*/		{ 2016,  241,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255,  256 }
+			};
+			var cellStore = this.GetCellStore(nullCoordinates: nullCells);
+			var enumerator = cellStore.GetEnumerator();
+			int resultCount = 0;
+			while (enumerator.MoveNext())
+			{
+				resultCount++;
+				var item = expectedData[enumerator.Row, enumerator.Column];
+				Assert.IsTrue(item.HasValue, $"Erroneously hit: [{enumerator.Row}:{enumerator.Column}]");
+				Assert.AreEqual(item.Value, enumerator.Value);
 			}
-			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(274, resultCount);
+		}
+
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesBlockTopRowsIncludingMetadata()
+		{
+			var expectedData = new int?[,]
+			{
+					{ null, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 },
+/*1*/			{ 2001,    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*2*/			{ 2002,   17,   18,   19,   20,   21,   22,   23,   24,   25,   26,   27,   28,   29,   30,   31,   32 },
+/*3*/			{ 2003,   33,   34,   35,   36,   37,   38,   39,   40,   41,   42,   43,   44,   45,   46,   47,   48 },
+/*4*/			{ 2004,   49,   50,   51,   52,   53,   54,   55,   56,   57,   58,   59,   60,   61,   62,   63,   64 },
+			};
+			var cellStore = this.GetCellStore();
+			var enumerator = cellStore.GetEnumerator(0, 0, 4, 16);
+			int resultCount = 0;
+			while (enumerator.MoveNext())
+			{
+				resultCount++;
+				var item = expectedData[enumerator.Row, enumerator.Column];
+				Assert.IsTrue(item.HasValue);
+				Assert.AreEqual(item.Value, enumerator.Value);
+			}
+			Assert.AreEqual(84, resultCount);
+		}
+
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesBlockTopRowsExcludingMetadata()
+		{
+			var expectedData = new int?[,]
+			{
+/*1*/			{ 2001,    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16 },
+/*2*/			{ 2002,   17,   18,   19,   20,   21,   22,   23,   24,   25,   26,   27,   28,   29,   30,   31,   32 },
+/*3*/			{ 2003,   33,   34,   35,   36,   37,   38,   39,   40,   41,   42,   43,   44,   45,   46,   47,   48 },
+/*4*/			{ 2004,   49,   50,   51,   52,   53,   54,   55,   56,   57,   58,   59,   60,   61,   62,   63,   64 },
+			};
+			var cellStore = this.GetCellStore();
+			var enumerator = cellStore.GetEnumerator(1, 0, 4, 16);
+			int resultCount = 0;
+			while (enumerator.MoveNext())
+			{
+				resultCount++;
+				var item = expectedData[enumerator.Row - 1, enumerator.Column];
+				Assert.IsTrue(item.HasValue);
+				Assert.AreEqual(item.Value, enumerator.Value);
+			}
+			Assert.AreEqual(68, resultCount);
 		}
 
 		[TestMethod]
 		public void ZCellStoreEnumeratorEnumeratesBlockBottomRows()
 		{
-			var cellStore = new ZCellStore<int>();
-			int value = 1;
-			for (int row = 1; row <= 10; row++)
+			var expectedData = new int?[,]
 			{
-				for (int column = 1; column <= 10; column++)
-				{
-					cellStore.SetValue(row, column, value++);
-				}
-			}
-			var enumerator = cellStore.GetEnumerator(7, 1, 10, 10);
-			for (value = 61; value <= 100; value++)
+/*12*/		{ 2012,  177,  178,  179,  180,  181,  182,  183,  184,  185,  186,  187,  188,  189,  190,  191,  192 },
+/*13*/		{ 2013,  193,  194,  195,  196,  197,  198,  199,  200,  201,  202,  203,  204,  205,  206,  207,  208 },
+/*14*/		{ 2014,  209,  210,  211,  212,  213,  214,  215,  216,  217,  218,  219,  220,  221,  222,  223,  224 },
+/*15*/		{ 2015,  225,  226,  227,  228,  229,  230,  231,  232,  233,  234,  235,  236,  237,  238,  239,  240 },
+/*16*/		{ 2016,  241,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255,  256 }
+			};
+			var cellStore = this.GetCellStore();
+			var enumerator = cellStore.GetEnumerator(12, 0, 16, 16);
+			int resultCount = 0;
+			while (enumerator.MoveNext())
 			{
-				Assert.IsTrue(enumerator.MoveNext());
-				Assert.AreEqual(value, enumerator.Value);
+				resultCount++;
+				var item = expectedData[enumerator.Row - 12, enumerator.Column];
+				Assert.IsTrue(item.HasValue);
+				Assert.AreEqual(item.Value, enumerator.Value);
 			}
-			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(85, resultCount);
 		}
 
 		[TestMethod]
-		public void ZCellStoreEnumeratorEnumeratesBlockBottomRowsHandlesLargeBlock()
+		public void ZCellStoreEnumeratorEnumeratesBlockBottomRowsIgnoresLudicrousDimensions()
 		{
-			var cellStore = new ZCellStore<int>();
-			int value = 1;
-			for (int row = 1; row <= 10; row++)
+			var expectedData = new int?[,]
 			{
-				for (int column = 1; column <= 10; column++)
-				{
-					cellStore.SetValue(row, column, value++);
-				}
-			}
-			var enumerator = cellStore.GetEnumerator(7, 1, 100, 100);
-			for (value = 61; value <= 100; value++)
+/*12*/		{ 2012,  177,  178,  179,  180,  181,  182,  183,  184,  185,  186,  187,  188,  189,  190,  191,  192 },
+/*13*/		{ 2013,  193,  194,  195,  196,  197,  198,  199,  200,  201,  202,  203,  204,  205,  206,  207,  208 },
+/*14*/		{ 2014,  209,  210,  211,  212,  213,  214,  215,  216,  217,  218,  219,  220,  221,  222,  223,  224 },
+/*15*/		{ 2015,  225,  226,  227,  228,  229,  230,  231,  232,  233,  234,  235,  236,  237,  238,  239,  240 },
+/*16*/		{ 2016,  241,  242,  243,  244,  245,  246,  247,  248,  249,  250,  251,  252,  253,  254,  255,  256 }
+			};
+			var cellStore = this.GetCellStore();
+			var enumerator = cellStore.GetEnumerator(12, 0, 1000, 1000);
+			int resultCount = 0;
+			while (enumerator.MoveNext())
 			{
-				Assert.IsTrue(enumerator.MoveNext());
-				Assert.AreEqual(value, enumerator.Value);
+				resultCount++;
+				var item = expectedData[enumerator.Row - 12, enumerator.Column];
+				Assert.IsTrue(item.HasValue);
+				Assert.AreEqual(item.Value, enumerator.Value);
 			}
-			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(85, resultCount);
 		}
 
 		[TestMethod]
-		public void ZCellStoreEnumeratorEnumeratesBlockLeftColumns()
+		public void ZCellStoreEnumeratorEnumeratesBlockLeftColumnsIncludingMetadata()
 		{
-			var cellStore = new ZCellStore<int>();
-			int value = 1;
-			for (int row = 1; row <= 10; row++)
+			var expectedData = new int?[,]
 			{
-				for (int column = 1; column <= 10; column++)
-				{
-					cellStore.SetValue(row, column, value++);
-				}
+					{ null, 1001, 1002, 1003, 1004 },
+/*1*/			{ 2001,    1,    2,    3,    4 },
+/*2*/			{ 2002,   17,   18,   19,   20 },
+/*3*/			{ 2003,   33,   34,   35,   36 },
+/*4*/			{ 2004,   49,   50,   51,   52 },
+/*5*/			{ 2005,   65,   66,   67,   68 },
+/*6*/			{ 2006,   81,   82,   83,   84 },
+/*7*/			{ 2007,   97,   98,   99,  100 },
+/*8*/			{ 2008,  113,  114,  115,  116 },
+/*9*/			{ 2009,  129,  130,  131,  132 },
+/*10*/		{ 2010,  145,  146,  147,  148 },
+/*11*/		{ 2011,  161,  162,  163,  164 },
+/*12*/		{ 2012,  177,  178,  179,  180 },
+/*13*/		{ 2013,  193,  194,  195,  196 },
+/*14*/		{ 2014,  209,  210,  211,  212 },
+/*15*/		{ 2015,  225,  226,  227,  228 },
+/*16*/		{ 2016,  241,  242,  243,  244 }
+			};
+			var cellStore = this.GetCellStore();
+			var enumerator = cellStore.GetEnumerator(0, 0, 16, 4);
+			int resultCount = 0;
+			while (enumerator.MoveNext())
+			{
+				resultCount++;
+				var item = expectedData[enumerator.Row, enumerator.Column];
+				Assert.IsTrue(item.HasValue);
+				Assert.AreEqual(item.Value, enumerator.Value);
 			}
-			var enumerator = cellStore.GetEnumerator(1, 1, 10, 2);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(1, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(2, enumerator.Value);
+			Assert.AreEqual(84, resultCount);
+		}
 
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(11, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(12, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(21, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(22, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(31, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(32, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(41, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(42, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(51, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(52, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(61, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(62, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(71, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(72, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(81, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(82, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(91, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(92, enumerator.Value);
-
-			Assert.IsFalse(enumerator.MoveNext());
+		[TestMethod]
+		public void ZCellStoreEnumeratorEnumeratesBlockLeftColumnsExcludingMetadata()
+		{
+			var expectedData = new int?[,]
+			{
+					/*	1			2			3			4	 */
+					{ 1001, 1002, 1003, 1004 },
+/*1*/			{    1,    2,    3,    4 },
+/*2*/			{   17,   18,   19,   20 },
+/*3*/			{   33,   34,   35,   36 },
+/*4*/			{   49,   50,   51,   52 },
+/*5*/			{   65,   66,   67,   68 },
+/*6*/			{   81,   82,   83,   84 },
+/*7*/			{   97,   98,   99,  100 },
+/*8*/			{  113,  114,  115,  116 },
+/*9*/			{  129,  130,  131,  132 },
+/*10*/		{  145,  146,  147,  148 },
+/*11*/		{  161,  162,  163,  164 },
+/*12*/		{  177,  178,  179,  180 },
+/*13*/		{  193,  194,  195,  196 },
+/*14*/		{  209,  210,  211,  212 },
+/*15*/		{  225,  226,  227,  228 },
+/*16*/		{  241,  242,  243,  244 }
+			};
+			var cellStore = this.GetCellStore();
+			var enumerator = cellStore.GetEnumerator(0, 1, 16, 4);
+			int resultCount = 0;
+			while (enumerator.MoveNext())
+			{
+				resultCount++;
+				var item = expectedData[enumerator.Row, enumerator.Column - 1];
+				Assert.IsTrue(item.HasValue);
+				Assert.AreEqual(item.Value, enumerator.Value);
+			}
+			Assert.AreEqual(68, resultCount);
 		}
 
 		[TestMethod]
 		public void ZCellStoreEnumeratorEnumeratesBlockRightColumns()
 		{
-			var cellStore = new ZCellStore<int>();
-			int value = 1;
-			for (int row = 1; row <= 10; row++)
+			var expectedData = new int?[,]
 			{
-				for (int column = 1; column <= 10; column++)
-				{
-					cellStore.SetValue(row, column, value++);
-				}
+					/*	11		12		13		14		15		16 */
+					{ 1011, 1012, 1013, 1014, 1015, 1016 },
+/*1*/			{   11,   12,   13,   14,   15,   16 },
+/*2*/			{   27,   28,   29,   30,   31,   32 },
+/*3*/			{   43,   44,   45,   46,   47,   48 },
+/*4*/			{   59,   60,   61,   62,   63,   64 },
+/*5*/			{   75,   76,   77,   78,   79,   80 },
+/*6*/			{   91,   92,   93,   94,   95,   96 },
+/*7*/			{  107,  108,  109,  110,  111,  112 },
+/*8*/			{  123,  124,  125,  126,  127,  128 },
+/*9*/			{  139,  140,  141,  142,  143,  144 },
+/*10*/		{  155,  156,  157,  158,  159,  160 },
+/*11*/		{  171,  172,  173,  174,  175,  176 },
+/*12*/		{  187,  188,  189,  190,  191,  192 },
+/*13*/		{  203,  204,  205,  206,  207,  208 },
+/*14*/		{  219,  220,  221,  222,  223,  224 },
+/*15*/		{  235,  236,  237,  238,  239,  240 },
+/*16*/		{  251,  252,  253,  254,  255,  256 }
+			};
+			var cellStore = this.GetCellStore();
+			var enumerator = cellStore.GetEnumerator(0, 11, 16, 16);
+			int resultCount = 0;
+			while (enumerator.MoveNext())
+			{
+				resultCount++;
+				var item = expectedData[enumerator.Row, enumerator.Column - 11];
+				Assert.IsTrue(item.HasValue);
+				Assert.AreEqual(item.Value, enumerator.Value);
 			}
-			var enumerator = cellStore.GetEnumerator(1, 7, 10, 10);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(7, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(8, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(9, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(10, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(17, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(18, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(19, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(20, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(27, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(28, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(29, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(30, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(37, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(38, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(39, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(40, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(47, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(48, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(49, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(50, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(57, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(58, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(59, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(60, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(67, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(68, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(69, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(70, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(77, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(78, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(79, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(80, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(87, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(88, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(89, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(90, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(97, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(98, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(99, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(100, enumerator.Value);
-
-			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(102, resultCount);
 		}
 
 		[TestMethod]
-		public void ZCellStoreEnumeratorEnumeratesBlockRightColumnsHandlesLargeBlock()
+		public void ZCellStoreEnumeratorEnumeratesBlockRightColumnsIgnoresLudicrousDimensions()
 		{
-			var cellStore = new ZCellStore<int>();
-			int value = 1;
-			for (int row = 1; row <= 10; row++)
+			var expectedData = new int?[,]
 			{
-				for (int column = 1; column <= 10; column++)
-				{
-					cellStore.SetValue(row, column, value++);
-				}
+					/*	11		12		13		14		15		16 */
+					{ 1011, 1012, 1013, 1014, 1015, 1016 },
+/*1*/			{   11,   12,   13,   14,   15,   16 },
+/*2*/			{   27,   28,   29,   30,   31,   32 },
+/*3*/			{   43,   44,   45,   46,   47,   48 },
+/*4*/			{   59,   60,   61,   62,   63,   64 },
+/*5*/			{   75,   76,   77,   78,   79,   80 },
+/*6*/			{   91,   92,   93,   94,   95,   96 },
+/*7*/			{  107,  108,  109,  110,  111,  112 },
+/*8*/			{  123,  124,  125,  126,  127,  128 },
+/*9*/			{  139,  140,  141,  142,  143,  144 },
+/*10*/		{  155,  156,  157,  158,  159,  160 },
+/*11*/		{  171,  172,  173,  174,  175,  176 },
+/*12*/		{  187,  188,  189,  190,  191,  192 },
+/*13*/		{  203,  204,  205,  206,  207,  208 },
+/*14*/		{  219,  220,  221,  222,  223,  224 },
+/*15*/		{  235,  236,  237,  238,  239,  240 },
+/*16*/		{  251,  252,  253,  254,  255,  256 }
+			};
+			var cellStore = this.GetCellStore();
+			var enumerator = cellStore.GetEnumerator(0, 11, 1000, 1000);
+			int resultCount = 0;
+			while (enumerator.MoveNext())
+			{
+				resultCount++;
+				var item = expectedData[enumerator.Row, enumerator.Column - 11];
+				Assert.IsTrue(item.HasValue);
+				Assert.AreEqual(item.Value, enumerator.Value);
 			}
-			var enumerator = cellStore.GetEnumerator(1, 7, 100, 100);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(7, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(8, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(9, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(10, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(17, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(18, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(19, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(20, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(27, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(28, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(29, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(30, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(37, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(38, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(39, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(40, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(47, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(48, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(49, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(50, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(57, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(58, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(59, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(60, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(67, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(68, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(69, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(70, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(77, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(78, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(79, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(80, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(87, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(88, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(89, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(90, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(97, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(98, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(99, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(100, enumerator.Value);
-
-			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(102, resultCount);
 		}
 
 		[TestMethod]
 		public void ZCellStoreEnumeratorEnumeratesInternalBlock()
 		{
-			var cellStore = new ZCellStore<int>();
-			int value = 1;
-			for (int row = 1; row <= 10; row++)
+			var expectedData = new int?[,]
 			{
-				for (int column = 1; column <= 10; column++)
-				{
-					cellStore.SetValue(row, column, value++);
-				}
+					/*  5		  6			7			8			9    10  */
+/*6*/			{   85,   86,   87,   88,   89,   90 },
+/*7*/			{  101,  102,  103,  104,  105,  106 },
+/*8*/			{  117,  118,  119,  120,  121,  122 },
+/*9*/			{  133,  134,  135,  136,  137,  138 },
+/*10*/		{  149,  150,  151,  152,  153,  154 },
+/*11*/		{  165,  166,  167,  168,  169,  170 },
+/*12*/		{  181,  182,  183,  184,  185,  186 },
+
+			};
+			var cellStore = this.GetCellStore();
+			var enumerator = cellStore.GetEnumerator(6, 5, 12, 10);
+			int resultCount = 0;
+			while (enumerator.MoveNext())
+			{
+				resultCount++;
+				var item = expectedData[enumerator.Row - 6, enumerator.Column - 5];
+				Assert.IsTrue(item.HasValue);
+				Assert.AreEqual(item.Value, enumerator.Value);
 			}
-			var enumerator = cellStore.GetEnumerator(4, 4, 7, 7);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(34, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(35, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(36, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(37, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(44, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(45, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(46, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(47, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(54, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(55, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(56, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(57, enumerator.Value);
-
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(64, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(65, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(66, enumerator.Value);
-			Assert.IsTrue(enumerator.MoveNext());
-			Assert.AreEqual(67, enumerator.Value);
-
-			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(42, resultCount);
 		}
 
 		[TestMethod]
-		public void DELME()
+		public void ZCellStoreEnumeratorEnumeratesInternalBlockSkipsEmptyCells()
 		{
-			var cellStore = new CellStore<int>();
-			var zCellStore = new ZCellStore<int>();
-			int i = 0;
-			for (int row = 0; row < 100; row++)
+			var nullCells = new Tuple<int, int>[]
 			{
-				for (int column = 0; column < 100; column++)
-				{
-					cellStore.SetValue(row, column, i);
-					zCellStore.SetValue(row, column, i++);
-				}
-			}
-			var cellStoreEnumerator = cellStore.GetEnumerator();
-			//var zCellStoreEnumerator = zCellStore.GetEnumerator();
-
-			//while (cellStoreEnumerator.MoveNext() && zCellStoreEnumerator.MoveNext())
-			//{
-			//	Assert.AreEqual(cellStoreEnumerator.Row, zCellStoreEnumerator.Row);
-			//	Assert.AreEqual(cellStoreEnumerator.Column, zCellStoreEnumerator.Column);
-			//	Assert.AreEqual(cellStoreEnumerator.Value, zCellStoreEnumerator.Value);
-			//	Assert.AreEqual(cellStoreEnumerator.Current, zCellStoreEnumerator.Current);
-			//	Assert.AreEqual(cellStoreEnumerator.CellAddress, zCellStoreEnumerator.CellAddress);
-			//} 
-			while(cellStoreEnumerator.MoveNext())
+				new Tuple<int, int>(7, 6),
+				new Tuple<int, int>(7, 7),
+				new Tuple<int, int>(7, 10),
+				new Tuple<int, int>(8, 10),
+				new Tuple<int, int>(9, 10),
+				new Tuple<int, int>(10, 10),
+				new Tuple<int, int>(11, 10)
+			};
+			var expectedData = new int?[,]
 			{
+					/*  5		  6			7			8			9    10  */
+/*6*/			{   85,   86,   87,   88,   89,   90 },
+/*7*/			{  101, null, null,  104,  105, null },
+/*8*/			{  117,  118,  119,  120,  121, null },
+/*9*/			{  133,  134,  135,  136,  137, null },
+/*10*/		{  149,  150,  151,  152,  153, null },
+/*11*/		{  165,  166,  167,  168,  169, null },
+/*12*/		{  181,  182,  183,  184,  185,  186 },
 
+			};
+			var cellStore = this.GetCellStore(nullCoordinates: nullCells);
+			var enumerator = cellStore.GetEnumerator(6, 5, 12, 10);
+			int resultCount = 0;
+			while (enumerator.MoveNext())
+			{
+				resultCount++;
+				var item = expectedData[enumerator.Row - 6, enumerator.Column - 5];
+				Assert.AreEqual(item.Value, enumerator.Value);
 			}
+			Assert.AreEqual(35, resultCount);
 		}
 		#endregion
 		#endregion
 
 		#region Helper Methods
-		private ICellStore<int> GetCellStore(bool fill = true)
+		private ICellStore<int> GetCellStore(bool fill = true, Tuple<int, int>[] nullCoordinates = null)
 		{
 			var cellStore = new ZCellStore<int>(2, 2);
 			if (fill)
@@ -2655,6 +2606,13 @@ namespace EPPlusTest
 /*16*/		{ 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
 				};
 				this.LoadCellStore(columnData, rowData, currentStore, cellStore);
+				if (nullCoordinates != null)
+				{
+					foreach (var coordinate in nullCoordinates)
+					{
+						cellStore.Clear(coordinate.Item1, coordinate.Item2, coordinate.Item1, coordinate.Item2);
+					}
+				}
 			}
 			return cellStore;
 		}
