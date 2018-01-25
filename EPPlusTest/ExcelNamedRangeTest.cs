@@ -249,6 +249,16 @@ namespace EPPlusTest
 				Assert.AreEqual("SHEET1!G7", address.Address);
 				Assert.AreEqual(worksheet1, address.Worksheet);
 
+				worksheet1.Names["name1"].NameFormula = "(Sheet1!G7)";
+				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!G7", address.Address);
+				Assert.AreEqual(worksheet1, address.Worksheet);
+
+				worksheet1.Names["name1"].NameFormula = "(SHeet1!B2):SHEET1!$C5";
+				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!B2:SHEET1!$C5", address.Address);
+				Assert.AreEqual(worksheet1, address.Worksheet);
+
 				worksheet1.Names["name1"].NameFormula = "SHeet1!B2:SHEET1!$C5";
 				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
 				Assert.AreEqual("SHEET1!B2:SHEET1!$C5", address.Address);

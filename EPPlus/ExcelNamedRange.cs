@@ -197,6 +197,8 @@ namespace OfficeOpenXml
 				{
 					stringBuilder.Append(token.Value);
 				}
+				else if (token.TokenType == TokenType.OpeningParenthesis || token.TokenType == TokenType.ClosingParenthesis)
+					continue;
 				else if (token.TokenType == TokenType.Function)
 				{
 					if (this.TryCalculateReferenceFunction(tokens, i, out string address, out i))

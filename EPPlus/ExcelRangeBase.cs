@@ -108,28 +108,27 @@ namespace OfficeOpenXml
 			SetDelegate();
 		}
 
-		internal ExcelRangeBase(ExcelWorksheet xlWorksheet, string address) :
-			base(address)
+		internal ExcelRangeBase(ExcelWorksheet xlWorksheet, string address) : base(address)
 		{
-			if (string.IsNullOrEmpty(xlWorksheet?.Name))
+			if (!string.IsNullOrEmpty(xlWorksheet?.Name))
 				_ws = xlWorksheet.Name;
 			this.myWorksheet = xlWorksheet;
 			this.myWorkbook = this.myWorksheet.Workbook;
 			base.SetRCFromTable(this.myWorksheet.Package, null);
-			if (string.IsNullOrEmpty(this._ws))
-				this._ws = this.myWorksheet == null ? string.Empty : this.myWorksheet.Name;
+			if (string.IsNullOrEmpty(_ws))
+				_ws = myWorksheet == null ? string.Empty : myWorksheet.Name;
 			SetDelegate();
 		}
-		internal ExcelRangeBase(ExcelWorkbook wb, ExcelWorksheet xlWorksheet, string address, bool isName) :
-			base(address, isName)
+
+		internal ExcelRangeBase(ExcelWorkbook wb, ExcelWorksheet xlWorksheet, string address, bool isName) : base(address, isName)
 		{
-			if (string.IsNullOrEmpty(xlWorksheet?.Name))
+			if (!string.IsNullOrEmpty(xlWorksheet?.Name))
 				_ws = xlWorksheet.Name;
 			SetRCFromTable(wb.Package, null);
 			this.myWorksheet = xlWorksheet;
 			this.myWorkbook = wb;
-			if (string.IsNullOrEmpty(this._ws))
-				this._ws = xlWorksheet?.Name;
+			if (string.IsNullOrEmpty(_ws))
+				_ws = xlWorksheet?.Name;
 			SetDelegate();
 		}
 		#endregion

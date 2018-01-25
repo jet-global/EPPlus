@@ -32,6 +32,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OfficeOpenXml.Extensions;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
@@ -202,7 +203,7 @@ namespace OfficeOpenXml.FormulaParsing
 						goto iterateToken;
 					}
 				}
-				else if (t.TokenType == TokenType.Function && t.Value.ToUpper() == Offset.Name)
+				else if (t.TokenType == TokenType.Function && t.Value.IsEquivalentTo(Offset.Name))
 				{
 					var stringBuilder = new StringBuilder($"{OffsetAddress.Name}(");
 					int offsetStartIndex = f.tokenIx;

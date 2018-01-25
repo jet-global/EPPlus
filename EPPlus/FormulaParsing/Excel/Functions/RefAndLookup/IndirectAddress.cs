@@ -54,7 +54,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var addressArgument = ArgToString(arguments, 0);
+			var addressArgument = base.ArgToString(arguments, 0);
 			var address = new ExcelAddress(addressArgument);
 			if (string.IsNullOrEmpty(address.Address))
 				return new CompileResult(eErrorType.Value);
