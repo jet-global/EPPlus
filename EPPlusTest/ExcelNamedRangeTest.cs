@@ -224,18 +224,6 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		public void UpdateFormulaSpaceSeparatedColumnDeleteUpdatesReferences()
-		{
-			using (var excelPackage = new ExcelPackage())
-			{
-				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
-				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!$L$10 Sheet1!$E5 Sheet1!G$8 Sheet1!F12", 0);
-				namedRange.UpdateFormula(0, 2, 0, -2, worksheet);
-				Assert.AreEqual("'SHEET1'!$K$10 'SHEET1'!$C5 'SHEET1'!E$8 SHEET1!C12", namedRange.NameFormula);
-			}
-		}
-
-		[TestMethod]
 		public void UpdateFormulaCommaSeparatedColumnDeleteUpdatesReferences()
 		{
 			using (var excelPackage = new ExcelPackage())
@@ -244,6 +232,123 @@ namespace EPPlusTest
 				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!$L$10,Sheet1!G$8,Sheet1!F12,Sheet1!$E5", 0);
 				namedRange.UpdateFormula(0, 2, 0, -2, worksheet);
 				Assert.AreEqual("'SHEET1'!$J$10,'SHEET1'!G$8,'SHEET1'!F12,'SHEET1'!$C5", namedRange.NameFormula);
+			}
+		}
+		#endregion
+
+		#region GetFormulaAsAddress Tests
+		[TestMethod]
+		public void GetFormulaAsAddressTest()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet1 = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				var worksheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
+				worksheet1.Names.Add("name1", "Sheet1!G7");
+				var address = worksheet1.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!G7", address.Address);
+				Assert.AreEqual(worksheet1, address.Worksheet);
+
+				worksheet1.Names["name1"].NameFormula = "(Sheet1!G7)";
+				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!G7", address.Address);
+				Assert.AreEqual(worksheet1, address.Worksheet);
+
+				worksheet1.Names["name1"].NameFormula = "(SHeet1!B2):SHEET1!$C5";
+				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!B2:SHEET1!$C5", address.Address);
+				Assert.AreEqual(worksheet1, address.Worksheet);
+
+				worksheet1.Names["name1"].NameFormula = "SHeet1!B2:SHEET1!$C5";
+				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!B2:SHEET1!$C5", address.Address);
+				Assert.AreEqual(worksheet1, address.Worksheet);
+
+				worksheet1.Names["name1"].NameFormula = "SHeet2!B2:SHEET2!$C5";
+				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET2!B2:SHEET2!$C5", address.Address);
+				Assert.AreEqual(worksheet2, address.Worksheet);
+
+				worksheet1.Names["name1"].NameFormula = "SHEET1!B2,SHEET1!$C5,SHEET1!$D$6";
+				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!B2,SHEET1!$C5,SHEET1!$D$6", address.Address);
+				Assert.AreEqual(worksheet1, address.Worksheet);
+			}
+		}
+
+		[TestMethod]
+		public void GetFormulaAsAddressNestedNamedRangeTest()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Names.Add("name1", "Sheet1!G7");
+				worksheet.Names.Add("name2", "Sheet1!G6,name1");
+				var name2Address = worksheet.Names["name2"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!G6,SHEET1!G7", name2Address?.Address);
+
+				worksheet.Names["name1"].NameFormula = "notanaddress";
+				name2Address = worksheet.Names["name2"].GetFormulaAsCellRange();
+				Assert.IsNull(name2Address);
+			}
+		}
+
+		[TestMethod]
+		public void GetFormulaAsAddressOffsetFormulaTest()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Names.Add("name1", "Offset(G7,1,1)");
+				var address = worksheet.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual(new ExcelRange(worksheet, "'Sheet1'!H8").Address, address.Address);
+				Assert.AreEqual(worksheet, address.Worksheet);
+
+				worksheet.Names["name1"].NameFormula = "Sheet1!G7,Offset(G7,1,1)";
+				address = worksheet.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!G7,'Sheet1'!H8", address.Address);
+				Assert.AreEqual(worksheet, address.Worksheet);
+
+				worksheet.Names["name1"].NameFormula = "Sheet1!G7,Offset(Sheet1!C2,2,1)";
+				address = worksheet.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!G7,'SHEET1'!D4", address.Address);
+
+				worksheet.Names["name1"].NameFormula = "Sheet1!G7,Offset(notanaddress,2,1)";
+				address = worksheet.Names["name1"].GetFormulaAsCellRange();
+				Assert.IsNull(address);
+			}
+		}
+
+		[TestMethod]
+		public void GetFormulaAsAddressIndirectFormulaTest()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Names.Add("name1", @"Sheet1!G7,Indirect(""Sheet1!C5"")");
+				var address = worksheet.Names["name1"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!G7,Sheet1!C5", address.Address);
+
+				worksheet.Names["name1"].NameFormula = @"Sheet1!G7,Indirect(""notanadddress"")";
+				address = worksheet.Names["name1"].GetFormulaAsCellRange();
+				Assert.IsNull(address);
+			}
+		}
+
+		[TestMethod]
+		public void GetFormulaAsAddressNestedNamedRangeWithFunctionTest()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Names.Add("name1", "OFFset(Sheet1!C3:Sheet1!D4, 2, 3),Sheet1!F6");
+				worksheet.Names.Add("name2", "Sheet1!G6,name1");
+				var name2Address = worksheet.Names["name2"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!G6,'SHEET1'!F5:G6,SHEET1!F6", name2Address.Address);
+
+				worksheet.Names["name1"].NameFormula = "OFFset(Sheet1!C3:Sheet1!D4, 2, 3),#REF!F6";
+				name2Address = worksheet.Names["name2"].GetFormulaAsCellRange();
+				Assert.AreEqual("SHEET1!G6,'SHEET1'!F5:G6,#REF!F6", name2Address.Address);
 			}
 		}
 		#endregion

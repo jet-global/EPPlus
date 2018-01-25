@@ -27,13 +27,31 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
+	/// <summary>
+	/// Represents the Excel INDIRECT(...) function.
+	/// </summary>
 	public class Indirect : ExcelFunction
 	{
+		#region Constants
+		/// <summary>
+		/// The name of the INDIRECT function.
+		/// </summary>
+		public const string Name = "INDIRECT";
+		#endregion
+
+		#region ExcelFunction Overrides
+		/// <summary>
+		/// Evaluates the INDIRECT function with the specified <paramref name="arguments"/> 
+		/// in the specified <paramref name="context"/>.
+		/// </summary>
+		/// <param name="arguments">The arguments to evaluate the function with.</param>
+		/// <param name="context">The context with which to evaluate the function in.</param>
+		/// <returns>A <see cref="CompileResult"/> containing the result of evaluation.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var address = ArgToString(arguments, 0);
+			var address = base.ArgToString(arguments, 0);
 			var adr = new ExcelAddress(address);
 			var ws = adr.WorkSheet;
 			if (string.IsNullOrEmpty(ws))
@@ -47,5 +65,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			}
 			return new CompileResult(result, DataType.Enumerable);
 		}
+		#endregion
 	}
 }

@@ -362,6 +362,20 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		}
 
 		[TestMethod]
+		public void OffsetWithNestedOffsetRowValueTest()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Cells["G8"].Formula = "OFFSET(A1, OFFSET(C3, 1, 1), 3)";
+				sheet1.Cells["D4"].Value = 1;
+				sheet1.Cells["D2"].Value = "Success!";
+				sheet1.Cells["G8"].Calculate();
+				Assert.AreEqual("Success!", sheet1.Cells["G8"].Value);
+			}
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(CircularReferenceException))]
 		public void OffsetWithSimpleCircularReferenceThrowsException()
 		{

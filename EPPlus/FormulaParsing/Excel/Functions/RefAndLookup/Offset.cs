@@ -34,6 +34,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 	public class Offset : LookupFunction
 	{
 		#region Constants
+		/// <summary>
+		/// The name of the OFFSET function.
+		/// </summary>
 		public const string Name = "OFFSET";
 		#endregion
 

@@ -715,6 +715,23 @@ namespace EPPlusTest
 		}
 		#endregion
 
+		#region Retrieval Tests
+		[TestMethod]
+		public void NamedRangeCollectionIndexerCaseInsensitiveTest()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var sheet = excelPackage.Workbook.Worksheets.Add("Sheet");
+				var namedRangeCollection = new ExcelNamedRangeCollection(excelPackage.Workbook);
+				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "$C$3"));
+				Assert.IsTrue(namedRangeCollection.ContainsKey("NAMEDrange"));
+				var namedRange = namedRangeCollection["namedRANGE"];
+				Assert.AreEqual("'Sheet'!$C$3", namedRange.NameFormula);
+				Assert.AreEqual(-1, namedRange.LocalSheetID);
+			}
+		}
+		#endregion
+
 		#region Reference Resolution Tests
 		[TestMethod]
 		public void AbsoluteNamedRangeReferenceResolvesToAbsoluteLocation()

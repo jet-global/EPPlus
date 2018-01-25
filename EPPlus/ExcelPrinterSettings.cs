@@ -553,12 +553,13 @@ namespace OfficeOpenXml
 			{
 				if (_ws.Names.ContainsKey("_xlnm.Print_Titles"))
 				{
-					var namedRange = _ws.Names["_xlnm.Print_Titles"];
-					ExcelRangeBase r = new ExcelRange(namedRange.LocalSheet, namedRange.NameFormula);
-					if (r.Start.Column == 1 && r.End.Column == ExcelPackage.MaxColumns)
-						return new ExcelAddress(r.FirstAddress);
-					else if (r._addresses != null)
-						return r._addresses.FirstOrDefault(a => a.Start.Column == 1 && a.End.Column == ExcelPackage.MaxColumns);
+					var rangeAddress = _ws.Names["_xlnm.Print_Titles"].GetFormulaAsCellRange();
+					if (rangeAddress == null)
+						throw new InvalidOperationException("Printer settings named ranges must be cell references.");
+					else if (rangeAddress.Start.Column == 1 && rangeAddress.End.Column == ExcelPackage.MaxColumns)
+						return new ExcelAddress(rangeAddress.FirstAddress);
+					else if (rangeAddress._addresses != null)
+						return rangeAddress._addresses.FirstOrDefault(a => a.Start.Column == 1 && a.End.Column == ExcelPackage.MaxColumns);
 					else
 						return null;
 				}
@@ -589,12 +590,13 @@ namespace OfficeOpenXml
 			{
 				if (_ws.Names.ContainsKey("_xlnm.Print_Titles"))
 				{
-					var namedRange = _ws.Names["_xlnm.Print_Titles"];
-					ExcelRangeBase r = new ExcelRange(namedRange.LocalSheet, namedRange.NameFormula);
-					if (r.Start.Row == 1 && r.End.Row == ExcelPackage.MaxRows)
-						return new ExcelAddress(r.FirstAddress);
-					else if (r._addresses != null)
-						return r._addresses.FirstOrDefault(a => a.Start.Row == 1 && a.End.Row == ExcelPackage.MaxRows);
+					var rangeAddress = _ws.Names["_xlnm.Print_Titles"].GetFormulaAsCellRange();
+					if (rangeAddress == null)
+						throw new InvalidOperationException("Printer settings named ranges must be cell references.");
+					else if (rangeAddress.Start.Row == 1 && rangeAddress.End.Row == ExcelPackage.MaxRows)
+						return new ExcelAddress(rangeAddress.FirstAddress);
+					else if (rangeAddress._addresses != null)
+						return rangeAddress._addresses.FirstOrDefault(a => a.Start.Row == 1 && a.End.Row == ExcelPackage.MaxRows);
 					else
 						return null;
 				}
@@ -624,10 +626,7 @@ namespace OfficeOpenXml
 			get
 			{
 				if (_ws.Names.ContainsKey("_xlnm.Print_Area"))
-				{
-					var namedRange = _ws.Names["_xlnm.Print_Area"];
-					return new ExcelRange(namedRange.LocalSheet, namedRange.NameFormula);
-				}
+					return _ws.Names["_xlnm.Print_Area"].GetFormulaAsCellRange();
 				else
 					return null;
 			}

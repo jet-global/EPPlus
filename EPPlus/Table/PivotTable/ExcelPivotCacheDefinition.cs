@@ -34,7 +34,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -200,17 +199,10 @@ namespace OfficeOpenXml.Table.PivotTable
 						if (ws == null)
 						{
 							var name = GetXmlNodeString(_sourceNamePath);
-							foreach (var namedRange in this.PivotTable.WorkSheet.Workbook.Names)
+							if (this.PivotTable.WorkSheet.Workbook.Names.ContainsKey(name))
 							{
-								if (name.Equals(namedRange.Name, StringComparison.InvariantCultureIgnoreCase))
-								{
-									ExcelRangeBase.SplitAddress(namedRange.NameFormula, out string workbook, out string worksheetName, out string address);
-									var worksheet = this.PivotTable.WorkSheet.Workbook.Worksheets[worksheetName];
-									if (worksheet == null)
-										throw new InvalidOperationException($"The named range reference '{namedRange.NameFormula}' must be a fully qualified excel address.");
-									_sourceRange = new ExcelRange(worksheet, namedRange.NameFormula);
-									return _sourceRange;
-								}
+								_sourceRange = this.PivotTable.WorkSheet.Workbook.Names[name].GetFormulaAsCellRange();
+								return _sourceRange;
 							}
 							foreach (var worksheet in this.PivotTable.WorkSheet.Workbook.Worksheets)
 							{
@@ -219,48 +211,36 @@ namespace OfficeOpenXml.Table.PivotTable
 									_sourceRange = new ExcelRangeBase(worksheet.Workbook, worksheet, name, true);
 									break;
 								}
-								foreach (var namedRange in worksheet.Names)
+								else if (worksheet.Names.ContainsKey(name))
 								{
-									if (name.IsEquivalentTo(namedRange.Name))
-									{
-										_sourceRange = new ExcelRange(namedRange.LocalSheet, namedRange.NameFormula);
-										break;
-									}
+									_sourceRange = worksheet.Names[name].GetFormulaAsCellRange();
+									break;
 								}
 							}
 						}
 						else
-						{
 							_sourceRange = ws.Cells[GetXmlNodeString(_sourceAddressPath)];
-						}
 					}
 					else
-					{
 						return null;
-					}
 				}
 				return _sourceRange;
 			}
 			set
 			{
 				if (this.PivotTable.WorkSheet.Workbook != value.Worksheet.Workbook)
-				{
 					throw (new ArgumentException("Range must be in the same package as the pivottable"));
-				}
-
-				var sr = this.SourceRange;
-				if (value.End.Column - value.Start.Column != sr.End.Column - sr.Start.Column)
-				{
+				var sourceRange = this.SourceRange;
+				if (value.End.Column - value.Start.Column != sourceRange.End.Column - sourceRange.Start.Column)
 					throw (new ArgumentException("Can not change the number of columns(fields) in the SourceRange"));
-				}
-
 				SetXmlNodeString(_sourceWorksheetPath, value.Worksheet.Name);
 				SetXmlNodeString(_sourceAddressPath, value.FirstAddress);
 				_sourceRange = value;
 			}
 		}
+
 		/// <summary>
-		/// Type of source data
+		/// Type of source data.
 		/// </summary>
 		public eSourceType CacheSource
 		{
