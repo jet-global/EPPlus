@@ -89,15 +89,18 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		private CompileResult CompileRangeValues()
 		{
 			var c = this._parsingContext.Scopes.Current;
-			var result = _excelDataProvider.GetRange(c.Address.Worksheet, c.Address.FromRow, c.Address.FromCol, ExpressionString);
+			var result = _excelDataProvider.GetRange(c.Address.Worksheet, c.Address.FromRow, c.Address.FromCol, this.ExpressionString);
 			if (result == null)
 			{
-				return CompileResult.Empty;
+				var excelAddress = new ExcelAddress(this.ExpressionString);
+				// External references are not supported.
+				if (!string.IsNullOrEmpty(excelAddress?.Workbook))
+					return new CompileResult(eErrorType.Ref);
+				else
+					return CompileResult.Empty;
 			}
 			if (this.ResolveAsRange || result.Address.Rows > 1 || result.Address.Columns > 1)
-			{
 				return new CompileResult(result, DataType.Enumerable);
-			}
 			return CompileSingleCell(result);
 		}
 

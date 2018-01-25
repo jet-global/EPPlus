@@ -127,9 +127,9 @@ namespace OfficeOpenXml
 			if (workbook == null)
 				throw new ArgumentNullException(nameof(workbook));
 			if (string.IsNullOrEmpty(name))
-				throw new ArgumentException(nameof(name));
+				throw new ArgumentNullException(nameof(name));
 			if (string.IsNullOrEmpty(formula))
-				throw new ArgumentException(nameof(formula));
+				throw new ArgumentNullException(nameof(formula));
 			this.Name = name;
 			this.Workbook = workbook;
 			this.LocalSheet = nameSheet;
@@ -153,6 +153,9 @@ namespace OfficeOpenXml
 				if (token.TokenType == TokenType.ExcelAddress)
 				{
 					var address = new ExcelAddress(token.Value);
+					// Do not update external references.
+					if (!string.IsNullOrEmpty(address?.Workbook))
+						continue;
 					int fromRow = this.GetRelativeLocation(address._fromRowFixed, address._fromRow, relativeRow, ExcelPackage.MaxRows);
 					int fromColumn = this.GetRelativeLocation(address._fromColFixed, address._fromCol, relativeColumn, ExcelPackage.MaxColumns);
 					int toRow = this.GetRelativeLocation(address._toRowFixed, address._toRow, relativeRow, ExcelPackage.MaxRows);
@@ -230,7 +233,11 @@ namespace OfficeOpenXml
 			}
 			var addressString = stringBuilder.ToString();
 			ExcelRangeBase.SplitAddress(addressString, out string workbook, out string worksheetName, out _);
+			if (string.IsNullOrEmpty(worksheetName))
+				throw new InvalidOperationException("References in named ranges must be fully-qualified with sheet names.");
 			var worksheet = this.Workbook.Worksheets[worksheetName];
+			if (worksheet == null)
+				throw new InvalidOperationException($"The worksheet '{worksheetName}' in the named range formula {this.NameFormula} does not exist.");
 			return new ExcelRangeBase(worksheet, addressString);
 		}
 		#endregion

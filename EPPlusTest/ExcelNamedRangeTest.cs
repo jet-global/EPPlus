@@ -21,7 +21,7 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
+		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructExcelNamedRangeNullNameThrowsException()
 		{
 			using (var excelPackage = new ExcelPackage())
@@ -32,7 +32,7 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
+		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructExcelNamedRangeEmptyNameThrowsException()
 		{
 			using (var excelPackage = new ExcelPackage())
@@ -43,7 +43,7 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
+		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructExcelNamedRangeNullFormulaThrowsException()
 		{
 			using (var excelPackage = new ExcelPackage())
@@ -54,7 +54,7 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
+		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructExcelNamedRangeEmptyFormulaThrowsException()
 		{
 			using (var excelPackage = new ExcelPackage())
@@ -93,25 +93,21 @@ namespace EPPlusTest
 		}
 		#endregion
 
-		#region GetRelativeAddress Tests
+		#region GetRelativeNameFormula Tests
 		[TestMethod]
-		public virtual void TryGetNamedRangeAddress()
+		public virtual void GetRelativeNameFormulaAddress()
 		{
 			string sheetName1 = "Sheet1", sheetName2 = "Name with spaces";
 			using (var package = new ExcelPackage())
-			using (var workbook = package.Workbook)
-			using (var worksheet1 = workbook.Worksheets.Add(sheetName1))
-			using (var worksheet2 = workbook.Worksheets.Add(sheetName2))
-			using (var cell1 = worksheet1.Cells["$D3"])
-			using (var cell2 = worksheet1.Cells["G$5"])
-			using (var cell3 = worksheet2.Cells["E5"])
-			using (var cell4 = worksheet2.Cells["$C$8"])
 			{
-				var names = workbook.Names;
-				names.Add("Name1", cell1);
-				names.Add("Name2", cell2);
-				names.Add("Name3", cell3);
-				names.Add("Name4", cell4);
+				var worksheet1 = package.Workbook.Worksheets.Add(sheetName1);
+				var worksheet2 = package.Workbook.Worksheets.Add(sheetName2);
+				var names = package.Workbook.Names;
+				names.Add("Name1", worksheet1.Cells["Sheet1!$D3"]);
+				names.Add("Name2", worksheet1.Cells["Sheet1!G$5"]);
+				names.Add("Name3", worksheet2.Cells["Sheet1!E5"]);
+				names.Add("Name4", worksheet2.Cells["Sheet1!$C$8"]);
+				names.Add("Name5", "'[Demo Waterfall Chart.xlsx]Sheet1'!E5");
 
 				// Relative references to a named range are relative to cell A1. Offsets that cause the 
 				// relative address to exceed the maximum row or column will wrap around.
@@ -119,18 +115,22 @@ namespace EPPlusTest
 				//	$B2 means on column B and down one row from the relative address.
 				//	D$5 means on row 5 and right three columns from the relative address.
 				//	C3 means right two and down three from the relative address.
-				var expected = $"'{sheetName1}'!$D4";
+				var expected = $"'SHEET1'!$D4";
 				string actual = string.Join(string.Empty, package.Workbook.Names["Name1"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
-				expected = $"'{sheetName1}'!H$5";
+				expected = $"'SHEET1'!H$5";
 				actual = string.Join(string.Empty, package.Workbook.Names["Name2"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
-				expected = $"'{sheetName2}'!F6";
+				expected = $"'SHEET1'!F6";
 				actual = string.Join(string.Empty, package.Workbook.Names["Name3"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
-				expected = $"'{sheetName2}'!$C$8";
+				expected = $"'SHEET1'!$C$8";
 				actual = string.Join(string.Empty, package.Workbook.Names["Name4"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
+
+				// External references will not be updated.
+				actual = string.Join(string.Empty, package.Workbook.Names["Name5"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
+				Assert.AreEqual("'[Demo Waterfall Chart.xlsx]Sheet1'!E5", actual);
 			}
 		}
 		#endregion
@@ -236,7 +236,7 @@ namespace EPPlusTest
 		}
 		#endregion
 
-		#region GetFormulaAsAddress Tests
+		#region GetFormulaAsCellRange Tests
 		[TestMethod]
 		public void GetFormulaAsAddressTest()
 		{
@@ -349,6 +349,81 @@ namespace EPPlusTest
 				worksheet.Names["name1"].NameFormula = "OFFset(Sheet1!C3:Sheet1!D4, 2, 3),#REF!F6";
 				name2Address = worksheet.Names["name2"].GetFormulaAsCellRange();
 				Assert.AreEqual("SHEET1!G6,'SHEET1'!F5:G6,#REF!F6", name2Address.Address);
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void GetFormulaAsAddressWithoutWorksheetThrowsException()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Names.Add("name1", "C3:D4");
+				worksheet.Names["name1"].GetFormulaAsCellRange();
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void GetFormulaAsAddressWithInvalidWorksheetThrowsException()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Names.Add("name1", "Sheet2!C3:Sheet2!D4");
+				worksheet.Names["name1"].GetFormulaAsCellRange();
+			}
+		}
+		#endregion
+
+		#region Named Range Formula Calculation Tests
+		[TestMethod]
+		public void NamedRangeFormulaCalculationTest()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Names.Add("name1", "\"7/23/2018\"");
+				sheet1.Names.Add("name2", "\"4/15/2017\"");
+				sheet1.Cells[2, 2].Formula = "DAYS360(name1, name2)";
+				sheet1.Calculate();
+				Assert.AreEqual(-458, sheet1.Cells[2, 2].Value);
+
+				sheet1.Names["name1"].NameFormula = "23";
+				sheet1.Names["name2"].NameFormula = "102";
+				sheet1.Cells[2, 2].Formula = "=name1 + name2";
+				sheet1.Calculate();
+				Assert.AreEqual(125d, sheet1.Cells[2, 2].Value);
+
+				sheet1.Names["name1"].NameFormula = "{1,2,3,4,5}";
+				sheet1.Names["name2"].NameFormula = "{6,7,8}";
+				sheet1.Cells[2, 2].Formula = "=SUM(name1, name2)";
+				sheet1.Calculate();
+				Assert.AreEqual(36d, sheet1.Cells[2, 2].Value);
+
+				sheet1.Names["name1"].NameFormula = "{1,2,3,4,5}";
+				sheet1.Names.Add("name3", "14");
+				sheet1.Names["name2"].NameFormula = "{6,7,8,name3}";
+				sheet1.Cells[2, 2].Formula = "=SUM(name1, name2)";
+				sheet1.Calculate();
+				Assert.AreEqual(50d, sheet1.Cells[2, 2].Value);
+
+				sheet1.Names["name1"].NameFormula = "{1,2,3,4,5}";
+				sheet1.Names["name2"].NameFormula = "OFFSET(Sheet1!$C$3,2,3)";
+				sheet1.Cells["F5"].Value = 10;
+				sheet1.Cells[2, 2].Formula = "=SUM(name1, name2)";
+				sheet1.Calculate();
+				Assert.AreEqual(25d, sheet1.Cells[2, 2].Value);
+
+				sheet1.Names["name1"].NameFormula = "{1,2,3,4,5}";
+				sheet1.Names["name3"].NameFormula = "Sheet1!$C$3";
+				sheet1.Names["name2"].NameFormula = "OFFSET(name3,2,3)";
+				sheet1.Cells["F5"].Value = 10;
+				sheet1.Cells["C3"].Value = 5;
+				sheet1.Cells[2, 2].Formula = "=SUM(name1, name2, name3)";
+				sheet1.Calculate();
+				Assert.AreEqual(30d, sheet1.Cells[2, 2].Value);
 			}
 		}
 		#endregion

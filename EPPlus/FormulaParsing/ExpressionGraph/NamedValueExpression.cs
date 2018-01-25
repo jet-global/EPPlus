@@ -33,41 +33,43 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
 	public class NamedValueExpression : AtomicExpression
 	{
-		public NamedValueExpression(string expression, ParsingContext parsingContext)
-			 : base(expression)
+		#region Class Variables
+		private readonly ParsingContext _parsingContext;
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Constructs a new <see cref="NamedValueExpression"/> instance.
+		/// </summary>
+		/// <param name="expression">The named range expression.</param>
+		/// <param name="parsingContext">The parsing context of the named range expression.</param>
+		public NamedValueExpression(string expression, ParsingContext parsingContext) : base(expression)
 		{
 			_parsingContext = parsingContext;
 		}
+		#endregion
 
-		private readonly ParsingContext _parsingContext;
-
+		#region AtomicExpression Overrides
+		/// <summary>
+		/// Compiles the expression.
+		/// </summary>
+		/// <returns>A <see cref="CompileResult"/> result of the expression compilation.</returns>
 		public override CompileResult Compile()
 		{
 			var c = this._parsingContext.Scopes.Current;
 			var name = _parsingContext.ExcelDataProvider.GetName(c.Address.Worksheet, ExpressionString);
-			//var result = _parsingContext.Parser.Parse(value.ToString());
-
 			if (name == null)
-			{
 				throw (new Exceptions.ExcelErrorValueException(ExcelErrorValue.Create(eErrorType.Name)));
-			}
 			if (name.Value == null)
-			{
 				return null;
-			}
-			if (name.Value is ExcelDataProvider.IRangeInfo)
+			if (name.Value is ExcelDataProvider.IRangeInfo range)
 			{
-				var range = (ExcelDataProvider.IRangeInfo)name.Value;
 				if (range.IsMulti)
-				{
-					return new CompileResult(name.Value, DataType.Enumerable);
-				}
+					return new CompileResult(range, DataType.Enumerable);
 				else
 				{
 					if (range.IsEmpty && range.Address._fromRowFixed == true && range.Address._fromColFixed == true)
-					{
 						return null;
-					}
 					var address = range.Address;
 					var column = address.Start.Column;
 					var row = address.Start.Row;
@@ -92,10 +94,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 				var factory = new CompileResultFactory();
 				return factory.Create(name.Value);
 			}
-
-
-
-			//return new CompileResultFactory().Create(result);
 		}
+		#endregion
 	}
 }

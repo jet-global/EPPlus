@@ -238,6 +238,9 @@ namespace OfficeOpenXml.FormulaParsing
 						// Only complete the OFFSET's dependency chain if a valid existing address was successfully parsed.
 						if (worksheet != null)
 						{
+							f.Tokens.RemoveRange(offsetStartIndex, f.tokenIx - offsetStartIndex);
+							var offsetResultTokens = wb.FormulaParser.Lexer.Tokenize(adr.FullAddress);
+							f.Tokens.InsertRange(offsetStartIndex, offsetResultTokens);
 							f.ws = worksheet;
 							f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
 							goto iterateCells;
