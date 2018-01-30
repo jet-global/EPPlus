@@ -9,20 +9,20 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 	[TestClass]
 	public class SourceCodeTokenizerTests
 	{
+		#region Class Variables
 		private SourceCodeTokenizer _tokenizer;
+		#endregion
 
+		#region Test Setup
 		[TestInitialize]
 		public void Setup()
 		{
 			var context = ParsingContext.Create();
 			_tokenizer = new SourceCodeTokenizer(context.Configuration.FunctionRepository, null);
 		}
-
-		[TestCleanup]
-		public void Cleanup()
-		{
-		}
-
+		#endregion
+		
+		#region Tokenize Tests
 		[TestMethod]
 		public void ShouldCreateTokensForStringCorrectly()
 		{
@@ -119,10 +119,6 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 		[TestMethod]
 		public void ShouldIgnoreTwoSubsequentStringIdentifyers2()
 		{
-			//using (var pck = new ExcelPackage(new FileInfo("c:\\temp\\QuoteIssue2.xlsx")))
-			//{
-			//    pck.Workbook.Worksheets.First().Calculate();
-			//}
 			var input = "\"\"\"\"\"\"";
 			var tokens = _tokenizer.Tokenize(input);
 			Assert.AreEqual(TokenType.StringContent, tokens.ElementAt(1).TokenType);
@@ -143,26 +139,6 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 			var tokens = _tokenizer.Tokenize(input);
 			Assert.AreEqual(1, tokens.Count());
 			Assert.AreEqual(TokenType.ExcelAddress, tokens.ElementAt(0).TokenType);
-		}
-
-		[TestMethod]
-		public void TestBug9_12_14()
-		{
-			//(( W60 -(- W63 )-( W29 + W30 + W31 ))/( W23 + W28 + W42 - W51 )* W4 )
-			using (var pck = new ExcelPackage())
-			{
-				var ws1 = pck.Workbook.Worksheets.Add("test");
-				for (var x = 1; x <= 10; x++)
-				{
-					ws1.Cells[x, 1].Value = x;
-				}
-
-				ws1.Cells["A11"].Formula = "(( A1 -(- A2 )-( A3 + A4 + A5 ))/( A6 + A7 + A8 - A9 )* A5 )";
-				//ws1.Cells["A11"].Formula = "(-A2 + 1 )";
-				ws1.Calculate();
-				var result = ws1.Cells["A11"].Value;
-				Assert.AreEqual(-3.75, result);
-			}
 		}
 
 		[TestMethod]
@@ -342,5 +318,587 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 			Assert.AreEqual(TokenType.Integer, tokens.ElementAt(7).TokenType);
 			Assert.AreEqual(TokenType.ClosingParenthesis, tokens.ElementAt(8).TokenType);
 		}
+
+		#region Error Type Tests
+		[TestMethod]
+		public void TokenizeHandlesNotApplicableError()
+		{
+			string input = "#N/A";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.NotApplicableError, token.TokenType);
+			Assert.AreEqual("#N/A", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesNameError()
+		{
+			string input = "#NAME?";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.NameError, token.TokenType);
+			Assert.AreEqual("#NAME?", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesDivZeroError()
+		{
+			string input = "#DIV/0!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.DivideByZeroError, token.TokenType);
+			Assert.AreEqual("#DIV/0!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesNullError()
+		{
+			string input = "#NULL!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.Null, token.TokenType);
+			Assert.AreEqual("#NULL!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesValueError()
+		{
+			var input = "#VALUE!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ValueDataTypeError, token.TokenType);
+			Assert.AreEqual("#VALUE!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesNumError()
+		{
+			var input = "#NUM!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.NumericError, token.TokenType);
+			Assert.AreEqual("#NUM!", token.Value);
+		}
+
+		#region #REF! Address Tokenization Tests
+		[TestMethod]
+		public void TokenizeHandlesInvalidReferenceError()
+		{
+			string input = "#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidCellReferenceWithSheetName()
+		{
+			string input = "Sheet1!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("Sheet1!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidCellReferenceWithQuotedSheetName()
+		{
+			string input = "'Sheet1'!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'Sheet1'!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidSheetReference()
+		{
+			string input = "#REF!C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("#REF!C5", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidSheetReferenceRange()
+		{
+			string input = "#REF!C5:#REF!C6";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("#REF!C5:#REF!C6", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidStartSheetReferenceRange()
+		{
+			string input = "#REF!C5:Sheet1!C6";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("#REF!C5:Sheet1!C6", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidEndSheetReferenceRange()
+		{
+			string input = "Sheet1!C5:#REF!C6";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("Sheet1!C5:#REF!C6", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesValidRefNamedSheetReference()
+		{
+			// A sheet named "#REF", which is valid.
+			string input = "'#REF'!C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("'#REF'!C5", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesValidRefBangNamedSheetReference()
+		{
+			// A sheet named "#REF!", which is valid.
+			string input = "'#REF!'!C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("'#REF!'!C5", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesStartInvalidCellReferenceRangeWithoutSheetName()
+		{
+			string input = "#REF!:C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("#REF!:C5", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesEndInvalidCellReferenceRangeWithoutSheetName()
+		{
+			string input = "C5:#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("C5:#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesBothInvalidCellReferenceRangeWithoutSheetName()
+		{
+			string input = "#REF!:#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("#REF!:#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesStartInvalidCellReferenceRangeWithSheetName()
+		{
+			string input = "Sheet1!#REF!:Sheet1!C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("Sheet1!#REF!:Sheet1!C5", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesEndInvalidCellReferenceRangeWithSheetName()
+		{
+			string input = "Sheet1!C5:Sheet1!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("Sheet1!C5:Sheet1!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesBothInvalidCellReferenceRangeWithSheetName()
+		{
+			string input = "Sheet1!#REF!:Sheet1!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("Sheet1!#REF!:Sheet1!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesStartInvalidCellReferenceRangeWithQuotedSheetName()
+		{
+			string input = "'Sheet1'!#REF!:'Sheet1'!C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'Sheet1'!#REF!:'Sheet1'!C5", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesEndInvalidCellReferenceRangeWithQuotedSheetName()
+		{
+			string input = "'Sheet1'!C5:'Sheet1'!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'Sheet1'!C5:'Sheet1'!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesBothInvalidCellReferenceRangeWithQuotedSheetName()
+		{
+			string input = "'Sheet1'!#REF!:'Sheet1'!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'Sheet1'!#REF!:'Sheet1'!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesStartInvalidCellReferenceRangeWithStartQuotedSheetName()
+		{
+			string input = "'Sheet1'!#REF!:Sheet1!C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'Sheet1'!#REF!:Sheet1!C5", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesEndInvalidCellReferenceRangeWithStartQuotedSheetName()
+		{
+			string input = "'Sheet1'!C5:Sheet1!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'Sheet1'!C5:Sheet1!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesBothInvalidCellReferenceRangeWithStartQuotedSheetName()
+		{
+			string input = "'Sheet1'!#REF!:Sheet1!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'Sheet1'!#REF!:Sheet1!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesStartInvalidCellReferenceRangeWithEndQuotedSheetName()
+		{
+			string input = "Sheet1!#REF!:'Sheet1'!C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("Sheet1!#REF!:'Sheet1'!C5", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesEndInvalidCellReferenceRangeWithEndQuotedSheetName()
+		{
+			string input = "Sheet1!C5:'Sheet1'!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("Sheet1!C5:'Sheet1'!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesBothInvalidCellReferenceRangeWithEndQuotedSheetName()
+		{
+			string input = "Sheet1!#REF!:'Sheet1'!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("Sheet1!#REF!:'Sheet1'!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidExternalReferenceWithQuotedSheetName()
+		{
+			string input = "'[1]Some external reference'!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'[1]Some external reference'!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidExternalReferenceWithSheetName()
+		{
+			string input = "[1]ExternalReference!#REF!";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("[1]ExternalReference!#REF!", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidExternalReferenceWithSheetNameRange()
+		{
+			string input = "'[1]ExternalReference'!#REF!:C3";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'[1]ExternalReference'!#REF!:C3", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidStartExternalReferenceWithSheetNameRange()
+		{
+			string input = "'[1]ExternalReference'!#REF!:'[1]ExternalReference'!C3";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'[1]ExternalReference'!#REF!:'[1]ExternalReference'!C3", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesInvalidStartSheetExternalReferenceWithSheetNameRange()
+		{
+			string input = "[1]#REF!C2:C3";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("[1]#REF!C2:C3", token.Value);
+		}
+		#endregion
+		#endregion
+
+		#region Address Tokenization Tests
+		[TestMethod]
+		public void TokenizeHandlesReference()
+		{
+			string input = "C3";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("C3", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesCellReferenceWithSheetName()
+		{
+			string input = "Sheet1!C3";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("Sheet1!C3", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesCellReferenceWithQuotedSheetName()
+		{
+			string input = "'Sheet1'!C2";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("'Sheet1'!C2", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesCellReferenceWithQuotedSheetNameContainingTicks()
+		{
+			string input = "'She''et1'!C2";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("'She''et1'!C2", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesCellReferenceWithQuotedSheetNameContainingHashtag()
+		{
+			string input = "'She#et1'!C2";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("'She#et1'!C2", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesCellReferenceWithQuotedSheetNameContainingSpecialCharacters()
+		{
+			string input = "'ab#k.!.2'!A1:A2";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("'ab#k.!.2'!A1:A2", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesReferenceRangeWithSheetName()
+		{
+			string input = "Sheet1!C5:Sheet1!C6";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("Sheet1!C5:Sheet1!C6", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesRangeWithQuotedSheetName()
+		{
+			string input = "'Sheet1'!C2:'Sheet1'!C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("'Sheet1'!C2:'Sheet1'!C5", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesRangeWithoutSheetName()
+		{
+			string input = "C2:C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("C2:C5", token.Value);
+		}
+		
+		[TestMethod]
+		public void TokenizeHandlesRangeWithStartQuotedSheetName()
+		{
+			string input = "'Sheet1'!C2:Sheet1!C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("'Sheet1'!C2:Sheet1!C5", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesRangeWithEndQuotedSheetName()
+		{
+			string input = "Sheet1!C2:'Sheet1'!C5";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
+			Assert.AreEqual("Sheet1!C2:'Sheet1'!C5", token.Value);
+		}
+		
+		[TestMethod]
+		public void TokenizeHandlesExternalReferenceWithQuotedSheetName()
+		{
+			string input = "'[1]Some external reference'!C2";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'[1]Some external reference'!C2", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesExternalReferenceWithSheetName()
+		{
+			string input = "[1]ExternalReference!C2";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			// External references are considered invalid.
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("[1]ExternalReference!C2", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesExternalReferenceWithSheetNameRange()
+		{
+			string input = "'[1]ExternalReference'!C2:C3";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'[1]ExternalReference'!C2:C3", token.Value);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesStartExternalReferenceWithSheetNameRange()
+		{
+			string input = "'[1]ExternalReference'!C2:'[1]ExternalReference'!C3";
+			var tokens = _tokenizer.Tokenize(input);
+			Assert.AreEqual(1, tokens.Count());
+			var token = tokens.ElementAt(0);
+			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
+			Assert.AreEqual("'[1]ExternalReference'!C2:'[1]ExternalReference'!C3", token.Value);
+		}
+		#endregion
+		#endregion
+
+		#region Integration Tokenizer Tests
+		[TestMethod]
+		public void TestBug9_12_14()
+		{
+			//(( W60 -(- W63 )-( W29 + W30 + W31 ))/( W23 + W28 + W42 - W51 )* W4 )
+			using (var pck = new ExcelPackage())
+			{
+				var ws1 = pck.Workbook.Worksheets.Add("test");
+				for (var x = 1; x <= 10; x++)
+				{
+					ws1.Cells[x, 1].Value = x;
+				}
+
+				ws1.Cells["A11"].Formula = "(( A1 -(- A2 )-( A3 + A4 + A5 ))/( A6 + A7 + A8 - A9 )* A5 )";
+				//ws1.Cells["A11"].Formula = "(-A2 + 1 )";
+				ws1.Calculate();
+				var result = ws1.Cells["A11"].Value;
+				Assert.AreEqual(-3.75, result);
+			}
+		}
+		#endregion
 	}
 }

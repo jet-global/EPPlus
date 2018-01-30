@@ -339,7 +339,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C$3"));
 				namedRangeCollection.Insert(1, 0, 3, 0, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!C$6", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!C$6", namedRange.NameFormula);
 			}
 		}
 
@@ -353,7 +353,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3"));
 				namedRangeCollection.Insert(1, 0, 3, 0, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!C3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!C3", namedRange.NameFormula);
 			}
 		}
 
@@ -368,7 +368,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", "CONCATENATE(Sheet2!$B$2, Sheet2!C3, Sheet2!D$4, Sheet!$B$2, Sheet!C5)");
 				namedRangeCollection.Insert(1, 0, 3, 0, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("CONCATENATE(SHEET2!$B$2,SHEET2!C3,SHEET2!D$4,'SHEET'!$B$5,'SHEET'!C5)", namedRange.NameFormula);
+				Assert.AreEqual("CONCATENATE(Sheet2!$B$2,Sheet2!C3,Sheet2!D$4,'Sheet'!$B$5,'Sheet'!C5)", namedRange.NameFormula);
 			}
 		}
 
@@ -382,7 +382,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C$3"));
 				namedRangeCollection.Insert(4, 0, 3, 0, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!$C$3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!$C$3", namedRange.NameFormula);
 			}
 		}
 
@@ -396,7 +396,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3"));
 				namedRangeCollection.Insert(4, 0, 3, 0, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!C3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!C3", namedRange.NameFormula);
 			}
 		}
 
@@ -410,7 +410,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C$3:$C$5"));
 				namedRangeCollection.Insert(4, 0, 3, 0, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!$C$3:$C$8", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!$C$3:$C$8", namedRange.NameFormula);
 			}
 		}
 
@@ -424,7 +424,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3:C5"));
 				namedRangeCollection.Insert(4, 0, 3, 0, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!C3:C5", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!C3:C5", namedRange.NameFormula);
 			}
 		}
 
@@ -438,7 +438,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C:D"));
 				namedRangeCollection.Insert(4, 0, 3, 0, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!C:D", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!C:D", namedRange.NameFormula);
 			}
 		}
 
@@ -636,7 +636,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C$3"));
 				namedRangeCollection.Insert(0, 1, 0, 3, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!$F$3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!$F$3", namedRange.NameFormula);
 			}
 		}
 
@@ -650,7 +650,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3"));
 				namedRangeCollection.Insert(0, 1, 0, 3, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!C3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!C3", namedRange.NameFormula);
 			}
 		}
 
@@ -664,7 +664,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C3"));
 				namedRangeCollection.Insert(0, 4, 0, 3, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!$C3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!$C3", namedRange.NameFormula);
 			}
 		}
 
@@ -678,7 +678,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C$3"));
 				namedRangeCollection.Insert(0, 4, 0, 3, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!C$3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!C$3", namedRange.NameFormula);
 			}
 		}
 
@@ -692,7 +692,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!$C3:$E3"));
 				namedRangeCollection.Insert(0, 4, 0, 3, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!$C3:$H3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!$C3:$H3", namedRange.NameFormula);
 			}
 		}
 
@@ -706,7 +706,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!C3:E3"));
 				namedRangeCollection.Insert(0, 4, 0, 3, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!C3:E3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!C3:E3", namedRange.NameFormula);
 			}
 		}
 
@@ -720,7 +720,7 @@ namespace EPPlusTest
 				namedRangeCollection.Add("NamedRange", new ExcelRangeBase(sheet, "Sheet!2:3"));
 				namedRangeCollection.Insert(0, 4, 0, 3, sheet);
 				var namedRange = namedRangeCollection["NamedRange"];
-				Assert.AreEqual("'SHEET'!2:3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet'!2:3", namedRange.NameFormula);
 			}
 		}
 

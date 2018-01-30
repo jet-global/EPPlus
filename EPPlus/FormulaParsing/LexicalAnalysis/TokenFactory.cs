@@ -29,9 +29,7 @@
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  * Jan Källman                      Replaced Adress validate    2013-03-01
  * *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
@@ -39,28 +37,61 @@ using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 {
+	/// <summary>
+	/// A factory class used to create tokens.
+	/// </summary>
 	public class TokenFactory : ITokenFactory
 	{
-		public TokenFactory(IFunctionNameProvider functionRepository, INameValueProvider nameValueProvider)
-			 : this(new TokenSeparatorProvider(), nameValueProvider, functionRepository)
-		{
+		#region Class Variables
+		private readonly ITokenSeparatorProvider _tokenSeparatorProvider;
+		private readonly IFunctionNameProvider _functionNameProvider;
+		private readonly INameValueProvider _nameValueProvider;
+		#endregion
 
+		#region Constructors
+		/// <summary>
+		/// Constructs a new <see cref="TokenFactory"/> object.
+		/// </summary>
+		/// <param name="functionNameProvider">The function name provider to use.</param>
+		/// <param name="nameValueProvider">The name value provider to use.</param>
+		public TokenFactory(IFunctionNameProvider functionNameProvider, INameValueProvider nameValueProvider)
+			 : this(new TokenSeparatorProvider(), nameValueProvider, functionNameProvider)
+		{
 		}
 
+		/// <summary>
+		/// Constructs a new <see cref="TokenFactory"/> object.
+		/// </summary>
+		/// <param name="tokenSeparatorProvider">The token separator provider to use.</param>
+		/// <param name="functionNameProvider">The function name provider to use.</param>
+		/// <param name="nameValueProvider">The name value provider to use.</param>
 		public TokenFactory(ITokenSeparatorProvider tokenSeparatorProvider, INameValueProvider nameValueProvider, IFunctionNameProvider functionNameProvider)
 		{
 			_tokenSeparatorProvider = tokenSeparatorProvider;
 			_functionNameProvider = functionNameProvider;
 			_nameValueProvider = nameValueProvider;
 		}
+		#endregion
 
-		private readonly ITokenSeparatorProvider _tokenSeparatorProvider;
-		private readonly IFunctionNameProvider _functionNameProvider;
-		private readonly INameValueProvider _nameValueProvider;
+		#region Public Methods
+		/// <summary>
+		/// Create a new token.
+		/// </summary>
+		/// <param name="tokens">Existing tokens.</param>
+		/// <param name="token">The token to create.</param>
+		/// <returns>The created token.</returns>
 		public Token Create(IEnumerable<Token> tokens, string token)
 		{
 			return Create(tokens, token, null);
 		}
+
+		/// <summary>
+		/// Create a new token.
+		/// </summary>
+		/// <param name="tokens">Existing tokens.</param>
+		/// <param name="token">The token to create.</param>
+		/// <param name="worksheet">The worksheet name to use to create the token.</param>
+		/// <returns>The created token.</returns>
 		public Token Create(IEnumerable<Token> tokens, string token, string worksheet)
 		{
 			Token tokenSeparator = null;
@@ -69,35 +100,6 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 				return tokenSeparator;
 			}
 			var tokenList = (IList<Token>)tokens;
-			//Address with worksheet-string before  /JK
-			if (token.StartsWith("!") && tokenList[tokenList.Count - 1].TokenType == TokenType.String)
-			{
-				string addr = "";
-				var i = tokenList.Count - 2;
-				if (i > 0)
-				{
-					if (tokenList[i].TokenType == TokenType.StringContent)
-					{
-						addr = "'" + tokenList[i].Value.Replace("'", "''") + "'";
-					}
-					else
-					{
-						throw (new ArgumentException(string.Format("Invalid formula token sequence near {0}", token)));
-					}
-					//Remove the string tokens and content
-					tokenList.RemoveAt(tokenList.Count - 1);
-					tokenList.RemoveAt(tokenList.Count - 1);
-					tokenList.RemoveAt(tokenList.Count - 1);
-
-					return new Token(addr + token, TokenType.ExcelAddress);
-				}
-				else
-				{
-					throw (new ArgumentException(string.Format("Invalid formula token sequence near {0}", token)));
-				}
-
-			}
-
 			if (tokens.Any() && tokens.Last().TokenType == TokenType.String)
 			{
 				return new Token(token, TokenType.StringContent);
@@ -118,22 +120,6 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 			{
 				return new Token(token, TokenType.Boolean);
 			}
-			if (token.ToUpper(CultureInfo.InvariantCulture).Contains("#REF!"))
-			{
-				return new Token(token, TokenType.InvalidReference);
-			}
-			if (token.ToUpper(CultureInfo.InvariantCulture) == "#NUM!")
-			{
-				return new Token(token, TokenType.NumericError);
-			}
-			if (token.ToUpper(CultureInfo.InvariantCulture) == "#VALUE!")
-			{
-				return new Token(token, TokenType.ValueDataTypeError);
-			}
-			if (token.ToUpper(CultureInfo.InvariantCulture) == "#NULL!")
-			{
-				return new Token(token, TokenType.Null);
-			}
 			if (_nameValueProvider != null && _nameValueProvider.IsNamedValue(token, worksheet))
 			{
 				return new Token(token, TokenType.NameValue);
@@ -146,22 +132,32 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 			{
 				return new Token(token, TokenType.Enumerable);
 			}
-			var at = OfficeOpenXml.ExcelAddress.IsValid(token);
+			var at = ExcelAddress.IsValid(token);
 			if (at == ExcelAddress.AddressType.InternalAddress)
 			{
-				return new Token(token.ToUpper(CultureInfo.InvariantCulture), TokenType.ExcelAddress);
+				return new Token(token, TokenType.ExcelAddress);
 			}
 			if (at == ExcelAddress.AddressType.ExternalAddress)
 			{
-				return new Token(token.ToUpper(CultureInfo.InvariantCulture), TokenType.InvalidReference);
+				return new Token(token, TokenType.InvalidReference);
+			}
+			if (at == ExcelAddress.AddressType.Invalid)
+			{
+				return new Token(token, TokenType.InvalidReference);
 			}
 			return new Token(token, TokenType.Unrecognized);
-
 		}
 
+		/// <summary>
+		/// Creates a token with the specified <paramref name="explicitTokenType"/>.
+		/// </summary>
+		/// <param name="token">The value of the token to create.</param>
+		/// <param name="explicitTokenType">The <see cref="TokenType"/> to assign to the new token.</param>
+		/// <returns>The created token.</returns>
 		public Token Create(string token, TokenType explicitTokenType)
 		{
 			return new Token(token, explicitTokenType);
 		}
+		#endregion
 	}
 }

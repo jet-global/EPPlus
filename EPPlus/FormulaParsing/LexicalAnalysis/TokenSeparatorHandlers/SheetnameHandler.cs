@@ -31,13 +31,24 @@
 
 namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis.TokenSeparatorHandlers
 {
+	/// <summary>
+	/// Handles worksheet names when the single-quote character is encountered.
+	/// </summary>
 	public class SheetnameHandler : SeparatorHandler
 	{
+		/// <summary>
+		/// Handles the single-quote character for worksheet names.
+		/// </summary>
+		/// <param name="c">The character to handle.</param>
+		/// <param name="tokenSeparator">The token separator to handle.</param>
+		/// <param name="context">The tokenization context.</param>
+		/// <param name="tokenIndexProvider">The <see cref="ITokenIndexProvider"/>.</param>
+		/// <returns>True if the token separator was handled, false otherwise.</returns>
 		public override bool Handle(char c, Token tokenSeparator, TokenizerContext context, ITokenIndexProvider tokenIndexProvider)
 		{
 			if (context.IsInSheetName)
 			{
-				if (IsDoubleQuote(tokenSeparator, tokenIndexProvider.Index, context))
+				if (base.IsDoubleQuote(tokenSeparator, tokenIndexProvider.Index, context))
 				{
 					tokenIndexProvider.MoveIndexPointerForward();
 					context.AppendToCurrentToken(c);
@@ -49,18 +60,10 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis.TokenSeparatorHandlers
 					return true;
 				}
 			}
-
 			if (tokenSeparator.TokenType == TokenType.WorksheetName)
 			{
-				if (context.LastToken != null && context.LastToken.TokenType == TokenType.WorksheetName)
-				{
-					context.AddToken(!context.CurrentTokenHasValue
-						 ? new Token(string.Empty, TokenType.WorksheetNameContent)
-						 : new Token(context.CurrentToken, TokenType.WorksheetNameContent));
-				}
-				context.AddToken(new Token("'", TokenType.WorksheetName));
+				context.AppendToCurrentToken(c);
 				context.ToggleIsInSheetName();
-				context.NewToken();
 				return true;
 			}
 			return false;

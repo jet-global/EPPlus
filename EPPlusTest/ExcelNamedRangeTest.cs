@@ -115,16 +115,16 @@ namespace EPPlusTest
 				//	$B2 means on column B and down one row from the relative address.
 				//	D$5 means on row 5 and right three columns from the relative address.
 				//	C3 means right two and down three from the relative address.
-				var expected = $"'SHEET1'!$D4";
+				var expected = $"'Sheet1'!$D4";
 				string actual = string.Join(string.Empty, package.Workbook.Names["Name1"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
-				expected = $"'SHEET1'!H$5";
+				expected = $"'Sheet1'!H$5";
 				actual = string.Join(string.Empty, package.Workbook.Names["Name2"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
-				expected = $"'SHEET1'!F6";
+				expected = $"'Sheet1'!F6";
 				actual = string.Join(string.Empty, package.Workbook.Names["Name3"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
-				expected = $"'SHEET1'!$C$8";
+				expected = $"'Sheet1'!$C$8";
 				actual = string.Join(string.Empty, package.Workbook.Names["Name4"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual(expected, actual);
 
@@ -145,7 +145,7 @@ namespace EPPlusTest
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, formula, 0);
 				namedRange.UpdateFormula(2, 0, 4, 0, worksheet);
-				Assert.AreEqual("'SHEET1'!E5", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet1'!E5", namedRange.NameFormula);
 			}
 		}
 
@@ -157,7 +157,7 @@ namespace EPPlusTest
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!E$5", 0);
 				namedRange.UpdateFormula(2, 0, 4, 0, worksheet);
-				Assert.AreEqual("'SHEET1'!E$9", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet1'!E$9", namedRange.NameFormula);
 			}
 		}
 
@@ -169,7 +169,7 @@ namespace EPPlusTest
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!E$5", 0);
 				namedRange.UpdateFormula(2, 0, -2, 0, worksheet);
-				Assert.AreEqual("'SHEET1'!E$3", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet1'!E$3", namedRange.NameFormula);
 			}
 		}
 
@@ -182,7 +182,7 @@ namespace EPPlusTest
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, formula, 0);
 				namedRange.UpdateFormula(0, 2, 0, 5, worksheet);
-				Assert.AreEqual("'SHEET1'!E5", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet1'!E5", namedRange.NameFormula);
 			}
 		}
 
@@ -194,7 +194,7 @@ namespace EPPlusTest
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!$E5", 0);
 				namedRange.UpdateFormula(0, 2, 0, 4, worksheet);
-				Assert.AreEqual("'SHEET1'!$I5", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet1'!$I5", namedRange.NameFormula);
 			}
 		}
 
@@ -206,7 +206,7 @@ namespace EPPlusTest
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!$E5", 0);
 				namedRange.UpdateFormula(0, 2, 0, -2, worksheet);
-				Assert.AreEqual("'SHEET1'!$C5", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet1'!$C5", namedRange.NameFormula);
 			}
 		}
 
@@ -219,7 +219,7 @@ namespace EPPlusTest
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "sheet1!$E5:U$7", 0);
 				namedRange.UpdateFormula(3, 3, 2, 4, worksheet);
-				Assert.AreEqual("'SHEET1'!$I5:U$9", namedRange.NameFormula);
+				Assert.AreEqual("'sheet1'!$I5:U$9", namedRange.NameFormula);
 			}
 		}
 
@@ -231,7 +231,7 @@ namespace EPPlusTest
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 				var namedRange = new ExcelNamedRange("someName", excelPackage.Workbook, worksheet, "Sheet1!$L$10,Sheet1!G$8,Sheet1!F12,Sheet1!$E5", 0);
 				namedRange.UpdateFormula(0, 2, 0, -2, worksheet);
-				Assert.AreEqual("'SHEET1'!$J$10,'SHEET1'!G$8,'SHEET1'!F12,'SHEET1'!$C5", namedRange.NameFormula);
+				Assert.AreEqual("'Sheet1'!$J$10,'Sheet1'!G$8,'Sheet1'!F12,'Sheet1'!$C5", namedRange.NameFormula);
 			}
 		}
 		#endregion
@@ -246,27 +246,27 @@ namespace EPPlusTest
 				var worksheet2 = excelPackage.Workbook.Worksheets.Add("Sheet2");
 				worksheet1.Names.Add("name1", "Sheet1!G7");
 				var address = worksheet1.Names["name1"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET1!G7", address.Address);
+				Assert.AreEqual("Sheet1!G7", address.Address);
 				Assert.AreEqual(worksheet1, address.Worksheet);
 
 				worksheet1.Names["name1"].NameFormula = "(Sheet1!G7)";
 				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET1!G7", address.Address);
+				Assert.AreEqual("Sheet1!G7", address.Address);
 				Assert.AreEqual(worksheet1, address.Worksheet);
 
 				worksheet1.Names["name1"].NameFormula = "(SHeet1!B2):SHEET1!$C5";
 				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET1!B2:SHEET1!$C5", address.Address);
+				Assert.AreEqual("SHeet1!B2:SHEET1!$C5", address.Address);
 				Assert.AreEqual(worksheet1, address.Worksheet);
 
 				worksheet1.Names["name1"].NameFormula = "SHeet1!B2:SHEET1!$C5";
 				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET1!B2:SHEET1!$C5", address.Address);
+				Assert.AreEqual("SHeet1!B2:SHEET1!$C5", address.Address);
 				Assert.AreEqual(worksheet1, address.Worksheet);
 
 				worksheet1.Names["name1"].NameFormula = "SHeet2!B2:SHEET2!$C5";
 				address = worksheet1.Names["name1"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET2!B2:SHEET2!$C5", address.Address);
+				Assert.AreEqual("SHeet2!B2:SHEET2!$C5", address.Address);
 				Assert.AreEqual(worksheet2, address.Worksheet);
 
 				worksheet1.Names["name1"].NameFormula = "SHEET1!B2,SHEET1!$C5,SHEET1!$D$6";
@@ -285,7 +285,7 @@ namespace EPPlusTest
 				worksheet.Names.Add("name1", "Sheet1!G7");
 				worksheet.Names.Add("name2", "Sheet1!G6,name1");
 				var name2Address = worksheet.Names["name2"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET1!G6,SHEET1!G7", name2Address?.Address);
+				Assert.AreEqual("Sheet1!G6,Sheet1!G7", name2Address?.Address);
 
 				worksheet.Names["name1"].NameFormula = "notanaddress";
 				name2Address = worksheet.Names["name2"].GetFormulaAsCellRange();
@@ -306,12 +306,12 @@ namespace EPPlusTest
 
 				worksheet.Names["name1"].NameFormula = "Sheet1!G7,Offset(G7,1,1)";
 				address = worksheet.Names["name1"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET1!G7,'Sheet1'!H8", address.Address);
+				Assert.AreEqual("Sheet1!G7,'Sheet1'!H8", address.Address);
 				Assert.AreEqual(worksheet, address.Worksheet);
 
 				worksheet.Names["name1"].NameFormula = "Sheet1!G7,Offset(Sheet1!C2,2,1)";
 				address = worksheet.Names["name1"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET1!G7,'SHEET1'!D4", address.Address);
+				Assert.AreEqual("Sheet1!G7,'Sheet1'!D4", address.Address);
 
 				worksheet.Names["name1"].NameFormula = "Sheet1!G7,Offset(notanaddress,2,1)";
 				address = worksheet.Names["name1"].GetFormulaAsCellRange();
@@ -327,7 +327,7 @@ namespace EPPlusTest
 				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Names.Add("name1", @"Sheet1!G7,Indirect(""Sheet1!C5"")");
 				var address = worksheet.Names["name1"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET1!G7,Sheet1!C5", address.Address);
+				Assert.AreEqual("Sheet1!G7,Sheet1!C5", address.Address);
 
 				worksheet.Names["name1"].NameFormula = @"Sheet1!G7,Indirect(""notanadddress"")";
 				address = worksheet.Names["name1"].GetFormulaAsCellRange();
@@ -344,11 +344,11 @@ namespace EPPlusTest
 				worksheet.Names.Add("name1", "OFFset(Sheet1!C3:Sheet1!D4, 2, 3),Sheet1!F6");
 				worksheet.Names.Add("name2", "Sheet1!G6,name1");
 				var name2Address = worksheet.Names["name2"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET1!G6,'SHEET1'!F5:G6,SHEET1!F6", name2Address.Address);
+				Assert.AreEqual("Sheet1!G6,'Sheet1'!F5:G6,Sheet1!F6", name2Address.Address);
 
 				worksheet.Names["name1"].NameFormula = "OFFset(Sheet1!C3:Sheet1!D4, 2, 3),#REF!F6";
 				name2Address = worksheet.Names["name2"].GetFormulaAsCellRange();
-				Assert.AreEqual("SHEET1!G6,'SHEET1'!F5:G6,#REF!F6", name2Address.Address);
+				Assert.AreEqual("Sheet1!G6,'Sheet1'!F5:G6,#REF!F6", name2Address.Address);
 			}
 		}
 

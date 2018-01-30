@@ -963,118 +963,35 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Validates the given <see cref="Address"/>.
 		/// </summary>
-		/// <param name="Address">The address to validate.</param>
+		/// <param name="address">The address to validate.</param>
 		/// <returns>An <see cref="AddressType"/> indicating the address status.</returns>
-		internal static AddressType IsValid(string Address)
+		internal static AddressType IsValid(string address)
 		{
-			double d;
-			if (Address == "#REF!")
-			{
+			if (address == ExcelErrorValue.Values.Ref)
 				return AddressType.Invalid;
-			}
-			else if (double.TryParse(Address, NumberStyles.Any, CultureInfo.InvariantCulture, out d)) //A double, no valid address
-			{
+			else if (double.TryParse(address, NumberStyles.Any, CultureInfo.InvariantCulture, out var d)) // A double, not a valid address.
 				return AddressType.Invalid;
-			}
-			else if (IsFormula(Address))
-			{
+			else if (ExcelAddress.IsFormula(address))
 				return AddressType.Formula;
-			}
 			else
 			{
-				string wb, ws, intAddress;
-				if (SplitAddress(Address, out wb, out ws, out intAddress))
+				if (address.Contains(':'))
 				{
-					if (intAddress.Contains("[")) //Table reference
+					var rangeParts = address.Split(':');
+					AddressType? resultType = null;
+					foreach (var rangePart in rangeParts)
 					{
-						return string.IsNullOrEmpty(wb) ? AddressType.InternalAddress : AddressType.ExternalAddress;
+						AddressType rangePartType = ExcelAddress.GetAddressType(rangePart);
+						// Allow the first half of a range to determine its type unless the second half is invalid.
+						if (resultType == null)
+							resultType = rangePartType;
+						else if (rangePartType == AddressType.Invalid)
+							resultType = rangePartType;
 					}
-					else if (intAddress.Contains(","))
-					{
-						intAddress = intAddress.Substring(0, intAddress.IndexOf(','));
-					}
-					if (IsAddress(intAddress))
-					{
-						return string.IsNullOrEmpty(wb) ? AddressType.InternalAddress : AddressType.ExternalAddress;
-					}
-					else
-					{
-						return string.IsNullOrEmpty(wb) ? AddressType.InternalName : AddressType.ExternalName;
-					}
+					return resultType.Value;
 				}
-				else
-				{
-					return AddressType.Invalid;
-				}
-
-				//if(string.IsNullOrEmpty(wb));
-
+				return ExcelAddress.GetAddressType(address);
 			}
-			//ExcelAddress a = new ExcelAddress(Address);
-			//if (Address.IndexOf('!') > 0)
-			//{                
-			//    string[] split = Address.Split('!');
-			//    if (split.Length == 2)
-			//    {
-			//        ws = split[0];
-			//        Address = split[1];
-			//    }
-			//    else if (split.Length == 3 && split[1] == "#REF" && split[2] == "")
-			//    {
-			//        ws = split[0];
-			//        Address = "#REF!";
-			//        if (ws.StartsWith("[") && ws.IndexOf("]") > 1)
-			//        {
-			//            return AddressType.ExternalAddress;
-			//        }
-			//        else
-			//        {
-			//            return AddressType.InternalAddress;
-			//        }
-			//    }
-			//    else
-			//    {
-			//        return AddressType.Invalid;
-			//    }            
-			//}
-			//int _fromRow, column, _toRow, _toCol;
-			//if (ExcelAddressBase.GetRowColFromAddress(Address, out _fromRow, out column, out _toRow, out _toCol))
-			//{
-			//    if (_fromRow > 0 && column > 0 && _toRow <= ExcelPackage.MaxRows && _toCol <= ExcelPackage.MaxColumns)
-			//    {
-			//        if (ws.StartsWith("[") && ws.IndexOf("]") > 1)
-			//        {
-			//            return AddressType.ExternalAddress;
-			//        }
-			//        else
-			//        {
-			//            return AddressType.InternalAddress;
-			//        }
-			//    }
-			//    else
-			//    {
-			//        return AddressType.Invalid;
-			//    }
-			//}
-			//else
-			//{
-			//    if(IsValidName(Address))
-			//    {
-			//        if (ws.StartsWith("[") && ws.IndexOf("]") > 1)
-			//        {
-			//            return AddressType.ExternalName;
-			//        }
-			//        else
-			//        {
-			//            return AddressType.InternalName;
-			//        }
-			//    }
-			//    else
-			//    {
-			//        return AddressType.Invalid;
-			//    }
-			//}
-
 		}
 
 		/// <summary>
@@ -1105,6 +1022,32 @@ namespace OfficeOpenXml
 			{
 				address = "";
 			}
+		}
+		
+		private static AddressType GetAddressType(string address)
+		{
+			if (ExcelAddress.SplitAddress(address, out string workbook, out string worksheet, out bool isWorksheetQuoted, out string internalAddress))
+			{
+				bool isInternalAddress = string.IsNullOrEmpty(workbook);
+				if (internalAddress.Contains("["))  // Table reference.
+					return isInternalAddress ? AddressType.InternalAddress : AddressType.ExternalAddress;
+				else if (internalAddress.Contains(","))
+					internalAddress = internalAddress.Substring(0, internalAddress.IndexOf(','));
+				if (string.IsNullOrEmpty(internalAddress) || internalAddress.Contains(ExcelErrorValue.Values.Ref))
+					return AddressType.Invalid;
+				if (ExcelAddress.IsAddress(internalAddress))
+				{
+					// The worksheet will have the '!' stripped off if it is an invalid reference.
+					if (!isWorksheetQuoted && worksheet == "#REF")
+						return AddressType.Invalid;
+					return isInternalAddress ? AddressType.InternalAddress : AddressType.ExternalAddress;
+				}
+				else if (ExcelAddress.IsValidNamedRangeName(internalAddress))
+					return isInternalAddress ? AddressType.InternalName : AddressType.ExternalName;
+				return AddressType.Invalid;
+			}
+			else
+				return AddressType.Invalid;
 		}
 
 		private static bool IsAddress(string intAddress)
@@ -1144,18 +1087,21 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private static bool SplitAddress(string Address, out string wb, out string ws, out string intAddress)
+		private static bool SplitAddress(string Address, out string wb, out string ws, out bool isWorksheetQuoted, out string internalAddress)
 		{
-			wb = "";
-			ws = "";
-			intAddress = "";
-			var text = "";
+			wb = string.Empty;
+			ws = string.Empty;
+			internalAddress = string.Empty;
+			string text = string.Empty;
 			bool isText = false;
-			var brackPos = -1;
+			isWorksheetQuoted = false;
+			int brackPos = -1;
 			for (int i = 0; i < Address.Length; i++)
 			{
 				if (Address[i] == '\'')
 				{
+					if (ws == string.Empty)
+						isWorksheetQuoted = true;
 					isText = !isText;
 					if (i > 0 && Address[i - 1] == '\'')
 					{
@@ -1175,7 +1121,7 @@ namespace OfficeOpenXml
 						{
 							ws = text;
 						}
-						intAddress = Address.Substring(i + 1);
+						internalAddress = Address.Substring(i + 1);
 						return true;
 					}
 					else
@@ -1184,7 +1130,7 @@ namespace OfficeOpenXml
 						{
 							if (i > 0) //Table reference return full address;
 							{
-								intAddress = Address;
+								internalAddress = Address;
 								return true;
 							}
 							brackPos = i;
@@ -1208,7 +1154,7 @@ namespace OfficeOpenXml
 					}
 				}
 			}
-			intAddress = text;
+			internalAddress = text;
 			return true;
 		}
 
@@ -1236,6 +1182,19 @@ namespace OfficeOpenXml
 				}
 			}
 			return false;
+		}
+
+		private static bool IsValidNamedRangeName(string name)
+		{
+			char[] allowedCharacters = { '_', '\\', '.', '?' };
+			if (string.IsNullOrEmpty(name))
+				return false;
+			// Named range names must start with a letter, underscore, or backslash.
+			else if (!char.IsLetter(name[0]) && name[0] != '_' && name[0] != '\\')
+				return false;
+			else if (!name.All(c => char.IsLetterOrDigit(c) || allowedCharacters.Contains(c)))
+				return false;
+			return true;
 		}
 
 		private static string GetWorkbookPart(string address)
