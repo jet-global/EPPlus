@@ -36,6 +36,54 @@ using System.Linq;
 
 namespace OfficeOpenXml
 {
+	/// <summary>
+	/// Understanding the ZCellStore
+	/// Author: Zachary Faltersack
+	/// 
+	/// The original cellstore was very complicated and contained some bad paging issues.
+	/// This is my implementation. The behavior is my best understanding of how the original cellstore was intended to work.
+	/// The following notes describe some invariants I've come to believe about the usage of the cellstore throughout EPPlus.
+	/// 
+	/// Excel uses 1-based indexing for cells, so A1 = [1,1].
+	/// In the cellstore:
+	/// The 0 index for row is used to store Column Metadata.
+	/// The 0 index for column is used to store Row Metadata.
+	/// [0,0] is NOT considered valid as far as I can tell.
+	/// 
+	/// 
+	/// 		Assume the current invariant (where X is at [0,0]):
+	/// 		X : Invalid coordinate.
+	/// 		C : Column metadata.
+	/// 		R : Row metadata.
+	/// 		* : Cell content.
+	/// 		
+	/// 		         XCCCCCCCC
+	/// 		         R********
+	/// 		         R********
+	/// 		         R********
+	/// 		         R********
+	/// 		         R********
+	/// 		         R********
+	/// 		         R********
+	/// 		         R********
+	/// 
+	/// ZCellStore uses 3 instances of a PagedStructure to store information (see below for more information on PagedStructure)
+	/// 
+	/// ColumnData [<![CDATA[PagedStructure<T>]]>] : This contains the metadata for the columns in the ZCellStore
+	/// RowData [<![CDATA[PagedStructure<T>]]>] : This contains the metadata for the rows in the ZCellStore
+	/// CellData [<![CDATA[PagedStructure<PagedStructure<T>>]]>] : This contains all of the cell data. The outer PagedStructure maps to columns
+	/// and the inner PagedStructure maps to rows.
+	/// 
+	/// Given that PagedStructure is 0-index, and the 0 indices have a special meaning for the ZCellStore, we need to mindfully
+	/// handle accessing data when retrieving/editing/enumerating values in the ZCellStore.
+	/// 
+	/// If the ZCellStore receives a request to access data in row 0, then we know we need to look at the ColumnData structure.
+	/// If the ZCellStore receives a request to access data in column 0, then we know we need to look at the RowData structure.
+	/// ALL other coordinates must be reduced by 1 (to accomodate the 0-indexing) and then we need to look in the CellData structure.
+	/// 
+	/// This is mostly straightfoward, but provides some interesting complexity when enumerating the ZCellStore.
+	/// </summary>
+	/// <typeparam name="S">The type this ZCellStore is going to contain.</typeparam>
 	internal class ZCellStore<T> : ICellStore<T>
 	{
 		#region Constants
@@ -66,6 +114,7 @@ namespace OfficeOpenXml
 			this.CellData = new PagedStructure<PagedStructure<T>>(this.ColumnPageBits);
 			this.ColumnData = new PagedStructure<T>(this.ColumnPageBits);
 			this.RowData = new PagedStructure<T>(this.RowPageBits);
+			// We need to accomodate 1-Indexing for Excel
 			this.MaximumRow = this.RowData.MaximumIndex + 1;
 			this.MaximumColumn = this.ColumnData.MaximumIndex + 1;
 		}
@@ -84,19 +133,22 @@ namespace OfficeOpenXml
 
 		public T GetValue(int row, int column)
 		{
+			// Row 0 means accessing column metadata
 			if (row == 0)
 			{
 				var item = this.ColumnData.GetItem(column - 1);
 				if (item.HasValue)
 					return item.Value;
 			}
+			// Column 0 means accessing row metadata
 			else if (column == 0)
 			{
 				var item = this.RowData.GetItem(row - 1);
 				if (item.HasValue)
 					return item.Value;
 			}
-			else if (this.TryUpdateIndices(ref row, ref column, true))
+			// Since we're in the main sheet, the row and column are reduced by 1
+			else if (this.TryUpdateIndices(ref row, ref column))
 			{
 				var columnItem = this.CellData.GetItem(column)?.Value;
 				if (columnItem != null)
@@ -111,11 +163,14 @@ namespace OfficeOpenXml
 
 		public void SetValue(int row, int column, T value)
 		{
+			// Row 0 means accessing column metadata
 			if (row == 0)
 				this.ColumnData.SetItem(column - 1, value);
+			// Column 0 means accessing row metadata
 			else if (column == 0)
 				this.RowData.SetItem(row - 1, value);
-			else if (this.TryUpdateIndices(ref row, ref column, true))
+			// Since we're in the main sheet, the row and column are reduced by 1
+			else if (this.TryUpdateIndices(ref row, ref column))
 			{
 				var columnStructure = this.CellData.GetItem(column);
 				if (columnStructure == null)
@@ -135,6 +190,7 @@ namespace OfficeOpenXml
 		public bool Exists(int row, int column, out T value)
 		{
 			value = default(T);
+			// Row 0 means accessing column metadata
 			if (row == 0)
 			{
 				var item = this.ColumnData.GetItem(column - 1);
@@ -144,6 +200,7 @@ namespace OfficeOpenXml
 					return true;
 				}
 			}
+			// Column 0 means accessing row metadata
 			else if (column == 0)
 			{
 				var item = this.RowData.GetItem(row - 1);
@@ -153,7 +210,8 @@ namespace OfficeOpenXml
 					return true;
 				}
 			}
-			else if (this.TryUpdateIndices(ref row, ref column, true))
+			// Since we're in the main sheet, the row and column are reduced by 1
+			else if (this.TryUpdateIndices(ref row, ref column))
 			{
 				var item = this.CellData.GetItem(column)?.Value.GetItem(row);
 				if (item.HasValue)
@@ -260,60 +318,62 @@ namespace OfficeOpenXml
 			if (fromRow != 0 && fromCol != 0)
 				throw new InvalidOperationException("Only delete rows or columns in a single operation.");
 
-			if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
+			fromRow--;
+			fromCol--;
+			if (fromCol >= 0)
 			{
-				if (fromCol >= 0)
+				this.CellData.ShiftItems(fromCol, -columns);
+				this.ColumnData.ShiftItems(fromCol, -columns);
+			}
+			else
+			{
+				int column = -1;
+				while (this.CellData.NextItem(ref column))
 				{
-					this.CellData.ShiftItems(fromCol, -columns);
-					this.ColumnData.ShiftItems(fromCol, -columns);
+					this.CellData.GetItem(column)?.Value.ShiftItems(fromRow, -rows);
 				}
-				else
-				{
-					int column = -1;
-					while (this.CellData.NextItem(ref column))
-					{
-						this.CellData.GetItem(column)?.Value.ShiftItems(fromRow, -rows);
-					}
-					this.RowData.ShiftItems(fromRow, -rows);
-				}
+				this.RowData.ShiftItems(fromRow, -rows);
 			}
 		}
 
 		public void Clear(int fromRow, int fromCol, int rows, int columns)
 		{
-			if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
+			if (fromRow == 0)
 			{
-				if (fromRow < 0 && rows >= this.MaximumRow)
+				this.ColumnData.ClearItems(fromCol - 1, columns);
+				fromRow++;
+				rows--;
+			}
+			if (fromCol == 0)
+			{
+				this.RowData.ClearItems(fromRow - 1, rows);
+				fromCol++;
+				columns--;
+			}
+			fromRow--;
+			fromCol--;
+			// Clearing full columns
+			if (fromRow <= 1 && fromRow + rows >= this.MaximumRow)
+			{
+				this.CellData.ClearItems(fromCol, columns);
+				this.ColumnData.ClearItems(fromCol, columns);
+			}
+			// Clearing full rows
+			else if (fromCol <= 1 && fromCol + columns >= this.MaximumColumn)
+			{
+				int column = -1;
+				while (this.CellData.NextItem(ref column))
 				{
-					this.CellData.ClearItems(fromCol, columns);
-					this.ColumnData.ClearItems(fromCol, columns);
+					this.CellData.GetItem(column)?.Value.ClearItems(fromRow, rows);
 				}
-				else if (fromCol < 0 && columns >= this.MaximumColumn)
+			}
+			// Clearing a nested block
+			else
+			{
+				int column = fromCol - 1;
+				while (this.CellData.NextItem(ref column) && column < (fromCol + columns))
 				{
-					if (fromRow < 0)
-					{
-						fromRow = 0;
-						rows--;
-					}
-					int column = -1; 
-					while (this.CellData.NextItem(ref column))
-					{
-						this.CellData.GetItem(column)?.Value.ClearItems(fromRow, rows);
-					}
-					this.RowData.ClearItems(fromRow, rows);
-				}
-				else
-				{
-					if (fromRow < 0)
-					{
-						fromRow = 0;
-						rows--;
-					}
-					int column = fromCol - 1;
-					while (this.CellData.NextItem(ref column) && column < (fromCol + columns))
-					{
-						this.CellData.GetItem(column)?.Value.ClearItems(fromRow, rows);
-					}
+					this.CellData.GetItem(column)?.Value.ClearItems(fromRow, rows);
 				}
 			}
 		}
@@ -324,7 +384,7 @@ namespace OfficeOpenXml
 			toCol = this.CellData.MaximumUsedIndex + 1;
 			fromRow = ExcelPackage.MaxRows + 1;
 			toRow = 0;
-			int searchIndex = 0;
+			int searchIndex = -1;
 			while (this.CellData.NextItem(ref searchIndex))
 			{
 				var column = this.CellData.GetItem(searchIndex);
@@ -342,27 +402,26 @@ namespace OfficeOpenXml
 		{
 			if (fromRow != 0 && fromCol != 0)
 				throw new InvalidOperationException("Only insert rows or columns in a single operation.");
-			if (this.TryUpdateIndices(ref fromRow, ref fromCol, false))
+			fromRow--;
+			fromCol--;
+			if (fromCol >= 0)
 			{
-				if (fromCol >= 0)
+				this.CellData.ShiftItems(fromCol, columns);
+				this.ColumnData.ShiftItems(fromCol, columns);
+			}
+			else
+			{
+				if (fromRow < 0)
 				{
-					this.CellData.ShiftItems(fromCol, columns);
-					this.ColumnData.ShiftItems(fromCol, columns);
+					fromRow = 0;
+					rows--;
 				}
-				else
+				int column = -1;
+				while (this.CellData.NextItem(ref column))
 				{
-					if (fromRow < 0)
-					{
-						fromRow = 0;
-						rows--;
-					}
-					int column = -1; 
-					while (this.CellData.NextItem(ref column))
-					{
-						this.CellData.GetItem(column)?.Value.ShiftItems(fromRow, rows);
-					}
-					this.RowData.ShiftItems(fromRow, rows);
+					this.CellData.GetItem(column)?.Value.ShiftItems(fromRow, rows);
 				}
+				this.RowData.ShiftItems(fromRow, rows);
 			}
 		}
 
@@ -395,9 +454,9 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Private Methods
-		private bool TryUpdateIndices(ref int row, ref int column, bool validate)
+		private bool TryUpdateIndices(ref int row, ref int column)
 		{
-			if (validate && (row < 1 || row > ExcelPackage.MaxRows || column < 1 || column > ExcelPackage.MaxColumns))
+			if (row < 1 || row > this.MaximumRow || column < 1 || column > this.MaximumColumn)
 				return false;
 			row--;
 			column--;
@@ -406,6 +465,9 @@ namespace OfficeOpenXml
 
 		private bool NextCellBound(ref int row, ref int column, int minRow, int maxRow, int minColumn, int maxColumn)
 		{
+			// This method finds the next cell in ZCellStore that is within the provided bound indices
+			// There is some performance tuning that can be achieved here, particularly in STEP 3.
+
 			// tests for this
 			if (row < minRow)
 				row = minRow;
@@ -479,17 +541,78 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Nested Classes
-		// This structure is 0-indexed
+		/// <summary>
+		///  Understanding the PagedStructure
+		///  Author: Zachary Faltersack
+		/// 
+		///  The PagedStructure is a 0-index collection that stores information across pages.
+		///  When the PagedStructure is instantiated, it is provided a bit count that indicates how large it is.
+		///  This bit count represents the number of bits used to represent the indices in a single page.
+		///  That same number is the number of pages to create in the page list.
+		///  Effectively this means data is stored in a square.
+		/// 
+		///  Example:
+		///  Given a PagedStructure with 2 bits, we end up with 2^2 == 4 indices per page, with 4 pages and a total of 16 data points.
+		///  Here we see that there are 4 pages, with 4 indices each and the actual index is the value in each slot:
+		///  P : Page
+		///  I : Index
+		/// 
+		///  				I0	I1	I2  I3
+		///  	{
+		///  P0		{  0,  1,  2,  3 },
+		///  P1		{  4,  5,  6,  7 },
+		///  P2		{  8,  9, 10, 11 },
+		///  P3		{ 12, 13, 14, 15 }
+		///  	}
+		/// 
+		///  This allows a rapid lookup by deconstructing an external index using bitshifting and bitmasking 
+		///  into page and sub-indices (eg 13 = [P3,I1]).
+		///  It also improves memory usage by breaking the structure up into smaller units that can be distributed in the heap
+		///  and only instantiates pages that are required to store data.
+		/// 
+		///  Since the PagedStructure can contain any type of data, the actual values are wrapped in a struct
+		///  called ValueHolder. This allows us to defined values as Nullable and improves performance by ensuring null
+		///  is written into the ZCellStore (specifically this helps improve the enumeration performance).
+		/// 
+		/// </summary>
+		/// <typeparam name="S">The type this structure is going to contain.</typeparam>
 		internal class PagedStructure<S>
 		{
 			#region Properties
-			public int PageBits { get; } // Defines a bit shift to retrive the primary index
-			public int PageSize { get; } // Defines the max index of a single page
-			public int PageMask { get; } // Defines a bit mask to retrieve the secondary index
+			/// <summary>
+			/// Gets the number of bits used to define a <see cref="Page"/>'s indices.
+			/// Use to define a bit shift to retrive the primary index (the <see cref="Page"/> index).
+			/// </summary>
+			public int PageBits { get; } 
+
+			/// <summary>
+			/// Gets the maximum index for any single <see cref="Page"/>.
+			/// </summary>
+			public int PageSize { get; } 
+
+			/// <summary>
+			/// Gets the bitmask to use for identifying the secondary index (the index into a <see cref="Page"/>).
+			/// </summary>
+			public int PageMask { get; }
+
+			/// <summary>
+			/// Gets the maximum 0-based index for this <see cref="PagedStructure{S}"/>.
+			/// </summary>
 			public int MaximumIndex { get; }
+
+			/// <summary>
+			/// Gets the minimum index that contains a value in this <see cref="PagedStructure{S}"/>.
+			/// </summary>
 			public int MinimumUsedIndex { get; private set; }
+
+			/// <summary>
+			/// Gets the maximum index that contains a value in this <see cref="PagedStructure{S}"/>.
+			/// </summary>
 			public int MaximumUsedIndex { get; private set; }
 
+			/// <summary>
+			/// Gets a value indicating whether or not this <see cref="PagedStructure{S}"/> contains any data.
+			/// </summary>
 			public bool IsEmpty
 			{
 				get { return this.MinimumUsedIndex == this.MaximumIndex + 1 && this.MaximumUsedIndex == -1; }
@@ -499,6 +622,10 @@ namespace OfficeOpenXml
 			#endregion
 
 			#region Constructors
+			/// <summary>
+			/// Creates an instance of a <see cref="PagedStructure{S}"/>.
+			/// </summary>
+			/// <param name="pageBits">The number of bits to use for defining the index range for this <see cref="PagedStructure{S}"/>.</param>
 			public PagedStructure(int pageBits)
 			{
 				this.PageBits = pageBits;
@@ -508,6 +635,7 @@ namespace OfficeOpenXml
 				this.Pages = new Page[this.PageSize];
 				this.MinimumUsedIndex = this.MaximumIndex + 1;
 				this.MaximumUsedIndex = -1;
+				// TODO ZPF Future work is to ensure that when a page becomes empty (by removing/clearing/shifting values) we null it out and remove it from out page list.
 			}
 			#endregion
 
@@ -517,10 +645,7 @@ namespace OfficeOpenXml
 				if (index < 0 || index > this.MaximumIndex)
 					return null;
 				this.DeConstructIndex(index, out int page, out int innerIndex);
-				var pageArray = this.Pages[page];
-				if (null == pageArray)
-					return null;
-				return pageArray[innerIndex];
+				return this.Pages[page]?[innerIndex];
 			}
 
 			public void SetItem(int index, ValueHolder? item)
@@ -530,10 +655,16 @@ namespace OfficeOpenXml
 
 			public void ShiftItems(int index, int amount)
 			{
+				// TODO ZPF This can be highly optimized.
+				// What we want to do is breakdown the index and directly work with the pages
+				// Even though deconstructing the indices is relatively quick, we don't need to do it 
+				// for every item that moves.
 				if (index < 0 || index > this.MaximumIndex)
 					return;
+				// Shift forward
 				if (amount > 0)
 				{
+					// Start at the end and shift back from there so as not to overwrite data.
 					for (int i = this.MaximumUsedIndex; i >= index; --i)
 					{
 						var target = i + amount;
@@ -544,8 +675,11 @@ namespace OfficeOpenXml
 						this.SetItem(i, null, false);
 					}
 				}
+				// Shift backward
 				else if (amount < 0)
 				{
+					// This represents a delete operation so start at the given index and copy back
+					// the desired data.
 					amount = -amount;
 					for (int i = index; i <= this.MaximumUsedIndex; ++i)
 					{
@@ -561,6 +695,8 @@ namespace OfficeOpenXml
 
 			public void ClearItems(int index, int amount)
 			{
+				// TODO ZPF This can be optimized by working directly with the pages instead of deconstructing 
+				// each index for every call.
 				if (index < 0 || index > this.MaximumIndex)
 					return;
 				var target = Math.Min(index + amount - 1, this.MaximumUsedIndex);
@@ -743,10 +879,10 @@ namespace OfficeOpenXml
 				#endregion
 
 				#region Public Methods
-				// TODO cleanup? Only used for test setup/validation.
+				// TODO ZPF cleanup? Only used for test setup/validation.
 				public ValueHolder?[] GetValues()
 				{
-					return this.Values; ;
+					return this.Values;
 				}
 
 				public bool TryGetNextIndex(int fromIndex, out int foundIndex)

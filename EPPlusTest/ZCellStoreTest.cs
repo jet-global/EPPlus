@@ -1013,6 +1013,122 @@ namespace EPPlusTest
 			var expectedRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
 			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedStore, cellStore);
 		}
+
+		[TestMethod]
+		public void ClearPartialColumnMetadata()
+		{
+			var cellStore = this.GetCellStore();
+			cellStore.Clear(0, 4, 0, 5);
+			var expectedStore = new int?[,]
+				{
+/*1*/			{   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16 },
+/*2*/			{  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32 },
+/*3*/			{  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48 },
+/*4*/			{  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64 },
+/*5*/			{  65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80 },
+/*6*/			{  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96 },
+/*7*/			{  97,  98,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112 },
+/*8*/			{ 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128 },
+/*9*/			{ 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144 },
+/*10*/		{ 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160 },
+/*11*/		{ 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176 },
+/*12*/		{ 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192 },
+/*13*/		{ 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208 },
+/*14*/		{ 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224 },
+/*15*/		{ 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240 },
+/*16*/		{ 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
+				};
+			var expectedColumnData = new int?[] { 1001, 1002, 1003, null, null, null, null, null, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+			var expectedRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedStore, cellStore);
+		}
+
+		[TestMethod]
+		public void ClearAllColumnMetadata()
+		{
+			var cellStore = this.GetCellStore();
+			cellStore.Clear(0, 1, 0, ExcelPackage.MaxColumns);
+			var expectedStore = new int?[,]
+				{
+/*1*/			{   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16 },
+/*2*/			{  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32 },
+/*3*/			{  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48 },
+/*4*/			{  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64 },
+/*5*/			{  65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80 },
+/*6*/			{  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96 },
+/*7*/			{  97,  98,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112 },
+/*8*/			{ 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128 },
+/*9*/			{ 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144 },
+/*10*/		{ 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160 },
+/*11*/		{ 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176 },
+/*12*/		{ 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192 },
+/*13*/		{ 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208 },
+/*14*/		{ 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224 },
+/*15*/		{ 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240 },
+/*16*/		{ 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
+				};
+			var expectedColumnData = new int?[] { null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null };
+			var expectedRowData = new int?[] { 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedStore, cellStore);
+		}
+
+		[TestMethod]
+		public void ClearPartialRowMetadata()
+		{
+			var cellStore = this.GetCellStore();
+			cellStore.Clear(4, 0, 5, 0);
+			var expectedStore = new int?[,]
+				{
+/*1*/			{   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16 },
+/*2*/			{  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32 },
+/*3*/			{  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48 },
+/*4*/			{  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64 },
+/*5*/			{  65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80 },
+/*6*/			{  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96 },
+/*7*/			{  97,  98,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112 },
+/*8*/			{ 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128 },
+/*9*/			{ 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144 },
+/*10*/		{ 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160 },
+/*11*/		{ 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176 },
+/*12*/		{ 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192 },
+/*13*/		{ 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208 },
+/*14*/		{ 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224 },
+/*15*/		{ 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240 },
+/*16*/		{ 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
+				};
+			var expectedColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+			var expectedRowData = new int?[] { 2001, 2002, 2003, null, null, null, null, null, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedStore, cellStore);
+		}
+
+		[TestMethod]
+		public void ClearAllRowMetadata()
+		{
+			var cellStore = this.GetCellStore();
+			cellStore.Clear(1, 0, ExcelPackage.MaxRows, 0);
+			var expectedStore = new int?[,]
+				{
+/*1*/			{   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16 },
+/*2*/			{  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32 },
+/*3*/			{  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48 },
+/*4*/			{  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64 },
+/*5*/			{  65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80 },
+/*6*/			{  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96 },
+/*7*/			{  97,  98,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112 },
+/*8*/			{ 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128 },
+/*9*/			{ 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144 },
+/*10*/		{ 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160 },
+/*11*/		{ 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176 },
+/*12*/		{ 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192 },
+/*13*/		{ 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208 },
+/*14*/		{ 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224 },
+/*15*/		{ 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240 },
+/*16*/		{ 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256 }
+				};
+			var expectedColumnData = new int?[] { 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016 };
+			var expectedRowData = new int?[] { null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null };
+			this.ValidateCellStore(expectedColumnData, expectedRowData, expectedStore, cellStore);
+		}
 		#endregion
 
 		#region GetDimension Tests
@@ -1063,6 +1179,68 @@ namespace EPPlusTest
 			Assert.AreEqual(6, fromCol);
 			Assert.AreEqual(6, toRow);
 			Assert.AreEqual(6, toCol);
+		}
+
+		[TestMethod]
+		public void GetDimensionFirstColumn()
+		{
+			var cellStore = this.GetCellStore(false);
+			var contents = new int?[,]
+			{
+/*1*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*2*/		{    1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{    2, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{    3, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(null, null, contents, cellStore);
+			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
+			Assert.AreEqual(2, fromRow);
+			Assert.AreEqual(1, fromCol);
+			Assert.AreEqual(9, toRow);
+			Assert.AreEqual(1, toCol);
+		}
+
+		[TestMethod]
+		public void GetDimensionFirstRow()
+		{
+			var cellStore = this.GetCellStore(false);
+			var contents = new int?[,]
+			{
+/*1*/		{    1, null,    2, null, null, null, null,    3, null, null, null, null, null, null, null, null },
+/*2*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*3*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*4*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*5*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*6*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*7*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*8*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*9*/		{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*10*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*11*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*12*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*13*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*14*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*15*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null },
+/*16*/	{ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null }
+			};
+			this.LoadCellStore(null, null, contents, cellStore);
+			Assert.IsTrue(cellStore.GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol));
+			Assert.AreEqual(1, fromRow);
+			Assert.AreEqual(1, fromCol);
+			Assert.AreEqual(1, toRow);
+			Assert.AreEqual(8, toCol);
 		}
 
 		[TestMethod]
@@ -2610,7 +2788,7 @@ namespace EPPlusTest
 				{
 					foreach (var coordinate in nullCoordinates)
 					{
-						cellStore.Clear(coordinate.Item1, coordinate.Item2, coordinate.Item1, coordinate.Item2);
+						cellStore.Clear(coordinate.Item1, coordinate.Item2, 1, 1);
 					}
 				}
 			}
