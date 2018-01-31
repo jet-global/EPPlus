@@ -294,16 +294,15 @@ namespace OfficeOpenXml.FormulaParsing
 		}
 		public override IRangeInfo GetRange(string worksheet, int row, int column, string address)
 		{
-			var addr = new ExcelAddress(worksheet, address);
-			if (addr.IsTableAddress)
-			{
-				addr.SetRCFromTable(_package, new ExcelAddress(row, column, row, column));
-			}
-			//SetCurrentWorksheet(addr.WorkSheet);
-			var wsName = string.IsNullOrEmpty(addr.WorkSheet) ? _currentWorksheet.Name : addr.WorkSheet;
+			var excelAddress = new ExcelAddress(worksheet, address);
+			// External references should not be resolved.
+			if (!string.IsNullOrEmpty(excelAddress?.Workbook))
+				return null;
+			if (excelAddress.IsTableAddress)
+				excelAddress.SetRCFromTable(_package, new ExcelAddress(row, column, row, column));
+			var wsName = string.IsNullOrEmpty(excelAddress.WorkSheet) ? _currentWorksheet.Name : excelAddress.WorkSheet;
 			var ws = _package.Workbook.Worksheets[wsName];
-			//return new CellsStoreEnumerator<object>(ws._values, addr._fromRow, addr._fromCol, addr._toRow, addr._toCol);
-			return new RangeInfo(ws, addr);
+			return new RangeInfo(ws, excelAddress);
 		}
 		public override INameInfo GetName(string worksheet, string name)
 		{
@@ -352,6 +351,11 @@ namespace OfficeOpenXml.FormulaParsing
 					Worksheet = nameItem.LocalSheet?.Name,
 					Formula = nameItem.NameFormula
 				};
+				var range = nameItem.GetFormulaAsCellRange();
+				if (range == null)
+					ni.Value = nameItem.NameFormula;
+				else
+					ni.Value = new RangeInfo(range.Worksheet ?? ws, range);
 				_names.Add(id, ni);
 				return ni;
 			}

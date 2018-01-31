@@ -114,7 +114,7 @@ namespace EPPlusTest
 		{
 			var formulaManager = new FormulaManager();
 			string actualFormula = formulaManager.UpdateFormulaDeletedSheetReferences("CONCATENATE(Sheet1!B2, Sheet2!C3)", "sheet1");
-			Assert.AreEqual("CONCATENATE(#REF!B2,'SHEET2'!C3)", actualFormula);
+			Assert.AreEqual("CONCATENATE(#REF!B2,'Sheet2'!C3)", actualFormula);
 		}
 
 		[TestMethod]

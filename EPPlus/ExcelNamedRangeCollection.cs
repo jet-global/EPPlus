@@ -104,6 +104,8 @@ namespace OfficeOpenXml
 		/// <returns>The named range that was added to the collection.</returns>
 		public ExcelNamedRange Add(string name, ExcelRangeBase range)
 		{
+			if (range == null)
+				throw new ArgumentNullException(nameof(range));
 			ExcelNamedRange namedRange = new ExcelNamedRange(name, this.Workbook, this.Worksheet, range.FullAddress, this.NamedRanges.Count);
 			this.NamedRanges.Add(name, namedRange);
 			return namedRange;

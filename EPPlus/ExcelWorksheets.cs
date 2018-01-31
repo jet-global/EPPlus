@@ -301,7 +301,7 @@ namespace OfficeOpenXml
 			if (!(worksheet is ExcelChartsheet) && worksheet.Comments.Count > 0)
 				worksheet.Comments.Clear();
 
-			// Update all named ranges referencing this sheet to #REF. 
+			// Update all named range formulas referencing this sheet to #REF!
 			foreach (var namedRange in this.Package.Workbook.Names)
 			{
 				namedRange.NameFormula = this.Package.FormulaManager.UpdateFormulaDeletedSheetReferences(namedRange.NameFormula, worksheet.Name);

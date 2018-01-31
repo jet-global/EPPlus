@@ -538,7 +538,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 				worksheet.Cells["B1"].Value = 2;
 				worksheet.Cells["C1"].Formula = "notaformula";
-				worksheet.Cells["B3"].Formula = "SUMIF(C1:B1, \"<>-10\")";
+				worksheet.Cells["B3"].Formula = "SUMIF(B1:C1, \"<>-10\")";
 				worksheet.Calculate();
 				Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)worksheet.Cells["B3"].Value).Type);
 			}
