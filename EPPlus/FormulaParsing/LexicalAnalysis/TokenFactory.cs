@@ -132,16 +132,16 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 			{
 				return new Token(token, TokenType.Enumerable);
 			}
-			var at = ExcelAddress.IsValid(token);
-			if (at == ExcelAddress.AddressType.InternalAddress)
+			var addressType = ExcelAddress.IsValid(token);
+			if (addressType == ExcelAddress.AddressType.InternalAddress)
 			{
 				return new Token(token, TokenType.ExcelAddress);
 			}
-			if (at == ExcelAddress.AddressType.ExternalAddress)
+			if (addressType == ExcelAddress.AddressType.ExternalAddress)
 			{
 				return new Token(token, TokenType.InvalidReference);
 			}
-			if (at == ExcelAddress.AddressType.Invalid)
+			if (addressType == ExcelAddress.AddressType.Invalid)
 			{
 				return new Token(token, TokenType.InvalidReference);
 			}

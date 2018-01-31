@@ -1822,6 +1822,18 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void IsValidInternalAddressCommaSeparatedRanges()
+		{
+			Assert.AreEqual(AddressType.InternalAddress, ExcelAddress.IsValid("C5:D7, C6:F8,G7:P8"));
+			Assert.AreEqual(AddressType.InternalAddress, ExcelAddress.IsValid("Sheet1!C5:Sheet1!D7, C6:F8,G7:P8"));
+			Assert.AreEqual(AddressType.InternalAddress, ExcelAddress.IsValid("Sheet1!C5:D7, Sheet1!C6:F8,G7:P11"));
+			Assert.AreEqual(AddressType.InternalAddress, ExcelAddress.IsValid("Sheet1!C5, Sheet1!C6:F8,Sheet1!G7:Sheet1!M12"));
+			Assert.AreEqual(AddressType.InternalAddress, ExcelAddress.IsValid("'Sheet1'!C5:D7, C6,G7:P8"));
+			Assert.AreEqual(AddressType.InternalAddress, ExcelAddress.IsValid("'Sheet1'!C5, 'Sheet1'!C6:'Sheet1'!F8,G7"));
+			Assert.AreEqual(AddressType.InternalAddress, ExcelAddress.IsValid("'Sheet1'!C5:Sheet1!D7, 'Sheet2'!C6:F9"));
+		}
+
+		[TestMethod]
 		public void IsValidInternalAddressWithEdgeCaseSheetNameTest()
 		{
 			Assert.AreEqual(AddressType.InternalAddress, ExcelAddress.IsValid("'#REF!'!C5"));
@@ -1844,6 +1856,7 @@ namespace EPPlusTest
 			Assert.AreEqual(AddressType.Invalid, ExcelAddress.IsValid("#REF!:#REF!"));
 			Assert.AreEqual(AddressType.Invalid, ExcelAddress.IsValid("#REF!:C5"));
 			Assert.AreEqual(AddressType.Invalid, ExcelAddress.IsValid("C5:#REF!"));
+			Assert.AreEqual(AddressType.Invalid, ExcelAddress.IsValid("C5:D7,#REF!"));
 			Assert.AreEqual(AddressType.Invalid, ExcelAddress.IsValid("#REF!#REF!:#REF!"));
 			Assert.AreEqual(AddressType.Invalid, ExcelAddress.IsValid("#REF!#REF!:#REF!#REF!"));
 

@@ -83,7 +83,7 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 		public void Next()
 		{
 			_tokenIndex++;
-			Handle();
+			this.Handle();
 		}
 		#endregion
 
@@ -109,29 +109,21 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 		private void Handle()
 		{
 			var c = _context.FormulaChars[_tokenIndex];
-			if (CharIsTokenSeparator(c, out var tokenSeparator))
+			if (this.CharIsTokenSeparator(c, out var tokenSeparator))
 			{
 				if (TokenSeparatorHandler.Handle(c, tokenSeparator, _context, this))
-				{
 					return;
-				}
 
 				if (_context.CurrentTokenHasValue)
 				{
 					if (Regex.IsMatch(_context.CurrentToken, "^\"*$"))
-					{
 						_context.AddToken(_tokenFactory.Create(_context.CurrentToken, TokenType.StringContent));
-					}
 					else
-					{
-						_context.AddToken(CreateToken(_context, Worksheet));
-					}
+						_context.AddToken(CreateToken(_context, this.Worksheet));
 
 					//If the a next token is an opening parantheses and the previous token is interpeted as an address or name, then the currenct token is a function
 					if (tokenSeparator.TokenType == TokenType.OpeningParenthesis && (_context.LastToken.TokenType == TokenType.ExcelAddress || _context.LastToken.TokenType == TokenType.NameValue))
-					{
 						_context.LastToken.TokenType = TokenType.Function;
-					}
 				}
 				if (tokenSeparator.Value == "-")
 				{
@@ -222,9 +214,7 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 			if (context.CurrentToken == "-")
 			{
 				if (context.LastToken == null && context.LastToken.TokenType == TokenType.Operator)
-				{
 					return new Token("-", TokenType.Negator);
-				}
 			}
 			return _tokenFactory.Create(context.Result, context.CurrentToken, worksheet);
 		}
