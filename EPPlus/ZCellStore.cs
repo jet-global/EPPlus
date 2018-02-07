@@ -24,15 +24,22 @@
  *
  * Code change notes:
  * 
- * Author							   Change									Date
+ * Author							   Change																				Date
  * ******************************************************************************
- * Zachary Faltersack    Added       		        2017-12-22
+ * Zachary Faltersack    Added       																	2017-12-22
+ * Zachary Faltersack    Complete work, add comments       		        2018-02-07
+ *******************************************************************************
+ * 
+ * NOTES:
+ * There is more optimization that can be done but for now this appears to be stable.
+ * I think in particular that enumerating can be sped up. 
+ * I also think that removing empty pages when clearing/shifting in PagedStructure might be beneficial.
+ * 
  *******************************************************************************/
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace OfficeOpenXml
 {
@@ -559,16 +566,23 @@ namespace OfficeOpenXml
 		private bool NextCellBound(ref int row, ref int column, int minRow, int maxRow, int minColumn, int maxColumn)
 		{
 			// This method finds the next cell in ZCellStore that is within the provided bound indices.
-			// The algorithm is generally as follows:
-			// 1. Determine if currently iterating row 0 which which checks the column metadata
+			// The algorithm is as follows [Assume that at all points there is also validation on any found item and row resets are within the bound indices]:
+			// 1. Determine if currently iterating row 0 which checks the column metadata
 			//		If so: search the column metadata
-			// 2. Determine if the current column to search includes the row metadata
-			//		If not: enumerate the current row in the 
+			// 2. Determine if currently in the middle of a row
+			//		If so: finish checking exactly that row and return true if a value is found.
+			//				If no value is found, reset to the next row.
+			//		If not: go to step 3
+			// 3. Determine if the current column to search includes the row metadata
+			// 3.1  If so: check that specific cell and return true if a value is found. 
+			//					If no value is found, move to sheet content.
+			//			If not: go to step 3.2
+			// 3.2	Check the worksheet across all columns for the closest cell to the target row
 			//
-			//
-			//
-			//
-			//
+			// There is some room for improvement. It makes the algorithm much messier so I'm saving it for future work.
+			// We can theoretically combine steps 2 and 3 so that the search across all columns only happens once. 
+			// As it stands, there are columns that will be revisited because Step 2 only checks the specific target row
+			// as opposed to just the next cell in that column.
 
 			// tests for this
 			if (row < minRow)
@@ -611,6 +625,7 @@ namespace OfficeOpenXml
 				column = minColumn - 1;
 			}
 			// STEP 3:: Search a full row from start
+			// STEP 3.1:: Check the row metadata cell if necessary
 			int currentRow = int.MaxValue;
 			int currentColumn = int.MaxValue;
 			if (minColumn == 0)
@@ -627,6 +642,7 @@ namespace OfficeOpenXml
 					}
 				}
 			}
+			// STEP 3.2:: Check the sheet content for the target row
 			columnSearch = column - 1;
 			while (this.CellData.NextItem(ref columnSearch) && columnSearch < maxColumn)
 			{
@@ -752,6 +768,11 @@ namespace OfficeOpenXml
 			#endregion
 
 			#region Public Methods
+			/// <summary>
+			/// Gets the item at the provided index if it exists.
+			/// </summary>
+			/// <param name="index">The index of the desired item.</param>
+			/// <returns>The value if it exists; otherwise null.</returns>
 			public ValueHolder? GetItem(int index)
 			{
 				if (index < 0 || index > this.MaximumIndex)
@@ -760,6 +781,11 @@ namespace OfficeOpenXml
 				return this.Pages[page]?[innerIndex];
 			}
 
+			/// <summary>
+			/// Sets the provided <paramref name="item"/> and the given index.
+			/// </summary>
+			/// <param name="index">The index to put the item in.</param>
+			/// <param name="item">The item to insert.</param>
 			public void SetItem(int index, ValueHolder? item)
 			{
 				if (index < 0 || index > this.MaximumIndex)
@@ -772,6 +798,16 @@ namespace OfficeOpenXml
 				this.UpdateBounds();
 			}
 
+			/// <summary>
+			/// Shifts items in this collection.
+			/// If <paramref name="amount"/> is positive, then all items after <paramref name="index"/> are shifted forward
+			/// and null is inserted in the generated space.
+			/// If <paramref name="amount"/> is negative, then all items after <paramref name="index"/> are shifted backwards,
+			/// overwriting the <paramref name="amount"/> of items immediately after <paramref name="index"/> and null is inserted
+			/// at the end.
+			/// </summary>
+			/// <param name="index">The index after which all items are shifted.</param>
+			/// <param name="amount">The amount to shift items forward or backwards.</param>
 			public void ShiftItems(int index, int amount)
 			{
 				if (index < 0 || index > this.MaximumIndex)
@@ -861,6 +897,11 @@ namespace OfficeOpenXml
 				this.UpdateBounds();
 			}
 
+			/// <summary>
+			/// Clears <paramref name="amount"/> items after the provided <paramref name="index"/>.
+			/// </summary>
+			/// <param name="index">The index to start clearing from.</param>
+			/// <param name="amount">The number of items to clear.</param>
 			public void ClearItems(int index, int amount)
 			{
 				if (index < 0 || index > this.MaximumIndex)
@@ -902,6 +943,12 @@ namespace OfficeOpenXml
 				this.UpdateBounds();
 			}
 
+			/// <summary>
+			/// Updates <paramref name="index"/> to the next index that has a non-null value in the collection
+			/// and returns true if an item is found. Otherwise false is returned.
+			/// </summary>
+			/// <param name="index">The index after which the next item should be found.</param>
+			/// <returns>true if another item exists after index; otherwise false.</returns>
 			public bool NextItem(ref int index)
 			{
 				if (this.IsEmpty || index > this.MaximumUsedIndex)
@@ -936,6 +983,12 @@ namespace OfficeOpenXml
 				return false;
 			}
 
+			/// <summary>
+			/// Updates <paramref name="index"/> to the previous index that has a non-null value in the collection
+			/// and returns true if an item is found. Otherwise false is returned.
+			/// </summary>
+			/// <param name="index">The index before which the next item should be found.</param>
+			/// <returns>true if another item exists before index; otherwise false.</returns>
 			public bool PreviousItem(ref int index)
 			{
 				if (this.IsEmpty || index < this.MinimumUsedIndex)
@@ -1009,28 +1062,64 @@ namespace OfficeOpenXml
 			#endregion
 
 			#region Nested Structs
+			/// <summary>
+			/// This is a Nullable placeholder for the values to contain within the <see cref="PagedStructure{S}"/>.
+			/// Generics can't be guaranteed to be nullable so this is allows nullable values to be used elsewhere.
+			/// </summary>
 			internal struct ValueHolder
 			{
+				#region Properties
+				/// <summary>
+				/// Gets or sets the value for this <see cref="ValueHolder"/>.
+				/// </summary>
 				public S Value { get; set; }
+				#endregion
+
+				#region Implicit Operators
+				/// <summary>
+				/// Converts the <paramref name="value"/> to a <see cref="ValueHolder"/>.
+				/// </summary>
+				/// <param name="value">The value to wrap.</param>
 				static public implicit operator ValueHolder(S value)
 				{
 					return new ValueHolder { Value = value };
 				}
+
+				/// <summary>
+				/// Returns the value that this <see cref="ValueHolder"/> contains.
+				/// </summary>
+				/// <param name="valueHolder">The <see cref="ValueHolder"/> to extract a value from.</param>
 				static public implicit operator S(ValueHolder valueHolder)
 				{
 					return valueHolder.Value;
 				}
+				#endregion
 			}
 			#endregion
 
 			#region Nested Classes
+			/// <summary>
+			/// This is a helper class that represents a single page within the <see cref="PagedStructure{S}"/> and
+			/// contains functionality to abstract basic operations.
+			/// </summary>
 			public class Page
 			{
 				#region Properties
-				public int MinimumUsedIndex { get; set; }
+				/// <summary>
+				/// Gets the minimum used index on this page.
+				/// </summary>
+				public int MinimumUsedIndex { get; private set; }
 
-				public int MaximumUsedIndex { get; set; }
+				/// <summary>
+				/// Gets the maximum used index on this page.
+				/// </summary>
+				public int MaximumUsedIndex { get; private set; }
 				
+				/// <summary>
+				/// Gets or sets the value at the given <paramref name="index"/>.
+				/// </summary>
+				/// <param name="index">The index to get a value for.</param>
+				/// <returns>The value at that index.</returns>
 				public ValueHolder? this[int index]
 				{
 					get { return this.Values[index]; }
@@ -1044,6 +1133,9 @@ namespace OfficeOpenXml
 					}
 				}
 
+				/// <summary>
+				/// Gets a value indicating whether or not this page is empty.
+				/// </summary>
 				public bool IsEmpty
 				{
 					get { return this.MinimumUsedIndex == this.Values.Length && this.MaximumUsedIndex == -1; }
@@ -1053,6 +1145,10 @@ namespace OfficeOpenXml
 				#endregion
 
 				#region Constructors
+				/// <summary>
+				/// Creates an instance of a <see cref="Page"/>.
+				/// </summary>
+				/// <param name="size">The number of items on this page.</param>
 				public Page(int size)
 				{
 					this.Values = new ValueHolder?[size];
@@ -1061,12 +1157,12 @@ namespace OfficeOpenXml
 				#endregion
 
 				#region Public Methods
-				// TODO ZPF cleanup? Only used for test setup/validation.
-				public ValueHolder?[] GetValues()
-				{
-					return this.Values;
-				}
-
+				/// <summary>
+				/// Finds the next index on this page with an item in it.
+				/// </summary>
+				/// <param name="fromIndex">The index to start searching from.</param>
+				/// <param name="foundIndex">The index that was found.</param>
+				/// <returns>true if an item was found; otherwise false.</returns>
 				public bool TryGetNextIndex(int fromIndex, out int foundIndex)
 				{
 					for (foundIndex = fromIndex + 1; foundIndex < this.Values.Length; ++foundIndex)
@@ -1077,6 +1173,12 @@ namespace OfficeOpenXml
 					return false;
 				}
 
+				/// <summary>
+				/// Finds the previous item on this page with an item in it.
+				/// </summary>
+				/// <param name="fromIndex">The index to start searching from.</param>
+				/// <param name="foundIndex">The index that was found.</param>
+				/// <returns>true if an item was found; otherwise false.</returns>
 				public bool TryGetPreviousIndex(int fromIndex, out int foundIndex)
 				{
 					for (foundIndex = fromIndex - 1; foundIndex >= 0; --foundIndex)
@@ -1129,15 +1231,11 @@ namespace OfficeOpenXml
 
 			#region Test Helpers
 			/// <summary>
-			/// This is included for testing purposes: DO NOT USE
+			/// Loads data into the <see cref="PagedStructure{S}"/>.
+			/// This is used for unit tests.
 			/// </summary>
-			/// <returns></returns>
-			public ValueHolder?[][] GetPages()
-			{
-				return this.Pages.Select(p => p.GetValues()).ToArray();
-			}
-
-			public void LoadPages(ValueHolder?[,] pageData)
+			/// <param name="pageData">The data to load into the cell store.</param>
+			internal void LoadPages(ValueHolder?[,] pageData)
 			{
 				for (int row = 0; row <= pageData.GetUpperBound(0); ++row)
 				{
@@ -1152,7 +1250,13 @@ namespace OfficeOpenXml
 				this.UpdateBounds();
 			}
 
-			public void ValidatePages(ValueHolder?[,] pageData, Action<int, int, string> invalidIndex)
+			/// <summary>
+			/// Validates the content in the <see cref="PagedStructure{S}"/>.
+			/// This is used for unit tests.
+			/// </summary>
+			/// <param name="pageData">The data against which to validate.</param>
+			/// <param name="invalidIndex">An action to invoke with a message and the coordinates for invalid data.</param>
+			internal void ValidatePages(ValueHolder?[,] pageData, Action<int, int, string> invalidIndex)
 			{
 				for (int row = 0; row <= pageData.GetUpperBound(0); ++row)
 				{
@@ -1168,6 +1272,9 @@ namespace OfficeOpenXml
 			#endregion
 		}
 
+		/// <summary>
+		/// Enumerates a cell store within a bounded set of coordinates.
+		/// </summary>
 		private class ZCellStoreEnumerator : ICellStoreEnumerator<T>
 		{
 			#region Class Variables
@@ -1184,11 +1291,21 @@ namespace OfficeOpenXml
 			#endregion
 
 			#region Constructors
+			/// <summary>
+			/// Creates a default instance of a <see cref="ZCellStoreEnumerator"/> that enumerates the entire cell store.
+			/// </summary>
+			/// <param name="zCellStore">The cell store to enumerate.</param>
 			public ZCellStoreEnumerator(ZCellStore<T> zCellStore) :
-				this(zCellStore, 0, 0, ExcelPackage.MaxRows, ExcelPackage.MaxColumns)
-			{
-			}
+				this(zCellStore, 0, 0, zCellStore.MaximumRow, zCellStore.MaximumColumn) { }
 
+			/// <summary>
+			/// Creates an instance of a <see cref="ZCellStoreEnumerator"/> that enumerates the cell store in a bounded context.
+			/// </summary>
+			/// <param name="zCellStore">The cell store to enumerate.</param>
+			/// <param name="startRow">The starting row to enumerate.</param>
+			/// <param name="startColumn">The starting column to enumerate.</param>
+			/// <param name="endRow">The ending row to enumerate.</param>
+			/// <param name="endColumn">The ending column to enumerate.</param>
 			public ZCellStoreEnumerator(ZCellStore<T> zCellStore, int startRow, int startColumn, int endRow, int endColumn)
 			{
 				this.CellStore = zCellStore;
@@ -1202,20 +1319,38 @@ namespace OfficeOpenXml
 			#endregion
 
 			#region ICellStorEnumerator Members
+			/// <summary>
+			/// Gets the current cell address in string format.
+			/// </summary>
 			public string CellAddress => ExcelAddressBase.GetAddress(this.Row, this.Column);
 
+			/// <summary>
+			/// Gets the current column.
+			/// </summary>
 			public int Column => myColumn;
 
+			/// <summary>
+			/// Gets the current row.
+			/// </summary>
 			public int Row => myRow;
 
+			/// <summary>
+			/// Gets or sets the value at the current row and column.
+			/// </summary>
 			public T Value
 			{
 				get { return this.CellStore.GetValue(this.Row, this.Column); }
 				set { this.CellStore.SetValue(this.Row, this.Column, value); }
 			}
 
+			/// <summary>
+			/// Gets the current value.
+			/// </summary>
 			public T Current => this.Value;
 
+			/// <summary>
+			/// Gets the current value.
+			/// </summary>
 			object IEnumerator.Current
 			{
 				get
@@ -1225,28 +1360,46 @@ namespace OfficeOpenXml
 				}
 			}
 
+			/// <summary>
+			/// Disposes the <see cref="ZCellStoreEnumerator"/>.
+			/// </summary>
 			public void Dispose()
 			{
 				// Nothing to dispose since we just index into a cellstore.
 			}
 
+			/// <summary>
+			/// Resets this <see cref="ZCellStoreEnumerator"/> and returns itself.
+			/// </summary>
+			/// <returns>This instance.</returns>
 			public IEnumerator<T> GetEnumerator()
 			{
 				this.Reset();
 				return this;
 			}
 
+			/// <summary>
+			/// Moves to the next item in the cell store.
+			/// </summary>
+			/// <returns>true if another item exists; otherwise false.</returns>
 			public bool MoveNext()
 			{
 				return this.CellStore.NextCellBound(ref myRow, ref myColumn, this.StartRow, this.EndRow, this.StartColumn, this.Endcolumn);
 			}
 
+			/// <summary>
+			/// Resets this instance to the start.
+			/// </summary>
 			public void Reset()
 			{
 				myRow = this.StartRow;
 				myColumn = this.StartColumn - 1;
 			}
 
+			/// <summary>
+			/// Resets this <see cref="ZCellStoreEnumerator"/> and returns itself.
+			/// </summary>
+			/// <returns>This instance.</returns>
 			IEnumerator IEnumerable.GetEnumerator()
 			{
 				this.Reset();
