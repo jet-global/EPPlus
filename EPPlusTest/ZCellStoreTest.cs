@@ -33,7 +33,6 @@ namespace EPPlusTest
 		 * 
 		 * */
 
-
 		#region GetValue Tests
 		[TestMethod]
 		public void GetValue()
@@ -1579,22 +1578,6 @@ namespace EPPlusTest
 			pagedStructure.LoadPages(items);
 			Assert.AreEqual(3, pagedStructure.GetItem(4));
 		}
-
-		//[TestMethod]
-		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		//public void GetItemIndexOutOfBoundsTooLow()
-		//{
-		//	var pagedStructure = new PagedStructure<int>(2);
-		//	pagedStructure.GetItem(-1);
-		//}
-
-		//[TestMethod]
-		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		//public void GetItemIndexOutOfBoundsTooHigh()
-		//{
-		//	var pagedStructure = new PagedStructure<int>(2);
-		//	pagedStructure.GetItem(16);
-		//}
 		#endregion
 
 		#region SetItem Tests
@@ -1665,22 +1648,6 @@ namespace EPPlusTest
 			};
 			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
 		}
-
-		//[TestMethod]
-		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		//public void SetItemIndexOutOfBoundsTooLow()
-		//{
-		//	var pagedStructure = new PagedStructure<int>(2);
-		//	pagedStructure.SetItem(-1, 13);
-		//}
-
-		//[TestMethod]
-		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		//public void SetItemIndexOutOfBoundsTooHigh()
-		//{
-		//	var pagedStructure = new PagedStructure<int>(2);
-		//	pagedStructure.SetItem(16, 13);
-		//}
 		#endregion
 
 		#region ShiftItems Tests
@@ -1896,22 +1863,6 @@ namespace EPPlusTest
 			};
 			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
 		}
-
-		//[TestMethod]
-		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		//public void ShiftItemsIndexOutOfBoundsTooLow()
-		//{
-		//	var pagedStructure = new PagedStructure<int>(2);
-		//	pagedStructure.ShiftItems(-1, 13);
-		//}
-
-		//[TestMethod]
-		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		//public void ShiftItemsIndexOutOfBoundsTooHigh()
-		//{
-		//	var pagedStructure = new PagedStructure<int>(2);
-		//	pagedStructure.ShiftItems(16, 13);
-		//}
 		#endregion
 
 		#region ClearItems Tests
@@ -2025,22 +1976,6 @@ namespace EPPlusTest
 			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
 			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
 		}
-
-		//[TestMethod]
-		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		//public void ClearItemsIndexOutOfBoundsTooLow()
-		//{
-		//	var pagedStructure = new PagedStructure<int>(2);
-		//	pagedStructure.ClearItems(-1, 2);
-		//}
-
-		//[TestMethod]
-		//[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		//public void ClearItemsIndexOutOfBoundsTooHigh()
-		//{
-		//	var pagedStructure = new PagedStructure<int>(2);
-		//	pagedStructure.ClearItems(16, 2);
-		//}
 		#endregion
 
 		#region NextItem Tests

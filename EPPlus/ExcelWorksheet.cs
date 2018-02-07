@@ -390,7 +390,7 @@ namespace OfficeOpenXml
 		#region Class Variables
 		internal ICellStore<ExcelCoreValue> _values;
 		internal ICellStore<object> _formulas;
-		internal FlagCellStore _flags;
+		internal IFlagStore _flags;
 		internal ICellStore<List<Token>> _formulaTokens;
 		internal ICellStore<Uri> _hyperLinks;
 		internal ICellStore<int> _commentsStore;
@@ -1188,7 +1188,7 @@ namespace OfficeOpenXml
 
 			_values = CellStore.Build<ExcelCoreValue>();
 			_formulas = CellStore.Build<object>();
-			_flags = new FlagCellStore();
+			_flags = CellStore.BuildFlagStore();
 			_commentsStore = CellStore.Build<int>();
 			_hyperLinks = CellStore.Build<Uri>();
 

@@ -82,8 +82,11 @@ namespace OfficeOpenXml
 	/// ALL other coordinates must be reduced by 1 (to accomodate the 0-indexing) and then we need to look in the CellData structure.
 	/// 
 	/// This is mostly straightfoward, but provides some interesting complexity when enumerating the ZCellStore.
+	/// 
+	/// Before attempting to understand the <see cref="ZCellStore{T}"/> it is highly recommended to review the notes for
+	/// the <see cref="PagedStructure{S}"/>.
 	/// </summary>
-	/// <typeparam name="S">The type this ZCellStore is going to contain.</typeparam>
+	/// <typeparam name="T">The type this ZCellStore is going to contain.</typeparam>
 	internal class ZCellStore<T> : ICellStore<T>
 	{
 		#region Constants
@@ -91,9 +94,18 @@ namespace OfficeOpenXml
 		 * Default Row Page Bits results in an index range of: 1..1048576
 		 * Default Column Page Bits results in an index range of: 1..16384
 		 * 
+		 * These values represent the number of bits to use that provide row and column ranges that match Excel.
+		 * When using them as a right-shift then you will get the page index that contains the coordinate that was requested.
+		 * When using them as a bit-mask you will get the index into the page that contains the coordinate that was requested.
+		 * 
+		 * In this case:
+		 * DefaultRowPageBits    : 10 -- yields :: 2^10 = 1024 ; 1024^2 = 1048576 [the max row for Excel]
+		 * DefaultColumnPageBits :  7 -- yields :: 2^7  =  128 ;  128^2 = 16384   [the max column for Excel]
+		 * 
+		 * See PagedStructure for how these numbers are actually used.
 		 * */
-		private const int DefaultRowPageBits = 10; // 2 ^ 10 = 1024 so right-shifting by 10 bits divides by 1024
-		private const int DefaultColumnPageBits = 7; // 2 ^ 7 = 128 so right-shifting by 7 bits divides by 128
+		private const int DefaultRowPageBits = 10;
+		private const int DefaultColumnPageBits = 7;
 		#endregion
 
 		#region Properties
@@ -105,8 +117,16 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Constructors
+		/// <summary>
+		/// Creates a default <see cref="ZCellStore{T}"/>.
+		/// </summary>
 		public ZCellStore() : this(ZCellStore<T>.DefaultRowPageBits, ZCellStore<T>.DefaultColumnPageBits) { }
 
+		/// <summary>
+		/// Creates a <see cref="ZCellStore{T}"/> with custom dimensions.
+		/// </summary>
+		/// <param name="rowPageBits">Half the number of bits to use for representing row coordinates.</param>
+		/// <param name="columnPageBits">Half the number of bits to use for representing column coordinates.</param>
 		public ZCellStore(int rowPageBits, int columnPageBits)
 		{
 			this.RowPageBits = rowPageBits;
@@ -131,6 +151,12 @@ namespace OfficeOpenXml
 		/// </summary>
 		public int MaximumColumn { get; }
 
+		/// <summary>
+		/// Get the value at a particular location.
+		/// </summary>
+		/// <param name="row">The row to read a value from.</param>
+		/// <param name="column">The column to read a value from.</param>
+		/// <returns>The value in the cell coordinate.</returns>
 		public T GetValue(int row, int column)
 		{
 			// Row 0 means accessing column metadata
@@ -161,6 +187,12 @@ namespace OfficeOpenXml
 			return default(T);
 		}
 
+		/// <summary>
+		/// Set the value at a particular location.
+		/// </summary>
+		/// <param name="row">The row of the location to set a value at.</param>
+		/// <param name="column">The column of the location to set a value at.</param>
+		/// <param name="value">The value to store at the location.</param>
 		public void SetValue(int row, int column, T value)
 		{
 			// Row 0 means accessing column metadata
@@ -182,11 +214,24 @@ namespace OfficeOpenXml
 			}
 		}
 
+		/// <summary>
+		/// Determine if a value exists at the given location.
+		/// </summary>
+		/// <param name="row">The row to look for a value at.</param>
+		/// <param name="column">The column to look for a value at.</param>
+		/// <returns>True if a value was found at the location; false otherwise.</returns>
 		public bool Exists(int row, int column)
 		{
 			return this.Exists(row, column, out _);
 		}
 
+		/// <summary>
+		/// Determine if a value exists at the given location, and return it as an out parameter if found.
+		/// </summary>
+		/// <param name="row">The row to look for a value at.</param>
+		/// <param name="column">The column to look for a value at.</param>
+		/// <param name="value">The value found, if one exists.</param>
+		/// <returns>True if a value was found at the location; false otherwise.</returns>
 		public bool Exists(int row, int column, out T value)
 		{
 			value = default(T);
@@ -223,11 +268,25 @@ namespace OfficeOpenXml
 			return false;
 		}
 
+		/// <summary>
+		/// Get the location of the next cell after the given row and column, if one exists.
+		/// Relies on the assumption that cells are sorted by column and then sorted within each column by row.
+		/// </summary>
+		/// <param name="row">The row to start searching from, and also the new location's row, if one exists.</param>
+		/// <param name="column">The column to start searching from, and also the new location's column, if one exists.</param>
+		/// <returns>True if a next cell has been found and the row and column parameters have been updated; false otherwise.</returns>
 		public bool NextCell(ref int row, ref int column)
 		{
 			return this.NextCellBound(ref row, ref column, 0, this.MaximumRow, 0, this.MaximumColumn);
 		}
 
+		/// <summary>
+		/// Get the location of the first cell before the given row and column, if one exists.
+		/// Relies on the assumption that cells are sorted by column and then sorted within each column by row.
+		/// </summary>
+		/// <param name="row">The row to start searching from, and also the new location's row, if one exists.</param>
+		/// <param name="column">The column to start searching from, and also the new location's column, if one exists.</param>
+		/// <returns>True if a previous cell has been found and the row and column parameters have been updated; false otherwise.</returns>
 		public bool PrevCell(ref int row, ref int column)
 		{
 			int columnSearch, rowSearch;
@@ -313,11 +372,20 @@ namespace OfficeOpenXml
 			return true;
 		}
 
+		/// <summary>
+		/// Deletes rows and/or columns from the workbook. This deletes all existing nodes in the specified range, and updates the keys of all subsequent nodes to reflect their new positions after being shifted to fill the newly-vacated space.
+		/// </summary>
+		/// <param name="fromRow">The first row to delete.</param>
+		/// <param name="fromCol">The first column to delete.</param>
+		/// <param name="rows">The number of rows to delete.</param>
+		/// <param name="columns">The number of columns to delete.</param>
 		public void Delete(int fromRow, int fromCol, int rows, int columns)
 		{
 			if (fromRow != 0 && fromCol != 0)
 				throw new InvalidOperationException("Only delete rows or columns in a single operation.");
-
+			// Invariant: The actual row or column to be deleting from will not be 0.
+			//						Only valid coordinates are passed in. A 0 is used to disambiguate between deleting full rows 
+			//						or full columns.
 			fromRow--;
 			fromCol--;
 			if (fromCol >= 0)
@@ -336,6 +404,13 @@ namespace OfficeOpenXml
 			}
 		}
 
+		/// <summary>
+		/// Removes the values in the specified range without updating cells below or to the right of the specified range.
+		/// </summary>
+		/// <param name="fromRow">The first row whose cells should be cleared.</param>
+		/// <param name="fromCol">The first column whose cells should be cleared.</param>
+		/// <param name="rows">The number of rows to clear.</param>
+		/// <param name="columns">The number of columns to clear.</param>
 		public void Clear(int fromRow, int fromCol, int rows, int columns)
 		{
 			if (fromRow == 0)
@@ -378,6 +453,14 @@ namespace OfficeOpenXml
 			}
 		}
 
+		/// <summary>
+		/// Get the range of cells contained in this collection.
+		/// </summary>
+		/// <param name="fromRow">The first row contained in this collection.</param>
+		/// <param name="fromCol">The first column contained in this collection.</param>
+		/// <param name="toRow">The last row contained in this collection.</param>
+		/// <param name="toCol">The last column contained in this collection.</param>
+		/// <returns>True if the collection contains at least one cell (and therefore has a dimension); false if the collection contains no cells and thus has no dimension.</returns>
 		public bool GetDimension(out int fromRow, out int fromCol, out int toRow, out int toCol)
 		{
 			fromCol = this.CellData.MinimumUsedIndex + 1;
@@ -398,10 +481,20 @@ namespace OfficeOpenXml
 			return fromRow != ExcelPackage.MaxRows + 1 && toRow != 0 && fromCol != 0 && toCol != 0;
 		}
 
+		/// <summary>
+		/// "Insert space" into the cellStore by updating all keys beyond the specified row or column by the specified number of rows or columns.
+		/// </summary>
+		/// <param name="fromRow">The row to start updating keys from.</param>
+		/// <param name="fromCol">The columnn to start updating keys from.</param>
+		/// <param name="rows">The number of rows being inserted.</param>
+		/// <param name="columns">The number of columns being inserted.</param>
 		public void Insert(int fromRow, int fromCol, int rows, int columns)
 		{
 			if (fromRow != 0 && fromCol != 0)
 				throw new InvalidOperationException("Only insert rows or columns in a single operation.");
+			// Invariant: The actual row or column to be inserting from will not be 0.
+			//						Only valid coordinates are passed in. A 0 is used to disambiguate between inserting full rows 
+			//						or full columns.
 			fromRow--;
 			fromCol--;
 			if (fromCol >= 0)
@@ -427,7 +520,7 @@ namespace OfficeOpenXml
 
 		public void Dispose()
 		{
-			// TODO ZPF do we really need this?...
+			// This will be deleted when the old cellstore is finally removed.
 		}
 
 		/// <summary>
@@ -465,8 +558,17 @@ namespace OfficeOpenXml
 
 		private bool NextCellBound(ref int row, ref int column, int minRow, int maxRow, int minColumn, int maxColumn)
 		{
-			// This method finds the next cell in ZCellStore that is within the provided bound indices
-			// There is some performance tuning that can be achieved here, particularly in STEP 3.
+			// This method finds the next cell in ZCellStore that is within the provided bound indices.
+			// The algorithm is generally as follows:
+			// 1. Determine if currently iterating row 0 which which checks the column metadata
+			//		If so: search the column metadata
+			// 2. Determine if the current column to search includes the row metadata
+			//		If not: enumerate the current row in the 
+			//
+			//
+			//
+			//
+			//
 
 			// tests for this
 			if (row < minRow)
@@ -518,6 +620,11 @@ namespace OfficeOpenXml
 				{
 					currentRow = rowSearch + 1;
 					currentColumn = 0;
+					if (currentRow == row)
+					{
+						column = currentColumn;
+						return true;
+					}
 				}
 			}
 			columnSearch = column - 1;
@@ -531,6 +638,11 @@ namespace OfficeOpenXml
 					{
 						currentRow = rowSearch + 1;
 						currentColumn = columnSearch + 1;
+						if (currentRow == row)
+						{
+							column = currentColumn;
+							return true;
+						}
 					}
 				}
 			}
@@ -650,29 +762,57 @@ namespace OfficeOpenXml
 
 			public void SetItem(int index, ValueHolder? item)
 			{
-				this.SetItem(index, item, true);
+				if (index < 0 || index > this.MaximumIndex)
+					return;
+				this.DeConstructIndex(index, out int page, out int innerIndex);
+				var pageArray = this.Pages[page];
+				if (null == pageArray)
+					this.Pages[page] = pageArray = new Page(this.PageSize);
+				pageArray[innerIndex] = item;
+				this.UpdateBounds();
 			}
 
 			public void ShiftItems(int index, int amount)
 			{
-				// TODO ZPF This can be highly optimized.
-				// What we want to do is breakdown the index and directly work with the pages
-				// Even though deconstructing the indices is relatively quick, we don't need to do it 
-				// for every item that moves.
 				if (index < 0 || index > this.MaximumIndex)
 					return;
 				// Shift forward
 				if (amount > 0)
 				{
-					// Start at the end and shift back from there so as not to overwrite data.
-					for (int i = this.MaximumUsedIndex; i >= index; --i)
+					this.DeConstructIndex(this.MaximumUsedIndex, out int sourcePageIndex, out int sourceInnerIndex);
+					this.DeConstructIndex(amount, out int numberOfPagesToShit, out int numberOfInnerIndexToShit);
+
+					for (int i = this.MaximumUsedIndex; i >= Math.Max(index, this.MinimumUsedIndex); --i)
 					{
-						var target = i + amount;
-						if (target <= this.MaximumIndex)
-							this.SetItem(target, this.GetItem(i), false);
+						var sourcePage = this.Pages[sourcePageIndex];
+						if (sourcePage == null)
+						{
+							// TODO -- tests for this case
+							sourceInnerIndex = this.PageSize - 1;
+							sourcePageIndex--;
+						}
 						else
-							throw new ArgumentOutOfRangeException();
-						this.SetItem(i, null, false);
+						{
+							var targetPageIndex = sourcePageIndex + numberOfPagesToShit;
+							var targetPageInnerIndex = sourceInnerIndex + numberOfInnerIndexToShit;
+							if (targetPageInnerIndex >= this.PageSize)
+							{
+								targetPageIndex++;
+								targetPageInnerIndex &= this.PageMask;
+							}
+							if (targetPageIndex >= this.Pages.Length)
+								throw new ArgumentOutOfRangeException();
+							var targetPage = this.Pages[targetPageIndex] ?? (this.Pages[targetPageIndex] = new Page(this.PageSize));
+							targetPage[targetPageInnerIndex] = sourcePage[sourceInnerIndex];
+							sourcePage[sourceInnerIndex] = null;
+							if (sourceInnerIndex > 0)
+								sourceInnerIndex--;
+							else
+							{
+								sourceInnerIndex = this.PageSize - 1;
+								sourcePageIndex--;
+							}
+						}
 					}
 				}
 				// Shift backward
@@ -681,13 +821,41 @@ namespace OfficeOpenXml
 					// This represents a delete operation so start at the given index and copy back
 					// the desired data.
 					amount = -amount;
+
+					this.DeConstructIndex(index, out int targetPageIndex, out int targetInnerIndex);
+					this.DeConstructIndex(amount, out int numberOfPagesToShit, out int numberOfInnerIndexToShit);
+
 					for (int i = index; i <= this.MaximumUsedIndex; ++i)
 					{
-						var source = i + amount;
-						if (source <= this.MaximumIndex)
-							this.SetItem(i, this.GetItem(source), false);
+						var sourcePageIndex = targetPageIndex + numberOfPagesToShit;
+						var sourcePageInnerIndex = targetInnerIndex + numberOfInnerIndexToShit;
+						if (sourcePageInnerIndex >= this.PageSize)
+						{
+							sourcePageIndex++;
+							sourcePageInnerIndex &= this.PageMask;
+						}
+						var targetPage = this.Pages[targetPageIndex] ?? (this.Pages[targetPageIndex] = new Page(this.PageSize));
+						if (sourcePageIndex < this.Pages.Length)
+						{
+							var sourcePage = this.Pages[sourcePageIndex];
+							// If the source is null then we can skip to the end of the page.
+							if (sourcePage == null)
+								targetInnerIndex = this.PageSize;
+							else
+							{
+								targetPage[targetInnerIndex] = sourcePage[sourcePageInnerIndex];
+								sourcePage[sourcePageInnerIndex] = null;
+							}
+						}
 						else
-							this.SetItem(i, null, false);
+							targetPage[targetInnerIndex] = null;
+						if (targetInnerIndex < this.PageSize - 1)
+							targetInnerIndex++;
+						else
+						{
+							targetInnerIndex = 0;
+							targetPageIndex++;
+						}
 					}
 				}
 				this.UpdateBounds();
@@ -695,14 +863,41 @@ namespace OfficeOpenXml
 
 			public void ClearItems(int index, int amount)
 			{
-				// TODO ZPF This can be optimized by working directly with the pages instead of deconstructing 
-				// each index for every call.
 				if (index < 0 || index > this.MaximumIndex)
 					return;
-				var target = Math.Min(index + amount - 1, this.MaximumUsedIndex);
-				for (; index <= target; ++index)
+
+				this.DeConstructIndex(index, out int pageIndex, out int pageInnerIndex);
+
+				var firstPage = this.Pages[pageIndex];
+				if (firstPage != null)
 				{
-					this.SetItem(index, null, false);
+					for (int i = pageInnerIndex; i < this.PageSize && amount > 0; ++i)
+					{
+						firstPage[i] = null;
+						amount--;
+					}
+				}
+				pageIndex++;
+				if (amount > 0 && pageIndex < this.Pages.Length)
+				{
+					this.DeConstructIndex(amount, out int pagesToClear, out int pagesInnerIndexToClear);
+					for (int i = 0; i < pagesToClear; ++i)
+					{
+						if (pageIndex + i >= this.Pages.Length)
+							break;
+						this.Pages[pageIndex + i] = null;
+					}
+					if (pageIndex + pagesToClear < this.Pages.Length)
+					{
+						var lastPage = this.Pages[pageIndex + pagesToClear];
+						if (lastPage != null)
+						{
+							for (int i = 0; i < pagesInnerIndexToClear; ++i)
+							{
+								lastPage[i] = null;
+							}
+						}
+					}
 				}
 				this.UpdateBounds();
 			}
@@ -797,19 +992,6 @@ namespace OfficeOpenXml
 						break;
 					}
 				}
-			}
-
-			private void SetItem(int index, ValueHolder? item, bool doBoundsUpdate)
-			{
-				if (index < 0 || index > this.MaximumIndex)
-					return;
-				this.DeConstructIndex(index, out int page, out int innerIndex);
-				var pageArray = this.Pages[page];
-				if (null == pageArray)
-					this.Pages[page] = pageArray = new Page(this.PageSize);
-				pageArray[innerIndex] = item;
-				if (doBoundsUpdate)
-					this.UpdateBounds();
 			}
 
 			private void DeConstructIndex(int index, out int page, out int innerIndex)
@@ -979,7 +1161,7 @@ namespace OfficeOpenXml
 						var item = this.Pages[row]?[column];
 						var data = pageData[row, column];
 						if (data.HasValue != item.HasValue || (data.HasValue && !data.Value.Value.Equals(item.Value.Value)))
-							invalidIndex(row, column, $"Expected: {(data?.ToString() ?? "null")}");
+							invalidIndex(row, column, $"Expected: {(data?.Value.ToString() ?? "null")}, Actual: {(item?.Value.ToString() ?? "null")}");
 					}
 				}
 			}
@@ -1045,7 +1227,7 @@ namespace OfficeOpenXml
 
 			public void Dispose()
 			{
-				// TODO ZPF Can we just take this off of the interface?...
+				// Nothing to dispose since we just index into a cellstore.
 			}
 
 			public IEnumerator<T> GetEnumerator()
@@ -1071,6 +1253,45 @@ namespace OfficeOpenXml
 				return this;
 			}
 			#endregion
+		}
+		#endregion
+	}
+
+	/// <summary>
+	/// At some point this data structure can go away. It's left for legacy purposes as future cleanup.
+	/// For the most part, it looks like the only CellFlags that is using it is RichText. Parsing XML
+	/// is likely also setting values for the other CellFlags but they aren't ever modified after that
+	/// based on a cursory search.
+	/// </summary>
+	internal class ZFlagStore : ZCellStore<byte>, IFlagStore
+	{
+		#region IFlagStore Members
+		/// <summary>
+		/// Adds or removes the given <paramref name="cellFlags"/> value based on <paramref name="value"/>.
+		/// </summary>
+		/// <param name="Row">The cell row to set a flag for.</param>
+		/// <param name="Col">The cell column to set a flag for.</param>
+		/// <param name="value">A boolean value indicating whether to add or remove the flag value.</param>
+		/// <param name="cellFlags">The flags to set for the cell.</param>
+		public void SetFlagValue(int Row, int Col, bool value, CellFlags cellFlags)
+		{
+			CellFlags currentValue = (CellFlags)base.GetValue(Row, Col);
+			if (value)
+				base.SetValue(Row, Col, (byte)(currentValue | cellFlags)); // add the CellFlag bit
+			else
+				base.SetValue(Row, Col, (byte)(currentValue & ~cellFlags)); // remove the CellFlag bit
+		}
+
+		/// <summary>
+		/// Gets the flag values from a given cell.
+		/// </summary>
+		/// <param name="Row">The cell row to get a flag for.</param>
+		/// <param name="Col">The cell column to get a flag for.</param>
+		/// <param name="cellFlags">The flags to query for.</param>
+		/// <returns>True if the flags are set; otherwise false.</returns>
+		public bool GetFlagValue(int Row, int Col, CellFlags cellFlags)
+		{
+			return !(((byte)cellFlags & base.GetValue(Row, Col)) == 0);
 		}
 		#endregion
 	}

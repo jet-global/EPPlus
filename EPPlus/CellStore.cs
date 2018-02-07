@@ -2048,11 +2048,10 @@ internal class CellStore<T> : ICellStore<T>, IDisposable// : IEnumerable<ulong>,
 
 }
 
-internal class FlagCellStore : CellStore<byte>
+internal class FlagCellStore : CellStore<byte>, IFlagStore
 {
-	// TODO -- ZPF -- Get rid of this eventually
-	#region Internal Methods
-	internal void SetFlagValue(int Row, int Col, bool value, CellFlags cellFlags)
+	#region Public Methods
+	public void SetFlagValue(int Row, int Col, bool value, CellFlags cellFlags)
 	{
 		CellFlags currentValue = (CellFlags)GetValue(Row, Col);
 		if (value)
@@ -2064,7 +2063,7 @@ internal class FlagCellStore : CellStore<byte>
 			SetValue(Row, Col, (byte)(currentValue & ~cellFlags)); // remove the CellFlag bit
 		}
 	}
-	internal bool GetFlagValue(int Row, int Col, CellFlags cellFlags)
+	public bool GetFlagValue(int Row, int Col, CellFlags cellFlags)
 	{
 		return !(((byte)cellFlags & GetValue(Row, Col)) == 0);
 	}

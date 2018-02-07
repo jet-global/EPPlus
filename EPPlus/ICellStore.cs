@@ -27,7 +27,7 @@ namespace OfficeOpenXml
 		/// </summary>
 		/// <param name="row">The row to read a value from.</param>
 		/// <param name="column">The column to read a value from.</param>
-		/// <returns></returns>
+		/// <returns>The value in the cell coordinate.</returns>
 		T GetValue(int row, int column);
 
 		/// <summary>
@@ -129,6 +129,32 @@ namespace OfficeOpenXml
 	}
 
 	/// <summary>
+	/// Represents an interface used to store flags with cell metadata.
+	/// </summary>
+	internal interface IFlagStore : ICellStore<byte>
+	{
+		#region Methods
+		/// <summary>
+		/// Adds or removes the given <paramref name="cellFlags"/> value based on <paramref name="value"/>.
+		/// </summary>
+		/// <param name="Row">The cell row to set a flag for.</param>
+		/// <param name="Col">The cell column to set a flag for.</param>
+		/// <param name="value">A boolean value indicating whether to add or remove the flag value.</param>
+		/// <param name="cellFlags">The flags to set for the cell.</param>
+		void SetFlagValue(int Row, int Col, bool value, CellFlags cellFlags);
+
+		/// <summary>
+		/// Gets the flag values from a given cell.
+		/// </summary>
+		/// <param name="Row">The cell row to get a flag for.</param>
+		/// <param name="Col">The cell column to get a flag for.</param>
+		/// <param name="cellFlags">The flags to query for.</param>
+		/// <returns>True if the flags are set; otherwise false.</returns>
+		bool GetFlagValue(int Row, int Col, CellFlags cellFlags);
+		#endregion
+	}
+
+	/// <summary>
 	/// An interface defining the properties necessary when enumerating a CellStore.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
@@ -155,15 +181,42 @@ namespace OfficeOpenXml
 		T Value { get; set; }
 	}
 
+	/// <summary>
+	/// This class will build the requested ICellStore type.
+	/// Currently it uses a hardcoded flag to toggle between the new implementation
+	/// and the original. Soon the old CellStore will be deleted but this structure 
+	/// will remain in place just so there is one place to always call into for a new 
+	/// ICellStore. This will simplify future development should we ever revisit this.
+	/// </summary>
 	internal static class CellStore
 	{
+		#region Properties
 		static bool UseZCellStore { get; } = true;
+		#endregion
 
+		#region Public Static Methods
+		/// <summary>
+		/// Returns a new <see cref="ICellStore{T}"/>.
+		/// </summary>
+		/// <typeparam name="T">The type the new cellstore will contain.</typeparam>
+		/// <returns>The new <see cref="ICellStore{T}"/>.</returns>
 		public static ICellStore<T> Build<T>()
 		{
 			if (CellStore.UseZCellStore)
 				return new ZCellStore<T>();
 			return new CellStore<T>();
 		}
+
+		/// <summary>
+		/// Returns a new <see cref="IFlagStore"/>.
+		/// </summary>
+		/// <returns>The new <see cref="IFlagStore"/>.</returns>
+		public static IFlagStore BuildFlagStore()
+		{
+			if (CellStore.UseZCellStore)
+				return new ZFlagStore();
+			return new FlagCellStore();
+		}
+		#endregion
 	}
 }
