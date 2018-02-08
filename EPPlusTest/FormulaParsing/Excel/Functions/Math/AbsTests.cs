@@ -24,11 +24,11 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
 using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml;
+
 namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 {
 	[TestClass]
@@ -87,6 +87,20 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var function = new Abs();
 			var result = function.Execute(FunctionsHelper.CreateArgs("string"), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
+		}
+
+		[TestMethod]
+		public void SumPropagatesErrorTypes()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("sheet1");
+				sheet.Cells["C2"].Formula = "VLOOKUP(D18,$F$7:$G$9,2,0)";
+				sheet.Cells["C3"].Formula = "-ABS(C2)";
+				sheet.Cells["C3"].Calculate();
+				var actual = sheet.Cells["C3"].Value as ExcelErrorValue;
+				Assert.AreEqual(eErrorType.NA, actual.Type);
+			}
 		}
 
 		[TestMethod]
