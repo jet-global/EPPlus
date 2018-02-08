@@ -156,10 +156,20 @@ namespace OfficeOpenXml
 					// Do not update external references.
 					if (!string.IsNullOrEmpty(address?.Workbook))
 						continue;
-					int fromRow = this.GetRelativeLocation(address._fromRowFixed, address._fromRow, relativeRow, ExcelPackage.MaxRows);
-					int fromColumn = this.GetRelativeLocation(address._fromColFixed, address._fromCol, relativeColumn, ExcelPackage.MaxColumns);
-					int toRow = this.GetRelativeLocation(address._toRowFixed, address._toRow, relativeRow, ExcelPackage.MaxRows);
-					int toColumn = this.GetRelativeLocation(address._toColFixed, address._toCol, relativeColumn, ExcelPackage.MaxColumns);
+					int fromRow = address._fromRow;
+					int fromColumn = address._fromCol;
+					int toRow = address._toRow;
+					int toColumn = address._toCol;
+					if (!address._isFullColumn)
+					{
+						fromRow = this.GetRelativeLocation(address._fromRowFixed, address._fromRow, relativeRow, ExcelPackage.MaxRows);
+						toRow = this.GetRelativeLocation(address._toRowFixed, address._toRow, relativeRow, ExcelPackage.MaxRows);
+					}
+					if (!address._isFullRow)
+					{
+						fromColumn = this.GetRelativeLocation(address._fromColFixed, address._fromCol, relativeColumn, ExcelPackage.MaxColumns);
+						toColumn = this.GetRelativeLocation(address._toColFixed, address._toCol, relativeColumn, ExcelPackage.MaxColumns);
+					}
 					var updatedAddress = ExcelCellBase.GetAddress(fromRow, fromColumn, toRow, toColumn, address._fromRowFixed, address._fromColFixed, address._toRowFixed, address._toColFixed);
 					token.Value = ExcelCellBase.GetFullAddress(address.WorkSheet, updatedAddress);
 				}
