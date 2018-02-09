@@ -306,7 +306,7 @@ namespace OfficeOpenXml
 				}
 			}
 			this.Worksheet._commentsStore.Delete(fromRow, fromCol, rows, columns);
-			var commentEnumerator = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.Worksheet._commentsStore);
+			var commentEnumerator = this.Worksheet._commentsStore.GetEnumerator();
 			while (commentEnumerator.MoveNext())
 			{
 				int offset = deletedIndices.Count(di => commentEnumerator.Value > di);

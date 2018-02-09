@@ -211,7 +211,7 @@ namespace OfficeOpenXml
 					return this.List.Count;
 				}
 			}
-			internal ICellStore<int> Cells { get; set; } = new CellStore<int>();
+			internal ICellStore<int> Cells { get; set; } = CellStore.Build<int>();
 			internal List<string> List { get; } = new List<string>();
 			#endregion
 
@@ -296,7 +296,7 @@ namespace OfficeOpenXml
 
 			internal void Clear(ExcelAddressBase Destination)
 			{
-				var cse = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.Cells, Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
+				var cse = this.Cells.GetEnumerator(Destination._fromRow, Destination._fromCol, Destination._toRow, Destination._toCol);
 				var used = new HashSet<int>();
 				while (cse.MoveNext())
 				{
@@ -336,20 +336,20 @@ namespace OfficeOpenXml
 					}
 				}
 
-				var cse = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.Cells, address._fromRow, address._fromCol, address._toRow, address._toCol);
+				var cse = this.Cells.GetEnumerator(address._fromRow, address._fromCol, address._toRow, address._toCol);
 				//cells
 				while (cse.MoveNext())
 				{
 					return false;
 				}
 				//Entire column
-				cse = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.Cells, 0, address._fromCol, 0, address._toCol);
+				cse = this.Cells.GetEnumerator(0, address._fromCol, 0, address._toCol);
 				while (cse.MoveNext())
 				{
 					return false;
 				}
 				//Entire row
-				cse = CellStoreEnumeratorFactory<int>.GetNewEnumerator(this.Cells, address._fromRow, 0, address._toRow, 0);
+				cse = this.Cells.GetEnumerator(address._fromRow, 0, address._toRow, 0);
 				while (cse.MoveNext())
 				{
 					return false;
@@ -390,7 +390,7 @@ namespace OfficeOpenXml
 		#region Class Variables
 		internal ICellStore<ExcelCoreValue> _values;
 		internal ICellStore<object> _formulas;
-		internal FlagCellStore _flags;
+		internal IFlagStore _flags;
 		internal ICellStore<List<Token>> _formulaTokens;
 		internal ICellStore<Uri> _hyperLinks;
 		internal ICellStore<int> _commentsStore;
@@ -410,7 +410,6 @@ namespace OfficeOpenXml
 		private ExcelCommentCollection _comments = null;
 		private ExcelHeaderFooter _headerFooter;
 		private MergeCellsCollection _mergedCells = new MergeCellsCollection();
-		private static CellStoreDelegates<ExcelCoreValue>.SetValueDelegate _setValueInnerUpdateDelegate = ExcelWorksheet.SetValueInnerUpdate;
 		private Dictionary<int, int> columnStyles = null;
 		private ExcelSheetProtection _protection = null;
 		private ExcelProtectedRangeCollection _protectedRanges;
@@ -1187,11 +1186,11 @@ namespace OfficeOpenXml
 			_positionID = positionID;
 			Hidden = hide;
 
-			_values = new CellStore<ExcelCoreValue>();
-			_formulas = new CellStore<object>();
-			_flags = new FlagCellStore();
-			_commentsStore = new CellStore<int>();
-			_hyperLinks = new CellStore<Uri>();
+			_values = CellStore.Build<ExcelCoreValue>();
+			_formulas = CellStore.Build<object>();
+			_flags = CellStore.BuildFlagStore();
+			_commentsStore = CellStore.Build<int>();
+			_hyperLinks = CellStore.Build<Uri>();
 
 			_names = new ExcelNamedRangeCollection(Workbook, this);
 
@@ -1407,7 +1406,7 @@ namespace OfficeOpenXml
 					f.Address = ExcelAddressBase.GetAddress(a._fromRow, a._fromCol, a._toRow, a._toCol);
 					f.Formula = this.Package.FormulaManager.UpdateFormulaReferences(f.Formula, rows, 0, rowFrom, 0, this.Name, this.Name);
 				}
-				var cse = CellStoreEnumeratorFactory<object>.GetNewEnumerator(_formulas);
+				var cse = _formulas.GetEnumerator();
 				while (cse.MoveNext())
 				{
 					if (cse.Value is string)
@@ -1418,7 +1417,7 @@ namespace OfficeOpenXml
 				this.FixMergedCellsRow(rowFrom, rows, false);
 				if (copyStylesFromRow > 0)
 				{
-					var cseS = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, copyStylesFromRow, 0, copyStylesFromRow, ExcelPackage.MaxColumns); //Fixes issue 15068 , 15090
+					var cseS = _values.GetEnumerator(copyStylesFromRow, 0, copyStylesFromRow, ExcelPackage.MaxColumns); //Fixes issue 15068 , 15090
 					while (cseS.MoveNext())
 					{
 						if (cseS.Value._styleId == 0) continue;
@@ -1527,7 +1526,7 @@ namespace OfficeOpenXml
 					f.Formula = this.Package.FormulaManager.UpdateFormulaReferences(f.Formula, 0, columns, 0, columnFrom, this.Name, this.Name);
 				}
 
-				var cse = CellStoreEnumeratorFactory<object>.GetNewEnumerator(_formulas);
+				var cse = _formulas.GetEnumerator();
 				while (cse.MoveNext())
 				{
 					if (cse.Value is string)
@@ -1538,7 +1537,7 @@ namespace OfficeOpenXml
 
 				this.FixMergedCellsColumn(columnFrom, columns, false);
 
-				var csec = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, 0, 1, 0, ExcelPackage.MaxColumns);
+				var csec = _values.GetEnumerator(0, 1, 0, ExcelPackage.MaxColumns);
 				var lst = new List<ExcelColumn>();
 				foreach (var val in csec)
 				{
@@ -1590,7 +1589,7 @@ namespace OfficeOpenXml
 
 					//Get styles to a cached list,
 					var l = new List<int[]>();
-					var sce = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, 0, copyStylesFromColumn, ExcelPackage.MaxRows, copyStylesFromColumn);
+					var sce = _values.GetEnumerator(0, copyStylesFromColumn, ExcelPackage.MaxRows, copyStylesFromColumn);
 					lock (sce)
 					{
 						while (sce.MoveNext())
@@ -1783,7 +1782,7 @@ namespace OfficeOpenXml
 				this.AdjustFormulasColumn(columnFrom, columns);
 				this.FixMergedCellsColumn(columnFrom, columns, true);
 
-				var csec = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, 0, columnFrom, 0, ExcelPackage.MaxColumns);
+				var csec = _values.GetEnumerator(0, columnFrom, 0, ExcelPackage.MaxColumns);
 				foreach (var val in csec)
 				{
 					var column = val._value;
@@ -2376,7 +2375,7 @@ namespace OfficeOpenXml
 		/// </summary>
 		internal void UpdateCellsWithDate1904Setting()
 		{
-			var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values);
+			var cse = _values.GetEnumerator();
 			var offset = this.Workbook.Date1904 ? -ExcelWorkbook.date1904Offset : ExcelWorkbook.date1904Offset;
 			while (cse.MoveNext())
 			{
@@ -2678,7 +2677,7 @@ namespace OfficeOpenXml
 				this._sharedFormulas.Remove(ix);
 			}
 			delSF = null;
-			var cse = CellStoreEnumeratorFactory<object>.GetNewEnumerator(_formulas, 1, 1, ExcelPackage.MaxRows, ExcelPackage.MaxColumns);
+			var cse = _formulas.GetEnumerator(1, 1, ExcelPackage.MaxRows, ExcelPackage.MaxColumns);
 			while (cse.MoveNext())
 			{
 				if (cse.Value is string)
@@ -2714,7 +2713,7 @@ namespace OfficeOpenXml
 				this._sharedFormulas.Remove(ix);
 			}
 			delSF = null;
-			var cse = CellStoreEnumeratorFactory<object>.GetNewEnumerator(_formulas, 1, 1, ExcelPackage.MaxRows, ExcelPackage.MaxColumns);
+			var cse = _formulas.GetEnumerator(1, 1, ExcelPackage.MaxRows, ExcelPackage.MaxColumns);
 			while (cse.MoveNext())
 			{
 				if (cse.Value is string)
@@ -3871,7 +3870,7 @@ namespace OfficeOpenXml
 				{
 					f.Formula = this.Package.FormulaManager.UpdateFormulaReferences(f.Formula, rows, columns, rowFrom, columnFrom, this.Name, sheetWhoseReferencesShouldBeUpdated);
 				}
-				var cse = CellStoreEnumeratorFactory<object>.GetNewEnumerator(_formulas);
+				var cse = _formulas.GetEnumerator();
 				while (cse.MoveNext())
 				{
 					if (cse.Value is string)
@@ -3894,7 +3893,7 @@ namespace OfficeOpenXml
 				{
 					f.Formula = this.Package.FormulaManager.UpdateFormulaSheetReferences(f.Formula, oldName, newName);
 				}
-				var cse = CellStoreEnumeratorFactory<object>.GetNewEnumerator(_formulas);
+				var cse = _formulas.GetEnumerator();
 				while (cse.MoveNext())
 				{
 					if (cse.Value is string)
@@ -4282,7 +4281,7 @@ namespace OfficeOpenXml
 		{
 			StringBuilder breaks = new StringBuilder();
 			int count = 0;
-			var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, 0, 0, 0, ExcelPackage.MaxColumns);
+			var cse = _values.GetEnumerator(0, 0, 0, ExcelPackage.MaxColumns);
 			//foreach (ExcelColumn col in _columns)
 			while (cse.MoveNext())
 			{
@@ -4303,7 +4302,7 @@ namespace OfficeOpenXml
 		{
 			StringBuilder breaks = new StringBuilder();
 			int count = 0;
-			var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, 0, 0, ExcelPackage.MaxRows, 0);
+			var cse = _values.GetEnumerator(0, 0, ExcelPackage.MaxRows, 0);
 			//foreach(ExcelRow row in _rows)
 			while (cse.MoveNext())
 			{
@@ -4325,7 +4324,7 @@ namespace OfficeOpenXml
 		/// </summary>
 		private void UpdateColumnData(StreamWriter sw)
 		{
-			var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, 0, 1, 0, ExcelPackage.MaxColumns);
+			var cse = _values.GetEnumerator(0, 1, 0, ExcelPackage.MaxColumns);
 			bool first = true;
 			while (cse.MoveNext())
 			{
@@ -4407,7 +4406,7 @@ namespace OfficeOpenXml
 			//}
 
 			columnStyles = new Dictionary<int, int>();
-			var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, 1, 0, ExcelPackage.MaxRows, ExcelPackage.MaxColumns);
+			var cse = _values.GetEnumerator(1, 0, ExcelPackage.MaxRows, ExcelPackage.MaxColumns);
 			//foreach (IRangeID r in _cells)
 			while (cse.MoveNext())
 			{
@@ -4773,7 +4772,7 @@ namespace OfficeOpenXml
 		private void UpdateHyperLinks(StreamWriter sw)
 		{
 			Dictionary<string, string> hyps = new Dictionary<string, string>();
-			var cse = CellStoreEnumeratorFactory<Uri>.GetNewEnumerator(_hyperLinks);
+			var cse = _hyperLinks.GetEnumerator();
 			bool first = true;
 			//foreach (ulong cell in _hyperLinks)
 			while (cse.MoveNext())
