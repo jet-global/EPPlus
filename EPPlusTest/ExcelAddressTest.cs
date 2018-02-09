@@ -1975,6 +1975,77 @@ namespace EPPlusTest
 			Assert.AreEqual("E5", excelAddress.Addresses[2].Address);
 		}
 		#endregion
+
+		#region Full Row/Column Tests
+		[TestMethod]
+		public void IsFullColumn()
+		{
+			var address = new ExcelAddress("C:C");
+			Assert.IsTrue(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+			address = new ExcelAddress("$C:$C");
+			Assert.IsTrue(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+			address = new ExcelAddress("C:$C");
+			Assert.IsTrue(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+			address = new ExcelAddress("$C:C");
+			Assert.IsTrue(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+			address = new ExcelAddress("'Sheet1'!$C:$C");
+			Assert.IsTrue(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+			address = new ExcelAddress("'Sheet1'!$C:'Sheet1'!$C");
+			Assert.IsTrue(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+		}
+
+		[TestMethod]
+		public void IsFullRowTest()
+		{
+			var address = new ExcelAddress("4:4");
+			Assert.IsTrue(address._isFullRow);
+			Assert.IsFalse(address._isFullColumn);
+			address = new ExcelAddress("$4:$4");
+			Assert.IsTrue(address._isFullRow);
+			Assert.IsFalse(address._isFullColumn);
+			address = new ExcelAddress("4:$4");
+			Assert.IsTrue(address._isFullRow);
+			Assert.IsFalse(address._isFullColumn);
+			address = new ExcelAddress("$4:4");
+			Assert.IsTrue(address._isFullRow);
+			Assert.IsFalse(address._isFullColumn);
+			address = new ExcelAddress("'Sheet1'!$4:$4");
+			Assert.IsTrue(address._isFullRow);
+			Assert.IsFalse(address._isFullColumn);
+			address = new ExcelAddress("'Sheet1'!$4:'Sheet1'!$4");
+			Assert.IsTrue(address._isFullRow);
+			Assert.IsFalse(address._isFullColumn);
+		}
+
+		[TestMethod]
+		public void IsFullRowsAndColumnsMultiAddressesAreFalse()
+		{
+			var address = new ExcelAddress("B5");
+			Assert.IsFalse(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+			address = new ExcelAddress("B5:C6");
+			Assert.IsFalse(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+			address = new ExcelAddress("B5,C:C");
+			Assert.IsFalse(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+			address = new ExcelAddress("C:C,B5");
+			Assert.IsFalse(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+			address = new ExcelAddress("C:C,B5:D9");
+			Assert.IsFalse(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+			address = new ExcelAddress("B5:D9,C:C");
+			Assert.IsFalse(address._isFullColumn);
+			Assert.IsFalse(address._isFullRow);
+		}
+		#endregion
 		#endregion
 
 		#region ExcelFormulaAddress Tests
