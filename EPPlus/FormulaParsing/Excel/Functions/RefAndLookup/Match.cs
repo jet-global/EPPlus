@@ -55,6 +55,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			int? lastValidIndex = null;
 			do
 			{
+				if (navigator.CurrentValue == null && searchedValue == null)
+					return this.CreateResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
 				var matchResult = this.IsMatch(navigator.CurrentValue, searchedValue);
 				// For all match types, if the match result indicated equality, return the index (1 based)
 				if (matchResult == 0)
