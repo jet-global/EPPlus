@@ -47,6 +47,8 @@ namespace OfficeOpenXml
 		#region Class Variables
 		protected internal int _fromRow = -1, _toRow, _fromCol, _toCol;
 		protected internal bool _fromRowFixed, _fromColFixed, _toRowFixed, _toColFixed;
+		// True if the ExcelAddress represents a single rectangle with a full row or column (ie: C:C or $4:$9)
+		protected internal bool _isFullRow, _isFullColumn;
 		protected internal string _wb;
 		protected internal string _ws;
 		protected internal string _address;
@@ -506,7 +508,7 @@ namespace OfficeOpenXml
 			else
 			{
 				//Simple address
-				ExcelCellBase.GetRowColFromAddress(_address, out _fromRow, out _fromCol, out _toRow, out _toCol, out _fromRowFixed, out _fromColFixed, out _toRowFixed, out _toColFixed);
+				ExcelCellBase.GetRowColFromAddress(_address, out _fromRow, out _fromCol, out _toRow, out _toCol, out _fromRowFixed, out _fromColFixed, out _toRowFixed, out _toColFixed, out _isFullRow, out _isFullColumn);
 				_addresses = null;
 				_start = null;
 				_end = null;
@@ -755,7 +757,12 @@ namespace OfficeOpenXml
 			{
 				if (string.IsNullOrEmpty(_ws) || !string.IsNullOrEmpty(ws)) _ws = ws;
 				_firstAddress = address;
-				GetRowColFromAddress(address, out _fromRow, out _fromCol, out _toRow, out _toCol, out _fromRowFixed, out _fromColFixed, out _toRowFixed, out _toColFixed);
+				GetRowColFromAddress(address, out _fromRow, out _fromCol, out _toRow, out _toCol, out _fromRowFixed, out _fromColFixed, out _toRowFixed, out _toColFixed, out bool isFullRow, out bool isFullColumn);
+				if (!isMulti)
+				{
+					this._isFullRow = isFullRow;
+					this._isFullColumn = isFullColumn;
+				}
 			}
 			if (isMulti)
 			{

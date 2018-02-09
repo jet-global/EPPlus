@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 
 namespace EPPlusTest
 {
@@ -131,6 +133,40 @@ namespace EPPlusTest
 				// External references will not be updated.
 				actual = string.Join(string.Empty, package.Workbook.Names["Name5"].GetRelativeNameFormula(2, 2).Select(t => t.Value).ToList());
 				Assert.AreEqual("'[Demo Waterfall Chart.xlsx]Sheet1'!E5", actual);
+			}
+		}
+
+		[TestMethod]
+		public void GetRelativeNameFormulaFullColumnTest()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Names.Add("name", "'Sheet1'!$C:$C");
+				IEnumerable<Token> tokens = sheet1.Names.First().GetRelativeNameFormula(4, 2);
+				Assert.AreEqual(1, tokens.Count());
+				var address = new ExcelAddress(tokens.First().Value);
+				var x = address._isFullColumn;
+				Assert.AreEqual("'Sheet1'!$C:$C", address.Address);
+			}
+		}
+
+		[TestMethod]
+		public void GetRelativeNameFormulaUnionWithFullRowsAndColumns()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				sheet1.Names.Add("name", "B5:D9,C:C,A1:A2,4:5,'Sheet1'!E:'Sheet1'!E,'DiffSheet'!4:4,$G:H");
+				IEnumerable<Token> tokens = sheet1.Names.First().GetRelativeNameFormula(4, 2);
+				Assert.AreEqual(13, tokens.Count());
+				Assert.AreEqual("C8:E12", new ExcelAddress(tokens.ElementAt(0).Value).Address);
+				Assert.AreEqual("D:D", new ExcelAddress(tokens.ElementAt(2).Value).Address);
+				Assert.AreEqual("B4:B5", new ExcelAddress(tokens.ElementAt(4).Value).Address);
+				Assert.AreEqual("7:8", new ExcelAddress(tokens.ElementAt(6).Value).Address);
+				Assert.AreEqual("'Sheet1'!F:F", new ExcelAddress(tokens.ElementAt(8).Value).Address);
+				Assert.AreEqual("'DiffSheet'!7:7", new ExcelAddress(tokens.ElementAt(10).Value).Address);
+				Assert.AreEqual("$G:I", new ExcelAddress(tokens.ElementAt(12).Value).Address);
 			}
 		}
 		#endregion
