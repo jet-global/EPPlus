@@ -449,7 +449,41 @@ namespace EPPlusTest.Excel.Functions
 			Assert.AreEqual(1, result.Result);
 		}
 
-		[TestMethod, Ignore]
+		[TestMethod]
+		public void MatchWithNullArgumentsReturnsNotApplicableException()
+		{
+			var func = new Match();
+			var args = FunctionsHelper.CreateArgs("B7", "A1:C1", -1);
+			var parsingContext = ParsingContext.Create();
+			parsingContext.Scopes.NewScope(RangeAddress.Empty);
+			var provider = MockRepository.GenerateStub<ExcelDataProvider>();
+			parsingContext.ExcelDataProvider = provider;
+			var result = func.Execute(args, parsingContext);
+			Assert.IsInstanceOfType(result.Result, typeof(ExcelErrorValue));
+			var errorValue = result.Result as ExcelErrorValue;
+			Assert.AreEqual(eErrorType.NA, errorValue.Type);
+		}
+
+		[TestMethod]
+		public void MatchCannotFindMatchReturnsNotApplicableException()
+		{
+			var func = new Match();
+			var args = FunctionsHelper.CreateArgs("B7", "A1:C1", 0);
+			var parsingContext = ParsingContext.Create();
+			parsingContext.Scopes.NewScope(RangeAddress.Empty);
+			var provider = MockRepository.GenerateStub<ExcelDataProvider>();
+			provider.Stub(x => x.GetCellValue(WorksheetName, 1, 1)).Return(10);
+			provider.Stub(x => x.GetCellValue(WorksheetName, 1, 2)).Return(8);
+			provider.Stub(x => x.GetCellValue(WorksheetName, 1, 3)).Return(5);
+			provider.Stub(x => x.GetCellValue(WorksheetName, 7, 2)).Return(99);
+			parsingContext.ExcelDataProvider = provider;
+			var result = func.Execute(args, parsingContext);
+			Assert.IsInstanceOfType(result.Result, typeof(ExcelErrorValue));
+			var errorValue = result.Result as ExcelErrorValue;
+			Assert.AreEqual(eErrorType.NA, errorValue.Type);
+		}
+
+		[TestMethod]
 		public void MatchShouldHandleAddressOnOtherSheet()
 		{
 			using (var package = new ExcelPackage())

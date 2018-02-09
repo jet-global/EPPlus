@@ -106,6 +106,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 								 result.Result, this.ExpressionString);
 							this.ParsingContext.Configuration.Logger.Log(this.ParsingContext, msg);
 						}
+						if (result.ResultValue is ExcelErrorValue errorValue)
+							return new CompileResult(errorValue);
 						return new CompileResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 					}
 					return new CompileResult(result.ResultNumeric * -1, result.DataType);
