@@ -2131,7 +2131,7 @@ namespace OfficeOpenXml
 			SetSharedFormula(this, arrayFormula, this, true);
 		}
 
-		internal void Clear(ExcelAddressBase range)
+		internal void Clear(ExcelAddress range)
 		{
 			this.myWorksheet.MergedCells.Clear(range);
 			//First find the start cell

@@ -242,7 +242,7 @@ namespace OfficeOpenXml.FormulaParsing
 							var offsetResultTokens = wb.FormulaParser.Lexer.Tokenize(adr.FullAddress);
 							f.Tokens.InsertRange(offsetStartIndex, offsetResultTokens);
 							f.ws = worksheet;
-							f.iterator = CellStoreEnumeratorFactory<object>.GetNewEnumerator(f.ws._formulas, adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
+							f.iterator = f.ws._formulas.GetEnumerator(adr.Start.Row, adr.Start.Column, adr.End.Row, adr.End.Column);
 							goto iterateCells;
 						}
 					}

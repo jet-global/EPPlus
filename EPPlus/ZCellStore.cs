@@ -1322,7 +1322,7 @@ namespace OfficeOpenXml
 			/// <summary>
 			/// Gets the current cell address in string format.
 			/// </summary>
-			public string CellAddress => ExcelAddressBase.GetAddress(this.Row, this.Column);
+			public string CellAddress => ExcelAddress.GetAddress(this.Row, this.Column);
 
 			/// <summary>
 			/// Gets the current column.
