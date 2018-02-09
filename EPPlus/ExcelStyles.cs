@@ -280,7 +280,7 @@ namespace OfficeOpenXml
 				}
 
 				//Set for individual cells in the span. We loop all cells here since the cells are sorted with columns first.
-				var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(ws._values, 1, address._fromCol, address._toRow, address._toCol);
+				var cse = ws._values.GetEnumerator(1, address._fromCol, address._toRow, address._toCol);
 				while (cse.MoveNext())
 				{
 					if (cse.Column >= address.Start.Column &&
@@ -304,7 +304,7 @@ namespace OfficeOpenXml
 				if (!(address._fromCol == 1 && address._toCol == ExcelPackage.MaxColumns))
 				{
 					//Update cells with styled columns
-					cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(ws._values, 1, 0, address._toRow, 0);
+					cse = ws._values.GetEnumerator(1, 0, address._toRow, 0);
 					while (cse.MoveNext())
 					{
 						if (cse.Value._styleId == 0) continue;
@@ -338,7 +338,7 @@ namespace OfficeOpenXml
 					if (s == 0)
 					{
 						//iterate all columns and set the row to the style of the last column
-						var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(ws._values, 0, 1, 0, ExcelPackage.MaxColumns);
+						var cse = ws._values.GetEnumerator(0, 1, 0, ExcelPackage.MaxColumns);
 						while (cse.MoveNext())
 						{
 							s = cse.Value._styleId;
@@ -372,7 +372,7 @@ namespace OfficeOpenXml
 				}
 
 				//Update individual cells 
-				var cse2 = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(ws._values, address._fromRow, address._fromCol, address._toRow, address._toCol);
+				var cse2 = ws._values.GetEnumerator(address._fromRow, address._fromCol, address._toRow, address._toCol);
 				while (cse2.MoveNext())
 				{
 					var s = cse2.Value._styleId;
@@ -391,7 +391,7 @@ namespace OfficeOpenXml
 				}
 
 				//Update cells with styled rows
-				cse2 = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(ws._values, 0, 1, 0, address._toCol);
+				cse2 = ws._values.GetEnumerator(0, 1, 0, address._toCol);
 				while (cse2.MoveNext())
 				{
 					if (cse2.Value._styleId == 0) continue;
@@ -838,7 +838,7 @@ namespace OfficeOpenXml
 			CellXfs[0].useCnt = 1; //First item is allways used.
 			foreach (ExcelWorksheet sheet in _wb.Worksheets)
 			{
-				var cse = CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(sheet._values);
+				var cse = sheet._values.GetEnumerator();
 				while (cse.MoveNext())
 				{
 					var v = cse.Value._styleId;

@@ -3,25 +3,31 @@ using System.Collections.Generic;
 
 namespace OfficeOpenXml
 {
-	internal static class CellStoreDelegates<T>
-	{
-		internal delegate void SetRangeValueDelegate(List<T> list, int index, int row, int column, object value);
-
-		internal delegate void SetValueDelegate(List<T> list, int index, object value);
-	}
-
 	/// <summary>
 	/// Represents a generic interface that defines how a CellStore data structure can be accessed and updated. 
 	/// </summary>
 	/// <typeparam name="T">The type of object being stored in the CellStore.</typeparam>
 	internal interface ICellStore<T> : IDisposable
 	{
+		#region Properties
+		/// <summary>
+		/// Gets the maximum row of the cellstore.
+		/// </summary>
+		int MaximumRow { get; }
+
+		/// <summary>
+		/// Gets the maximum column of the cellstore.
+		/// </summary>
+		int MaximumColumn { get; }
+		#endregion
+
+		#region Methods
 		/// <summary>
 		/// Get the value at a particular location.
 		/// </summary>
 		/// <param name="row">The row to read a value from.</param>
 		/// <param name="column">The column to read a value from.</param>
-		/// <returns></returns>
+		/// <returns>The value in the cell coordinate.</returns>
 		T GetValue(int row, int column);
 
 		/// <summary>
@@ -67,19 +73,7 @@ namespace OfficeOpenXml
 		/// <param name="rows">The number of rows to delete.</param>
 		/// <param name="columns">The number of columns to delete.</param>
 		void Delete(int fromRow, int fromCol, int rows, int columns);
-
-
-		/// <summary>
-		/// Deletes rows and/or columns from the workbook. This deletes all existing nodes in the specified range.
-		/// If <paramref name="shift"/> is set to true, all subsequent keys will be updated to reflect their new position after being shifted into the newly-vacated space.
-		/// </summary>
-		/// <param name="fromRow">The first row to delete.</param>
-		/// <param name="fromCol">The first column to delete.</param>
-		/// <param name="rows">The number of rows to delete.</param>
-		/// <param name="columns">The number of columns to delete.</param>
-		/// <param name="shift">Whether or not subsequent rows and columns should be shifted up / left to fill the space that was deleted, or left where they are.</param>
-		void Delete(int fromRow, int fromCol, int rows, int columns, bool shift);
-
+		
 		/// <summary>
 		/// Determine if a value exists at the given location.
 		/// </summary>
@@ -115,6 +109,49 @@ namespace OfficeOpenXml
 		/// <param name="rows">The number of rows being inserted.</param>
 		/// <param name="columns">The number of columns being inserted.</param>
 		void Insert(int rowFrom, int columnFrom, int rows, int columns);
+
+		/// <summary>
+		/// Gets a default enumerator for the cellstore.
+		/// </summary>
+		/// <returns>The default enumerator for the cellstore.</returns>
+		ICellStoreEnumerator<T> GetEnumerator();
+
+		/// <summary>
+		/// Gets a contained enumerator for the cellstore.
+		/// </summary>
+		/// <param name="startRow">The minimum row to enumerate.</param>
+		/// <param name="startColumn">The minimum column to enumerate.</param>
+		/// <param name="endRow">The maximum row to enumerate.</param>
+		/// <param name="endColumn">The maximum column to enumerate.</param>
+		/// <returns>The constrained enumerator for the cellstore.</returns>
+		ICellStoreEnumerator<T> GetEnumerator(int startRow, int startColumn, int endRow, int endColumn);
+		#endregion
+	}
+
+	/// <summary>
+	/// Represents an interface used to store flags with cell metadata.
+	/// </summary>
+	internal interface IFlagStore : ICellStore<byte>
+	{
+		#region Methods
+		/// <summary>
+		/// Adds or removes the given <paramref name="cellFlags"/> value based on <paramref name="value"/>.
+		/// </summary>
+		/// <param name="Row">The cell row to set a flag for.</param>
+		/// <param name="Col">The cell column to set a flag for.</param>
+		/// <param name="value">A boolean value indicating whether to add or remove the flag value.</param>
+		/// <param name="cellFlags">The flags to set for the cell.</param>
+		void SetFlagValue(int Row, int Col, bool value, CellFlags cellFlags);
+
+		/// <summary>
+		/// Gets the flag values from a given cell.
+		/// </summary>
+		/// <param name="Row">The cell row to get a flag for.</param>
+		/// <param name="Col">The cell column to get a flag for.</param>
+		/// <param name="cellFlags">The flags to query for.</param>
+		/// <returns>True if the flags are set; otherwise false.</returns>
+		bool GetFlagValue(int Row, int Col, CellFlags cellFlags);
+		#endregion
 	}
 
 	/// <summary>
@@ -145,39 +182,41 @@ namespace OfficeOpenXml
 	}
 
 	/// <summary>
-	/// A factory class for generating CellStoreEnumerators for a given <see cref="ICellStore{T}"/>.
+	/// This class will build the requested ICellStore type.
+	/// Currently it uses a hardcoded flag to toggle between the new implementation
+	/// and the original. Soon the old CellStore will be deleted but this structure 
+	/// will remain in place just so there is one place to always call into for a new 
+	/// ICellStore. This will simplify future development should we ever revisit this.
 	/// </summary>
-	/// <typeparam name="T">The type of the value being stored in the <see cref="ICellStore{T}"/>.</typeparam>
-	internal class CellStoreEnumeratorFactory<T>
+	internal static class CellStore
 	{
+		#region Properties
+		static bool UseZCellStore { get; } = true;
+		#endregion
+
+		#region Public Static Methods
 		/// <summary>
-		/// Enumerate the entire CellStore.
+		/// Returns a new <see cref="ICellStore{T}"/>.
 		/// </summary>
-		/// <param name="cellStore">The CellStore to enumerate.</param>
-		/// <returns>An <see cref="ICellStoreEnumerator{T}"/> that enumerates the entire <paramref name="cellStore"/>.</returns>
-		public static ICellStoreEnumerator<T> GetNewEnumerator(ICellStore<T> cellStore)
+		/// <typeparam name="T">The type the new cellstore will contain.</typeparam>
+		/// <returns>The new <see cref="ICellStore{T}"/>.</returns>
+		public static ICellStore<T> Build<T>()
 		{
-			var specificCellStore = cellStore as CellStore<T>;
-			if (specificCellStore != null)
-				return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore);
-			throw new NotImplementedException($"No CellStoreEnumerator accepts the type {cellStore.GetType()}.");
+			if (CellStore.UseZCellStore)
+				return new ZCellStore<T>();
+			return new CellStore<T>();
 		}
 
 		/// <summary>
-		/// Enumerate only the part of the <paramref name="cellStore"/> that lie within the given bounds.
+		/// Returns a new <see cref="IFlagStore"/>.
 		/// </summary>
-		/// <param name="cellStore">The <see cref="ICellStore{T}"/> to partially enumerate.</param>
-		/// <param name="startRow">The minimum row of cells to enumerate.</param>
-		/// <param name="startColumn">The minimum column of cells to enumerate.</param>
-		/// <param name="endRow">The maximum row to enumerate.</param>
-		/// <param name="endColumn">The maximum column to enumerate.</param>
-		/// <returns>An enumerator that only returns values within the given range.</returns>
-		public static ICellStoreEnumerator<T> GetNewEnumerator(ICellStore<T> cellStore, int startRow, int startColumn, int endRow, int endColumn)
+		/// <returns>The new <see cref="IFlagStore"/>.</returns>
+		public static IFlagStore BuildFlagStore()
 		{
-			var specificCellStore = cellStore as CellStore<T>;
-			if (specificCellStore != null)
-				return new CellStore<T>.CellsStoreEnumerator<T>(specificCellStore, startRow, startColumn, endRow, endColumn);
-			throw new NotImplementedException($"No CellStoreEnumerator accepts the type {cellStore.GetType()}.");
+			if (CellStore.UseZCellStore)
+				return new ZFlagStore();
+			return new FlagCellStore();
 		}
+		#endregion
 	}
 }

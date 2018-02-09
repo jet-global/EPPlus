@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{84BB37E9-CE27-48E0-88F6-A741A46D5883}"
 	ProjectSection(SolutionItems) = preProject
@@ -88,6 +88,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9580F668-EE01-4760-A342-1A3C906D10E7}
 		VisualSVNWorkingCopyRoot = .
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
