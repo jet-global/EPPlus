@@ -553,53 +553,30 @@ namespace OfficeOpenXml
 			{
 				if (_ws.Names.ContainsKey("_xlnm.Print_Titles"))
 				{
-					ExcelRangeBase r = _ws.Names["_xlnm.Print_Titles"] as ExcelRangeBase;
-					if (r.Start.Column == 1 && r.End.Column == ExcelPackage.MaxColumns)
-					{
-						return new ExcelAddress(r.FirstAddress);
-					}
-					else if (r._addresses != null)
-					{
-						return r._addresses.FirstOrDefault(a => a.Start.Column == 1 && a.End.Column == ExcelPackage.MaxColumns);
-					}
+					var rangeAddress = _ws.Names["_xlnm.Print_Titles"].GetFormulaAsCellRange();
+					if (rangeAddress == null)
+						throw new InvalidOperationException("Printer settings named ranges must be cell references.");
+					else if (rangeAddress.Start.Column == 1 && rangeAddress.End.Column == ExcelPackage.MaxColumns)
+						return new ExcelAddress(rangeAddress.FirstAddress);
+					else if (rangeAddress._addresses != null)
+						return rangeAddress._addresses.FirstOrDefault(a => a.Start.Column == 1 && a.End.Column == ExcelPackage.MaxColumns);
 					else
-					{
 						return null;
-					}
 				}
 				else
-				{
 					return null;
-				}
 			}
 			set
 			{
-
 				//Must span entire columns
 				if (!(value.Start.Column == 1 && value.End.Column == ExcelPackage.MaxColumns))
-				{
 					throw new InvalidOperationException("Address must span full columns only (for ex. Address=\"A:A\" for the first column).");
-				}
-
 				var vertAddr = RepeatColumns;
-				string addr;
-				if (vertAddr == null)
-				{
-					addr = value.Address;
-				}
-				else
-				{
-					addr = vertAddr.Address + "," + value.Address;
-				}
-
+				string addr = vertAddr == null ? value.Address : vertAddr.Address + "," + value.Address;
 				if (_ws.Names.ContainsKey("_xlnm.Print_Titles"))
-				{
-					_ws.Names["_xlnm.Print_Titles"].Address = addr;
-				}
+					_ws.Names["_xlnm.Print_Titles"].NameFormula = addr;
 				else
-				{
 					_ws.Names.Add("_xlnm.Print_Titles", new ExcelRangeBase(_ws, addr));
-				}
 			}
 		}
 		/// <summary>
@@ -613,55 +590,33 @@ namespace OfficeOpenXml
 			{
 				if (_ws.Names.ContainsKey("_xlnm.Print_Titles"))
 				{
-					ExcelRangeBase r = _ws.Names["_xlnm.Print_Titles"] as ExcelRangeBase;
-
-					if (r.Start.Row == 1 && r.End.Row == ExcelPackage.MaxRows)
-					{
-						return new ExcelAddress(r.FirstAddress);
-					}
-					else if (r._addresses != null)
-					{
-						return r._addresses.FirstOrDefault(a => a.Start.Row == 1 && a.End.Row == ExcelPackage.MaxRows);
-					}
+					var rangeAddress = _ws.Names["_xlnm.Print_Titles"].GetFormulaAsCellRange();
+					if (rangeAddress == null)
+						throw new InvalidOperationException("Printer settings named ranges must be cell references.");
+					else if (rangeAddress.Start.Row == 1 && rangeAddress.End.Row == ExcelPackage.MaxRows)
+						return new ExcelAddress(rangeAddress.FirstAddress);
+					else if (rangeAddress._addresses != null)
+						return rangeAddress._addresses.FirstOrDefault(a => a.Start.Row == 1 && a.End.Row == ExcelPackage.MaxRows);
 					else
-					{
 						return null;
-					}
 				}
 				else
-				{
 					return null;
-				}
 			}
 			set
 			{
 				//Must span entire rows
 				if (!(value.Start.Row == 1 && value.End.Row == ExcelPackage.MaxRows))
-				{
 					throw new InvalidOperationException("Address must span rows only (for ex. Address=\"1:1\" for the first row).");
-				}
-
 				var horAddr = RepeatRows;
-				string addr;
-				if (horAddr == null)
-				{
-					addr = value.Address;
-				}
-				else
-				{
-					addr = value.Address + "," + horAddr.Address;
-				}
-
+				string address = horAddr == null ? value.Address : value.Address + "," + horAddr.Address;
 				if (_ws.Names.ContainsKey("_xlnm.Print_Titles"))
-				{
-					_ws.Names["_xlnm.Print_Titles"].Address = addr;
-				}
+					_ws.Names["_xlnm.Print_Titles"].NameFormula = address;
 				else
-				{
-					_ws.Names.Add("_xlnm.Print_Titles", new ExcelRangeBase(_ws, addr));
-				}
+					_ws.Names.Add("_xlnm.Print_Titles", new ExcelRangeBase(_ws, address));
 			}
 		}
+
 		/// <summary>
 		/// The printarea.
 		/// Null if no print area is set.
@@ -671,28 +626,18 @@ namespace OfficeOpenXml
 			get
 			{
 				if (_ws.Names.ContainsKey("_xlnm.Print_Area"))
-				{
-					return _ws.Names["_xlnm.Print_Area"];
-				}
+					return _ws.Names["_xlnm.Print_Area"].GetFormulaAsCellRange();
 				else
-				{
 					return null;
-				}
 			}
 			set
 			{
 				if (value == null)
-				{
 					_ws.Names.Remove("_xlnm.Print_Area");
-				}
 				else if (_ws.Names.ContainsKey("_xlnm.Print_Area"))
-				{
-					_ws.Names["_xlnm.Print_Area"].Address = value.Address;
-				}
+					_ws.Names["_xlnm.Print_Area"].NameFormula = value.Address;
 				else
-				{
 					_ws.Names.Add("_xlnm.Print_Area", value);
-				}
 			}
 		}
 		const string _gridLinesPath = "d:printOptions/@gridLines";

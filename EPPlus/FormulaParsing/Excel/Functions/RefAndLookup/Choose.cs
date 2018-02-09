@@ -81,7 +81,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			return 0;
 		}
 
-		public ExcelAddressBase Address
+		public ExcelAddress Address
 		{
 			get { return null; }
 		}

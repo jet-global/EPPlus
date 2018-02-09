@@ -101,7 +101,7 @@ namespace OfficeOpenXml
 			get { return this.CommentHelper.GetXmlNodeString("@ref"); }
 			set
 			{
-				var a = new ExcelAddressBase(value);
+				var a = new ExcelAddress(value);
 				var rows = a._fromRow - this.Range._fromRow;
 				var cols = a._fromCol - this.Range._fromCol;
 				this.Range.Address = value;

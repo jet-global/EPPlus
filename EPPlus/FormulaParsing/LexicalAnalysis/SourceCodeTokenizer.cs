@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
+
 namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 {
 	public class SourceCodeTokenizer : ISourceCodeTokenizer
@@ -83,9 +84,6 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 
 			return context.Result;
 		}
-
-
-
 
 		private static void CleanupTokens(TokenizerContext context, IDictionary<string, Token> tokens)
 		{

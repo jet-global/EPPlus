@@ -257,7 +257,7 @@ namespace OfficeOpenXml
 			}
 			set
 			{
-				_worksheet.MergedCells.Add(new ExcelAddressBase(1, ColumnMin, ExcelPackage.MaxRows, ColumnMax), true);
+				_worksheet.MergedCells.Add(new ExcelAddress(1, ColumnMin, ExcelPackage.MaxRows, ColumnMax), true);
 			}
 		}
 		#endregion

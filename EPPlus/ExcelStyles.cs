@@ -171,7 +171,7 @@ namespace OfficeOpenXml
 		/// <returns></returns>
 		internal int PropertyChange(StyleBase sender, Style.StyleChangeEventArgs e)
 		{
-			var address = new ExcelAddressBase(e.Address);
+			var address = new ExcelAddress(e.Address);
 			var ws = _wb.Worksheets[e.PositionID];
 			Dictionary<int, int> styleCashe = new Dictionary<int, int>();
 			//Set single address
@@ -189,7 +189,7 @@ namespace OfficeOpenXml
 			}
 			return 0;
 		}
-		private void SetStyleAddress(StyleBase sender, Style.StyleChangeEventArgs e, ExcelAddressBase address, ExcelWorksheet ws, ref Dictionary<int, int> styleCashe)
+		private void SetStyleAddress(StyleBase sender, Style.StyleChangeEventArgs e, ExcelAddress address, ExcelWorksheet ws, ref Dictionary<int, int> styleCashe)
 		{
 			if (address.Start.Column == 0 || address.Start.Row == 0)
 			{

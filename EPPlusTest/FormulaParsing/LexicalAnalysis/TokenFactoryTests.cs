@@ -3,15 +3,18 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using Rhino.Mocks;
+
 namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 {
 	[TestClass]
 	public class TokenFactoryTests
 	{
+		#region Class Variables
 		private ITokenFactory _tokenFactory;
 		private INameValueProvider _nameValueProvider;
+		#endregion
 
-
+		#region Test Setup
 		[TestInitialize]
 		public void Setup()
 		{
@@ -20,13 +23,9 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 			_nameValueProvider = MockRepository.GenerateStub<INameValueProvider>();
 			_tokenFactory = new TokenFactory(context.Configuration.FunctionRepository, _nameValueProvider);
 		}
+		#endregion
 
-		[TestCleanup]
-		public void Cleanup()
-		{
-
-		}
-
+		#region Test Methods
 		[TestMethod]
 		public void ShouldCreateAStringToken()
 		{
@@ -150,7 +149,7 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 			var input = "ws!A1:B15";
 			var token = _tokenFactory.Create(Enumerable.Empty<Token>(), input);
 			Assert.AreEqual(TokenType.ExcelAddress, token.TokenType);
-			Assert.AreEqual("WS!A1:B15", token.Value);
+			Assert.AreEqual("ws!A1:B15", token.Value);
 		}
 
 		[TestMethod]
@@ -170,7 +169,8 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 			var input = "[1]ws!A1:B15";
 			var token = _tokenFactory.Create(Enumerable.Empty<Token>(), input);
 			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
-			Assert.AreEqual("[1]WS!A1:B15", token.Value);
+			Assert.AreEqual("[1]ws!A1:B15", token.Value);
 		}
+		#endregion
 	}
 }

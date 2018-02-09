@@ -46,21 +46,19 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis.TokenSeparatorHandlers
 		};
 
 		/// <summary>
-		/// Handles a tokenseparator.
+		/// Handles a token separator.
 		/// </summary>
-		/// <param name="c"></param>
-		/// <param name="tokenSeparator"></param>
-		/// <param name="context"></param>
-		/// <param name="tokenIndexProvider"></param>
-		/// <returns>Returns true if the tokenseparator was handled.</returns>
+		/// <param name="c">The current token character.</param>
+		/// <param name="tokenSeparator">The current token separator.</param>
+		/// <param name="context">The tokenizer context.</param>
+		/// <param name="tokenIndexProvider">The <see cref="ITokenIndexProvider"/>.</param>
+		/// <returns>Returns true if the token separator was handled.</returns>
 		public static bool Handle(char c, Token tokenSeparator, TokenizerContext context, ITokenIndexProvider tokenIndexProvider)
 		{
 			foreach (var handler in _handlers)
 			{
 				if (handler.Handle(c, tokenSeparator, context, tokenIndexProvider))
-				{
 					return true;
-				}
 			}
 			return false;
 		}

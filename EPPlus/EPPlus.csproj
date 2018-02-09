@@ -237,6 +237,7 @@
     <Compile Include="Drawing\Sparkline\ExcelSparklineGroups.cs" />
     <Compile Include="Drawing\Sparkline\SparklineEnums.cs" />
     <Compile Include="ExcelChartsheet.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="ExternalReferenceCollection.cs" />
     <Compile Include="FontSize.cs" />
     <Compile Include="DataValidation\Contracts\IExcelDataValidation.cs" />
@@ -537,6 +538,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\HLookup.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\Index.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\Indirect.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\IndirectAddress.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\Lookup.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\LookupArguments.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\LookupDirection.cs" />

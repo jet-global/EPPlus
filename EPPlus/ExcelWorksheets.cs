@@ -40,6 +40,7 @@ using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Drawing.Slicers;
 using OfficeOpenXml.Drawing.Sparkline;
 using OfficeOpenXml.Drawing.Vml;
+using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Utils;
 using OfficeOpenXml.VBA;
 
@@ -207,7 +208,7 @@ namespace OfficeOpenXml
 				}
 				if (originalWorksheet.Names.Count > 0)
 				{
-					this.CopySheetNames(originalWorksheet, added);
+					this.CopySheetNamedRanges(originalWorksheet, added);
 				}
 				if (originalWorksheet.SparklineGroups.SparklineGroups.Count > 0)
 				{
@@ -296,13 +297,22 @@ namespace OfficeOpenXml
 
 			ExcelWorksheet worksheet = this.Worksheets[Index];
 			if (worksheet.Drawings.Count > 0)
-			{
 				worksheet.Drawings.ClearDrawings();
+			if (!(worksheet is ExcelChartsheet) && worksheet.Comments.Count > 0)
+				worksheet.Comments.Clear();
+
+			// Update all named range formulas referencing this sheet to #REF!
+			foreach (var namedRange in this.Package.Workbook.Names)
+			{
+				namedRange.NameFormula = this.Package.FormulaManager.UpdateFormulaDeletedSheetReferences(namedRange.NameFormula, worksheet.Name);
 			}
 
-			if (!(worksheet is ExcelChartsheet) && worksheet.Comments.Count > 0)
+			foreach (var sheet in this.Worksheets.Where(w => !w.Value.Name.IsEquivalentTo(worksheet.Name)))
 			{
-				worksheet.Comments.Clear();
+				foreach (var namedRange in sheet.Value.Names)
+				{
+					namedRange.NameFormula = this.Package.FormulaManager.UpdateFormulaDeletedSheetReferences(namedRange.NameFormula, worksheet.Name);
+				}
 			}
 
 			//Delete any parts still with relations to the Worksheet.
@@ -699,31 +709,12 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private void CopySheetNames(ExcelWorksheet originalWorksheet, ExcelWorksheet addedWorksheet)
+		private void CopySheetNamedRanges(ExcelWorksheet originalWorksheet, ExcelWorksheet addedWorksheet)
 		{
-			foreach (var name in originalWorksheet.Names)
+			foreach (var namedRange in originalWorksheet.Names)
 			{
-				ExcelNamedRange newName;
-				if (!name.IsName)
-				{
-					if (name.WorkSheet == originalWorksheet.Name)
-					{
-						newName = addedWorksheet.Names.Add(name.Name, addedWorksheet.Cells[name.FirstAddress]);
-					}
-					else
-					{
-						newName = addedWorksheet.Names.Add(name.Name, addedWorksheet.Workbook.Worksheets[name.WorkSheet].Cells[name.FirstAddress]);
-					}
-				}
-				else if (!string.IsNullOrEmpty(name.NameFormula))
-				{
-					newName = addedWorksheet.Names.AddFormula(name.Name, name.Formula);
-				}
-				else
-				{
-					newName = addedWorksheet.Names.AddValue(name.Name, name.Value);
-				}
-				newName.NameComment = name.NameComment;
+				string updatedFormula = this.Package.FormulaManager.UpdateFormulaSheetReferences(namedRange.NameFormula, originalWorksheet.Name, addedWorksheet.Name);
+				addedWorksheet.Names.Add(namedRange.Name, updatedFormula, namedRange.IsNameHidden, namedRange.NameComment);
 			}
 		}
 
@@ -1136,7 +1127,7 @@ namespace OfficeOpenXml
 						var slicer = newWorksheet.Slicers.Slicers.First(excelSlicer => excelSlicer.Name == draw.Name);
 						slicer.Name += $" {newSlicerNumber}";
 						slicer.SlicerCache.Name += newSlicerNumber.ToString();
-						this.Package.Workbook.Names.AddFormula(slicer.SlicerCache.Name, "#N/A");
+						this.Package.Workbook.Names.Add(slicer.SlicerCache.Name, "#N/A");
 
 						newSlicerDrawing.Slicer = slicer;
 						newSlicerDrawing.Name = newSlicerDrawing.Slicer.Name;

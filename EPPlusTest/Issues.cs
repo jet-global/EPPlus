@@ -976,7 +976,7 @@ namespace EPPlusTest
 		{
 			using (var exfile = new ExcelPackage(new FileInfo(@"c:\temp\bug\dotinname.xlsx")))
 			{
-				var v = exfile.Workbook.Worksheets["sheet1.3"].Names["Test.Name"].Value;
+				var v = exfile.Workbook.Worksheets["sheet1.3"].Names["Test.Name"].NameFormula;
 				Assert.AreEqual(v, 1);
 			}
 		}
@@ -1349,7 +1349,7 @@ namespace EPPlusTest
 				sheet1.Cells["A3"].Formula = "myName3";
 
 				sheet2.InsertRow(2, 2);
-				Assert.AreEqual("'Sheet2'!$A$5", package.Workbook.Names.Last().Address);
+				Assert.AreEqual("'Sheet2'!$A$5", package.Workbook.Names.Last().NameFormula);
 
 			}
 		}

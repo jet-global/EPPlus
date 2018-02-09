@@ -230,15 +230,8 @@ namespace OfficeOpenXml
 		{
 			if (item.Column == 0)
 			{
-				if (item.SheetID == -1)
-				{
-					workbook.Names[item.Row].NameValue = v;
-				}
-				else
-				{
-					var sh = workbook.Worksheets.GetBySheetID(item.SheetID);
-					sh.Names[item.Row].NameValue = v;
-				}
+				// This used to set named range values, which no longer exist.
+				throw new InvalidOperationException("Invalid cell column: 0.");
 			}
 			else
 			{

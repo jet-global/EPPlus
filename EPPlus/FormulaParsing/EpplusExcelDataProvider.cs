@@ -15,7 +15,7 @@ namespace OfficeOpenXml.FormulaParsing
 			ICellStoreEnumerator<ExcelCoreValue> _values = null;
 			int _fromRow, _toRow, _fromCol, _toCol;
 			int _cellCount = 0;
-			ExcelAddressBase _address;
+			ExcelAddress _address;
 			ICellInfo _cell;
 
 			public RangeInfo(ExcelWorksheet ws, int fromRow, int fromCol, int toRow, int toCol)
@@ -25,13 +25,13 @@ namespace OfficeOpenXml.FormulaParsing
 				_fromCol = fromCol;
 				_toRow = toRow;
 				_toCol = toCol;
-				_address = new ExcelAddressBase(_fromRow, _fromCol, _toRow, _toCol);
+				_address = new ExcelAddress(_fromRow, _fromCol, _toRow, _toCol);
 				_address._ws = ws.Name;
 				_values = ws._values.GetEnumerator(_fromRow, _fromCol, _toRow, _toCol);
 				_cell = new CellInfo(_ws, _values);
 			}
 
-			public RangeInfo(ExcelWorksheet ws, ExcelAddressBase address)
+			public RangeInfo(ExcelWorksheet ws, ExcelAddress address)
 			{
 				_ws = ws;
 				_fromRow = address._fromRow;
@@ -147,7 +147,7 @@ namespace OfficeOpenXml.FormulaParsing
 				return this;
 			}
 
-			public ExcelAddressBase Address
+			public ExcelAddress Address
 			{
 				get { return _address; }
 			}
@@ -294,16 +294,15 @@ namespace OfficeOpenXml.FormulaParsing
 		}
 		public override IRangeInfo GetRange(string worksheet, int row, int column, string address)
 		{
-			var addr = new ExcelAddress(worksheet, address);
-			if (addr.IsTableAddress)
-			{
-				addr.SetRCFromTable(_package, new ExcelAddressBase(row, column, row, column));
-			}
-			//SetCurrentWorksheet(addr.WorkSheet);
-			var wsName = string.IsNullOrEmpty(addr.WorkSheet) ? _currentWorksheet.Name : addr.WorkSheet;
+			var excelAddress = new ExcelAddress(worksheet, address);
+			// External references should not be resolved.
+			if (!string.IsNullOrEmpty(excelAddress?.Workbook))
+				return null;
+			if (excelAddress.IsTableAddress)
+				excelAddress.SetRCFromTable(_package, new ExcelAddress(row, column, row, column));
+			var wsName = string.IsNullOrEmpty(excelAddress.WorkSheet) ? _currentWorksheet.Name : excelAddress.WorkSheet;
 			var ws = _package.Workbook.Worksheets[wsName];
-			//return new CellsStoreEnumerator<object>(ws._values, addr._fromRow, addr._fromCol, addr._toRow, addr._toCol);
-			return new RangeInfo(ws, addr);
+			return new RangeInfo(ws, excelAddress);
 		}
 		public override INameInfo GetName(string worksheet, string name)
 		{
@@ -338,8 +337,7 @@ namespace OfficeOpenXml.FormulaParsing
 					return null;
 				}
 			}
-			id = ExcelAddressBase.GetCellID(nameItem.LocalSheetID, nameItem.Index, 0);
-
+			id = ExcelAddress.GetCellID(nameItem.LocalSheetID, nameItem.Index, 0);
 			if (_names.ContainsKey(id))
 			{
 				return _names[id];
@@ -350,21 +348,19 @@ namespace OfficeOpenXml.FormulaParsing
 				{
 					Id = id,
 					Name = name,
-					Worksheet = nameItem.Worksheet == null ? nameItem._ws : nameItem.Worksheet.Name,
-					Formula = nameItem.Formula
+					Worksheet = nameItem.LocalSheet?.Name,
+					Formula = nameItem.NameFormula
 				};
-				if (nameItem._fromRow > 0)
-				{
-					ni.Value = new RangeInfo(nameItem.Worksheet ?? ws, nameItem);
-				}
+				var range = nameItem.GetFormulaAsCellRange();
+				if (range == null)
+					ni.Value = nameItem.NameFormula;
 				else
-				{
-					ni.Value = nameItem.Value;
-				}
+					ni.Value = new RangeInfo(range.Worksheet ?? ws, range);
 				_names.Add(id, ni);
 				return ni;
 			}
 		}
+
 		public override IEnumerable<object> GetRangeValues(string address)
 		{
 			SetCurrentWorksheet(ExcelAddressInfo.Parse(address));

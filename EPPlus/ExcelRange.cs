@@ -30,6 +30,7 @@
  * Jan Källman		    License changed GPL-->LGPL 2011-12-27
  *******************************************************************************/
 using System;
+
 namespace OfficeOpenXml
 {
 	/// <summary>
@@ -59,67 +60,38 @@ namespace OfficeOpenXml
 		#endregion
 		#region "Indexers"
 		/// <summary>
-		/// Access the range using an address
+		/// Access the range using an address.
 		/// </summary>
-		/// <param name="Address">The address</param>
-		/// <returns>A range object</returns>
-		public ExcelRange this[string Address]
+		/// <param name="address">The address to retrieve.</param>
+		/// <returns>A range object.</returns>
+		public ExcelRange this[string address]
 		{
 			get
 			{
-				if (myWorksheet.Names.ContainsKey(Address))
-				{
-					if (myWorksheet.Names[Address].IsName)
-					{
-						return null;
-					}
-					else
-					{
-						base.Address = myWorksheet.Names[Address].Address;
-					}
-				}
+				if (myWorksheet.Names.ContainsKey(address))
+					throw new InvalidOperationException($"Invalid attempt to index into a range with the defined name: {address}.");
 				else
-				{
-					base.Address = Address;
-				}
+					base.Address = address;
 				myExcelRichTextCollection = null;
 				return this;
 			}
 		}
 
-		private ExcelRange GetTableAddess(ExcelWorksheet _worksheet, string address)
-		{
-			int ixStart = address.IndexOf('[');
-			if (ixStart == 0) //External Address
-			{
-				int ixEnd = address.IndexOf(']', ixStart + 1);
-				if (ixStart >= 0 & ixEnd >= 0)
-				{
-					var external = address.Substring(ixStart + 1, ixEnd - 1);
-					//if (Worksheet.Workbook._externalReferences.Count < external)
-					//{
-					//foreach(var 
-					//}
-				}
-			}
-			return null;
-		}
 		/// <summary>
-		/// Access a single cell
+		/// Access a single cell.
 		/// </summary>
-		/// <param name="Row">The row</param>
-		/// <param name="Col">The column</param>
-		/// <returns>A range object</returns>
-		public ExcelRange this[int Row, int Col]
+		/// <param name="row">The row.</param>
+		/// <param name="col">The column.</param>
+		/// <returns>A range object.</returns>
+		public ExcelRange this[int row, int col]
 		{
 			get
 			{
-				ValidateRowCol(Row, Col);
-
-				_fromCol = Col;
-				_fromRow = Row;
-				_toCol = Col;
-				_toRow = Row;
+				ValidateRowCol(row, col);
+				_fromCol = col;
+				_fromRow = row;
+				_toCol = col;
+				_toRow = row;
 				myExcelRichTextCollection = null;
 				// avoid address re-calculation
 				//base.Address = GetAddress(_fromRow, _fromCol);
@@ -131,25 +103,25 @@ namespace OfficeOpenXml
 				return this;
 			}
 		}
+
 		/// <summary>
-		/// Access a range of cells
+		/// Access a range of cells.
 		/// </summary>
-		/// <param name="FromRow">Start row</param>
-		/// <param name="FromCol">Start column</param>
-		/// <param name="ToRow">End Row</param>
-		/// <param name="ToCol">End Column</param>
-		/// <returns></returns>
-		public ExcelRange this[int FromRow, int FromCol, int ToRow, int ToCol]
+		/// <param name="fromRow">Start row.</param>
+		/// <param name="fromCol">Start column.</param>
+		/// <param name="toRow">End Row.</param>
+		/// <param name="toCol">End Column.</param>
+		/// <returns>An <see cref="ExcelRange"/> matching the specified parameters.</returns>
+		public ExcelRange this[int fromRow, int fromCol, int toRow, int toCol]
 		{
 			get
 			{
-				ValidateRowCol(FromRow, FromCol);
-				ValidateRowCol(ToRow, ToCol);
-
-				_fromCol = FromCol;
-				_fromRow = FromRow;
-				_toCol = ToCol;
-				_toRow = ToRow;
+				ValidateRowCol(fromRow, fromCol);
+				ValidateRowCol(toRow, toCol);
+				_fromCol = fromCol;
+				_fromRow = fromRow;
+				_toCol = toCol;
+				_toRow = toRow;
 				myExcelRichTextCollection = null;
 				// avoid address re-calculation
 				//base.Address = GetAddress(_fromRow, _fromCol, _toRow, _toCol);
@@ -162,17 +134,15 @@ namespace OfficeOpenXml
 			}
 		}
 		#endregion
-		private static void ValidateRowCol(int Row, int Col)
-		{
-			if (Row < 1 || Row > ExcelPackage.MaxRows)
-			{
-				throw (new ArgumentException("Row out of range"));
-			}
-			if (Col < 1 || Col > ExcelPackage.MaxColumns)
-			{
-				throw (new ArgumentException("Column out of range"));
-			}
-		}
 
+		#region Private Methods
+		private static void ValidateRowCol(int row, int col)
+		{
+			if (row < 1 || row > ExcelPackage.MaxRows)
+				throw (new ArgumentException("Row out of range"));
+			if (col < 1 || col > ExcelPackage.MaxColumns)
+				throw (new ArgumentException("Column out of range"));
+		}
+		#endregion
 	}
 }

@@ -83,7 +83,7 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 		{
 			Require.That(address).Named("range").IsNotNullOrEmpty();
 			//var addressInfo = ExcelAddressInfo.Parse(address);
-			var adr = new ExcelAddressBase(address);
+			var adr = new ExcelAddress(address);
 			var sheet = string.IsNullOrEmpty(adr.WorkSheet) ? worksheetName : adr.WorkSheet;
 			var dim = _excelDataProvider.GetDimensionEnd(sheet);
 			var rangeAddress = new RangeAddress()
@@ -111,7 +111,7 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 		{
 			Require.That(range).Named("range").IsNotNullOrEmpty();
 			//var addressInfo = ExcelAddressInfo.Parse(range);
-			var adr = new ExcelAddressBase(range);
+			var adr = new ExcelAddress(range);
 			var rangeAddress = new RangeAddress()
 			{
 				Address = adr.Address,

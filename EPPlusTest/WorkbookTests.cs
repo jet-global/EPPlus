@@ -22,12 +22,12 @@ namespace EPPlusTest
 			{
 				using (var package = new ExcelPackage(file))
 				{
-					Assert.AreEqual("'[F:\\Cgypt\\Desktop\\test%20cases\\Demo%20Waterfall%20Chart.xlsx]Chart'!$A$1", package.Workbook.Names.First().Formula);
+					Assert.AreEqual("'[F:\\Cgypt\\Desktop\\test%20cases\\Demo%20Waterfall%20Chart.xlsx]Chart'!$A$1", package.Workbook.Names.First().NameFormula);
 					package.SaveAs(newFile);
 				}
 				using (var package = new ExcelPackage(newFile))
 				{
-					Assert.AreEqual("'[F:\\Cgypt\\Desktop\\test%20cases\\Demo%20Waterfall%20Chart.xlsx]Chart'!$A$1", package.Workbook.Names.First().Formula);
+					Assert.AreEqual("'[F:\\Cgypt\\Desktop\\test%20cases\\Demo%20Waterfall%20Chart.xlsx]Chart'!$A$1", package.Workbook.Names.First().NameFormula);
 				}
 
 			}
@@ -137,17 +137,25 @@ namespace EPPlusTest
 		public void SavePreservesRelativeWorkbookLevelNamedRanges()
 		{
 			var file = new FileInfo(Path.GetTempFileName());
-			file.Delete();
-			using (var package = new ExcelPackage())
+			if (file.Exists)
+				file.Delete();
+			try
 			{
-				var sheet = package.Workbook.Worksheets.Add("Sheet");
-				package.Workbook.Names.Add("MyNamedRange", new ExcelRangeBase(sheet, "$C1"));
-				Assert.AreEqual("'Sheet'!$C1", package.Workbook.Names["MyNamedRange"].FullAddress);
-				package.SaveAs(file);
+				using (var package = new ExcelPackage())
+				{
+					var sheet = package.Workbook.Worksheets.Add("Sheet");
+					package.Workbook.Names.Add("MyNamedRange", new ExcelRangeBase(sheet, "$C1"));
+					Assert.AreEqual("'Sheet'!$C1", package.Workbook.Names["MyNamedRange"].NameFormula);
+					package.SaveAs(file);
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					Assert.AreEqual("'Sheet'!$C1", package.Workbook.Names["MyNamedRange"].NameFormula);
+				}
 			}
-			using (var package = new ExcelPackage(file))
+			finally
 			{
-				Assert.AreEqual("'Sheet'!$C1", package.Workbook.Names["MyNamedRange"].FullAddress);
+				file.Delete();
 			}
 		}
 		#endregion
