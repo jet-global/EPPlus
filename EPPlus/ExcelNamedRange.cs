@@ -86,9 +86,6 @@ namespace OfficeOpenXml
 		/// </summary>
 		internal ExcelWorkbook Workbook { get; private set; }
 
-		// TODO: Is Index needed anymore? Dependency chain IDs for named ranges may not be correct
-		// because of the case where a relative named range can actually be many different formulas depending on where 
-		// it is referenced from. Index is now only used from the EpplusExcelDataProvider.
 		/// <summary>
 		/// Gets or sets the index value of this named range in its parent <see cref="ExcelNamedRangeCollection"/>.
 		/// This is used to create ID values for dependency chains.

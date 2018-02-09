@@ -249,6 +249,10 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Properties
+		/// <summary>
+		/// Converts an <see cref="ExcelRangeBase"/> to a string.
+		/// </summary>
+		/// <param name="excelRangeBase">The <see cref="ExcelRangeBase"/> to convert to a string.</param>
 		public static implicit operator string(ExcelRangeBase excelRangeBase)
 		{
 			return excelRangeBase.ToString();

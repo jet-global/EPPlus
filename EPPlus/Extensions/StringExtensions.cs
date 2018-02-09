@@ -2,6 +2,9 @@
 
 namespace OfficeOpenXml.Extensions
 {
+	/// <summary>
+	/// A class containing extension methods for <see cref="string"/>.
+	/// </summary>
 	public static class StringExtensions
 	{
 		#region Public Static Methods
