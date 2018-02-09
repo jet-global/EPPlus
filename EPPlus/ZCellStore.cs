@@ -1127,7 +1127,7 @@ namespace OfficeOpenXml
 					{
 						this.Values[index] = value;
 						if (null == value)
-							this.UpdatedNulledIndex(index);
+							this.UpdateNulledIndex(index);
 						else
 							this.UpdateIndex(index);
 					}
@@ -1191,7 +1191,7 @@ namespace OfficeOpenXml
 				#endregion
 
 				#region Private Methods
-				private void UpdatedNulledIndex(int index)
+				private void UpdateNulledIndex(int index)
 				{
 					var equalsMinimum = index == this.MinimumUsedIndex;
 					var equalsMaximum = index == this.MaximumUsedIndex;
