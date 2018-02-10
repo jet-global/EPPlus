@@ -33,6 +33,7 @@ using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
@@ -82,8 +83,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 		}
 		public virtual FunctionCompiler Create(ExcelFunction function)
 		{
-			if (function.IsLookupFuction) return new LookupFunctionCompiler(function);
-			if (function.IsErrorHandlingFunction) return new ErrorHandlingFunctionCompiler(function);
+			if (function is LookupFunction) return new LookupFunctionCompiler(function);
+			if (function is ErrorHandlingFunction) return new ErrorHandlingFunctionCompiler(function);
 			return GetCompilerByType(function);
 		}
 	}

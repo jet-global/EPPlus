@@ -56,11 +56,12 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			Operator = null;
 		}
 
-		public virtual bool ParentIsLookupFunction
-		{
-			get;
-			set;
-		}
+		/// <summary>
+		/// Gets or sets a value indicating that all parts of this <see cref="Expression"/>
+		/// that are an ExcelAddress should be compiled as an ExcelAddress instead of being 
+		/// evaluated at compile time.
+		/// </summary>
+		public virtual bool CompileAsExcelAddress { get; set; }
 
 		public virtual bool HasChildren
 		{

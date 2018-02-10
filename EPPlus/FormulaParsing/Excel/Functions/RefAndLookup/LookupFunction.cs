@@ -22,6 +22,7 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
@@ -31,6 +32,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 	{
 		private readonly ValueMatcher _valueMatcher;
 		private readonly CompileResultFactory _compileResultFactory;
+
+		/// <summary>
+		/// Represents the index of the argument to the lookup function that 
+		/// should not be compiled before the function is called.
+		/// </summary>
+		public List<int> LookupArgumentIndicies { get; set; }
 
 		public LookupFunction()
 			 : this(new LookupValueMatcher(), new CompileResultFactory())
@@ -42,14 +49,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		{
 			_valueMatcher = valueMatcher;
 			_compileResultFactory = compileResultFactory;
-		}
-
-		public override bool IsLookupFuction
-		{
-			get
-			{
-				return true;
-			}
 		}
 
 		protected int IsMatch(object o1, object o2)

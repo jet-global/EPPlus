@@ -21,6 +21,21 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		}
 
 		[TestMethod]
+		public void OffsetHandlesReferencesForAllArguments()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[1, 1].Formula = "=OFFSET(A1,A2,A3)";
+				worksheet.Cells[2, 1].Value = 2;
+				worksheet.Cells[3, 1].Value = 2;
+				worksheet.Cells[3, 3].Value = 5;
+				worksheet.Calculate();
+				Assert.AreEqual(5, worksheet.Cells[1, 1].Value);
+			}
+		}
+
+		[TestMethod]
 		public void OffsetReturnsPoundRefIfInvalidArgumentsAreSupplied()
 		{
 			var parsingContext = ParsingContext.Create();
@@ -68,7 +83,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 				worksheet.Cells[2, 2].Calculate();
 				var result = worksheet.Cells[2, 2].Value;
 				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));
-				Assert.AreEqual(ExcelErrorValue.Values.Value, result.ToString());
+				Assert.AreEqual(ExcelErrorValue.Values.Name, result.ToString());
 				Assert.AreEqual(formula, worksheet.Cells[3, 3].Formula);
 			}
 		}
@@ -86,7 +101,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 				worksheet.Calculate();
 				var result = worksheet.Cells[2, 2].Value;
 				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));
-				Assert.AreEqual(ExcelErrorValue.Values.Value, result.ToString());
+				Assert.AreEqual(ExcelErrorValue.Values.NA, result.ToString());
 				Assert.AreEqual(formula, worksheet.Cells[3, 3].Formula);
 				result = worksheet.Cells[2, 3].Value;
 				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));

@@ -30,6 +30,7 @@
  *******************************************************************************/
 using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
@@ -44,29 +45,17 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 		public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
 		{
 			var args = new List<FunctionArgument>();
-			Function.BeforeInvoke(context);
-			var firstChild = true;
+			base.Function.BeforeInvoke(context);
+			int i = 0;
 			foreach (var child in children)
 			{
-				if (!firstChild || Function.SkipArgumentEvaluation)
-				{
-					child.ParentIsLookupFunction = Function.IsLookupFuction;
-				}
-				else
-				{
-					firstChild = false;
-				}
+				if (base.Function is LookupFunction lookupFunction && lookupFunction.LookupArgumentIndicies.Contains(i))
+					child.CompileAsExcelAddress = true;
 				var arg = child.Compile();
-				if (arg != null)
-				{
-					BuildFunctionArguments(arg.Result, arg.DataType, args);
-				}
-				else
-				{
-					BuildFunctionArguments(null, DataType.Unknown, args);
-				}
+				base.BuildFunctionArguments(arg?.Result, arg?.DataType ?? DataType.Unknown, args);
+				i++;
 			}
-			return Function.Execute(args, context);
+			return base.Function.Execute(args, context);
 		}
 	}
 }

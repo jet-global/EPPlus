@@ -70,27 +70,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// <param name="context"></param>
 		public virtual void BeforeInvoke(ParsingContext context) { }
 
-		public virtual bool IsLookupFuction
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		public virtual bool IsErrorHandlingFunction
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		/// <summary>
-		/// Used for some Lookupfunctions to indicate that function arguments should
-		/// not be compiled before the function is called.
-		/// </summary>
-		public bool SkipArgumentEvaluation { get; set; }
 		protected object GetFirstValue(IEnumerable<FunctionArgument> val)
 		{
 			var arg = ((IEnumerable<FunctionArgument>)val).FirstOrDefault();
