@@ -36,7 +36,7 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		}
 		#endregion
 
-		#region <X>Lookup Tests
+		#region VLookup Tests
 		[TestMethod]
 		public void VLookupShouldReturnCorrespondingValue()
 		{
@@ -49,6 +49,44 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 				ws.Cells["A2"].Value = 2;
 				ws.Cells["B2"].Value = 5;
 				ws.Cells["A3"].Formula = "VLOOKUP(2, " + lookupAddress + ", 2)";
+				ws.Calculate();
+				var result = ws.Cells["A3"].Value;
+				Assert.AreEqual(5, result);
+			}
+		}
+
+		[TestMethod]
+		public void VLookupWithAllReferenceArguments()
+		{
+			using (var pck = new ExcelPackage())
+			{
+				var ws = pck.Workbook.Worksheets.Add("test");
+				ws.Cells["A1"].Value = 1;
+				ws.Cells["B1"].Value = 1;
+				ws.Cells["A2"].Value = 2;
+				ws.Cells["B2"].Value = 5;
+
+				ws.Cells["Z5"].Value = 2;
+				ws.Cells["Z6"].Value = 2;
+				ws.Cells["A3"].Formula = "VLOOKUP(Z5, A1:B2, Z6)";
+				ws.Calculate();
+				var result = ws.Cells["A3"].Value;
+				Assert.AreEqual(5, result);
+			}
+		}
+
+		[TestMethod, Ignore]
+		/// <remarks>This currently does not work because if does not return a reference.</remarks>
+		public void VLookupOfIf()
+		{
+			using (var pck = new ExcelPackage())
+			{
+				var ws = pck.Workbook.Worksheets.Add("test");
+				ws.Cells["B1"].Value = 1;
+				ws.Cells["C1"].Value = 1;
+				ws.Cells["B2"].Value = 2;
+				ws.Cells["C2"].Value = 5;
+				ws.Cells["A3"].Formula = "VLOOKUP(2, IF(1,A1:B2,Z10), 2)";
 				ws.Calculate();
 				var result = ws.Cells["A3"].Value;
 				Assert.AreEqual(5, result);
@@ -72,7 +110,9 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 				Assert.AreEqual(1, result);
 			}
 		}
+		#endregion
 
+		#region HLookup Tests
 		[TestMethod]
 		public void HLookupShouldReturnCorrespondingValue()
 		{
@@ -101,6 +141,28 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		}
 
 		[TestMethod]
+		public void HLookupWithAllReferenceArguments()
+		{
+			using (var pck = new ExcelPackage())
+			{
+				var ws = pck.Workbook.Worksheets.Add("test");
+				ws.Cells["A1"].Value = 1;
+				ws.Cells["B1"].Value = 3;
+				ws.Cells["A2"].Value = 2;
+				ws.Cells["B2"].Value = 5;
+
+				ws.Cells["Z5"].Value = 3;
+				ws.Cells["Z6"].Value = 2;
+				ws.Cells["A3"].Formula = "HLOOKUP(Z5, A1:B2, Z6)";
+				ws.Calculate();
+				var result = ws.Cells["A3"].Value;
+				Assert.AreEqual(5, result);
+			}
+		}
+		#endregion
+
+		#region Lookup Tests
+		[TestMethod]
 		public void LookupShouldReturnMatchingValue()
 		{
 			var lookupAddress = "A1:B2";
@@ -113,7 +175,7 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		}
 		#endregion
 
-		#region Row/Column Tests
+		#region Row Tests
 		[TestMethod]
 		public void RowShouldReturnRowNumber()
 		{
@@ -135,9 +197,34 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		}
 
 		[TestMethod]
+		public void RowOfRangeReturnsFirstRowNumber()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var s1 = package.Workbook.Worksheets.Add("test");
+				s1.Cells["A1"].Formula = "ROW(C5:D9)";
+				s1.Calculate();
+				Assert.AreEqual(5, s1.Cells["A1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void RowOfOffsetOfNestedFunction()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var s1 = package.Workbook.Worksheets.Add("test");
+				s1.Cells["A1"].Formula = "ROW(OFFSET(A1,IF(1,1,0),IF(1,2,0)))";
+				s1.Calculate();
+				Assert.AreEqual(2, s1.Cells["A1"].Value);
+			}
+		}
+		#endregion
+
+		#region Column Tests
+		[TestMethod]
 		public void ColumnShouldReturnRowNumber()
 		{
-			//_excelDataProvider.Stub(x => x.GetRangeValues("B4")).Return(new List<ExcelCell> { new ExcelCell(null, "Column()", 0, 0) });
 			_excelDataProvider.Stub(x => x.GetRangeFormula("", 4, 2)).Return("Column()");
 			var result = _parser.ParseAt("B4");
 			Assert.AreEqual(2, result);
@@ -156,13 +243,41 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		}
 
 		[TestMethod]
+		public void ColumnOfRangeReturnsFirstColumnNumber()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var s1 = package.Workbook.Worksheets.Add("test");
+				s1.Cells["A1"].Formula = "COLUMN(C5:D9)";
+				s1.Calculate();
+				Assert.AreEqual(3, s1.Cells["A1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void ColumnOfOffsetOfNestedFunction()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var s1 = package.Workbook.Worksheets.Add("test");
+				s1.Cells["A1"].Formula = "COLUMN(OFFSET(A1,IF(1,1,0),IF(1,2,0)))";
+				s1.Calculate();
+				Assert.AreEqual(3, s1.Cells["A1"].Value);
+			}
+		}
+		#endregion
+
+		#region Rows Test
+		[TestMethod]
 		public void RowsShouldReturnNbrOfRows()
 		{
 			_excelDataProvider.Stub(x => x.GetRangeFormula("", 4, 1)).Return("Rows(A5:B7)");
 			var result = _parser.ParseAt("A4");
 			Assert.AreEqual(3, result);
 		}
+		#endregion
 
+		#region Columns Test
 		[TestMethod]
 		public void ColumnsShouldReturnNbrOfCols()
 		{
@@ -170,7 +285,9 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 			var result = _parser.ParseAt("A4");
 			Assert.AreEqual(2, result);
 		}
+		#endregion
 
+		#region Choose Tests
 		[TestMethod]
 		public void ChooseShouldReturnCorrectResult()
 		{
