@@ -22,6 +22,7 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
@@ -31,6 +32,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 	{
 		private readonly ValueMatcher _valueMatcher;
 		private readonly CompileResultFactory _compileResultFactory;
+
+		/// <summary>
+		/// Gets or sets a value representing the indicies of the arguments to the lookup function that
+		/// should be compiled as ExcelAddresses instead of being evaluated.
+		/// </summary>
+		public List<int> LookupArgumentIndicies { get; set; }
 
 		public LookupFunction()
 			 : this(new LookupValueMatcher(), new CompileResultFactory())
@@ -42,14 +49,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		{
 			_valueMatcher = valueMatcher;
 			_compileResultFactory = compileResultFactory;
-		}
-
-		public override bool IsLookupFuction
-		{
-			get
-			{
-				return true;
-			}
 		}
 
 		protected int IsMatch(object o1, object o2)

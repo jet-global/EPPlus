@@ -41,18 +41,18 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			_function = function;
 		}
 
-		public override bool ParentIsLookupFunction
+		public override bool CompileAsExcelAddress
 		{
 			get
 			{
-				return base.ParentIsLookupFunction;
+				return base.CompileAsExcelAddress;
 			}
 			set
 			{
-				base.ParentIsLookupFunction = value;
+				base.CompileAsExcelAddress = value;
 				foreach (var child in Children)
 				{
-					child.ParentIsLookupFunction = value;
+					child.CompileAsExcelAddress = value;
 				}
 			}
 		}

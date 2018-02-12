@@ -68,7 +68,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 				worksheet.Cells[2, 2].Calculate();
 				var result = worksheet.Cells[2, 2].Value;
 				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));
-				Assert.AreEqual(ExcelErrorValue.Values.Value, result.ToString());
+				Assert.AreEqual(ExcelErrorValue.Values.Name, result.ToString());
 				Assert.AreEqual(formula, worksheet.Cells[3, 3].Formula);
 			}
 		}
@@ -86,7 +86,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 				worksheet.Calculate();
 				var result = worksheet.Cells[2, 2].Value;
 				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));
-				Assert.AreEqual(ExcelErrorValue.Values.Value, result.ToString());
+				Assert.AreEqual(ExcelErrorValue.Values.NA, result.ToString());
 				Assert.AreEqual(formula, worksheet.Cells[3, 3].Formula);
 				result = worksheet.Cells[2, 3].Value;
 				Assert.IsInstanceOfType(result, typeof(ExcelErrorValue));

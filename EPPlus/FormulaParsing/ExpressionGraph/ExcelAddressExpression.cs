@@ -76,14 +76,10 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 
 		public override CompileResult Compile()
 		{
-			if (ParentIsLookupFunction)
-			{
-				return new CompileResult(ExpressionString, DataType.ExcelAddress);
-			}
+			if (base.CompileAsExcelAddress)
+				return new CompileResult(this.ExpressionString, DataType.ExcelAddress);
 			else
-			{
-				return CompileRangeValues();
-			}
+				return this.CompileRangeValues();
 		}
 
 		private CompileResult CompileRangeValues()

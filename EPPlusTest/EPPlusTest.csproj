@@ -233,6 +233,7 @@
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultFactoryTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\FunctionCompilerFactoryTests.cs" />
+    <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\LookupFunctionCompilerTest.cs" />
     <Compile Include="FormulaParsing\FormulaParserManagerTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LargeTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTestBase.cs" />
