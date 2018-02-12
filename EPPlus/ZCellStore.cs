@@ -816,12 +816,12 @@ namespace OfficeOpenXml
 				if (amount > 0)
 				{
 					this.DeConstructIndex(this.MaximumUsedIndex, out int sourcePageIndex, out int sourceInnerIndex);
-					this.DeConstructIndex(amount, out int numberOfPagesToShit, out int numberOfInnerIndexToShit);
+					this.DeConstructIndex(amount, out int numberOfPagesToShift, out int numberOfInnerIndexToShift);
 
 					for (int i = this.MaximumUsedIndex; i >= Math.Max(index, this.MinimumUsedIndex); --i)
 					{
-						var targetPageIndex = sourcePageIndex + numberOfPagesToShit;
-						var targetPageInnerIndex = sourceInnerIndex + numberOfInnerIndexToShit;
+						var targetPageIndex = sourcePageIndex + numberOfPagesToShift;
+						var targetPageInnerIndex = sourceInnerIndex + numberOfInnerIndexToShift;
 						if (targetPageInnerIndex >= this.PageSize)
 						{
 							targetPageIndex++;
@@ -855,12 +855,12 @@ namespace OfficeOpenXml
 					amount = -amount;
 
 					this.DeConstructIndex(index, out int targetPageIndex, out int targetInnerIndex);
-					this.DeConstructIndex(amount, out int numberOfPagesToShit, out int numberOfInnerIndexToShit);
+					this.DeConstructIndex(amount, out int numberOfPagesToShift, out int numberOfInnerIndexToShift);
 
 					for (int i = index; i <= this.MaximumUsedIndex; ++i)
 					{
-						var sourcePageIndex = targetPageIndex + numberOfPagesToShit;
-						var sourcePageInnerIndex = targetInnerIndex + numberOfInnerIndexToShit;
+						var sourcePageIndex = targetPageIndex + numberOfPagesToShift;
+						var sourcePageInnerIndex = targetInnerIndex + numberOfInnerIndexToShift;
 						if (sourcePageInnerIndex >= this.PageSize)
 						{
 							sourcePageIndex++;
