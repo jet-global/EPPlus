@@ -34,8 +34,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		private readonly CompileResultFactory _compileResultFactory;
 
 		/// <summary>
-		/// Represents the index of the argument to the lookup function that 
-		/// should not be compiled before the function is called.
+		/// Gets or sets a value representing the indicies of the arguments to the lookup function that
+		/// should be compiled as ExcelAddresses instead of being evaluated.
 		/// </summary>
 		public List<int> LookupArgumentIndicies { get; set; }
 

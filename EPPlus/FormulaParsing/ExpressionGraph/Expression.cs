@@ -58,8 +58,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 
 		/// <summary>
 		/// Gets or sets a value indicating that all parts of this <see cref="Expression"/>
-		/// that are an ExcelAddress should be compiled as an ExcelAddress instead of being 
-		/// evaluated at compile time.
+		/// that are a <see cref="FunctionArgumentExpression"/> and an Excel address 
+		/// should be compiled as an ExcelAddress instead of being evaluated at compile time.
 		/// </summary>
 		public virtual bool CompileAsExcelAddress { get; set; }
 
