@@ -1724,6 +1724,31 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void ShiftItemsFromStartPositiveShiftGoesForwardHandlesEmptyPages()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ null, null, null, null },
+				{ 9, 10, 11, 12 },
+				{ null, null, null, null }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(2, 4);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(15, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, null, null },
+				{ null, null, 3, 4 },
+				{ null, null, null, null },
+				{ 9, 10, 11, 12 }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
 		public void ShiftItemsFromMiddleMultiplePagesPositiveShiftGoesForward()
 		{
 			var pagedStructure = new PagedStructure<int>(2);
@@ -1746,22 +1771,6 @@ namespace EPPlusTest
 				{ null, null, null, 6 },
 			};
 			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void ShiftItemsForwardAmountTooHighIsResolvedSilently()
-		{
-			var pagedStructure = new PagedStructure<int>(2);
-			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
-			{
-				{ 1, 2, 3, 4 },
-				{ 5, 6, 7, 8 },
-				{ 9, 10, 11, 12 },
-				{ 13, 14, 15, 16 }
-			};
-			pagedStructure.LoadPages(items);
-			pagedStructure.ShiftItems(0, 100);
 		}
 
 		[TestMethod]
@@ -1840,6 +1849,31 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void ShiftItemsFromMiddleMultiplePagesNegativeShiftHandlesEmptyPages()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, null },
+				{ null, null, null, null },
+				{ null, null, null, null },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(2, -5);
+			Assert.AreEqual(0, pagedStructure.MinimumUsedIndex);
+			Assert.AreEqual(10, pagedStructure.MaximumUsedIndex);
+			items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, null, null },
+				{ null, null, null, 13 },
+				{ 14, 15, 16, null },
+				{ null, null, null, null }
+			};
+			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
 		public void ShiftItemsBackwardAmountTooHighIsResolvedSilently()
 		{
 			var pagedStructure = new PagedStructure<int>(2);
@@ -1862,6 +1896,22 @@ namespace EPPlusTest
 				{ null, null, null, null }
 			};
 			pagedStructure.ValidatePages(items, (row, column, expected) => Assert.Fail($"Row {row} :: Column {column} :: Did not match. {expected}"));
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		public void ShiftItemsForwardAmountTooHighThrowsException()
+		{
+			var pagedStructure = new PagedStructure<int>(2);
+			var items = new ZCellStore<int>.PagedStructure<int>.ValueHolder?[,]
+			{
+				{ 1, 2, 3, 4 },
+				{ 5, 6, 7, 8 },
+				{ 9, 10, 11, 12 },
+				{ 13, 14, 15, 16 }
+			};
+			pagedStructure.LoadPages(items);
+			pagedStructure.ShiftItems(0, 100);
 		}
 		#endregion
 

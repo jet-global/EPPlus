@@ -816,38 +816,34 @@ namespace OfficeOpenXml
 				if (amount > 0)
 				{
 					this.DeConstructIndex(this.MaximumUsedIndex, out int sourcePageIndex, out int sourceInnerIndex);
-					this.DeConstructIndex(amount, out int numberOfPagesToShit, out int numberOfInnerIndexToShit);
+					this.DeConstructIndex(amount, out int numberOfPagesToShift, out int numberOfInnerIndexToShift);
 
 					for (int i = this.MaximumUsedIndex; i >= Math.Max(index, this.MinimumUsedIndex); --i)
 					{
+						var targetPageIndex = sourcePageIndex + numberOfPagesToShift;
+						var targetPageInnerIndex = sourceInnerIndex + numberOfInnerIndexToShift;
+						if (targetPageInnerIndex >= this.PageSize)
+						{
+							targetPageIndex++;
+							targetPageInnerIndex &= this.PageMask;
+						}
+						if (targetPageIndex >= this.Pages.Length)
+							throw new ArgumentOutOfRangeException();
+						var targetPage = this.Pages[targetPageIndex] ?? (this.Pages[targetPageIndex] = new Page(this.PageSize));
 						var sourcePage = this.Pages[sourcePageIndex];
 						if (sourcePage == null)
-						{
-							// TODO -- tests for this case
-							sourceInnerIndex = this.PageSize - 1;
-							sourcePageIndex--;
-						}
+							targetPage[targetPageInnerIndex] = null;
 						else
 						{
-							var targetPageIndex = sourcePageIndex + numberOfPagesToShit;
-							var targetPageInnerIndex = sourceInnerIndex + numberOfInnerIndexToShit;
-							if (targetPageInnerIndex >= this.PageSize)
-							{
-								targetPageIndex++;
-								targetPageInnerIndex &= this.PageMask;
-							}
-							if (targetPageIndex >= this.Pages.Length)
-								throw new ArgumentOutOfRangeException();
-							var targetPage = this.Pages[targetPageIndex] ?? (this.Pages[targetPageIndex] = new Page(this.PageSize));
 							targetPage[targetPageInnerIndex] = sourcePage[sourceInnerIndex];
 							sourcePage[sourceInnerIndex] = null;
-							if (sourceInnerIndex > 0)
-								sourceInnerIndex--;
-							else
-							{
-								sourceInnerIndex = this.PageSize - 1;
-								sourcePageIndex--;
-							}
+						}
+						if (sourceInnerIndex > 0)
+							sourceInnerIndex--;
+						else
+						{
+							sourceInnerIndex = this.PageSize - 1;
+							sourcePageIndex--;
 						}
 					}
 				}
@@ -859,12 +855,12 @@ namespace OfficeOpenXml
 					amount = -amount;
 
 					this.DeConstructIndex(index, out int targetPageIndex, out int targetInnerIndex);
-					this.DeConstructIndex(amount, out int numberOfPagesToShit, out int numberOfInnerIndexToShit);
+					this.DeConstructIndex(amount, out int numberOfPagesToShift, out int numberOfInnerIndexToShift);
 
 					for (int i = index; i <= this.MaximumUsedIndex; ++i)
 					{
-						var sourcePageIndex = targetPageIndex + numberOfPagesToShit;
-						var sourcePageInnerIndex = targetInnerIndex + numberOfInnerIndexToShit;
+						var sourcePageIndex = targetPageIndex + numberOfPagesToShift;
+						var sourcePageInnerIndex = targetInnerIndex + numberOfInnerIndexToShift;
 						if (sourcePageInnerIndex >= this.PageSize)
 						{
 							sourcePageIndex++;
@@ -874,9 +870,8 @@ namespace OfficeOpenXml
 						if (sourcePageIndex < this.Pages.Length)
 						{
 							var sourcePage = this.Pages[sourcePageIndex];
-							// If the source is null then we can skip to the end of the page.
 							if (sourcePage == null)
-								targetInnerIndex = this.PageSize;
+								targetPage[targetInnerIndex] = null;
 							else
 							{
 								targetPage[targetInnerIndex] = sourcePage[sourcePageInnerIndex];
@@ -1031,18 +1026,17 @@ namespace OfficeOpenXml
 				this.MaximumUsedIndex = -1;
 				for (int i = 0; i < this.PageSize; i++)
 				{
-					if (this.Pages[i]?.IsEmpty == false)
+					var page = this.Pages[i];
+					if (page != null)
 					{
-						this.MinimumUsedIndex = this.ReConstructIndex(i, this.Pages[i].MinimumUsedIndex);
-						break;
-					}
-				}
-				for (int i = this.PageSize - 1; i >= 0; i--)
-				{
-					if (this.Pages[i]?.IsEmpty == false)
-					{
-						this.MaximumUsedIndex = this.ReConstructIndex(i, this.Pages[i].MaximumUsedIndex);
-						break;
+						if (page.IsEmpty)
+							this.Pages[i] = null;
+						else
+						{
+							if (this.MinimumUsedIndex == this.MaximumIndex + 1)
+								this.MinimumUsedIndex = this.ReConstructIndex(i, this.Pages[i].MinimumUsedIndex);
+							this.MaximumUsedIndex = this.ReConstructIndex(i, this.Pages[i].MaximumUsedIndex);
+						}
 					}
 				}
 			}
