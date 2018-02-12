@@ -326,6 +326,21 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		}
 
 		[TestMethod]
+		public void OffsetHandlesReferencesForAllArguments()
+		{
+			using (var excelPackage = new ExcelPackage())
+			{
+				var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[1, 1].Formula = "=OFFSET(A1,A2,A3)";
+				worksheet.Cells[2, 1].Value = 2;
+				worksheet.Cells[3, 1].Value = 2;
+				worksheet.Cells[3, 3].Value = 5;
+				worksheet.Calculate();
+				Assert.AreEqual(5, worksheet.Cells[1, 1].Value);
+			}
+		}
+
+		[TestMethod]
 		public void OffsetDirectReferenceToMultiRangeShouldSetValueError()
 		{
 			using (var package = new ExcelPackage())
