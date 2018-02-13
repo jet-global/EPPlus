@@ -63,6 +63,34 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void SubTotalCountAEmptySingleCell()
+		{
+			var function = new Subtotal();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+				worksheet.Cells["A1"].Formula = "=subtotal(103,B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(0, worksheet.Cells["A1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SubTotalCountAEmptyArrayOfCells()
+		{
+			var function = new Subtotal();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+				worksheet.Cells["A1"].Formula = "=subtotal(103,B1:B5)";
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells["A1"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void SubtotalIsGivenAListOfInputsFuntionNum6TestTwo()
 		{
 			var function = new Subtotal();
@@ -2615,6 +2643,15 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var args = FunctionsHelper.CreateArgs(1, 10, 20, 30, 40, 50);
 			var result = func.Execute(args, _context);
 			Assert.AreEqual(30d, result.Result);
+		}
+
+		[TestMethod]
+		public void ShouldCalculateAverageWhenCalcTypeIs1WithZero()
+		{
+			var func = new Subtotal();
+			var args = FunctionsHelper.CreateArgs(1, 10, 20, 30, 40, 0);
+			var result = func.Execute(args, _context);
+			Assert.AreEqual(20d, result.Result);
 		}
 
 		[TestMethod]

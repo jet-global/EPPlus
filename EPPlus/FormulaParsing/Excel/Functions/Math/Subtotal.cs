@@ -85,12 +85,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return CreateResult(0d, DataType.Decimal);
 			}
-			var actualArgs = arguments.Skip(1);
 			ExcelFunction function = null;
 			if (!_functions.ContainsKey(funcNum))
 				return new CompileResult(eErrorType.Value);
 			else
 				function = _functions[funcNum];
+			var actualArgs = arguments.Skip(1);
+			if (actualArgs.All(a => a.Value == null))
+				return new CompileResult(0, DataType.Integer);
 			var compileResult = function.Execute(actualArgs, context);
 			compileResult.IsResultOfSubtotal = true;
 			return compileResult;

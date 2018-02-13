@@ -111,6 +111,31 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void CountAWithEmptyStringPassedIn()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "COUNTA(\"\")";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void CountAWithEmptyStringReference()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = "COUNTA(C2)";
+				worksheet.Cells["C2"].Formula = "=\"\"";
+				worksheet.Calculate();
+				Assert.AreEqual(1d, worksheet.Cells["B2"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void CountAWithValuesInSingleCellReferences()
 		{
 			using (var package = new ExcelPackage())
