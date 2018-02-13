@@ -22,14 +22,22 @@ namespace EPPlusTest
 			{
 				using (var package = new ExcelPackage(file))
 				{
-					Assert.AreEqual("'[F:\\Cgypt\\Desktop\\test%20cases\\Demo%20Waterfall%20Chart.xlsx]Chart'!$A$1", package.Workbook.Names.First().NameFormula);
+					Assert.AreEqual("[1]Chart!$A$1", package.Workbook.Names.ElementAt(0).NameFormula);
+					Assert.AreEqual("[1]Sheet1!XFA1048568", package.Workbook.Names.ElementAt(1).NameFormula);
+					// Verify that references containing external links are never updated.
+					package.Workbook.Worksheets.First().InsertRow(1, 5);
+					package.Workbook.Worksheets.First().InsertColumn(1, 5);
+					Assert.AreEqual("[1]Chart!$A$1", package.Workbook.Names.ElementAt(0).NameFormula);
+					var name = package.Workbook.Names.ElementAt(1);
+					Assert.AreEqual("[1]Sheet1!XFA1048568", name.NameFormula);
+					Assert.AreEqual("[1]Sheet1!XFA1048568", string.Join(string.Empty, name.GetRelativeNameFormula(3, 3).Select(n => n.Value)));
 					package.SaveAs(newFile);
 				}
 				using (var package = new ExcelPackage(newFile))
 				{
-					Assert.AreEqual("'[F:\\Cgypt\\Desktop\\test%20cases\\Demo%20Waterfall%20Chart.xlsx]Chart'!$A$1", package.Workbook.Names.First().NameFormula);
+					Assert.AreEqual("[1]Chart!$A$1", package.Workbook.Names.ElementAt(0).NameFormula);
+					Assert.AreEqual("[1]Sheet1!XFA1048568", package.Workbook.Names.ElementAt(1).NameFormula);
 				}
-
 			}
 			finally
 			{
