@@ -163,6 +163,11 @@ namespace OfficeOpenXml.Utils
 				OADate = dateDouble;
 				return true;
 			}
+			else if (dateCandidate is decimal dateDecimal)
+			{
+				OADate = (double)dateDecimal;
+				return true;
+			}
 			else if(dateCandidate is bool dateBool)
 			{
 
