@@ -403,6 +403,21 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void SubtotalSumWithDecimal()
+		{
+			var function = new Subtotal();
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+				worksheet.Cells["B1"].Value = (decimal)7;
+				worksheet.Cells["A1"].Formula = "=subtotal(109,B1)";
+				worksheet.Calculate();
+				Assert.AreEqual(7d, worksheet.Cells["A1"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void SubtotalIsGivenAListOfInputsFuntionNum10()
 		{
 			var function = new Subtotal();

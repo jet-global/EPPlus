@@ -147,6 +147,15 @@ namespace EPPlusTest.Utils
 		}
 
 		[TestMethod]
+		public void TryParseObjectToDecimalParsesDecimal()
+		{
+			var expectedDate = new DateTime(1900, 3, 1, 12, 0, 0);
+			var isValidDate = ConvertUtil.TryParseObjectToDecimal((decimal)61.5, out double OADate);
+			Assert.AreEqual(true, isValidDate);
+			Assert.AreEqual(expectedDate.ToOADate(), OADate);
+		}
+
+		[TestMethod]
 		public void TryParseObjectToDecimalParsesNegativeInt()
 		{
 			var isValidDate = ConvertUtil.TryParseObjectToDecimal(-1, out double OADate);
