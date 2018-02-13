@@ -654,28 +654,6 @@ namespace OfficeOpenXml
 				foreach (XmlElement elem in nodeList)
 				{
 					string nameFormula = elem.InnerText;
-					if (nameFormula.IndexOf("[") == 0)
-					{
-						int start = nameFormula.IndexOf("[");
-						int end = nameFormula.IndexOf("]", start);
-						if (start >= 0 && end >= 0)
-						{
-							string externalIndex = nameFormula.Substring(start + 1, end - start - 1);
-							if (int.TryParse(externalIndex, out int index) && this.ExternalReferences != null)
-							{
-								if (index > 0 && index <= this.ExternalReferences.References.Count)
-								{
-									// External workbook addresses are always fully qualified with a workbook, worksheet, and address.
-									string externalReference = this.ExternalReferences.References[index - 1].Name;
-									if (externalReference.StartsWith("file:///", StringComparison.InvariantCultureIgnoreCase))
-										externalReference = externalReference.Substring(8);
-									var address = new ExcelAddress(nameFormula.Substring(end + 1));
-									string cellAddress = address.Address.Substring(address.Address.LastIndexOf('!'));
-									nameFormula = $"{nameFormula.Substring(0, start)}'[{externalReference}]{address.WorkSheet}'{cellAddress}";
-								}
-							}
-						}
-					}
 					string comment = elem.GetAttribute("comment");
 					bool isHidden = elem.GetAttribute("hidden") == "1";
 					if (int.TryParse(elem.GetAttribute("localSheetId"), out int localSheetID))
