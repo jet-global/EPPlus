@@ -17,6 +17,8 @@ namespace EPPlusTest.ExcelUtilities
 		[TestMethod]
 		public void IsMatchTests()
 		{
+			Assert.AreEqual(0, _matcher.IsMatch("a", "a"));
+			Assert.AreEqual(0, _matcher.IsMatch("abcd", "abcd"));
 			Assert.AreEqual(0, _matcher.IsMatch("a?c?", "abcd"));
 			Assert.AreEqual(0, _matcher.IsMatch("a???", "abcd"));
 			Assert.AreEqual(0, _matcher.IsMatch("??c?", "abcd"));
@@ -41,6 +43,15 @@ namespace EPPlusTest.ExcelUtilities
 			Assert.AreEqual(0, _matcher.IsMatch("hey~?", "hey?"));
 			Assert.AreEqual(0, _matcher.IsMatch("hey?", "hey?"));
 			Assert.AreEqual(0, _matcher.IsMatch("hey~~*", "hey~*"));
+			Assert.AreEqual(0, _matcher.IsMatch("~~", "~"));
+			Assert.AreEqual(0, _matcher.IsMatch("~~~*ab~~~~~*a", "~*ab~~*a"));
+			Assert.AreEqual(0, _matcher.IsMatch("~~~*ab~~~~~*~??", "~*ab~~*?a"));
+			Assert.AreEqual(0, _matcher.IsMatch("'", "'"));
+			Assert.AreEqual(0, _matcher.IsMatch(@"""", @""""));
+			Assert.AreEqual(0, _matcher.IsMatch(@"""""", @""""""));
+			Assert.AreEqual(0, _matcher.IsMatch(@".", @"."));
+			Assert.AreEqual(0, _matcher.IsMatch(@"hey.", @"hey."));
+			Assert.AreEqual(0, _matcher.IsMatch(@"hey!", @"hey!"));
 		}
 
 		[TestMethod]
@@ -56,6 +67,7 @@ namespace EPPlusTest.ExcelUtilities
 			Assert.AreNotEqual(0, _matcher.IsMatch("~*", "a"));
 			Assert.AreNotEqual(0, _matcher.IsMatch("~*", "?"));
 			Assert.AreNotEqual(0, _matcher.IsMatch("~?", "*"));
+			Assert.AreEqual(0, _matcher.IsMatch("~", "~"));
 		}
 	}
 }

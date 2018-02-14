@@ -36,7 +36,7 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 	{
 		protected override int CompareStringToString(string searchString, string testValue)
 		{
-			if (searchString.Contains("*") || searchString.Contains("?"))
+			if (searchString.Contains("*") || searchString.Contains("?") || searchString.Contains("~"))
 			{
 				Regex regex = this.TranslateExcelMatchStringToRegex(searchString);
 				if (regex.IsMatch(testValue))
@@ -57,7 +57,9 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 			regexPattern = regexPattern.Replace(@"\?", ".");
 			// Check for Excel escaped single character match ("~?" (which is now "~." (see above))) and replace with Regex escaped question mark.
 			regexPattern = regexPattern.Replace(@"~.", @"\?");
-			// Format as regex.
+			// Un-escape any escaped Excel escape characters since it's not a special character in regex.
+			regexPattern = regexPattern.Replace("~~", "~");
+			// Start and end characters for full string match.
 			return new Regex(string.Format("^{0}$", regexPattern));
 		}
 	}
