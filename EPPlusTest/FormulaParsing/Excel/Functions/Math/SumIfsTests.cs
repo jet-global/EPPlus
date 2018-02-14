@@ -186,7 +186,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions
 				sheet.Cells["E1"].Formula = "SUMIFS(A:A,B:B, \">2\")";
 				sheet.Calculate();
 
-				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)sheet.Cells["E1"].Value).Type);
+				Assert.AreEqual(4d, sheet.Cells["E1"].Value);
 			}
 		}
 
@@ -1304,6 +1304,47 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions
 				Assert.AreEqual(4d, worksheet.Cells["B2"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B3"].Value);
 				Assert.AreEqual(0d, worksheet.Cells["B4"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfsWithEmptySumRangeReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Formula = "SUMIFS(C3:C6, D3:D6, E5)";
+				worksheet.Cells[3, 4].Value = 1;
+				worksheet.Cells[4, 4].Value = 2;
+				worksheet.Cells[5, 4].Value = 3;
+				worksheet.Cells[6, 4].Value = 4;
+				worksheet.Cells[5, 5].Value = 2;
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells[2, 2].Value);
+			}
+		}
+
+		[TestMethod]
+		public void SumIfsWithEmptyMatchValueReturnsZero()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Formula = "SUMIFS(C3:C6, D3:D6, E5)";
+
+				worksheet.Cells[3, 3].Value = 1;
+				worksheet.Cells[4, 3].Value = 2;
+				// worksheet.Cells[5, 3] is left empty.
+				worksheet.Cells[6, 3].Value = 4;
+
+				worksheet.Cells[3, 4].Value = 1;
+				worksheet.Cells[4, 4].Value = 2;
+				worksheet.Cells[5, 4].Value = 3;
+				worksheet.Cells[6, 4].Value = 4;
+
+				worksheet.Cells[5, 5].Value = 3;
+				worksheet.Calculate();
+				Assert.AreEqual(0d, worksheet.Cells[2, 2].Value);
 			}
 		}
 
