@@ -38,8 +38,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			ClosestBelow = 1
 		}
 
-		public Match() : base(new WildCardValueMatcher(), new CompileResultFactory()) { }
-
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
@@ -57,11 +55,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			{
 				if (navigator.CurrentValue == null && searchedValue == null)
 					return this.CreateResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
-				var matchResult = this.IsMatch(navigator.CurrentValue, searchedValue);
+				int matchResult;
+				if (matchType == MatchType.ExactMatch)
+					matchResult = new WildCardValueMatcher().IsMatch(searchedValue, navigator.CurrentValue);
+				else
+					matchResult = new LookupValueMatcher().IsMatch(searchedValue, navigator.CurrentValue);
 				// For all match types, if the match result indicated equality, return the index (1 based)
 				if (matchResult == 0)
 					return this.CreateResult(navigator.Index + 1, DataType.Integer);
-				if ((matchType == MatchType.ClosestBelow && matchResult < 0) || (matchType == MatchType.ClosestAbove && matchResult > 0))
+				if ((matchType == MatchType.ClosestBelow && matchResult > 0) || (matchType == MatchType.ClosestAbove && matchResult < 0))
 					lastValidIndex = navigator.Index + 1;
 				// If matchType is ClosestBelow or ClosestAbove and the match result test failed, no more searching is required
 				else if (matchType == MatchType.ClosestBelow || matchType == MatchType.ClosestAbove)

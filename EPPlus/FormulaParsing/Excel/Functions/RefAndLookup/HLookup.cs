@@ -23,6 +23,8 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
+using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
@@ -37,7 +39,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			if (lookupArgs.LookupIndex < 1)
 				return new CompileResult(eErrorType.Value);
 			var navigator = LookupNavigatorFactory.Create(LookupDirection.Horizontal, lookupArgs, context);
-			return Lookup(navigator, lookupArgs);
+			if (arguments.Count() > 3 && arguments.ElementAt(3).Value is bool rangeLookup && !rangeLookup)
+				return Lookup(navigator, lookupArgs, new WildCardValueMatcher());
+			else 
+				return Lookup(navigator, lookupArgs, new LookupValueMatcher());
 		}
 	}
 }

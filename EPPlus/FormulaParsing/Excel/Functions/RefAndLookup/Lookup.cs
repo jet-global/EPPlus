@@ -67,7 +67,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			}
 			var lookupArgs = new LookupArguments(searchedValue, firstAddress, lookupIndex, 0, true, arguments.ElementAt(1).ValueAsRangeInfo);
 			var navigator = LookupNavigatorFactory.Create(lookupDirection, lookupArgs, context);
-			return Lookup(navigator, lookupArgs);
+			return Lookup(navigator, lookupArgs, new LookupValueMatcher());
 		}
 
 		private CompileResult HandleTwoRanges(IEnumerable<FunctionArgument> arguments, ParsingContext context)
@@ -90,7 +90,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			}
 			var lookupArgs = new LookupArguments(searchedValue, firstAddress, lookupIndex, lookupOffset, true, arguments.ElementAt(1).ValueAsRangeInfo);
 			var navigator = LookupNavigatorFactory.Create(lookupDirection, lookupArgs, context);
-			return Lookup(navigator, lookupArgs);
+			return Lookup(navigator, lookupArgs, new LookupValueMatcher());
 		}
 	}
 }

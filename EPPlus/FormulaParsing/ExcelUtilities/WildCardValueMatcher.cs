@@ -34,20 +34,31 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 {
 	public class WildCardValueMatcher : ValueMatcher
 	{
-		protected override int CompareStringToString(string s1, string s2)
+		protected override int CompareStringToString(string searchString, string testValue)
 		{
-			if (s1.Contains("*") || s1.Contains("?"))
+			if (searchString.Contains("*") || searchString.Contains("?"))
 			{
-				var regexPattern = Regex.Escape(s1);
-				regexPattern = string.Format("^{0}$", regexPattern);
-				regexPattern = regexPattern.Replace(@"\*", ".*");
-				regexPattern = regexPattern.Replace(@"\?", ".");
-				if (Regex.IsMatch(s2, regexPattern))
-				{
+				Regex regex = this.TranslateExcelMatchStringToRegex(searchString);
+				if (regex.IsMatch(testValue))
 					return 0;
-				}
 			}
-			return base.CompareStringToString(s1, s2);
+			return base.CompareStringToString(searchString, testValue);
+		}
+
+		private Regex TranslateExcelMatchStringToRegex(string searchString)
+		{
+			// Escape all regex special characters (including * and ?).
+			var regexPattern = Regex.Escape(searchString);
+			// Un-escape * and replace with ".*" because we want * to act as a wild card.
+			regexPattern = regexPattern.Replace(@"\*", ".*");
+			// Check for Excel escaped wildcards ("~*" (which is now "~.*" (see above))) and replaced with Regex escaped wildcards.
+			regexPattern = regexPattern.Replace(@"~.*", @"\*");
+			// Un-escape ? and replace with . because we want ? to match a single character.
+			regexPattern = regexPattern.Replace(@"\?", ".");
+			// Check for Excel escaped single character match ("~?" (which is now "~." (see above))) and replace with Regex escaped question mark.
+			regexPattern = regexPattern.Replace(@"~.", @"\?");
+			// Format as regex.
+			return new Regex(string.Format("^{0}$", regexPattern));
 		}
 	}
 }
