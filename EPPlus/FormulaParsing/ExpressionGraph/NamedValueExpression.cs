@@ -59,7 +59,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			var c = this._parsingContext.Scopes.Current;
 			var name = _parsingContext.ExcelDataProvider.GetName(c.Address.Worksheet, ExpressionString);
 			if (name == null)
-				throw (new Exceptions.ExcelErrorValueException(ExcelErrorValue.Create(eErrorType.Name)));
+				return new CompileResult(eErrorType.Name);
 			if (name.Value == null)
 				return null;
 			if (name.Value is ExcelDataProvider.IRangeInfo range)
