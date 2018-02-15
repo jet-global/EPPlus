@@ -179,7 +179,7 @@ namespace OfficeOpenXml.FormulaParsing
 			public IEnumerable<object> AllValues()
 			{
 				var values = new List<object>();
-				if (this.Address.Addresses != null && this.Address.Addresses.Any())
+				if (this.Address.Addresses?.Any() == true)
 				{
 					foreach (var subAddress in this.Address.Addresses)
 					{
