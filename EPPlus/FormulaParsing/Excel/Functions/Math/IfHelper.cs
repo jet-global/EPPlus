@@ -94,7 +94,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		public static List<int> GetIndicesOfCellsPassingCriterion(ExcelDataProvider.IRangeInfo cellsToCompare, object criterion)
 		{
 			var passingIndices = new List<int>();
-			var cellValues = IfHelper.GetAllCellValuesInRange(cellsToCompare);
+			var cellValues = cellsToCompare.AllValues();
 			for (var index = 0; index < cellValues.Count(); index++)
 			{
 				if (IfHelper.ObjectMatchesCriterion(cellValues.ElementAt(index), criterion))
@@ -228,33 +228,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			else
 				return 0;
-		}
-
-		/// <summary>
-		/// Return a list containing the value of each and every cell in the given <paramref name="cellRange"/>.
-		/// This function exists because iterating normally over a <see cref="ExcelDataProvider.IRangeInfo"/>
-		/// and looking at each <see cref="ExcelDataProvider.ICellInfo"/> will not include cells that have not been set;
-		/// cells that have been empty since the workbook's creation will therefore not be available for comparing to
-		/// any criteria for the *IF/*IFS functions. This function works around that issue.
-		/// </summary>
-		/// <param name="cellRange">The <see cref="ExcelDataProvider.IRangeInfo"/> containing the cells' values.</param>
-		/// <returns>Returns a list containing the value of each and every cell in <paramref name="cellRange"/>.</returns>
-		public static List<object> GetAllCellValuesInRange(ExcelDataProvider.IRangeInfo cellRange)
-		{
-			var cellValuesInRange = new List<object>();
-			var startingRow = cellRange.Address._fromRow;
-			var startingColumn = cellRange.Address._fromCol;
-			var endingRow = cellRange.Address._toRow;
-			var endingColumn = cellRange.Address._toCol;
-			for (var currentRow = startingRow; currentRow <= endingRow; currentRow++)
-			{
-				for (var currentColumn = startingColumn; currentColumn <= endingColumn; currentColumn++)
-				{
-					var currentCellValue = IfHelper.GetFirstArgument(cellRange.GetValue(currentRow, currentColumn));
-					cellValuesInRange.Add(currentCellValue);
-				}
-			}
-			return cellValuesInRange;
 		}
 		#endregion
 
@@ -604,38 +577,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				return false;
 			
 			return true;
-		}
-
-		/// <summary>
-		/// If the argument is a collection, its first value will be returned.
-		/// If the argument is not a collection, the argument will be returned.
-		/// </summary>
-		/// <param name="argument">The first element will be extracted from this argument.</param>
-		/// <returns>Returns the first element of the given argument. If the argument is a collection, returns <paramref name="argument"/>.</returns>
-		private static FunctionArgument GetFirstArgument(FunctionArgument argument)
-		{
-			var list = argument.Value as List<FunctionArgument>;
-			if (list != null)
-			{
-				return list.First();
-			}
-			return argument;
-		}
-
-		/// <summary>
-		/// If the argument is a collection, its first value will be returned.
-		/// If the argument is not a collection, the argument will be returned.
-		/// </summary>
-		/// <param name="argument">The first element will be extracted from this argument.</param>
-		/// <returns>Returns the first element of the given argument. If the argument is not a collection, returns <paramref name="argument"/>.</returns>
-		private static object GetFirstArgument(object argument)
-		{
-			var list = argument as List<object>;
-			if (list != null)
-			{
-				return list.First();
-			}
-			return argument;
 		}
 		#endregion
 	}

@@ -21,7 +21,7 @@ namespace OfficeOpenXml.FormulaParsing
 			ExcelAddress Address { get; }
 			object GetValue(int row, int col);
 			object GetOffset(int rowOffset, int colOffset);
-
+			IEnumerable<object> AllValues();
 			ExcelWorksheet Worksheet { get; }
 		}
 

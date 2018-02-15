@@ -168,6 +168,42 @@ namespace OfficeOpenXml.FormulaParsing
 					return _ws.GetValue(_values.Row + rowOffset, _values.Column + colOffset);
 				}
 			}
+
+			/// <summary>
+			/// Return a list containing the value of each and every cell in this <see cref="RangeInfo"/>.
+			/// This function exists because iterating normally over a <see cref="ExcelDataProvider.IRangeInfo"/>
+			/// and looking at each <see cref="ExcelDataProvider.ICellInfo"/> will not include cells that have not been set
+			/// (ie: cells that have been empty since the workbook's creation). This function works around that issue.
+			/// </summary>
+			/// <returns>The value of every cell in this <see cref="RangeInfo"/>.</returns>
+			public IEnumerable<object> AllValues()
+			{
+				var values = new List<object>();
+				if (this.Address.Addresses?.Any() == true)
+				{
+					foreach (var subAddress in this.Address.Addresses)
+					{
+						values.AddRange(this.AllValuesInSubAddress(subAddress));
+					}
+				}
+				else
+					values.AddRange(this.AllValuesInSubAddress(this.Address));
+				return values;
+			}
+
+			private IEnumerable<object> AllValuesInSubAddress(ExcelAddress address)
+			{
+				var values = new List<object>();
+				for (var currentRow = address._fromRow; currentRow <= address._toRow; currentRow++)
+				{
+					for (var currentColumn = address._fromCol; currentColumn <= address._toCol; currentColumn++)
+					{
+						var value = _ws._values.GetValue(currentRow, currentColumn)._value;
+						values.Add(value);
+					}
+				}
+				return values;
+			}
 		}
 
 		public class CellInfo : ICellInfo
