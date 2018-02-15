@@ -200,6 +200,15 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 		}
 
 		[TestMethod]
+		public void FromCompileResultErrorTypeEnum()
+		{
+			var compileResult = new CompileResult(eErrorType.Value, DataType.ExcelError);
+			var result = new ExpressionConverter().FromCompileResult(compileResult);
+			Assert.IsInstanceOfType(result, typeof(ExcelErrorExpression));
+			Assert.AreEqual(ExcelErrorValue.Parse("#VALUE!"), result.Compile().Result);
+		}
+
+		[TestMethod]
 		public void FromCompileResultExcelErrorUnknown()
 		{
 			var compileResult = new CompileResult(ExcelErrorValue.Parse("#N/A"), DataType.Unknown);

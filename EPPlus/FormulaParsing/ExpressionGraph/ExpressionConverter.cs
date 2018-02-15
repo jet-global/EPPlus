@@ -75,10 +75,12 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 						return new DateExpression(oaDate.ToString());
 					return new ExcelErrorExpression(ExcelErrorValue.Create(eErrorType.Value));
 				case DataType.ExcelError:
-					return compileResult.Result is string
-						 ? new ExcelErrorExpression(compileResult.Result.ToString(),
-							  ExcelErrorValue.Parse(compileResult.Result.ToString()))
-						 : new ExcelErrorExpression((ExcelErrorValue)compileResult.Result);
+					if (compileResult.Result is ExcelErrorValue errorValueResult)
+						return new ExcelErrorExpression(errorValueResult);
+					else if (compileResult.Result is eErrorType eErrorTypeResult)
+						return new ExcelErrorExpression(ExcelErrorValue.Create(eErrorTypeResult));
+					else
+						return new ExcelErrorExpression(compileResult.Result?.ToString(), ExcelErrorValue.Parse(compileResult.Result?.ToString()));
 				case DataType.Empty:
 					return new IntegerExpression(0);
 				case DataType.ExcelAddress:
