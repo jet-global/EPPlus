@@ -44,14 +44,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		{
 			if (this.ArgumentCountIsValid(arguments, 3) == false)
 				return new CompileResult(eErrorType.Value);
-			var rangeToAverage = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
-			if (rangeToAverage == null)
+			var sumRange = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
+			if (sumRange == null)
 				return new CompileResult(0d, DataType.Decimal);
 			var indicesOfValidCells = new List<int>();
 			for (var argumentIndex = 1; argumentIndex < arguments.Count(); argumentIndex += 2)
 			{
 				var currentRangeToCompare = arguments.ElementAt(argumentIndex).ValueAsRangeInfo;
-				if (currentRangeToCompare == null || !IfHelper.RangesAreTheSameShape(rangeToAverage, currentRangeToCompare))
+				if (currentRangeToCompare == null || !IfHelper.RangesAreTheSameShape(sumRange, currentRangeToCompare))
 					return new CompileResult(eErrorType.Value);
 				var currentCriterion = IfHelper.ExtractCriterionObject(arguments.ElementAt(argumentIndex + 1), context);
 
@@ -66,14 +66,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 				else
 					indicesOfValidCells = indicesOfValidCells.Intersect(passingIndices).ToList();
 			}
-			var sumOfValidValues = 0d;
-			foreach (var cellIndex in indicesOfValidCells)
+			double sumOfValidValues = 0d;
+			if (sumRange.Count() > 0)
 			{
-				var currentCellValue = rangeToAverage.ElementAt(cellIndex).Value;
-				if (currentCellValue is ExcelErrorValue cellError)
-					return new CompileResult(cellError.Type);
-				else if (ConvertUtil.IsNumeric(currentCellValue, true))
-					sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);
+				// Again, all cells, including empty cells, need to be available here. 
+				// The IRangeInfo will only provide non-empty cells.
+				var allSumValues = IfHelper.GetAllCellValuesInRange(sumRange);
+				foreach (var cellIndex in indicesOfValidCells)
+				{
+					var currentCellValue = allSumValues[cellIndex];
+					if (currentCellValue is ExcelErrorValue cellError)
+						return new CompileResult(cellError.Type);
+					else if (ConvertUtil.IsNumeric(currentCellValue, true))
+						sumOfValidValues += ConvertUtil.GetValueDouble(currentCellValue);
+				}
 			}
 			return this.CreateResult(sumOfValidValues, DataType.Decimal);
 		}
