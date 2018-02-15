@@ -71,10 +71,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				// Again, all cells, including empty cells, need to be available here. 
 				// The IRangeInfo will only provide non-empty cells.
-				var allSumValues = IfHelper.GetAllCellValuesInRange(sumRange);
+				var allSumValues = sumRange.AllValues();
 				foreach (var cellIndex in indicesOfValidCells)
 				{
-					var currentCellValue = allSumValues[cellIndex];
+					var currentCellValue = allSumValues.ElementAt(cellIndex);
 					if (currentCellValue is ExcelErrorValue cellError)
 						return new CompileResult(cellError.Type);
 					else if (ConvertUtil.IsNumeric(currentCellValue, true))
