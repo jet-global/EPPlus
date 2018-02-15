@@ -43,15 +43,48 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 			using (var pck = new ExcelPackage())
 			{
 				var ws = pck.Workbook.Worksheets.Add("test");
-				var lookupAddress = "A1:B2";
 				ws.Cells["A1"].Value = 1;
 				ws.Cells["B1"].Value = 1;
 				ws.Cells["A2"].Value = 2;
 				ws.Cells["B2"].Value = 5;
-				ws.Cells["A3"].Formula = "VLOOKUP(2, " + lookupAddress + ", 2)";
+				ws.Cells["A3"].Formula = "VLOOKUP(2, A1:B2, 2)";
 				ws.Calculate();
 				var result = ws.Cells["A3"].Value;
 				Assert.AreEqual(5, result);
+			}
+		}
+
+		[TestMethod]
+		public void VLookupWithTextAndFalseRangeLookupShouldMatchWildcard()
+		{
+			using (var pck = new ExcelPackage())
+			{
+				var ws = pck.Workbook.Worksheets.Add("test");
+				ws.Cells["A1"].Value = "apples";
+				ws.Cells["B1"].Value = "bananas";
+				ws.Cells["A2"].Value = "other";
+				ws.Cells["B2"].Value = "stuff";
+				ws.Cells["A3"].Formula = @"VLOOKUP(""oth*?"", A1:B2, 2, FALSE)";
+				ws.Calculate();
+				var result = ws.Cells["A3"].Value;
+				Assert.AreEqual("stuff", result);
+			}
+		}
+
+		[TestMethod]
+		public void VLookupWithTextAndTrueRangeLookupShouldReturnFirstClosestMatch()
+		{
+			using (var pck = new ExcelPackage())
+			{
+				var ws = pck.Workbook.Worksheets.Add("test");
+				ws.Cells["A1"].Value = "apples";
+				ws.Cells["B1"].Value = "bananas";
+				ws.Cells["A2"].Value = "other";
+				ws.Cells["B2"].Value = "stuff";
+				ws.Cells["A3"].Formula = @"VLOOKUP(""oth*?"", A1:B2, 2, TRUE)";
+				ws.Calculate();
+				var result = ws.Cells["A3"].Value;
+				Assert.AreEqual("bananas", result);
 			}
 		}
 
@@ -125,6 +158,40 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 			_worksheet.Calculate();
 			var result = _worksheet.Cells["A3"].Value;
 			Assert.AreEqual(5, result);
+		}
+
+		[TestMethod]
+		public void HLookupWithTextAndFalseRangeLookupShouldMatchWildcard()
+		{
+			using (var pck = new ExcelPackage())
+			{
+				var ws = pck.Workbook.Worksheets.Add("test");
+				ws.Cells["A1"].Value = "apples";
+				ws.Cells["B1"].Value = "other";
+				ws.Cells["A2"].Value = "bananas";
+				ws.Cells["B2"].Value = "stuff";
+				ws.Cells["A3"].Formula = @"HLOOKUP(""oth*?"", A1:B2, 2, FALSE)";
+				ws.Calculate();
+				var result = ws.Cells["A3"].Value;
+				Assert.AreEqual("stuff", result);
+			}
+		}
+
+		[TestMethod]
+		public void HLookupWithTextAndTrueRangeLookupShouldReturnFirstClosestMatch()
+		{
+			using (var pck = new ExcelPackage())
+			{
+				var ws = pck.Workbook.Worksheets.Add("test");
+				ws.Cells["A1"].Value = "apples";
+				ws.Cells["B1"].Value = "other";
+				ws.Cells["A2"].Value = "bananas";
+				ws.Cells["B2"].Value = "stuff";
+				ws.Cells["A3"].Formula = @"HLOOKUP(""oth*?"", A1:B2, 2, TRUE)";
+				ws.Calculate();
+				var result = ws.Cells["A3"].Value;
+				Assert.AreEqual("bananas", result);
+			}
 		}
 
 		[TestMethod]

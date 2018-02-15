@@ -72,6 +72,83 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		}
 
 		[TestMethod]
+		public void MatchWildcard()
+		{
+			this.Worksheet.Cells["A1"].Value = "hello";
+			this.Worksheet.Cells["A2"].Value = "abc";
+			this.Worksheet.Cells["A3"].Value = "123";
+			this.Worksheet.Cells["A4"].Formula = @"MATCH(""*"",A1:A3,0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(1, this.Worksheet.Cells["A4"].Value);
+		}
+
+		[TestMethod]
+		public void MatchWildcardStartsWith()
+		{
+			this.Worksheet.Cells["A1"].Value = "hello";
+			this.Worksheet.Cells["A2"].Value = "abc";
+			this.Worksheet.Cells["A3"].Value = "123";
+			this.Worksheet.Cells["A4"].Formula = @"MATCH(""a*"",A1:A3,0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(2, this.Worksheet.Cells["A4"].Value);
+		}
+
+		[TestMethod]
+		public void MatchWildcardStartsWithNumber()
+		{
+			this.Worksheet.Cells["A1"].Value = "hello";
+			this.Worksheet.Cells["A2"].Value = "abc";
+			this.Worksheet.Cells["A3"].Value = "123";
+			this.Worksheet.Cells["A4"].Formula = @"MATCH(""1*"",A1:A3,0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(3, this.Worksheet.Cells["A4"].Value);
+		}
+
+		[TestMethod]
+		public void MatchWildcardMissingCharacterEnd()
+		{
+			this.Worksheet.Cells["A1"].Value = "hello";
+			this.Worksheet.Cells["A2"].Value = "abc";
+			this.Worksheet.Cells["A3"].Value = "123";
+			this.Worksheet.Cells["A4"].Formula = @"MATCH(""ab?"",A1:A3,0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(2, this.Worksheet.Cells["A4"].Value);
+		}
+
+		[TestMethod]
+		public void MatchWildcardMissingCharacterMiddle()
+		{
+			this.Worksheet.Cells["A1"].Value = "hello";
+			this.Worksheet.Cells["A2"].Value = "abc";
+			this.Worksheet.Cells["A3"].Value = "123";
+			this.Worksheet.Cells["A4"].Formula = @"MATCH(""a??"",A1:A3,0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(2, this.Worksheet.Cells["A4"].Value);
+		}
+
+		[TestMethod]
+		public void MatchWildcardManyMissingCharacterMatches()
+		{
+			this.Worksheet.Cells["A1"].Value = "hello1";
+			this.Worksheet.Cells["A2"].Value = "hello2";
+			this.Worksheet.Cells["A3"].Value = "hello3";
+			this.Worksheet.Cells["A4"].Formula = @"MATCH(""??l?o2"",A1:A3,0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(2, this.Worksheet.Cells["A4"].Value);
+		}
+
+		[TestMethod]
+		public void MatchEscapedStar()
+		{
+			this.Worksheet.Cells["A1"].Value = "hello";
+			this.Worksheet.Cells["A2"].Value = "*hey";
+			this.Worksheet.Cells["A3"].Value = "123";
+			this.Worksheet.Cells["A4"].Formula = @"MATCH(""~*hey"",A1:A3,0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(2, this.Worksheet.Cells["A4"].Value);
+		}
+
+		[TestMethod]
 		public void MatchExactNotFound()
 		{
 			this.Worksheet.Cells["A1"].Value = 5d;

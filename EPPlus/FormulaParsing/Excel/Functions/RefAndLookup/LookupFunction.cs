@@ -30,31 +30,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
 	public abstract class LookupFunction : ExcelFunction
 	{
-		private readonly ValueMatcher _valueMatcher;
-		private readonly CompileResultFactory _compileResultFactory;
-
 		/// <summary>
 		/// Gets or sets a value representing the indicies of the arguments to the lookup function that
 		/// should be compiled as ExcelAddresses instead of being evaluated.
 		/// </summary>
 		public List<int> LookupArgumentIndicies { get; set; }
-
-		public LookupFunction()
-			 : this(new LookupValueMatcher(), new CompileResultFactory())
-		{
-
-		}
-
-		public LookupFunction(ValueMatcher valueMatcher, CompileResultFactory compileResultFactory)
-		{
-			_valueMatcher = valueMatcher;
-			_compileResultFactory = compileResultFactory;
-		}
-
-		protected int IsMatch(object o1, object o2)
-		{
-			return _valueMatcher.IsMatch(o1, o2);
-		}
 
 		protected LookupDirection GetLookupDirection(RangeAddress rangeAddress)
 		{
@@ -63,7 +43,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			return nCols > nRows ? LookupDirection.Horizontal : LookupDirection.Vertical;
 		}
 
-		protected CompileResult Lookup(LookupNavigator navigator, LookupArguments lookupArgs)
+		protected CompileResult Lookup(LookupNavigator navigator, LookupArguments lookupArgs, ValueMatcher valueMatcher)
 		{
 			object lastValue = null;
 			object lastLookupValue = null;
@@ -74,19 +54,19 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			}
 			do
 			{
-				var matchResult = IsMatch(navigator.CurrentValue, lookupArgs.SearchedValue);
+				var matchResult = valueMatcher.IsMatch(lookupArgs.SearchedValue, navigator.CurrentValue);
 				if (matchResult != 0)
 				{
 					if (lastValue != null && navigator.CurrentValue == null) break;
 
 					if (!lookupArgs.RangeLookup) continue;
-					if (lastValue == null && matchResult > 0)
+					if (lastValue == null && matchResult < 0)
 					{
 						return new CompileResult(eErrorType.NA);
 					}
-					if (lastValue != null && matchResult > 0 && lastMatchResult < 0)
+					if (lastValue != null && matchResult < 0 && lastMatchResult > 0)
 					{
-						return _compileResultFactory.Create(lastLookupValue);
+						return new CompileResultFactory().Create(lastLookupValue);
 					}
 					lastMatchResult = matchResult;
 					lastValue = navigator.CurrentValue;
@@ -94,12 +74,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				}
 				else
 				{
-					return _compileResultFactory.Create(navigator.GetLookupValue());
+					return new CompileResultFactory().Create(navigator.GetLookupValue());
 				}
 			}
 			while (navigator.MoveNext());
 
-			return lookupArgs.RangeLookup ? _compileResultFactory.Create(lastLookupValue) : new CompileResult(eErrorType.NA);
+			return lookupArgs.RangeLookup ? new CompileResultFactory().Create(lastLookupValue) : new CompileResult(eErrorType.NA);
 		}
 
 		protected ExcelAddress CalculateOffset(FunctionArgument[] arguments, ParsingContext context)

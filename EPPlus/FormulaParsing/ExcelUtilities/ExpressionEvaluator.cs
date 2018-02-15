@@ -37,20 +37,6 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 {
 	public class ExpressionEvaluator
 	{
-		private readonly WildCardValueMatcher _wildCardValueMatcher;
-		private readonly CompileResultFactory _compileResultFactory;
-
-		public ExpressionEvaluator()
-			 : this(new WildCardValueMatcher(), new CompileResultFactory())
-		{
-
-		}
-
-		public ExpressionEvaluator(WildCardValueMatcher wildCardValueMatcher, CompileResultFactory compileResultFactory)
-		{
-			_wildCardValueMatcher = wildCardValueMatcher;
-			_compileResultFactory = compileResultFactory;
-		}
 
 		private string GetNonAlphanumericStartChars(string expression)
 		{
@@ -64,8 +50,9 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 
 		private bool EvaluateOperator(object left, object right, IOperator op)
 		{
-			var leftResult = _compileResultFactory.Create(left);
-			var rightResult = _compileResultFactory.Create(right);
+			var compileResultFactory = new CompileResultFactory();
+			var leftResult = compileResultFactory.Create(left);
+			var rightResult = compileResultFactory.Create(right);
 			var result = op.Apply(leftResult, rightResult);
 			if (result.DataType != DataType.Boolean)
 			{
@@ -138,7 +125,7 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 					return EvaluateOperator(left, right, op);
 				}
 			}
-			return _wildCardValueMatcher.IsMatch(expression, left) == 0;
+			return new WildCardValueMatcher().IsMatch(expression, left) == 0;
 		}
 	}
 }
