@@ -318,6 +318,24 @@ namespace EPPlusTest.Excel
 			var result = Operator.Plus.Apply(new CompileResult(1, DataType.Integer), new CompileResult("2", DataType.String));
 			Assert.AreEqual(3d, result.Result);
 		}
+
+		[TestMethod]
+		public void OperatorPlusErrorTypeArguments()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = @"""some text""+otherText";
+				sheet.Cells[2, 3].Formula = @"otherText + ""some text""";
+				sheet.Cells[2, 4].Formula = @"(5/0) + 1";
+				sheet.Cells[2, 5].Formula = @"1 + (5/0)";
+				sheet.Calculate();
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 2].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 3].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Div0), sheet.Cells[2, 4].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 5].Value);
+			}
+		}
 		#endregion
 
 		#region Operator Minus Tests
