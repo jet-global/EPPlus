@@ -361,6 +361,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		#region Public Methods
 		/// <summary>
 		/// Applies the specified <see cref="IOperator"/> given the specified <paramref name="left"/> and <paramref name="right"/> arguments.
+		/// If the left operand is an error type, its error type is returned. If the right operand is an error type,
+		/// a #VALUE! error type is returned.
 		/// </summary>
 		/// <param name="left">The left argument to the operator.</param>
 		/// <param name="right">The right argument to the operator.</param>
@@ -368,13 +370,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		public CompileResult Apply(CompileResult left, CompileResult right)
 		{
 			if (left.Result is ExcelErrorValue)
-			{
 				return new CompileResult(left.Result, DataType.ExcelError);
-			}
 			else if (right.Result is ExcelErrorValue)
-			{
-				return new CompileResult(right.Result, DataType.ExcelError);
-			}
+				return new CompileResult(eErrorType.Value, DataType.ExcelError);
 			return this.Implementation(left, right);
 		}
 
