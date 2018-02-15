@@ -44,16 +44,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		/// <returns>Returns a <see cref="CompileResult"/> containing either the resulting column or an error value.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			string rangeAddress = arguments.Count() == 0 ? string.Empty : this.ArgToString(arguments, 0);
-			if (arguments == null || arguments.Count() == 0 || string.IsNullOrEmpty(rangeAddress))
+			var rangeAddress = arguments.Count() == 0 ? null : arguments.ElementAt(0).ValueAsRangeInfo?.Address;
+			if (arguments == null || arguments.Count() == 0 || rangeAddress == null)
 			{
 				return CreateResult(context.Scopes.Current.Address.FromCol, DataType.Integer);
 			}
-			if (!ExcelAddressUtil.IsValidAddress(rangeAddress))
+			if (!ExcelAddressUtil.IsValidAddress(rangeAddress.Address))
 				return new CompileResult(eErrorType.Value);
-			var factory = new RangeAddressFactory(context.ExcelDataProvider);
-			var address = factory.Create(rangeAddress);
-			return CreateResult(address.FromCol, DataType.Integer);
+			return CreateResult(rangeAddress._fromCol, DataType.Integer);
 		}
 		#endregion
 	}

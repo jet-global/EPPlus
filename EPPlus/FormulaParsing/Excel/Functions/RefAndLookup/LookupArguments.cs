@@ -22,9 +22,11 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using static OfficeOpenXml.FormulaParsing.ExcelDataProvider;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
@@ -71,15 +73,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			}
 			var indexVal = arguments.ElementAt(2);
 
-			if (indexVal.DataType == DataType.ExcelAddress)
+			if (indexVal.DataType == DataType.Enumerable)
 			{
-				var address = new ExcelAddress(indexVal.Value.ToString());
+				var rangeInfo = indexVal.ValueAsRangeInfo;
+				var address = rangeInfo?.Address ?? throw new InvalidOperationException("Value does not match declared type.");
 				var indexObj = context.ExcelDataProvider.GetRangeValue(address.WorkSheet ?? context.Scopes.Current.Address.Worksheet, address._fromRow, address._fromCol);
 				LookupIndex = (int)_argumentParsers.GetParser(DataType.Integer).Parse(indexObj);
 			}
 			else
 			{
-				LookupIndex = (int)_argumentParsers.GetParser(DataType.Integer).Parse(arguments.ElementAt(2).Value);
+				LookupIndex = (int)_argumentParsers.GetParser(DataType.Integer).Parse(indexVal.Value);
 			}
 
 			if (arguments.Count() > 3)

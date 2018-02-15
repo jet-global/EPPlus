@@ -84,7 +84,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 
 		protected ExcelAddress CalculateOffset(FunctionArgument[] arguments, ParsingContext context)
 		{
-			var startRange = ArgToString(arguments, 0);
 			var rowOffset = ArgToInt(arguments, 1);
 			var columnOffset = ArgToInt(arguments, 2);
 			int width = 0, height = 0;
@@ -94,7 +93,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				width = ArgToInt(arguments, 4);
 			if ((arguments.Length > 3 && height == 0) || (arguments.Length > 4 && width == 0))
 				return null;
-			var address = new ExcelAddress(startRange);
+			var address = arguments[0].ValueAsRangeInfo?.Address;
 			string targetWorksheetName;
 			if (string.IsNullOrEmpty(address.WorkSheet))
 				targetWorksheetName = context.Scopes?.Current?.Address?.Worksheet;

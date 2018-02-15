@@ -31,17 +31,28 @@
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.CompileStrategy
 {
+	/// <summary>
+	/// Performs string concatenation on two expressions.
+	/// </summary>
 	public class StringConcatStrategy : CompileStrategy
 	{
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of a <see cref="StringConcatStrategy"/>.
+		/// </summary>
+		/// <param name="expression">The <see cref="Expression"/> to concatenate.</param>
 		public StringConcatStrategy(Expression expression)
-			 : base(expression)
-		{
+			 : base(expression) { }
+		#endregion
 
-		}
-
+		#region CompileStrategy Overrides
+		/// <summary>
+		/// Concatenates this strategy's expression with the next expression.
+		/// </summary>
+		/// <returns>The merged expression.</returns>
 		public override Expression Compile()
 		{
-			var newExp = _expression is ExcelAddressExpression ? _expression : ExpressionConverter.Instance.ToStringExpression(_expression);
+			var newExp = _expression is ExcelAddressExpression ? _expression : this.CompileToStringExpression(_expression);
 			newExp.Prev = _expression.Prev;
 			newExp.Next = _expression.Next;
 			if (_expression.Prev != null)
@@ -54,5 +65,14 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.CompileStrategy
 			}
 			return newExp.MergeWithNext();
 		}
+		#endregion
+
+		#region Private Methods
+		private StringExpression CompileToStringExpression(Expression expression)
+		{
+			var result = expression.Compile();
+			return new StringExpression(result.Result.ToString()) { Operator = expression.Operator };
+		}
+		#endregion
 	}
 }

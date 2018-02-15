@@ -40,23 +40,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		{
 			_function = function;
 		}
-
-		public override bool CompileAsExcelAddress
-		{
-			get
-			{
-				return base.CompileAsExcelAddress;
-			}
-			set
-			{
-				base.CompileAsExcelAddress = value;
-				foreach (var child in Children)
-				{
-					child.CompileAsExcelAddress = value;
-				}
-			}
-		}
-
+		
 		public override bool IsGroupedExpression
 		{
 			get { return false; }

@@ -29,6 +29,8 @@
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
@@ -37,39 +39,11 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 	/// </summary>
 	public class ExpressionConverter : IExpressionConverter
 	{
-		#region Class Variables
-		private static IExpressionConverter myInstance;
-		#endregion
-
 		#region Properties
-		/// <summary>
-		/// Gets the current instance of the ExpressionConverter.
-		/// </summary>
-		public static IExpressionConverter Instance
-		{
-			get
-			{
-				if (myInstance == null)
-				{
-					myInstance = new ExpressionConverter();
-				}
-				return myInstance;
-			}
-		}
+		private CompileResultFactory ResultFactory { get; } = new CompileResultFactory();
 		#endregion
 
 		#region Public Methods
-		/// <summary>
-		/// Converts the given <see cref="Expression"/> into a <see cref="StringExpression"/>.
-		/// </summary>
-		/// <param name="expression">The <see cref="Expression"/> to convert.</param>
-		/// <returns>Returns the <see cref="StringExpression"/> representation of the given <see cref="Expression"/>.</returns>
-		public StringExpression ToStringExpression(Expression expression)
-		{
-			var result = expression.Compile();
-			return new StringExpression(result.Result.ToString()) { Operator = expression.Operator};
-		}
-
 		/// <summary>
 		/// Converts the given <see cref="CompileResult"/> into an <see cref="Expression"/>.
 		/// </summary>
@@ -83,16 +57,23 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 					return compileResult.Result is string
 						 ? new IntegerExpression(compileResult.Result.ToString())
 						 : new IntegerExpression(Convert.ToDouble(compileResult.Result));
-				case DataType.String:
-					return new StringExpression(compileResult.Result.ToString());
+				case DataType.Time:
 				case DataType.Decimal:
 					return compileResult.Result is string
 								  ? new DecimalExpression(compileResult.Result.ToString())
 								  : new DecimalExpression(Convert.ToDouble(compileResult.Result));
+				case DataType.String:
+					return new StringExpression(compileResult.Result.ToString());
 				case DataType.Boolean:
 					return compileResult.Result is string
 								  ? new BooleanExpression(compileResult.Result.ToString())
 								  : new BooleanExpression((bool)compileResult.Result);
+				case DataType.Date:
+					if (compileResult.Result is DateTime dateTimeResult || DateTime.TryParse(compileResult.Result.ToString(), out dateTimeResult))
+						return new DateExpression(dateTimeResult.ToOADate().ToString());
+					if (double.TryParse(compileResult.Result.ToString(), out double oaDate))
+						return new DateExpression(oaDate.ToString());
+					return new ExcelErrorExpression(ExcelErrorValue.Create(eErrorType.Value));
 				case DataType.ExcelError:
 					return compileResult.Result is string
 						 ? new ExcelErrorExpression(compileResult.Result.ToString(),
@@ -100,8 +81,21 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 						 : new ExcelErrorExpression((ExcelErrorValue)compileResult.Result);
 				case DataType.Empty:
 					return new IntegerExpression(0);
+				case DataType.ExcelAddress:
+					return new StringExpression(compileResult.Result.ToString());
+				case DataType.Enumerable:
+				case DataType.Unknown:
+				default:
+					// Enumerable results only end up with the first item in the collection.
+					// The result factory will itself return an enumerable CompileResult for List<object> so 
+					// in order to prevent infinite recursion there is an explicit check for that specific type.
+					// The other form of enumerable result is IRangeInfo which is safely reduced in the result factory.
+					var resultToProcess = compileResult.Result;
+					if (resultToProcess is List<object> listResult)
+						resultToProcess = listResult.FirstOrDefault();
+					var result = this.ResultFactory.Create(resultToProcess);
+					return this.FromCompileResult(result);
 			}
-			return null;
 		}
 		#endregion
 	}
