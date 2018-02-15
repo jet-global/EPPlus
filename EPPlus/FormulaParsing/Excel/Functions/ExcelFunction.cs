@@ -424,7 +424,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			}
 			if (ExcelErrorValue.Values.IsErrorValue(result))
 			{
-				return CreateResult(result, DataType.ExcelAddress);
+				return CreateResult(result, DataType.ExcelError);
 			}
 			if (result == null)
 			{

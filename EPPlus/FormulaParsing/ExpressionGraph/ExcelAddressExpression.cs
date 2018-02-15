@@ -76,14 +76,6 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 
 		public override CompileResult Compile()
 		{
-			if (base.CompileAsExcelAddress)
-				return new CompileResult(this.ExpressionString, DataType.ExcelAddress);
-			else
-				return this.CompileRangeValues();
-		}
-
-		private CompileResult CompileRangeValues()
-		{
 			var c = this._parsingContext.Scopes.Current;
 			var result = _excelDataProvider.GetRange(c.Address.Worksheet, c.Address.FromRow, c.Address.FromCol, this.ExpressionString);
 			if (result == null)
@@ -99,7 +91,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 				return new CompileResult(result, DataType.Enumerable);
 			return CompileSingleCell(result);
 		}
-
+		
 		private CompileResult CompileSingleCell(ExcelDataProvider.IRangeInfo result)
 		{
 			var cell = result.FirstOrDefault();

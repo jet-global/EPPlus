@@ -35,7 +35,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.CompileStrategy
 	{
 		protected readonly Expression _expression;
 
-		public CompileStrategy(Expression expression)
+		protected CompileStrategy(Expression expression)
 		{
 			_expression = expression;
 		}

@@ -53,7 +53,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		{
 			var searchedValue = arguments.ElementAt(0).Value;
 			Require.That(arguments.ElementAt(1).Value).Named("firstAddress").IsNotNull();
-			var firstAddress = ArgToString(arguments, 1);
+			var firstAddress = arguments.ElementAt(1).ValueAsRangeInfo?.Address.Address;
 			var rangeAddressFactory = new RangeAddressFactory(context.ExcelDataProvider);
 			var address = rangeAddressFactory.Create(firstAddress);
 			var nRows = address.ToRow - address.FromRow;

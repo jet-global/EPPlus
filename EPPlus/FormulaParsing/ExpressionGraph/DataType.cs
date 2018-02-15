@@ -40,7 +40,6 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		Date,
 		Time,
 		Enumerable,
-		LookupArray,
 		ExcelAddress,
 		ExcelError,
 		Empty,

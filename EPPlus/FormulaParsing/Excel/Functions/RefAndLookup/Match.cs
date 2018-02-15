@@ -45,7 +45,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var searchedValue = arguments.ElementAt(0).Value;
-			var address = arguments.ElementAt(1).IsExcelRange ? arguments.ElementAt(1).ValueAsRangeInfo.Address.FullAddress : this.ArgToString(arguments, 1);
+			var address = arguments.ElementAt(1).ValueAsRangeInfo?.Address.Address;
 			var rangeAddressFactory = new RangeAddressFactory(context.ExcelDataProvider);
 			var rangeAddress = rangeAddressFactory.Create(address);
 			var matchType = this.GetMatchType(arguments);

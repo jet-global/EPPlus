@@ -46,7 +46,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 
 		}
 
-		public ExpressionCompiler(IExpressionConverter expressionConverter, ICompileStrategyFactory compileStrategyFactory)
+		private ExpressionCompiler(IExpressionConverter expressionConverter, ICompileStrategyFactory compileStrategyFactory)
 		{
 			_expressionConverter = expressionConverter;
 			_compileStrategyFactory = compileStrategyFactory;

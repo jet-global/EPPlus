@@ -37,37 +37,47 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
 	public abstract class Expression
 	{
-		protected string ExpressionString { get; private set; }
-		private readonly List<Expression> _children = new List<Expression>();
+		#region Properties
 		public IEnumerable<Expression> Children { get { return _children; } }
+
 		public Expression Next { get; set; }
+
 		public Expression Prev { get; set; }
+
 		public IOperator Operator { get; set; }
-		public abstract bool IsGroupedExpression { get; }
-
-		public Expression()
-		{
-
-		}
-
-		public Expression(string expression)
-		{
-			ExpressionString = expression;
-			Operator = null;
-		}
-
-		/// <summary>
-		/// Gets or sets a value indicating that all parts of this <see cref="Expression"/>
-		/// that are a <see cref="FunctionArgumentExpression"/> and an Excel address 
-		/// should be compiled as an ExcelAddress instead of being evaluated at compile time.
-		/// </summary>
-		public virtual bool CompileAsExcelAddress { get; set; }
 
 		public virtual bool HasChildren
 		{
 			get { return _children.Any(); }
 		}
 
+		protected string ExpressionString { get; private set; }
+
+		private readonly List<Expression> _children = new List<Expression>();
+
+		private static ExpressionConverter Converter { get; } = new ExpressionConverter();
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Default constructor is required for the <see cref="GroupExpression"/>.
+		/// </summary>
+		protected Expression() { }
+
+		protected Expression(string expression)
+		{
+			ExpressionString = expression;
+			Operator = null;
+		}
+		#endregion
+
+		#region Abstract Members
+		public abstract bool IsGroupedExpression { get; }
+
+		public abstract CompileResult Compile();
+		#endregion
+
+		#region Public Methods
 		public virtual Expression PrepareForNextChild()
 		{
 			return this;
@@ -96,7 +106,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			if (Next != null && Operator != null)
 			{
 				var result = Operator.Apply(GetComparableExpression().Compile(), Next.GetComparableExpression().Compile());
-				expression = ExpressionConverter.Instance.FromCompileResult(result);
+				expression = Expression.Converter.FromCompileResult(result);
 				if (expression is ExcelErrorExpression)
 				{
 					expression.Next = null;
@@ -125,8 +135,6 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			}
 			return expression;
 		}
-
-		public abstract CompileResult Compile();
-
+		#endregion
 	}
 }

@@ -34,7 +34,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 	/// For each of the children of the given function, if that child came from a cell reference,
 	/// this compiler will set that child's ResolveAsRange flag to true.
 	/// </summary>
-	class ResolveCellReferencesAsRangeCompiler : DefaultCompiler
+	public class ResolveCellReferencesAsRangeCompiler : DefaultCompiler
 	{
 		/// <summary>
 		/// Initializes a new ResolveCellReferencesAsRangeCompiler.
