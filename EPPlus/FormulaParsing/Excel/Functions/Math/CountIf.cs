@@ -58,9 +58,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			// does not include empty cells that have not been set since the workbook's creation. This function
 			// wants to consider empty cells for comparing with the criterion, but it can be better optimized.
 			// A similar problem and optimization opportunity exists in the AverageIf, AverageIfs, SumIf, SumIfs, and CountIfs functions.
-			var cellValuesFromRange = IfHelper.GetAllCellValuesInRange(cellRangeToCheck);
 			var criteriaObject = IfHelper.ExtractCriterionObject(arguments.ElementAt(1), context);
-			double count = cellValuesFromRange.Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, criteriaObject)).Count();
+			double count = cellRangeToCheck.AllValues().Where(cellValue => IfHelper.ObjectMatchesCriterion(cellValue, criteriaObject)).Count();
 			return this.CreateResult(count, DataType.Integer);
 		}
 	}
