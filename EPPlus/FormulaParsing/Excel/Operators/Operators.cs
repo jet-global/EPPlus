@@ -33,13 +33,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 {
 	public enum OperatorType
 	{
-		Undefined,
 		Concat,
 		Plus,
 		Minus,
 		Multiply,
 		Divide,
-		Modulus,
 		Percent,
 		Equals,
 		GreaterThan,
@@ -47,7 +45,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		LessThan,
 		LessThanOrEqual,
 		NotEqualTo,
-		IntegerDivision,
 		Exponentiation
 	}
 }

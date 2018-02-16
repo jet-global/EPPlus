@@ -69,7 +69,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 
 		public bool ValueIsExcelError
 		{
-			get { return ExcelErrorValue.Values.IsErrorValue(Value); }
+			get { return this.Value is ExcelErrorValue; }
 		}
 
 		public ExcelErrorValue ValueAsExcelErrorValue

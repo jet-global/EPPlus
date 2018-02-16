@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace OfficeOpenXml
 {
 	/// <summary>
-	/// Represents the errortypes in excel
+	/// Represents the error types in excel.
 	/// </summary>
 	public enum eErrorType
 	{
@@ -44,101 +44,56 @@ namespace OfficeOpenXml
 	/// <seealso cref="eErrorType"/>
 	public class ExcelErrorValue
 	{
+		#region Properties
 		/// <summary>
-		/// Handles the convertion between <see cref="eErrorType"/> and the string values
-		/// used by Excel.
+		/// The error type
 		/// </summary>
-		public static class Values
+		public eErrorType Type { get; private set; }
+		#endregion
+
+		#region Constructors
+		private ExcelErrorValue(eErrorType type)
 		{
-			public const string Div0 = "#DIV/0!";
-			public const string NA = "#N/A";
-			public const string Name = "#NAME?";
-			public const string Null = "#NULL!";
-			public const string Num = "#NUM!";
-			public const string Ref = "#REF!";
-			public const string Value = "#VALUE!";
-
-			private static Dictionary<string, eErrorType> _values = new Dictionary<string, eErrorType>()
-					 {
-						  {Div0, eErrorType.Div0},
-						  {NA, eErrorType.NA},
-						  {Name, eErrorType.Name},
-						  {Null, eErrorType.Null},
-						  {Num, eErrorType.Num},
-						  {Ref, eErrorType.Ref},
-						  {Value, eErrorType.Value}
-					 };
-
-			/// <summary>
-			/// Returns true if the supplied <paramref name="candidate"/> is an excel error.
-			/// </summary>
-			/// <param name="candidate"></param>
-			/// <returns></returns>
-			public static bool IsErrorValue(object candidate)
-			{
-				if (candidate == null || !(candidate is ExcelErrorValue)) return false;
-				var candidateString = candidate.ToString();
-				return (!string.IsNullOrEmpty(candidateString) && _values.ContainsKey(candidateString));
-			}
-
-			/// <summary>
-			/// Returns true if the supplied <paramref name="candidate"/> is an excel error.
-			/// </summary>
-			/// <param name="candidate"></param>
-			/// <returns></returns>
-			public static bool StringIsErrorValue(string candidate)
-			{
-				return (!string.IsNullOrEmpty(candidate) && _values.ContainsKey(candidate));
-			}
-
-			/// <summary>
-			/// Converts a string to an <see cref="eErrorType"/>
-			/// </summary>
-			/// <param name="val"></param>
-			/// <returns></returns>
-			/// <exception cref="ArgumentException">Thrown if the supplied value is not an Excel error</exception>
-			public static eErrorType ToErrorType(string val)
-			{
-				if (string.IsNullOrEmpty(val) || !_values.ContainsKey(val))
-				{
-					throw new ArgumentException("Invalid error code " + (val ?? "<empty>"));
-				}
-				return _values[val];
-			}
+			if (type == default(eErrorType))
+				throw new ArgumentException($"{nameof(type)} must be a valid error type.");
+			this.Type = type;
 		}
+		#endregion
 
+		#region Internal Static Methods
+		/// <summary>
+		/// Creates a new <see cref="ExcelErrorValue"/> with the specified <paramref name="errorType"/>.
+		/// </summary>
+		/// <param name="errorType">The type of error to create.</param>
+		/// <returns>An <see cref="ExcelErrorValue"/>.</returns>
 		internal static ExcelErrorValue Create(eErrorType errorType)
 		{
 			return new ExcelErrorValue(errorType);
 		}
 
+		/// <summary>
+		/// Parse the specified <paramref name="val"/> to an <see cref="ExcelErrorValue"/>.
+		/// </summary>
+		/// <param name="val">The value to attempt to parse.</param>
+		/// <returns>An <see cref="ExcelErrorValue"/> matching the the specified <paramref name="val"/>.</returns>
 		internal static ExcelErrorValue Parse(string val)
 		{
-			if (Values.StringIsErrorValue(val))
-			{
-				return new ExcelErrorValue(Values.ToErrorType(val));
-			}
-			if (string.IsNullOrEmpty(val)) throw new ArgumentNullException("val");
+			if (Values.TryGetErrorType(val, out eErrorType errorType))
+				return new ExcelErrorValue(errorType);
+			if (string.IsNullOrEmpty(val))
+				throw new ArgumentNullException(nameof(val));
 			throw new ArgumentException("Not a valid error value: " + val);
 		}
+		#endregion
 
-		private ExcelErrorValue(eErrorType type)
-		{
-			Type = type;
-		}
-
+		#region Object Overrides
 		/// <summary>
-		/// The error type
+		/// Returns the string representation of the error type.
 		/// </summary>
-		public eErrorType Type { get; private set; }
-
-		/// <summary>
-		/// Returns the string representation of the error type
-		/// </summary>
-		/// <returns></returns>
+		/// <returns>A string representation of the error type.</returns>
 		public override string ToString()
 		{
-			switch (Type)
+			switch (this.Type)
 			{
 				case eErrorType.Div0:
 					return Values.Div0;
@@ -155,27 +110,96 @@ namespace OfficeOpenXml
 				case eErrorType.Value:
 					return Values.Value;
 				default:
-					throw (new ArgumentException("Invalid errortype"));
+					throw new ArgumentException("Invalid error type");
 			}
 		}
-		public static ExcelErrorValue operator +(object v1, ExcelErrorValue v2)
-		{
-			return v2;
-		}
-		public static ExcelErrorValue operator +(ExcelErrorValue v1, ExcelErrorValue v2)
-		{
-			return v1;
-		}
 
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
+		/// <summary>
+		/// Compares the specified <paramref name="obj"/> to this for equality.
+		/// </summary>
+		/// <param name="obj">The object to compare for equality.</param>
+		/// <returns>True if the objects are equal, otherwise false.</returns>
 		public override bool Equals(object obj)
 		{
-			if (!(obj is ExcelErrorValue)) return false;
-			return ((ExcelErrorValue)obj).ToString() == this.ToString();
+			if (!(obj is ExcelErrorValue errorValueObj))
+				return false;
+			return errorValueObj.Type == this.Type;
 		}
+
+		/// <summary>
+		/// Gets the hash code for this object.
+		/// </summary>
+		/// <returns>An integer hash code for this object.</returns>
+		public override int GetHashCode()
+		{
+			return 2049151605 + this.Type.GetHashCode();
+		}
+		#endregion
+
+		#region Nested Classes
+		/// <summary>
+		/// Handles the convertion between <see cref="eErrorType"/> and the string values
+		/// used by Excel.
+		/// </summary>
+		public static class Values
+		{
+			#region Constants
+			/// <summary>
+			/// The string representation of a divide by zero error.
+			/// </summary>
+			public const string Div0 = "#DIV/0!";
+			/// <summary>
+			/// The string representation of a not applicable error.
+			/// </summary>
+			public const string NA = "#N/A";
+			/// <summary>
+			/// The string representation of a unknown name error.
+			/// </summary>
+			public const string Name = "#NAME?";
+			/// <summary>
+			/// The string representation of a null error.
+			/// </summary>
+			public const string Null = "#NULL!";
+			/// <summary>
+			/// The string representation of an invalid number error.
+			/// </summary>
+			public const string Num = "#NUM!";
+			/// <summary>
+			/// The string representation of an invalid reference error.
+			/// </summary>
+			public const string Ref = "#REF!";
+			/// <summary>
+			/// The string representation of a value error.
+			/// </summary>
+			public const string Value = "#VALUE!";
+			#endregion
+
+			#region Static Class Variables
+			private static Dictionary<string, eErrorType> _values = new Dictionary<string, eErrorType>()
+			{
+				{Div0, eErrorType.Div0},
+				{NA, eErrorType.NA},
+				{Name, eErrorType.Name},
+				{Null, eErrorType.Null},
+				{Num, eErrorType.Num},
+				{Ref, eErrorType.Ref},
+				{Value, eErrorType.Value}
+			};
+			#endregion
+
+			#region Public Methods
+			/// <summary>
+			/// Tries to convert a string to an <see cref="eErrorType"/>.
+			/// </summary>
+			/// <param name="candidate">The string to convert to an error value.</param>
+			/// <param name="eErrorType">The converted <see cref="eErrorType"/>.</param>
+			/// <returns>True if succesfully converted, otherwise false.</returns>
+			public static bool TryGetErrorType(string candidate, out eErrorType eErrorType)
+			{
+				return _values.TryGetValue(candidate, out eErrorType);
+			}
+			#endregion
+		}
+		#endregion
 	}
 }

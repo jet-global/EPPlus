@@ -585,10 +585,8 @@
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResult.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultFactory.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileStrategy\CompileStrategy.cs" />
-    <Compile Include="FormulaParsing\ExpressionGraph\CompileStrategy\CompileStrategyFactory.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileStrategy\DefaultCompileStrategy.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileStrategy\ICompileStrategyFactory.cs" />
-    <Compile Include="FormulaParsing\ExpressionGraph\CompileStrategy\StringConcatStrategy.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\ExcelErrorExpression.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\DataType.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\DateExpression.cs" />

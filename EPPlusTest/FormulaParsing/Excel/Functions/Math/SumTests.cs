@@ -685,6 +685,36 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(10d, result.Result);
 		}
+
+		[TestMethod]
+		public void SumPropagatesRangeErrors()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Value = "#NAME?";
+				sheet.Cells[2, 3].Value = 0;
+				sheet.Cells[2, 4].Value = 1;
+				sheet.Cells[2, 5].Formula = "SUM(B2:D2)";
+				sheet.Calculate();
+				Assert.AreEqual(eErrorType.Name, ((ExcelErrorValue)sheet.Cells[2, 5].Value).Type);
+			}
+		}
+
+		[TestMethod]
+		public void SumIgnoresTextThatLooksLikeAnErrorValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = @"""#NAME?""";
+				sheet.Cells[2, 3].Value = 0;
+				sheet.Cells[2, 4].Value = 1;
+				sheet.Cells[2, 5].Formula = "SUM(B2:D2)";
+				sheet.Calculate();
+				Assert.AreEqual(1d, sheet.Cells[2, 5].Value);
+			}
+		}
 		#endregion
 	}
 }
