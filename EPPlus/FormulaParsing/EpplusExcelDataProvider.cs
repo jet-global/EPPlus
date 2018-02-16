@@ -269,7 +269,14 @@ namespace OfficeOpenXml.FormulaParsing
 
 			public bool IsExcelError
 			{
-				get { return ExcelErrorValue.Values.IsErrorValue(_values.Value._value); }
+				get
+				{
+					var value = _values.Value._value;
+					// Parse error string values that were not set by a formula as error values.
+					if (value is string stringValue && ExcelErrorValue.Values.TryGetErrorType(stringValue, out _) && string.IsNullOrEmpty(this.Formula))
+						return true;
+					return value is ExcelErrorValue;
+				}
 			}
 
 			public IList<Token> Tokens

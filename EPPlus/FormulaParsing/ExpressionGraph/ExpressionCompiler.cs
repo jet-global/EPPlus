@@ -34,35 +34,55 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph.CompileStrategy;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
+	/// <summary>
+	/// A class to compile expressions.
+	/// </summary>
 	public class ExpressionCompiler : IExpressionCompiler
 	{
+		#region Class Variables
 		private IEnumerable<Expression> _expressions;
 		private IExpressionConverter _expressionConverter;
-		private ICompileStrategyFactory _compileStrategyFactory;
+		#endregion
 
+		#region Constructors
+		/// <summary>
+		/// Instantiates a new <see cref="ExpressionCompiler"/> object.
+		/// </summary>
 		public ExpressionCompiler()
-			 : this(new ExpressionConverter(), new CompileStrategyFactory())
 		{
-
+			_expressionConverter = new ExpressionConverter();
 		}
+		#endregion
 
-		private ExpressionCompiler(IExpressionConverter expressionConverter, ICompileStrategyFactory compileStrategyFactory)
-		{
-			_expressionConverter = expressionConverter;
-			_compileStrategyFactory = compileStrategyFactory;
-		}
-
+		#region Public Methods
+		/// <summary>
+		/// Compiles the specified <paramref name="expressions"/>.
+		/// </summary>
+		/// <param name="expressions">The expressions to compile.</param>
+		/// <returns>A <see cref="CompileResult"/> result.</returns>
 		public CompileResult Compile(IEnumerable<Expression> expressions)
 		{
 			_expressions = expressions;
 			return PerformCompilation();
 		}
+
+		/// <summary>
+		/// Compiles the specififed <paramref name="expressions"/> in the context of the 
+		/// specified <paramref name="worksheet"/>, <paramref name="row"/>, and <paramref name="column"/>.
+		/// </summary>
+		/// <param name="worksheet">The worksheet to compile within the context of.</param>
+		/// <param name="row">The row to compile within the context of.</param>
+		/// <param name="column">The column to compile within the context of.</param>
+		/// <param name="expressions">The expressions to compile.</param>
+		/// <returns>A <see cref="CompileResult"/> result.</returns>
 		public CompileResult Compile(string worksheet, int row, int column, IEnumerable<Expression> expressions)
 		{
 			_expressions = expressions;
 			return PerformCompilation(worksheet, row, column);
 		}
+		#endregion
 
+		#region Private Methods
 		private CompileResult PerformCompilation(string worksheet = "", int row = -1, int column = -1)
 		{
 			var compiledExpressions = HandleGroupedExpressions();
@@ -115,7 +135,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			var expression = expressionsToHandle.First();
 			do
 			{
-				var strategy = _compileStrategyFactory.Create(expression);
+				var strategy = new DefaultCompileStrategy(expression);
 				var compiledExpression = strategy.Compile();
 				if (compiledExpression is ExcelErrorExpression)
 				{
@@ -150,5 +170,6 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			_expressions = resultList;
 			return resultList;
 		}
+		#endregion
 	}
 }

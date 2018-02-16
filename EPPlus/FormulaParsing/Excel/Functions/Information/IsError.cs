@@ -38,17 +38,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Information
 			}
 			foreach (var argument in arguments)
 			{
-				if (argument.Value is ExcelDataProvider.IRangeInfo)
+				if (argument.Value is ExcelDataProvider.IRangeInfo rangeInfo)
 				{
-					var r = (ExcelDataProvider.IRangeInfo)argument.Value;
-					if (ExcelErrorValue.Values.IsErrorValue(r.GetValue(r.Address._fromRow, r.Address._fromCol)))
+					if (rangeInfo.GetValue(rangeInfo.Address._fromRow, rangeInfo.Address._fromCol) is ExcelErrorValue)
 					{
 						return CreateResult(true, DataType.Boolean);
 					}
 				}
 				else
 				{
-					if (ExcelErrorValue.Values.IsErrorValue(argument.Value))
+					if (argument.Value is ExcelErrorValue)
 					{
 						return CreateResult(true, DataType.Boolean);
 					}

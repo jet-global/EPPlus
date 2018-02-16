@@ -42,9 +42,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		#region Constants
 		private const int PrecedencePercent = 2;
 		private const int PrecedenceExp = 4;
-		private const int PrecedenceMultiplyDevide = 6;
-		private const int PrecedenceIntegerDivision = 8;
-		private const int PrecedenceModulus = 10;
+		private const int PrecedenceMultiplyDivide = 6;
 		private const int PrecedenceAddSubtract = 12;
 		private const int PrecedenceConcat = 15;
 		private const int PrecedenceComparison = 25;
@@ -78,25 +76,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				return myPlus ?? (myPlus = new Operator(OperatorType.Plus, PrecedenceAddSubtract, (l, r) =>
-				{
-					l = l == null || l.Result == null ? new CompileResult(0, DataType.Integer) : l;
-					r = r == null || r.Result == null ? new CompileResult(0, DataType.Integer) : r;
-					if (EitherIsError(l, r, out ExcelErrorValue errorVal))
-					{
-						return new CompileResult(errorVal);
-					}
-					if (l.DataType == DataType.Integer && r.DataType == DataType.Integer)
-					{
-						return new CompileResult(l.ResultNumeric + r.ResultNumeric, DataType.Integer);
-					}
-					else if ((l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) &&
-									 (r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
-					{
-						return new CompileResult(l.ResultNumeric + r.ResultNumeric, DataType.Decimal);
-					}
-					return new CompileResult(eErrorType.Value);
-				}));
+				CompileResult add(CompileResult l, CompileResult r) => 
+					Operator.CalculateNumericalOperator(l, r, (ld, rd, dataType) => new CompileResult(ld + rd, dataType));
+				return myPlus ?? (myPlus = new Operator(OperatorType.Plus, Operator.PrecedenceAddSubtract, add));
 			}
 		}
 
@@ -107,22 +89,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				return myMinus ?? (myMinus = new Operator(OperatorType.Minus, PrecedenceAddSubtract, (l, r) =>
-				{
-					l = l == null || l.Result == null ? new CompileResult(0, DataType.Integer) : l;
-					r = r == null || r.Result == null ? new CompileResult(0, DataType.Integer) : r;
-					if (l.DataType == DataType.Integer && r.DataType == DataType.Integer)
-					{
-						return new CompileResult(l.ResultNumeric - r.ResultNumeric, DataType.Integer);
-					}
-					else if ((l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) &&
-									 (r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
-					{
-						return new CompileResult(l.ResultNumeric - r.ResultNumeric, DataType.Decimal);
-					}
-
-					return new CompileResult(eErrorType.Value);
-				}));
+				CompileResult subtract(CompileResult l, CompileResult r) => 
+					Operator.CalculateNumericalOperator(l, r, (ld, rd, dataType) => new CompileResult(ld - rd, dataType));
+				return myMinus ?? (myMinus = new Operator(OperatorType.Minus, Operator.PrecedenceAddSubtract, subtract));
 			}
 		}
 
@@ -133,21 +102,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				return myMultiply ?? (myMultiply = new Operator(OperatorType.Multiply, PrecedenceMultiplyDevide, (l, r) =>
-				{
-					l = l ?? new CompileResult(0, DataType.Integer);
-					r = r ?? new CompileResult(0, DataType.Integer);
-					if (l.DataType == DataType.Integer && r.DataType == DataType.Integer)
-					{
-						return new CompileResult(l.ResultNumeric * r.ResultNumeric, DataType.Integer);
-					}
-					else if ((l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) &&
-									 (r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
-					{
-						return new CompileResult(l.ResultNumeric * r.ResultNumeric, DataType.Decimal);
-					}
-					return new CompileResult(eErrorType.Value);
-				}));
+				CompileResult multiply(CompileResult l, CompileResult r) => 
+					Operator.CalculateNumericalOperator(l, r, (ld, rd, dataType) => new CompileResult(ld * rd, dataType));
+				return myMultiply ?? (myMultiply = new Operator(OperatorType.Multiply, Operator.PrecedenceMultiplyDivide, multiply));
 			}
 		}
 
@@ -158,26 +115,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				return myDivide ?? (myDivide = new Operator(OperatorType.Divide, PrecedenceMultiplyDevide, (l, r) =>
+				CompileResult divide(CompileResult l, CompileResult r)
 				{
-					if (!(l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) ||
-							  !(r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
+					return 	Operator.CalculateNumericalOperator(l, r, (ld, rd, dataType) =>
 					{
-						return new CompileResult(eErrorType.Value);
-					}
-					var left = l.ResultNumeric;
-					var right = r.ResultNumeric;
-					if (Math.Abs(right - 0d) < double.Epsilon)
-					{
-						return new CompileResult(eErrorType.Div0);
-					}
-					else if ((l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) &&
-									 (r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
-					{
-						return new CompileResult(left / right, DataType.Decimal);
-					}
-					return new CompileResult(eErrorType.Value);
-				}));
+						if (Math.Abs(rd) < double.Epsilon)
+							return new CompileResult(eErrorType.Div0);
+						return new CompileResult(ld / rd, DataType.Decimal);
+					});
+				}
+				return myDivide ?? (myDivide = new Operator(OperatorType.Divide, Operator.PrecedenceMultiplyDivide, divide));
 			}
 		}
 
@@ -188,21 +135,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				return myExp ?? (myExp = new Operator(OperatorType.Exponentiation, PrecedenceExp, (l, r) =>
-				{
-					if (l == null && r == null)
-					{
-						return new CompileResult(eErrorType.Value);
-					}
-					l = l ?? new CompileResult(0, DataType.Integer);
-					r = r ?? new CompileResult(0, DataType.Integer);
-					if ((l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) &&
-					 (r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
-					{
-						return new CompileResult(Math.Pow(l.ResultNumeric, r.ResultNumeric), DataType.Decimal);
-					}
-					return new CompileResult(0d, DataType.Decimal);
-				}));
+				CompileResult exponentiate(CompileResult l, CompileResult r) => 
+					Operator.CalculateNumericalOperator(l, r, (ld, rd, dataType) => new CompileResult(Math.Pow(ld, rd), dataType));
+				return myExp ?? (myExp = new Operator(OperatorType.Exponentiation, Operator.PrecedenceExp, exponentiate));
 			}
 		}
 
@@ -217,6 +152,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 				{
 					l = l ?? new CompileResult(string.Empty, DataType.String);
 					r = r ?? new CompileResult(string.Empty, DataType.String);
+					if (l.DataType == DataType.ExcelError)
+						return new CompileResult(l.Result as ExcelErrorValue);
+					else if (r.DataType == DataType.ExcelError)
+						return new CompileResult(r.Result as ExcelErrorValue);
 					var lStr = Convert.ToString(l.ResultValue);
 					var rStr = Convert.ToString(r.ResultValue);
 					return new CompileResult(string.Concat(lStr, rStr), DataType.String);
@@ -306,29 +245,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		}
 
 		/// <summary>
-		/// Gets an <see cref="IOperator"/> that can perform the Percent operation.
+		/// Gets an <see cref="IOperator"/> that can perform the 
+		/// Excel Percent operation (multiply by .01).
 		/// </summary>
-		public static IOperator Percent
-		{
-			get
-			{
-				return myPercent ?? (myPercent = new Operator(OperatorType.Percent, PrecedencePercent, (l, r) =>
-					{
-						l = l ?? new CompileResult(0, DataType.Integer);
-						r = r ?? new CompileResult(0, DataType.Integer);
-						if (l.DataType == DataType.Integer && r.DataType == DataType.Integer)
-						{
-							return new CompileResult(l.ResultNumeric * r.ResultNumeric, DataType.Integer);
-						}
-						else if ((l.IsNumeric || l.IsDateString || l.IsNumericString || l.Result is ExcelDataProvider.IRangeInfo) &&
-						 (r.IsNumeric || r.IsDateString || r.IsNumericString || r.Result is ExcelDataProvider.IRangeInfo))
-						{
-							return new CompileResult(l.ResultNumeric * r.ResultNumeric, DataType.Decimal);
-						}
-						return new CompileResult(eErrorType.Value);
-					}));
-			}
-		}
+		/// <remarks>Note that the right operand to this operator has been set to .01.</remarks>
+		public static IOperator Percent => Operator.Multiply;
 		#endregion
 
 		#region Properties
@@ -369,10 +290,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		/// <returns>The result of performing the specified operation on the operands.</returns>
 		public CompileResult Apply(CompileResult left, CompileResult right)
 		{
-			if (left.Result is ExcelErrorValue)
-				return new CompileResult(left.Result, DataType.ExcelError);
-			else if (right.Result is ExcelErrorValue)
-				return new CompileResult(eErrorType.Value, DataType.ExcelError);
 			return this.Implementation(left, right);
 		}
 
@@ -387,6 +304,39 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		#endregion
 
 		#region Private Static Methods
+		private static CompileResult CalculateNumericalOperator(CompileResult left, CompileResult right, Func<double, double, DataType, CompileResult> operation)
+		{
+			if (left == null || right == null)
+				return new CompileResult(eErrorType.Value);
+			DataType leftType, rightType;
+			if (left.DataType == DataType.ExcelError)
+				return new CompileResult(left.Result as ExcelErrorValue);
+			else if (!Operator.TryGetNumericType(left, out leftType))
+				return new CompileResult(eErrorType.Value);
+			else if (right.DataType == DataType.ExcelError)
+				return new CompileResult(right.Result as ExcelErrorValue);
+			else if (!Operator.TryGetNumericType(right, out rightType))
+				return new CompileResult(eErrorType.Value);
+			DataType resultType = leftType == DataType.Integer && rightType == DataType.Integer ? DataType.Integer : DataType.Decimal;
+			return operation(left.ResultNumeric, right.ResultNumeric, resultType);
+		}
+
+		private static bool TryGetNumericType(CompileResult result, out DataType dataType)
+		{
+			if (result.DataType == DataType.Integer)
+			{
+				dataType = DataType.Integer;
+				return true;
+			}
+			else if (result.IsNumeric|| result.IsDateString || result.IsNumericString || result.Result is ExcelDataProvider.IRangeInfo)
+			{
+				dataType = DataType.Decimal;
+				return true;
+			}
+			dataType = DataType.Unknown;
+			return false;
+		}
+
 		private static CompileResult GetObjectWithDefaultValueThatMatchesTheOtherObjectType(CompileResult target, CompileResult other)
 		{
 			if (target.Result == null)

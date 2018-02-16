@@ -147,11 +147,11 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 						break;
 					c = _context.FormulaChars[_tokenIndex];
 				}
-				while (!ExcelErrorValue.Values.StringIsErrorValue(_context.CurrentToken));
+				while (!ExcelErrorValue.Values.TryGetErrorType(_context.CurrentToken, out _));
 				_tokenIndex--;
 				if (this.CharIsTokenSeparator(c, out _) || _tokenIndex == _context.FormulaChars.Length - 1)
 				{
-					var errorType = ExcelErrorValue.Values.ToErrorType(_context.CurrentToken);
+					ExcelErrorValue.Values.TryGetErrorType(_context.CurrentToken, out eErrorType errorType);
 					switch (errorType)
 					{
 						case eErrorType.Div0:

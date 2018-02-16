@@ -325,15 +325,25 @@ namespace EPPlusTest.Excel
 			using (ExcelPackage package = new ExcelPackage())
 			{
 				var sheet = package.Workbook.Worksheets.Add("Sheet1");
-				sheet.Cells[2, 2].Formula = @"""some text""+otherText";
-				sheet.Cells[2, 3].Formula = @"otherText + ""some text""";
-				sheet.Cells[2, 4].Formula = @"(5/0) + 1";
-				sheet.Cells[2, 5].Formula = @"1 + (5/0)";
+				sheet.Cells[2, 2].Formula = @"2+2";
+				sheet.Cells[2, 3].Formula = @"2+""text""";
+				sheet.Cells[2, 4].Formula = @"2+notavalidname";
+				sheet.Cells[2, 5].Formula = @"""text""+2";
+				sheet.Cells[2, 6].Formula = @"""text""+""other text""";
+				sheet.Cells[2, 7].Formula = @"""text""+notavalidname";
+				sheet.Cells[2, 8].Formula = @"notavalidname+2";
+				sheet.Cells[2, 9].Formula = @"notavalidname+""other text""";
+				sheet.Cells[2, 10].Formula = @"notavalidname+notavalidname";
 				sheet.Calculate();
-				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 2].Value);
-				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 3].Value);
-				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Div0), sheet.Cells[2, 4].Value);
+				Assert.AreEqual(4d, sheet.Cells[2, 2].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 3].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 4].Value);
 				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 5].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 6].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 7].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 8].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 9].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 10].Value);
 			}
 		}
 		#endregion
@@ -351,6 +361,34 @@ namespace EPPlusTest.Excel
 		{
 			var result = Operator.Minus.Apply(new CompileResult(5, DataType.Integer), new CompileResult("2", DataType.String));
 			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorMinusErrorTypeArguments()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = @"5-2";
+				sheet.Cells[2, 3].Formula = @"2-""text""";
+				sheet.Cells[2, 4].Formula = @"2-notavalidname";
+				sheet.Cells[2, 5].Formula = @"""text""-2";
+				sheet.Cells[2, 6].Formula = @"""text""-""other text""";
+				sheet.Cells[2, 7].Formula = @"""text""-notavalidname";
+				sheet.Cells[2, 8].Formula = @"notavalidname-2";
+				sheet.Cells[2, 9].Formula = @"notavalidname-""other text""";
+				sheet.Cells[2, 10].Formula = @"notavalidname-notavalidname";
+				sheet.Calculate();
+				Assert.AreEqual(3d, sheet.Cells[2, 2].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 3].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 4].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 5].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 6].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 7].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 8].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 9].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 10].Value);
+			}
 		}
 		#endregion
 
@@ -381,6 +419,34 @@ namespace EPPlusTest.Excel
 		{
 			var result = Operator.Divide.Apply(new CompileResult(9, DataType.Integer), new CompileResult("3", DataType.String));
 			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorDivideErrorTypeArguments()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = @"10/2";
+				sheet.Cells[2, 3].Formula = @"2/""text""";
+				sheet.Cells[2, 4].Formula = @"2/notavalidname";
+				sheet.Cells[2, 5].Formula = @"""text""/2";
+				sheet.Cells[2, 6].Formula = @"""text""/""other text""";
+				sheet.Cells[2, 7].Formula = @"""text""/notavalidname";
+				sheet.Cells[2, 8].Formula = @"notavalidname/2";
+				sheet.Cells[2, 9].Formula = @"notavalidname/""other text""";
+				sheet.Cells[2, 10].Formula = @"notavalidname/notavalidname";
+				sheet.Calculate();
+				Assert.AreEqual(5d, sheet.Cells[2, 2].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 3].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 4].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 5].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 6].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 7].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 8].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 9].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 10].Value);
+			}
 		}
 		#endregion
 
@@ -511,6 +577,64 @@ namespace EPPlusTest.Excel
 				Assert.AreEqual(System.Math.Pow(2, 255), ws.Cells["C1"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void OperatorMultiplyErrorTypeArguments()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = @"2*2";
+				sheet.Cells[2, 3].Formula = @"2*""text""";
+				sheet.Cells[2, 4].Formula = @"2*notavalidname";
+				sheet.Cells[2, 5].Formula = @"""text""*2";
+				sheet.Cells[2, 6].Formula = @"""text""*""other text""";
+				sheet.Cells[2, 7].Formula = @"""text""*notavalidname";
+				sheet.Cells[2, 8].Formula = @"notavalidname*2";
+				sheet.Cells[2, 9].Formula = @"notavalidname*""other text""";
+				sheet.Cells[2, 10].Formula = @"notavalidname*notavalidname";
+				sheet.Calculate();
+				Assert.AreEqual(4d, sheet.Cells[2, 2].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 3].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 4].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 5].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 6].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 7].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 8].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 9].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 10].Value);
+			}
+		}
+		#endregion
+
+		#region Operator Percent Tests
+		[TestMethod]
+		public void OperatorPercentPropagatesErrors()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = @"2%";
+				sheet.Cells[2, 3].Formula = @"""text""%";
+				sheet.Cells[2, 4].Formula = @"notavalidname%";
+				sheet.Calculate();
+				Assert.AreEqual(.02, sheet.Cells[2, 2].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 3].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 4].Value);
+			}
+		}
+
+		[TestMethod]
+		public void OperatorPercentCompounds()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = @"24%%%";
+				sheet.Calculate();
+				Assert.AreEqual(.000024d, (double)sheet.Cells[2, 2].Value, .0000000000000001);
+			}
+		}
 		#endregion
 
 		#region Operator Concat Tests
@@ -541,6 +665,24 @@ namespace EPPlusTest.Excel
 				Assert.AreEqual("b", result.Result);
 				result = Operator.Concat.Apply(new CompileResult("b", DataType.String), new CompileResult(emptyRange, DataType.ExcelAddress));
 				Assert.AreEqual("b", result.Result);
+			}
+		}
+
+		[TestMethod]
+		public void OperatorConcatShouldPropagateErrors()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = @"""text""&notaname";
+				sheet.Cells[2, 3].Formula = @"notaname&""text""";
+				sheet.Cells[2, 4].Formula = @"notaname&ROUND(""AA"", 1)";
+				sheet.Cells[2, 5].Formula = @"ROUND(""AA"", 1)&notaname";
+				sheet.Calculate();
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 2].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 3].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 4].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 5].Value);
 			}
 		}
 		#endregion

@@ -111,6 +111,7 @@
     <Compile Include="Drawing\Slicers\TabularItemNodeTest.cs" />
     <Compile Include="ExcelAddressTest.cs" />
     <Compile Include="ExcelCellBaseTest.cs" />
+    <Compile Include="ExcelErrorValueTest.cs" />
     <Compile Include="ExcelNamedRangeCollectionTest.cs" />
     <Compile Include="ExcelNamedRangeTest.cs" />
     <Compile Include="ExcelPackageTest.cs" />

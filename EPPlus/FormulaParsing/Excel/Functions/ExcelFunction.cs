@@ -422,7 +422,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			{
 				return CreateResult(result, DataType.String);
 			}
-			if (ExcelErrorValue.Values.IsErrorValue(result))
+			if (result is ExcelErrorValue)
 			{
 				return CreateResult(result, DataType.ExcelError);
 			}
