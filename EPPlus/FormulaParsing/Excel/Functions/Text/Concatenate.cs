@@ -32,18 +32,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 	{
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (arguments == null)
-			{
-				return CreateResult(string.Empty, DataType.String);
-			}
+			if (!this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError))
+				return new CompileResult(argumentError);
 			var sb = new StringBuilder();
 			foreach (var arg in arguments)
 			{
 				var v = arg.ValueFirst;
 				if (v != null)
-				{
 					sb.Append(v);
-				}
 			}
 			return CreateResult(sb.ToString(), DataType.String);
 		}

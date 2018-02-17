@@ -113,6 +113,47 @@ namespace EPPlusTest.Excel.Functions.Text
 		}
 
 		[TestMethod]
+		public void ConcatenatePropogatesErrors()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Test");
+				ws.Cells["A1"].Formula = @"noname"; // #NAME?
+				ws.Cells["A2"].Formula = @"""hey""+1"; // #VALUE!
+				ws.Cells["A3"].Formula = "CONCATENATE(A1,A2)";
+				ws.Calculate();
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), ws.Cells["A1"].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), ws.Cells["A2"].Value);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), ws.Cells["A3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void ConcatenateSingleString()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Test");
+				ws.Cells["A3"].Formula = @"CONCATENATE(""hey"")";
+				ws.Calculate();
+				Assert.AreEqual("hey", ws.Cells["A3"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void ConcatenateSingleReference()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Test");
+				ws.Cells["A1"].Value = @"hey";
+				ws.Cells["A3"].Formula = @"CONCATENATE(A1)";
+				ws.Calculate();
+				Assert.AreEqual("hey", ws.Cells["A3"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void ExactShouldReturnTrueWhenTwoEqualStrings()
 		{
 			var func = new Exact();
