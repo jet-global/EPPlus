@@ -99,9 +99,12 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 				return CompileResult.Empty;
 			var factory = new CompileResultFactory();
 			var compileResult = factory.Create(cell.Value);
-			if (_negate && compileResult.IsNumeric)
+			if (_negate)
 			{
-				compileResult = new CompileResult(compileResult.ResultNumeric * -1, compileResult.DataType);
+				if (compileResult.IsNumeric)
+					compileResult = new CompileResult(compileResult.ResultNumeric * -1, compileResult.DataType);
+				else if (compileResult.DataType == DataType.String && compileResult.ResultValue is string resultString && double.TryParse(resultString, out double resultDouble))
+					compileResult = new CompileResult((resultDouble * -1).ToString(), compileResult.DataType);
 			}
 			compileResult.IsHiddenCell = cell.IsHiddenRow;
 			return compileResult;

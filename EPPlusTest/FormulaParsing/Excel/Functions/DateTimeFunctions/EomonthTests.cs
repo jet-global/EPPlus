@@ -64,6 +64,84 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
+		public void EomonthNegativeMonthsOffset()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "12";
+				worksheet.Cells[2, 3].Formula = @"EOMONTH(""9/30/2014"",-12)";
+				worksheet.Calculate();
+				Assert.AreEqual(41547d, worksheet.Cells[2, 3].Value);
+			}
+		}
+
+		[TestMethod]
+		public void EomonthNegativeStringMonthsOffset()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "12";
+				worksheet.Cells[2, 3].Formula = @"EOMONTH(""9/30/2014"",""-12"")";
+				worksheet.Calculate();
+				Assert.AreEqual(41547d, worksheet.Cells[2, 3].Value);
+			}
+		}
+
+		[TestMethod]
+		public void EomonthNegativeReferenceMonthsOffset()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "12";
+				worksheet.Cells[2, 3].Formula = @"EOMONTH(""9/30/2014"",-B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(41547d, worksheet.Cells[2, 3].Value);
+			}
+		}
+
+		[TestMethod]
+		public void EomonthMonthsReferenceNegative()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "-12";
+				worksheet.Cells[2, 3].Formula = @"EOMONTH(""9/30/2014"",B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(41547d, worksheet.Cells[2, 3].Value);
+			}
+		}
+
+		[TestMethod]
+		public void EomonthNegativeReferenceMonthsOffsetInScientificNotation()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "1.2e1";
+				worksheet.Cells[2, 3].Formula = @"EOMONTH(""9/30/2014"",-B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(41547d, worksheet.Cells[2, 3].Value);
+			}
+		}
+
+		[TestMethod]
+		public void EomonthNegativeReferenceMonthsOffsetDouble()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "12.03";
+				worksheet.Cells[2, 3].Formula = @"EOMONTH(""9/30/2014"",-B2)";
+				worksheet.Calculate();
+				Assert.AreEqual(41547d, worksheet.Cells[2, 3].Value);
+			}
+		}
+
+		[TestMethod]
 		public void EomonthReturnsEndOfMonthWithPositiveOffsetFromDateTime()
 		{
 			var function = new Eomonth();
