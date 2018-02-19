@@ -44,8 +44,6 @@ using System.Xml;
 using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.DataValidation;
-using OfficeOpenXml.DataValidation.Contracts;
-using OfficeOpenXml.DataValidation.Formulas.Contracts;
 using OfficeOpenXml.DataValidation.X14DataValidation;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
@@ -4485,9 +4483,12 @@ namespace OfficeOpenXml
 								else
 									v = string.Empty;
 							}
-							if ((v.GetType().IsPrimitive || v is double || v is decimal || v is DateTime || v is TimeSpan))
+							eErrorType valueErrorType = default(eErrorType);
+							if (v.GetType().IsPrimitive || v is double || v is decimal || v is DateTime || v is TimeSpan || v is ExcelErrorValue 
+								|| (v is string stringValue && ExcelErrorValue.Values.TryGetErrorType(stringValue, out valueErrorType)))
 							{
 								//string sv = GetValueForXml(v);
+								v = valueErrorType == default(eErrorType) ? v : ExcelErrorValue.Create(valueErrorType);
 								cache.AppendFormat("<c r=\"{0}\" s=\"{1}\"{2}>", cse.CellAddress, styleID < 0 ? 0 : styleID, GetCellType(v));
 								cache.AppendFormat("{0}</c>", GetFormulaValue(v));
 							}

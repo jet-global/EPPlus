@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-using EPPlusTest.FormulaParsing.TestHelpers;
+﻿using EPPlusTest.FormulaParsing.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
@@ -284,13 +282,18 @@ namespace EPPlusTest.Excel.Functions
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
-		[TestMethod, Ignore]
-		public void IfShouldIgnoreCase()
+		[TestMethod]
+		public void IfWithErrorArgumentPropagatesError()
 		{
-			using (var pck = new ExcelPackage(new FileInfo(@"c:\temp\book1.xlsx")))
+			using (var package = new ExcelPackage())
 			{
-				pck.Workbook.Calculate();
-				Assert.AreEqual("Sant", pck.Workbook.Worksheets.First().Cells["C3"].Value);
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Value = "#NAME?";
+				sheet.Cells[2, 3].Formula = "IF(B2=0, \"hide\",\"show\")";
+				sheet.Cells[2, 4].Formula = "IF(SUM(B2)=0, \"hide\",\"show\")";
+				sheet.Calculate();
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 3].Value as ExcelErrorValue);
+				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Name), sheet.Cells[2, 4].Value as ExcelErrorValue);
 			}
 		}
 		#endregion

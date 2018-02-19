@@ -62,6 +62,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 			var firstChild = children.ElementAt(0);
 			var v = firstChild.Compile().Result;
 
+			if (v is ExcelErrorValue errorValue)
+				return new CompileResult(errorValue);
 			/****  Handle names and ranges ****/
 			if (v is ExcelDataProvider.INameInfo)
 			{
