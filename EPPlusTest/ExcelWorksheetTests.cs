@@ -6284,6 +6284,77 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void RenameWorksheetUpdatesChartReferences()
+		{
+			FileInfo file = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets.Add("chartsheet");
+					var chart = worksheet.Drawings.AddChart("namey", eChartType.Doughnut);
+					var serie = chart.Series.Add("'chartsheet'!C2:C10", "'chartsheet'!D2:D20");
+					serie.HeaderAddress = new ExcelAddress("'chartsheet'!A7");
+					worksheet.Name = "newName";
+					Assert.AreEqual("'newName'!C2:C10", serie.Series);
+					Assert.AreEqual("'newName'!D2:D20", serie.XSeries);
+					Assert.AreEqual("'newName'!A7", serie.HeaderAddress.FullAddress);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["newName"];
+					var chart = worksheet.Drawings.First() as ExcelChart;
+					var serie = chart.Series[0];
+					Assert.AreEqual("'newName'!C2:C10", serie.Series);
+					Assert.AreEqual("'newName'!D2:D20", serie.XSeries);
+					Assert.AreEqual("'newName'!A7", serie.HeaderAddress.FullAddress);
+				}
+			}
+			finally
+			{
+				if (file.Exists)
+					file.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void RenameWorksheetUpdatesChartCrossSheetReferences()
+		{
+			FileInfo file = new FileInfo(Path.GetTempFileName());
+			try
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var chartSheet = package.Workbook.Worksheets.Add("chartsheet");
+					var dataSheet = package.Workbook.Worksheets.Add("datasheet");
+					var chart = chartSheet.Drawings.AddChart("namey", eChartType.Doughnut);
+					var serie = chart.Series.Add("'datasheet'!C2:C10", "'datasheet'!D2:D20");
+					serie.HeaderAddress = new ExcelAddress("'datasheet'!A7");
+					dataSheet.Name = "newDataSheetName";
+					Assert.AreEqual("'newDataSheetName'!C2:C10", serie.Series);
+					Assert.AreEqual("'newDataSheetName'!D2:D20", serie.XSeries);
+					Assert.AreEqual("'newDataSheetName'!A7", serie.HeaderAddress.FullAddress);
+					package.Save();
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["chartsheet"];
+					var chart = worksheet.Drawings.First() as ExcelChart;
+					var serie = chart.Series[0];
+					Assert.AreEqual("'newDataSheetName'!C2:C10", serie.Series);
+					Assert.AreEqual("'newDataSheetName'!D2:D20", serie.XSeries);
+					Assert.AreEqual("'newDataSheetName'!A7", serie.HeaderAddress.FullAddress);
+				}
+			}
+			finally
+			{
+				if (file.Exists)
+					file.Delete();
+			}
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(ArgumentException))]
 		public void ExcelWorksheetRenameWithStartApostropheThrowsException()
 		{

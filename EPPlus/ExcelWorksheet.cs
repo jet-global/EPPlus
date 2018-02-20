@@ -44,8 +44,6 @@ using System.Xml;
 using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.DataValidation;
-using OfficeOpenXml.DataValidation.Contracts;
-using OfficeOpenXml.DataValidation.Formulas.Contracts;
 using OfficeOpenXml.DataValidation.X14DataValidation;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
@@ -3150,28 +3148,17 @@ namespace OfficeOpenXml
 						{
 							foreach (ExcelChartSerie serie in chart.Series)
 							{
-								string workbook, worksheet, address;
-								ExcelRange.SplitAddress(serie.Series, out workbook, out worksheet, out address);
-								if (worksheet == this._name)
+								if (!string.IsNullOrEmpty(serie.HeaderAddress?.Address))
 								{
-									serie.Series = ExcelRangeBase.GetFullAddress(value, address);
+									string updatedHeaderAddress = this.Package.FormulaManager.UpdateFormulaSheetReferences(serie.HeaderAddress.Address, this._name, value);
+									serie.HeaderAddress = new ExcelAddress(updatedHeaderAddress);
 								}
+								if (!string.IsNullOrEmpty(serie.Series))
+									serie.Series = this.Package.FormulaManager.UpdateFormulaSheetReferences(serie.Series, this._name, value);
 								if (!string.IsNullOrEmpty(serie.XSeries))
-								{
-									ExcelRange.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
-									if (worksheet == this._name)
-									{
-										serie.XSeries = ExcelRangeBase.GetFullAddress(value, address);
-									}
-								}
-								if (serie is ExcelBubbleChartSerie bubbleSerie)
-								{
-									ExcelRange.SplitAddress(bubbleSerie.BubbleSize, out workbook, out worksheet, out address);
-									if (worksheet == this._name)
-									{
-										bubbleSerie.BubbleSize = ExcelRangeBase.GetFullAddress(value, address);
-									}
-								}
+									serie.XSeries = this.Package.FormulaManager.UpdateFormulaSheetReferences(serie.XSeries, this._name, value);
+								if (serie is ExcelBubbleChartSerie bubbleSerie && !string.IsNullOrEmpty(bubbleSerie.BubbleSize))
+									bubbleSerie.BubbleSize = this.Package.FormulaManager.UpdateFormulaSheetReferences(bubbleSerie.BubbleSize, this._name, value);
 							}
 						}
 					}
