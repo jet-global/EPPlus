@@ -4474,8 +4474,7 @@ namespace OfficeOpenXml
 						else if (v != null)
 						{
 							// Fix for issue 15460
-							var enumerableResult = v as System.Collections.IEnumerable;
-							if (enumerableResult != null && !(v is string))
+							if (v is System.Collections.IEnumerable enumerableResult && !(v is string))
 							{
 								var enumerator = enumerableResult.GetEnumerator();
 								if (enumerator.MoveNext() && enumerator.Current != null)
@@ -4487,7 +4486,6 @@ namespace OfficeOpenXml
 							if (v.GetType().IsPrimitive || v is double || v is decimal || v is DateTime || v is TimeSpan || v is ExcelErrorValue 
 								|| (v is string stringValue && ExcelErrorValue.Values.TryGetErrorType(stringValue, out valueErrorType)))
 							{
-								//string sv = GetValueForXml(v);
 								v = valueErrorType == default(eErrorType) ? v : ExcelErrorValue.Create(valueErrorType);
 								cache.AppendFormat("<c r=\"{0}\" s=\"{1}\"{2}>", cse.CellAddress, styleID < 0 ? 0 : styleID, GetCellType(v));
 								cache.AppendFormat("{0}</c>", GetFormulaValue(v));
@@ -4510,15 +4508,9 @@ namespace OfficeOpenXml
 							}
 						}
 					}
-					////Update hyperlinks.
-					//if (cell.Hyperlink != null)
-					//{
-					//    _hyperLinkCells.Add(cell.CellID);
-					//}
 				}
 				else  //ExcelRow
 				{
-					//int newRow=((ExcelRow)cse.Value).Row;
 					WriteRow(cache, cellXfs, row, cse.Row);
 					row = cse.Row;
 				}
