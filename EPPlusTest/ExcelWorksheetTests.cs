@@ -3240,6 +3240,27 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void InsertRowsUpdatesCommaSeparatedSeries()
+		{
+			using (ExcelPackage package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "Cars";
+				worksheet.Cells[3, 2].Value = "Trucks";
+				worksheet.Cells[2, 3].Value = 10;
+				worksheet.Cells[3, 3].Value = 4;
+				worksheet.Cells[2, 4].Value = 1;
+				worksheet.Cells[3, 4].Value = 2;
+				var chart = worksheet.Drawings.AddChart("Chart1", eChartType.Bubble) as ExcelBubbleChart;
+				chart.Series.AddSeries("Sheet1!$C$2:$C$3,Sheet1!$E$4:$G$5", "Sheet1!$B$2:$B$3,Sheet1!$F$5:$H$6", "Sheet1!$D$2:$D$3,Sheet1!$H$7:$K$9");
+				worksheet.InsertRow(3, 3);
+				Assert.AreEqual("'Sheet1'!$B$2:$B$6,'Sheet1'!$F$8:$H$9", chart.Series[0].XSeries);
+				Assert.AreEqual("'Sheet1'!$C$2:$C$6,'Sheet1'!$E$7:$G$8", chart.Series[0].Series);
+				Assert.AreEqual("'Sheet1'!$D$2:$D$6,'Sheet1'!$H$10:$K$12", ((ExcelBubbleChartSerie)chart.Series[0]).BubbleSize);
+			}
+		}
+
+		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\ComboFromExcel.xlsx")]
 		public void InsertRowsUpdatesComboChart()
 		{

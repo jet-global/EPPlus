@@ -2796,24 +2796,20 @@ namespace OfficeOpenXml
 							{
 								foreach (ExcelChartSerie serie in chart.Series)
 								{
-									if (serie.Series != null && string.Empty != serie.Series)
+									if (!string.IsNullOrEmpty(serie.Series))
 									{
-										ExcelRangeBase.SplitAddress(serie.Series, out workbook, out worksheet, out address);
-										string newSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
-										serie.Series = ExcelRangeBase.GetFullAddress(worksheet, newSeries);
+										var excelAddress = new ExcelAddress(serie.Series);
+										serie.Series = this.Package.FormulaManager.UpdateFormulaReferences(serie.Series, rows, columns, rowFrom, colFrom, excelAddress.WorkSheet, this.Name);
 									}
 									if (!string.IsNullOrEmpty(serie.XSeries))
 									{
-										ExcelRangeBase.SplitAddress(serie.XSeries, out workbook, out worksheet, out address);
-										string newXSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
-										serie.XSeries = ExcelRangeBase.GetFullAddress(worksheet, newXSeries);
+										var excelAddress = new ExcelAddress(serie.XSeries);
+										serie.XSeries = this.Package.FormulaManager.UpdateFormulaReferences(serie.XSeries, rows, columns, rowFrom, colFrom, excelAddress.WorkSheet, this.Name);
 									}
-									var bubbleSerie = serie as ExcelBubbleChartSerie;
-									if (bubbleSerie != null && bubbleSerie.BubbleSize != null && bubbleSerie.BubbleSize != string.Empty)
+									if (serie is ExcelBubbleChartSerie bubbleSerie && !string.IsNullOrEmpty(bubbleSerie.BubbleSize))
 									{
-										ExcelRangeBase.SplitAddress(bubbleSerie.BubbleSize, out workbook, out worksheet, out address);
-										string newBubbleSeries = this.Package.FormulaManager.UpdateFormulaReferences(address, rows, columns, rowFrom, colFrom, worksheet, this.Name);
-										bubbleSerie.BubbleSize = ExcelRangeBase.GetFullAddress(worksheet, newBubbleSeries);
+										var excelAddress = new ExcelAddress(bubbleSerie.BubbleSize);
+										bubbleSerie.BubbleSize = this.Package.FormulaManager.UpdateFormulaReferences(bubbleSerie.BubbleSize, rows, columns, rowFrom, colFrom, excelAddress.WorkSheet, this.Name);
 									}
 								}
 							}
