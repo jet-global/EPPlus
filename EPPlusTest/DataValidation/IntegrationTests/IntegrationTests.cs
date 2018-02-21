@@ -59,31 +59,49 @@ namespace EPPlusTest.DataValidation.IntegrationTests
 		[TestMethod]
 		public void DataValidations_AddOneValidationOfTypeListOfTypeList()
 		{
-			var validation = _sheet.DataValidations.AddListValidation("A:A");
-			validation.ShowErrorMessage = true;
-			validation.ShowInputMessage = true;
-			validation.Formula.Values.Add("1");
-			validation.Formula.Values.Add("2");
-			validation.Formula.Values.Add("3");
-			validation.Validate();
+			var file = new FileInfo(GetTestOutputPath("AddOneValidationOfTypeList.xlsx"));
+			try
+			{
+				var validation = _sheet.DataValidations.AddListValidation("A:A");
+				validation.ShowErrorMessage = true;
+				validation.ShowInputMessage = true;
+				validation.Formula.Values.Add("1");
+				validation.Formula.Values.Add("2");
+				validation.Formula.Values.Add("3");
+				validation.Validate();
 
-			_package.SaveAs(new FileInfo(GetTestOutputPath("AddOneValidationOfTypeList.xlsx")));
+				_package.SaveAs(file);
+			}
+			finally
+			{
+				if (file.Exists)
+					file.Delete();
+			}
 		}
 
 		[TestMethod]
 		public void DataValidations_AddOneValidationOfTypeListOfTypeTime()
 		{
-			var validation = _sheet.DataValidations.AddTimeValidation("A1");
-			validation.ShowErrorMessage = true;
-			validation.ShowInputMessage = true;
-			validation.Formula.Value.Hour = 14;
-			validation.Formula.Value.Minute = 30;
-			validation.Operator = ExcelDataValidationOperator.greaterThan;
-			validation.Prompt = "Enter a time greater than 14:30";
-			validation.Error = "Invalid time was entered";
-			validation.Validate();
+			var file = new FileInfo(GetTestOutputPath("AddOneValidationOfTypeTime.xlsx"));
+			try
+			{
+				var validation = _sheet.DataValidations.AddTimeValidation("A1");
+				validation.ShowErrorMessage = true;
+				validation.ShowInputMessage = true;
+				validation.Formula.Value.Hour = 14;
+				validation.Formula.Value.Minute = 30;
+				validation.Operator = ExcelDataValidationOperator.greaterThan;
+				validation.Prompt = "Enter a time greater than 14:30";
+				validation.Error = "Invalid time was entered";
+				validation.Validate();
 
-			_package.SaveAs(new FileInfo(GetTestOutputPath("AddOneValidationOfTypeTime.xlsx")));
+				_package.SaveAs(file);
+			}
+			finally
+			{
+				if (file.Exists)
+					file.Delete();
+			}
 		}
 
 		[TestMethod, Ignore]
