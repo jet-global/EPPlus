@@ -87,8 +87,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			else
 			{
-				var rangeVal = arg.Value as ExcelDataProvider.IRangeInfo;
-				if (rangeVal != null)
+				if (arg.Value is ExcelDataProvider.IRangeInfo rangeVal)
 				{
 					foreach (var cell in rangeVal)
 					{

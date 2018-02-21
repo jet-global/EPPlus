@@ -101,8 +101,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				targetWorksheetName = address.WorkSheet;
 			var fromRow = address._fromRow + rowOffset;
 			var fromCol = address._fromCol + columnOffset;
-			var toRow = (height != 0 ? height : address._toRow) + rowOffset;
-			var toCol = (width != 0 ? width : address._toCol) + columnOffset;
+			var toRow = (height == 0 ? address._toRow : height + address._fromRow - 1) + rowOffset;
+			var toCol = (width == 0 ? address._toCol : width + address._fromCol - 1) + columnOffset;
 			return new ExcelAddress(targetWorksheetName, fromRow, fromCol, toRow, toCol);
 		}
 	}
