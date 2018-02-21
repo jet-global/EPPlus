@@ -95,6 +95,42 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		}
 		#endregion
 
+		#region Offset Integration Tests
+		[TestMethod]
+		public void OffsetWithHeight()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = "SUM(OFFSET(C3, 0, 0, 5))";
+				sheet.Cells[3, 3].Value = 1;
+				sheet.Cells[4, 3].Value = 2;
+				sheet.Cells[5, 3].Value = 3;
+				sheet.Cells[6, 3].Value = 4;
+				sheet.Cells[7, 3].Value = 5;
+				sheet.Calculate();
+				Assert.AreEqual(15d, sheet.Cells[2, 2].Value);
+			}
+		}
+
+		[TestMethod]
+		public void OffsetWithWidth()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = "SUM(OFFSET(C3, 0, 0, 1, 5))";
+				sheet.Cells[3, 3].Value = 1;
+				sheet.Cells[3, 4].Value = 2;
+				sheet.Cells[3, 5].Value = 3;
+				sheet.Cells[3, 6].Value = 4;
+				sheet.Cells[3, 7].Value = 5;
+				sheet.Calculate();
+				Assert.AreEqual(15d, sheet.Cells[2, 2].Value);
+			}
+		}
+		#endregion
+
 		#region Helper Methods
 		private void ValidateOffsetAndOffsetAddress(IEnumerable<FunctionArgument> arguments, ParsingContext context, object expectedOffsetResult, object expectedOffsetAddressResult, bool errorExpected = false)
 		{
