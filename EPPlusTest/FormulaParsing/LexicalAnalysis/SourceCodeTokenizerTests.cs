@@ -319,6 +319,108 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 			Assert.AreEqual(TokenType.ClosingParenthesis, tokens.ElementAt(8).TokenType);
 		}
 
+		[TestMethod]
+		public void TokenizeHandlesSingleStructuredReferences()
+		{
+			var structuredReferences = new[]
+			{
+				"MyTable[[#All],[MyColumn]]", // Casing is unimportant for item specifiers
+				"MyTable[[#ALL],[MyColumn]]",
+				"MyTable[[#Data],[MyColumn]]",
+				"MyTable[[#DATA],[MyColumn]]",
+				"MyTable[[#Headers],[MyColumn]]",
+				"MyTable[[#HEADERS],[MyColumn]]",
+				"MyTable[[#Totals],[MyColumn]]",
+				"MyTable[[#TOTALS],[MyColumn]]",
+				"MyTable[[#This Row],[MyColumn]]",
+				"MyTable[[#THIS ROW],[MyColumn]]",
+				"MyTable[[#Headers],[#Data],[MyColumn]]",
+				"MyTable[[#All],[#Totals],[#This Row],[#Headers],[#Data],[MyColumn]]", // multiple item specifiers
+				"MyTable[[#Headers],[MyStartColumn]:[MyEndColumn]]", // multi-column selector
+				"MyTable[MyColumn]",
+				@"\MyTable[MyColumn]", // Tables can begin with \
+				"_MyTable[MyColumn]", // Tables can begin with _
+				"My.Table[MyColumn]", // Tables can contain .
+				"MyTable[[MyColumn]]", // Columns can be double bracketed
+				"MyTable[[My \t Column]]", // Column names with \t MUST be double bracketed
+				"MyTable[[My \n Column]]", // Column names with \n MUST be double bracketed
+				"MyTable[[My \r Column]]", // Column names with \r MUST be double bracketed
+				"MyTable[[My , Column]]", // Column names with , MUST be double bracketed
+				"MyTable[[My : Column]]", // Column names with : MUST be double bracketed
+				"MyTable[[My . Column]]", // Column names with . MUST be double bracketed
+				"MyTable[[My '[ Column]]", // Column names with [ MUST be double bracketed AND [ must be escaped with '
+				"MyTable[[My '] Column]]", // Column names with ] MUST be double bracketed AND ] must be escaped with '
+				"MyTable[[My '# Column]]", // Column names with # MUST be double bracketed AND # must be escaped with '
+				"MyTable[['# MyColumn]]", // Column names with # MUST be double bracketed AND # must be escaped with '
+				"MyTable[[My '' Column]]", // Column names with ' MUST be double bracketed AND ' must be escaped with '
+				"MyTable[[My \" Column]]", // Column names with ' MUST be double bracketed
+				"MyTable[[My { Column]]", // Column names with { MUST be double bracketed
+				"MyTable[[My } Column]]", // Column names with } MUST be double bracketed
+				"MyTable[[My $ Column]]", // Column names with $ MUST be double bracketed
+				"MyTable[[My ^ Column]]", // Column names with ^ MUST be double bracketed
+				"MyTable[[My & Column]]", // Column names with & MUST be double bracketed
+				"MyTable[[My * Column]]", // Column names with * MUST be double bracketed
+				"MyTable[[My + Column]]", // Column names with + MUST be double bracketed
+				"MyTable[[My = Column]]", // Column names with = MUST be double bracketed
+				"MyTable[[My - Column]]", // Column names with - MUST be double bracketed
+				"MyTable[[My > Column]]", // Column names with > MUST be double bracketed
+				"MyTable[[My < Column]]", // Column names with < MUST be double bracketed
+				"MyTable[[My / Column]]", // Column names with / MUST be double bracketed
+				"MyTable[   [MyColumn]   ]", // whitespace can generally be ignored
+			};
+			foreach (var reference in structuredReferences)
+			{
+				var tokens = _tokenizer.Tokenize(reference);
+				Assert.AreEqual(TokenType.StructuredReference, tokens.ElementAt(0).TokenType, $"Reference: {reference} did not tokenize correctly.");
+			}
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesOperatorDelimitedStructuredReferences()
+		{
+			var formula = "MyTable[[#All],[MyColumn]]*MyTable[[#This Row],[MyColumn]]";
+			var tokens = _tokenizer.Tokenize(formula);
+			Assert.AreEqual(3, tokens.Count());
+			Assert.AreEqual("MyTable[[#All],[MyColumn]]", tokens.ElementAt(0).Value);
+			Assert.AreEqual(TokenType.StructuredReference, tokens.ElementAt(0).TokenType);
+			Assert.AreEqual("*", tokens.ElementAt(1).Value);
+			Assert.AreEqual(TokenType.Operator, tokens.ElementAt(1).TokenType);
+			Assert.AreEqual("MyTable[[#This Row],[MyColumn]]", tokens.ElementAt(2).Value);
+			Assert.AreEqual(TokenType.StructuredReference, tokens.ElementAt(2).TokenType);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesStructuredReferencesAsFunctionArguments()
+		{
+			var formula = "SUM(MyTable[[#All],[MyColumn]],MyTable[[#This Row],[MyColumn]])";
+			var tokens = _tokenizer.Tokenize(formula);
+			Assert.AreEqual(6, tokens.Count());
+			Assert.AreEqual("SUM", tokens.ElementAt(0).Value);
+			Assert.AreEqual(TokenType.Function, tokens.ElementAt(0).TokenType);
+			Assert.AreEqual("(", tokens.ElementAt(1).Value);
+			Assert.AreEqual(TokenType.OpeningParenthesis, tokens.ElementAt(1).TokenType);
+			Assert.AreEqual("MyTable[[#All],[MyColumn]]", tokens.ElementAt(2).Value);
+			Assert.AreEqual(TokenType.StructuredReference, tokens.ElementAt(2).TokenType);
+			Assert.AreEqual(",", tokens.ElementAt(3).Value);
+			Assert.AreEqual(TokenType.Comma, tokens.ElementAt(3).TokenType);
+			Assert.AreEqual("MyTable[[#This Row],[MyColumn]]", tokens.ElementAt(4).Value);
+			Assert.AreEqual(TokenType.StructuredReference, tokens.ElementAt(4).TokenType);
+			Assert.AreEqual(")", tokens.ElementAt(5).Value);
+			Assert.AreEqual(TokenType.ClosingParenthesis, tokens.ElementAt(5).TokenType);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesNegatedStructuredReferences()
+		{
+			var formula = "-MyTable[[#This Row],[MyColumn]]";
+			var tokens = _tokenizer.Tokenize(formula);
+			Assert.AreEqual(2, tokens.Count());
+			Assert.AreEqual("-", tokens.ElementAt(0).Value);
+			Assert.AreEqual(TokenType.Negator, tokens.ElementAt(0).TokenType);
+			Assert.AreEqual("MyTable[[#This Row],[MyColumn]]", tokens.ElementAt(1).Value);
+			Assert.AreEqual(TokenType.StructuredReference, tokens.ElementAt(1).TokenType);
+		}
+
 		#region Error Type Tests
 		[TestMethod]
 		public void TokenizeHandlesNotApplicableError()
