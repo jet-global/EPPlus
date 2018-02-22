@@ -59,5 +59,13 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 			var expression = _factory.Create(token);
 			Assert.IsInstanceOfType(expression, typeof(NamedValueExpression));
 		}
+
+		[TestMethod]
+		public void ShouldReturnStructuredReferenceExpressionWhenTokenIsStructuredReference()
+		{
+			var token = new Token("Table[Column]", TokenType.StructuredReference);
+			var expression = _factory.Create(token);
+			Assert.IsInstanceOfType(expression, typeof(StructuredReferenceExpression));
+		}
 	}
 }

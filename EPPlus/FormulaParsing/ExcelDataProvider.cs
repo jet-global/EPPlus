@@ -74,6 +74,16 @@ namespace OfficeOpenXml.FormulaParsing
 		/// <returns></returns>
 		public abstract IRangeInfo GetRange(string worksheetName, int row, int column, string address);
 
+		/// <summary>
+		/// Returns values from the range defined by the <paramref name="structuredReference"/>.
+		/// </summary>
+		/// <param name="structuredReference">The <see cref="StructuredReference"/> to resolve.</param>
+		/// <param name="originSheet">The sheet referencing the <paramref name="structuredReference"/>.</param>
+		/// <param name="originRow">The row referencing the <paramref name="structuredReference"/>.</param>
+		/// <param name="originColumn">The column referencing the <paramref name="structuredReference"/>.</param>
+		/// <returns>The <see cref="ExcelDataProvider.IRangeInfo"/> containing the referenced data.</returns>
+		public abstract IRangeInfo ResolveStructuredReference(StructuredReference structuredReference, string originSheet, int originRow, int originColumn);
+
 		public abstract INameInfo GetName(string worksheet, string name);
 
 		public abstract IEnumerable<object> GetRangeValues(string address);

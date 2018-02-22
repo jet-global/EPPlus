@@ -347,6 +347,42 @@ namespace OfficeOpenXml.FormulaParsing
 			var ws = _package.Workbook.Worksheets[wsName];
 			return new RangeInfo(ws, excelAddress);
 		}
+
+		/// <summary>
+		/// Returns values from the range defined by the <paramref name="structuredReference"/>.
+		/// </summary>
+		/// <param name="structuredReference">The <see cref="StructuredReference"/> to resolve.</param>
+		/// <param name="originSheet">The sheet referencing the <paramref name="structuredReference"/>.</param>
+		/// <param name="originRow">The row referencing the <paramref name="structuredReference"/>.</param>
+		/// <param name="originColumn">The column referencing the <paramref name="structuredReference"/>.</param>
+		/// <returns>The <see cref="ExcelDataProvider.IRangeInfo"/> containing the referenced data.</returns>
+		public override IRangeInfo ResolveStructuredReference(StructuredReference structuredReference, string originSheet, int originRow, int originColumn)
+		{
+			if (structuredReference == null)
+				return null;
+			var table = _package.Workbook.GetTable(structuredReference.TableName);
+			int startRow = table.Address.Start.Row;
+			int startColumn = table.Address.Start.Column;
+			int endRow = table.Address.End.Row;
+			int endColumn = startColumn;
+			// Do not use else-ifs here because the specifiers are in aggregate
+			if (structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Data))
+			{
+				if (table.ShowHeader)
+					startRow++;
+				if (table.ShowTotal)
+					endRow--;
+			}
+			// I'm 100% on this one.
+			if (structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.ThisRow))
+				startRow = endRow = originRow;
+			if (startRow <= originRow && endRow >= originRow)
+				startRow = endRow = originRow;
+			startColumn += table.Columns[structuredReference.StartColumn].Position;
+			endColumn += table.Columns[structuredReference.EndColumn].Position;
+			return new RangeInfo(table.WorkSheet, new ExcelAddress(startRow, startColumn, endRow, endColumn));
+		}
+
 		public override INameInfo GetName(string worksheet, string name)
 		{
 			ExcelNamedRange nameItem;

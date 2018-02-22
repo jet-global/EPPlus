@@ -32,18 +32,35 @@ using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
+	/// <summary>
+	/// Generates expressions based off of tokens.
+	/// </summary>
 	public class ExpressionFactory : IExpressionFactory
 	{
+		#region Class Variables
 		private readonly ExcelDataProvider _excelDataProvider;
 		private readonly ParsingContext _parsingContext;
+		#endregion
 
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of a <see cref="ExpressionFactory"/>.
+		/// </summary>
+		/// <param name="excelDataProvider">An <see cref="ExcelDataProvider"/> to retrieve data from a workbook.</param>
+		/// <param name="context">The <see cref="ParsingContext"/> for the factory.</param>
 		public ExpressionFactory(ExcelDataProvider excelDataProvider, ParsingContext context)
 		{
 			_excelDataProvider = excelDataProvider;
 			_parsingContext = context;
 		}
+		#endregion
 
-
+		#region Public Methods
+		/// <summary>
+		/// Creates expressions from the given <paramref name="token"/>.
+		/// </summary>
+		/// <param name="token">The <see cref="Token"/> to generate an expression from.</param>
+		/// <returns>The <see cref="Expression"/>.</returns>
 		public Expression Create(Token token)
 		{
 			switch (token.TokenType)
@@ -58,6 +75,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 					return new BooleanExpression(token.Value);
 				case TokenType.ExcelAddress:
 					return new ExcelAddressExpression(token.Value, _excelDataProvider, _parsingContext, token.IsNegated);
+				case TokenType.StructuredReference:
+					return new StructuredReferenceExpression(token.Value, _excelDataProvider, _parsingContext, token.IsNegated);
 				case TokenType.InvalidReference:
 					return new ExcelErrorExpression(token.Value, ExcelErrorValue.Create(eErrorType.Ref));
 				case TokenType.NumericError:
@@ -72,5 +91,6 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 					return new StringExpression(token.Value);
 			}
 		}
+		#endregion
 	}
 }
