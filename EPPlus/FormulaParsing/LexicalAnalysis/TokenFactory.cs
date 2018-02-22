@@ -120,6 +120,10 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 			{
 				return new Token(token, TokenType.Boolean);
 			}
+			if (Regex.IsMatch(token, RegexConstants.StructuredReference, RegexOptions.IgnoreCase | RegexOptions.Multiline))
+			{
+				return new Token(token, TokenType.StructuredReference);
+			}
 			if (_nameValueProvider != null && _nameValueProvider.IsNamedValue(token, worksheet))
 			{
 				return new Token(token, TokenType.NameValue);

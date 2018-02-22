@@ -40,5 +40,6 @@ namespace OfficeOpenXml.FormulaParsing.Utilities
 		public const string Boolean = @"^(true|false)$";
 		public const string Decimal = @"^[0-9]+\.[0-9]+$";
 		public const string Integer = @"^[0-9]+$";
+		public const string StructuredReference = @"^[^\[]+.*\]$";
 	}
 }
