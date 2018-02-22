@@ -76,8 +76,9 @@ namespace EPPlusTest.FormulaParsing
 		#endregion
 
 		#region ResolveStructuredReference Tests
+		#region #ThisRow Tests
 		[TestMethod]
-		public void ResolveStructuredReferenceThisRow()
+		public void ResolveStructuredReferenceThisRowRightOfTable()
 		{
 			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#This Row],[{EpplusExcelDataProviderTest.Header1}]]");
 			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 7, 7);
@@ -89,17 +90,57 @@ namespace EPPlusTest.FormulaParsing
 		}
 
 		[TestMethod]
-		public void ResolveStructuredReferenceDataWithinRowReturnsIndexedItem()
+		public void ResolveStructuredReferenceThisRowRange()
 		{
-			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#Data],[{EpplusExcelDataProviderTest.Header4}]]");
-			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 5, 7);
-			Assert.AreEqual(5, result.Address.Start.Row);
-			Assert.AreEqual(6, result.Address.Start.Column);
-			Assert.AreEqual(5, result.Address.End.Row);
-			Assert.AreEqual(6, result.Address.End.Column);
-			Assert.AreEqual("h4_r2", result.GetOffset(0, 0));
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#This Row],[{EpplusExcelDataProviderTest.Header1}]:[{EpplusExcelDataProviderTest.Header3}]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 7, 7);
+			Assert.AreEqual(7, result.Address.Start.Row);
+			Assert.AreEqual(3, result.Address.Start.Column);
+			Assert.AreEqual(7, result.Address.End.Row);
+			Assert.AreEqual(5, result.Address.End.Column);
+			Assert.AreEqual("h1_r4", result.GetOffset(0, 0));
+			Assert.AreEqual("h2_r4", result.GetOffset(0, 1));
+			Assert.AreEqual("h3_r4", result.GetOffset(0, 2));
 		}
 
+		[TestMethod]
+		public void ResolveStructuredReferenceThisRowLeftOfTable()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#This Row],[{EpplusExcelDataProviderTest.Header1}]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 7, 1);
+			Assert.AreEqual(7, result.Address.Start.Row);
+			Assert.AreEqual(3, result.Address.Start.Column);
+			Assert.AreEqual(7, result.Address.End.Row);
+			Assert.AreEqual(3, result.Address.End.Column);
+			Assert.AreEqual("h1_r4", result.GetOffset(0, 0));
+		}
+
+		[TestMethod]
+		public void ResolveStructuredReferenceThisRowAboveTable()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#This Row],[{EpplusExcelDataProviderTest.Header1}]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 2, 4);
+			Assert.IsNull(result);
+		}
+
+		[TestMethod]
+		public void ResolveStructuredReferenceThisRowBelowTable()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#This Row],[{EpplusExcelDataProviderTest.Header1}]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 12, 4);
+			Assert.IsNull(result);
+		}
+
+		[TestMethod]
+		public void ResolveStructuredReferenceThisRowHeaderRow()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#This Row],[{EpplusExcelDataProviderTest.Header1}]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 3, 7);
+			Assert.IsNull(result);
+		}
+		#endregion
+
+		#region #Data Tests
 		[TestMethod]
 		public void ResolveStructuredReferenceDataWithoutRowReturnsFullRange()
 		{
@@ -139,6 +180,144 @@ namespace EPPlusTest.FormulaParsing
 			Assert.AreEqual("h4_r5", result.GetOffset(4, 1));
 			Assert.AreEqual("h4_r6", result.GetOffset(5, 1));
 		}
+
+		[TestMethod]
+		public void ResolveStructuredReferenceDataWithHeaders()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#Data],[#Headers]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 15, 7);
+			Assert.AreEqual(3, result.Address.Start.Row);
+			Assert.AreEqual(3, result.Address.Start.Column);
+			Assert.AreEqual(9, result.Address.End.Row);
+			Assert.AreEqual(6, result.Address.End.Column);
+			Assert.AreEqual(EpplusExcelDataProviderTest.Header1, result.GetOffset(0, 0));
+			Assert.AreEqual(EpplusExcelDataProviderTest.Header2, result.GetOffset(0, 1));
+			Assert.AreEqual(EpplusExcelDataProviderTest.Header3, result.GetOffset(0, 2));
+			Assert.AreEqual(EpplusExcelDataProviderTest.Header4, result.GetOffset(0, 3));
+			Assert.AreEqual("h1_r1", result.GetOffset(1, 0));
+			Assert.AreEqual("h1_r2", result.GetOffset(2, 0));
+			Assert.AreEqual("h1_r3", result.GetOffset(3, 0));
+			Assert.AreEqual("h1_r4", result.GetOffset(4, 0));
+			Assert.AreEqual("h1_r5", result.GetOffset(5, 0));
+			Assert.AreEqual("h1_r6", result.GetOffset(6, 0));
+		}
+
+		[TestMethod]
+		public void ResolveStructuredReferenceDataWithHeadersNoHeaders()
+		{
+			var table = this.Package.Workbook.GetTable(EpplusExcelDataProviderTest.TableName);
+			this.Package.Workbook.Worksheets["Sheet1"].Tables.Delete(table);
+			this.Package.Workbook.Worksheets["Sheet1"].Tables.Add(new ExcelAddress(4, 3, 9, 6), EpplusExcelDataProviderTest.TableName);
+			try
+			{
+				var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#Data],[#Headers]]");
+				var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 15, 7);
+				Assert.AreEqual(4, result.Address.Start.Row);
+				Assert.AreEqual(3, result.Address.Start.Column);
+				Assert.AreEqual(9, result.Address.End.Row);
+				Assert.AreEqual(6, result.Address.End.Column);
+				Assert.AreEqual("h1_r1", result.GetOffset(0, 0));
+				Assert.AreEqual("h1_r2", result.GetOffset(1, 0));
+				Assert.AreEqual("h1_r3", result.GetOffset(2, 0));
+				Assert.AreEqual("h1_r4", result.GetOffset(3, 0));
+				Assert.AreEqual("h1_r5", result.GetOffset(4, 0));
+				Assert.AreEqual("h1_r6", result.GetOffset(5, 0));
+			}
+			finally
+			{
+				this.Package.Workbook.GetTable(EpplusExcelDataProviderTest.TableName).ShowHeader = true;
+			}
+		}
+
+		[TestMethod]
+		public void ResolveStructuredReferenceDataWithHeadersColumn()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#Data],[#Headers],[Header2]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 15, 7);
+			Assert.AreEqual(3, result.Address.Start.Row);
+			Assert.AreEqual(4, result.Address.Start.Column);
+			Assert.AreEqual(9, result.Address.End.Row);
+			Assert.AreEqual(4, result.Address.End.Column);
+			Assert.AreEqual(EpplusExcelDataProviderTest.Header2, result.GetOffset(0, 0));
+			Assert.AreEqual("h2_r1", result.GetOffset(1, 0));
+			Assert.AreEqual("h2_r2", result.GetOffset(2, 0));
+			Assert.AreEqual("h2_r3", result.GetOffset(3, 0));
+			Assert.AreEqual("h2_r4", result.GetOffset(4, 0));
+			Assert.AreEqual("h2_r5", result.GetOffset(5, 0));
+			Assert.AreEqual("h2_r6", result.GetOffset(6, 0));
+		}
+
+		[TestMethod]
+		public void ResolveStructuredReferenceDataWithHeadersColumns()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#Data],[#Headers],[Header2]:[Header4]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 15, 7);
+			Assert.AreEqual(3, result.Address.Start.Row);
+			Assert.AreEqual(4, result.Address.Start.Column);
+			Assert.AreEqual(9, result.Address.End.Row);
+			Assert.AreEqual(6, result.Address.End.Column);
+			Assert.AreEqual(EpplusExcelDataProviderTest.Header2, result.GetOffset(0, 0));
+			Assert.AreEqual("h2_r1", result.GetOffset(1, 0));
+			Assert.AreEqual("h2_r2", result.GetOffset(2, 0));
+			Assert.AreEqual("h2_r3", result.GetOffset(3, 0));
+			Assert.AreEqual("h2_r4", result.GetOffset(4, 0));
+			Assert.AreEqual("h2_r5", result.GetOffset(5, 0));
+			Assert.AreEqual("h2_r6", result.GetOffset(6, 0));
+			Assert.AreEqual("h4_r6", result.GetOffset(6, 2));
+		}
+
+		[TestMethod]
+		public void ResolveStructuredReferenceDataWithTotalsNoTotals()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#Data],[#Totals]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 15, 7);
+			Assert.AreEqual(4, result.Address.Start.Row);
+			Assert.AreEqual(3, result.Address.Start.Column);
+			Assert.AreEqual(9, result.Address.End.Row);
+			Assert.AreEqual(6, result.Address.End.Column);
+			Assert.AreEqual("h1_r1", result.GetOffset(0, 0));
+			Assert.AreEqual("h1_r2", result.GetOffset(1, 0));
+			Assert.AreEqual("h1_r3", result.GetOffset(2, 0));
+			Assert.AreEqual("h1_r4", result.GetOffset(3, 0));
+			Assert.AreEqual("h1_r5", result.GetOffset(4, 0));
+			Assert.AreEqual("h1_r6", result.GetOffset(5, 0));
+		}
+
+		[TestMethod]
+		public void ResolveStructuredReferenceDataWithTotalsColumnNoTotals()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#Data],[#Totals],[Header2]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 15, 7);
+			Assert.AreEqual(4, result.Address.Start.Row);
+			Assert.AreEqual(4, result.Address.Start.Column);
+			Assert.AreEqual(9, result.Address.End.Row);
+			Assert.AreEqual(4, result.Address.End.Column);
+			Assert.AreEqual("h2_r1", result.GetOffset(0, 0));
+			Assert.AreEqual("h2_r2", result.GetOffset(1, 0));
+			Assert.AreEqual("h2_r3", result.GetOffset(2, 0));
+			Assert.AreEqual("h2_r4", result.GetOffset(3, 0));
+			Assert.AreEqual("h2_r5", result.GetOffset(4, 0));
+			Assert.AreEqual("h2_r6", result.GetOffset(5, 0));
+		}
+
+		[TestMethod]
+		public void ResolveStructuredReferenceDataWithTotalsColumnsNoTotals()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#Data],[#Totals],[Header2]:[Header4]]");
+			var result = this.DataProvider.ResolveStructuredReference(reference, "Sheet1", 15, 7);
+			Assert.AreEqual(4, result.Address.Start.Row);
+			Assert.AreEqual(4, result.Address.Start.Column);
+			Assert.AreEqual(9, result.Address.End.Row);
+			Assert.AreEqual(6, result.Address.End.Column);
+			Assert.AreEqual("h2_r1", result.GetOffset(0, 0));
+			Assert.AreEqual("h2_r2", result.GetOffset(1, 0));
+			Assert.AreEqual("h2_r3", result.GetOffset(2, 0));
+			Assert.AreEqual("h2_r4", result.GetOffset(3, 0));
+			Assert.AreEqual("h2_r5", result.GetOffset(4, 0));
+			Assert.AreEqual("h2_r6", result.GetOffset(5, 0));
+			Assert.AreEqual("h4_r6", result.GetOffset(5, 2));
+		}
+		#endregion
 		#endregion
 	}
 }

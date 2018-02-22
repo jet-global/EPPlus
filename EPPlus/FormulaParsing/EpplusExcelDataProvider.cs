@@ -358,28 +358,51 @@ namespace OfficeOpenXml.FormulaParsing
 		/// <returns>The <see cref="ExcelDataProvider.IRangeInfo"/> containing the referenced data.</returns>
 		public override IRangeInfo ResolveStructuredReference(StructuredReference structuredReference, string originSheet, int originRow, int originColumn)
 		{
-			if (structuredReference == null)
+			if (structuredReference == null || !structuredReference.HasValidItemSpecifiers())
 				return null;
 			var table = _package.Workbook.GetTable(structuredReference.TableName);
+			if (table == null)
+				return null;
 			int startRow = table.Address.Start.Row;
-			int startColumn = table.Address.Start.Column;
 			int endRow = table.Address.End.Row;
-			int endColumn = startColumn;
-			// Do not use else-ifs here because the specifiers are in aggregate
 			if (structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Data))
 			{
-				if (table.ShowHeader)
+				if ((structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Headers) && !table.ShowHeader) ||
+					(!structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Headers) && table.ShowHeader))
 					startRow++;
-				if (table.ShowTotal)
+				if ((structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Totals) && !table.ShowTotal) ||
+					(!structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Totals) && table.ShowTotal))
 					endRow--;
 			}
-			// I'm 100% on this one.
-			if (structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.ThisRow))
+			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.ThisRow)
+			{
+				if (originRow < startRow || originRow > endRow || (originRow == startRow && table.ShowHeader) || (originRow == endRow && table.ShowTotal)) 
+					return null;
 				startRow = endRow = originRow;
-			if (startRow <= originRow && endRow >= originRow)
-				startRow = endRow = originRow;
-			startColumn += table.Columns[structuredReference.StartColumn].Position;
-			endColumn += table.Columns[structuredReference.EndColumn].Position;
+			}
+			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.All)
+			{
+				// Already set.
+			}
+			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.Headers)
+			{
+				if (!table.ShowHeader)
+					return new RangeInfo(table.WorkSheet, new ExcelAddress(ExcelErrorValue.Values.Ref));
+				endRow = startRow;
+			}
+			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.Totals)
+			{
+				if (!table.ShowTotal)
+					return new RangeInfo(table.WorkSheet, new ExcelAddress(ExcelErrorValue.Values.Ref));
+				startRow = endRow;
+			}
+			int startColumn = table.Address.Start.Column;
+			int endColumn = table.Address.End.Column;
+			if (!string.IsNullOrEmpty(structuredReference.StartColumn) && !string.IsNullOrEmpty(structuredReference.EndColumn))
+			{
+				startColumn += table.Columns[structuredReference.StartColumn].Position;
+				endColumn = table.Address.Start.Column + table.Columns[structuredReference.EndColumn].Position;
+			}
 			return new RangeInfo(table.WorkSheet, new ExcelAddress(startRow, startColumn, endRow, endColumn));
 		}
 

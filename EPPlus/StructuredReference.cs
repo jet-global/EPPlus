@@ -95,6 +95,27 @@ namespace OfficeOpenXml
 				this.EndColumn = this.StartColumn;
 			// TODO :: some validation on the resulting parsed structured reference.
 		}
+
+		/// <summary>
+		/// Checks that the item specifiers are valid for the structured reference.
+		/// </summary>
+		/// <returns>True if the item specifiers are valid, otherwise false.</returns>
+		/// <remarks>
+		/// Only one item specifier can be used for a structured reference except for 
+		/// (#Data and #Headers) and (#Data and #Totals).
+		/// </remarks>
+		public bool HasValidItemSpecifiers()
+		{
+			if (this.ItemSpecifiers == default(ItemSpecifiers))
+				return false;
+			else if ((this.ItemSpecifiers & (this.ItemSpecifiers - 1)) != 0 
+				&& this.ItemSpecifiers != (ItemSpecifiers.Data | ItemSpecifiers.Headers) 
+				&& this.ItemSpecifiers != (ItemSpecifiers.Data | ItemSpecifiers.Totals))
+			{
+				return false;
+			}
+			return true;
+		}
 		#endregion
 
 		#region Private Methods
