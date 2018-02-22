@@ -63,6 +63,7 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 		NameError,
 		Null,
 		Unrecognized,
-		Hashtag
+		Hashtag,
+		StructuredReference
 	}
 }
