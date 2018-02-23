@@ -65,6 +65,7 @@ namespace EPPlusTest.FormulaParsing
 		{
 			this.DataProviderWithDataAndHeaders.Dispose();
 			this.DataProviderWithDataAndTotals.Dispose();
+			this.DataProviderWithDataHeadersAndTotals.Dispose();
 		}
 		#endregion
 
