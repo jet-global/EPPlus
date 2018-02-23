@@ -118,6 +118,7 @@
     <Compile Include="ExcelWorksheetTests.cs" />
     <Compile Include="Extensions\ExtensionsTest.cs" />
     <Compile Include="ExternalReferenceCollectionTest.cs" />
+    <Compile Include="FormulaParsing\DataProviderTestBase.cs" />
     <Compile Include="FormulaParsing\EpplusExcelDataProviderTest.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AbsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingMathTests.cs" />

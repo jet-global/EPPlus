@@ -1,21 +1,12 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
 
 namespace EPPlusTest.FormulaParsing
 {
 	[TestClass]
-	public class EpplusExcelDataProviderTest
+	public class EpplusExcelDataProviderTest : DataProviderTestBase
 	{
-		#region Constants
-		private const string TableName = "MyTable";
-		private const string Header1 = "Header1";
-		private const string Header2 = "Header2";
-		private const string Header3 = "Header3";
-		private const string Header4 = "Header4";
-		#endregion
-
 		#region Properties
 		private EpplusExcelDataProvider DataProviderWithDataAndHeaders { get; set; }
 		private EpplusExcelDataProvider DataProviderWithDataAndTotals { get; set; }
@@ -657,52 +648,6 @@ namespace EPPlusTest.FormulaParsing
 			Assert.AreEqual("h4_r6", result.GetOffset(6, 3));
 		}
 		#endregion
-		#endregion
-
-		#region Helper Methods
-		private void BuildTableHeaders(ExcelWorksheet worksheet)
-		{
-			worksheet.Cells[3, 3].Value = EpplusExcelDataProviderTest.Header1;
-			worksheet.Cells[3, 4].Value = EpplusExcelDataProviderTest.Header2;
-			worksheet.Cells[3, 5].Value = EpplusExcelDataProviderTest.Header3;
-			worksheet.Cells[3, 6].Value = EpplusExcelDataProviderTest.Header4;
-		}
-
-		private void BuildTableTotals(ExcelWorksheet worksheet)
-		{
-			worksheet.Cells[10, 3].Value = "h1_t";
-			worksheet.Cells[10, 4].Value = "h2_t";
-			worksheet.Cells[10, 5].Value = "h3_t";
-			worksheet.Cells[10, 6].Value = "h4_t";
-		}
-
-		private void BuildTableData(ExcelWorksheet worksheet)
-		{
-			worksheet.Cells[4, 3].Value = "h1_r1";
-			worksheet.Cells[4, 4].Value = "h2_r1";
-			worksheet.Cells[4, 5].Value = "h3_r1";
-			worksheet.Cells[4, 6].Value = "h4_r1";
-			worksheet.Cells[5, 3].Value = "h1_r2";
-			worksheet.Cells[5, 4].Value = "h2_r2";
-			worksheet.Cells[5, 5].Value = "h3_r2";
-			worksheet.Cells[5, 6].Value = "h4_r2";
-			worksheet.Cells[6, 3].Value = "h1_r3";
-			worksheet.Cells[6, 4].Value = "h2_r3";
-			worksheet.Cells[6, 5].Value = "h3_r3";
-			worksheet.Cells[6, 6].Value = "h4_r3";
-			worksheet.Cells[7, 3].Value = "h1_r4";
-			worksheet.Cells[7, 4].Value = "h2_r4";
-			worksheet.Cells[7, 5].Value = "h3_r4";
-			worksheet.Cells[7, 6].Value = "h4_r4";
-			worksheet.Cells[8, 3].Value = "h1_r5";
-			worksheet.Cells[8, 4].Value = "h2_r5";
-			worksheet.Cells[8, 5].Value = "h3_r5";
-			worksheet.Cells[8, 6].Value = "h4_r5";
-			worksheet.Cells[9, 3].Value = "h1_r6";
-			worksheet.Cells[9, 4].Value = "h2_r6";
-			worksheet.Cells[9, 5].Value = "h3_r6";
-			worksheet.Cells[9, 6].Value = "h4_r6";
-		}
 		#endregion
 	}
 }

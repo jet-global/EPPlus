@@ -1,11 +1,12 @@
 ﻿using System;
+using EPPlusTest.FormulaParsing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 
 namespace EPPlusTest
 {
 	[TestClass]
-	public class StructuredReferenceTest
+	public class StructuredReferenceTest : DataProviderTestBase
 	{
 		#region Constructor Tests
 		[TestMethod]
@@ -381,6 +382,53 @@ namespace EPPlusTest
 			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
 			structuredReference = new StructuredReference("MyTable[[#Data],[#Headers],[#Totals]]");
 			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
+		}
+		#endregion
+
+		#region Integration Tests
+		[TestMethod]
+		public void StructuredReferenceTests()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				this.BuildTableHeaders(worksheet);
+				this.BuildTableData(worksheet, true);
+				var table = worksheet.Tables.Add(new ExcelRange(worksheet, 3, 3, 9, 6), DataProviderTestBase.TableName);
+				worksheet.Cells[6, 20].Formula = $"{DataProviderTestBase.TableName}[[#this row],[{DataProviderTestBase.Header2}]]";
+				worksheet.Cells[6, 21].Formula = $"=SUM({DataProviderTestBase.TableName}[[#data],[{DataProviderTestBase.Header2}]])";
+				worksheet.Cells[6, 22].Formula = $"=SUM({DataProviderTestBase.TableName}[[#all],[{DataProviderTestBase.Header2}]])";
+				worksheet.Cells[6, 23].Formula = $"{DataProviderTestBase.TableName}[[#headers],[{DataProviderTestBase.Header2}]]";
+				worksheet.Cells[6, 24].Formula = $"{DataProviderTestBase.TableName}[[#totals],[{DataProviderTestBase.Header3}]]";
+				worksheet.Cells[6, 25].Formula = $"{DataProviderTestBase.TableName}[[#totals]]";
+				worksheet.Cells[6, 26].Formula = $"SUM({DataProviderTestBase.TableName}[[#this row],[{DataProviderTestBase.Header2}]:[{DataProviderTestBase.Header4}]])";
+				worksheet.Calculate();
+				Assert.AreEqual(32, worksheet.Cells[6, 20].Value);
+				Assert.AreEqual(12+22+32+42+52+62d, worksheet.Cells[6, 21].Value);
+				Assert.AreEqual(12+22+32+42+52+62d, worksheet.Cells[6, 22].Value);
+				Assert.AreEqual(DataProviderTestBase.Header2, worksheet.Cells[6, 23].Value);
+				Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)worksheet.Cells[6, 24].Value).Type);
+				Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)worksheet.Cells[6, 25].Value).Type);
+				Assert.AreEqual(32+33+34d, worksheet.Cells[6, 26].Value);
+			}
+		}
+
+		[TestMethod]
+		public void StructuredReferenceTestsWithHeaderSpecialCharaters()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[3, 3].Value = "#Hashtag";
+				worksheet.Cells[3, 4].Value = "#!'][%:$";
+				worksheet.Cells[3, 5].Value = DataProviderTestBase.Header3;
+				worksheet.Cells[3, 6].Value = DataProviderTestBase.Header4;
+				this.BuildTableData(worksheet, true);
+				var table = worksheet.Tables.Add(new ExcelRange(worksheet, 3, 3, 9, 6), DataProviderTestBase.TableName);
+				worksheet.Cells[6, 20].Formula = $"SUM({DataProviderTestBase.TableName}[[#this row],['#!''']'[%:$]:[{DataProviderTestBase.Header3}]])";
+				worksheet.Calculate();
+				Assert.AreEqual(32+33d, worksheet.Cells[6, 20].Value);
+			}
 		}
 		#endregion
 	}
