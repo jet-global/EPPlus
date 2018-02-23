@@ -572,6 +572,35 @@ namespace EPPlusTest
 				Assert.AreEqual(string.Empty, sheet.Cells[3, 3].Formula);
 			}
 		}
+
+		[TestMethod]
+		public void SetFormulaOnEmptyCellCreatesEmptyValue()
+		{
+			const string formula = "1 + 1";
+			var file = new FileInfo(Path.GetTempFileName());
+			if (file.Exists)
+				file.Delete();
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var sheet = package.Workbook.Worksheets.Add("Sheet1");
+					var cell = package.Workbook.Worksheets["Sheet1"].Cells[2, 2];
+					cell.SetFormula(formula, false);
+					package.SaveAs(file);
+				}
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets["Sheet1"];
+					Assert.AreEqual(formula, package.Workbook.Worksheets["Sheet1"].Cells[2, 2].Formula);
+				}
+			}
+			finally
+			{
+				if (file.Exists)
+					file.Delete();
+			}
+		}
 		#endregion
 
 		#region SetAddress Tests
