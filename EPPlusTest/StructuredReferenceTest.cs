@@ -419,7 +419,7 @@ namespace EPPlusTest
 			using (var package = new ExcelPackage())
 			{
 				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-				worksheet.Cells[3, 3].Value = "#Hashtag";
+				worksheet.Cells[3, 3].Value = DataProviderTestBase.Header1;
 				worksheet.Cells[3, 4].Value = "#!'][%:$";
 				worksheet.Cells[3, 5].Value = DataProviderTestBase.Header3;
 				worksheet.Cells[3, 6].Value = DataProviderTestBase.Header4;
