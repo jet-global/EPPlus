@@ -240,6 +240,7 @@
     <Compile Include="FormulaParsing\FormulaParserManagerTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LargeTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTestBase.cs" />
+    <Compile Include="FormulaParsing\LexicalAnalysis\TokenTest.cs" />
     <Compile Include="StructuredReferenceTest.cs" />
     <Compile Include="Style\Dxf\ExcelDxfStyleTest.cs" />
     <Compile Include="Style\XmlAccess\ExcelFontXmlTest.cs" />
