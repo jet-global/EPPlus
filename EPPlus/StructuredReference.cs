@@ -95,7 +95,9 @@ namespace OfficeOpenXml
 				this.EndColumn = this.StartColumn;
 			// TODO :: some validation on the resulting parsed structured reference.
 		}
+		#endregion
 
+		#region Public Methods
 		/// <summary>
 		/// Checks that the item specifiers are valid for the structured reference.
 		/// </summary>

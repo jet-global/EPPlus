@@ -363,22 +363,20 @@ namespace OfficeOpenXml.FormulaParsing
 			var table = _package.Workbook.GetTable(structuredReference.TableName);
 			if (table == null)
 				return null;
-			int startRow = table.Address.Start.Row;
-			int endRow = table.Address.End.Row;
+			int startRowPosition = table.Address.Start.Row;
+			int endRowPosition = table.Address.End.Row;
 			if (structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Data))
 			{
-				if ((structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Headers) && !table.ShowHeader) ||
-					(!structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Headers) && table.ShowHeader))
-					startRow++;
-				if ((structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Totals) && !table.ShowTotal) ||
-					(!structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Totals) && table.ShowTotal))
-					endRow--;
+				if (table.ShowHeader && !structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Headers))
+					startRowPosition++;
+				if (table.ShowTotal && !structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Totals))
+					endRowPosition--;
 			}
 			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.ThisRow)
 			{
-				if (originRow < startRow || originRow > endRow || (originRow == startRow && table.ShowHeader) || (originRow == endRow && table.ShowTotal)) 
+				if (originRow < startRowPosition || originRow > endRowPosition || (originRow == startRowPosition && table.ShowHeader) || (originRow == endRowPosition && table.ShowTotal)) 
 					return null;
-				startRow = endRow = originRow;
+				startRowPosition = endRowPosition = originRow;
 			}
 			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.All)
 			{
@@ -388,22 +386,26 @@ namespace OfficeOpenXml.FormulaParsing
 			{
 				if (!table.ShowHeader)
 					return new RangeInfo(table.WorkSheet, new ExcelAddress(ExcelErrorValue.Values.Ref));
-				endRow = startRow;
+				endRowPosition = startRowPosition;
 			}
 			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.Totals)
 			{
 				if (!table.ShowTotal)
 					return new RangeInfo(table.WorkSheet, new ExcelAddress(ExcelErrorValue.Values.Ref));
-				startRow = endRow;
+				startRowPosition = endRowPosition;
 			}
-			int startColumn = table.Address.Start.Column;
-			int endColumn = table.Address.End.Column;
+			int startColumnPosition = table.Address.Start.Column;
+			int endColumnPosition = table.Address.End.Column;
 			if (!string.IsNullOrEmpty(structuredReference.StartColumn) && !string.IsNullOrEmpty(structuredReference.EndColumn))
 			{
-				startColumn += table.Columns[structuredReference.StartColumn].Position;
-				endColumn = table.Address.Start.Column + table.Columns[structuredReference.EndColumn].Position;
+				var startColumn = table.Columns[structuredReference.StartColumn];
+				if (startColumn != null)
+					startColumnPosition += startColumn.Position;
+				var endColumn = table.Columns[structuredReference.EndColumn];
+				if (endColumn != null)
+					endColumnPosition = table.Address.Start.Column + endColumn.Position;
 			}
-			return new RangeInfo(table.WorkSheet, new ExcelAddress(startRow, startColumn, endRow, endColumn));
+			return new RangeInfo(table.WorkSheet, new ExcelAddress(startRowPosition, startColumnPosition, endRowPosition, endColumnPosition));
 		}
 
 		public override INameInfo GetName(string worksheet, string name)

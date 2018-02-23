@@ -149,5 +149,49 @@ namespace EPPlusTest
 			new StructuredReference(string.Empty);
 		}
 		#endregion
+
+		#region HasValidItemSpecifier Tests
+		[TestMethod]
+		public void HasValidItemSpecifiersValidTests()
+		{
+			var structuredReference = new StructuredReference("MyTable[#Data]");
+			Assert.IsTrue(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[#Headers]");
+			Assert.IsTrue(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[#Totals]");
+			Assert.IsTrue(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[#This row]");
+			Assert.IsTrue(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[#All]");
+			Assert.IsTrue(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[[#Data],[#Headers]]");
+			Assert.IsTrue(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[[#Data],[#Totals]]");
+			Assert.IsTrue(structuredReference.HasValidItemSpecifiers());
+		}
+
+		[TestMethod]
+		public void HasValidItemSpecifiersInvalidTests()
+		{
+			var structuredReference = new StructuredReference("MyTable[[#Data],[#This row]]");
+			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[[#Data],[#All]]");
+			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[[#Headers],[#Totals]]");
+			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[[#Headers],[#This row]]");
+			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[[#Headers],[#All]]");
+			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[[#Totals],[#This row]]");
+			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[[#Totals],[#All]]");
+			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[[#This row],[#All]]");
+			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
+			structuredReference = new StructuredReference("MyTable[[#Data],[#Headers],[#Totals]]");
+			Assert.IsFalse(structuredReference.HasValidItemSpecifiers());
+		}
+		#endregion
 	}
 }
