@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace OfficeOpenXml
 {
@@ -12,6 +14,10 @@ namespace OfficeOpenXml
 	/// </summary>
 	public class StructuredReference
 	{
+		#region Constants
+		private const string MalformedExceptionMessage = "Malformed structured reference.";
+		#endregion
+
 		#region Properties
 		/// <summary>
 		/// Gets the table name for the structured reference.
@@ -45,6 +51,8 @@ namespace OfficeOpenXml
 		{
 			if (string.IsNullOrEmpty(structuredReference))
 				throw new ArgumentNullException(nameof(structuredReference));
+			if (!Regex.IsMatch(structuredReference, RegexConstants.StructuredReference, RegexOptions.IgnoreCase | RegexOptions.Multiline))
+				throw new ArgumentException(StructuredReference.MalformedExceptionMessage);
 			this.OriginalReference = structuredReference;
 			var letters = structuredReference.ToArray();
 			int currentIndex = 0;
@@ -89,11 +97,10 @@ namespace OfficeOpenXml
 				currentIndex++;
 			}
 			// Set default specifiers if none were specified
-			if (this.ItemSpecifiers == 0)
+			if (this.ItemSpecifiers == default(ItemSpecifiers))
 				this.ItemSpecifiers = ItemSpecifiers.Data;
 			if (this.EndColumn == null)
 				this.EndColumn = this.StartColumn;
-			// TODO :: some validation on the resulting parsed structured reference.
 		}
 		#endregion
 
@@ -125,7 +132,7 @@ namespace OfficeOpenXml
 		{
 			var letter = letters[currentIndex++];
 			if (letter != '[')
-				throw new ArgumentException("Malformed structured reference");
+				throw new ArgumentException(StructuredReference.MalformedExceptionMessage);
 			StringBuilder component = new StringBuilder();
 			for (;currentIndex < letters.Length; currentIndex++)
 			{

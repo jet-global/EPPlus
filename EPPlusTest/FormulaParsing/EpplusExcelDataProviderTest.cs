@@ -170,6 +170,23 @@ namespace EPPlusTest.FormulaParsing
 		}
 
 		[TestMethod]
+		public void ResolveStructuredReferenceEmptyBracketsResolvesToData()
+		{
+			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[]");
+			var result = this.DataProviderWithDataAndTotals.ResolveStructuredReference(reference, "Sheet1", 15, 7);
+			Assert.AreEqual(4, result.Address.Start.Row);
+			Assert.AreEqual(3, result.Address.Start.Column);
+			Assert.AreEqual(9, result.Address.End.Row);
+			Assert.AreEqual(6, result.Address.End.Column);
+			Assert.AreEqual("h1_r1", result.GetOffset(0, 0));
+			Assert.AreEqual("h1_r2", result.GetOffset(1, 0));
+			Assert.AreEqual("h1_r3", result.GetOffset(2, 0));
+			Assert.AreEqual("h1_r4", result.GetOffset(3, 0));
+			Assert.AreEqual("h1_r5", result.GetOffset(4, 0));
+			Assert.AreEqual("h1_r6", result.GetOffset(5, 0));
+		}
+
+		[TestMethod]
 		public void ResolveStructuredReferenceDataMultipleColumns()
 		{
 			var reference = new StructuredReference($"{EpplusExcelDataProviderTest.TableName}[[#Data],[{EpplusExcelDataProviderTest.Header3}]:[{EpplusExcelDataProviderTest.Header4}]]");

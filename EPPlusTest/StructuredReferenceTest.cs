@@ -9,9 +9,83 @@ namespace EPPlusTest
 	{
 		#region Constructor Tests
 		[TestMethod]
+		public void StructuredReferenceWithAll()
+		{
+			var structuredReference = new StructuredReference("MyTable[#All]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.IsNull(structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.All, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceWithData()
+		{
+			var structuredReference = new StructuredReference("MyTable[#Data]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.IsNull(structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceWithThisRow()
+		{
+			var structuredReference = new StructuredReference("MyTable[#This row]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.IsNull(structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.ThisRow, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceWithHeaders()
+		{
+			var structuredReference = new StructuredReference("MyTable[#Headers]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.IsNull(structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Headers, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceWithTotals()
+		{
+			var structuredReference = new StructuredReference("MyTable[#Totals]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.IsNull(structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Totals, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceNoArguments()
+		{
+			var structuredReference = new StructuredReference("MyTable[]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.IsTrue(string.IsNullOrEmpty(structuredReference.StartColumn));
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceAtArgument()
+		{
+			var structuredReference = new StructuredReference("MyTable[#this row]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.IsNull(structuredReference.StartColumn);
+			Assert.IsNull(structuredReference.EndColumn);
+			Assert.AreEqual(ItemSpecifiers.ThisRow, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceNestedAtArgument()
+		{
+			var structuredReference = new StructuredReference("MyTable[[#this row]]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.IsNull(structuredReference.StartColumn);
+			Assert.IsNull(structuredReference.EndColumn);
+			Assert.AreEqual(ItemSpecifiers.ThisRow, structuredReference.ItemSpecifiers);
+		}
+		
+		[TestMethod]
 		public void StructuredReferenceWithTableAndColumnAll()
 		{
-			var structuredReference = new StructuredReference("MyTable[[#All],[MyColumn]]");
+			var structuredReference = new StructuredReference("MyTable[[#all],[MyColumn]]");
 			Assert.AreEqual("MyTable", structuredReference.TableName);
 			Assert.AreEqual("MyColumn", structuredReference.StartColumn);
 			Assert.AreEqual(ItemSpecifiers.All, structuredReference.ItemSpecifiers);
@@ -133,6 +207,51 @@ namespace EPPlusTest
 			Assert.AreEqual("MyTable", structuredReference.TableName);
 			Assert.AreEqual("MyColumn", structuredReference.StartColumn);
 			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+
+		[TestMethod]
+		public void StructuredReferenceInvalidItemSpecifier()
+		{
+			var structuredReference = new StructuredReference("MyTable[#NotAnItemSpecifier]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("#NotAnItemSpecifier", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void StructuredReferenceNoBrackets()
+		{
+			var structuredReference = new StructuredReference("MyTable");
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void StructuredReferenceNoTable()
+		{
+			var structuredReference = new StructuredReference("[#this row]");
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void StructuredReferenceTrailingCharacters()
+		{
+			var structuredReference = new StructuredReference("MyTable[#this row]sdfsdf");
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void StructuredReferenceInvalidArgument()
+		{
+			var structuredReference = new StructuredReference("MyTable[[#All],fsdfs[[]dfsd]]]]]");
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void StructuredReferenceNoEndBracket()
+		{
+			var structuredReference = new StructuredReference("MyTable[#this row");
 		}
 
 		[TestMethod]
