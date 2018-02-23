@@ -60,8 +60,6 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 		/// <param name="tokenType">The type of the <see cref="Token"/>.</param>
 		public Token(string token, TokenType tokenType)
 		{
-			if (string.IsNullOrEmpty(token))
-				throw new ArgumentNullException(nameof(token));
 			Value = token;
 			TokenType = tokenType;
 		}

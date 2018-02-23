@@ -15,20 +15,6 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 			Assert.AreEqual("value", token.Value);
 			Assert.AreEqual(TokenType.Boolean, token.TokenType);
 		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ConstructorNullToken()
-		{
-			var token = new Token(null, TokenType.Boolean);
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ConstructorEmptyToken()
-		{
-			var token = new Token(string.Empty, TokenType.Boolean);
-		}
 		#endregion
 
 		#region Negate Tests

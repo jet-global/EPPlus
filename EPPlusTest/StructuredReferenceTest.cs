@@ -209,13 +209,84 @@ namespace EPPlusTest
 			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
 		}
 
-
 		[TestMethod]
-		public void StructuredReferenceInvalidItemSpecifier()
+		public void StructuredReferenceColumnNameWithHashtagEscaped()
 		{
-			var structuredReference = new StructuredReference("MyTable[#NotAnItemSpecifier]");
+			var structuredReference = new StructuredReference("MyTable['#NotAnItemSpecifier]");
 			Assert.AreEqual("MyTable", structuredReference.TableName);
 			Assert.AreEqual("#NotAnItemSpecifier", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceColumnNameWithHashtagEscapedNested()
+		{
+			var structuredReference = new StructuredReference("MyTable[['#NotAnItemSpecifier]]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("#NotAnItemSpecifier", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceEscapedLeftBracketInColumn()
+		{
+			var structuredReference = new StructuredReference("MyTable[My'[olumn]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("My[olumn", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceEscapedRightBracketInColumn()
+		{
+			var structuredReference = new StructuredReference("MyTable[My']olumn]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("My]olumn", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceEscapedQuotationInColumn()
+		{
+			var structuredReference = new StructuredReference("MyTable[My''olumn]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("My'olumn", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceEscapedThreeQuotationInColumn()
+		{
+			var structuredReference = new StructuredReference("MyTable[My'''[olumn]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("My'[olumn", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceEscapedFourQuotationInColumn()
+		{
+			var structuredReference = new StructuredReference("MyTable[My''''olumn]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("My''olumn", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceSpecialCharactersInColumn()
+		{
+			var structuredReference = new StructuredReference("MyTable[!|\\;`']  ,;:.ss'[]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("!|\\;`]  ,;:.ss[", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceSpecialCharactersInTableName()
+		{
+			var structuredReference = new StructuredReference("My\\}+'Table[column]");
+			Assert.AreEqual("My\\}+'Table", structuredReference.TableName);
+			Assert.AreEqual("column", structuredReference.StartColumn);
 			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
 		}
 

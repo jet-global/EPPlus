@@ -133,13 +133,26 @@ namespace OfficeOpenXml
 			var letter = letters[currentIndex++];
 			if (letter != '[')
 				throw new ArgumentException(StructuredReference.MalformedExceptionMessage);
+			bool isEscaped = false;
+			const char escapeCharacter = '\'';
 			StringBuilder component = new StringBuilder();
-			for (;currentIndex < letters.Length; currentIndex++)
+			for (; currentIndex < letters.Length; currentIndex++)
 			{
 				letter = letters[currentIndex];
-				if (letter == ']')
+				if (letter == ']' && !isEscaped)
 					break;
-				component.Append(letter);
+				if (letter != escapeCharacter)
+				{
+					component.Append(letter);
+					isEscaped = false;
+				}
+				else if (letter == escapeCharacter && !isEscaped)
+					isEscaped = true;
+				else if (letter == escapeCharacter && isEscaped)
+				{
+					component.Append(letter);
+					isEscaped = false;
+				}
 			}
 			currentIndex++;
 			return component.ToString();
