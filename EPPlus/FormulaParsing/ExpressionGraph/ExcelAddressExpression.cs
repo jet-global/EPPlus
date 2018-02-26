@@ -139,6 +139,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		#region Private Methods
 		private CompileResult CompileSingleCell(ExcelDataProvider.IRangeInfo result)
 		{
+			if (result.Address.Address == ExcelErrorValue.Values.Ref)
+				return new CompileResult(eErrorType.Ref);
 			var cell = result.FirstOrDefault();
 			if (cell == null)
 				return CompileResult.Empty;
