@@ -655,6 +655,7 @@
     <Compile Include="FormulaParsing\ParsingContext.cs" />
     <Compile Include="FormulaParsing\ParsingScope.cs" />
     <Compile Include="FormulaParsing\ParsingScopes.cs" />
+    <Compile Include="FormulaParsing\ExpressionGraph\StructuredReferenceExpression.cs" />
     <Compile Include="FormulaParsing\Utilities\ArgumentInfo.cs" />
     <Compile Include="FormulaParsing\Utilities\ExtensionMethods.cs" />
     <Compile Include="FormulaParsing\Utilities\IdProvider.cs" />
@@ -763,6 +764,7 @@
     <Compile Include="RangeCollection.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="StructuredReference.cs" />
     <Compile Include="Table\PivotTable\CacheFieldItem.cs" />
     <Compile Include="Table\PivotTable\CacheFieldNode.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />

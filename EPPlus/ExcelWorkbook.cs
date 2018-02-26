@@ -40,6 +40,7 @@ using OfficeOpenXml.Drawing.Slicers;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OfficeOpenXml.Packaging.Ionic.Zip;
+using OfficeOpenXml.Table;
 using OfficeOpenXml.Utils;
 using OfficeOpenXml.VBA;
 
@@ -779,6 +780,23 @@ namespace OfficeOpenXml
 				}
 			}
 			return false;
+		}
+
+		/// <summary>
+		/// Gets the table with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">The name of the table to retrieve.</param>
+		/// <returns>The table if it was found; otherwise null.</returns>
+		internal ExcelTable GetTable(string name)
+		{
+			foreach (var ws in this.Worksheets)
+			{
+				if (ws.Tables.TableNames.ContainsKey(name))
+				{
+					return ws.Tables[name];
+				}
+			}
+			return null;
 		}
 
 		/// <summary>

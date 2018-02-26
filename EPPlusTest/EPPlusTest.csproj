@@ -118,6 +118,8 @@
     <Compile Include="ExcelWorksheetTests.cs" />
     <Compile Include="Extensions\ExtensionsTest.cs" />
     <Compile Include="ExternalReferenceCollectionTest.cs" />
+    <Compile Include="FormulaParsing\DataProviderTestBase.cs" />
+    <Compile Include="FormulaParsing\EpplusExcelDataProviderTest.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AbsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingMathTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingTests.cs" />
@@ -235,9 +237,12 @@
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\FunctionCompilerFactoryTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\FunctionCompilers\LookupFunctionCompilerTest.cs" />
+    <Compile Include="FormulaParsing\ExpressionGraph\StructuredReferenceExpressionTest.cs" />
     <Compile Include="FormulaParsing\FormulaParserManagerTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\LargeTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTestBase.cs" />
+    <Compile Include="FormulaParsing\LexicalAnalysis\TokenTest.cs" />
+    <Compile Include="StructuredReferenceTest.cs" />
     <Compile Include="Style\Dxf\ExcelDxfStyleTest.cs" />
     <Compile Include="Style\XmlAccess\ExcelFontXmlTest.cs" />
     <Compile Include="Table\PivotTable\CacheFieldItemTest.cs" />

@@ -347,6 +347,67 @@ namespace OfficeOpenXml.FormulaParsing
 			var ws = _package.Workbook.Worksheets[wsName];
 			return new RangeInfo(ws, excelAddress);
 		}
+
+		/// <summary>
+		/// Returns values from the range defined by the <paramref name="structuredReference"/>.
+		/// </summary>
+		/// <param name="structuredReference">The <see cref="StructuredReference"/> to resolve.</param>
+		/// <param name="originSheet">The sheet referencing the <paramref name="structuredReference"/>.</param>
+		/// <param name="originRow">The row referencing the <paramref name="structuredReference"/>.</param>
+		/// <param name="originColumn">The column referencing the <paramref name="structuredReference"/>.</param>
+		/// <returns>The <see cref="ExcelDataProvider.IRangeInfo"/> containing the referenced data.</returns>
+		public override IRangeInfo ResolveStructuredReference(StructuredReference structuredReference, string originSheet, int originRow, int originColumn)
+		{
+			if (structuredReference == null || !structuredReference.HasValidItemSpecifiers())
+				return null;
+			var table = _package.Workbook.GetTable(structuredReference.TableName);
+			if (table == null)
+				return null;
+			int startRowPosition = table.Address.Start.Row;
+			int endRowPosition = table.Address.End.Row;
+			if (structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Data))
+			{
+				if (table.ShowHeader && !structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Headers))
+					startRowPosition++;
+				if (table.ShowTotal && !structuredReference.ItemSpecifiers.HasFlag(ItemSpecifiers.Totals))
+					endRowPosition--;
+			}
+			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.ThisRow)
+			{
+				if (originRow < startRowPosition || originRow > endRowPosition || (originRow == startRowPosition && table.ShowHeader) || (originRow == endRowPosition && table.ShowTotal)) 
+					return null;
+				startRowPosition = endRowPosition = originRow;
+			}
+			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.All)
+			{
+				// Already set.
+			}
+			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.Headers)
+			{
+				if (!table.ShowHeader)
+					return new RangeInfo(table.WorkSheet, new ExcelAddress(ExcelErrorValue.Values.Ref));
+				endRowPosition = startRowPosition;
+			}
+			else if (structuredReference.ItemSpecifiers == ItemSpecifiers.Totals)
+			{
+				if (!table.ShowTotal)
+					return new RangeInfo(table.WorkSheet, new ExcelAddress(ExcelErrorValue.Values.Ref));
+				startRowPosition = endRowPosition;
+			}
+			int startColumnPosition = table.Address.Start.Column;
+			int endColumnPosition = table.Address.End.Column;
+			if (!string.IsNullOrEmpty(structuredReference.StartColumn) && !string.IsNullOrEmpty(structuredReference.EndColumn))
+			{
+				var startColumn = table.Columns[structuredReference.StartColumn];
+				if (startColumn != null)
+					startColumnPosition += startColumn.Position;
+				var endColumn = table.Columns[structuredReference.EndColumn];
+				if (endColumn != null)
+					endColumnPosition = table.Address.Start.Column + endColumn.Position;
+			}
+			return new RangeInfo(table.WorkSheet, new ExcelAddress(startRowPosition, startColumnPosition, endRowPosition, endColumnPosition));
+		}
+
 		public override INameInfo GetName(string worksheet, string name)
 		{
 			ExcelNamedRange nameItem;

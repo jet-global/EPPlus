@@ -37,10 +37,12 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis.TokenSeparatorHandlers
 	/// </summary>
 	public static class TokenSeparatorHandler
 	{
+		// The order of these handlers defines the priority of the special separator tokens.
+		// Be very careful if you move them around.
 		private static SeparatorHandler[] _handlers = new SeparatorHandler[]
 		{
-				new StringHandler(),
 				new BracketHandler(),
+				new StringHandler(),
 				new SheetnameHandler(),
 				new MultipleCharSeparatorHandler()
 		};

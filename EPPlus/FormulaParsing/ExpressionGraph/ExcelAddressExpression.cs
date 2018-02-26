@@ -34,30 +34,52 @@ using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
+	/// <summary>
+	/// Represents an expression that defines a workbook sheet reference.
+	/// </summary>
 	public class ExcelAddressExpression : AtomicExpression
 	{
+		#region Class Variables
+		protected readonly ExcelDataProvider _excelDataProvider;
+		protected readonly ParsingContext _parsingContext;
+		private readonly RangeAddressFactory _rangeAddressFactory;
+		private readonly bool _negate;
+		#endregion
+
+		#region Properties
 		/// <summary>
 		/// Gets or sets a value that indicates whether or not to resolve directly to an <see cref="ExcelDataProvider.IRangeInfo"/>
 		/// </summary>
 		public bool ResolveAsRange { get; set; }
+		#endregion
 
-		private readonly ExcelDataProvider _excelDataProvider;
-		private readonly ParsingContext _parsingContext;
-		private readonly RangeAddressFactory _rangeAddressFactory;
-		private readonly bool _negate;
-
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of an <see cref="ExcelAddressExpression"/>.
+		/// </summary>
+		/// <param name="expression">The expression string.</param>
+		/// <param name="excelDataProvider">An <see cref="ExcelDataProvider"/> for resolving addresses.</param>
+		/// <param name="parsingContext">The current <see cref="ParsingContext"/>.</param>
 		public ExcelAddressExpression(string expression, ExcelDataProvider excelDataProvider, ParsingContext parsingContext)
 			 : this(expression, excelDataProvider, parsingContext, new RangeAddressFactory(excelDataProvider), false)
 		{
 
 		}
+
+		/// <summary>
+		/// Creates an instance of an <see cref="ExcelAddressExpression"/>.
+		/// </summary>
+		/// <param name="expression">The expression string.</param>
+		/// <param name="excelDataProvider">An <see cref="ExcelDataProvider"/> for resolving addresses.</param>
+		/// <param name="parsingContext">The current <see cref="ParsingContext"/>.</param>
+		/// <param name="negate">A value indicating whether or not to negate the expression.</param>
 		public ExcelAddressExpression(string expression, ExcelDataProvider excelDataProvider, ParsingContext parsingContext, bool negate)
 			 : this(expression, excelDataProvider, parsingContext, new RangeAddressFactory(excelDataProvider), negate)
 		{
 
 		}
 
-		public ExcelAddressExpression(string expression, ExcelDataProvider excelDataProvider, ParsingContext parsingContext, RangeAddressFactory rangeAddressFactory, bool negate)
+		private ExcelAddressExpression(string expression, ExcelDataProvider excelDataProvider, ParsingContext parsingContext, RangeAddressFactory rangeAddressFactory, bool negate)
 			 : base(expression)
 		{
 			Require.That(excelDataProvider).Named("excelDataProvider").IsNotNull();
@@ -68,12 +90,21 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			_rangeAddressFactory = rangeAddressFactory;
 			_negate = negate;
 		}
+		#endregion
 
+		#region AtomicExpression Overrides
+		/// <summary>
+		/// Gets a value indicating whether or not this is a grouped expression.
+		/// </summary>
 		public override bool IsGroupedExpression
 		{
 			get { return false; }
 		}
 
+		/// <summary>
+		/// Compiles the expression into a value.
+		/// </summary>
+		/// <returns>The <see cref="CompileResult"/> with the expression value.</returns>
 		public override CompileResult Compile()
 		{
 			var c = this._parsingContext.Scopes.Current;
@@ -87,13 +118,29 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 				else
 					return CompileResult.Empty;
 			}
+			return this.BuildResult(result);
+		}
+		#endregion
+
+		#region Protected Methods
+		/// <summary>
+		/// Builds a <see cref="CompileResult"/> based off the result and the expression configuration.
+		/// </summary>
+		/// <param name="result">The <see cref="ExcelDataProvider.IRangeInfo"/> result.</param>
+		/// <returns>The processed result.</returns>
+		protected CompileResult BuildResult(ExcelDataProvider.IRangeInfo result)
+		{
 			if (this.ResolveAsRange || result.Address.Rows > 1 || result.Address.Columns > 1)
 				return new CompileResult(result, DataType.Enumerable);
 			return CompileSingleCell(result);
 		}
-		
+		#endregion
+
+		#region Private Methods
 		private CompileResult CompileSingleCell(ExcelDataProvider.IRangeInfo result)
 		{
+			if (result.Address.Address == ExcelErrorValue.Values.Ref)
+				return new CompileResult(eErrorType.Ref);
 			var cell = result.FirstOrDefault();
 			if (cell == null)
 				return CompileResult.Empty;
@@ -103,11 +150,17 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			{
 				if (compileResult.IsNumeric)
 					compileResult = new CompileResult(compileResult.ResultNumeric * -1, compileResult.DataType);
-				else if (compileResult.DataType == DataType.String && compileResult.ResultValue is string resultString && double.TryParse(resultString, out double resultDouble))
-					compileResult = new CompileResult((resultDouble * -1).ToString(), compileResult.DataType);
+				else if (compileResult.DataType == DataType.String)
+				{
+					if (compileResult.ResultValue is string resultString && double.TryParse(resultString, out double resultDouble))
+						compileResult = new CompileResult((resultDouble * -1).ToString(), compileResult.DataType);
+					else
+						compileResult = new CompileResult(eErrorType.Value);
+				}
 			}
 			compileResult.IsHiddenCell = cell.IsHiddenRow;
 			return compileResult;
 		}
+		#endregion
 	}
 }

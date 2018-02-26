@@ -29,43 +29,61 @@
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
 
+using System;
+
 namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 {
 	public class Token
 	{
+		#region Properties
+		/// <summary>
+		/// Gets or sets the value of the token.
+		/// </summary>
+		public string Value { get; internal set; }
+
+		/// <summary>
+		/// Gets or sets the <see cref="TokenType"/> of the token.
+		/// </summary>
+		public TokenType TokenType { get; internal set; }
+
+		/// <summary>
+		/// Gets a value indicating that the token is negated.
+		/// </summary>
+		public bool IsNegated { get; private set; }
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Instantiates a new <see cref="Token"/>.
+		/// </summary>
+		/// <param name="token">The value of the <see cref="Token"/>.</param>
+		/// <param name="tokenType">The type of the <see cref="Token"/>.</param>
 		public Token(string token, TokenType tokenType)
 		{
 			Value = token;
 			TokenType = tokenType;
 		}
+		#endregion
 
-		public string Value { get; internal set; }
-
-		public TokenType TokenType { get; internal set; }
-
-		public void Append(string stringToAppend)
-		{
-			Value += stringToAppend;
-		}
-
-		public bool IsNegated { get; private set; }
-
+		#region Publid Methods
+		/// <summary>
+		/// Marks the token as negated.
+		/// </summary>
 		public void Negate()
 		{
 
-			if (
-				 TokenType == TokenType.Decimal
-				 ||
-				 TokenType == TokenType.Integer
-				 ||
-				 TokenType == TokenType.ExcelAddress)
-			{
-				IsNegated = true;
-			}
+			this.IsNegated = this.TokenType == TokenType.Decimal
+				|| this.TokenType == TokenType.Integer
+				|| this.TokenType == TokenType.ExcelAddress
+				|| this.TokenType == TokenType.StructuredReference;
 		}
+		#endregion
+
+		#region Object Overrides
 		public override string ToString()
 		{
-			return TokenType.ToString() + ", " + Value;
+			return this.TokenType.ToString() + ", " + Value;
 		}
+		#endregion
 	}
 }

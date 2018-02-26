@@ -171,6 +171,62 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 			Assert.AreEqual(TokenType.InvalidReference, token.TokenType);
 			Assert.AreEqual("[1]ws!A1:B15", token.Value);
 		}
+
+		[TestMethod]
+		public void ShouldCreateStructuredReferenceTokens()
+		{
+			var structuredReferences = new[]
+			{
+				"MyTable[[#All],[MyColumn]]", // Casing is unimportant for item specifiers
+				"MyTable[[#ALL],[MyColumn]]",
+				"MyTable[[#Data],[MyColumn]]",
+				"MyTable[[#DATA],[MyColumn]]",
+				"MyTable[[#Headers],[MyColumn]]",
+				"MyTable[[#HEADERS],[MyColumn]]",
+				"MyTable[[#Totals],[MyColumn]]",
+				"MyTable[[#TOTALS],[MyColumn]]",
+				"MyTable[[#This Row],[MyColumn]]",
+				"MyTable[[#THIS ROW],[MyColumn]]",
+				"MyTable[[#Headers],[#Data],[MyColumn]]",
+				"MyTable[[#All],[#Totals],[#This Row],[#Headers],[#Data],[MyColumn]]", // multiple item specifiers
+				"MyTable[[#Headers],[MyStartColumn]:[MyEndColumn]]", // multi-column selector
+				"MyTable[MyColumn]",
+				@"\MyTable[MyColumn]", // Tables can begin with \
+				"_MyTable[MyColumn]", // Tables can begin with _
+				"My.Table[MyColumn]", // Tables can contain .
+				"MyTable[[MyColumn]]", // Columns can be double bracketed
+				"MyTable[[My \t Column]]", // Column names with \t MUST be double bracketed
+				"MyTable[[My \n Column]]", // Column names with \n MUST be double bracketed
+				"MyTable[[My \r Column]]", // Column names with \r MUST be double bracketed
+				"MyTable[[My , Column]]", // Column names with , MUST be double bracketed
+				"MyTable[[My : Column]]", // Column names with : MUST be double bracketed
+				"MyTable[[My . Column]]", // Column names with . MUST be double bracketed
+				"MyTable[[My '[ Column]]", // Column names with [ MUST be double bracketed AND [ must be escaped with '
+				"MyTable[[My '] Column]]", // Column names with ] MUST be double bracketed AND ] must be escaped with '
+				"MyTable[[My '# Column]]", // Column names with # MUST be double bracketed AND # must be escaped with '
+				"MyTable[['# MyColumn]]", // Column names with # MUST be double bracketed AND # must be escaped with '
+				"MyTable[[My '' Column]]", // Column names with ' MUST be double bracketed AND ' must be escaped with '
+				"MyTable[[My \" Column]]", // Column names with ' MUST be double bracketed
+				"MyTable[[My { Column]]", // Column names with { MUST be double bracketed
+				"MyTable[[My } Column]]", // Column names with } MUST be double bracketed
+				"MyTable[[My $ Column]]", // Column names with $ MUST be double bracketed
+				"MyTable[[My ^ Column]]", // Column names with ^ MUST be double bracketed
+				"MyTable[[My & Column]]", // Column names with & MUST be double bracketed
+				"MyTable[[My * Column]]", // Column names with * MUST be double bracketed
+				"MyTable[[My + Column]]", // Column names with + MUST be double bracketed
+				"MyTable[[My = Column]]", // Column names with = MUST be double bracketed
+				"MyTable[[My - Column]]", // Column names with - MUST be double bracketed
+				"MyTable[[My > Column]]", // Column names with > MUST be double bracketed
+				"MyTable[[My < Column]]", // Column names with < MUST be double bracketed
+				"MyTable[[My / Column]]", // Column names with / MUST be double bracketed
+				"MyTable[   [MyColumn]   ]", // whitespace can generally be ignored
+			};
+			foreach (var reference in structuredReferences)
+			{
+				var token = _tokenFactory.Create(Enumerable.Empty<Token>(), reference);
+				Assert.AreEqual(TokenType.StructuredReference, token.TokenType, $"Reference: {reference} did not tokenize correctly.");
+			}
+		}
 		#endregion
 	}
 }

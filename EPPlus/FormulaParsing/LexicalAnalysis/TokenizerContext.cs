@@ -113,16 +113,6 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 			_currentToken.Append(c.ToString());
 		}
 
-		public void AppendToLastToken(string stringToAppend)
-		{
-			_result.Last().Append(stringToAppend);
-		}
-
-		public void SetLastTokenType(TokenType type)
-		{
-			_result.Last().TokenType = type;
-		}
-
 		public void ReplaceLastToken(Token newToken)
 		{
 			var count = _result.Count;
