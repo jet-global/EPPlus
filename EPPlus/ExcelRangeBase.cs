@@ -765,14 +765,15 @@ namespace OfficeOpenXml
 			range.myWorksheet.SetValueInner(row, col, value);
 		}
 
-		private static void SetFormula(ExcelRangeBase range, object value, int row, int col, bool clearValue = true)
+		private static void SetFormula(ExcelRangeBase range, string value, int row, int col, bool clearValue = true)
 		{
 			var formulaValue = range.myWorksheet._formulas.GetValue(row, col);
+			var valueValue = range.myWorksheet._values.GetValue(row, col);
 			if (formulaValue is int && (int)formulaValue >= 0)
 				range.UpdateSharedFormulaAnchors(range.myWorksheet.Cells[row, col]);
-			string formula = (value == null ? string.Empty : value.ToString());
+			string formula = value ?? string.Empty;
 			range.myWorksheet._formulas.SetValue(row, col, formula);
-			if (formula != string.Empty && clearValue)
+			if ((formula != string.Empty && clearValue) || valueValue.Equals(default(ExcelCoreValue)))
 				range.myWorksheet.SetValueInner(row, col, null);
 		}
 
