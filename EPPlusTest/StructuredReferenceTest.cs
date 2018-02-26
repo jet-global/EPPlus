@@ -414,7 +414,7 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		public void StructuredReferenceTestsWithHeaderSpecialCharaters()
+		public void StructuredReferenceTestsWithHeaderSpecialCharacters()
 		{
 			using (var package = new ExcelPackage())
 			{
