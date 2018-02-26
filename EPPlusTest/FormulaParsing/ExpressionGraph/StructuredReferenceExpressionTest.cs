@@ -61,7 +61,6 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 					worksheet.Cells[9, 5].Value = "h3_r6";
 					worksheet.Cells[9, 6].Value = "h4_r6";
 					var table = worksheet.Tables.Add(new ExcelAddress("Sheet1", 3, 3, 9, 6), StructuredReferenceExpressionTest.TableName);
-					// TODO :: add variations where total row is or is not shown, same with headers.
 				}
 				return myPackage;
 			}
