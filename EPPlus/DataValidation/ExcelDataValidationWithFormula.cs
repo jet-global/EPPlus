@@ -39,7 +39,7 @@ namespace OfficeOpenXml.DataValidation
 	/// A validation containing a formula
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class ExcelDataValidationWithFormula<T> : ExcelDataValidation
+	public abstract class ExcelDataValidationWithFormula<T> : ExcelDataValidation
 		 where T : IExcelDataValidationFormula
 	{
 		/// <summary>

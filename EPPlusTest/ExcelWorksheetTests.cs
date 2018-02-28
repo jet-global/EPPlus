@@ -10,6 +10,7 @@ using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.DataValidation;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Drawing.Vml;
@@ -3390,6 +3391,59 @@ namespace EPPlusTest
 				//validate that the implicitly addressed Data Validation range has also expanded
 				validationRange = sheet.DataValidations.Last() as OfficeOpenXml.DataValidation.Contracts.IExcelDataValidationList;
 				Assert.AreEqual("=$B$2:$B$5", validationRange.Formula.ExcelFormula);
+			}
+		}
+
+		[TestMethod]
+		public void InsertRowUpdatesDataValidationAddressesAndFormulas()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet");
+				var anyValidation = sheet.Cells["E5:E10"].DataValidation.AddAnyDataValidation();
+				var customValidation = sheet.Cells["F1:F6"].DataValidation.AddCustomDataValidation();
+				customValidation.Formula.ExcelFormula = "=Sheet!$B$2:$B$5";
+				var listValidation = sheet.Cells["G1:G10"].DataValidation.AddListDataValidation();
+				listValidation.Formula.ExcelFormula = "A1:A8";
+				var timeValidation = sheet.Cells["J1:K10"].DataValidation.AddTimeDataValidation();
+				timeValidation.Formula.ExcelFormula = "A10:H100";
+				timeValidation.Formula2.ExcelFormula = "I1:I99";
+				var dateTimeValidation = sheet.Cells["L1:L10"].DataValidation.AddDateTimeDataValidation();
+				dateTimeValidation.Formula.ExcelFormula = "A10:H100";
+				dateTimeValidation.Formula2.ExcelFormula = "I1:I99";
+				var integerValidation = sheet.Cells["D5:D8"].DataValidation.AddIntegerDataValidation();
+				integerValidation.Formula.ExcelFormula = "=Sheet!$B$2:$B$4";
+				integerValidation.Formula2.ExcelFormula = "=Sheet!$B$1:$B$5";
+				var decimalValidation = sheet.Cells["Z1:AA100"].DataValidation.AddDecimalDataValidation();
+				decimalValidation.Formula.ExcelFormula = "=Sheet!$B$2:$B$4";
+				decimalValidation.Formula2.ExcelFormula = "=Sheet!$B$1:$B$5";
+
+				sheet.InsertRow(3, 2);
+
+				var updatedAnyValidation = sheet.DataValidations.Single(v => v.ValidationType.Type == eDataValidationType.Any) as ExcelDataValidationAny;
+				Assert.AreEqual("E7:E12", updatedAnyValidation.Address.Address);
+				var updatedCustomValidation = sheet.DataValidations.Single(v => v.ValidationType.Type == eDataValidationType.Custom) as ExcelDataValidationCustom;
+				Assert.AreEqual("F1:F8", updatedCustomValidation.Address.Address);
+				Assert.AreEqual("='Sheet'!$B$2:$B$7", updatedCustomValidation.Formula.ExcelFormula);
+				var updatedListValidation = sheet.DataValidations.Single(v => v.ValidationType.Type == eDataValidationType.List) as ExcelDataValidationList;
+				Assert.AreEqual("G1:G12", updatedListValidation.Address.Address);
+				Assert.AreEqual("A1:A10", updatedListValidation.Formula.ExcelFormula);
+				var updatedTimeValidation = sheet.DataValidations.Single(v => v.ValidationType.Type == eDataValidationType.Time) as ExcelDataValidationTime;
+				Assert.AreEqual("J1:K12", updatedTimeValidation.Address.Address);
+				Assert.AreEqual("A12:H102", updatedTimeValidation.Formula.ExcelFormula);
+				Assert.AreEqual("I1:I101", updatedTimeValidation.Formula2.ExcelFormula);
+				var updatedDateTimeValidation = sheet.DataValidations.Single(v => v.ValidationType.Type == eDataValidationType.DateTime) as ExcelDataValidationDateTime;
+				Assert.AreEqual("L1:L12", updatedDateTimeValidation.Address.Address);
+				Assert.AreEqual("A12:H102", updatedDateTimeValidation.Formula.ExcelFormula);
+				Assert.AreEqual("I1:I101", updatedDateTimeValidation.Formula2.ExcelFormula);
+				var updatedIntegerValidation = sheet.DataValidations.Single(v => v.ValidationType.Type == eDataValidationType.Whole) as ExcelDataValidationInt;
+				Assert.AreEqual("D7:D10", updatedIntegerValidation.Address.Address);
+				Assert.AreEqual("='Sheet'!$B$2:$B$6", updatedIntegerValidation.Formula.ExcelFormula);
+				Assert.AreEqual("='Sheet'!$B$1:$B$7", updatedIntegerValidation.Formula2.ExcelFormula);
+				var updatedDecimalValidation = sheet.DataValidations.Single(v => v.ValidationType.Type == eDataValidationType.Decimal) as ExcelDataValidationDecimal;
+				Assert.AreEqual("Z1:AA102", updatedDecimalValidation.Address.Address);
+				Assert.AreEqual("='Sheet'!$B$2:$B$6", updatedDecimalValidation.Formula.ExcelFormula);
+				Assert.AreEqual("='Sheet'!$B$1:$B$7", updatedDecimalValidation.Formula2.ExcelFormula);
 			}
 		}
 

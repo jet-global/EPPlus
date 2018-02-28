@@ -34,7 +34,7 @@ using OfficeOpenXml.DataValidation.Formulas.Contracts;
 
 namespace OfficeOpenXml.DataValidation
 {
-	public class ExcelDataValidationWithFormula2<T> : ExcelDataValidationWithFormula<T>
+	public abstract class ExcelDataValidationWithFormula2<T> : ExcelDataValidationWithFormula<T>
 		 where T : IExcelDataValidationFormula
 	{
 		/// <summary>

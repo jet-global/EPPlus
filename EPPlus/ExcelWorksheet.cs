@@ -4903,8 +4903,51 @@ namespace OfficeOpenXml
 			{
 				for (int i = sheet.DataValidations.Count - 1; i >= 0; i--)
 				{
-					if (sheet.DataValidations.ElementAt(i) is DataValidation.Contracts.IExcelDataValidationList validation)
-						validation.Formula.ExcelFormula = this.TranslateDataValidationFormula(sheet, validation.Address, validation.Formula.ExcelFormula, rowFrom, rows, columnFrom, columns);
+					var validation = sheet.DataValidations.ElementAt(i);
+					var newAddress = this.Package.FormulaManager.UpdateFormulaReferences(validation.Address.Address, rows, columns, rowFrom, columnFrom, sheet.Name, this.Name);
+					validation.Address = new ExcelAddress(newAddress);
+					if (validation is ExcelDataValidationAny anyValidation)
+					{
+						// No formulas
+					}
+					else if (validation is ExcelDataValidationCustom customValidation)
+					{
+						if (!string.IsNullOrEmpty(customValidation.Formula?.ExcelFormula))
+							customValidation.Formula.ExcelFormula = this.TranslateDataValidationFormula(sheet, customValidation.Address, customValidation.Formula.ExcelFormula, rowFrom, rows, columnFrom, columns);
+					}
+					else if (validation is ExcelDataValidationList listValidation)
+					{
+						if (!string.IsNullOrEmpty(listValidation.Formula?.ExcelFormula))
+							listValidation.Formula.ExcelFormula = this.TranslateDataValidationFormula(sheet, listValidation.Address, listValidation.Formula.ExcelFormula, rowFrom, rows, columnFrom, columns);
+					}
+					else if (validation is ExcelDataValidationTime timeValidation)
+					{
+						if (!string.IsNullOrEmpty(timeValidation.Formula?.ExcelFormula))
+							timeValidation.Formula.ExcelFormula = this.TranslateDataValidationFormula(sheet, timeValidation.Address, timeValidation.Formula.ExcelFormula, rowFrom, rows, columnFrom, columns);
+						if (!string.IsNullOrEmpty(timeValidation.Formula2?.ExcelFormula))
+							timeValidation.Formula2.ExcelFormula = this.TranslateDataValidationFormula(sheet, timeValidation.Address, timeValidation.Formula2.ExcelFormula, rowFrom, rows, columnFrom, columns);
+					}
+					else if (validation is ExcelDataValidationDateTime dateTimeValidation)
+					{
+						if (!string.IsNullOrEmpty(dateTimeValidation.Formula?.ExcelFormula))
+							dateTimeValidation.Formula.ExcelFormula = this.TranslateDataValidationFormula(sheet, dateTimeValidation.Address, dateTimeValidation.Formula.ExcelFormula, rowFrom, rows, columnFrom, columns);
+						if (!string.IsNullOrEmpty(dateTimeValidation.Formula2?.ExcelFormula))
+							dateTimeValidation.Formula2.ExcelFormula = this.TranslateDataValidationFormula(sheet, dateTimeValidation.Address, dateTimeValidation.Formula2.ExcelFormula, rowFrom, rows, columnFrom, columns);
+					}
+					else if (validation is ExcelDataValidationInt intValidation)
+					{
+						if (!string.IsNullOrEmpty(intValidation.Formula?.ExcelFormula))
+							intValidation.Formula.ExcelFormula = this.TranslateDataValidationFormula(sheet, intValidation.Address, intValidation.Formula.ExcelFormula, rowFrom, rows, columnFrom, columns);
+						if (!string.IsNullOrEmpty(intValidation.Formula2?.ExcelFormula))
+							intValidation.Formula2.ExcelFormula = this.TranslateDataValidationFormula(sheet, intValidation.Address, intValidation.Formula2.ExcelFormula, rowFrom, rows, columnFrom, columns);
+					}
+					else if (validation is ExcelDataValidationDecimal decimalValidation)
+					{
+						if (!string.IsNullOrEmpty(decimalValidation.Formula?.ExcelFormula))
+							decimalValidation.Formula.ExcelFormula = this.TranslateDataValidationFormula(sheet, decimalValidation.Address, decimalValidation.Formula.ExcelFormula, rowFrom, rows, columnFrom, columns);
+						if (!string.IsNullOrEmpty(decimalValidation.Formula2?.ExcelFormula))
+							decimalValidation.Formula2.ExcelFormula = this.TranslateDataValidationFormula(sheet, decimalValidation.Address, decimalValidation.Formula2.ExcelFormula, rowFrom, rows, columnFrom, columns);
+					}
 				}
 			}
 		}
