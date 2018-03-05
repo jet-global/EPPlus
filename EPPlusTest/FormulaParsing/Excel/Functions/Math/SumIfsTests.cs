@@ -1363,6 +1363,18 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions
 				Assert.AreEqual(3d, worksheet.Cells["B2"].Value);
 			}
 		}
+
+		[TestMethod]
+		public void SumIfsErrorPropogation()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B2"].Formula = @"SUMIFS(OFFSET(A1,0,MATCH(""A"",A1,0)),D2:D3,"""")";
+				worksheet.Calculate();
+				Assert.AreEqual(eErrorType.NA, ((ExcelErrorValue)worksheet.Cells["B2"].Value).Type);
+			}
+		}
 		#endregion
 	}
 }
