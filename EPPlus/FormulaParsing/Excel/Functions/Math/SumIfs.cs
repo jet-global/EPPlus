@@ -42,8 +42,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns the sum of all cells in the given range that pass the given criteria.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			if (this.ArgumentCountIsValid(arguments, 3) == false)
-				return new CompileResult(eErrorType.Value);
+			if (!this.ArgumentsAreValid(arguments, 3, out eErrorType errorType))
+				return new CompileResult(errorType);
 			var sumRange = arguments.ElementAt(0).Value as ExcelDataProvider.IRangeInfo;
 			if (sumRange == null)
 				return new CompileResult(0d, DataType.Decimal);
