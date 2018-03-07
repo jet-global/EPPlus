@@ -63,6 +63,7 @@ namespace OfficeOpenXml
 				tableName.Append(currentChar);
 				currentChar = letters[currentIndex++];
 			} while (currentChar != '[');
+			this.MovePastWhitespace(letters, ref currentIndex);
 			this.TableName = tableName.ToString();
 			// If there is no specifier then only a single bracket exists
 			if (letters[currentIndex] != '[')
@@ -94,7 +95,7 @@ namespace OfficeOpenXml
 							this.EndColumn = component;
 						break;
 				}
-				currentIndex++;
+				this.MoveToNextComponent(letters, ref currentIndex);
 			}
 			// Set default specifiers if none were specified
 			if (this.ItemSpecifiers == default(ItemSpecifiers))
@@ -128,6 +129,22 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Private Methods
+		private void MovePastWhitespace(char[] letters, ref int currentIndex)
+		{
+			while (currentIndex < letters.Count() && char.IsWhiteSpace(letters[currentIndex]))
+			{
+				currentIndex++;
+			}
+		}
+
+		private void MoveToNextComponent(char[] letters, ref int currentIndex)
+		{
+			this.MovePastWhitespace(letters, ref currentIndex);
+			if (currentIndex < letters.Count() && (letters[currentIndex] == ',' || letters[currentIndex] == ':' || letters[currentIndex] == ']'))
+				currentIndex++;
+			this.MovePastWhitespace(letters, ref currentIndex);
+		}
+
 		private string BuildComponent(char[] letters, ref int currentIndex)
 		{
 			var letter = letters[currentIndex++];

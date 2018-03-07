@@ -283,6 +283,24 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void StructuredReferenceSpecialCharactersInColumnWithWhitespace()
+		{
+			var structuredReference = new StructuredReference("MyTable[ \t [#data]  \t  , \t [!|\\;`']  ,;:.ss'[]]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("!|\\;`]  ,;:.ss[", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceWithMultipleSpecifiersWithWhitesoace()
+		{
+			var structuredReference = new StructuredReference("MyTable[\t[#Headers]   ,\t [#Data] ,\t     [MyColumn]]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("MyColumn", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Headers | ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
 		public void StructuredReferenceSpecialCharactersInTableName()
 		{
 			var structuredReference = new StructuredReference("My\\}+'Table[column]");
