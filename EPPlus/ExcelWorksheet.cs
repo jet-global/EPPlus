@@ -4420,7 +4420,6 @@ namespace OfficeOpenXml
 								{
 									cache.AppendFormat("<c r=\"{0}\" s=\"{1}\"{6}><f ref=\"{2}\" t=\"shared\" si=\"{3}\">{4}</f>{5}</c>", cse.CellAddress, styleID < 0 ? 0 : styleID, f.Address, sfId, ConvertUtil.ExcelEscapeString(f.Formula), GetFormulaValue(v), GetCellType(v, true));
 								}
-
 							}
 							else if (f.IsArray)
 							{
@@ -4440,15 +4439,17 @@ namespace OfficeOpenXml
 							}
 							else
 							{
-								cache.AppendFormat("<c r=\"{0}\" s=\"{1}\">", f.Address, styleID < 0 ? 0 : styleID);
-								cache.AppendFormat("<f>{0}</f>{1}</c>", ConvertUtil.ExcelEscapeString(f.Formula), GetFormulaValue(v));
+								object resultValue = this.TryGetTypedValue(v, out resultValue) ? resultValue : v;
+								cache.AppendFormat("<c r=\"{0}\" s=\"{1}\"{2}>", f.Address, styleID < 0 ? 0 : styleID, GetCellType(resultValue, true));
+								cache.AppendFormat("<f>{0}</f>{1}</c>", ConvertUtil.ExcelEscapeString(f.Formula), GetFormulaValue(resultValue));
 							}
 						}
 					}
-					else if (formula != null && formula.ToString() != "")
+					else if (!string.IsNullOrEmpty(formula?.ToString()))
 					{
-						cache.AppendFormat("<c r=\"{0}\" s=\"{1}\"{2}>", cse.CellAddress, styleID < 0 ? 0 : styleID, GetCellType(v, true));
-						cache.AppendFormat("<f>{0}</f>{1}</c>", ConvertUtil.ExcelEscapeString(formula.ToString()), GetFormulaValue(v));
+						object resultValue = this.TryGetTypedValue(v, out resultValue) ? resultValue : v;
+						cache.AppendFormat("<c r=\"{0}\" s=\"{1}\"{2}>", cse.CellAddress, styleID < 0 ? 0 : styleID, GetCellType(resultValue, true));
+						cache.AppendFormat("<f>{0}</f>{1}</c>", ConvertUtil.ExcelEscapeString(formula.ToString()), GetFormulaValue(resultValue));
 					}
 					else
 					{
@@ -4467,13 +4468,10 @@ namespace OfficeOpenXml
 								else
 									v = string.Empty;
 							}
-							eErrorType valueErrorType = default(eErrorType);
-							if (v.GetType().IsPrimitive || v is double || v is decimal || v is DateTime || v is TimeSpan || v is ExcelErrorValue 
-								|| (v is string stringValue && ExcelErrorValue.Values.TryGetErrorType(stringValue, out valueErrorType)))
+							if (this.TryGetTypedValue(v, out object resultValue))
 							{
-								v = valueErrorType == default(eErrorType) ? v : ExcelErrorValue.Create(valueErrorType);
-								cache.AppendFormat("<c r=\"{0}\" s=\"{1}\"{2}>", cse.CellAddress, styleID < 0 ? 0 : styleID, GetCellType(v));
-								cache.AppendFormat("{0}</c>", GetFormulaValue(v));
+								cache.AppendFormat("<c r=\"{0}\" s=\"{1}\"{2}>", cse.CellAddress, styleID < 0 ? 0 : styleID, GetCellType(resultValue));
+								cache.AppendFormat("{0}</c>", GetFormulaValue(resultValue));
 							}
 							else
 							{
@@ -4512,6 +4510,19 @@ namespace OfficeOpenXml
 			cache.Append("</sheetData>");
 			sw.Write(cache.ToString());
 			sw.Flush();
+		}
+
+		private bool TryGetTypedValue(object v, out object resultValue)
+		{
+			resultValue = null;
+			eErrorType valueErrorType = default(eErrorType);
+			if (v?.GetType()?.IsPrimitive == true || v is double || v is decimal || v is DateTime || v is TimeSpan || v is ExcelErrorValue
+				|| (v is string stringValue && ExcelErrorValue.Values.TryGetErrorType(stringValue, out valueErrorType)))
+			{
+				resultValue = valueErrorType == default(eErrorType) ? v : ExcelErrorValue.Create(valueErrorType);
+				return true;
+			}
+			return false;
 		}
 
 		// get StyleID without cell style for UpdateRowCellData
