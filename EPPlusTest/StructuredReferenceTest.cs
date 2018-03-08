@@ -93,6 +93,24 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		public void StructuredReferenceWithTableAndColumnNoBrackets()
+		{
+			var structuredReference = new StructuredReference("MyTable[[#all],MyColumn]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("MyColumn", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.All, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceWithTableAndColumnNoBracketsFirst()
+		{
+			var structuredReference = new StructuredReference("MyTable[MyColumn,[#data]]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("MyColumn", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
 		public void StructuredReferenceWithTableAndColumnAllIgnoreCase()
 		{
 			var structuredReference = new StructuredReference("MyTable[[#ALL],[MyColumn]]");
@@ -280,6 +298,33 @@ namespace EPPlusTest
 			Assert.AreEqual("MyTable", structuredReference.TableName);
 			Assert.AreEqual("!|\\;`]  ,;:.ss[", structuredReference.StartColumn);
 			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceSpecialCharactersInColumnNested()
+		{
+			var structuredReference = new StructuredReference("MyTable[[!|\\;`']  ,;:.ss'[]]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("!|\\;`]  ,;:.ss[", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceSpecialCharactersInColumnWithWhitespace()
+		{
+			var structuredReference = new StructuredReference("MyTable[ \t [#data]  \t  , \t [!|\\;`']  ,;:.ss'[]]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("!|\\;`]  ,;:.ss[", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
+		}
+
+		[TestMethod]
+		public void StructuredReferenceWithMultipleSpecifiersWithWhitespace()
+		{
+			var structuredReference = new StructuredReference("MyTable[\t[#Headers]   ,\t [#Data] ,\t     [MyColumn]]");
+			Assert.AreEqual("MyTable", structuredReference.TableName);
+			Assert.AreEqual("MyColumn", structuredReference.StartColumn);
+			Assert.AreEqual(ItemSpecifiers.Headers | ItemSpecifiers.Data, structuredReference.ItemSpecifiers);
 		}
 
 		[TestMethod]

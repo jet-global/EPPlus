@@ -63,13 +63,12 @@ namespace OfficeOpenXml
 				tableName.Append(currentChar);
 				currentChar = letters[currentIndex++];
 			} while (currentChar != '[');
+			this.MovePastWhitespace(letters, ref currentIndex);
 			this.TableName = tableName.ToString();
-			// If there is no specifier then only a single bracket exists
-			if (letters[currentIndex] != '[')
-				currentIndex--;
+			bool structuredReferenceIsSingleComponent = !Regex.IsMatch(new string(letters.Skip(currentIndex).ToArray()), "[^']\\[");
 			while (currentIndex < letters.Length)
 			{
-				var component = this.BuildComponent(letters, ref currentIndex);
+				var component = this.BuildComponent(letters, ref currentIndex, structuredReferenceIsSingleComponent);
 				switch (component.ToLower())
 				{
 					case "#all":
@@ -94,7 +93,7 @@ namespace OfficeOpenXml
 							this.EndColumn = component;
 						break;
 				}
-				currentIndex++;
+				this.MoveToNextComponent(letters, ref currentIndex);
 			}
 			// Set default specifiers if none were specified
 			if (this.ItemSpecifiers == default(ItemSpecifiers))
@@ -128,19 +127,43 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Private Methods
-		private string BuildComponent(char[] letters, ref int currentIndex)
+		private void MovePastWhitespace(char[] letters, ref int currentIndex)
 		{
-			var letter = letters[currentIndex++];
-			if (letter != '[')
-				throw new ArgumentException(StructuredReference.MalformedExceptionMessage);
+			while (currentIndex < letters.Count() && char.IsWhiteSpace(letters[currentIndex]))
+			{
+				currentIndex++;
+			}
+		}
+
+		private void MoveToNextComponent(char[] letters, ref int currentIndex)
+		{
+			this.MovePastWhitespace(letters, ref currentIndex);
+			if (currentIndex < letters.Count() && (letters[currentIndex] == ',' || letters[currentIndex] == ':' || letters[currentIndex] == ']'))
+				currentIndex++;
+			this.MovePastWhitespace(letters, ref currentIndex);
+		}
+
+		private string BuildComponent(char[] letters, ref int currentIndex, bool structuredReferenceIsSingleComponent)
+		{
+			var letter = letters[currentIndex];
+			bool inBrackets = letter == '[';
+			if (inBrackets)
+				currentIndex++;
 			bool isEscaped = false;
 			const char escapeCharacter = '\'';
 			StringBuilder component = new StringBuilder();
 			for (; currentIndex < letters.Length; currentIndex++)
 			{
 				letter = letters[currentIndex];
+				// Stopping conditions
 				if (letter == ']' && !isEscaped)
 					break;
+				else if (!structuredReferenceIsSingleComponent && !inBrackets && letter == ',')
+					break;
+				// Error cases
+				if (!inBrackets && !isEscaped && (letter == '[' || letter == ']'))
+					throw new ArgumentException(StructuredReference.MalformedExceptionMessage);
+				// Building component
 				if (letter != escapeCharacter)
 				{
 					component.Append(letter);
