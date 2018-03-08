@@ -319,7 +319,7 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		public void StructuredReferenceWithMultipleSpecifiersWithWhitesoace()
+		public void StructuredReferenceWithMultipleSpecifiersWithWhitespace()
 		{
 			var structuredReference = new StructuredReference("MyTable[\t[#Headers]   ,\t [#Data] ,\t     [MyColumn]]");
 			Assert.AreEqual("MyTable", structuredReference.TableName);
