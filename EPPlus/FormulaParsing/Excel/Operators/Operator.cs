@@ -66,7 +66,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		private static IOperator myGreaterThanOrEqual;
 		private static IOperator myLessThan;
 		private static IOperator myLessThanOrEqual;
-		private static IOperator myPercent;
 		#endregion
 
 		/// <summary>

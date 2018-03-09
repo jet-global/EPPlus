@@ -388,6 +388,8 @@ namespace OfficeOpenXml
 		/// <param name="fixedFromColumn">Is the from column fixed?</param>
 		/// <param name="fixedToRow">Is the to row fixed?</param>
 		/// <param name="fixedToColumn">Is the to column fixed?</param>
+		/// <param name="isFullRow">Indicates whether the address spans a full row.</param>
+		/// <param name="isFullColumn">Indicates whether the address spans a full column.</param>
 		/// <returns></returns>
 		internal static bool GetRowColFromAddress(string CellAddress, out int FromRow, out int FromColumn, out int ToRow, out int ToColumn, out bool fixedFromRow, out bool fixedFromColumn, out bool fixedToRow, out bool fixedToColumn, out bool isFullRow, out bool isFullColumn)
 		{

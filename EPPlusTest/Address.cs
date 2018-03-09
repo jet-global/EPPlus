@@ -9,13 +9,6 @@ namespace EPPlusTest
 	[TestClass]
 	public class Address
 	{
-		public Address()
-		{
-			//
-			// TODO: Add constructor logic here
-			//
-		}
-
 		private TestContext testContextInstance;
 
 		/// <summary>
