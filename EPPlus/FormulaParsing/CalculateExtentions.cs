@@ -36,10 +36,16 @@ using System.Linq;
 using System.Threading;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Exceptions;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using OfficeOpenXml.Style;
 
 namespace OfficeOpenXml
 {
+	/// <summary>
+	/// A class that calculates a <see cref="ExcelWorksheet"/>, <see cref="ExcelRangeBase"/>, 
+	/// or formula string.
+	/// </summary>
 	public static class CalculationExtension
 	{
 		#region Public Static Methods
@@ -113,13 +119,14 @@ namespace OfficeOpenXml
 		/// </summary>
 		/// <param name="range">The range to be calculated.</param>
 		/// <param name="options">Settings for this calculation.</param>
-		public static void Calculate(this ExcelRangeBase range, ExcelCalculationOption options)
+		/// <param name="setResultStyle">Indicates whether or not to set the cell's style based on the calculation result.</param>
+		public static void Calculate(this ExcelRangeBase range, ExcelCalculationOption options, bool setResultStyle = false)
 		{
 			Init(range.myWorkbook);
 			var parser = range.myWorkbook.FormulaParser;
 			parser.InitNewCalc();
 			var dc = DependencyChainFactory.Create(range, options);
-			CalcChain(range.myWorkbook, parser, dc);
+			CalcChain(range.myWorkbook, parser, dc, setResultStyle);
 		}
 
 		/// <summary>
@@ -172,7 +179,7 @@ namespace OfficeOpenXml
 
 				CalcChain(worksheet.Workbook, parser, dc);
 
-				return parser.ParseCell(f.Tokens, worksheet.Name, row, column);
+				return parser.ParseCell(f.Tokens, worksheet.Name, row, column, out _);
 			}
 			catch (Exception ex)
 			{
@@ -182,7 +189,7 @@ namespace OfficeOpenXml
 		#endregion
 
 		#region Private Static Methods
-		private static void CalcChain(ExcelWorkbook wb, FormulaParser parser, DependencyChain dc)
+		private static void CalcChain(ExcelWorkbook wb, FormulaParser parser, DependencyChain dc, bool setResultSyle = false)
 		{
 			var debug = parser.Logger != null;
 			foreach (var ix in dc.CalcOrder)
@@ -191,14 +198,14 @@ namespace OfficeOpenXml
 				try
 				{
 					var ws = wb.Worksheets.GetBySheetID(item.SheetID);
-					var v = parser.ParseCell(item.Tokens, ws == null ? "" : ws.Name, item.Row, item.Column);
+					var v = parser.ParseCell(item.Tokens, ws == null ? "" : ws.Name, item.Row, item.Column, out DataType dataType);
 					if (v is IEnumerable enumerable && !(v is string))
 						v = enumerable.Cast<object>().FirstOrDefault();
-					SetValue(wb, item, v);
+					CalculationExtension.SetValue(wb, item, v);
+					if (setResultSyle)
+						CalculationExtension.SetStyle(wb, item, dataType);
 					if (debug)
-					{
 						parser.Logger.LogCellCounted();
-					}
 					Thread.Sleep(0);
 				}
 				catch (Exception ex) when ((ex is OperationCanceledException) == false)
@@ -238,6 +245,20 @@ namespace OfficeOpenXml
 				var sheet = workbook.Worksheets.GetBySheetID(item.SheetID);
 				sheet.SetValueInner(item.Row, item.Column, v);
 			}
+		}
+
+		private static void SetStyle(ExcelWorkbook workbook, FormulaCell item, DataType dataType)
+		{
+			var sheet = workbook.Worksheets.GetBySheetID(item.SheetID);
+			// TODO: Verify these number formats against what excel uses
+			if (dataType == DataType.Date)
+				sheet.Cells[item.Row, item.Column].Style.Numberformat.Format = ExcelNumberFormat.GetFromBuildInFromID(14);
+			else if (dataType == DataType.Time)
+				sheet.Cells[item.Row, item.Column].Style.Numberformat.Format = ExcelNumberFormat.GetFromBuildInFromID(21);
+			else if (dataType == DataType.Integer)
+				sheet.Cells[item.Row, item.Column].Style.Numberformat.Format = ExcelNumberFormat.GetFromBuildInFromID(1);
+			else if (dataType == DataType.Decimal)
+				sheet.Cells[item.Row, item.Column].Style.Numberformat.Format = ExcelNumberFormat.GetFromBuildInFromID(2);
 		}
 		#endregion
 	}
