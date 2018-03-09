@@ -250,7 +250,6 @@ namespace OfficeOpenXml
 		private static void SetStyle(ExcelWorkbook workbook, FormulaCell item, DataType dataType)
 		{
 			var sheet = workbook.Worksheets.GetBySheetID(item.SheetID);
-			// TODO: Verify these number formats against what excel uses
 			if (dataType == DataType.Date)
 				sheet.Cells[item.Row, item.Column].Style.Numberformat.Format = ExcelNumberFormat.GetFromBuildInFromID(14);
 			else if (dataType == DataType.Time)

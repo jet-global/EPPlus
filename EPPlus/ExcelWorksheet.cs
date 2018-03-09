@@ -2737,7 +2737,6 @@ namespace OfficeOpenXml
 			}
 
 			HashSet<ExcelChart> uniqueChartTypes = new HashSet<ExcelChart>();
-			string workbook, worksheet, address;
 			foreach (var sheet in this.Workbook.Worksheets)
 			{
 				foreach (ExcelDrawing drawing in sheet.Drawings)
