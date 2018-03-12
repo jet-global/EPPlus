@@ -2360,19 +2360,6 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Remove a specific relationship from the document.
-		/// </summary>
-		/// <param name="relID">The relationship to remove.</param>
-		internal void RemoveLegacyDrawingRel(string relID)
-		{
-			var n = this.WorksheetXml.DocumentElement.SelectSingleNode(string.Format("d:legacyDrawing[@r:id=\"{0}\"]", relID), NameSpaceManager);
-			if (n != null)
-			{
-				n.ParentNode.RemoveChild(n);
-			}
-		}
-
-		/// <summary>
 		/// Pre-process cells that use 1904-style dates.
 		/// </summary>
 		internal void UpdateCellsWithDate1904Setting()
@@ -3922,7 +3909,6 @@ namespace OfficeOpenXml
 						this.Part.DeleteRelationship(_comments.RelId);
 						this.Package.Package.DeletePart(_comments.Uri);
 					}
-					this.RemoveLegacyDrawingRel(this.VmlDrawingsComments.RelId);
 				}
 				else
 				{
@@ -3934,8 +3920,8 @@ namespace OfficeOpenXml
 						this.Part.CreateRelationship(UriHelper.GetRelativeUri(WorksheetUri, _comments.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/comments");
 					}
 					_comments.CommentXml.Save(_comments.Part.GetStream(FileMode.Create));
-					ExcelVmlDrawingCommentHelper.AddCommentDrawings(this, _comments);
 				}
+				ExcelVmlDrawingCommentHelper.AddCommentDrawings(this, _comments);
 			}
 		}
 

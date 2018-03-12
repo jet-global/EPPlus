@@ -40,6 +40,8 @@ namespace OfficeOpenXml.Drawing.Vml
 				{
 					vmlDocumentXml.RemoveChild(node);
 				}
+				if (commentCollection.Count > 0)
+					ExcelVmlDrawingCommentHelper.RemoveLegacyDrawingRel(sheet);
 			}
 			else
 			{
@@ -101,6 +103,18 @@ namespace OfficeOpenXml.Drawing.Vml
 			vml += $"<x:Column>{col - 1}</x:Column>";
 			vml += "</x:ClientData>";
 			node.InnerXml = vml;
+		}
+
+		private static void RemoveLegacyDrawingRel(ExcelWorksheet sheet)
+		{
+			var vmlNode = sheet.WorksheetXml.DocumentElement.SelectSingleNode("d:legacyDrawing/@r:id", sheet.NameSpaceManager);
+			if (sheet.Part.RelationshipExists(vmlNode.Value))
+			{
+				var rel = sheet.Part.GetRelationship(vmlNode.Value);
+				var n = sheet.WorksheetXml.DocumentElement.SelectSingleNode($"d:legacyDrawing[@r:id=\"{rel.Id}\"]", sheet.NameSpaceManager);
+				if (n != null)
+					n.ParentNode.RemoveChild(n);
+			}
 		}
 		#endregion
 	}
