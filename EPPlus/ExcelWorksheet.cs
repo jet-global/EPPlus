@@ -41,6 +41,7 @@ using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using DocumentFormat.OpenXml.Spreadsheet;
 using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.DataValidation;
@@ -4375,6 +4376,53 @@ namespace OfficeOpenXml
 			var cache = new StringBuilder();
 			cache.Append("<sheetData>");
 
+			var sheetData = new SheetData();
+			Row oxRow = null;
+			var valueEnumerator = _values.GetEnumerator(1, 0, ExcelPackage.MaxRows, ExcelPackage.MaxColumns);
+			while (valueEnumerator.MoveNext())
+			{
+				var value = valueEnumerator.Value;
+				if (value._value is ExcelRow excelRow)
+				{
+					if (oxRow != null)
+						sheetData.Append(oxRow);
+					oxRow = new Row
+					{
+						Hidden = excelRow.Hidden,
+						Height = excelRow.Height,
+						CustomHeight = excelRow.CustomHeight,
+						OutlineLevel = Convert.ToByte(excelRow.OutlineLevel),
+						Collapsed = excelRow.Collapsed,
+						ShowPhonetic = excelRow.Phonetic,
+						StyleIndex = Convert.ToUInt32(cellXfs[this.GetStyleInner(excelRow.Row, 0)].newID)
+					};
+				}
+				else
+				{
+					var cell = new Cell
+					{
+						CellReference = valueEnumerator.CellAddress,
+						DataType = CellValues.String,
+						CellValue = new CellValue(valueEnumerator.Value._value.ToString())
+					};
+					object formula = _formulas.GetValue(valueEnumerator.Row, valueEnumerator.Column);
+					if (formula is int)
+					{
+						// shared formula
+					}
+					else if (!string.IsNullOrEmpty(formula?.ToString()))
+					{
+						// has standard formula
+					}
+					else
+					{
+						// No formula
+					}
+					oxRow.AppendChild(cell);
+				}
+			}
+
+
 			////Set a value for cells with style and no value set.
 			//var cseStyle =CellStoreEnumeratorFactory<ExcelCoreValue>.GetNewEnumerator(_values, 0, 0, ExcelPackage.MaxRows, ExcelPackage.MaxColumns);
 			//foreach (var s in cseStyle)
@@ -4881,7 +4929,7 @@ namespace OfficeOpenXml
 			foreach (var stringAddress in originalAddress.ToString().Split(seperator))
 			{
 				var newAddress = this.Package.FormulaManager.UpdateFormulaReferences(stringAddress, -rows, -columns, rowFrom, columnFrom, this.Name, this.Name);
-				if(newAddress != Values.Ref)
+				if(newAddress != ExcelErrorValue.Values.Ref)
 					movedAddresses.Add(newAddress);
 			}
 			return string.Join(seperator.ToString(), movedAddresses);
