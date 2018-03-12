@@ -3919,50 +3919,22 @@ namespace OfficeOpenXml
 				{
 					if (_comments.Uri != null)
 					{
-						Part.DeleteRelationship(_comments.RelId);
+						this.Part.DeleteRelationship(_comments.RelId);
 						this.Package.Package.DeletePart(_comments.Uri);
 					}
-					RemoveLegacyDrawingRel(VmlDrawingsComments.RelId);
+					this.RemoveLegacyDrawingRel(this.VmlDrawingsComments.RelId);
 				}
 				else
 				{
 					if (_comments.Uri == null)
-					{
-						_comments.Uri = new Uri(string.Format(@"/xl/comments{0}.xml", SheetID), UriKind.Relative);
-					}
+						_comments.Uri = new Uri(string.Format(@"/xl/comments{0}.xml", this.SheetID), UriKind.Relative);
 					if (_comments.Part == null)
 					{
 						_comments.Part = this.Package.Package.CreatePart(_comments.Uri, "application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml", this.Package.Compression);
-						var rel = Part.CreateRelationship(UriHelper.GetRelativeUri(WorksheetUri, _comments.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/comments");
+						this.Part.CreateRelationship(UriHelper.GetRelativeUri(WorksheetUri, _comments.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/comments");
 					}
 					_comments.CommentXml.Save(_comments.Part.GetStream(FileMode.Create));
-				}
-			}
-
-			if (_vmlDrawings != null)
-			{
-				if (_vmlDrawings.Count == 0)
-				{
-					if (_vmlDrawings.Uri != null)
-					{
-						Part.DeleteRelationship(_vmlDrawings.RelId);
-						this.Package.Package.DeletePart(_vmlDrawings.Uri);
-					}
-				}
-				else
-				{
-					if (_vmlDrawings.Uri == null)
-					{
-						_vmlDrawings.Uri = XmlHelper.GetNewUri(this.Package.Package, @"/xl/drawings/vmlDrawing{0}.vml");
-					}
-					if (_vmlDrawings.Part == null)
-					{
-						_vmlDrawings.Part = this.Package.Package.CreatePart(_vmlDrawings.Uri, "application/vnd.openxmlformats-officedocument.vmlDrawing", this.Package.Compression);
-						var rel = Part.CreateRelationship(UriHelper.GetRelativeUri(WorksheetUri, _vmlDrawings.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/vmlDrawing");
-						SetXmlNodeString("d:legacyDrawing/@r:id", rel.Id);
-						_vmlDrawings.RelId = rel.Id;
-					}
-					_vmlDrawings.VmlDrawingXml.Save(_vmlDrawings.Part.GetStream(FileMode.Create));
+					ExcelVmlDrawingCommentHelper.AddCommentDrawings(this, _comments);
 				}
 			}
 		}

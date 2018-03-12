@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 
@@ -9,31 +8,115 @@ namespace EPPlusTest
 	[TestClass]
 	public class CommentsTest
 	{
-		[Ignore]
+		#region AddComment Tests
 		[TestMethod]
-		public void ReadExcelComments()
+		public void AddCommentTest()
 		{
-			var fi = new FileInfo(@"c:\temp\googleComments\Comments.excel.xlsx");
-			using (var excelPackage = new ExcelPackage(fi))
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
 			{
-				var sheet1 = excelPackage.Workbook.Worksheets.First();
-				Assert.AreEqual(2, sheet1.Comments.Count);
+				using (var package = new ExcelPackage())
+				{
+					var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+					var sheet2 = package.Workbook.Worksheets.Add("Sheet2");
+					sheet1.Cells[2, 2].Value = "testvalue1";
+					sheet1.Cells[2, 2].AddComment("Comment text", "an author");
+
+					sheet2.Cells[2, 2].Value = "testvalue2";
+					sheet2.Cells[2, 2].AddComment("Comment text 2", "another author");
+					Assert.AreEqual("Comment text", sheet1.Cells[2, 2].Comment.Text);
+					Assert.AreEqual("an author", sheet1.Cells[2, 2].Comment.Author);
+					Assert.AreEqual("Comment text 2", sheet2.Cells[2, 2].Comment.Text);
+					Assert.AreEqual("another author", sheet2.Cells[2, 2].Comment.Author);
+					package.SaveAs(tempFile);
+				}
+				using (var package = new ExcelPackage(tempFile))
+				{
+					var sheet1 = package.Workbook.Worksheets["Sheet1"];
+					var sheet2 = package.Workbook.Worksheets["Sheet2"];
+					Assert.AreEqual("Comment text", sheet1.Cells[2,2].Comment.Text);
+					Assert.AreEqual("an author", sheet1.Cells[2,2].Comment.Author);
+					Assert.AreEqual("Comment text 2", sheet2.Cells[2, 2].Comment.Text);
+					Assert.AreEqual("another author", sheet2.Cells[2, 2].Comment.Author);
+				}
 			}
-		}
-		[Ignore]
-		[TestMethod]
-		public void ReadGoogleComments()
-		{
-			var fi = new FileInfo(@"c:\temp\googleComments\Comments.google.xlsx");
-			using (var excelPackage = new ExcelPackage(fi))
+			finally
 			{
-				var sheet1 = excelPackage.Workbook.Worksheets.First();
-				Assert.AreEqual(2, sheet1.Comments.Count);
-				Assert.AreEqual("Note for column 'Address'.", sheet1.Comments[0].Text);
+				if (tempFile.Exists)
+					tempFile.Delete();
 			}
 		}
 
-		//[Ignore]
+		[TestMethod]
+		public void AddCommentAfterRowInsert()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var sheet = package.Workbook.Worksheets.Add("Sheet1");
+					sheet.Cells[2, 2].Value = "testdata";
+					sheet.Cells[2, 2].AddComment("testMessage1", "an author");
+					sheet.InsertRow(2, 1);
+					sheet.Cells[2, 2].AddComment("testMessage2", "another author");
+					package.SaveAs(tempFile);
+				}
+				using (var package = new ExcelPackage(tempFile))
+				{
+					var sheet = package.Workbook.Worksheets["Sheet1"];
+					Assert.AreEqual("testMessage2", sheet.Cells[2, 2].Comment.Text);
+					Assert.AreEqual("another author", sheet.Cells[2, 2].Comment.Author);
+					Assert.AreEqual("testMessage1", sheet.Cells[3, 2].Comment.Text);
+					Assert.AreEqual("an author", sheet.Cells[3, 2].Comment.Author);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+
+		[TestMethod]
+		public void AddCommentAfterRowDelete()
+		{
+			var tempFile = new FileInfo(Path.GetTempFileName());
+			if (tempFile.Exists)
+				tempFile.Delete();
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var sheet = package.Workbook.Worksheets.Add("Sheet1");
+					sheet.Cells[3, 3].Value = "testdata";
+					sheet.Cells[3, 3].AddComment("testMessage1", "an author");
+					sheet.DeleteRow(2, 1);
+					sheet.Cells[3, 3].AddComment("testMessage2", "another author");
+					package.SaveAs(tempFile);
+				}
+				using (var package = new ExcelPackage(tempFile))
+				{
+					var sheet = package.Workbook.Worksheets["Sheet1"];
+					Assert.AreEqual("testMessage1", sheet.Cells[2, 3].Comment.Text);
+					Assert.AreEqual("an author", sheet.Cells[2, 3].Comment.Author);
+					Assert.AreEqual("testMessage2", sheet.Cells[3, 3].Comment.Text);
+					Assert.AreEqual("another author", sheet.Cells[3, 3].Comment.Author);
+				}
+			}
+			finally
+			{
+				if (tempFile.Exists)
+					tempFile.Delete();
+			}
+		}
+		#endregion
+
+		#region Integration Tests
 		[TestMethod]
 		public void VisibilityComments()
 		{
@@ -66,7 +149,6 @@ namespace EPPlusTest
 						}
 					});
 					Assert.IsTrue(stylesDict.ContainsKey("visibility"));
-					//Assert.AreEqual("visible", stylesDict["visibility"]);
 					Assert.AreEqual("hidden", stylesDict["visibility"]);
 					Assert.IsFalse(a1.Comment.Visible);
 					pkg.Save();
@@ -81,5 +163,6 @@ namespace EPPlusTest
 				File.Delete(xlsxName);
 			}
 		}
+		#endregion
 	}
 }

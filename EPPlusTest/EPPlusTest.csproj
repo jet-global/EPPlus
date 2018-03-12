@@ -109,6 +109,7 @@
     <Compile Include="Drawing\Slicers\SlicerSelectionNodeTest.cs" />
     <Compile Include="Drawing\Slicers\TabularDataNodeTest.cs" />
     <Compile Include="Drawing\Slicers\TabularItemNodeTest.cs" />
+    <Compile Include="Drawing\Vml\ExcelVmlDrawingCommentHelperTest.cs" />
     <Compile Include="ExcelAddressTest.cs" />
     <Compile Include="ExcelCellBaseTest.cs" />
     <Compile Include="ExcelErrorValueTest.cs" />
