@@ -53,7 +53,8 @@ namespace OfficeOpenXml.Drawing.Vml
 		///  The <see cref="XmlNamespaceManager"/> for VML Drawings.
 		/// </summary>
 		internal static XmlNamespaceManager NameSpaceManager
-		{ get
+		{
+			get
 			{
 				if (myNamespaceManager == null)
 				{
