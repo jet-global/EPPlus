@@ -30,7 +30,6 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-27
  *******************************************************************************/
 using System.Xml;
-using OfficeOpenXml.Drawing.Vml;
 using OfficeOpenXml.Style;
 
 namespace OfficeOpenXml
@@ -38,13 +37,14 @@ namespace OfficeOpenXml
 	/// <summary>
 	/// Represents a comment on an excel cell.
 	/// </summary>
-	public class ExcelComment : ExcelVmlDrawingComment
+	public class ExcelComment
 	{
-		#region Properties
-		internal XmlHelper CommentHelper { get; }
+		#region Constants
+		private const string AUTHORS_PATH = "d:comments/d:authors";
+		private const string AUTHOR_PATH = "d:comments/d:authors/d:author";
+		#endregion
 
-		const string AUTHORS_PATH = "d:comments/d:authors";
-		const string AUTHOR_PATH = "d:comments/d:authors/d:author";
+		#region Properties
 		/// <summary>
 		/// Gets or sets the name of the Author of the comment.
 		/// </summary>
@@ -87,11 +87,7 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Gets or sets the Rich Text Collection.
 		/// </summary>
-		public ExcelRichTextCollection RichText
-		{
-			get;
-			set;
-		}
+		public ExcelRichTextCollection RichText { get; set; }
 
 		/// <summary>
 		/// Gets or sets the cell reference that specifies which cell this comment is associated with.
@@ -101,27 +97,24 @@ namespace OfficeOpenXml
 			get { return this.CommentHelper.GetXmlNodeString("@ref"); }
 			set
 			{
-				var a = new ExcelAddress(value);
-				var rows = a._fromRow - this.Range._fromRow;
-				var cols = a._fromCol - this.Range._fromCol;
 				this.Range.Address = value;
 				this.CommentHelper.SetXmlNodeString("@ref", value);
-
-				this.From.Row += rows;
-				this.To.Row += rows;
-
-				this.From.Column += cols;
-				this.To.Column += cols;
-
-				this.Row = this.Range._fromRow - 1;
-				this.Column = this.Range._fromCol - 1;
 			}
 		}
+
+		/// <summary>
+		/// Gets or sets the <see cref="ExcelRangeBase"/> that the comment refers to.
+		/// </summary>
+		public ExcelRangeBase Range { get; set; }
+
+		/// <summary>
+		/// Gets the <see cref="XmlHelper"/> for this <see cref="ExcelComment"/>.
+		/// </summary>
+		internal XmlHelper CommentHelper { get; }
 		#endregion
 
 		#region Constructors
-		internal ExcelComment(XmlNamespaceManager ns, XmlNode commentTopNode, ExcelRangeBase cell, XmlNode drawingTopNode = null)
-			 : base(null, cell, cell.Worksheet.VmlDrawingsComments.NameSpaceManager)
+		internal ExcelComment(XmlNamespaceManager ns, XmlNode commentTopNode, ExcelRangeBase cell)
 		{
 			this.CommentHelper = XmlHelperFactory.Create(ns, commentTopNode);
 			var textElem = commentTopNode.SelectSingleNode("d:text", ns);
@@ -130,9 +123,7 @@ namespace OfficeOpenXml
 				textElem = commentTopNode.OwnerDocument.CreateElement("text", ExcelPackage.schemaMain);
 				commentTopNode.AppendChild(textElem);
 			}
-			if (!cell.Worksheet.VmlDrawingsComments.ContainsKey(ExcelAddress.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)))
-				cell.Worksheet.VmlDrawingsComments.Add(cell, drawingTopNode);
-			this.TopNode = cell.Worksheet.VmlDrawingsComments[ExcelCellBase.GetCellID(cell.Worksheet.SheetID, cell.Start.Row, cell.Start.Column)].TopNode;
+			this.Range = cell;
 			this.RichText = new ExcelRichTextCollection(ns, textElem);
 		}
 		#endregion

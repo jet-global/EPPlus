@@ -404,7 +404,6 @@ namespace OfficeOpenXml
 		private ExcelNamedRangeCollection _names;
 		private ExcelSparklineGroups _sparklineGroups;
 		private double _defaultRowHeight = double.NaN;
-		private ExcelVmlDrawingCommentCollection _vmlDrawings = null;
 		private ExcelCommentCollection _comments = null;
 		private ExcelHeaderFooter _headerFooter;
 		private MergeCellsCollection _mergedCells = new MergeCellsCollection();
@@ -821,21 +820,6 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Vml drawings. underlaying object for comments
-		/// </summary>
-		internal ExcelVmlDrawingCommentCollection VmlDrawingsComments
-		{
-			get
-			{
-				if (_vmlDrawings == null)
-				{
-					CreateVmlCollection();
-				}
-				return _vmlDrawings;
-			}
-		}
-
-		/// <summary>
 		/// Gets this worksheet's VBA code module.
 		/// </summary>
 		public VBA.ExcelVBAModule CodeModule
@@ -874,10 +858,7 @@ namespace OfficeOpenXml
 			{
 				this.CheckSheetType();
 				if (this._comments == null)
-				{
-					this.CreateVmlCollection();
 					this._comments = new ExcelCommentCollection(this.Package, this, this.NameSpaceManager);
-				}
 				return this._comments;
 			}
 		}
@@ -1689,7 +1670,6 @@ namespace OfficeOpenXml
 				this._flags.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this._hyperLinks.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Comments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
-				this.VmlDrawingsComments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Names.Delete(rowFrom, 0, rows, 0, this);
 
 				this.AdjustFormulasRow(rowFrom, rows);
@@ -1776,7 +1756,6 @@ namespace OfficeOpenXml
 				this._flags.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._hyperLinks.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this.Comments.Delete(0, columnFrom, 0, columns);
-				this.VmlDrawingsComments.Delete(0, columnFrom, 0, columns);
 				this.Names.Delete(0, columnFrom, 0, columns, this);
 
 				this.AdjustFormulasColumn(columnFrom, columns);
@@ -2133,7 +2112,6 @@ namespace OfficeOpenXml
 			this._sharedFormulas = null;
 			this.SheetView = null;
 			this._tables = null;
-			this._vmlDrawings = null;
 			this._conditionalFormatting = null;
 			this._dataValidation = null;
 			this._x14dataValidation = null;
@@ -3159,26 +3137,6 @@ namespace OfficeOpenXml
 			else
 			{
 				return 15;   //Default Calibri 11
-			}
-		}
-
-		private void CreateVmlCollection()
-		{
-			var vmlNode = _worksheetXml.DocumentElement.SelectSingleNode("d:legacyDrawing/@r:id", NameSpaceManager);
-			if (vmlNode == null)
-			{
-				this._vmlDrawings = new ExcelVmlDrawingCommentCollection(this.Package, this, null);
-			}
-			else
-			{
-				if (this.Part.RelationshipExists(vmlNode.Value))
-				{
-					var rel = this.Part.GetRelationship(vmlNode.Value);
-					var vmlUri = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
-
-					_vmlDrawings = new ExcelVmlDrawingCommentCollection(this.Package, this, vmlUri);
-					_vmlDrawings.RelId = rel.Id;
-				}
 			}
 		}
 

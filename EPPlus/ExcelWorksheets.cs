@@ -183,10 +183,6 @@ namespace OfficeOpenXml
 				{
 					this.CopyComment(originalWorksheet, added);
 				}
-				else if (originalWorksheet.VmlDrawingsComments.Count > 0)
-				{
-					this.CopyVmlDrawing(originalWorksheet, added);
-				}
 
 				CopyHeaderFooterPictures(originalWorksheet, added);
 
@@ -981,47 +977,14 @@ namespace OfficeOpenXml
 
 		private void CopyComment(ExcelWorksheet originalWorksheet, ExcelWorksheet addedWorksheet)
 		{
-			//First copy the drawing XML
 			string xml = originalWorksheet.Comments.CommentXml.InnerXml;
 			var uriComment = new Uri(string.Format("/xl/comments{0}.xml", addedWorksheet.SheetID), UriKind.Relative);
-			if (this.Package.Package.PartExists(uriComment))
-			{
-				uriComment = XmlHelper.GetNewUri(this.Package.Package, "/xl/drawings/vmldrawing{0}.vml");
-			}
-
 			var part = this.Package.Package.CreatePart(uriComment, "application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml", this.Package.Compression);
-
 			StreamWriter streamDrawing = new StreamWriter(part.GetStream(FileMode.Create, FileAccess.Write));
 			streamDrawing.Write(xml);
 			streamDrawing.Flush();
-
 			//Add the relationship ID to the worksheet xml.
 			var commentRelation = addedWorksheet.Part.CreateRelationship(UriHelper.GetRelativeUri(addedWorksheet.WorksheetUri, uriComment), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/comments");
-
-			xml = originalWorksheet.VmlDrawingsComments.VmlDrawingXml.InnerXml;
-
-			var uriVml = new Uri(string.Format("/xl/drawings/vmldrawing{0}.vml", addedWorksheet.SheetID), UriKind.Relative);
-			if (this.Package.Package.PartExists(uriVml))
-			{
-				uriVml = XmlHelper.GetNewUri(this.Package.Package, "/xl/drawings/vmldrawing{0}.vml");
-			}
-
-			var vmlPart = this.Package.Package.CreatePart(uriVml, "application/vnd.openxmlformats-officedocument.vmlDrawing", this.Package.Compression);
-			StreamWriter streamVml = new StreamWriter(vmlPart.GetStream(FileMode.Create, FileAccess.Write));
-			streamVml.Write(xml);
-			streamVml.Flush();
-
-			var newVmlRel = addedWorksheet.Part.CreateRelationship(UriHelper.GetRelativeUri(addedWorksheet.WorksheetUri, uriVml), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/vmlDrawing");
-
-			//Add the relationship ID to the worksheet xml.
-			XmlElement e = addedWorksheet.WorksheetXml.SelectSingleNode("//d:legacyDrawing", this.NamespaceManager) as XmlElement;
-			if (e == null)
-			{
-				addedWorksheet.CreateNode("d:legacyDrawing");
-				e = addedWorksheet.WorksheetXml.SelectSingleNode("//d:legacyDrawing", this.NamespaceManager) as XmlElement;
-			}
-
-			e.SetAttribute("id", ExcelPackage.schemaRelationships, newVmlRel.Id);
 		}
 
 		private void CopySlicers(ExcelWorksheet originalWorksheet, ExcelWorksheet newWorksheet)
@@ -1164,30 +1127,6 @@ namespace OfficeOpenXml
 			newWorkbookSlicerCachesNode.AppendChild(newWorkbookSlicerCacheNode);
 			newWorkbookSlicerCacheNode.Attributes["r:id"].Value = slicerCacheRelationship.Id;
 			// We don't know the new PivotTableName yet, so updating that must done later, when PivotTables are copied.
-		}
-
-		private void CopyVmlDrawing(ExcelWorksheet originalSheet, ExcelWorksheet newSheet)
-		{
-			var xml = originalSheet.VmlDrawingsComments.VmlDrawingXml.OuterXml;
-			var vmlUri = new Uri(string.Format("/xl/drawings/vmlDrawing{0}.vml", newSheet.SheetID), UriKind.Relative);
-			var part = this.Package.Package.CreatePart(vmlUri, "application/vnd.openxmlformats-officedocument.vmlDrawing", this.Package.Compression);
-			using (var streamDrawing = new StreamWriter(part.GetStream(FileMode.Create, FileAccess.Write)))
-			{
-				streamDrawing.Write(xml);
-				streamDrawing.Flush();
-			}
-
-			//Add the relationship ID to the worksheet xml.
-			var vmlRelation = newSheet.Part.CreateRelationship(UriHelper.GetRelativeUri(newSheet.WorksheetUri, vmlUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/vmlDrawing");
-			var e = newSheet.WorksheetXml.SelectSingleNode("//d:legacyDrawing", this.NamespaceManager) as XmlElement;
-			if (e == null)
-			{
-				e = newSheet.WorksheetXml.CreateNode(XmlNodeType.Entity, "//d:legacyDrawing", this.NamespaceManager.LookupNamespace("d")) as XmlElement;
-			}
-			if (e != null)
-			{
-				e.SetAttribute("id", ExcelPackage.schemaRelationships, vmlRelation.Id);
-			}
 		}
 
 		private string CreateWorkbookRel(string Name, int sheetID, Uri uriWorksheet, bool isChart)

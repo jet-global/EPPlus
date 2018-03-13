@@ -213,7 +213,7 @@ namespace OfficeOpenXml
 				ExcelComment nextComment = this.Comments[Worksheet._commentsStore.GetValue(nextCommentRow, nextCommentColumn)];
 				nextComment.CommentHelper.TopNode.ParentNode.InsertBefore(element, nextComment.CommentHelper.TopNode);
 			}
-			ExcelComment comment = new ExcelComment(this.NameSpaceManager, element, cell, copyComment.TopNode);
+			ExcelComment comment = new ExcelComment(this.NameSpaceManager, element, cell);
 			comment.RichText = copyComment.RichText;
 			// Copy text styling.
 			comment.CommentHelper.TopNode.SelectSingleNode(".//d:text", this.NameSpaceManager).InnerXml = copyComment.CommentHelper.TopNode.SelectSingleNode(".//d:text", this.NameSpaceManager).InnerXml;
@@ -222,8 +222,6 @@ namespace OfficeOpenXml
 				author = Thread.CurrentPrincipal.Identity.Name;
 			comment.Reference = new ExcelAddress(cell._fromRow, cell._fromCol, cell._fromRow, cell._fromCol).Address;
 			comment.Author = author;
-			comment.Height = copyComment.Height;
-			comment.Width = copyComment.Width;
 			float rowMarginOffset = 0, columnMarginOffset = 0;
 			int rowDirection = comment.Range._fromRow.CompareTo(copyComment.Range._fromRow);
 			var fromRow = Math.Min(comment.Range._fromRow, copyComment.Range._fromRow);
@@ -239,8 +237,6 @@ namespace OfficeOpenXml
 			{
 				columnMarginOffset += (float)this.Worksheet.Column(i).Width;
 			}
-			comment.MarginTop = copyComment.MarginTop + (rowDirection * rowMarginOffset);
-			comment.MarginLeft = copyComment.MarginLeft + (columnDirection * columnMarginOffset);
 			this.Comments.Add(comment);
 			this.Worksheet._commentsStore.SetValue(cell._fromRow, cell._fromCol, this.Comments.Count - 1);
 			// Check if a value exists otherwise add one so it is saved when the cells collection is iterated.
@@ -256,7 +252,6 @@ namespace OfficeOpenXml
 		{
 			if (comment != null && this.Comments.Contains(comment))
 			{
-				comment.TopNode.ParentNode.RemoveChild(comment.TopNode); //Remove VML
 				comment.CommentHelper.TopNode.ParentNode.RemoveChild(comment.CommentHelper.TopNode); //Remove Comment
 				this.Comments.Remove(comment);
 			}
@@ -277,7 +272,7 @@ namespace OfficeOpenXml
 			ExcelAddress address = null;
 			foreach (ExcelComment comment in this.Comments)
 			{
-				address = new ExcelAddress(comment.Address);
+				address = new ExcelAddress(comment.Range);
 				if (fromCol > 0 && address._fromCol >= fromCol)
 				{
 					address = address.DeleteColumn(fromCol, columns);
@@ -325,7 +320,7 @@ namespace OfficeOpenXml
 		{
 			foreach (ExcelComment comment in this.Comments)
 			{
-				var address = new ExcelAddress(comment.Address);
+				var address = new ExcelAddress(comment.Range);
 				if (rows > 0 && address._fromRow >= fromRow)
 				{
 					comment.Reference = comment.Range.AddRow(fromRow, rows).Address;
