@@ -206,16 +206,9 @@ namespace EPPlusSamples
 			comment.Font.Bold = true;
 			var rt = comment.RichText.Add("This column contains the extensions.");
 			rt.Bold = false;
-			comment.AutoFit = true;
-
 			//Add a comment using the Comment collection
 			comment = ws.Comments.Add(ws.Cells["B3"], "This column contains the size of the files.", "JK");
 			//This sets the size and position. (The position is only when the comment is visible)
-			comment.From.Column = 7;
-			comment.From.Row = 3;
-			comment.To.Column = 16;
-			comment.To.Row = 8;
-			comment.BackgroundColor = Color.White;
 			comment.RichText.Add("\r\nTo format the numbers use the Numberformat-property like:\r\n");
 
 			ws.Cells["B3:B42"].Style.Numberformat.Format = "#,##0";

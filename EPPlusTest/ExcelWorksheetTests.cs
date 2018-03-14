@@ -13,7 +13,6 @@ using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.DataValidation;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Drawing.Chart;
-using OfficeOpenXml.Drawing.Vml;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
 using OfficeOpenXml.Table.PivotTable;
@@ -716,33 +715,17 @@ namespace EPPlusTest
 			comment.RichText[0].Bold = true;
 			comment.RichText[0].PreserveSpace = true;
 			var rt = comment.RichText.Add("Test comment");
-			comment.VerticalAlignment = eTextAlignVerticalVml.Center;
 			comment = ws.Comments.Add(ws.Cells["A2"], "Jan Källman\r\nAuthor\r\n1", "JK");
 
 			comment = ws.Comments.Add(ws.Cells["A1"], "Jan Källman\r\nAuthor\r\n2", "JK");
-			comment.AlternativeText = "Test of AlternetiveText2";
 			comment = ws.Comments.Add(ws.Cells["C2"], "Jan Källman\r\nAuthor\r\n3", "JK");
 			comment = ws.Comments.Add(ws.Cells["C1"], "Jan Källman\r\nAuthor\r\n5", "JK");
 			comment = ws.Comments.Add(ws.Cells["B1"], "Jan Källman\r\nAuthor\r\n7", "JK");
 
 			ws.Comments.Remove(ws.Cells["A2"].Comment);
-			//comment.HorizontalAlignment = eTextAlignHorizontalVml.Center;
-			//comment.Visible = true;
-			//comment.BackgroundColor = Color.Green;
-			//comment.To.Row += 4;
-			//comment.To.Column += 2;
-			//comment.LineStyle = eLineStyleVml.LongDash;
-			//comment.LineColor = Color.Red;
-			//comment.LineWidth = (Single)2.5;
-			//rt.Color = Color.Red;
-
 			var rt2 = ws.Cells["B2"].AddComment("Range Added Comment test test test test test test test test test test testtesttesttesttesttesttesttesttesttesttest", "Jan Källman");
-			ws.Cells["c3"].Comment.AutoFit = true;
-
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void Address()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("Address");
@@ -777,8 +760,6 @@ namespace EPPlusTest
 			namedStyle.Style.Font.Color.SetColor(Color.Blue);
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void Encoding()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("Encoding");
@@ -788,12 +769,12 @@ namespace EPPlusTest
 			ws.Cells["A4"].Value = "test" + (char)31;   //Bug issue 14689 //Fixed
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void WorksheetCopy()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("Copied Address", _pck.Workbook.Worksheets["Address"]);
 			var wsCopy = _pck.Workbook.Worksheets.Add("Copied Comment", _pck.Workbook.Worksheets["Comment"]);
+			Assert.AreEqual(6, _pck.Workbook.Worksheets["Comment"].Comments.Count);
+			Assert.AreEqual(6, wsCopy.Comments.Count);
 
 			ExcelPackage pck2 = new ExcelPackage();
 			pck2.Workbook.Worksheets.Add("Copy From other pck", _pck.Workbook.Worksheets["Address"]);
@@ -820,8 +801,6 @@ namespace EPPlusTest
 			pack.Save();
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void LoadFromCollectionTest()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("LoadFromCollection");
@@ -846,13 +825,11 @@ namespace EPPlusTest
 			ws.Cells["A15"].Value = ints;
 		}
 
-		//[TestMethod]
 		public void LoadFromEmptyCollectionTest()
 		{
 			if (_pck == null) _pck = new ExcelPackage();
 			var ws = _pck.Workbook.Worksheets.Add("LoadFromEmpyCollection");
 			List<TestDTO> listDTO = new List<TestDTO>(0);
-			//List<int> list = new List<int>(0);
 
 			ws.Cells["A1"].LoadFromCollection(listDTO, true);
 			ws.Cells["A5"].LoadFromCollection(listDTO, true, OfficeOpenXml.Table.TableStyles.Medium9, BindingFlags.Instance | BindingFlags.Instance, typeof(TestDTO).GetFields());
@@ -869,7 +846,6 @@ namespace EPPlusTest
 			if (_pck == null) _pck = new ExcelPackage();
 			var ws = _pck.Workbook.Worksheets.Add("LoadFromEmpyCollection");
 			List<TestDTO> listDTO = new List<TestDTO>(0) { new TestDTO() { Name = "Single" } };
-			//List<int> list = new List<int>(0);
 
 			var r = ws.Cells["A1"].LoadFromCollection(listDTO, true);
 			Assert.AreEqual(2, r.Rows);
@@ -900,7 +876,7 @@ namespace EPPlusTest
 			if (newFile.Exists)
 			{
 				newFile.Delete();  // ensures we create a new workbook
-										 //newFile = new FileInfo(dir + @"sample8.xlsx");
+				//newFile = new FileInfo(dir + @"sample8.xlsx");
 			}
 
 			ExcelPackage package = new ExcelPackage();
@@ -918,8 +894,6 @@ namespace EPPlusTest
 
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void HideTest()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("Hidden");
@@ -927,19 +901,14 @@ namespace EPPlusTest
 			ws.Hidden = eWorkSheetHidden.Hidden;
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void Hyperlink()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("HyperLinks");
 			var hl = new ExcelHyperLink("G1", "Till G1");
 			hl.ToolTip = "Link to cell G1";
 			ws.Cells["A1"].Hyperlink = hl;
-			//ws.Cells["A2"].Hyperlink = new ExcelHyperLink("mailto:ecsomany@google:huszar", UriKind.Absolute); //Invalid URL will throw an Exception
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void VeryHideTest()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("VeryHidden");
@@ -947,8 +916,6 @@ namespace EPPlusTest
 			ws.Hidden = eWorkSheetHidden.VeryHidden;
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void PrinterSettings()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("Sod/Hydroseed");
@@ -987,8 +954,6 @@ namespace EPPlusTest
 			ws.PrinterSettings.PaperSize = ePaperSize.A4;
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void StyleNameTest()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("StyleNameTest");
@@ -1012,8 +977,6 @@ namespace EPPlusTest
 			ws.Protection.IsProtected = true;
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void ValueError()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("ValueError");
@@ -1025,8 +988,6 @@ namespace EPPlusTest
 			TestContext.WriteLine(rt.Bold.ToString());
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void FormulaError()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("FormulaError");
@@ -1037,8 +998,6 @@ namespace EPPlusTest
 
 			ws = _pck.Workbook.Worksheets.Add("Sheet-RC1");
 			ws.Cells["A4"].FormulaR1C1 = "+ROUNDUP('Sheet-RC1'!RC[1]/10,0)*10";
-
-			//ws.Cells["B2:I2"].Formula = "";   //Error
 		}
 
 		[TestMethod, Ignore]
@@ -1051,8 +1010,6 @@ namespace EPPlusTest
 			_pck.SaveAs(new FileInfo("c:\\temp\\arrayformula.xlsx"));
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void PictureURL()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("Pic URL");
@@ -1405,8 +1362,6 @@ namespace EPPlusTest
 			}
 		}
 
-		//[Ignore]
-		//[TestMethod]
 		public void TableTest()
 		{
 			var ws = _pck.Workbook.Worksheets.Add("Table");

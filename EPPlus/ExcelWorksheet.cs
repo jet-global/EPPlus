@@ -404,7 +404,6 @@ namespace OfficeOpenXml
 		private ExcelNamedRangeCollection _names;
 		private ExcelSparklineGroups _sparklineGroups;
 		private double _defaultRowHeight = double.NaN;
-		private ExcelVmlDrawingCommentCollection _vmlDrawings = null;
 		private ExcelCommentCollection _comments = null;
 		private ExcelHeaderFooter _headerFooter;
 		private MergeCellsCollection _mergedCells = new MergeCellsCollection();
@@ -821,21 +820,6 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Vml drawings. underlaying object for comments
-		/// </summary>
-		internal ExcelVmlDrawingCommentCollection VmlDrawingsComments
-		{
-			get
-			{
-				if (_vmlDrawings == null)
-				{
-					CreateVmlCollection();
-				}
-				return _vmlDrawings;
-			}
-		}
-
-		/// <summary>
 		/// Gets this worksheet's VBA code module.
 		/// </summary>
 		public VBA.ExcelVBAModule CodeModule
@@ -874,10 +858,7 @@ namespace OfficeOpenXml
 			{
 				this.CheckSheetType();
 				if (this._comments == null)
-				{
-					this.CreateVmlCollection();
 					this._comments = new ExcelCommentCollection(this.Package, this, this.NameSpaceManager);
-				}
 				return this._comments;
 			}
 		}
@@ -1689,7 +1670,6 @@ namespace OfficeOpenXml
 				this._flags.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this._hyperLinks.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Comments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
-				this.VmlDrawingsComments.Delete(rowFrom, 0, rows, ExcelPackage.MaxColumns);
 				this.Names.Delete(rowFrom, 0, rows, 0, this);
 
 				this.AdjustFormulasRow(rowFrom, rows);
@@ -1776,7 +1756,6 @@ namespace OfficeOpenXml
 				this._flags.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this._hyperLinks.Delete(0, columnFrom, ExcelPackage.MaxRows, columns);
 				this.Comments.Delete(0, columnFrom, 0, columns);
-				this.VmlDrawingsComments.Delete(0, columnFrom, 0, columns);
 				this.Names.Delete(0, columnFrom, 0, columns, this);
 
 				this.AdjustFormulasColumn(columnFrom, columns);
@@ -2133,7 +2112,6 @@ namespace OfficeOpenXml
 			this._sharedFormulas = null;
 			this.SheetView = null;
 			this._tables = null;
-			this._vmlDrawings = null;
 			this._conditionalFormatting = null;
 			this._dataValidation = null;
 			this._x14dataValidation = null;
@@ -2357,19 +2335,6 @@ namespace OfficeOpenXml
 		internal void SetHFLegacyDrawingRel(string relID)
 		{
 			this.SetXmlNodeString("d:legacyDrawingHF/@r:id", relID);
-		}
-
-		/// <summary>
-		/// Remove a specific relationship from the document.
-		/// </summary>
-		/// <param name="relID">The relationship to remove.</param>
-		internal void RemoveLegacyDrawingRel(string relID)
-		{
-			var n = this.WorksheetXml.DocumentElement.SelectSingleNode(string.Format("d:legacyDrawing[@r:id=\"{0}\"]", relID), NameSpaceManager);
-			if (n != null)
-			{
-				n.ParentNode.RemoveChild(n);
-			}
 		}
 
 		/// <summary>
@@ -3175,26 +3140,6 @@ namespace OfficeOpenXml
 			}
 		}
 
-		private void CreateVmlCollection()
-		{
-			var vmlNode = _worksheetXml.DocumentElement.SelectSingleNode("d:legacyDrawing/@r:id", NameSpaceManager);
-			if (vmlNode == null)
-			{
-				this._vmlDrawings = new ExcelVmlDrawingCommentCollection(this.Package, this, null);
-			}
-			else
-			{
-				if (this.Part.RelationshipExists(vmlNode.Value))
-				{
-					var rel = this.Part.GetRelationship(vmlNode.Value);
-					var vmlUri = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
-
-					_vmlDrawings = new ExcelVmlDrawingCommentCollection(this.Package, this, vmlUri);
-					_vmlDrawings.RelId = rel.Id;
-				}
-			}
-		}
-
 		private void CreateXml()
 		{
 			this._worksheetXml = new XmlDocument();
@@ -3919,51 +3864,22 @@ namespace OfficeOpenXml
 				{
 					if (_comments.Uri != null)
 					{
-						Part.DeleteRelationship(_comments.RelId);
+						this.Part.DeleteRelationship(_comments.RelId);
 						this.Package.Package.DeletePart(_comments.Uri);
 					}
-					RemoveLegacyDrawingRel(VmlDrawingsComments.RelId);
 				}
 				else
 				{
 					if (_comments.Uri == null)
-					{
-						_comments.Uri = new Uri(string.Format(@"/xl/comments{0}.xml", SheetID), UriKind.Relative);
-					}
+						_comments.Uri = new Uri(string.Format(@"/xl/comments{0}.xml", this.SheetID), UriKind.Relative);
 					if (_comments.Part == null)
 					{
 						_comments.Part = this.Package.Package.CreatePart(_comments.Uri, "application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml", this.Package.Compression);
-						var rel = Part.CreateRelationship(UriHelper.GetRelativeUri(WorksheetUri, _comments.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/comments");
+						this.Part.CreateRelationship(UriHelper.GetRelativeUri(WorksheetUri, _comments.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/comments");
 					}
 					_comments.CommentXml.Save(_comments.Part.GetStream(FileMode.Create));
 				}
-			}
-
-			if (_vmlDrawings != null)
-			{
-				if (_vmlDrawings.Count == 0)
-				{
-					if (_vmlDrawings.Uri != null)
-					{
-						Part.DeleteRelationship(_vmlDrawings.RelId);
-						this.Package.Package.DeletePart(_vmlDrawings.Uri);
-					}
-				}
-				else
-				{
-					if (_vmlDrawings.Uri == null)
-					{
-						_vmlDrawings.Uri = XmlHelper.GetNewUri(this.Package.Package, @"/xl/drawings/vmlDrawing{0}.vml");
-					}
-					if (_vmlDrawings.Part == null)
-					{
-						_vmlDrawings.Part = this.Package.Package.CreatePart(_vmlDrawings.Uri, "application/vnd.openxmlformats-officedocument.vmlDrawing", this.Package.Compression);
-						var rel = Part.CreateRelationship(UriHelper.GetRelativeUri(WorksheetUri, _vmlDrawings.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/vmlDrawing");
-						SetXmlNodeString("d:legacyDrawing/@r:id", rel.Id);
-						_vmlDrawings.RelId = rel.Id;
-					}
-					_vmlDrawings.VmlDrawingXml.Save(_vmlDrawings.Part.GetStream(FileMode.Create));
-				}
+				ExcelVmlDrawingCommentHelper.AddCommentDrawings(this, _comments);
 			}
 		}
 

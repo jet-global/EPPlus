@@ -236,6 +236,7 @@
     <Compile Include="Drawing\Sparkline\ExcelSparklineGroup.cs" />
     <Compile Include="Drawing\Sparkline\ExcelSparklineGroups.cs" />
     <Compile Include="Drawing\Sparkline\SparklineEnums.cs" />
+    <Compile Include="Drawing\Vml\ExcelVmlDrawingCommentHelper.cs" />
     <Compile Include="ExcelChartsheet.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="ExternalReferenceCollection.cs" />
@@ -297,7 +298,6 @@
     <Compile Include="Drawing\ExcelPicture.cs" />
     <Compile Include="Drawing\Chart\ExcelRadarChartSerie.cs" />
     <Compile Include="Drawing\Vml\ExcelVmlDrawingPictureCollection.cs" />
-    <Compile Include="Drawing\Vml\ExcelVmlDrawingCommentCollection.cs" />
     <Compile Include="Drawing\Vml\ExcelVmlDrawingPicture.cs" />
     <Compile Include="Drawing\Vml\ExcelVmlDrawingBase.cs" />
     <Compile Include="Encryption\EncryptionHandler.cs" />
@@ -835,7 +835,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Drawing\Chart\ExcelLineChart.cs" />
-    <Compile Include="Drawing\Vml\ExcelVmlDrawingComment.cs" />
     <Compile Include="Drawing\Vml\ExcelVmlDrawingPosition.cs" />
     <Compile Include="Drawing\Vml\ExcelVmlDrawingBaseCollection.cs" />
     <Compile Include="ExcelAddress.cs" />

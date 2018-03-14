@@ -106,8 +106,6 @@ namespace OfficeOpenXml.Drawing.Vml
 			node.SetAttribute("id", id);
 			node.SetAttribute("o:type", "#_x0000_t75");
 			node.SetAttribute("style", string.Format("position:absolute;margin-left:0;margin-top:0;width:{0}pt;height:{1}pt;z-index:1", width.ToString(CultureInfo.InvariantCulture), height.ToString(CultureInfo.InvariantCulture)));
-			//node.SetAttribute("fillcolor", "#ffffe1");
-			//node.SetAttribute("insetmode", ExcelPackage.schemaMicrosoftOffice, "auto");
 
 			node.InnerXml = string.Format("<v:imagedata o:relid=\"\" o:title=\"{0}\"/><o:lock v:ext=\"edit\" rotation=\"t\"/>", Name);
 			return node;
@@ -130,34 +128,6 @@ namespace OfficeOpenXml.Drawing.Vml
 			{
 				return _images.Count;
 			}
-		}
-
-		int _nextID = 0;
-		/// <summary>
-		/// returns the next drawing id.
-		/// </summary>
-		/// <returns></returns>
-		internal string GetNewId()
-		{
-			if (_nextID == 0)
-			{
-				foreach (ExcelVmlDrawingComment draw in this)
-				{
-					if (draw.Id.Length > 3 && draw.Id.StartsWith("vml"))
-					{
-						int id;
-						if (int.TryParse(draw.Id.Substring(3, draw.Id.Length - 3), out id))
-						{
-							if (id > _nextID)
-							{
-								_nextID = id;
-							}
-						}
-					}
-				}
-			}
-			_nextID++;
-			return "vml" + _nextID.ToString();
 		}
 		#region IEnumerable Members
 
