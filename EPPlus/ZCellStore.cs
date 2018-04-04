@@ -1033,9 +1033,24 @@ namespace OfficeOpenXml
 							this.Pages[i] = null;
 						else
 						{
-							if (this.MinimumUsedIndex == this.MaximumIndex + 1)
-								this.MinimumUsedIndex = this.ReConstructIndex(i, this.Pages[i].MinimumUsedIndex);
+							this.MinimumUsedIndex = this.ReConstructIndex(i, this.Pages[i].MinimumUsedIndex);
+							break;
+						}
+					}
+				}
+				// Find the max index starting at the end in order to avoid enumerating
+				// pages that are likely to have data.
+				for (int i = this.PageSize - 1; i >= 0; --i)
+				{
+					var page = this.Pages[i];
+					if (page != null)
+					{
+						if (page.IsEmpty)
+							this.Pages[i] = null;
+						else
+						{
 							this.MaximumUsedIndex = this.ReConstructIndex(i, this.Pages[i].MaximumUsedIndex);
+							break;
 						}
 					}
 				}
