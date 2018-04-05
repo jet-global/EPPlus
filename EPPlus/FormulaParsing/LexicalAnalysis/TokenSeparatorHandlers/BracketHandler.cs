@@ -35,6 +35,8 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis.TokenSeparatorHandlers
 	{
 		public override bool Handle(char c, Token tokenSeparator, TokenizerContext context, ITokenIndexProvider tokenIndexProvider)
 		{
+			if (context.IsInString)
+				return false;
 			if (tokenSeparator.TokenType == TokenType.OpeningBracket)
 			{
 				context.AppendToCurrentToken(c);
