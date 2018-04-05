@@ -265,6 +265,18 @@ namespace EPPlusTest
 				Assert.AreEqual(ExcelErrorValue.Create(eErrorType.Value), sheet.Cells[2, 2].Value);
 			}
 		}
+
+		[TestMethod]
+		public void CalculateHandlesNestedBrackets()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("sheet");
+				worksheet.Cells["C3"].Formula = "=\"\"\"[Cust - Bill-to].[b\"&\"y Country City].[Country]\"\"\"";
+				worksheet.Cells["C3"].Calculate();
+				Assert.AreEqual("\"[Cust - Bill-to].[by Country City].[Country]\"", worksheet.Cells["C3"].Value);
+			}
+		}
 		#endregion
 
 		#region Private Methods
