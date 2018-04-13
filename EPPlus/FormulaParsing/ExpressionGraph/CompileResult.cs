@@ -34,144 +34,171 @@ using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
+	/// <summary>
+	/// Represents the resulting value of function compilation.
+	/// </summary>
 	public class CompileResult
 	{
-		private static CompileResult _empty = new CompileResult(null, DataType.Empty);
+		#region Class Variables
+		private double? myResultNumeric;
+		#endregion
 
+		#region Properties
+		/// <summary>
+		/// Gets an empty compile result.
+		/// </summary>
 		public static CompileResult Empty
 		{
-			get { return _empty; }
+			get { return EmptyResult; }
 		}
 
-		private double? _ResultNumeric;
+		/// <summary>
+		/// Gets the result of the <see cref="CompileResult"/>.
+		/// </summary>
+		public object Result { get; private set; }
 
-		public CompileResult(object result, DataType dataType)
-		{
-			Result = result;
-			DataType = dataType;
-		}
-
-		public CompileResult(eErrorType errorType)
-		{
-			Result = ExcelErrorValue.Create(errorType);
-			DataType = DataType.ExcelError;
-		}
-
-		public CompileResult(ExcelErrorValue errorValue)
-		{
-			Require.Argument(errorValue).IsNotNull("errorValue");
-			Result = errorValue;
-			DataType = DataType.ExcelError;
-		}
-
-		public object Result
-		{
-			get;
-			private set;
-		}
-
+		/// <summary>
+		/// Gets the result of the <see cref="CompileResult"/>, resolving range references if applicable.
+		/// </summary>
 		public object ResultValue
 		{
 			get
 			{
-				var r = Result as ExcelDataProvider.IRangeInfo;
-				if (r == null)
-				{
-					return Result;
-				}
+				if (this.Result is ExcelDataProvider.IRangeInfo rangeResult)
+					return rangeResult.GetValue(rangeResult.Address._fromRow, rangeResult.Address._fromCol);
 				else
-				{
-					return r.GetValue(r.Address._fromRow, r.Address._fromCol);
-				}
+					return this.Result;
 			}
 		}
 
+		/// <summary>
+		/// Gets the result of the <see cref="CompileResult"/> as a numeric value.
+		/// </summary>
 		public double ResultNumeric
 		{
 			get
 			{
 				// We assume that Result does not change unless it is a range.
-				if (_ResultNumeric == null)
+				if (myResultNumeric == null)
 				{
-					if (IsNumeric)
+					if (this.Result is DateTime)
+						myResultNumeric = ((DateTime)this.Result).ToOADate();
+					else if (this.IsNumeric)
+						myResultNumeric = this.Result == null ? 0 : Convert.ToDouble(this.Result);
+					else if (this.Result is TimeSpan)
+						myResultNumeric = DateTime.FromOADate(0).Add((TimeSpan)this.Result).ToOADate();
+					else if (this.Result is ExcelDataProvider.IRangeInfo)
 					{
-						_ResultNumeric = Result == null ? 0 : Convert.ToDouble(Result);
-					}
-					else if (Result is DateTime)
-					{
-						_ResultNumeric = ((DateTime)Result).ToOADate();
-					}
-					else if (Result is TimeSpan)
-					{
-						_ResultNumeric = DateTime.FromOADate(0).Add((TimeSpan)Result).ToOADate();
-					}
-					else if (Result is ExcelDataProvider.IRangeInfo)
-					{
-						var c = ((ExcelDataProvider.IRangeInfo)Result).FirstOrDefault();
-						if (c == null)
-						{
-							return 0;
-						}
-						else
-						{
-							return c.ValueDoubleLogical;
-						}
+						var c = ((ExcelDataProvider.IRangeInfo)this.Result).FirstOrDefault();
+						return c?.ValueDoubleLogical ?? 0;
 					}
 					// The IsNumericString and IsDateString properties will set _ResultNumeric for efficiency so we just need
 					// to check them here.
-					else if (!IsNumericString && !IsDateString)
-					{
-						_ResultNumeric = 0;
-					}
+					else if (!this.IsNumericString && !this.IsDateString)
+						myResultNumeric = 0;
 				}
-				return _ResultNumeric.Value;
+				return myResultNumeric.Value;
 			}
 		}
 
-		public DataType DataType
-		{
-			get;
-			private set;
-		}
+		/// <summary>
+		/// Gets the <see cref="DataType"/> of the <see cref="CompileResult"/>.
+		/// </summary>
+		public DataType DataType { get; private set; }
 
+		/// <summary>
+		/// Gets a value indicating whether the <see cref="CompileResult"/> is numeric.
+		/// </summary>
 		public bool IsNumeric
 		{
 			get
 			{
-				return DataType == DataType.Decimal || DataType == DataType.Integer || DataType == DataType.Empty || DataType == DataType.Boolean || DataType == DataType.Date;
+				return this.DataType == DataType.Decimal 
+					|| this.DataType == DataType.Boolean 
+					|| this.DataType == DataType.Integer 
+					|| this.DataType == DataType.Empty 
+					|| this.DataType == DataType.Date;
 			}
 		}
 
+		/// <summary>
+		/// Gets the result of the <see cref="CompileResult"/> as a numeric string.
+		/// </summary>
 		public bool IsNumericString
 		{
 			get
 			{
-				double result;
-				if (DataType == DataType.String && ConvertUtil.TryParseNumericString(Result, out result))
+				if (this.DataType == DataType.String && ConvertUtil.TryParseNumericString(this.Result, out var result))
 				{
-					_ResultNumeric = result;
+					myResultNumeric = result;
 					return true;
 				}
 				return false;
 			}
 		}
 
+		/// <summary>
+		/// Gets a value indicating whether the <see cref="CompileResult"/> is a date string.
+		/// </summary>
 		public bool IsDateString
 		{
 			get
 			{
-				DateTime result;
-				if (DataType == DataType.String && ConvertUtil.TryParseDateString(Result, out result))
+				if (this.DataType == DataType.String && ConvertUtil.TryParseDateString(this.Result, out var result))
 				{
-					_ResultNumeric = result.ToOADate();
+					myResultNumeric = result.ToOADate();
 					return true;
 				}
 				return false;
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether the <see cref="CompileResult"/> is a result of a subtotal.
+		/// </summary>
 		public bool IsResultOfSubtotal { get; set; }
 
+		/// <summary>
+		/// Gets or sets a value indicating whether the <see cref="CompileResult"/> is for a hidden cell.
+		/// </summary>
 		public bool IsHiddenCell { get; set; }
+
+		private static CompileResult EmptyResult { get; } = new CompileResult(null, DataType.Empty);
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Instantiates a new <see cref="CompileResult"/>.
+		/// </summary>
+		/// <param name="result">The result value.</param>
+		/// <param name="dataType">The type of the result value.</param>
+		public CompileResult(object result, DataType dataType)
+		{
+			this.Result = result;
+			this.DataType = dataType;
+		}
+
+		/// <summary>
+		/// Instantiates a new <see cref="CompileResult"/> for an error type.
+		/// </summary>
+		/// <param name="errorType">The error type.</param>
+		public CompileResult(eErrorType errorType)
+		{
+			this.Result = ExcelErrorValue.Create(errorType);
+			this.DataType = DataType.ExcelError;
+		}
+
+		/// <summary>
+		/// Instantiates a new <see cref="CompileResult"/> for an error value.
+		/// </summary>
+		/// <param name="errorValue">The <see cref="ExcelErrorValue"/> result.</param>
+		public CompileResult(ExcelErrorValue errorValue)
+		{
+			if (errorValue == null)
+				throw new ArgumentNullException(nameof(errorValue));
+			this.Result = errorValue;
+			this.DataType = DataType.ExcelError;
+		}
+		#endregion
 	}
 }
