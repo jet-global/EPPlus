@@ -95,6 +95,7 @@ namespace OfficeOpenXml
 						 ExcelPackage.schemaXsi);
 
 					_xmlPropertiesCore = GetXmlDocument(xml, _uriPropertiesCore, @"application/vnd.openxmlformats-package.core-properties+xml", @"http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties");
+					_xmlPropertiesCore.PreserveWhitespace = true;
 				}
 				return (_xmlPropertiesCore);
 			}
