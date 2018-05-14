@@ -6490,6 +6490,18 @@ namespace EPPlusTest
 				Assert.AreEqual($"'Venta diaria'!$I$9:$U$15", refAddress);
 			}
 		}
+
+		[TestMethod]
+		public void AddingAndSavingWorksheetDoesNotCreateVmlDrawings()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+				var sheetCopy = package.Workbook.Worksheets.Add("Sheet2", sheet1);
+				package.SaveAs(new FileInfo(@"C:\Users\ems\Downloads\tmp.xlsx"));
+				Assert.IsFalse(package.Package.TryGetPart(new Uri(@"/xl/drawings/vmlDrawing1.vml", UriKind.Relative), out var vmlDrawingsPart));
+			}
+		}
 		#endregion
 
 		#region AutoFilters Tests
