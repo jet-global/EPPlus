@@ -214,6 +214,34 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void MinIgnoresNonNumericReferencedStrings()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 2].Value = "abc";
+				worksheet.Cells[2, 3].Value = 123;
+				worksheet.Cells[2, 6].Formula = "MIN(B2,C2)";
+				worksheet.Calculate();
+				Assert.AreEqual(123d, worksheet.Cells[2, 6].Value);
+			}
+		}
+
+		[TestMethod]
+		public void MinWithEmptyValueReturnsCorrectValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[2, 3].Value = 123;
+				worksheet.Cells[2, 4].Value = 345;
+				worksheet.Cells[2, 6].Formula = "MIN(B2,C2,D2)";
+				worksheet.Calculate();
+				Assert.AreEqual(123d, worksheet.Cells[2, 6].Value);
+			}
+		}
+
+		[TestMethod]
 		public void MinWithIntegerInputReturnsCorrectValue()
 		{
 			var function = new Min();

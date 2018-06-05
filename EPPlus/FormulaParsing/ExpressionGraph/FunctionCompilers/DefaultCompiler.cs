@@ -44,6 +44,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 			this.Function.BeforeInvoke(context);
 			foreach (var child in children)
 			{
+				if (base.Function.ResolveArgumentsAsRange)
+					this.ConfigureExcelAddressExpressionToResolveAsRange(child.Children);
 				var compileResult = child.Compile();
 				if (compileResult.IsResultOfSubtotal)
 				{
