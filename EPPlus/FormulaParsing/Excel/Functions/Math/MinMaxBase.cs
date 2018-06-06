@@ -9,6 +9,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 	/// </summary>
 	public abstract class MinMaxBase : HiddenValuesHandlingFunction
 	{
+		#region Constructors
+		/// <summary>
+		/// Instantiates a new <see cref="MinMaxBase"/> base class.
+		/// </summary>
+		public MinMaxBase()
+		{
+			// Min/Max functions handle values differently depending on whether or not they
+			// originated from a range argument or a static argument, so the compiler must
+			// resolve all range arguments as such in order to allow us to distinguish between range
+			// and static values.
+			this.ResolveArgumentsAsRange = true;
+		}
+		#endregion
+
 		#region Protected Methods
 		/// <summary>
 		/// Coalesces the potentially numeric MIN/MAX-able values in the specified <paramref name="arguments"/>.
@@ -88,6 +102,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		private bool TryGetDoubleValue(object value, out double doubleValue)
 		{
 			doubleValue = 0;
+			if (value == null)
+				return false;
 			if ((value.GetType().IsPrimitive && value is bool == false) || value is decimal)
 				doubleValue = Convert.ToDouble(value);
 			else if (value is System.DateTime dateTimeArg)

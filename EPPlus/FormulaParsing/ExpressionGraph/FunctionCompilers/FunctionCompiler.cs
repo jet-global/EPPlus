@@ -28,22 +28,46 @@
  * ******************************************************************************
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
-using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 {
 	public abstract class FunctionCompiler
 	{
+		#region Properties
+		/// <summary>
+		/// Gets the function to compile.
+		/// </summary>
 		protected ExcelFunction Function { get; private set; }
+		#endregion
 
+		#region Constructors
+		/// <summary>
+		/// Default constructor for the <see cref="FunctionCompiler"/>.
+		/// </summary>
+		/// <param name="function">The <see cref="ExcelFunction"/> to compile.</param>
 		public FunctionCompiler(ExcelFunction function)
 		{
-			Require.That(function).Named("function").IsNotNull();
+			if (function == null)
+				throw new ArgumentNullException(nameof(function));
 			this.Function = function;
 		}
+		#endregion
 
+		#region Public Abstract Methods
+		/// <summary>
+		/// Compiles the function.
+		/// </summary>
+		/// <param name="children">The children of the function to compile.</param>
+		/// <param name="context">The context to compile within.</param>
+		/// <returns>A <see cref="CompileResult"/>.</returns>
+		public abstract CompileResult Compile(IEnumerable<Expression> children, ParsingContext context);
+		#endregion
+
+		#region Protected Methods
 		protected void BuildFunctionArguments(object result, DataType dataType, List<FunctionArgument> args)
 		{
 			if (result is IEnumerable<object> && !(result is ExcelDataProvider.IRangeInfo))
@@ -57,11 +81,24 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 				args.Add(new FunctionArgument(argList));
 			}
 			else
-			{
 				args.Add(new FunctionArgument(result, dataType));
-			}
 		}
 
-		public abstract CompileResult Compile(IEnumerable<Expression> children, ParsingContext context);
+		protected void ConfigureExcelAddressExpressionToResolveAsRange(IEnumerable<Expression> children)
+		{
+			// EPPlus handles operators as members of the child expression instead of as functions of their own.
+			// We want to exclude those children whose values are part of an operator expression (since they will be resolved by the operator).
+			if (children.Any(grandkid => grandkid.Operator != null))
+				return;
+			// Typically the Expressions will be FunctionArgumentExpressions, equivalent to the NimbusExcelFormulaCell,
+			// so any of their children will be the actual expression arguments to compile, most notably this will
+			// be the ExcelAddressExpression who's results we want to manipulate for resolving arguments.
+			var childrenToResolveAsRange = children.Where(child => child is ExcelAddressExpression);
+			foreach (ExcelAddressExpression excelAddress in childrenToResolveAsRange)
+			{
+				excelAddress.ResolveAsRange = true;
+			}
+		}
+		#endregion
 	}
 }

@@ -41,9 +41,11 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 		public override CompileResult Compile(IEnumerable<Expression> children, ParsingContext context)
 		{
 			var args = new List<FunctionArgument>();
-			this.Function.BeforeInvoke(context);
+			base.Function.BeforeInvoke(context);
 			foreach (var child in children)
 			{
+				if (base.Function.ResolveArgumentsAsRange)
+					base.ConfigureExcelAddressExpressionToResolveAsRange(child.Children);
 				var compileResult = child.Compile();
 				if (compileResult.IsResultOfSubtotal)
 				{
@@ -52,11 +54,9 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 					args.Add(arg);
 				}
 				else
-				{
-					this.BuildFunctionArguments(compileResult.Result, compileResult.DataType, args);
-				}
+					base.BuildFunctionArguments(compileResult.Result, compileResult.DataType, args);
 			}
-			return this.Function.Execute(args, context);
+			return base.Function.Execute(args, context);
 		}
 	}
 }

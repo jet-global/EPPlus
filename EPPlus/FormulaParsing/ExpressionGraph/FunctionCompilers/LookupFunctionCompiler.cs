@@ -29,7 +29,6 @@
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
 using System.Collections.Generic;
-using System.Linq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
@@ -45,8 +44,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 		/// Creates an instance of a <see cref="LookupFunctionCompiler"/>.
 		/// </summary>
 		/// <param name="function">The <see cref="ExcelFunction"/> to compile.</param>
-		public LookupFunctionCompiler(ExcelFunction function)
-			 : base(function) { }
+		public LookupFunctionCompiler(ExcelFunction function) : base(function) { }
 		#endregion
 
 		#region FunctionCompiler Overrides
@@ -70,24 +68,6 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph.FunctionCompilers
 				i++;
 			}
 			return base.Function.Execute(args, context);
-		}
-		#endregion
-
-		#region Private Methods
-		private void ConfigureExcelAddressExpressionToResolveAsRange(IEnumerable<Expression> children)
-		{
-			// EPPlus handles operators as members of the child expression instead of as functions of their own.
-			// We want to exclude those children whose values are part of an operator expression (since they will be resolved by the operator).
-			if (children.Any(grandkid => grandkid.Operator != null))
-				return;
-			// Typically the Expressions will be FunctionArgumentExpressions, equivalent to the NimbusExcelFormulaCell,
-			// so any of their children will be the actual expression arguments to compile, most notably this will
-			// be the ExcelAddressExpression who's results we want to manipulate for resolving arguments.
-			var childrenToResolveAsRange = children.Where(child => child is ExcelAddressExpression);
-			foreach (ExcelAddressExpression excelAddress in childrenToResolveAsRange)
-			{
-				excelAddress.ResolveAsRange = true;
-			}
 		}
 		#endregion
 	}
