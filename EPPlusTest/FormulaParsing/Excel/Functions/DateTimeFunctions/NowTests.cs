@@ -48,7 +48,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var result = func.Execute(args, this.ParsingContext);
 			Thread.Sleep(1);
 			var endTime = DateTime.Now;
-			var resultDate = DateTime.FromOADate((double)result.Result);
+			var resultDate = (DateTime)result.Result;
 			Assert.IsTrue(resultDate > startTime && resultDate < endTime);
 		}
 		#endregion

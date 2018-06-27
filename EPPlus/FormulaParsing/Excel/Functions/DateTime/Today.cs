@@ -46,7 +46,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>Today's date as an OADate.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			return this.CreateResult(System.DateTime.Today.ToOADate(), DataType.Date);
+			return this.CreateResult(System.DateTime.Today, DataType.Date);
 		}
 	}
 }

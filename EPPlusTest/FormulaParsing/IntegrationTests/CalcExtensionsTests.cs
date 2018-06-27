@@ -55,6 +55,11 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests
 				range.Calculate(calcOption, true);
 				Assert.AreEqual(14, range.Style.Numberformat.NumFmtID);
 
+				range.Formula = "TODAY() + 5";
+				range.Calculate(calcOption, true);
+				Assert.AreEqual(14, range.Style.Numberformat.NumFmtID);
+				Assert.AreEqual(DateTime.Today.AddDays(5), range.Value);
+
 				range.Formula = "TIME(14, 23, 15)";
 				range.Calculate(calcOption, true);
 				Assert.AreEqual(21, range.Style.Numberformat.NumFmtID);

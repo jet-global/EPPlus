@@ -75,8 +75,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				CompileResult add(CompileResult l, CompileResult r) => 
-					Operator.CalculateNumericalOperator(l, r, (ld, rd, dataType) => new CompileResult(ld + rd, dataType));
+				CompileResult add(CompileResult l, CompileResult r) =>
+					Operator.CalculateNumericalOperator(l, r, () => {
+						var dataType = Operator.ParseAdditiveOperatorDataType(l.DataType, r.DataType);
+						return new CompileResult(l.ResultNumeric + r.ResultNumeric, dataType);
+					});
 				return myPlus ?? (myPlus = new Operator(OperatorType.Plus, Operator.PrecedenceAddSubtract, add));
 			}
 		}
@@ -89,7 +92,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			get
 			{
 				CompileResult subtract(CompileResult l, CompileResult r) => 
-					Operator.CalculateNumericalOperator(l, r, (ld, rd, dataType) => new CompileResult(ld - rd, dataType));
+					Operator.CalculateNumericalOperator(l, r, () => {
+							var dataType = Operator.ParseAdditiveOperatorDataType(l.DataType, r.DataType);
+							return new CompileResult(l.ResultNumeric - r.ResultNumeric, dataType);
+						});
 				return myMinus ?? (myMinus = new Operator(OperatorType.Minus, Operator.PrecedenceAddSubtract, subtract));
 			}
 		}
@@ -102,7 +108,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			get
 			{
 				CompileResult multiply(CompileResult l, CompileResult r) => 
-					Operator.CalculateNumericalOperator(l, r, (ld, rd, dataType) => new CompileResult(ld * rd, dataType));
+					Operator.CalculateNumericalOperator(l, r, () => {
+						var dataType = Operator.ParseGeneralOperatorDataType(l.DataType, r.DataType);
+						return new CompileResult(l.ResultNumeric * r.ResultNumeric, dataType);
+					});
 				return myMultiply ?? (myMultiply = new Operator(OperatorType.Multiply, Operator.PrecedenceMultiplyDivide, multiply));
 			}
 		}
@@ -116,11 +125,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				CompileResult divide(CompileResult l, CompileResult r)
 				{
-					return 	Operator.CalculateNumericalOperator(l, r, (ld, rd, dataType) =>
+					return 	Operator.CalculateNumericalOperator(l, r, () =>
 					{
-						if (Math.Abs(rd) < double.Epsilon)
+						if (Math.Abs(r.ResultNumeric) < double.Epsilon)
 							return new CompileResult(eErrorType.Div0);
-						return new CompileResult(ld / rd, DataType.Decimal);
+						return new CompileResult(l.ResultNumeric / r.ResultNumeric, DataType.Decimal);
 					});
 				}
 				return myDivide ?? (myDivide = new Operator(OperatorType.Divide, Operator.PrecedenceMultiplyDivide, divide));
@@ -135,7 +144,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			get
 			{
 				CompileResult exponentiate(CompileResult l, CompileResult r) => 
-					Operator.CalculateNumericalOperator(l, r, (ld, rd, dataType) => new CompileResult(Math.Pow(ld, rd), dataType));
+					Operator.CalculateNumericalOperator(l, r, () => {
+						var dataType = Operator.ParseGeneralOperatorDataType(l.DataType, r.DataType);
+						return new CompileResult(Math.Pow(l.ResultNumeric, r.ResultNumeric), dataType);
+					});
 				return myExp ?? (myExp = new Operator(OperatorType.Exponentiation, Operator.PrecedenceExp, exponentiate));
 			}
 		}
@@ -303,37 +315,25 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		#endregion
 
 		#region Private Static Methods
-		private static CompileResult CalculateNumericalOperator(CompileResult left, CompileResult right, Func<double, double, DataType, CompileResult> operation)
+		private static CompileResult CalculateNumericalOperator(CompileResult left, CompileResult right, Func<CompileResult> operation)
 		{
 			if (left == null || right == null)
 				return new CompileResult(eErrorType.Value);
-			DataType leftType, rightType;
-			if (left.DataType == DataType.ExcelError)
+			else if (left.DataType == DataType.ExcelError)
 				return new CompileResult(left.Result as ExcelErrorValue);
-			else if (!Operator.TryGetNumericType(left, out leftType))
+			else if (!Operator.IsNumericType(left))
 				return new CompileResult(eErrorType.Value);
 			else if (right.DataType == DataType.ExcelError)
 				return new CompileResult(right.Result as ExcelErrorValue);
-			else if (!Operator.TryGetNumericType(right, out rightType))
+			else if (!Operator.IsNumericType(right))
 				return new CompileResult(eErrorType.Value);
-			DataType resultType = leftType == DataType.Integer && rightType == DataType.Integer ? DataType.Integer : DataType.Decimal;
-			return operation(left.ResultNumeric, right.ResultNumeric, resultType);
+			return operation();
 		}
 
-		private static bool TryGetNumericType(CompileResult result, out DataType dataType)
+		private static bool IsNumericType(CompileResult result)
 		{
-			if (result.DataType == DataType.Integer)
-			{
-				dataType = DataType.Integer;
-				return true;
-			}
-			else if (result.IsNumeric|| result.IsDateString || result.IsNumericString || result.Result is ExcelDataProvider.IRangeInfo)
-			{
-				dataType = DataType.Decimal;
-				return true;
-			}
-			dataType = DataType.Unknown;
-			return false;
+			return result.DataType == DataType.Integer || result.IsNumeric || result.IsDateString 
+				|| result.IsNumericString || result.Result is ExcelDataProvider.IRangeInfo;
 		}
 
 		private static CompileResult GetObjectWithDefaultValueThatMatchesTheOtherObjectType(CompileResult target, CompileResult other)
@@ -353,9 +353,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		private static CompileResult Compare(CompileResult left, CompileResult right, Func<int, bool> comparison)
 		{
 			if (Operator.EitherIsError(left, right, out ExcelErrorValue errorValue))
-			{
 				return new CompileResult(errorValue);
-			}
 			return new CompileResult(comparison(Operator.Compare(left, right)), DataType.Boolean);
 		}
 
@@ -423,6 +421,23 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			}
 			errorVal = null;
 			return false;
+		}
+
+		private static DataType ParseGeneralOperatorDataType(DataType leftType, DataType rightType)
+		{
+			return (leftType == DataType.Integer && rightType == DataType.Integer) ? DataType.Integer : DataType.Decimal;
+		}
+
+		private static DataType ParseAdditiveOperatorDataType(DataType leftType, DataType rightType)
+		{
+			DataType dataType;
+			if (leftType == DataType.Date || rightType == DataType.Date)
+				dataType = DataType.Date;
+			else if (leftType == DataType.Time || rightType == DataType.Time)
+				dataType = DataType.Time;
+			else
+				dataType = Operator.ParseGeneralOperatorDataType(leftType, rightType);
+			return dataType;
 		}
 		#endregion
 	}

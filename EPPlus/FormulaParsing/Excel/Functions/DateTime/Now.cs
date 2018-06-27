@@ -46,7 +46,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>The current date and time on the local computer as an OA Date.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			return this.CreateResult(System.DateTime.Now.ToOADate(), DataType.Date);
+			return this.CreateResult(System.DateTime.Now, DataType.Date);
 		}
 	}
 }
