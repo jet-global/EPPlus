@@ -6445,7 +6445,8 @@ namespace EPPlusTest
 		public void SaveIncludesOnlyThoseTablesThatAreNotDeleted()
 		{
 			var file = new FileInfo(Path.GetTempFileName());
-			file.Delete();
+			if (file.Exists)
+				file.Delete();
 			try
 			{
 				using (var package = new ExcelPackage(file))
@@ -6472,7 +6473,8 @@ namespace EPPlusTest
 			}
 			finally
 			{
-				file.Delete();
+				if (file.Exists)
+					file.Delete();
 			}
 		}
 
@@ -6494,12 +6496,22 @@ namespace EPPlusTest
 		[TestMethod]
 		public void AddingAndSavingWorksheetDoesNotCreateVmlDrawings()
 		{
-			using (var package = new ExcelPackage())
+			var file = new FileInfo(Path.GetTempFileName());
+			file.Delete();
+			try
 			{
-				var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
-				var sheetCopy = package.Workbook.Worksheets.Add("Sheet2", sheet1);
-				package.SaveAs(new FileInfo(@"C:\Users\ems\Downloads\tmp.xlsx"));
-				Assert.IsFalse(package.Package.TryGetPart(new Uri(@"/xl/drawings/vmlDrawing1.vml", UriKind.Relative), out var vmlDrawingsPart));
+				using (var package = new ExcelPackage())
+				{
+					var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+					var sheetCopy = package.Workbook.Worksheets.Add("Sheet2", sheet1);
+					package.SaveAs(file);
+					Assert.IsFalse(package.Package.TryGetPart(new Uri(@"/xl/drawings/vmlDrawing1.vml", UriKind.Relative), out _));
+				}
+			}
+			finally
+			{
+				if (file.Exists)
+					file.Delete();
 			}
 		}
 		#endregion
