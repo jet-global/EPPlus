@@ -44,14 +44,14 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		public void TodayShouldReturnAResult()
 		{
 			var result = _parser.Parse("Today()");
-			Assert.IsInstanceOfType(DateTime.FromOADate((double)result), typeof(DateTime));
+			Assert.IsInstanceOfType(result, typeof(DateTime));
 		}
 
 		[TestMethod]
 		public void NowShouldReturnAResult()
 		{
 			var result = _parser.Parse("now()");
-			Assert.IsInstanceOfType(DateTime.FromOADate((double)result), typeof(DateTime));
+			Assert.IsInstanceOfType(result, typeof(DateTime));
 		}
 
 		[TestMethod]

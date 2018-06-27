@@ -238,19 +238,20 @@ namespace EPPlusTest
 				var dateFormulaWithMath = "B2+1";
 				var quotedDateFormulaWithMath = $"\"{date.ToString("d")}\"+1";
 				var quotedDateReferenceFormulaWithMath = "C2+1";
-				var expectedDate = 41275.0; // January 1, 2013
-				var expectedDateWithMath = 41276.0; // January 2, 2013
+				var expectedDate = DateTime.FromOADate(41275.0); // January 1, 2013
+				var expectedDateDecimalWithMath = 41276.0;
+				var expectedDateWithMath = DateTime.FromOADate(expectedDateDecimalWithMath); // January 2, 2013
 				Assert.AreEqual(expectedDate, worksheet.Calculate(dateFormula));
 				Assert.AreEqual(expectedDateWithMath, worksheet.Calculate(dateFormulaWithMath));
-				Assert.AreEqual(expectedDateWithMath, worksheet.Calculate(quotedDateFormulaWithMath));
-				Assert.AreEqual(expectedDateWithMath, worksheet.Calculate(quotedDateReferenceFormulaWithMath));
+				Assert.AreEqual(expectedDateDecimalWithMath, worksheet.Calculate(quotedDateFormulaWithMath));
+				Assert.AreEqual(expectedDateDecimalWithMath, worksheet.Calculate(quotedDateReferenceFormulaWithMath));
 				var formulaCell = worksheet.Cells[2, 4];
 				formulaCell.Formula = dateFormulaWithMath;
 				formulaCell.Calculate();
 				Assert.AreEqual(expectedDateWithMath, formulaCell.Value);
 				formulaCell.Formula = quotedDateReferenceFormulaWithMath;
 				formulaCell.Calculate();
-				Assert.AreEqual(expectedDateWithMath, formulaCell.Value);
+				Assert.AreEqual(expectedDateDecimalWithMath, formulaCell.Value);
 			}
 		}
 

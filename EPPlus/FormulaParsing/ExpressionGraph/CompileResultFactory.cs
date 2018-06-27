@@ -58,7 +58,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 			if (obj is ExcelErrorValue)
 				return new CompileResult(obj, DataType.ExcelError);
 			if (obj is DateTime dateTimeValue)
-				return new CompileResult(dateTimeValue.ToOADate(), DataType.Date);
+				return new CompileResult(dateTimeValue, DataType.Date);
 			if (obj is IEnumerable && !(obj is string))
 				return new CompileResult(obj, DataType.Enumerable);
 			throw new ArgumentException("Non supported type " + obj.GetType().FullName);
