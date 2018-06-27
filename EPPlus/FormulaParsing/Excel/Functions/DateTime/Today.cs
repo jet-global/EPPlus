@@ -43,7 +43,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// </summary>
 		/// <param name="arguments">Not used, but needed for overriding the method.</param>
 		/// <param name="context">Not used, but needed for overriding the method.</param>
-		/// <returns>Today's date as an OADate.</returns>
+		/// <returns>Today's date as a <see cref="DateTime"/>.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			return this.CreateResult(System.DateTime.Today, DataType.Date);

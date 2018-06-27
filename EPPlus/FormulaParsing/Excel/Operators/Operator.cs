@@ -75,11 +75,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				CompileResult add(CompileResult l, CompileResult r) =>
-					Operator.CalculateNumericalOperator(l, r, () => {
-						var dataType = Operator.ParseAdditiveOperatorDataType(l.DataType, r.DataType);
-						return new CompileResult(l.ResultNumeric + r.ResultNumeric, dataType);
-					});
+				CompileResult add(CompileResult l, CompileResult r)
+				{
+					var dataType = Operator.ParseAdditiveOperatorDataType(l.DataType, r.DataType);
+					return Operator.CalculateNumericalOperator(l, r, () => new CompileResult(l.ResultNumeric + r.ResultNumeric, dataType));
+				}
 				return myPlus ?? (myPlus = new Operator(OperatorType.Plus, Operator.PrecedenceAddSubtract, add));
 			}
 		}
@@ -91,11 +91,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				CompileResult subtract(CompileResult l, CompileResult r) => 
-					Operator.CalculateNumericalOperator(l, r, () => {
-							var dataType = Operator.ParseAdditiveOperatorDataType(l.DataType, r.DataType);
-							return new CompileResult(l.ResultNumeric - r.ResultNumeric, dataType);
-						});
+				CompileResult subtract(CompileResult l, CompileResult r)
+				{
+					var dataType = Operator.ParseAdditiveOperatorDataType(l.DataType, r.DataType);
+					return Operator.CalculateNumericalOperator(l, r, () => new CompileResult(l.ResultNumeric - r.ResultNumeric, dataType));
+				} 
 				return myMinus ?? (myMinus = new Operator(OperatorType.Minus, Operator.PrecedenceAddSubtract, subtract));
 			}
 		}
@@ -107,11 +107,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				CompileResult multiply(CompileResult l, CompileResult r) => 
-					Operator.CalculateNumericalOperator(l, r, () => {
-						var dataType = Operator.ParseGeneralOperatorDataType(l.DataType, r.DataType);
-						return new CompileResult(l.ResultNumeric * r.ResultNumeric, dataType);
-					});
+				CompileResult multiply(CompileResult l, CompileResult r)
+				{
+					var dataType = Operator.ParseGeneralOperatorDataType(l.DataType, r.DataType);
+					return Operator.CalculateNumericalOperator(l, r, () => new CompileResult(l.ResultNumeric * r.ResultNumeric, dataType));
+				}
 				return myMultiply ?? (myMultiply = new Operator(OperatorType.Multiply, Operator.PrecedenceMultiplyDivide, multiply));
 			}
 		}
@@ -143,11 +143,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				CompileResult exponentiate(CompileResult l, CompileResult r) => 
-					Operator.CalculateNumericalOperator(l, r, () => {
-						var dataType = Operator.ParseGeneralOperatorDataType(l.DataType, r.DataType);
-						return new CompileResult(Math.Pow(l.ResultNumeric, r.ResultNumeric), dataType);
-					});
+				CompileResult exponentiate(CompileResult l, CompileResult r)
+				{
+					var dataType = Operator.ParseGeneralOperatorDataType(l.DataType, r.DataType);
+					return Operator.CalculateNumericalOperator(l, r, () => new CompileResult(Math.Pow(l.ResultNumeric, r.ResultNumeric), dataType));
+				}
 				return myExp ?? (myExp = new Operator(OperatorType.Exponentiation, Operator.PrecedenceExp, exponentiate));
 			}
 		}
@@ -182,9 +182,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			get
 			{
 				return myGreaterThan ??
-						 (myGreaterThan =
-							  new Operator(OperatorType.GreaterThan, PrecedenceComparison,
-									(l, r) => Compare(l, r, (compRes) => compRes > 0)));
+					(myGreaterThan = new Operator(
+						OperatorType.GreaterThan,
+						PrecedenceComparison,
+						(l, r) => Compare(l, r, (compRes) => compRes > 0)));
 			}
 		}
 
@@ -196,9 +197,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			get
 			{
 				return myEqualsTo ??
-						 (myEqualsTo =
-							  new Operator(OperatorType.Equals, PrecedenceComparison,
-									(l, r) => Compare(l, r, (compRes) => compRes == 0)));
+					(myEqualsTo = new Operator(
+						OperatorType.Equals,
+						PrecedenceComparison,
+						(l, r) => Compare(l, r, (compRes) => compRes == 0)));
 			}
 		}
 
@@ -210,9 +212,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			get
 			{
 				return myNotEqualsTo ??
-						 (myNotEqualsTo =
-							  new Operator(OperatorType.NotEqualTo, PrecedenceComparison,
-									(l, r) => Compare(l, r, (compRes) => compRes != 0)));
+					(myNotEqualsTo = new Operator(
+						OperatorType.NotEqualTo,
+						PrecedenceComparison,
+						(l, r) => Compare(l, r, (compRes) => compRes != 0)));
 			}
 		}
 
@@ -224,9 +227,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			get
 			{
 				return myGreaterThanOrEqual ??
-						 (myGreaterThanOrEqual =
-							  new Operator(OperatorType.GreaterThanOrEqual, PrecedenceComparison,
-									(l, r) => Compare(l, r, (compRes) => compRes >= 0)));
+					(myGreaterThanOrEqual = new Operator(
+						OperatorType.GreaterThanOrEqual,
+						PrecedenceComparison,
+						(l, r) => Compare(l, r, (compRes) => compRes >= 0)));
 			}
 		}
 
@@ -237,10 +241,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				return myLessThan ??
-						 (myLessThan =
-							  new Operator(OperatorType.LessThan, PrecedenceComparison,
-									(l, r) => Compare(l, r, (compRes) => compRes < 0)));
+				return myLessThan ?? 
+					(myLessThan = new Operator(
+						OperatorType.LessThan, 
+						PrecedenceComparison,
+						(l, r) => Compare(l, r, (compRes) => compRes < 0)));
 			}
 		}
 
@@ -251,7 +256,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 		{
 			get
 			{
-				return myLessThanOrEqual ?? (myLessThanOrEqual = new Operator(OperatorType.LessThanOrEqual, PrecedenceComparison, (l, r) => Compare(l, r, (compRes) => compRes <= 0)));
+				return myLessThanOrEqual ?? 
+					(myLessThanOrEqual = new Operator(
+						OperatorType.LessThanOrEqual, 
+						PrecedenceComparison, 
+						(l, r) => Compare(l, r, (compRes) => compRes <= 0)));
 			}
 		}
 
@@ -430,14 +439,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 
 		private static DataType ParseAdditiveOperatorDataType(DataType leftType, DataType rightType)
 		{
-			DataType dataType;
 			if (leftType == DataType.Date || rightType == DataType.Date)
-				dataType = DataType.Date;
+				return DataType.Date;
 			else if (leftType == DataType.Time || rightType == DataType.Time)
-				dataType = DataType.Time;
+				return DataType.Time;
 			else
-				dataType = Operator.ParseGeneralOperatorDataType(leftType, rightType);
-			return dataType;
+				return Operator.ParseGeneralOperatorDataType(leftType, rightType);
 		}
 		#endregion
 	}
