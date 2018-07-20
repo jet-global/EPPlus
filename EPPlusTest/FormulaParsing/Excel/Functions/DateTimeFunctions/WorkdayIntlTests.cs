@@ -442,7 +442,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new WorkdayIntl();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, null), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, null, null), this.ParsingContext);
 			Assert.AreEqual(42751.00, result.Result);
 		}
 
@@ -451,8 +451,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new WorkdayIntl();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result1 = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, "testString"), this.ParsingContext);
-			var result2 = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, ""), this.ParsingContext);
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, 1, "testString"), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, 1, ""), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result2.Result).Type);
 		}
@@ -462,7 +462,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new WorkdayIntl();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, -1), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, 1, -1), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 
@@ -509,7 +509,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new WorkdayIntl();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 5, 1), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 5, 1, 1), this.ParsingContext);
 			Assert.AreEqual(42744.00, result.Result);
 		}
 
@@ -815,7 +815,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
-		// The below Test Cases below involve the Weekend and Holiday Parameter
+		// The below Test Cases involve the Weekend and Holiday Parameter
 
 		[TestMethod]
 		public void WorkdayIntlWithWeekendAndOneHolidayReturnsCorrectResults()
