@@ -398,7 +398,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\TimeBaseFunction.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Today.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Weekday.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workday.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\DateTime\WorkdayIntl.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workdays\AdditionalHolidayDays.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workdays\HolidayWeekdays.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workdays\HolidayWeekdaysFactory.cs" />
