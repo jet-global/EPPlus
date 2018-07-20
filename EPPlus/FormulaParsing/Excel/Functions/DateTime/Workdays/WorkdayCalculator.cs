@@ -118,16 +118,5 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 			}
 			return new WorkdayCalculatorResult(workdaysCounted, calculatedResult.StartDate, endDate, direction);
 		}
-
-		/*public WorkdayCalculatorResult AdjustResultWithWeekend(WorkdayCalculatorResult calculatedResult, FunctionArgument weekend)
-		{
-			var startDate = calculatedResult.StartDate;
-			var endDate = calculatedResult.EndDate;
-			var direction = calculatedResult.Direction;
-			var workdaysCounted = calculatedResult.NumberOfWorkdays;
-			
-
-			return null;
-		}*/
 	}
 }

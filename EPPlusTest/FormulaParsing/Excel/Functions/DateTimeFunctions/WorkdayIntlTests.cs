@@ -415,7 +415,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var holidayDate2 = new DateTime(2016, 7, 8).ToOADate();
 			var expectedDate = new DateTime(2016, 6, 13).ToOADate();
 			var func = new WorkdayIntl();
-			var args = FunctionsHelper.CreateArgs(inputDate, -30, FunctionsHelper.CreateArgs(holidayDate1, holidayDate2));
+			var args = FunctionsHelper.CreateArgs(inputDate, -30, 1, FunctionsHelper.CreateArgs(holidayDate1, holidayDate2));
 			var result = func.Execute(args, this.ParsingContext);
 			Assert.AreEqual(expectedDate, result.Result);
 		}
@@ -429,7 +429,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["A1"].Value = new DateTime(2016, 7, 27).ToOADate();
 				ws.Cells["B1"].Value = new DateTime(2016, 7, 11).ToOADate();
 				ws.Cells["B2"].Value = new DateTime(2016, 7, 8).ToOADate();
-				ws.Cells["B3"].Formula = "WORKDAY(A1,-30, B1:B2)";
+				ws.Cells["B3"].Formula = "WORKDAY.INTL(A1,-30, 1, B1:B2)";
 				ws.Calculate();
 				var expectedDate = new DateTime(2016, 6, 13).ToOADate();
 				var actualDate = ws.Cells["B3"].Value;
@@ -470,7 +470,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void WorkdayWithHolidaysAsStringsReturnsCorrectValue()
 		{
 			var function = new WorkdayIntl();
-			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 41, "1/25/2017"), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 41, null, "1/25/2017"), this.ParsingContext);
 			Assert.AreEqual(42795.00, result.Result);
 		}
 
@@ -479,7 +479,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{ 
 			var function = new WorkdayIntl();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 41, "1-25-2017"), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 41, 1, "1-25-2017"), this.ParsingContext);
 			Assert.AreEqual(42795.00, result.Result);
 		}
 
@@ -491,7 +491,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			// this way, but here we parse the date normally (as if it were written as "1/2/2017", for example). 
 			var function = new WorkdayIntl();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 500, "3.30.2017"), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 500, 1, "3.30.2017"), this.ParsingContext);
 			Assert.AreEqual(43438.00, result.Result);
 		}
 
@@ -500,7 +500,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new WorkdayIntl();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 40, 0), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 40, 1, 0), this.ParsingContext);
 			Assert.AreEqual(42793.00, result.Result);
 		}
 
@@ -522,7 +522,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["A1"].Value = new DateTime(2017, 1, 2);
 				ws.Cells["B1"].Value = new DateTime(2017, 1, 20);
 				ws.Cells["B2"].Value = new DateTime(2017, 1, 25);
-				ws.Cells["B3"].Formula = "WORKDAY(A1,40, B1:B2)";
+				ws.Cells["B3"].Formula = "WORKDAY.INTL(A1,40,1,B1:B2)";
 				ws.Calculate();
 				var actualDate = ws.Cells["B3"].Value;
 				Assert.AreEqual(42795.00, actualDate);
@@ -538,14 +538,14 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["A1"].Value = "1/2/2017";
 				ws.Cells["B1"].Value = 5 / 4 / 2017;
 				ws.Cells["B2"].Value = 2 / 15 / 2017;
-				ws.Cells["B3"].Formula = "WORKDAY(A1,40, B1:B2)";
+				ws.Cells["B3"].Formula = "WORKDAY.INTL(A1,40,1,B1:B2)";
 				ws.Calculate();
 				var actualDate = ws.Cells["B3"].Value;
 				Assert.AreEqual(42793.00, actualDate);
 			}
 			var function = new WorkdayIntl();
 			var holiInput = 1 / 20 / 2017;
-			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 40, holiInput), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 40, 1, holiInput), this.ParsingContext);
 			Assert.AreEqual(42793.00, result.Result);
 		}
 
@@ -597,7 +597,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["B39"].Value = "3/15/2017";
 				ws.Cells["B40"].Value = "4/1/2017";
 				ws.Cells["B41"].Value = "5/4/2017";
-				ws.Cells["C1"].Formula = "WORKDAY(A1, 150, B1:B41)";
+				ws.Cells["C1"].Formula = "WORKDAY.INTL(A1, 150, 1, B1:B41)";
 				ws.Calculate();
 				Assert.AreEqual(42985.00, ws.Cells["C1"].Value);
 			}
@@ -651,7 +651,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["B39"].Value = new DateTime(2017, 3, 15).ToOADate();
 				ws.Cells["B40"].Value = new DateTime(2017, 4, 1).ToOADate();
 				ws.Cells["B41"].Value = new DateTime(2017, 5, 4).ToOADate();
-				ws.Cells["C1"].Formula = "WORKDAY(A1, 150, B1:B41)";
+				ws.Cells["C1"].Formula = "WORKDAY.INTL(A1, 150, 1, B1:B41)";
 				ws.Calculate();
 				Assert.AreEqual(42985.00, ws.Cells["C1"].Value);
 			}
@@ -706,8 +706,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new WorkdayIntl();
 			var inputDate = new DateTime(2018, 1, 1).ToOADate();
-			var expectedDate = new DateTime(2018, 2, 5).ToOADate();
-			var args = FunctionsHelper.CreateArgs(inputDate, 30, 11);
+			var expectedDate = new DateTime(2018, 1, 25).ToOADate();
+			var args = FunctionsHelper.CreateArgs(inputDate, 17, 3);
 			var result = function.Execute(args, this.ParsingContext);
 			Assert.AreEqual(expectedDate, result.Result);
 		}
@@ -841,7 +841,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				ws.Cells["B3"].Value = new DateTime(2018, 8, 19);
 				ws.Cells["C1"].Formula = "WORKDAY.INTL(A1, 23, 6, B1:B3)";
 				ws.Calculate();
-				Assert.AreEqual(43337, ws.Cells["C1"].Value);
+				Assert.AreEqual(43337.00, ws.Cells["C1"].Value);
 			}
 		}
 		#endregion
