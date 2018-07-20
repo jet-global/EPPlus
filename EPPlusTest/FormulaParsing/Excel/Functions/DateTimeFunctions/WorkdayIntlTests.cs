@@ -835,13 +835,13 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			using (var package = new ExcelPackage())
 			{
 				var ws = package.Workbook.Worksheets.Add("test");
-				ws.Cells[1, 1].Value = new DateTime(2018, 7, 20);
-				ws.Cells[2, 1].Value = new DateTime(2018, 7, 25);
-				ws.Cells[2, 2].Value = new DateTime(2018, 8, 5);
-				ws.Cells[2, 3].Value = new DateTime(2018, 8, 19);
-				ws.Cells[3, 1].Formula = "WORKDAY.INTL(A1, 23, 6, B1:B3)";
+				ws.Cells["A1"].Value = new DateTime(2018, 7, 20);
+				ws.Cells["B1"].Value = new DateTime(2018, 7, 25);
+				ws.Cells["B2"].Value = new DateTime(2018, 8, 5);
+				ws.Cells["B3"].Value = new DateTime(2018, 8, 19);
+				ws.Cells["C1"].Formula = "WORKDAY.INTL(A1, 23, 6, B1:B3)";
 				ws.Calculate();
-				Assert.AreEqual(43337, ws.Cells[3, 1].Value);
+				Assert.AreEqual(43337, ws.Cells["C1"].Value);
 			}
 		}
 		#endregion
