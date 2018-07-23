@@ -23,7 +23,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// </summary>
 		/// <param name="weekend">The user specified weekend code</param>
 		/// <returns>A calculator with Saturday and Sunday as default weekend days.</returns>
-		protected override WorkdayCalculator SetCalculator(object weekend)
+		protected override WorkdayCalculator GetCalculator(object weekend)
 		{
 			return new WorkdayCalculator();
 		}

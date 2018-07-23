@@ -116,7 +116,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		public void WorkdayIntlWithDateUsingPeriodsIntseadOfSlashesReturnsCorrectValue()
 		{
 			// Test case where the first parameter is a date written as a string but with '.' in place of the '/'.
-			// This functionality is different than that of Excell's. Excel normally returns a #VALUE! when this 
+			// This functionality is different than that of Excel's. Excel normally returns a #VALUE! when this 
 			// is entered into the function but here the date is parsed normally. 
 			var function = new WorkdayIntl();
 			var input = "1.2.2017";
@@ -209,7 +209,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlWithDateAsStringAndNegDayInputReturnsCorrectValue()
+		public void WorkdayIntlWithDateAsStringAndNegativeDayInputReturnsCorrectValue()
 		{
 			var function = new WorkdayIntl();
 			var inputDate = "1/2/2017";
@@ -218,7 +218,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlWithGenericStringAndNegDayInputReturnsPoundValue()
+		public void WorkdayIntlWithGenericStringAndNegativeDayInputReturnsPoundValue()
 		{
 			var function = new WorkdayIntl();
 			var inputDate1 = "testString";
@@ -230,7 +230,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlWithEmptyFirstParameterAndNegDateInputREturnsPoundNA()
+		public void WorkdayIntlWithEmptyFirstParameterAndNegativeDateInputREturnsPoundNA()
 		{
 			var function = new WorkdayIntl();
 			var result = function.Execute(FunctionsHelper.CreateArgs(null, -10), this.ParsingContext);
@@ -247,7 +247,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlWithDateUsingPeriodsIntseadOfSlashesAndNegDayInputReturnsCorrectValue()
+		public void WorkdayIntlWithDateUsingPeriodsIntseadOfSlashesAndNegativeDayInputReturnsCorrectValue()
 		{
 			// Test case where the second argument is negative and the first argument is the date as a string
 			// with '.' instead of '/'.
@@ -260,7 +260,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlWithNegFirstInputAndNegDateInputReturnsPoundNum()
+		public void WorkdayIntlWithNegativeFirstInputAndNegativeDateInputReturnsPoundNum()
 		{
 			var function = new WorkdayIntl();
 			var inputDate = -1;
@@ -269,7 +269,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlWithZeroFirstInputNegDateInputReturnsPoundNum()
+		public void WorkdayIntlWithZeroFirstInputNegativeDateInputReturnsPoundNum()
 		{
 			var function = new WorkdayIntl();
 			var result = function.Execute(FunctionsHelper.CreateArgs(0, -10), this.ParsingContext);
@@ -285,7 +285,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlDateWithSlashesFirstInputAndNegDateInputReturnsCorrectInput()
+		public void WorkdayIntlDateWithSlashesFirstInputAndNegativeDateInputReturnsCorrectInput()
 		{
 			var function = new WorkdayIntl();
 			var result = function.Execute(FunctionsHelper.CreateArgs("1-2-2017", -10), this.ParsingContext);

@@ -101,7 +101,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 						if (weekend is int && ArgToInt(functionArguments, 2) <= 0)
 							return new CompileResult(eErrorType.Num);
 
-						calculator = SetCalculator(weekend);
+						calculator = this.GetCalculator(weekend);
 
 						if (IsNumeric(weekend) && calculator == null)
 							return new CompileResult(eErrorType.Num);
@@ -134,19 +134,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				return new CompileResult(error.Value);
 		}
 
+		#region Protected Methods
 		/// <summary>
 		/// Execute returns the calculator with the given weekend days.
 		/// </summary>
 		/// <param name="weekend">The user specified weekend code that indicates the weekend</param>
 		/// <returns>The calculator with set weekend days.</returns>
-		protected virtual WorkdayCalculator SetCalculator(object weekend)
+		protected virtual WorkdayCalculator GetCalculator(object weekend)
 		{
 			var calculator = new WorkdayCalculator();
 			var weekdayFactory = new HolidayWeekdaysFactory();
 
 			if (weekend == null)
 			{
-				calculator = new WorkdayCalculator(weekdayFactory.Create(1));
+				int defaultWeekend = 1;
+				calculator = new WorkdayCalculator(weekdayFactory.Create(defaultWeekend));
 			}
 			else if (Regex.IsMatch(weekend.ToString(), "^[01]{7}"))
 			{
@@ -202,5 +204,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		{
 			return holidayIndex;
 		}
+		#endregion
 	}
 }
