@@ -806,7 +806,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntWithIncorrectStringLengthWeekendCodeReturnsPoundValue()
+		public void WorkdayIntlWithIncorrectStringLengthWeekendCodeReturnsPoundValue()
 		{
 			var function = new WorkdayIntl();
 			var inputDate = new DateTime(2019, 5, 7).ToOADate();

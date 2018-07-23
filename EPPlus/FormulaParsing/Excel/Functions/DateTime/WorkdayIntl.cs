@@ -85,7 +85,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				var workDateSerial = this.ArgToDecimal(arguments, 1);
 				var resultDate = System.DateTime.MinValue;
 				var calculator = new WorkdayCalculator();
-				var weekdayFactory = new HolidayWeekdaysFactory();
+				//var weekdayFactory = new HolidayWeekdaysFactory();
 
 				if (functionArguments.Length > 2)
 				{
@@ -94,33 +94,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					if (weekend is int && ArgToInt(functionArguments, 2) <= 0)
 						return new CompileResult(eErrorType.Num);
 
-					else if (weekend == null)
-					{
-						calculator = new WorkdayCalculator(weekdayFactory.Create(1));
-					}
-					else if (Regex.IsMatch(weekend.ToString(), "^[01]{7}"))
-					{
-						var weekendDayOfWeek = weekdayFactory.Create(weekend.ToString());
-
-						if (weekendDayOfWeek == null)
-							return new CompileResult(eErrorType.Value);
-
-						calculator = new WorkdayCalculator(weekendDayOfWeek);
-					}
-					else if (IsNumeric(weekend))
-					{
-						var holidayCode = Convert.ToInt32(weekend);
-						var weekendDayOfWeek = weekdayFactory.Create(holidayCode);
-
-						if (weekendDayOfWeek == null)
-							return new CompileResult(eErrorType.Num);
-
-						calculator = new WorkdayCalculator(weekendDayOfWeek);
-					}
-					else
-					{
+					calculator = setCalculator(weekend);
+					if (calculator == null)
 						return new CompileResult(eErrorType.Value);
-					}
 				}
 
 				var dateResult = calculator.CalculateWorkday(startDate, (int)workDateSerial);
@@ -147,6 +123,45 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			}
 			else
 				return new CompileResult(error.Value);
+		}
+
+		private WorkdayCalculator setCalculator(object weekend)
+		{
+			var calculator = new WorkdayCalculator();
+			var weekdayFactory = new HolidayWeekdaysFactory();
+
+			if (weekend == null)
+			{
+				calculator = new WorkdayCalculator(weekdayFactory.Create(1));
+			}
+			else if (Regex.IsMatch(weekend.ToString(), "^[01]{7}"))
+			{
+				var weekendDayOfWeek = weekdayFactory.Create(weekend.ToString());
+
+				if (weekendDayOfWeek == null)
+					//return new CompileResult(eErrorType.Value);
+					return null;
+
+				calculator = new WorkdayCalculator(weekendDayOfWeek);
+			}
+			else if (IsNumeric(weekend))
+			{
+				var holidayCode = Convert.ToInt32(weekend);
+				var weekendDayOfWeek = weekdayFactory.Create(holidayCode);
+
+				if (weekendDayOfWeek == null)
+					//return new CompileResult(eErrorType.Num);
+					return eErrorType.N;
+
+				calculator = new WorkdayCalculator(weekendDayOfWeek);
+			}
+			else
+			{
+				//return new CompileResult(eErrorType.Value);
+				return null;
+			}
+
+			return calculator;
 		}
 	}
 }
