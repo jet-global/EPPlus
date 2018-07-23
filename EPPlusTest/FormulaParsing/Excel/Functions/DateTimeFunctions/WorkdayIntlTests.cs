@@ -104,15 +104,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlWithDateNotAsStringReturnsCorrectValue()
-		{
-			var function = new WorkdayIntl();
-			var input = 1 / 2 / 2017;
-			var result = function.Execute(FunctionsHelper.CreateArgs(input, 5), this.ParsingContext);
-			Assert.AreEqual(6.00, result.Result);
-		}
-
-		[TestMethod]
 		public void WorkdayIntlWithDATEFunctionAsInputReturnsCorrectValue()
 		{
 			var function = new WorkdayIntl();
@@ -215,15 +206,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var inputDate = new DateTime(2017, 1, 2);
 			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
 			Assert.AreEqual(42723.00, result.Result);
-		}
-
-		[TestMethod]
-		public void WorkdayIntlWithDateNotAsStringAndNegDayInputReturnsPoundNum()
-		{
-			var function = new WorkdayIntl();
-			var inputDate = 1 / 2 / 2017;
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
@@ -330,16 +312,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var startDate = new DateTime(2017, 1, 1);
 			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput), this.ParsingContext);
 			Assert.AreEqual(102582.00, result.Result);
-		}
-
-		[TestMethod]
-		public void WorkdayIntlWithDayParameterWithNoQuotesReturnsCorrectValue()
-		{
-			var function = new WorkdayIntl();
-			var daysInput = 1 / 13 / 2017;
-			var startDate = new DateTime(2017, 1, 1);
-			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput), this.ParsingContext);
-			Assert.AreEqual(42736.00, result.Result);
 		}
 
 		[TestMethod]
@@ -527,26 +499,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				var actualDate = ws.Cells["B3"].Value;
 				Assert.AreEqual(42795.00, actualDate);
 			}
-		}
-
-		[TestMethod]
-		public void WorkdayIntlWithHolidayDateNotAsStringReturnsCorrectInput()
-		{
-			using (var package = new ExcelPackage())
-			{
-				var ws = package.Workbook.Worksheets.Add("test");
-				ws.Cells["A1"].Value = "1/2/2017";
-				ws.Cells["B1"].Value = 5 / 4 / 2017;
-				ws.Cells["B2"].Value = 2 / 15 / 2017;
-				ws.Cells["B3"].Formula = "WORKDAY.INTL(A1,40,1,B1:B2)";
-				ws.Calculate();
-				var actualDate = ws.Cells["B3"].Value;
-				Assert.AreEqual(42793.00, actualDate);
-			}
-			var function = new WorkdayIntl();
-			var holiInput = 1 / 20 / 2017;
-			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 40, 1, holiInput), this.ParsingContext);
-			Assert.AreEqual(42793.00, result.Result);
 		}
 
 		[TestMethod]

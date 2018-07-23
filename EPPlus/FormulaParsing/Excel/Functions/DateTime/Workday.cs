@@ -13,6 +13,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 	/// </summary>
 	public class Workday : WorkdayIntl
 	{
+		#region Properties
+		private int holidayIndex = 2;
+		#endregion
+
+		#region ExcelFunction Overrides
 		/// <summary>
 		/// Execute returns a calculator with default Saturday and Sunday as weekend.
 		/// </summary>
@@ -24,12 +29,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		}
 
 		/// <summary>
-		/// Execute returns a value dummy value for the weekend parameter.
+		/// Execute returns whether or not there is a weekend parameter.
 		/// </summary>
-		/// <returns>The value 0 (but can be any value except 2).</returns>
-		protected override int GetWeekendIndex()
+		/// <returns>False since Workday does not have a weekend parameter.</returns>
+		protected override bool WeekendSpecified(FunctionArgument[] functionArguments)
 		{
-			return 0;
+			return false;
 		}
 
 		/// <summary>
@@ -37,12 +42,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// </summary>
 		/// <param name="functionArguments">The array of parameters for function</param>
 		/// <returns>A boolean depending on whether or not the holiday parameter is given.</returns>
-		protected override bool HolidaysGiven(FunctionArgument[] functionArguments)
+		protected override bool HolidaysSpecified(FunctionArgument[] functionArguments)
 		{
-			if (functionArguments.Length > 2)
-				return true;
-			else
-				return false;
+			return functionArguments.Length > 2;
 		}
 
 		/// <summary>
@@ -51,7 +53,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>The index value 2 corresponding to holiday parameter index.</returns>
 		protected override int GetHolidayIndex()
 		{
-			return 2;
+			return holidayIndex;
 		}
+
+		#endregion
 	}
 }

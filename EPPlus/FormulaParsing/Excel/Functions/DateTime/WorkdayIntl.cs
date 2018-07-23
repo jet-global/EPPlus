@@ -40,6 +40,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 	/// </summary>
 	public class WorkdayIntl : ExcelFunction
 	{
+		#region Properties
+		private int weekendIndex = 2;
+		private int holidayIndex = 3;
+		#endregion
+
 		/// <summary>
 		/// Execute returns the date based on the user's input.
 		/// </summary>
@@ -89,10 +94,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 				if (functionArguments.Length > 2)
 				{
-					var weekendIndex = GetWeekendIndex();
 					var weekend = arguments.ElementAt(weekendIndex).Value;
 
-					if (weekendIndex == 2)
+					if (this.WeekendSpecified(functionArguments))
 					{
 						if (weekend is int && ArgToInt(functionArguments, 2) <= 0)
 							return new CompileResult(eErrorType.Num);
@@ -100,36 +104,26 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 						calculator = SetCalculator(weekend);
 
 						if (IsNumeric(weekend) && calculator == null)
-						{
 							return new CompileResult(eErrorType.Num);
-						}
 						else if (calculator == null)
-						{
 							return new CompileResult(eErrorType.Value);
-						}
 
 						dateResult = calculator.CalculateWorkday(startDate, (int)workDateSerial);
 					}
 				}
 
-				bool hasHolidays = HolidaysGiven(functionArguments);
-
-				if (hasHolidays)
+				if (this.HolidaysSpecified(functionArguments))
 				{
-					var holidayIndex = GetHolidayIndex();
-					for (int i = holidayIndex; i < functionArguments.Length; i++)
-					{ 
-						var holidayCandidate = arguments.ElementAt(i).Value;
-						bool isHolidayZero = (serialNumberCandidate is int holAsint && holAsint == 0);
+					var holidayCandidate = arguments.ElementAt(this.GetHolidayIndex()).Value;
+					bool isHolidayZero = (serialNumberCandidate is int holAsint && holAsint == 0);
 
-						if (holidayCandidate is int holAsInt && holAsInt < 0)
-							return new CompileResult(eErrorType.Num);
+					if (holidayCandidate is int holAsInt && holAsInt < 0)
+						return new CompileResult(eErrorType.Num);
 						
-						if (holidayCandidate is string && !ConvertUtil.TryParseDateString(holidayCandidate, out output))
-							return new CompileResult(eErrorType.Value);
+					if (holidayCandidate is string && !ConvertUtil.TryParseDateString(holidayCandidate, out output))
+						return new CompileResult(eErrorType.Value);
 
-						dateResult = calculator.AdjustResultWithHolidays(dateResult, functionArguments[holidayIndex]);
-					}
+					dateResult = calculator.AdjustResultWithHolidays(dateResult, functionArguments[this.GetHolidayIndex()]);
 				}
 
 				if (serialNumberIsZero)
@@ -182,12 +176,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		}
 
 		/// <summary>
-		/// Execute returns the index of the Weekend parameter.
+		/// Execute returns whether or not there is a weekend parameter.
 		/// </summary>
-		/// <returns>The index value 2 corresponding to the Weekend parameter.</returns>
-		protected virtual int GetWeekendIndex()
+		/// <returns>True if there are more than two parameters given, false otherwise.</returns>
+		protected virtual bool WeekendSpecified(FunctionArgument[] functionArguments)
 		{
-			return 2;
+			return functionArguments.Length > 2;
 		}
 
 		/// <summary>
@@ -195,12 +189,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// </summary>
 		/// <param name="functionArguments">The array of parameters for function</param>
 		/// <returns>A boolean depending on whether or not the holiday parameter is given.</returns>
-		protected virtual bool HolidaysGiven(FunctionArgument[] functionArguments)
+		protected virtual bool HolidaysSpecified(FunctionArgument[] functionArguments)
 		{
-			if (functionArguments.Length > 3)
-				return true;
-			else
-				return false;
+			return functionArguments.Length > 3;
 		}
 
 		/// <summary>
@@ -209,7 +200,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		/// <returns>Index value 3 corresponding to the holiday parameter index</returns>
 		protected virtual int GetHolidayIndex()
 		{
-			return 3;
+			return holidayIndex;
 		}
 	}
 }

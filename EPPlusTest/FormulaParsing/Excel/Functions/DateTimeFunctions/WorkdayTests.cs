@@ -78,15 +78,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayWithDateNotAsStringReturnsCorrectValue()
-		{
-			var function = new Workday();
-			var input = 1 / 2 / 2017;
-			var result = function.Execute(FunctionsHelper.CreateArgs(input, 5), this.ParsingContext);
-			Assert.AreEqual(6.00, result.Result);
-		}
-
-		[TestMethod]
 		public void WorkdayWithDATEFunctionAsInputReturnsCorrectValue()
 		{
 			var function = new Workday();
@@ -189,15 +180,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var inputDate = new DateTime(2017, 1, 2);
 			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
 			Assert.AreEqual(42723.00, result.Result);
-		}
-
-		[TestMethod]
-		public void WorkdayWithDateNotAsStringAndNegDayInputReturnsPoundNum()
-		{
-			var function = new Workday();
-			var inputDate = 1 / 2 / 2017;
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, -10), this.ParsingContext);
-			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 
 		[TestMethod]
@@ -307,16 +289,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayWithDayParameterWithNoQuotesReturnsCorrectValue()
-		{
-			var function = new Workday();
-			var daysInput = 1 / 13 / 2017;
-			var startDate = new DateTime(2017, 1, 1);
-			var result = function.Execute(FunctionsHelper.CreateArgs(startDate, daysInput), this.ParsingContext);
-			Assert.AreEqual(42736.00, result.Result);
-		}
-
-		[TestMethod]
 		public void WorkdayWithDayParameterAsGenericStringReturnsPoundValue()
 		{
 			var function = new Workday();
@@ -416,7 +388,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new Workday();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, null, null), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, null), this.ParsingContext);
 			Assert.AreEqual(42751.00, result.Result);
 		}
 
@@ -425,8 +397,8 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new Workday();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result1 = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, 1, "testString"), this.ParsingContext);
-			var result2 = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, 1, ""), this.ParsingContext);
+			var result1 = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, "testString"), this.ParsingContext);
+			var result2 = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, ""), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result1.Result).Type);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result2.Result).Type);
 		}
@@ -436,7 +408,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new Workday();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, 1, -1), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 10, -1), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Num, ((ExcelErrorValue)result.Result).Type);
 		}
 
@@ -483,7 +455,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		{
 			var function = new Workday();
 			var inputDate = new DateTime(2017, 1, 2);
-			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 5, 1, 1), this.ParsingContext);
+			var result = function.Execute(FunctionsHelper.CreateArgs(inputDate, 5, 1), this.ParsingContext);
 			Assert.AreEqual(42744.00, result.Result);
 		}
 
@@ -501,26 +473,6 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 				var actualDate = ws.Cells["B3"].Value;
 				Assert.AreEqual(42795.00, actualDate);
 			}
-		}
-
-		[TestMethod]
-		public void WorkdayWithHolidayDateNotAsStringReturnsCorrectInput()
-		{
-			using (var package = new ExcelPackage())
-			{
-				var ws = package.Workbook.Worksheets.Add("test");
-				ws.Cells["A1"].Value = "1/2/2017";
-				ws.Cells["B1"].Value = 5 / 4 / 2017;
-				ws.Cells["B2"].Value = 2 / 15 / 2017;
-				ws.Cells["B3"].Formula = "WORKDAY(A1,40,B1:B2)";
-				ws.Calculate();
-				var actualDate = ws.Cells["B3"].Value;
-				Assert.AreEqual(42793.00, actualDate);
-			}
-			var function = new Workday();
-			var holiInput = 1 / 20 / 2017;
-			var result = function.Execute(FunctionsHelper.CreateArgs("1/2/2017", 40, 1, holiInput), this.ParsingContext);
-			Assert.AreEqual(42793.00, result.Result);
 		}
 
 		[TestMethod]
