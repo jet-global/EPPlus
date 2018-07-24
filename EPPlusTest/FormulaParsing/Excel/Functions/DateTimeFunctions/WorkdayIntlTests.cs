@@ -113,7 +113,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlWithDateUsingPeriodsIntseadOfSlashesReturnsCorrectValue()
+		public void WorkdayIntlWithDateUsingPeriodsInsteadOfSlashesReturnsCorrectValue()
 		{
 			// Test case where the first parameter is a date written as a string but with '.' in place of the '/'.
 			// This functionality is different than that of Excel's. Excel normally returns a #VALUE! when this 
@@ -230,7 +230,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlWithEmptyFirstParameterAndNegativeDateInputREturnsPoundNA()
+		public void WorkdayIntlWithEmptyFirstParameterAndNegativeDateInputReturnsPoundNA()
 		{
 			var function = new WorkdayIntl();
 			var result = function.Execute(FunctionsHelper.CreateArgs(null, -10), this.ParsingContext);

@@ -69,7 +69,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 				tmpDate = tmpDate.AddDays(direction);
 				if (!_holidayWeekdays.IsHolidayWeekday(tmpDate)) workdaysCounted++;
 			}
-
 			return new WorkdayCalculatorResult(workdaysCounted, startDate, tmpDate, calcDirection);
 		}
 

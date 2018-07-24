@@ -71,7 +71,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 				case 17:
 					return new HolidayWeekdays(DayOfWeek.Saturday);
 				default:
-					//throw new ArgumentException("Invalid code supplied to HolidayWeekdaysFactory: " + code);
 					return null;
 			}
 		}

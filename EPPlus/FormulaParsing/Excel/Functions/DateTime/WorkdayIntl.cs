@@ -42,7 +42,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 	{
 		#region Properties
 		private int weekendIndex = 2;
-		private int holidayIndex = 3;
+		protected virtual int HolidayIndex { get; } = 3;
 		#endregion
 
 		/// <summary>
@@ -70,7 +70,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 			if (serialNumberIsZero || ConvertUtil.TryParseDateObject(serialNumberCandidate, out output, out eErrorType? error))
 			{
-				if (serialNumberCandidate is int && ArgToInt(functionArguments, 1) < 0)
+				if (serialNumberCandidate is int && this.ArgToInt(functionArguments, 1) < 0)
 					return new CompileResult(eErrorType.Num);
 
 				if (workDaysCandidate is string)
@@ -103,7 +103,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 						calculator = this.GetCalculator(weekend);
 
-						if (IsNumeric(weekend) && calculator == null)
+						if (this.IsNumeric(weekend) && calculator == null)
 							return new CompileResult(eErrorType.Num);
 						else if (calculator == null)
 							return new CompileResult(eErrorType.Value);
@@ -114,7 +114,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 				if (this.HolidaysSpecified(functionArguments))
 				{
-					var holidayCandidate = arguments.ElementAt(this.GetHolidayIndex()).Value;
+					var holidayCandidate = arguments.ElementAt(this.HolidayIndex).Value;
 					bool isHolidayZero = (serialNumberCandidate is int holAsint && holAsint == 0);
 
 					if (holidayCandidate is int holAsInt && holAsInt < 0)
@@ -123,7 +123,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 					if (holidayCandidate is string && !ConvertUtil.TryParseDateString(holidayCandidate, out output))
 						return new CompileResult(eErrorType.Value);
 
-					dateResult = calculator.AdjustResultWithHolidays(dateResult, functionArguments[this.GetHolidayIndex()]);
+					dateResult = calculator.AdjustResultWithHolidays(dateResult, functionArguments[this.HolidayIndex]);
 				}
 
 				if (serialNumberIsZero)
@@ -159,7 +159,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 
 				calculator = new WorkdayCalculator(weekendDayOfWeek);
 			}
-			else if (IsNumeric(weekend))
+			else if (this.IsNumeric(weekend))
 			{
 				var holidayCode = Convert.ToInt32(weekend);
 				var weekendDayOfWeek = weekdayFactory.Create(holidayCode);
@@ -194,15 +194,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 		protected virtual bool HolidaysSpecified(FunctionArgument[] functionArguments)
 		{
 			return functionArguments.Length > 3;
-		}
-
-		/// <summary>
-		/// Execute returns the holiday parameter index
-		/// </summary>
-		/// <returns>Index value 3 corresponding to the holiday parameter index</returns>
-		protected virtual int GetHolidayIndex()
-		{
-			return holidayIndex;
 		}
 		#endregion
 	}
