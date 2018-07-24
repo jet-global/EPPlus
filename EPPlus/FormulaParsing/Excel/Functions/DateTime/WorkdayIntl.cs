@@ -36,10 +36,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 {
 	/// <summary>
 	/// This class contains the formula for computing a date based on the given date, number of workdays, and (optional).
-	/// dates of holidays
+	/// weekend days and dates of holidays
 	/// </summary>
 	public class WorkdayIntl : ExcelFunction
 	{
+		#region Properties
+		private int weekendIndex = 2;
+		private int holidayIndex = 3;
+		#endregion
+
 		/// <summary>
 		/// Execute returns the date based on the user's input.
 		/// </summary>
@@ -85,62 +90,42 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 				var workDateSerial = this.ArgToDecimal(arguments, 1);
 				var resultDate = System.DateTime.MinValue;
 				var calculator = new WorkdayCalculator();
-				var weekdayFactory = new HolidayWeekdaysFactory();
+				var dateResult = calculator.CalculateWorkday(startDate, (int)workDateSerial);
 
 				if (functionArguments.Length > 2)
 				{
-					var weekend = arguments.ElementAt(2).Value;
+					var weekend = arguments.ElementAt(weekendIndex).Value;
 
-					if (weekend is int && ArgToInt(functionArguments, 2) <= 0)
-						return new CompileResult(eErrorType.Num);
-
-					else if (weekend == null)
+					if (this.WeekendSpecified(functionArguments))
 					{
-						calculator = new WorkdayCalculator(weekdayFactory.Create(1));
-					}
-					else if (Regex.IsMatch(weekend.ToString(), "^[01]{7}"))
-					{
-						var weekendDayOfWeek = weekdayFactory.Create(weekend.ToString());
-
-						if (weekendDayOfWeek == null)
-							return new CompileResult(eErrorType.Value);
-
-						calculator = new WorkdayCalculator(weekendDayOfWeek);
-					}
-					else if (IsNumeric(weekend))
-					{
-						var holidayCode = Convert.ToInt32(weekend);
-						var weekendDayOfWeek = weekdayFactory.Create(holidayCode);
-
-						if (weekendDayOfWeek == null)
+						if (weekend is int && ArgToInt(functionArguments, 2) <= 0)
 							return new CompileResult(eErrorType.Num);
 
-						calculator = new WorkdayCalculator(weekendDayOfWeek);
-					}
-					else
-					{
-						return new CompileResult(eErrorType.Value);
+						calculator = this.GetCalculator(weekend);
+
+						if (IsNumeric(weekend) && calculator == null)
+							return new CompileResult(eErrorType.Num);
+						else if (calculator == null)
+							return new CompileResult(eErrorType.Value);
+
+						dateResult = calculator.CalculateWorkday(startDate, (int)workDateSerial);
 					}
 				}
 
-				var dateResult = calculator.CalculateWorkday(startDate, (int)workDateSerial);
-
-				if (functionArguments.Length > 3)
+				if (this.HolidaysSpecified(functionArguments))
 				{
-					for (int i = 3; i < functionArguments.Length; i++)
-					{ 
-						var holidayCandidate = arguments.ElementAt(i).Value;
-						bool isHolidayZero = (serialNumberCandidate is int holAsint && holAsint == 0);
+					var holidayCandidate = arguments.ElementAt(this.GetHolidayIndex()).Value;
+					bool isHolidayZero = (serialNumberCandidate is int holAsint && holAsint == 0);
 
-						if (holidayCandidate is int holAsInt && holAsInt < 0)
-							return new CompileResult(eErrorType.Num);
+					if (holidayCandidate is int holAsInt && holAsInt < 0)
+						return new CompileResult(eErrorType.Num);
 						
-						if (holidayCandidate is string && !ConvertUtil.TryParseDateString(holidayCandidate, out output))
-							return new CompileResult(eErrorType.Value);
+					if (holidayCandidate is string && !ConvertUtil.TryParseDateString(holidayCandidate, out output))
+						return new CompileResult(eErrorType.Value);
 
-						dateResult = calculator.AdjustResultWithHolidays(dateResult, functionArguments[3]);
-					}
+					dateResult = calculator.AdjustResultWithHolidays(dateResult, functionArguments[this.GetHolidayIndex()]);
 				}
+
 				if (serialNumberIsZero)
 					return CreateResult(dateResult.EndDate.ToOADate()-1, DataType.Date);
 				return CreateResult(dateResult.EndDate.ToOADate(), DataType.Date);
@@ -148,5 +133,77 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 			else
 				return new CompileResult(error.Value);
 		}
+
+		#region Protected Methods
+		/// <summary>
+		/// Execute returns the calculator with the given weekend days.
+		/// </summary>
+		/// <param name="weekend">The user specified weekend code that indicates the weekend</param>
+		/// <returns>The calculator with set weekend days.</returns>
+		protected virtual WorkdayCalculator GetCalculator(object weekend)
+		{
+			var calculator = new WorkdayCalculator();
+			var weekdayFactory = new HolidayWeekdaysFactory();
+
+			if (weekend == null)
+			{
+				int defaultWeekend = 1;
+				calculator = new WorkdayCalculator(weekdayFactory.Create(defaultWeekend));
+			}
+			else if (Regex.IsMatch(weekend.ToString(), "^[01]{7}"))
+			{
+				var weekendDayOfWeek = weekdayFactory.Create(weekend.ToString());
+
+				if (weekendDayOfWeek == null)
+					return null;
+
+				calculator = new WorkdayCalculator(weekendDayOfWeek);
+			}
+			else if (IsNumeric(weekend))
+			{
+				var holidayCode = Convert.ToInt32(weekend);
+				var weekendDayOfWeek = weekdayFactory.Create(holidayCode);
+
+				if (weekendDayOfWeek == null)
+					return null;
+
+				calculator = new WorkdayCalculator(weekendDayOfWeek);
+			}
+			else
+			{
+				return null;
+			}
+
+			return calculator;
+		}
+
+		/// <summary>
+		/// Execute returns whether or not there is a weekend parameter.
+		/// </summary>
+		/// <returns>True if there are more than two parameters given, false otherwise.</returns>
+		protected virtual bool WeekendSpecified(FunctionArgument[] functionArguments)
+		{
+			return functionArguments.Length > 2;
+		}
+
+		/// <summary>
+		/// Execute returns whether holidays parameter is specified by user.
+		/// </summary>
+		/// <param name="functionArguments">The array of parameters for function</param>
+		/// <returns>A boolean depending on whether or not the holiday parameter is given.</returns>
+		protected virtual bool HolidaysSpecified(FunctionArgument[] functionArguments)
+		{
+			return functionArguments.Length > 3;
+		}
+
+		/// <summary>
+		/// Execute returns the holiday parameter index
+		/// </summary>
+		/// <returns>Index value 3 corresponding to the holiday parameter index</returns>
+		protected virtual int GetHolidayIndex()
+		{
+			return holidayIndex;
+		}
+		#endregion
 	}
 }

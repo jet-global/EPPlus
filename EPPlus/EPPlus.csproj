@@ -377,6 +377,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Database\ExcelDatabaseField.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Database\ExcelDatabaseRow.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Database\RowMatcher.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\DateTime\Workday.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Date.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\DateValue.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTime\Day.cs" />
