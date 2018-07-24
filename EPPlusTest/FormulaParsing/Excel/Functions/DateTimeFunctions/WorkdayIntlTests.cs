@@ -247,7 +247,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayIntlWithDateUsingPeriodsIntseadOfSlashesAndNegativeDayInputReturnsCorrectValue()
+		public void WorkdayIntlWithDateUsingPeriodsInsteadOfSlashesAndNegativeDayInputReturnsCorrectValue()
 		{
 			// Test case where the second argument is negative and the first argument is the date as a string
 			// with '.' instead of '/'.
