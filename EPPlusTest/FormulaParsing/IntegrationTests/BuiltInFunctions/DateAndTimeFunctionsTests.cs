@@ -154,9 +154,9 @@ namespace EPPlusTest.FormulaParsing.IntegrationTests.BuiltInFunctions
 		}
 
 		[TestMethod]
-		public void WorkdayShouldReturnAResult()
+		public void WorkdayIntlShouldReturnAResult()
 		{
-			var result = _parser.Parse("Workday(Date(2013, 2, 2), 3)");
+			var result = _parser.Parse("Workday.INTL(Date(2013, 2, 2), 3)");
 			Assert.IsInstanceOfType(result, typeof(double));
 		}
 
