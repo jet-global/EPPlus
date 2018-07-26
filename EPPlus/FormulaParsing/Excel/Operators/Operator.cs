@@ -109,7 +109,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				CompileResult multiply(CompileResult l, CompileResult r)
 				{
-					var dataType = Operator.ParseGeneralOperatorDataType(l.DataType, r.DataType);
+					var dataType = Operator.ParseMultiplyOperatorDataType(l.DataType, r.DataType);
 					return Operator.CalculateNumericalOperator(l, r, () => new CompileResult(l.ResultNumeric * r.ResultNumeric, dataType));
 				}
 				return myMultiply ?? (myMultiply = new Operator(OperatorType.Multiply, Operator.PrecedenceMultiplyDivide, multiply));
@@ -125,11 +125,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 			{
 				CompileResult divide(CompileResult l, CompileResult r)
 				{
-					return 	Operator.CalculateNumericalOperator(l, r, () =>
+					return Operator.CalculateNumericalOperator(l, r, () =>
 					{
 						if (Math.Abs(r.ResultNumeric) < double.Epsilon)
 							return new CompileResult(eErrorType.Div0);
-						return new CompileResult(l.ResultNumeric / r.ResultNumeric, DataType.Decimal);
+						var dataType = Operator.ParseDivideOperatorDataType(l.DataType, r.DataType);
+						return new CompileResult(l.ResultNumeric / r.ResultNumeric, dataType);
 					});
 				}
 				return myDivide ?? (myDivide = new Operator(OperatorType.Divide, Operator.PrecedenceMultiplyDivide, divide));
@@ -341,7 +342,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 
 		private static bool IsNumericType(CompileResult result)
 		{
-			return result.DataType == DataType.Integer || result.IsNumeric || result.IsDateString 
+			return result.IsNumeric || result.IsDateString 
 				|| result.IsNumericString || result.Result is ExcelDataProvider.IRangeInfo;
 		}
 
@@ -439,12 +440,37 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 
 		private static DataType ParseAdditiveOperatorDataType(DataType leftType, DataType rightType)
 		{
-			if (leftType == DataType.Date || rightType == DataType.Date)
+			if (leftType == DataType.Date)
 				return DataType.Date;
-			else if (leftType == DataType.Time || rightType == DataType.Time)
+			else if (leftType == DataType.Time)
 				return DataType.Time;
 			else
 				return Operator.ParseGeneralOperatorDataType(leftType, rightType);
+		}
+
+		private static DataType ParseMultiplyOperatorDataType(DataType leftType, DataType rightType)
+		{
+			return Operator.ParseMultiplicativeDateTimeOperatorDataType(leftType, rightType) 
+				?? Operator.ParseGeneralOperatorDataType(leftType, rightType);
+		}
+
+		private static DataType ParseDivideOperatorDataType(DataType leftType, DataType rightType)
+		{
+			return Operator.ParseMultiplicativeDateTimeOperatorDataType(leftType, rightType) 
+				?? DataType.Decimal;
+		}
+
+		private static DataType? ParseMultiplicativeDateTimeOperatorDataType(DataType leftType, DataType rightType)
+		{
+			if (leftType == DataType.Date && rightType == DataType.Date)
+				return DataType.Decimal;
+			else if (leftType == DataType.Date && rightType == DataType.Time)
+				return DataType.Date;
+			else if (leftType == DataType.Time && rightType == DataType.Date)
+				return DataType.Time;
+			else if (leftType == DataType.Time && rightType == DataType.Time)
+				return DataType.Time;
+			return null;
 		}
 		#endregion
 	}

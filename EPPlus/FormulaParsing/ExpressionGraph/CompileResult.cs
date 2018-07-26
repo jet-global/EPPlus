@@ -117,7 +117,8 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 					|| this.DataType == DataType.Boolean 
 					|| this.DataType == DataType.Integer 
 					|| this.DataType == DataType.Empty 
-					|| this.DataType == DataType.Date;
+					|| this.DataType == DataType.Date
+					|| this.DataType == DataType.Time;
 			}
 		}
 
