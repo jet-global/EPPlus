@@ -31,6 +31,21 @@ namespace EPPlusTest
 				Directory.CreateDirectory(@"c:\Temp\bug");
 			}
 		}
+
+		[TestMethod]
+		public void Issue73646FromMattWilson()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var ws = package.Workbook.Worksheets.Add("Test");
+				ws.Cells["C8"].Formula = "CONCATENATE(1.1)";
+				ws.Cells["C9"].Formula = "CONCATENATE(C8+0.1)";
+				ws.Calculate();
+				Assert.AreEqual("1.1", ws.Cells["C8"].Value);
+				Assert.AreEqual("1.2", ws.Cells["C9"].Value);
+			}
+		}
+
 		[TestMethod, Ignore]
 		public void Issue15052()
 		{
@@ -59,6 +74,7 @@ namespace EPPlusTest
 				ws.Dispose();
 			}
 		}
+
 		[TestMethod]
 		public void Issue15031()
 		{

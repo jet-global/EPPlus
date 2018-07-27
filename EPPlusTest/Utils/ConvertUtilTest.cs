@@ -44,6 +44,68 @@ namespace EPPlusTest.Utils
 			numericString = expected.ToString("n6", CultureInfo.CurrentCulture); // -0.005260
 			Assert.IsTrue(ConvertUtil.TryParseNumericString(numericString, out result));
 			Assert.AreEqual(expected, result);
+
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("2,345,656,567", out result));
+			Assert.AreEqual(2345656567d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("123", out result));
+			Assert.AreEqual(123d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("12345", out result));
+			Assert.AreEqual(12345d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("-12345", out result));
+			Assert.AreEqual(-12345d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("-12,345", out result));
+			Assert.AreEqual(-12345d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("-122,345", out result));
+			Assert.AreEqual(-122345d, result);
+
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("2,3,45,656,567", out result));
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("23,45,656,567", out result));
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("2345656,567", out result));
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("2345656567,", out result));
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("2,345,656,567,", out result));
+			Assert.IsFalse(ConvertUtil.TryParseNumericString(",567", out result));
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("-,567", out result));
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("567-", out result));
+
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("2,345,656,7.45E-003", out result));
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("2,345,656,567E+003", out result));
+			Assert.AreEqual(2345656567000d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("2,345,656,567.45E-003", out result));
+			Assert.AreEqual(2345656.56745d, result);
+
+			Thread.CurrentThread.CurrentCulture = new TestCulture("en-US", new NumberFormatInfo { NumberGroupSizes = new int[4] { 2, 3, 4, 0 }, NumberGroupSeparator = "*" });
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("1", out result));
+			Assert.AreEqual(1d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("12", out result));
+			Assert.AreEqual(12d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("123", out result));
+			Assert.AreEqual(123d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("1*23", out result));
+			Assert.AreEqual(123d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("123*23", out result));
+			Assert.AreEqual(12323d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("6*123*23", out result));
+			Assert.AreEqual(612323d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("9876*123*23", out result));
+			Assert.AreEqual(987612323d, result);
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("99876*123*23", out result));
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("9*9876*123*23", out result));
+			Assert.AreEqual(9987612323d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("1231239*9876*123*23", out result));
+			Assert.AreEqual(1231239987612323d, result);
+
+			Thread.CurrentThread.CurrentCulture = new TestCulture("en-US", new NumberFormatInfo { NumberGroupSizes = new int[2] { 2, 3,}, NumberGroupSeparator = "*", NumberDecimalSeparator = "#", NegativeSign = "_" });
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("_123*23#23", out result));
+			Assert.AreEqual(-12323.23d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("6*123*23#", out result));
+			Assert.AreEqual(612323d, result);
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("126*123*23#8989", out result));
+			Assert.AreEqual(12612323.8989d, result);
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("9126*123*23", out result));
+
+			Thread.CurrentThread.CurrentCulture = new TestCulture("en-US", new NumberFormatInfo { NumberGroupSizes = new int[0] });
+			Assert.IsFalse(ConvertUtil.TryParseNumericString("2,345", out result));
+			Assert.IsTrue(ConvertUtil.TryParseNumericString("2345", out result));
 		}
 
 		[TestMethod]
@@ -508,6 +570,17 @@ namespace EPPlusTest.Utils
 			var isValidDate = ConvertUtil.TryParseDateObject(0.5, out DateTime resultDate, out eErrorType? resultError);
 			Assert.AreEqual(false, isValidDate);
 			Assert.AreEqual(eErrorType.Num, resultError);
+		}
+		#endregion
+
+		#region Private Classes
+		private class TestCulture : CultureInfo
+		{
+			public TestCulture(string name, NumberFormatInfo info)
+				: base(name)
+			{
+				this.NumberFormat = info;
+			}
 		}
 		#endregion
 	}

@@ -26,6 +26,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -58,11 +59,14 @@ namespace OfficeOpenXml.Utils
 				// This may not always be true, but it is a better assumption than assuming it is always in the invariant culture, which will probably never be true
 				// for locales outside the United States.
 				var style = NumberStyles.Float | NumberStyles.AllowThousands;
-				return double.TryParse(candidate.ToString(), style, CultureInfo.CurrentCulture, out result);
+				var candidateString = candidate.ToString();
+				return double.TryParse(candidateString, style, CultureInfo.CurrentCulture, out result)
+					&& ConvertUtil.ValidateNumberGroupSizes(candidateString, CultureInfo.CurrentCulture.NumberFormat);
 			}
 			result = 0;
 			return false;
 		}
+
 		/// <summary>
 		/// Tries to parse a boolean value from the specificed <paramref name="candidate"/>.
 		/// </summary>
@@ -349,6 +353,7 @@ namespace OfficeOpenXml.Utils
 			ExcelEncodeString(sb, t, true);
 			return sb.ToString();
 		}
+
 		internal static string ExcelDecodeString(string t)
 		{
 			var match = Regex.Match(t, "(_x005F|_x[0-9A-F]{4,4}_)");
@@ -386,6 +391,42 @@ namespace OfficeOpenXml.Utils
 		#region internal cache objects
 		internal static TextInfo _invariantTextInfo = CultureInfo.InvariantCulture.TextInfo;
 		internal static CompareInfo _invariantCompareInfo = CompareInfo.GetCompareInfo(CultureInfo.InvariantCulture.LCID);
+		#endregion
+
+		#region Private Static Methods
+		private static bool ValidateNumberGroupSizes(string candidate, NumberFormatInfo info)
+		{
+			if (!candidate.Contains(info.NumberGroupSeparator))
+				return true;
+			if (!info.NumberGroupSizes.Any())
+				return false;
+			// Remove decimal point and decimal digits.
+			if (candidate.Contains(info.NumberDecimalSeparator))
+				candidate = candidate.Remove(candidate.IndexOf(info.NumberDecimalSeparator));
+			// Remove scientific notation suffix.
+			var eIndex = candidate.IndexOf("e", StringComparison.CurrentCultureIgnoreCase);
+			if (eIndex != -1)
+				candidate = candidate.Remove(eIndex);
+			// Remove leading negative sign.
+			candidate = candidate.Replace(info.NegativeSign, string.Empty);
+			var groups = candidate.Split(info.NumberGroupSeparator.ToCharArray(), StringSplitOptions.None)
+				.ToArray()
+				.Reverse();
+			int expectedGroupCount = 0;
+			for (int i = 0; i < groups.Count(); i++)
+			{
+				var group = groups.ElementAt(i);
+				if (i < info.NumberGroupSizes.Count())
+					expectedGroupCount = info.NumberGroupSizes.ElementAt(i);
+				// The last group can have fewer than the expected count.
+				// An expected count of 0 indicates no limit on group size.
+				if (i + 1 == groups.Count())
+					return expectedGroupCount == 0 || groups.Last().Count() <= expectedGroupCount;
+				if (expectedGroupCount != 0 && expectedGroupCount != group.Count())
+					return false;
+			}
+			return true;
+		}
 		#endregion
 	}
 }

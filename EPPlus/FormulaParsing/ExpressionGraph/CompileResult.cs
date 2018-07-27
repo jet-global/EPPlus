@@ -145,7 +145,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		{
 			get
 			{
-				if (this.DataType == DataType.String && ConvertUtil.TryParseDateString(this.Result, out var result))
+				if (this.DataType == DataType.String && !this.IsNumericString && ConvertUtil.TryParseDateString(this.Result, out var result))
 				{
 					myResultNumeric = result.ToOADate();
 					return true;
