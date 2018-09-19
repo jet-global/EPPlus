@@ -768,6 +768,12 @@
     <Compile Include="StructuredReference.cs" />
     <Compile Include="Table\PivotTable\CacheFieldItem.cs" />
     <Compile Include="Table\PivotTable\CacheFieldNode.cs" />
+    <Compile Include="Table\PivotTable\ExcelPivotTableDataFieldCollection.cs" />
+    <Compile Include="Table\PivotTable\ExcelPivotTableFieldCollectionBase.cs" />
+    <Compile Include="Table\PivotTable\ExcelPivotTableFieldDateGroup.cs" />
+    <Compile Include="Table\PivotTable\ExcelPivotTableFieldItemCollection.cs" />
+    <Compile Include="Table\PivotTable\ExcelPivotTableFieldNumericGroup.cs" />
+    <Compile Include="Table\PivotTable\ExcelPivotTableRowColumnFieldCollection.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\InternationalizationUtility.cs" />
     <Compile Include="Utils\UriHelper.cs" />

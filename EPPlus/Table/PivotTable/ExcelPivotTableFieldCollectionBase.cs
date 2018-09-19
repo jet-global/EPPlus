@@ -31,68 +31,100 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Xml;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// Wraps a <cacheField/> node in <pivotcachedefinition-cacheFields/>.
+	/// Abstract base collection class for pivot table fields.
 	/// </summary>
-	public class CacheFieldNode
+	/// <typeparam name="T">An instance of {T}.</typeparam>
+	public abstract class ExcelPivotTableFieldCollectionBase<T> : IEnumerable<T>
 	{
 		#region Class Variables
-		private List<CacheFieldItem> myItems = new List<CacheFieldItem>();
+		/// <summary>
+		/// The pivot table.
+		/// </summary>
+		protected ExcelPivotTable myTable;
+
+		/// <summary>
+		/// A list of fields.
+		/// </summary>
+		internal List<T> myList = new List<T>();
 		#endregion
 
 		#region Properties
 		/// <summary>
-		/// Gets or sets the name for this <see cref="CacheFieldNode"/>.
+		/// Gets the generic enumerator of the list.
 		/// </summary>
-		public string Name
+		/// <returns>The enumerator.</returns>
+		public IEnumerator<T> GetEnumerator()
 		{
-			get { return this.Node.Attributes["name"].Value; }
-			set { this.Node.Attributes["name"].Value = value; }
+			return myList.GetEnumerator();
 		}
 
 		/// <summary>
-		/// Gets or sets the number format ID for this <see cref="CacheFieldNode"/>.
+		/// Gets the specified type enumerator of the list.
 		/// </summary>
-		public string NumFormatId
+		/// <returns>The enumerator.</returns>
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		{
-			get { return this.Node.Attributes["numFmtId"].Value; }
-			set { this.Node.Attributes["numFmtId"].Value = value; }
+			return myList.GetEnumerator();
 		}
 
 		/// <summary>
-		/// Gets a readonly list of the items in this <see cref="CacheFieldNode"/>.
+		/// Gets the count of fields in the pivot table.
 		/// </summary>
-		public IReadOnlyList<CacheFieldItem> Items
+		public int Count
 		{
-			get { return myItems; }
+			get
+			{
+				return myList.Count;
+			}
 		}
 
-		private XmlNode Node { get; set; }
-		private XmlNamespaceManager NameSpaceManager { get; set; }
+		/// <summary>
+		/// Gets the field at the given index.
+		/// </summary>
+		/// <param name="Index">The position of the field in the list.</param>
+		/// <returns>The pivot table field.</returns>
+		public T this[int Index]
+		{
+			get
+			{
+				if (Index < 0 || Index >= myList.Count)
+					throw (new ArgumentOutOfRangeException("Index out of range"));
+				return myList[Index];
+			}
+		}
 		#endregion
 
 		#region Constructors
 		/// <summary>
-		/// Creates an instance of a <see cref="CacheFieldNode"/>.
+		/// Creates an instance of a <see cref="ExcelPivotTableFieldCollection"/>.
 		/// </summary>
-		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheFieldNode"/>.</param>
-		/// <param name="namespaceManager">The namespace manager to use for searching child nodes.</param>
-		public CacheFieldNode(XmlNode node, XmlNamespaceManager namespaceManager)
+		/// <param name="table">The existing pivot table.</param>
+		internal ExcelPivotTableFieldCollectionBase(ExcelPivotTable table)
 		{
-			if (node == null)
-				throw new ArgumentNullException(nameof(node));
-			if (namespaceManager == null)
-				throw new ArgumentNullException(nameof(namespaceManager));
-			this.Node = node;
-			this.NameSpaceManager = namespaceManager;
-			foreach (XmlNode cacheFieldItem in this.Node.SelectNodes("d:sharedItems/d:s", this.NameSpaceManager))
-			{
-				myItems.Add(new CacheFieldItem(cacheFieldItem));
-			}
+			myTable = table;
+		}
+		#endregion
+
+		#region Methods
+		/// <summary>
+		/// Adds a field to the collection.
+		/// </summary>
+		/// <param name="field"></param>
+		internal void AddInternal(T field)
+		{
+			myList.Add(field);
+		}
+
+		/// <summary>
+		/// Clears the field collection.
+		/// </summary>
+		internal void Clear()
+		{
+			myList.Clear();
 		}
 		#endregion
 	}

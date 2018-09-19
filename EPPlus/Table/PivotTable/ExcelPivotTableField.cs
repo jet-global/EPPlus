@@ -198,7 +198,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// The pivot table field items.
 		/// </summary>
-		internal ExcelPivotTableFieldCollectionBase<ExcelPivotTableFieldItem> myItems;
+		internal ExcelPivotTableFieldItemCollection myItems;
 		#endregion
 
 		#region Properties
@@ -567,13 +567,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Gets the pivot table field items that is used for grouping.
 		/// </summary>
-		public ExcelPivotTableFieldCollectionBase<ExcelPivotTableFieldItem> Items
+		public ExcelPivotTableFieldItemCollection Items
 		{
 			get
 			{
 				if (myItems == null)
 				{
-					myItems = new ExcelPivotTableFieldCollectionBase<ExcelPivotTableFieldItem>(myTable);
+					myItems = new ExcelPivotTableFieldItemCollection(myTable);
 					foreach (XmlNode node in this.TopNode.SelectNodes("d:items//d:item", this.NameSpaceManager))
 					{
 						var item = new ExcelPivotTableFieldItem(this.NameSpaceManager, node, this);

@@ -29,40 +29,20 @@
  * Jan Källman		Added		21-MAR-2011
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
-using System;
-using System.Xml;
-
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// Wraps a <s/> node in <pivotcachedefinition-cacheFields-cacheField-sharedItems/>.
+	/// Collection class for <see cref="ExcelPivotTableFieldItem"/>.
 	/// </summary>
-	public class CacheFieldItem
+	public class ExcelPivotTableFieldItemCollection : ExcelPivotTableFieldCollectionBase<ExcelPivotTableFieldItem>
 	{
-		#region Properties
 		/// <summary>
-		/// Gets or sets the value of this item.
+		/// Creates an instance of a <see cref="ExcelPivotTableFieldCollection"/>.
 		/// </summary>
-		public string Value
+		/// <param name="table">The existing pivot table.</param>
+		public ExcelPivotTableFieldItemCollection(ExcelPivotTable table) : base(table)
 		{
-			get { return this.Node.Attributes["v"].Value; }
-			set { this.Node.Attributes["v"].Value = value; }
-		}
 
-		private XmlNode Node { get; set; }
-		#endregion
-
-		#region Constructors
-		/// <summary>
-		/// Creates an instance of a <see cref="CacheFieldItem"/>.
-		/// </summary>
-		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheFieldItem"/>.</param>
-		public CacheFieldItem(XmlNode node)
-		{
-			if (node == null)
-				throw new ArgumentNullException(nameof(node));
-			this.Node = node;
 		}
-		#endregion
 	}
 }

@@ -29,39 +29,79 @@
  * Jan Källman		Added		21-MAR-2011
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
-using System;
+using System.Globalization;
 using System.Xml;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// Wraps a <s/> node in <pivotcachedefinition-cacheFields-cacheField-sharedItems/>.
+	/// A pivot table field numeric grouping.
 	/// </summary>
-	public class CacheFieldItem
+	public class ExcelPivotTableFieldNumericGroup : ExcelPivotTableFieldGroup
 	{
+		#region Constants
+		private const string StartPath = "d:fieldGroup/d:rangePr/@startNum";
+		private const string EndPath = "d:fieldGroup/d:rangePr/@endNum";
+		private const string GroupIntervalPath = "d:fieldGroup/d:rangePr/@groupInterval";
+		#endregion
+
 		#region Properties
 		/// <summary>
-		/// Gets or sets the value of this item.
+		/// Gets the start value.
 		/// </summary>
-		public string Value
+		public double Start
 		{
-			get { return this.Node.Attributes["v"].Value; }
-			set { this.Node.Attributes["v"].Value = value; }
+			get
+			{
+				return (double)base.GetXmlNodeDoubleNull(ExcelPivotTableFieldNumericGroup.StartPath);
+			}
+			private set
+			{
+				base.SetXmlNodeString(ExcelPivotTableFieldNumericGroup.StartPath, value.ToString(CultureInfo.InvariantCulture));
+			}
 		}
 
-		private XmlNode Node { get; set; }
+		/// <summary>
+		/// Gets the end value.
+		/// </summary>
+		public double End
+		{
+			get
+			{
+				return (double)base.GetXmlNodeDoubleNull(ExcelPivotTableFieldNumericGroup.EndPath);
+			}
+			private set
+			{
+				base.SetXmlNodeString(ExcelPivotTableFieldNumericGroup.EndPath, value.ToString(CultureInfo.InvariantCulture));
+			}
+		}
+
+		/// <summary>
+		/// Gets the interval.
+		/// </summary>
+		public double Interval
+		{
+			get
+			{
+				return (double)base.GetXmlNodeDoubleNull(ExcelPivotTableFieldNumericGroup.GroupIntervalPath);
+			}
+			private set
+			{
+				base.SetXmlNodeString(ExcelPivotTableFieldNumericGroup.GroupIntervalPath, value.ToString(CultureInfo.InvariantCulture));
+			}
+		}
 		#endregion
 
 		#region Constructors
 		/// <summary>
-		/// Creates an instance of a <see cref="CacheFieldItem"/>.
+		/// Creates an instance of a <see cref="ExcelPivotTableFieldNumericGroup"/>.
 		/// </summary>
-		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheFieldItem"/>.</param>
-		public CacheFieldItem(XmlNode node)
+		/// <param name="ns">The namespace of the worksheet.</param>
+		/// <param name="topNode">The top node in the xml.</param>
+		internal ExcelPivotTableFieldNumericGroup(XmlNamespaceManager ns, XmlNode topNode) :
+			 base(ns, topNode)
 		{
-			if (node == null)
-				throw new ArgumentNullException(nameof(node));
-			this.Node = node;
+
 		}
 		#endregion
 	}

@@ -30,38 +30,73 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
+using System.Globalization;
 using System.Xml;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// Wraps a <s/> node in <pivotcachedefinition-cacheFields-cacheField-sharedItems/>.
+	/// A pivot table field date group.
 	/// </summary>
-	public class CacheFieldItem
+	public class ExcelPivotTableFieldDateGroup : ExcelPivotTableFieldGroup
 	{
+		#region Constants
+		private const string GroupByPath = "d:fieldGroup/d:rangePr/@groupBy";
+		#endregion
+
 		#region Properties
 		/// <summary>
-		/// Gets or sets the value of this item.
+		/// Gets how to group the date field.
 		/// </summary>
-		public string Value
+		public eDateGroupBy GroupBy
 		{
-			get { return this.Node.Attributes["v"].Value; }
-			set { this.Node.Attributes["v"].Value = value; }
+			get
+			{
+				string v = base.GetXmlNodeString(ExcelPivotTableFieldDateGroup.GroupByPath);
+				if (v != "")
+					return (eDateGroupBy)Enum.Parse(typeof(eDateGroupBy), v, true);
+				else
+					throw (new Exception("Invalid date Groupby"));
+			}
+			private set
+			{
+				base.SetXmlNodeString(ExcelPivotTableFieldDateGroup.GroupByPath, value.ToString().ToLower(CultureInfo.InvariantCulture));
+			}
 		}
 
-		private XmlNode Node { get; set; }
+		/// <summary>
+		/// Gets whether there exist an auto detect start date.
+		/// </summary>
+		public bool AutoStart
+		{
+			get
+			{
+				return base.GetXmlNodeBool("@autoStart", false);
+			}
+		}
+
+		/// <summary>
+		/// Gets whether there exist an auto detect end date.
+		/// </summary>
+		public bool AutoEnd
+		{
+			get
+			{
+				return base.GetXmlNodeBool("@autoStart", false);
+			}
+		}
 		#endregion
 
 		#region Constructors
 		/// <summary>
-		/// Creates an instance of a <see cref="CacheFieldItem"/>.
+		/// Creates an instance of a <see cref="ExcelPivotTableFieldDateGroup"/>.
 		/// </summary>
-		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheFieldItem"/>.</param>
-		public CacheFieldItem(XmlNode node)
+		/// <param name="ns">The namespace of the worksheet.</param>
+		/// <param name="topNode">The top node in the xml.</param>
+		internal ExcelPivotTableFieldDateGroup(XmlNamespaceManager ns, XmlNode topNode) :
+			 base(ns, topNode)
 		{
-			if (node == null)
-				throw new ArgumentNullException(nameof(node));
-			this.Node = node;
+
 		}
 		#endregion
 	}
