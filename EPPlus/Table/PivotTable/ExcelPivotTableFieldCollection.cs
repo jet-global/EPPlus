@@ -55,7 +55,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Properties
 		/// <summary>
-		/// Gets the enumerator of the list.
+		/// Gets the generic enumerator of the list.
 		/// </summary>
 		/// <returns>The enumerator.</returns>
 		public IEnumerator<T> GetEnumerator()
@@ -63,6 +63,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			return myList.GetEnumerator();
 		}
 
+		/// <summary>
+		/// Gets the specified type enumerator of the list.
+		/// </summary>
+		/// <returns>The enumerator.</returns>
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		{
 			return myList.GetEnumerator();
