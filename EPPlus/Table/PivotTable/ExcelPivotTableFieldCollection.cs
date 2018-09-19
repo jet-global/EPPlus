@@ -39,7 +39,7 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// Base collection class for pivot table fields.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class ExcelPivotTableFieldCollectionBase<T> : IEnumerable<T>
+	public abstract class ExcelPivotTableFieldCollectionBase<T> : IEnumerable<T>
 	{
 		#region Class Variables
 		/// <summary>
@@ -128,6 +128,14 @@ namespace OfficeOpenXml.Table.PivotTable
 			myList.Clear();
 		}
 		#endregion
+	}
+
+	public class ExcelPivotTableFieldItemCollection : ExcelPivotTableFieldCollectionBase<ExcelPivotTableFieldItem>
+	{
+		public ExcelPivotTableFieldItemCollection(ExcelPivotTable table) : base(table)
+		{
+
+		}
 	}
 
 	/// <summary>
