@@ -808,7 +808,7 @@ namespace OfficeOpenXml
 		{
 			foreach (var ws in this.Worksheets)
 			{
-				if (ws.PivotTables._pivotTableNames.ContainsKey(name))
+				if (ws.PivotTables.myPivotTableNames.ContainsKey(name))
 				{
 					return true;
 				}

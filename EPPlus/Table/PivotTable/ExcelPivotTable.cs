@@ -42,845 +42,685 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// </summary>
 	public class ExcelPivotTable : XmlHelper
 	{
-		internal ExcelPivotTable(Packaging.ZipPackageRelationship rel, ExcelWorksheet sheet) :
-			 base(sheet.NameSpaceManager)
-		{
-			WorkSheet = sheet;
-			PivotTableUri = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
-			Relationship = rel;
-			var pck = sheet.Package.Package;
-			Part = pck.GetPart(PivotTableUri);
+		#region Constants
+		private const string NamePath = "@name";
+		private const string DisplayNamePath = "@displayName";
+		private const string FirstHeaderRowPath = "d:location/@firstHeaderRow";
+		private const string FirstDataRowPath = "d:location/@firstDataRow";
+		private const string FirstDataColumnPath = "d:location/@firstDataCol";
+		private const string StyleNamePath = "d:pivotTableStyleInfo/@name";
+		#endregion
 
-			PivotTableXml = new XmlDocument();
-			LoadXmlSafe(PivotTableXml, Part.GetStream());
-			init();
-			TopNode = PivotTableXml.DocumentElement;
-			Address = new ExcelAddress(GetXmlNodeString("d:location/@ref"));
+		#region Class Variables
+		private ExcelPivotCacheDefinition myCacheDefinition;
+		private ExcelPivotTableFieldCollection myFields;
+		private ExcelPivotTableRowColumnFieldCollection myRowFields;
+		private ExcelPivotTableRowColumnFieldCollection myColumnFields;
+		private ExcelPivotTableDataFieldCollection myDataFields;
+		private ExcelPivotTableRowColumnFieldCollection myPageFields;
+		private TableStyles myTableStyle = Table.TableStyles.Medium6;
+		#endregion
 
-			_cacheDefinition = new ExcelPivotCacheDefinition(sheet.NameSpaceManager, this);
-			LoadFields();
-
-			//Add row fields.
-			foreach (XmlElement rowElem in TopNode.SelectNodes("d:rowFields/d:field", NameSpaceManager))
-			{
-				int x;
-				if (int.TryParse(rowElem.GetAttribute("x"), out x) && x >= 0)
-				{
-					RowFields.AddInternal(Fields[x]);
-				}
-				else
-				{
-					rowElem.ParentNode.RemoveChild(rowElem);
-				}
-			}
-
-			////Add column fields.
-			foreach (XmlElement colElem in TopNode.SelectNodes("d:colFields/d:field", NameSpaceManager))
-			{
-				int x;
-				if (int.TryParse(colElem.GetAttribute("x"), out x) && x >= 0)
-				{
-					ColumnFields.AddInternal(Fields[x]);
-				}
-				else
-				{
-					colElem.ParentNode.RemoveChild(colElem);
-				}
-			}
-
-			//Add Page elements
-			//int index = 0;
-			foreach (XmlElement pageElem in TopNode.SelectNodes("d:pageFields/d:pageField", NameSpaceManager))
-			{
-				int fld;
-				if (int.TryParse(pageElem.GetAttribute("fld"), out fld) && fld >= 0)
-				{
-					var field = Fields[fld];
-					field._pageFieldSettings = new ExcelPivotTablePageFieldSettings(NameSpaceManager, pageElem, field, fld);
-					PageFields.AddInternal(field);
-				}
-			}
-
-			//Add data elements
-			//index = 0;
-			foreach (XmlElement dataElem in TopNode.SelectNodes("d:dataFields/d:dataField", NameSpaceManager))
-			{
-				int fld;
-				if (int.TryParse(dataElem.GetAttribute("fld"), out fld) && fld >= 0)
-				{
-					var field = Fields[fld];
-					var dataField = new ExcelPivotTableDataField(NameSpaceManager, dataElem, field);
-					DataFields.AddInternal(dataField);
-				}
-			}
-		}
+		#region Properties
 		/// <summary>
-		/// Add a new pivottable
-		/// </summary>
-		/// <param name="sheet">The worksheet</param>
-		/// <param name="address">the address of the pivottable</param>
-		/// <param name="sourceAddress">The address of the Source data</param>
-		/// <param name="name"></param>
-		/// <param name="tblId"></param>
-		internal ExcelPivotTable(ExcelWorksheet sheet, ExcelAddress address, ExcelRangeBase sourceAddress, string name, int tblId) :
-			 base(sheet.NameSpaceManager)
-		{
-			WorkSheet = sheet;
-			Address = address;
-			var pck = sheet.Package.Package;
-
-			PivotTableXml = new XmlDocument();
-			LoadXmlSafe(PivotTableXml, GetStartXml(name, tblId, address, sourceAddress), Encoding.UTF8);
-			TopNode = PivotTableXml.DocumentElement;
-			PivotTableUri = GetNewUri(pck, "/xl/pivotTables/pivotTable{0}.xml", ref tblId);
-			init();
-
-			Part = pck.CreatePart(PivotTableUri, ExcelPackage.schemaPivotTable);
-			PivotTableXml.Save(Part.GetStream());
-
-			//Worksheet-Pivottable relationship
-			Relationship = sheet.Part.CreateRelationship(UriHelper.ResolvePartUri(sheet.WorksheetUri, PivotTableUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
-
-			_cacheDefinition = new ExcelPivotCacheDefinition(sheet.NameSpaceManager, this, sourceAddress, tblId);
-			_cacheDefinition.Relationship = Part.CreateRelationship(UriHelper.ResolvePartUri(PivotTableUri, _cacheDefinition.CacheDefinitionUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheDefinition");
-
-			sheet.Workbook.AddPivotTable(CacheID.ToString(), _cacheDefinition.CacheDefinitionUri);
-
-			LoadFields();
-
-			using (var r = sheet.Cells[address.Address])
-			{
-				r.Clear();
-			}
-		}
-		private void init()
-		{
-			SchemaNodeOrder = new string[] { "location", "pivotFields", "rowFields", "rowItems", "colFields", "colItems", "pageFields", "pageItems", "dataFields", "dataItems", "formats", "pivotTableStyleInfo" };
-		}
-		private void LoadFields()
-		{
-			//Fields.Clear();
-			//int ix=0;
-			//foreach(XmlElement fieldNode in PivotXml.SelectNodes("//d:pivotFields/d:pivotField",NameSpaceManager))
-			//{
-			//    Fields.AddInternal(new ExcelPivotTableField(NameSpaceManager, fieldNode, this, ix++));
-			//}
-
-			int index = 0;
-			//Add fields.
-			foreach (XmlElement fieldElem in TopNode.SelectNodes("d:pivotFields/d:pivotField", NameSpaceManager))
-			{
-				var fld = new ExcelPivotTableField(NameSpaceManager, fieldElem, this, index, index++);
-				Fields.AddInternal(fld);
-			}
-
-			//Add fields.
-			index = 0;
-			foreach (XmlElement fieldElem in _cacheDefinition.TopNode.SelectNodes("d:cacheFields/d:cacheField", NameSpaceManager))
-			{
-				var fld = Fields[index++];
-				fld.SetCacheFieldNode(fieldElem);
-			}
-
-
-		}
-		private string GetStartXml(string name, int id, ExcelAddress address, ExcelAddress sourceAddress)
-		{
-			string xml = string.Format("<pivotTableDefinition xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" name=\"{0}\" cacheId=\"{1}\" dataOnRows=\"1\" applyNumberFormats=\"0\" applyBorderFormats=\"0\" applyFontFormats=\"0\" applyPatternFormats=\"0\" applyAlignmentFormats=\"0\" applyWidthHeightFormats=\"1\" dataCaption=\"Data\"  createdVersion=\"4\" showMemberPropertyTips=\"0\" useAutoFormatting=\"1\" itemPrintTitles=\"1\" indent=\"0\" compact=\"0\" compactData=\"0\" gridDropZones=\"1\">", name, id);
-
-			xml += string.Format("<location ref=\"{0}\" firstHeaderRow=\"1\" firstDataRow=\"1\" firstDataCol=\"1\" /> ", address.FirstAddress);
-			xml += string.Format("<pivotFields count=\"{0}\">", sourceAddress._toCol - sourceAddress._fromCol + 1);
-			for (int col = sourceAddress._fromCol; col <= sourceAddress._toCol; col++)
-			{
-				xml += "<pivotField showAll=\"0\" />"; //compact=\"0\" outline=\"0\" subtotalTop=\"0\" includeNewItemsInFilter=\"1\"     
-			}
-
-			xml += "</pivotFields>";
-			xml += "<pivotTableStyleInfo name=\"PivotStyleMedium9\" showRowHeaders=\"1\" showColHeaders=\"1\" showRowStripes=\"0\" showColStripes=\"0\" showLastColumn=\"1\" />";
-			xml += "</pivotTableDefinition>";
-			return xml;
-		}
-		internal Packaging.ZipPackagePart Part
-		{
-			get;
-			set;
-		}
-		/// <summary>
-		/// Provides access to the XML data representing the pivottable in the package.
+		/// Gets or sets the xml data representing the pivot table in the package.
 		/// </summary>
 		public XmlDocument PivotTableXml { get; private set; }
+		
 		/// <summary>
-		/// The package internal URI to the pivottable Xml Document.
+		/// Gets or sets the package internal URI to the pivot table xml Document.
 		/// </summary>
-		public Uri PivotTableUri
-		{
-			get;
-			internal set;
-		}
-		internal Packaging.ZipPackageRelationship Relationship
-		{
-			get;
-			set;
-		}
-		//const string ID_PATH = "@id";
-		//internal int Id
-		//{
-		//    get
-		//    {
-		//        return GetXmlNodeInt(ID_PATH);
-		//    }
-		//    set
-		//    {
-		//        SetXmlNodeString(ID_PATH, value.ToString());
-		//    }
-		//}
-		const string NAME_PATH = "@name";
-		const string DISPLAY_NAME_PATH = "@displayName";
+		public Uri PivotTableUri { get; internal set; }
+		
 		/// <summary>
-		/// Name of the pivottable object in Excel
+		/// Gets or sets the name of the pivot table object in Excel.
 		/// </summary>
 		public string Name
 		{
 			get
 			{
-				return GetXmlNodeString(NAME_PATH);
+				return base.GetXmlNodeString(NamePath);
 			}
 			set
 			{
-				if (WorkSheet.Workbook.ExistsTableName(value))
-				{
+				if (this.WorkSheet.Workbook.ExistsTableName(value))
 					throw (new ArgumentException("PivotTable name is not unique"));
-				}
 				string prevName = Name;
-				if (WorkSheet.Tables.TableNames.ContainsKey(prevName))
+				if (this.WorkSheet.Tables.TableNames.ContainsKey(prevName))
 				{
-					int ix = WorkSheet.Tables.TableNames[prevName];
-					WorkSheet.Tables.TableNames.Remove(prevName);
-					WorkSheet.Tables.TableNames.Add(value, ix);
+					int ix = this.WorkSheet.Tables.TableNames[prevName];
+					this.WorkSheet.Tables.TableNames.Remove(prevName);
+					this.WorkSheet.Tables.TableNames.Add(value, ix);
 				}
-				SetXmlNodeString(NAME_PATH, value);
-				SetXmlNodeString(DISPLAY_NAME_PATH, cleanDisplayName(value));
+				base.SetXmlNodeString(NamePath, value);
+				base.SetXmlNodeString(DisplayNamePath, this.CleanDisplayName(value));
 			}
 		}
-		ExcelPivotCacheDefinition _cacheDefinition = null;
+		
 		/// <summary>
-		/// Reference to the pivot table cache definition object
+		/// Gets the reference to the pivot table cache definition object.
 		/// </summary>
 		public ExcelPivotCacheDefinition CacheDefinition
 		{
 			get
 			{
-				if (_cacheDefinition == null)
-				{
-					_cacheDefinition = new ExcelPivotCacheDefinition(NameSpaceManager, this, null, 1);
-				}
-				return _cacheDefinition;
+				if (myCacheDefinition == null)
+					myCacheDefinition = new ExcelPivotCacheDefinition(this.NameSpaceManager, this, null, 1);
+				return myCacheDefinition;
 			}
 		}
-		private string cleanDisplayName(string name)
-		{
-			return Regex.Replace(name, @"[^\w\.-_]", "_");
-		}
-		#region "Public Properties"
-
+		
 		/// <summary>
-		/// The worksheet where the pivottable is located
+		/// Gets or sets the worksheet where the pivot table is located.
 		/// </summary>
-		public ExcelWorksheet WorkSheet
-		{
-			get;
-			set;
-		}
+		public ExcelWorksheet WorkSheet { get; set; }
+		
 		/// <summary>
-		/// The location of the pivot table
+		/// Gets or sets the location of the pivot table.
 		/// </summary>
-		public ExcelAddress Address
-		{
-			get;
-			internal set;
-		}
+		public ExcelAddress Address { get; internal set; }
+		
 		/// <summary>
-		/// If multiple datafields are displayed in the row area or the column area
+		/// Gets or sets whether multiple datafields are displayed in the row area or the column area.
 		/// </summary>
 		public bool DataOnRows
 		{
 			get
 			{
-				return GetXmlNodeBool("@dataOnRows");
+				return base.GetXmlNodeBool("@dataOnRows");
 			}
 			set
 			{
-				SetXmlNodeBool("@dataOnRows", value);
+				base.SetXmlNodeBool("@dataOnRows", value);
 			}
 		}
+
 		/// <summary>
-		/// if true apply legacy table autoformat number format properties.
+		/// Gets or sets whether to apply the legacy table autoformat number format properties.
 		/// </summary>
 		public bool ApplyNumberFormats
 		{
 			get
 			{
-				return GetXmlNodeBool("@applyNumberFormats");
+				return base.GetXmlNodeBool("@applyNumberFormats");
 			}
 			set
 			{
-				SetXmlNodeBool("@applyNumberFormats", value);
+				base.SetXmlNodeBool("@applyNumberFormats", value);
 			}
 		}
+
 		/// <summary>
-		/// If true apply legacy table autoformat border properties
+		/// Gets or sets whether to apply the legacy table autoformat border properties.
 		/// </summary>
 		public bool ApplyBorderFormats
 		{
 			get
 			{
-				return GetXmlNodeBool("@applyBorderFormats");
+				return base.GetXmlNodeBool("@applyBorderFormats");
 			}
 			set
 			{
-				SetXmlNodeBool("@applyBorderFormats", value);
+				base.SetXmlNodeBool("@applyBorderFormats", value);
 			}
 		}
+
 		/// <summary>
-		/// If true apply legacy table autoformat font properties
+		/// Gets or sets whether to apply the legacy table autoformat font properties.
 		/// </summary>
 		public bool ApplyFontFormats
 		{
 			get
 			{
-				return GetXmlNodeBool("@applyFontFormats");
+				return base.GetXmlNodeBool("@applyFontFormats");
 			}
 			set
 			{
-				SetXmlNodeBool("@applyFontFormats", value);
+				base.SetXmlNodeBool("@applyFontFormats", value);
 			}
 		}
+
 		/// <summary>
-		/// If true apply legacy table autoformat pattern properties
+		/// Gets or sets whether to apply the legacy table autoformat pattern properties.
 		/// </summary>
 		public bool ApplyPatternFormats
 		{
 			get
 			{
-				return GetXmlNodeBool("@applyPatternFormats");
+				return base.GetXmlNodeBool("@applyPatternFormats");
 			}
 			set
 			{
-				SetXmlNodeBool("@applyPatternFormats", value);
+				base.SetXmlNodeBool("@applyPatternFormats", value);
 			}
 		}
+
 		/// <summary>
-		/// If true apply legacy table autoformat width/height properties.
+		/// Gets or sets whether to apply the legacy table autoformat width/height properties.
 		/// </summary>
 		public bool ApplyWidthHeightFormats
 		{
 			get
 			{
-				return GetXmlNodeBool("@applyWidthHeightFormats");
+				return base.GetXmlNodeBool("@applyWidthHeightFormats");
 			}
 			set
 			{
-				SetXmlNodeBool("@applyWidthHeightFormats", value);
+				base.SetXmlNodeBool("@applyWidthHeightFormats", value);
 			}
 		}
+
 		/// <summary>
-		/// Show member property information
+		/// Gets or sets whether to show member property information.
 		/// </summary>
 		public bool ShowMemberPropertyTips
 		{
 			get
 			{
-				return GetXmlNodeBool("@showMemberPropertyTips");
+				return base.GetXmlNodeBool("@showMemberPropertyTips");
 			}
 			set
 			{
-				SetXmlNodeBool("@showMemberPropertyTips", value);
+				base.SetXmlNodeBool("@showMemberPropertyTips", value);
 			}
 		}
+
 		/// <summary>
-		/// Show the drill indicators
+		/// Gets or sets whether to show the drill indicators.
 		/// </summary>
 		public bool ShowCalcMember
 		{
 			get
 			{
-				return GetXmlNodeBool("@showCalcMbrs");
+				return base.GetXmlNodeBool("@showCalcMbrs");
 			}
 			set
 			{
-				SetXmlNodeBool("@showCalcMbrs", value);
+				base.SetXmlNodeBool("@showCalcMbrs", value);
 			}
 		}
+		
 		/// <summary>
-		/// If the user is prevented from drilling down on a PivotItem or aggregate value
+		/// Gets or sets if the user can enable drill down on a PivotItem or aggregate value.
 		/// </summary>
 		public bool EnableDrill
 		{
 			get
 			{
-				return GetXmlNodeBool("@enableDrill", true);
+				return base.GetXmlNodeBool("@enableDrill", true);
 			}
 			set
 			{
-				SetXmlNodeBool("@enableDrill", value);
+				base.SetXmlNodeBool("@enableDrill", value);
 			}
 		}
+
 		/// <summary>
-		/// Show the drill down buttons
+		/// Gets or sets whether to show the drill down buttons.
 		/// </summary>
 		public bool ShowDrill
 		{
 			get
 			{
-				return GetXmlNodeBool("@showDrill", true);
+				return base.GetXmlNodeBool("@showDrill", true);
 			}
 			set
 			{
-				SetXmlNodeBool("@showDrill", value);
+				base.SetXmlNodeBool("@showDrill", value);
 			}
 		}
+
 		/// <summary>
-		/// If the tooltips should be displayed for PivotTable data cells.
+		/// Gets or sets whether the tooltips should be displayed for PivotTable data cells.
 		/// </summary>
 		public bool ShowDataTips
 		{
 			get
 			{
-				return GetXmlNodeBool("@showDataTips", true);
+				return base.GetXmlNodeBool("@showDataTips", true);
 			}
 			set
 			{
-				SetXmlNodeBool("@showDataTips", value, true);
+				base.SetXmlNodeBool("@showDataTips", value, true);
 			}
 		}
+
 		/// <summary>
-		/// If the row and column titles from the PivotTable should be printed.
+		/// Gets or sets whether the row and column titles from the PivotTable should be printed.
 		/// </summary>
 		public bool FieldPrintTitles
 		{
 			get
 			{
-				return GetXmlNodeBool("@fieldPrintTitles");
+				return base.GetXmlNodeBool("@fieldPrintTitles");
 			}
 			set
 			{
-				SetXmlNodeBool("@fieldPrintTitles", value);
+				base.SetXmlNodeBool("@fieldPrintTitles", value);
 			}
 		}
+
 		/// <summary>
-		/// If the row and column titles from the PivotTable should be printed.
+		/// Gets or sets whether the row and column titles from the PivotTable should be printed.
 		/// </summary>
 		public bool ItemPrintTitles
 		{
 			get
 			{
-				return GetXmlNodeBool("@itemPrintTitles");
+				return base.GetXmlNodeBool("@itemPrintTitles");
 			}
 			set
 			{
-				SetXmlNodeBool("@itemPrintTitles", value);
+				base.SetXmlNodeBool("@itemPrintTitles", value);
 			}
 		}
+
 		/// <summary>
-		/// If the grand totals should be displayed for the PivotTable columns
+		/// Gets or sets whether the grand totals should be displayed for the PivotTable columns.
 		/// </summary>
 		public bool ColumGrandTotals
 		{
 			get
 			{
-				return GetXmlNodeBool("@colGrandTotals");
+				return base.GetXmlNodeBool("@colGrandTotals");
 			}
 			set
 			{
-				SetXmlNodeBool("@colGrandTotals", value);
+				base.SetXmlNodeBool("@colGrandTotals", value);
 			}
 		}
+
 		/// <summary>
-		/// If the grand totals should be displayed for the PivotTable rows
+		///Gets or sets whether the grand totals should be displayed for the PivotTable rows.
 		/// </summary>
 		public bool RowGrandTotals
 		{
 			get
 			{
-				return GetXmlNodeBool("@rowGrandTotals");
+				return base.GetXmlNodeBool("@rowGrandTotals");
 			}
 			set
 			{
-				SetXmlNodeBool("@rowGrandTotals", value);
+				base.SetXmlNodeBool("@rowGrandTotals", value);
 			}
 		}
+
 		/// <summary>
-		/// If the drill indicators expand collapse buttons should be printed.
+		/// Gets or sets whether the drill indicators expand collapse buttons should be printed.
 		/// </summary>
 		public bool PrintDrill
 		{
 			get
 			{
-				return GetXmlNodeBool("@printDrill");
+				return base.GetXmlNodeBool("@printDrill");
 			}
 			set
 			{
-				SetXmlNodeBool("@printDrill", value);
+				base.SetXmlNodeBool("@printDrill", value);
 			}
 		}
+
 		/// <summary>
-		/// Indicates whether to show error messages in cells.
+		/// Gets or sets whether to show error messages in cells.
 		/// </summary>
 		public bool ShowError
 		{
 			get
 			{
-				return GetXmlNodeBool("@showError");
+				return base.GetXmlNodeBool("@showError");
 			}
 			set
 			{
-				SetXmlNodeBool("@showError", value);
+				base.SetXmlNodeBool("@showError", value);
 			}
 		}
+	
 		/// <summary>
-		/// The string to be displayed in cells that contain errors.
+		/// Gets or sets the string to be displayed in cells that contain errors.
 		/// </summary>
 		public string ErrorCaption
 		{
 			get
 			{
-				return GetXmlNodeString("@errorCaption");
+				return base.GetXmlNodeString("@errorCaption");
 			}
 			set
 			{
-				SetXmlNodeString("@errorCaption", value);
+				base.SetXmlNodeString("@errorCaption", value);
 			}
 		}
+		
 		/// <summary>
-		/// Specifies the name of the value area field header in the PivotTable. 
+		/// Gets or sets the name of the value area field header in the PivotTable. 
 		/// This caption is shown when the PivotTable when two or more fields are in the values area.
 		/// </summary>
 		public string DataCaption
 		{
 			get
 			{
-				return GetXmlNodeString("@dataCaption");
+				return base.GetXmlNodeString("@dataCaption");
 			}
 			set
 			{
-				SetXmlNodeString("@dataCaption", value);
+				base.SetXmlNodeString("@dataCaption", value);
 			}
 		}
+
 		/// <summary>
-		/// Show field headers
+		/// Gets or sets whether to show field headers.
 		/// </summary>
 		public bool ShowHeaders
 		{
 			get
 			{
-				return GetXmlNodeBool("@showHeaders");
+				return base.GetXmlNodeBool("@showHeaders");
 			}
 			set
 			{
-				SetXmlNodeBool("@showHeaders", value);
+				base.SetXmlNodeBool("@showHeaders", value);
 			}
 		}
+		
 		/// <summary>
-		/// The number of page fields to display before starting another row or column
+		/// Gets or sets the number of page fields to display before starting another row or column.
 		/// </summary>
 		public int PageWrap
 		{
 			get
 			{
-				return GetXmlNodeInt("@pageWrap");
+				return base.GetXmlNodeInt("@pageWrap");
 			}
 			set
 			{
 				if (value < 0)
-				{
 					throw new Exception("Value can't be negative");
-				}
-				SetXmlNodeString("@pageWrap", value.ToString());
+				base.SetXmlNodeString("@pageWrap", value.ToString());
 			}
 		}
+		
 		/// <summary>
-		/// A boolean that indicates whether legacy auto formatting has been applied to the PivotTable view
+		/// Gets or sets whether the legacy auto formatting has been applied to the PivotTable view.
 		/// </summary>
 		public bool UseAutoFormatting
 		{
 			get
 			{
-				return GetXmlNodeBool("@useAutoFormatting");
+				return base.GetXmlNodeBool("@useAutoFormatting");
 			}
 			set
 			{
-				SetXmlNodeBool("@useAutoFormatting", value);
+				base.SetXmlNodeBool("@useAutoFormatting", value);
 			}
 		}
+		
 		/// <summary>
-		/// A boolean that indicates whether the in-grid drop zones should be displayed at runtime, and whether classic layout is applied
+		/// Gets or sets whether the in-grid drop zones should be displayed at runtime, and whether classic layout is applied.
 		/// </summary>
 		public bool GridDropZones
 		{
 			get
 			{
-				return GetXmlNodeBool("@gridDropZones");
+				return base.GetXmlNodeBool("@gridDropZones");
 			}
 			set
 			{
-				SetXmlNodeBool("@gridDropZones", value);
+				base.SetXmlNodeBool("@gridDropZones", value);
 			}
 		}
+		
 		/// <summary>
-		/// Specifies the indentation increment for compact axis and can be used to set the Report Layout to Compact Form
+		/// Gets or sets the indentation increment for compact axis or can be used to set the Report Layout to Compact Form.
 		/// </summary>
 		public int Indent
 		{
 			get
 			{
-				return GetXmlNodeInt("@indent");
+				return base.GetXmlNodeInt("@indent");
 			}
 			set
 			{
-				SetXmlNodeString("@indent", value.ToString());
+				base.SetXmlNodeString("@indent", value.ToString());
 			}
 		}
+		
 		/// <summary>
-		/// A boolean that indicates whether data fields in the PivotTable should be displayed in outline form
+		/// Gets or sets whether data fields in the PivotTable should be displayed in outline form.
 		/// </summary>
 		public bool OutlineData
 		{
 			get
 			{
-				return GetXmlNodeBool("@outlineData");
+				return base.GetXmlNodeBool("@outlineData");
 			}
 			set
 			{
-				SetXmlNodeBool("@outlineData", value);
+				base.SetXmlNodeBool("@outlineData", value);
 			}
 		}
+		
 		/// <summary>
-		/// a boolean that indicates whether new fields should have their outline flag set to true
+		/// Gets or sets whether new fields should have their outline flag set to true.
 		/// </summary>
 		public bool Outline
 		{
 			get
 			{
-				return GetXmlNodeBool("@outline");
+				return base.GetXmlNodeBool("@outline");
 			}
 			set
 			{
-				SetXmlNodeBool("@outline", value);
+				base.SetXmlNodeBool("@outline", value);
 			}
 		}
+		
 		/// <summary>
-		/// A boolean that indicates whether the fields of a PivotTable can have multiple filters set on them
+		/// Gets or sets whether the fields of a PivotTable can have multiple filters set on them.
 		/// </summary>
 		public bool MultipleFieldFilters
 		{
 			get
 			{
-				return GetXmlNodeBool("@multipleFieldFilters");
+				return base.GetXmlNodeBool("@multipleFieldFilters");
 			}
 			set
 			{
-				SetXmlNodeBool("@multipleFieldFilters", value);
+				base.SetXmlNodeBool("@multipleFieldFilters", value);
 			}
 		}
+		
 		/// <summary>
-		/// A boolean that indicates whether new fields should have their compact flag set to true
+		/// Gets or sets whether new fields should have their compact flag set to true.
 		/// </summary>
 		public bool Compact
 		{
 			get
 			{
-				return GetXmlNodeBool("@compact");
+				return base.GetXmlNodeBool("@compact");
 			}
 			set
 			{
-				SetXmlNodeBool("@compact", value);
+				base.SetXmlNodeBool("@compact", value);
 			}
 		}
+		
 		/// <summary>
-		/// A boolean that indicates whether the field next to the data field in the PivotTable should be displayed in the same column of the spreadsheet
+		/// Gets or sets whether the field next to the data field in the PivotTable should be displayed in the same column of the spreadsheet.
 		/// </summary>
 		public bool CompactData
 		{
 			get
 			{
-				return GetXmlNodeBool("@compactData");
+				return base.GetXmlNodeBool("@compactData");
 			}
 			set
 			{
-				SetXmlNodeBool("@compactData", value);
+				base.SetXmlNodeBool("@compactData", value);
 			}
 		}
+		
 		/// <summary>
-		/// Specifies the string to be displayed for grand totals.
+		/// Gets or sets the string to be displayed for grand totals.
 		/// </summary>
 		public string GrandTotalCaption
 		{
 			get
 			{
-				return GetXmlNodeString("@grandTotalCaption");
+				return base.GetXmlNodeString("@grandTotalCaption");
 			}
 			set
 			{
-				SetXmlNodeString("@grandTotalCaption", value);
+				base.SetXmlNodeString("@grandTotalCaption", value);
 			}
 		}
+		
 		/// <summary>
-		/// Specifies the string to be displayed in row header in compact mode.
+		/// Gets or sets the string to be displayed in row header in compact mode.
 		/// </summary>
 		public string RowHeaderCaption
 		{
 			get
 			{
-				return GetXmlNodeString("@rowHeaderCaption");
+				return base.GetXmlNodeString("@rowHeaderCaption");
 			}
 			set
 			{
-				SetXmlNodeString("@rowHeaderCaption", value);
+				base.SetXmlNodeString("@rowHeaderCaption", value);
 			}
 		}
+		
 		/// <summary>
-		/// Specifies the string to be displayed in cells with no value
+		/// Gets or sets the string to be displayed in cells with no value.
 		/// </summary>
 		public string MissingCaption
 		{
 			get
 			{
-				return GetXmlNodeString("@missingCaption");
+				return base.GetXmlNodeString("@missingCaption");
 			}
 			set
 			{
-				SetXmlNodeString("@missingCaption", value);
+				base.SetXmlNodeString("@missingCaption", value);
 			}
 		}
-		const string FIRSTHEADERROW_PATH = "d:location/@firstHeaderRow";
+		
 		/// <summary>
-		/// Specifies the first row of the PivotTable header, relative to the top left cell in the ref value
+		/// Gets or sets the first row of the PivotTable header relative to the top left cell in the ref value.
 		/// </summary>
 		public int FirstHeaderRow
 		{
 			get
 			{
-				return GetXmlNodeInt(FIRSTHEADERROW_PATH);
+				return base.GetXmlNodeInt(FirstHeaderRowPath);
 			}
 			set
 			{
-				SetXmlNodeString(FIRSTHEADERROW_PATH, value.ToString());
+				base.SetXmlNodeString(FirstHeaderRowPath, value.ToString());
 			}
 		}
-		const string FIRSTDATAROW_PATH = "d:location/@firstDataRow";
+		
 		/// <summary>
-		/// Specifies the first column of the PivotTable data, relative to the top left cell in the ref value
+		/// Gets or sets the first column of the PivotTable data relative to the top left cell in the ref value.
 		/// </summary>
 		public int FirstDataRow
 		{
 			get
 			{
-				return GetXmlNodeInt(FIRSTDATAROW_PATH);
+				return base.GetXmlNodeInt(FirstDataRowPath);
 			}
 			set
 			{
-				SetXmlNodeString(FIRSTDATAROW_PATH, value.ToString());
+				base.SetXmlNodeString(FirstDataRowPath, value.ToString());
 			}
 		}
-		const string FIRSTDATACOL_PATH = "d:location/@firstDataCol";
+		
 		/// <summary>
-		/// Specifies the first column of the PivotTable data, relative to the top left cell in the ref value
+		/// Gets or sets the first column of the PivotTable data relative to the top left cell in the ref value.
 		/// </summary>
 		public int FirstDataCol
 		{
 			get
 			{
-				return GetXmlNodeInt(FIRSTDATACOL_PATH);
+				return base.GetXmlNodeInt(FirstDataColumnPath);
 			}
 			set
 			{
-				SetXmlNodeString(FIRSTDATACOL_PATH, value.ToString());
+				base.SetXmlNodeString(FirstDataColumnPath, value.ToString());
 			}
 		}
-		ExcelPivotTableFieldCollection _fields = null;
+		
 		/// <summary>
-		/// The fields in the table 
+		/// Gets the fields in the table .
 		/// </summary>
 		public ExcelPivotTableFieldCollection Fields
 		{
 			get
 			{
-				if (_fields == null)
-				{
-					_fields = new ExcelPivotTableFieldCollection(this, "");
-				}
-				return _fields;
+				if (myFields == null)
+					myFields = new ExcelPivotTableFieldCollection(this, "");
+				return myFields;
 			}
 		}
-		ExcelPivotTableRowColumnFieldCollection _rowFields = null;
+		
 		/// <summary>
-		/// Row label fields 
+		/// Gets the row label fields.
 		/// </summary>
 		public ExcelPivotTableRowColumnFieldCollection RowFields
 		{
 			get
 			{
-				if (_rowFields == null)
-				{
-					_rowFields = new ExcelPivotTableRowColumnFieldCollection(this, "rowFields");
-				}
-				return _rowFields;
+				if (myRowFields == null)
+					myRowFields = new ExcelPivotTableRowColumnFieldCollection(this, "rowFields");
+				return myRowFields;
 			}
 		}
-		ExcelPivotTableRowColumnFieldCollection _columnFields = null;
+		
 		/// <summary>
-		/// Column label fields 
+		/// Gets the column label fields.
 		/// </summary>
 		public ExcelPivotTableRowColumnFieldCollection ColumnFields
 		{
 			get
 			{
-				if (_columnFields == null)
-				{
-					_columnFields = new ExcelPivotTableRowColumnFieldCollection(this, "colFields");
-				}
-				return _columnFields;
+				if (myColumnFields == null)
+					myColumnFields = new ExcelPivotTableRowColumnFieldCollection(this, "colFields");
+				return myColumnFields;
 			}
 		}
-		ExcelPivotTableDataFieldCollection _dataFields = null;
+		
 		/// <summary>
-		/// Value fields 
+		/// Gets the value fields.
 		/// </summary>
 		public ExcelPivotTableDataFieldCollection DataFields
 		{
 			get
 			{
-				if (_dataFields == null)
-				{
-					_dataFields = new ExcelPivotTableDataFieldCollection(this);
-				}
-				return _dataFields;
+				if (myDataFields == null)
+					myDataFields = new ExcelPivotTableDataFieldCollection(this);
+				return myDataFields;
 			}
 		}
-		ExcelPivotTableRowColumnFieldCollection _pageFields = null;
+		
 		/// <summary>
-		/// Report filter fields
+		/// Gets the report filter fields.
 		/// </summary>
 		public ExcelPivotTableRowColumnFieldCollection PageFields
 		{
 			get
 			{
-				if (_pageFields == null)
-				{
-					_pageFields = new ExcelPivotTableRowColumnFieldCollection(this, "pageFields");
-				}
-				return _pageFields;
+				if (myPageFields == null)
+					myPageFields = new ExcelPivotTableRowColumnFieldCollection(this, "pageFields");
+				return myPageFields;
 			}
 		}
-		const string STYLENAME_PATH = "d:pivotTableStyleInfo/@name";
+		
 		/// <summary>
-		/// Pivot style name. Used for custom styles
+		/// Gets or sets the pivot style name that is used for custom styles.
 		/// </summary>
 		public string StyleName
 		{
 			get
 			{
-				return GetXmlNodeString(STYLENAME_PATH);
+				return base.GetXmlNodeString(StyleNamePath);
 			}
 			set
 			{
@@ -888,47 +728,44 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					try
 					{
-						_tableStyle = (TableStyles)Enum.Parse(typeof(TableStyles), value.Substring(10, value.Length - 10), true);
+						myTableStyle = (TableStyles)Enum.Parse(typeof(TableStyles), value.Substring(10, value.Length - 10), true);
 					}
 					catch
 					{
-						_tableStyle = TableStyles.Custom;
+						myTableStyle = TableStyles.Custom;
 					}
 				}
 				else if (value == "None")
 				{
-					_tableStyle = TableStyles.None;
+					myTableStyle = TableStyles.None;
 					value = "";
 				}
 				else
-				{
-					_tableStyle = TableStyles.Custom;
-				}
-				SetXmlNodeString(STYLENAME_PATH, value, true);
+					myTableStyle = TableStyles.Custom;
+				base.SetXmlNodeString(StyleNamePath, value, true);
 			}
 		}
-		TableStyles _tableStyle = Table.TableStyles.Medium6;
+		
 		/// <summary>
-		/// The table style. If this property is cusom the style from the StyleName propery is used.
+		/// Gets or sets the table style. If this is a custom property, the style from the StyleName propery is used.
 		/// </summary>
 		public TableStyles TableStyle
 		{
 			get
 			{
-				return _tableStyle;
+				return myTableStyle;
 			}
 			set
 			{
-				_tableStyle = value;
+				myTableStyle = value;
 				if (value != TableStyles.Custom)
-				{
-					SetXmlNodeString(STYLENAME_PATH, "PivotStyle" + value.ToString());
-				}
+					base.SetXmlNodeString(StyleNamePath, "PivotStyle" + value.ToString());
 			}
 		}
-
-		#endregion
-		#region "Internal Properties"
+		
+		/// <summary>
+		/// Gets or sets the cache id of the pivot table.
+		/// </summary>
 		internal int CacheID
 		{
 			get
@@ -941,7 +778,169 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the pivot table part.
+		/// </summary>
+		internal Packaging.ZipPackagePart Part { get; set; }
+
+		/// <summary>
+		/// Gets or sets the worksheet-pivot table relationship.
+		/// </summary>
+		internal Packaging.ZipPackageRelationship Relationship { get; set; }
 		#endregion
 
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of a <see cref="ExcelPivotTable"/> from a relationship.
+		/// </summary>
+		/// <param name="rel">The relationship to create the pivot table from.</param>
+		/// <param name="sheet">The worksheet the pivot table is on.</param>
+		internal ExcelPivotTable(Packaging.ZipPackageRelationship rel, ExcelWorksheet sheet) :
+			 base(sheet.NameSpaceManager)
+		{
+			this.WorkSheet = sheet;
+			this.PivotTableUri = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
+			this.Relationship = rel;
+			var pck = sheet.Package.Package;
+			this.Part = pck.GetPart(this.PivotTableUri);
+
+			this.PivotTableXml = new XmlDocument();
+			XmlHelper.LoadXmlSafe(this.PivotTableXml, this.Part.GetStream());
+			this.InitSchemaNodeOrder();
+			this.TopNode = this.PivotTableXml.DocumentElement;
+			this.Address = new ExcelAddress(base.GetXmlNodeString("d:location/@ref"));
+
+			myCacheDefinition = new ExcelPivotCacheDefinition(sheet.NameSpaceManager, this);
+			this.LoadFields();
+
+			// Add row fields.
+			foreach (XmlElement rowElem in this.TopNode.SelectNodes("d:rowFields/d:field", this.NameSpaceManager))
+			{
+				if (int.TryParse(rowElem.GetAttribute("x"), out var x) && x >= 0)
+					this.RowFields.AddInternal(this.Fields[x]);
+				else
+					rowElem.ParentNode.RemoveChild(rowElem);
+			}
+
+			// Add column fields.
+			foreach (XmlElement colElem in this.TopNode.SelectNodes("d:colFields/d:field", this.NameSpaceManager))
+			{
+				if (int.TryParse(colElem.GetAttribute("x"), out var x) && x >= 0)
+					this.ColumnFields.AddInternal(this.Fields[x]);
+				else
+					colElem.ParentNode.RemoveChild(colElem);
+			}
+
+			// Add Page elements
+			foreach (XmlElement pageElem in this.TopNode.SelectNodes("d:pageFields/d:pageField", this.NameSpaceManager))
+			{
+				if (int.TryParse(pageElem.GetAttribute("fld"), out var fld) && fld >= 0)
+				{
+					var field = this.Fields[fld];
+					field.myPageFieldSettings = new ExcelPivotTablePageFieldSettings(this.NameSpaceManager, pageElem, field, fld);
+					this.PageFields.AddInternal(field);
+				}
+			}
+
+			// Add data elements
+			foreach (XmlElement dataElem in this.TopNode.SelectNodes("d:dataFields/d:dataField", this.NameSpaceManager))
+			{
+				if (int.TryParse(dataElem.GetAttribute("fld"), out var fld) && fld >= 0)
+				{
+					var field = this.Fields[fld];
+					var dataField = new ExcelPivotTableDataField(this.NameSpaceManager, dataElem, field);
+					this.DataFields.AddInternal(dataField);
+				}
+			}
+		}
+		
+		/// <summary>
+		/// Creates an instance of a <see cref="ExcelPivotTable"/>.
+		/// </summary>
+		/// <param name="sheet">The worksheet of the pivot table.</param>
+		/// <param name="address">The address of the pivot table.</param>
+		/// <param name="sourceAddress">The address of the source data.</param>
+		/// <param name="name">The name of the pivot table.</param>
+		/// <param name="tblId">The pivot table id.</param>
+		internal ExcelPivotTable(ExcelWorksheet sheet, ExcelAddress address, ExcelRangeBase sourceAddress, string name, int tblId) :
+			 base(sheet.NameSpaceManager)
+		{
+			this.WorkSheet = sheet;
+			this.Address = address;
+			var pck = sheet.Package.Package;
+
+			this.PivotTableXml = new XmlDocument();
+			LoadXmlSafe(this.PivotTableXml, this.GetStartXml(name, tblId, address, sourceAddress), Encoding.UTF8);
+			this.TopNode = this.PivotTableXml.DocumentElement;
+			this.PivotTableUri = GetNewUri(pck, "/xl/pivotTables/pivotTable{0}.xml", ref tblId);
+			this.InitSchemaNodeOrder();
+
+			this.Part = pck.CreatePart(this.PivotTableUri, ExcelPackage.schemaPivotTable);
+			this.PivotTableXml.Save(this.Part.GetStream());
+
+			// Worksheet-PivotTable relationship
+			this.Relationship = sheet.Part.CreateRelationship(UriHelper.ResolvePartUri(sheet.WorksheetUri, this.PivotTableUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
+
+			myCacheDefinition = new ExcelPivotCacheDefinition(sheet.NameSpaceManager, this, sourceAddress, tblId);
+			myCacheDefinition.Relationship = this.Part.CreateRelationship(UriHelper.ResolvePartUri(this.PivotTableUri, myCacheDefinition.CacheDefinitionUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheDefinition");
+
+			sheet.Workbook.AddPivotTable(this.CacheID.ToString(), myCacheDefinition.CacheDefinitionUri);
+
+			this.LoadFields();
+
+			using (var range = sheet.Cells[address.Address])
+			{
+				range.Clear();
+			}
+		}
+		#endregion
+
+		#region Private Methods
+		private void InitSchemaNodeOrder()
+		{
+			this.SchemaNodeOrder = new string[] { "location", "pivotFields", "rowFields", "rowItems", "colFields", "colItems", "pageFields", "pageItems", "dataFields", "dataItems", "formats", "pivotTableStyleInfo" };
+		}
+
+		private void LoadFields()
+		{
+			int index = 0;
+			// Add fields.
+			foreach (XmlElement fieldElem in this.TopNode.SelectNodes("d:pivotFields/d:pivotField", this.NameSpaceManager))
+			{
+				var fld = new ExcelPivotTableField(this.NameSpaceManager, fieldElem, this, index, index++);
+				this.Fields.AddInternal(fld);
+			}
+
+			// Add fields.
+			index = 0;
+			foreach (XmlElement fieldElem in myCacheDefinition.TopNode.SelectNodes("d:cacheFields/d:cacheField", this.NameSpaceManager))
+			{
+				var fld = this.Fields[index++];
+				fld.SetCacheFieldNode(fieldElem);
+			}
+		}
+
+		private string GetStartXml(string name, int id, ExcelAddress address, ExcelAddress sourceAddress)
+		{
+			string xml = string.Format("<pivotTableDefinition xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" name=\"{0}\" cacheId=\"{1}\" dataOnRows=\"1\" applyNumberFormats=\"0\" applyBorderFormats=\"0\" applyFontFormats=\"0\" applyPatternFormats=\"0\" applyAlignmentFormats=\"0\" applyWidthHeightFormats=\"1\" dataCaption=\"Data\"  createdVersion=\"4\" showMemberPropertyTips=\"0\" useAutoFormatting=\"1\" itemPrintTitles=\"1\" indent=\"0\" compact=\"0\" compactData=\"0\" gridDropZones=\"1\">", name, id);
+
+			xml += string.Format("<location ref=\"{0}\" firstHeaderRow=\"1\" firstDataRow=\"1\" firstDataCol=\"1\" /> ", address.FirstAddress);
+			xml += string.Format("<pivotFields count=\"{0}\">", sourceAddress._toCol - sourceAddress._fromCol + 1);
+			for (int col = sourceAddress._fromCol; col <= sourceAddress._toCol; col++)
+			{
+				xml += "<pivotField showAll=\"0\" />";
+			}
+
+			xml += "</pivotFields>";
+			xml += "<pivotTableStyleInfo name=\"PivotStyleMedium9\" showRowHeaders=\"1\" showColHeaders=\"1\" showRowStripes=\"0\" showColStripes=\"0\" showLastColumn=\"1\" />";
+			xml += "</pivotTableDefinition>";
+			return xml;
+		}
+
+		private string CleanDisplayName(string name)
+		{
+			return Regex.Replace(name, @"[^\w\.-_]", "_");
+		}
+		#endregion
 	}
 }
