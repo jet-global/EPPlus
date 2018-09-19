@@ -39,51 +39,71 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// </summary>
 	public class ExcelPivotTableFieldItem : XmlHelper
 	{
-		ExcelPivotTableField _field;
-		internal ExcelPivotTableFieldItem(XmlNamespaceManager ns, XmlNode topNode, ExcelPivotTableField field) :
-			 base(ns, topNode)
-		{
-			_field = field;
-		}
+		#region Class Variables
+		private ExcelPivotTableField myField;
+		#endregion
+
+		#region Properties
 		/// <summary>
-		/// The text. Unique values only
+		/// Gets or sets the text with unique values only.
 		/// </summary>
 		public string Text
 		{
 			get
 			{
-				return GetXmlNodeString("@n");
+				return base.GetXmlNodeString("@n");
 			}
 			set
 			{
 				if (string.IsNullOrEmpty(value))
 				{
-					DeleteNode("@n");
+					base.DeleteNode("@n");
 					return;
 				}
-				foreach (var item in _field.Items)
+				foreach (var item in myField.Items)
 				{
 					if (item.Text == value)
-					{
 						throw (new ArgumentException("Duplicate Text"));
-					}
 				}
-				SetXmlNodeString("@n", value);
+				base.SetXmlNodeString("@n", value);
 			}
 		}
+
+		/// <summary>
+		/// Gets the reference values.
+		/// </summary>
 		internal int X
 		{
 			get
 			{
-				return GetXmlNodeInt("@x");
+				return base.GetXmlNodeInt("@x");
 			}
 		}
+
+		/// <summary>
+		/// Gets the grand total value.
+		/// </summary>
 		internal string T
 		{
 			get
 			{
-				return GetXmlNodeString("@t");
+				return base.GetXmlNodeString("@t");
 			}
 		}
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of a <see cref="ExcelPivotTableFieldItem"/>.
+		/// </summary>
+		/// <param name="ns">The namespace of the worksheet.</param>
+		/// <param name="topNode">The top node of the xml.</param>
+		/// <param name="field">The pivot table field.</param>
+		internal ExcelPivotTableFieldItem(XmlNamespaceManager ns, XmlNode topNode, ExcelPivotTableField field) :
+			 base(ns, topNode)
+		{
+			myField = field;
+		}
+		#endregion
 	}
 }

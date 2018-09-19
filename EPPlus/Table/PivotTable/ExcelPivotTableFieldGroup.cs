@@ -36,122 +36,157 @@ using System.Xml;
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// Base class for pivot table field groups
+	/// Base class for pivot table field groups.
 	/// </summary>
 	public class ExcelPivotTableFieldGroup : XmlHelper
 	{
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of a <see cref="ExcelPivotTableFieldGroup"/>.
+		/// </summary>
+		/// <param name="ns">The namespace of the worksheet.</param>
+		/// <param name="topNode">The top node in the xml.</param>
 		internal ExcelPivotTableFieldGroup(XmlNamespaceManager ns, XmlNode topNode) :
 			 base(ns, topNode)
 		{
 
 		}
+		#endregion
 	}
+	
 	/// <summary>
-	/// A date group
+	/// A pivot table field date group.
 	/// </summary>
 	public class ExcelPivotTableFieldDateGroup : ExcelPivotTableFieldGroup
 	{
-		internal ExcelPivotTableFieldDateGroup(XmlNamespaceManager ns, XmlNode topNode) :
-			 base(ns, topNode)
-		{
-		}
-		const string groupByPath = "d:fieldGroup/d:rangePr/@groupBy";
+		#region Constants
+		private const string GroupByPath = "d:fieldGroup/d:rangePr/@groupBy";
+		#endregion
+
+		#region Properties
 		/// <summary>
-		/// How to group the date field
+		/// Gets how to group the date field.
 		/// </summary>
 		public eDateGroupBy GroupBy
 		{
 			get
 			{
-				string v = GetXmlNodeString(groupByPath);
+				string v = base.GetXmlNodeString(ExcelPivotTableFieldDateGroup.GroupByPath);
 				if (v != "")
-				{
 					return (eDateGroupBy)Enum.Parse(typeof(eDateGroupBy), v, true);
-				}
 				else
-				{
 					throw (new Exception("Invalid date Groupby"));
-				}
 			}
 			private set
 			{
-				SetXmlNodeString(groupByPath, value.ToString().ToLower(CultureInfo.InvariantCulture));
+				base.SetXmlNodeString(ExcelPivotTableFieldDateGroup.GroupByPath, value.ToString().ToLower(CultureInfo.InvariantCulture));
 			}
 		}
+
 		/// <summary>
-		/// Auto detect start date
+		/// Gets whether there exist an auto detect start date.
 		/// </summary>
 		public bool AutoStart
 		{
 			get
 			{
-				return GetXmlNodeBool("@autoStart", false);
+				return base.GetXmlNodeBool("@autoStart", false);
 			}
 		}
+
 		/// <summary>
-		/// Auto detect end date
+		/// Gets whether there exist an auto detect end date.
 		/// </summary>
 		public bool AutoEnd
 		{
 			get
 			{
-				return GetXmlNodeBool("@autoStart", false);
+				return base.GetXmlNodeBool("@autoStart", false);
 			}
 		}
-	}
-	/// <summary>
-	/// A pivot table field numeric grouping
-	/// </summary>
-	public class ExcelPivotTableFieldNumericGroup : ExcelPivotTableFieldGroup
-	{
-		internal ExcelPivotTableFieldNumericGroup(XmlNamespaceManager ns, XmlNode topNode) :
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of a <see cref="ExcelPivotTableFieldDateGroup"/>.
+		/// </summary>
+		/// <param name="ns">The namespace of the worksheet.</param>
+		/// <param name="topNode">The top node in the xml.</param>
+		internal ExcelPivotTableFieldDateGroup(XmlNamespaceManager ns, XmlNode topNode) :
 			 base(ns, topNode)
 		{
 		}
-		const string startPath = "d:fieldGroup/d:rangePr/@startNum";
+		#endregion
+	}
+
+	/// <summary>
+	/// A pivot table field numeric grouping.
+	/// </summary>
+	public class ExcelPivotTableFieldNumericGroup : ExcelPivotTableFieldGroup
+	{
+		#region Constants
+		private const string StartPath = "d:fieldGroup/d:rangePr/@startNum";
+		private const string EndPath = "d:fieldGroup/d:rangePr/@endNum";
+		private const string GroupIntervalPath = "d:fieldGroup/d:rangePr/@groupInterval";
+		#endregion
+
+		#region Properties
 		/// <summary>
-		/// Start value
+		/// Gets the start value.
 		/// </summary>
 		public double Start
 		{
 			get
 			{
-				return (double)GetXmlNodeDoubleNull(startPath);
+				return (double)base.GetXmlNodeDoubleNull(ExcelPivotTableFieldNumericGroup.StartPath);
 			}
 			private set
 			{
-				SetXmlNodeString(startPath, value.ToString(CultureInfo.InvariantCulture));
+				base.SetXmlNodeString(ExcelPivotTableFieldNumericGroup.StartPath, value.ToString(CultureInfo.InvariantCulture));
 			}
 		}
-		const string endPath = "d:fieldGroup/d:rangePr/@endNum";
+		
 		/// <summary>
-		/// End value
+		/// Gets the end value.
 		/// </summary>
 		public double End
 		{
 			get
 			{
-				return (double)GetXmlNodeDoubleNull(endPath);
+				return (double)base.GetXmlNodeDoubleNull(ExcelPivotTableFieldNumericGroup.EndPath);
 			}
 			private set
 			{
-				SetXmlNodeString(endPath, value.ToString(CultureInfo.InvariantCulture));
+				base.SetXmlNodeString(ExcelPivotTableFieldNumericGroup.EndPath, value.ToString(CultureInfo.InvariantCulture));
 			}
 		}
-		const string groupIntervalPath = "d:fieldGroup/d:rangePr/@groupInterval";
+
 		/// <summary>
-		/// Interval
+		/// Gets the interval.
 		/// </summary>
 		public double Interval
 		{
 			get
 			{
-				return (double)GetXmlNodeDoubleNull(groupIntervalPath);
+				return (double)base.GetXmlNodeDoubleNull(ExcelPivotTableFieldNumericGroup.GroupIntervalPath);
 			}
 			private set
 			{
-				SetXmlNodeString(groupIntervalPath, value.ToString(CultureInfo.InvariantCulture));
+				base.SetXmlNodeString(ExcelPivotTableFieldNumericGroup.GroupIntervalPath, value.ToString(CultureInfo.InvariantCulture));
 			}
 		}
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of a <see cref="ExcelPivotTableFieldNumericGroup"/>.
+		/// </summary>
+		/// <param name="ns">The namespace of the worksheet.</param>
+		/// <param name="topNode">The top node in the xml.</param>
+		internal ExcelPivotTableFieldNumericGroup(XmlNamespaceManager ns, XmlNode topNode) :
+			 base(ns, topNode)
+		{
+		}
+		#endregion
 	}
 }

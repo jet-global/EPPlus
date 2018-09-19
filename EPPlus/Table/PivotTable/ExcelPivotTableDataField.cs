@@ -37,149 +37,133 @@ using OfficeOpenXml.Style.XmlAccess;
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// A pivo table data field
+	/// A pivot table data field.
 	/// </summary>
 	public class ExcelPivotTableDataField : XmlHelper
 	{
-		internal ExcelPivotTableDataField(XmlNamespaceManager ns, XmlNode topNode, ExcelPivotTableField field) :
-			 base(ns, topNode)
-		{
-			if (topNode.Attributes.Count == 0)
-			{
-				Index = field.Index;
-				BaseField = 0;
-				BaseItem = 0;
-			}
-
-			Field = field;
-		}
+		#region Properties
 		/// <summary>
-		/// The field
+		/// Gets the pivot table field.
 		/// </summary>
-		public ExcelPivotTableField Field
-		{
-			get;
-			private set;
-		}
+		public ExcelPivotTableField Field { get; private set; }
+		
 		/// <summary>
-		/// The index of the datafield
+		/// Gets or sets the index of the data field.
 		/// </summary>
 		public int Index
 		{
 			get
 			{
-				return GetXmlNodeInt("@fld");
+				return base.GetXmlNodeInt("@fld");
 			}
 			internal set
 			{
-				SetXmlNodeString("@fld", value.ToString());
+				base.SetXmlNodeString("@fld", value.ToString());
 			}
 		}
+		
 		/// <summary>
-		/// The name of the datafield
+		/// Gets or sets the name of the data field.
 		/// </summary>
 		public string Name
 		{
 			get
 			{
-				return GetXmlNodeString("@name");
+				return base.GetXmlNodeString("@name");
 			}
 			set
 			{
-				if (Field._table.DataFields.ExistsDfName(value, this))
-				{
+				if (this.Field.myTable.DataFields.ExistsDfName(value, this))
 					throw (new InvalidOperationException("Duplicate datafield name"));
-				}
-				SetXmlNodeString("@name", value);
+				base.SetXmlNodeString("@name", value);
 			}
 		}
+		
 		/// <summary>
-		/// Field index. Reference to the field collection
+		/// Gets or sets the field index referencing the field collection.
 		/// </summary>
 		public int BaseField
 		{
 			get
 			{
-				return GetXmlNodeInt("@baseField");
+				return base.GetXmlNodeInt("@baseField");
 			}
 			set
 			{
-				SetXmlNodeString("@baseField", value.ToString());
+				base.SetXmlNodeString("@baseField", value.ToString());
 			}
 		}
+		
 		/// <summary>
-		/// Specifies the index to the base item when the ShowDataAs calculation is in use
+		/// Gets or sets the index to the base item when the ShowDataAs calculation is in use.
 		/// </summary>
 		public int BaseItem
 		{
 			get
 			{
-				return GetXmlNodeInt("@baseItem");
+				return base.GetXmlNodeInt("@baseItem");
 			}
 			set
 			{
-				SetXmlNodeString("@baseItem", value.ToString());
+				base.SetXmlNodeString("@baseItem", value.ToString());
 			}
 		}
+		
 		/// <summary>
-		/// Number format id. 
+		/// Gets or sets the number format id. 
 		/// </summary>
 		internal int NumFmtId
 		{
 			get
 			{
-				return GetXmlNodeInt("@numFmtId");
+				return base.GetXmlNodeInt("@numFmtId");
 			}
 			set
 			{
-				SetXmlNodeString("@numFmtId", value.ToString());
+				base.SetXmlNodeString("@numFmtId", value.ToString());
 			}
 		}
+		
 		/// <summary>
-		/// Number format for the data column
+		/// Gets or sets the number format for the data column.
 		/// </summary>
 		public string Format
 		{
 			get
 			{
-				foreach (var nf in Field._table.WorkSheet.Workbook.Styles.NumberFormats)
+				foreach (var nf in this.Field.myTable.WorkSheet.Workbook.Styles.NumberFormats)
 				{
-					if (nf.NumFmtId == NumFmtId)
-					{
+					if (nf.NumFmtId == this.NumFmtId)
 						return nf.Format;
-					}
 				}
-				return Field._table.WorkSheet.Workbook.Styles.NumberFormats[0].Format;
+				return this.Field.myTable.WorkSheet.Workbook.Styles.NumberFormats[0].Format;
 			}
 			set
 			{
-				var styles = Field._table.WorkSheet.Workbook.Styles;
+				var styles = this.Field.myTable.WorkSheet.Workbook.Styles;
 
 				ExcelNumberFormatXml nf = null;
 				if (!styles.NumberFormats.FindByID(value, ref nf))
 				{
-					nf = new ExcelNumberFormatXml(NameSpaceManager) { Format = value, NumFmtId = styles.NumberFormats.NextId++ };
+					nf = new ExcelNumberFormatXml(this.NameSpaceManager) { Format = value, NumFmtId = styles.NumberFormats.NextId++ };
 					styles.NumberFormats.Add(value, nf);
 				}
-				NumFmtId = nf.NumFmtId;
+				this.NumFmtId = nf.NumFmtId;
 			}
 		}
+		
 		/// <summary>
-		/// Type of aggregate function
+		/// Gets or sets the type of aggregate function.
 		/// </summary>
 		public DataFieldFunctions Function
 		{
 			get
 			{
-				string s = GetXmlNodeString("@subtotal");
+				string s = base.GetXmlNodeString("@subtotal");
 				if (s == "")
-				{
 					return DataFieldFunctions.None;
-				}
 				else
-				{
 					return (DataFieldFunctions)Enum.Parse(typeof(DataFieldFunctions), s, true);
-				}
 			}
 			set
 			{
@@ -187,7 +171,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				switch (value)
 				{
 					case DataFieldFunctions.None:
-						DeleteNode("@subtotal");
+						base.DeleteNode("@subtotal");
 						return;
 					case DataFieldFunctions.CountNums:
 						v = "CountNums";
@@ -202,30 +186,29 @@ namespace OfficeOpenXml.Table.PivotTable
 						v = value.ToString().ToLower(CultureInfo.InvariantCulture);
 						break;
 				}
-				SetXmlNodeString("@subtotal", v);
+				base.SetXmlNodeString("@subtotal", v);
 			}
 		}
-		/////Since we have no items, Excel will crash when we use showDataAs options that require baseItem's
-		//public eShowDataAs ShowDataAs
-		//{
-		//    get
-		//    {
-		//        string s = GetXmlNodeString("@showDataAs");
-		//        if (s == "")
-		//        {
-		//            return eShowDataAs.Normal;
-		//        }
-		//        else
-		//        {
-		//            return (eShowDataAs)Enum.Parse(typeof(eShowDataAs), s, true);
-		//        }
-		//    }
-		//    set
-		//    {
-		//        string v = value.ToString();
-		//        v = v.Substring(0, 1).ToLower() + v.Substring(1);
-		//        SetXmlNodeString("@showDataAs", v);
-		//    }
-		//}
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of a <see cref="ExcelPivotTableDataField"/>.
+		/// </summary>
+		/// <param name="ns">The namespace of the sheet.</param>
+		/// <param name="topNode">The top node of the xml.</param>
+		/// <param name="field">The pivot table field.</param>
+		internal ExcelPivotTableDataField(XmlNamespaceManager ns, XmlNode topNode, ExcelPivotTableField field) :
+			 base(ns, topNode)
+		{
+			if (topNode.Attributes.Count == 0)
+			{
+				this.Index = field.Index;
+				this.BaseField = 0;
+				this.BaseItem = 0;
+			}
+			this.Field = field;
+		}
+		#endregion
 	}
 }

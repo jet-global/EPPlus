@@ -6488,7 +6488,7 @@ namespace EPPlusTest
 			{
 				package.Save();
 				var pivotTable = package.Workbook.Worksheets.ElementAt(1).PivotTables.First();
-				var refAddress = pivotTable.CacheDefinition.GetXmlNodeString(ExcelPivotCacheDefinition._sourceAddressPath);
+				var refAddress = pivotTable.CacheDefinition.GetXmlNodeString(ExcelPivotCacheDefinition.SourceAddressPath);
 				Assert.AreEqual($"'Venta diaria'!$I$9:$U$15", refAddress);
 			}
 		}

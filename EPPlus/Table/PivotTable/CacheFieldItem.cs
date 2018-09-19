@@ -4,7 +4,7 @@ using System.Xml;
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// Wraps a <s /> node in <pivotcachedefinition-cacheFields-cacheField-sharedItems />.
+	/// Wraps a <s/> node in <pivotcachedefinition-cacheFields-cacheField-sharedItems/>.
 	/// </summary>
 	public class CacheFieldItem
 	{

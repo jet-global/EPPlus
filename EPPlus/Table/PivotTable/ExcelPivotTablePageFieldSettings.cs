@@ -34,82 +34,91 @@ using System.Xml;
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// A page / report filter field
+	/// A page/report filter field.
 	/// </summary>
 	public class ExcelPivotTablePageFieldSettings : XmlHelper
 	{
-		ExcelPivotTableField _field;
-		internal ExcelPivotTablePageFieldSettings(XmlNamespaceManager ns, XmlNode topNode, ExcelPivotTableField field, int index) :
-			 base(ns, topNode)
-		{
-			if (GetXmlNodeString("@hier") == "")
-			{
-				Hier = -1;
-			}
-			_field = field;
-		}
-		internal int Index
-		{
-			get
-			{
-				return GetXmlNodeInt("@fld");
-			}
-			set
-			{
-				SetXmlNodeString("@fld", value.ToString());
-			}
-		}
+		#region Class Variables
+		private ExcelPivotTableField myField;
+		#endregion
+
+		#region Properties
 		/// <summary>
-		/// The Name of the field
+		/// Gets or sets the name of the field.
 		/// </summary>
 		public string Name
 		{
 			get
 			{
-				return GetXmlNodeString("@name");
+				return base.GetXmlNodeString("@name");
 			}
 			set
 			{
-				SetXmlNodeString("@name", value);
+				base.SetXmlNodeString("@name", value);
 			}
 		}
-		/***** Dont work. Need items to be populated. ****/
-		///// <summary>
-		///// The selected item 
-		///// </summary>
-		//public int SelectedItem
-		//{
-		//    get
-		//    {
-		//        return GetXmlNodeInt("@item");
-		//    }
-		//    set
-		//    {
-		//        if (value < 0) throw new InvalidOperationException("Can't be negative");
-		//        SetXmlNodeString("@item", value.ToString());
-		//    }
-		//}
+
+		/// <summary>
+		/// Gets or sets the index of the field.
+		/// </summary>
+		internal int Index
+		{
+			get
+			{
+				return base.GetXmlNodeInt("@fld");
+			}
+			set
+			{
+				base.SetXmlNodeString("@fld", value.ToString());
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the number format id of the field.
+		/// </summary>
 		internal int NumFmtId
 		{
 			get
 			{
-				return GetXmlNodeInt("@numFmtId");
+				return base.GetXmlNodeInt("@numFmtId");
 			}
 			set
 			{
-				SetXmlNodeString("@numFmtId", value.ToString());
+				base.SetXmlNodeString("@numFmtId", value.ToString());
 			}
 		}
+
+		/// <summary>
+		/// Gets or sets the hier of the field.
+		/// </summary>
 		internal int Hier
 		{
 			get
 			{
-				return GetXmlNodeInt("@hier");
+				return base.GetXmlNodeInt("@hier");
 			}
 			set
 			{
-				SetXmlNodeString("@hier", value.ToString());
+				base.SetXmlNodeString("@hier", value.ToString());
 			}
 		}
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of a <see cref="ExcelPivotTablePageFieldSettings"/>.
+		/// </summary>
+		/// <param name="ns">The namespace of the worksheet.</param>
+		/// <param name="topNode">The top node in the xml.</param>
+		/// <param name="field">The pivot table field.</param>
+		/// <param name="index">The index of the field.</param>
+		internal ExcelPivotTablePageFieldSettings(XmlNamespaceManager ns, XmlNode topNode, ExcelPivotTableField field, int index) :
+			 base(ns, topNode)
+		{
+			if (base.GetXmlNodeString("@hier") == "")
+				this.Hier = -1;
+			myField = field;
+		}
+		#endregion
 	}
 }
