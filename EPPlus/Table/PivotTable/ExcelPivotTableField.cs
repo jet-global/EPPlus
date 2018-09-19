@@ -580,32 +580,6 @@ namespace OfficeOpenXml.Table.PivotTable
 						if (item.T == "")
 							myItems.AddInternal(item);
 					}
-					//if (_grouping is ExcelPivotTableFieldDateGroup)
-					//{
-					//    ExcelPivotTableFieldDateGroup dtgrp = ((ExcelPivotTableFieldDateGroup)_grouping);
-
-					//    ExcelPivotTableFieldItem minItem=null, maxItem=null;
-					//    foreach (var item in _items)
-					//    {
-					//        if (item.X == 0)
-					//        {
-					//            minItem = item;
-					//        }
-					//        else if (maxItem == null || maxItem.X < item.X)
-					//        {
-					//            maxItem = item;
-					//        }
-					//    }
-					//    if (dtgrp.AutoStart)
-					//    {
-					//        _items._list.Remove(minItem);
-					//    }
-					//    if (dtgrp.AutoEnd)
-					//    {
-					//        _items._list.Remove(maxItem);
-					//    }
-
-					//}
 				}
 				return myItems;
 			}
@@ -691,7 +665,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="index">The index of the field.</param>
 		/// <param name="fieldNodeText">The text of the new node.</param>
 		/// <param name="indexAttrText">The text of the index attribute.</param>
-		/// <returns></returns>
+		/// <returns>The added xml element.</returns>
 		internal XmlElement AppendField(XmlNode rowsNode, int index, string fieldNodeText, string indexAttrText)
 		{
 			XmlElement prevField = null, newElement;
@@ -702,12 +676,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					if (fieldIndex == index)    //Row already exists
 						return field;
-					//else if (fieldIndex > index)
-					//{
-					//    newElement = rowsNode.OwnerDocument.CreateElement(fieldNodeText, ExcelPackage.schemaMain);
-					//    newElement.SetAttribute(indexAttrText, index.ToString());
-					//    rowsNode.InsertAfter(newElement, field);
-					//}
 				}
 				prevField = field;
 			}
@@ -745,7 +713,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="startDate">The start date.</param>
 		/// <param name="endDate">The end date.</param>
 		/// <param name="interval">The interval of the grouping.</param>
-		/// <returns></returns>
+		/// <returns>The new field data group.</returns>
 		internal ExcelPivotTableFieldDateGroup SetDateGroup(eDateGroupBy groupBy, DateTime startDate, DateTime endDate, int interval)
 		{
 			ExcelPivotTableFieldDateGroup group;
@@ -785,7 +753,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="start">The start value.</param>
 		/// <param name="end">The end value.</param>
 		/// <param name="interval">The interval value.</param>
-		/// <returns></returns>
+		/// <returns>The new field numeric group.</returns>
 		internal ExcelPivotTableFieldNumericGroup SetNumericGroup(double start, double end, double interval)
 		{
 			ExcelPivotTableFieldNumericGroup group;

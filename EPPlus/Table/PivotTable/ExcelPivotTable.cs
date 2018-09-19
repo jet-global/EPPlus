@@ -63,7 +63,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Properties
 		/// <summary>
-		/// Gets or sets the xml data representing the pivot table in the package.
+		/// Gets the xml data representing the pivot table in the package.
 		/// </summary>
 		public XmlDocument PivotTableXml { get; private set; }
 		

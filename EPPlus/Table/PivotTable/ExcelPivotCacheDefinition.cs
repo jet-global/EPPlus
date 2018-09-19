@@ -75,6 +75,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// The path of the data source cell range.
 		/// </summary>
 		internal const string SourceAddressPath = "d:cacheSource/d:worksheetSource/@ref";
+
 		private const string SourceNamePath = "d:cacheSource/d:worksheetSource/@name";
 		#endregion
 
@@ -83,6 +84,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// The source data range for the pivot table.
 		/// </summary>
 		internal ExcelRangeBase mySourceRange;
+
 		private List<CacheFieldNode> myCacheFields = new List<CacheFieldNode>();
 		#endregion
 
@@ -203,7 +205,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal Packaging.ZipPackageRelationship RecordRelationship { get; set; }
 
 		/// <summary>
-		/// Gets or setes the record relationship id.
+		/// Gets or sets the record relationship id.
 		/// </summary>
 		internal string RecordRelationshipID
 		{

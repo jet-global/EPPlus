@@ -126,6 +126,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 	}
 
+	/// <summary>
+	/// A collection of pivot table field objects.
+	/// </summary>
 	public class ExcelPivotTableFieldCollection : ExcelPivotTableFieldCollectionBase<ExcelPivotTableField>
 	{
 		#region Properties

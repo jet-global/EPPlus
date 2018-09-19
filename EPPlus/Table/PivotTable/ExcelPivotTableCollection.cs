@@ -35,7 +35,7 @@ using System.Collections.Generic;
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// A collection of pivottable objects
+	/// A collection of pivot table objects.
 	/// </summary>
 	public class ExcelPivotTableCollection : IEnumerable<ExcelPivotTable>
 	{
@@ -64,7 +64,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets the pivot table Index starting at base 0.
 		/// </summary>
 		/// <param name="Index">The position of the pivot table.</param>
-		/// <returns></returns>
+		/// <returns>The pivot table at the given index.</returns>
 		public ExcelPivotTable this[int Index]
 		{
 			get
@@ -120,7 +120,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="range">The range address including header and total row</param>
 		/// <param name="source">The Source data range address</param>
 		/// <param name="name">The name of the table. Must be unique </param>
-		/// <returns>The pivottable object</returns>
+		/// <returns>The pivot table object</returns>
 		public ExcelPivotTable Add(ExcelAddress range, ExcelRangeBase source, string name)
 		{
 			if (string.IsNullOrEmpty(name))

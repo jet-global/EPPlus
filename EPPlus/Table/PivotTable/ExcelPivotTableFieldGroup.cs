@@ -63,21 +63,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		private const string GroupByPath = "d:fieldGroup/d:rangePr/@groupBy";
 		#endregion
 
-		#region Constructors
-		/// <summary>
-		/// Creates an instance of a <see cref="ExcelPivotTableFieldDateGroup"/>.
-		/// </summary>
-		/// <param name="ns">The namespace of the worksheet.</param>
-		/// <param name="topNode">The top node in the xml.</param>
-		internal ExcelPivotTableFieldDateGroup(XmlNamespaceManager ns, XmlNode topNode) :
-			 base(ns, topNode)
-		{
-		}
-		#endregion
-
 		#region Properties
 		/// <summary>
-		/// Gets or sets how to group the date field.
+		/// Gets how to group the date field.
 		/// </summary>
 		public eDateGroupBy GroupBy
 		{
@@ -117,6 +105,18 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Creates an instance of a <see cref="ExcelPivotTableFieldDateGroup"/>.
+		/// </summary>
+		/// <param name="ns">The namespace of the worksheet.</param>
+		/// <param name="topNode">The top node in the xml.</param>
+		internal ExcelPivotTableFieldDateGroup(XmlNamespaceManager ns, XmlNode topNode) :
+			 base(ns, topNode)
+		{
+		}
+		#endregion
 	}
 
 	/// <summary>
@@ -132,7 +132,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Properties
 		/// <summary>
-		/// Gets or sets the start value.
+		/// Gets the start value.
 		/// </summary>
 		public double Start
 		{
@@ -147,7 +147,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 		
 		/// <summary>
-		/// Gets or sets the end value.
+		/// Gets the end value.
 		/// </summary>
 		public double End
 		{
@@ -162,7 +162,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets the interval.
+		/// Gets the interval.
 		/// </summary>
 		public double Interval
 		{

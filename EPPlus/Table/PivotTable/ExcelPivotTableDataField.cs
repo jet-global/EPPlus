@@ -43,7 +43,7 @@ namespace OfficeOpenXml.Table.PivotTable
 	{
 		#region Properties
 		/// <summary>
-		/// Gets or sets the pivot table field.
+		/// Gets the pivot table field.
 		/// </summary>
 		public ExcelPivotTableField Field { get; private set; }
 		
