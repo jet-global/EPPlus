@@ -32,7 +32,6 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -41,6 +40,7 @@ using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OfficeOpenXml.Packaging.Ionic.Zip;
 using OfficeOpenXml.Table;
+using OfficeOpenXml.Table.PivotTable;
 using OfficeOpenXml.Utils;
 using OfficeOpenXml.VBA;
 
@@ -96,10 +96,10 @@ namespace OfficeOpenXml
 		private ExcelWorksheets _worksheets;
 		private OfficeProperties _properties;
 		private ExcelStyles _styles;
-		private ExcelNamedRangeCollection _names;
 		private FormulaParser _formulaParser = null;
 		private FormulaParserManager _parserManager;
-		private List<ExcelSlicerCache> _slicerCaches;
+		private List<ExcelSlicerCache> mySlicerCaches;
+		private List<ExcelPivotCacheDefinition> myPivotCacheDefinitions;
 		private decimal _standardFontWidth = decimal.MinValue;
 		private string _fontID = "";
 		private ExcelProtection _protection = null;
@@ -112,16 +112,39 @@ namespace OfficeOpenXml
 
 		#region Public Properties
 		/// <summary>
+		/// Gets a list of <see cref="ExcelPivotCacheDefinition"/>.
+		/// </summary>
+		public List<ExcelPivotCacheDefinition> PivotCacheDefinitions
+		{
+			get
+			{
+				if (myPivotCacheDefinitions == null)
+				{
+					myPivotCacheDefinitions = new List<ExcelPivotCacheDefinition>();
+					var cacheDefinitions = this.Part.GetRelationshipsByType(ExcelPackage.schemaPivotCacheRelationship);
+					foreach (var cache in cacheDefinitions)
+					{
+						var pivotCacheTargetUri = $"xl/pivotCache/{ExcelPivotCacheDefinition.GetCacheDefinitionUriName(cache.TargetUri)}";
+						var uri = new Uri(pivotCacheTargetUri, UriKind.Relative);
+						var possiblePart = this.Package.GetXmlFromUri(uri);
+						myPivotCacheDefinitions.Add(new ExcelPivotCacheDefinition(this.NameSpaceManager, this.Package, possiblePart, uri));
+					}
+				}
+				return myPivotCacheDefinitions;
+			}
+		}
+
+		/// <summary>
 		/// Gets a list of the slicer caches present in this workbook.
 		/// </summary>
 		public List<ExcelSlicerCache> SlicerCaches
 		{
 			get
 			{
-				if (this._slicerCaches == null)
+				if (mySlicerCaches == null)
 				{
 					var slicerCacheNamespaceManager = ExcelSlicer.SlicerDocumentNamespaceManager;
-					this._slicerCaches = new List<ExcelSlicerCache>();
+					mySlicerCaches = new List<ExcelSlicerCache>();
 					var slicerCaches = this.Part.GetRelationshipsByType(ExcelPackage.schemaSlicerCache);
 					foreach (var cache in slicerCaches)
 					{
@@ -129,10 +152,10 @@ namespace OfficeOpenXml
 						var uri = new Uri($"/xl/{cacheTargetUri}", UriKind.Relative);
 						var possiblePart = this.Package.GetXmlFromUri(uri);
 						var slicerCacheNode = possiblePart.SelectSingleNode("default:slicerCacheDefinition", slicerCacheNamespaceManager);
-						this._slicerCaches.Add(new ExcelSlicerCache(slicerCacheNode, slicerCacheNamespaceManager, cache.TargetUri, possiblePart));
+						mySlicerCaches.Add(new ExcelSlicerCache(slicerCacheNode, slicerCacheNamespaceManager, cache.TargetUri, possiblePart));
 					}
 				}
-				return this._slicerCaches;
+				return mySlicerCaches;
 			}
 		}
 
@@ -160,13 +183,7 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Provides access to named ranges
 		/// </summary>
-		public ExcelNamedRangeCollection Names
-		{
-			get
-			{
-				return this._names;
-			}
-		}
+		public ExcelNamedRangeCollection Names { get; }
 
 		/// <summary>
 		/// Gets the <see cref="FormulaParserManager"/> to use when parsing formulas in this workbook.
@@ -583,7 +600,7 @@ namespace OfficeOpenXml
 			this.SharedStringsUri = new Uri("/xl/sharedStrings.xml", UriKind.Relative);
 			this.StylesUri = new Uri("/xl/styles.xml", UriKind.Relative);
 
-			this._names = new ExcelNamedRangeCollection(this);
+			this.Names = new ExcelNamedRangeCollection(this);
 			this.NameSpaceManager = namespaceManager;
 			this.TopNode = this.WorkbookXml.DocumentElement;
 			this.SchemaNodeOrder = new string[] { "fileVersion", "fileSharing", "workbookPr", "workbookProtection", "bookViews", "sheets", "functionGroups", "functionPrototypes", "externalReferences", "definedNames", "calcPr", "oleSize", "customWorkbookViews", "pivotCaches", "smartTagPr", "smartTagTypes", "webPublishing", "fileRecoveryPr", };
@@ -1035,7 +1052,7 @@ namespace OfficeOpenXml
 					{
 						top.RemoveAll();
 					}
-					foreach (ExcelNamedRange name in _names)
+					foreach (ExcelNamedRange name in this.Names)
 					{
 
 						XmlElement elem = this.WorkbookXml.CreateElement("definedName", ExcelPackage.schemaMain);

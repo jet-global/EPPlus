@@ -822,29 +822,12 @@ namespace OfficeOpenXml
 				StreamWriter streamTbl = new StreamWriter(partTbl.GetStream(FileMode.Create, FileAccess.Write));
 				streamTbl.Write(xml);
 				streamTbl.Flush();
-
-				xml = tbl.CacheDefinition.CacheDefinitionXml.OuterXml;
-				var uriCd = GetNewUri(this.Package.Package, "/xl/pivotCache/pivotCacheDefinition{0}.xml", ref Id);
-				var partCd = this.Package.Package.CreatePart(uriCd, ExcelPackage.schemaPivotCacheDefinition, this.Package.Compression);
-				StreamWriter streamCd = new StreamWriter(partCd.GetStream(FileMode.Create, FileAccess.Write));
-				streamCd.Write(xml);
-				streamCd.Flush();
-
-				xml = "<pivotCacheRecords xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" count=\"0\" />";
-				var uriRec = new Uri(string.Format("/xl/pivotCache/pivotCacheRecords{0}.xml", Id), UriKind.Relative);
-				while (this.Package.Package.PartExists(uriRec))
-				{
-					uriRec = new Uri(string.Format("/xl/pivotCache/pivotCacheRecords{0}.xml", ++Id), UriKind.Relative);
-				}
-				var partRec = this.Package.Package.CreatePart(uriRec, ExcelPackage.schemaPivotCacheRecords, this.Package.Compression);
-				StreamWriter streamRec = new StreamWriter(partRec.GetStream(FileMode.Create, FileAccess.Write));
-				streamRec.Write(xml);
-				streamRec.Flush();
-
-				//create the relationship and add the ID to the worksheet xml.
+				
+				// Create the relationship and add the ID to the worksheet xml.
 				addedWorksheet.Part.CreateRelationship(UriHelper.ResolvePartUri(addedWorksheet.WorksheetUri, uriTbl), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
-				partTbl.CreateRelationship(UriHelper.ResolvePartUri(tbl.Relationship.SourceUri, uriCd), tbl.CacheDefinition.Relationship.TargetMode, tbl.CacheDefinition.Relationship.RelationshipType);
-				partCd.CreateRelationship(UriHelper.ResolvePartUri(uriCd, uriRec), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheRecords");
+				// Creates the relationship to the original table's cache definition.
+				// Copying pivot tables does not duplicate cache definitions.
+				partTbl.CreateRelationship(UriHelper.ResolvePartUri(tbl.WorksheetRelationship.SourceUri, tbl.CacheDefinition.CacheDefinitionUri), tbl.CacheDefinitionRelationship.TargetMode, tbl.CacheDefinitionRelationship.RelationshipType);
 			}
 		}
 

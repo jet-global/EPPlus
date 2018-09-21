@@ -1557,6 +1557,7 @@ namespace EPPlusTest
 
 		#region Copy Worksheet Copies Drawings Tests
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\SlicerFromExcel.xlsx")]
 		public void CopyWorksheetCopiesExcelSlicer()
 		{
 			var tempFile = new FileInfo(Path.GetTempFileName());
