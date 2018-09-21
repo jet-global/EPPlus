@@ -115,6 +115,7 @@ namespace OfficeOpenXml
 		internal const string schemaVt = @"http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes";
 
 		//Pivottables
+		internal const string schemaPivotCacheRelationship = @"http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition";
 		internal const string schemaPivotTable = @"application/vnd.openxmlformats-officedocument.spreadsheetml.pivotTable+xml";
 		internal const string schemaPivotCacheDefinition = @"application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheDefinition+xml";
 		internal const string schemaPivotCacheRecords = @"application/vnd.openxmlformats-officedocument.spreadsheetml.pivotCacheRecords+xml";

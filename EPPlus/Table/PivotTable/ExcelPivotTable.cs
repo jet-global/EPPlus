@@ -30,9 +30,11 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -85,7 +87,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				if (this.WorkSheet.Workbook.ExistsTableName(value))
 					throw (new ArgumentException("PivotTable name is not unique"));
-				string prevName = Name;
+				string prevName = this.Name;
 				if (this.WorkSheet.Tables.TableNames.ContainsKey(prevName))
 				{
 					int ix = this.WorkSheet.Tables.TableNames[prevName];
@@ -105,8 +107,26 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				if (myCacheDefinition == null)
-					myCacheDefinition = new ExcelPivotCacheDefinition(this.NameSpaceManager, this, null, 1);
+				{
+					if (this.CacheDefinitionRelationship == null)
+						throw new InvalidOperationException($"{nameof(this.CacheDefinitionRelationship)} is null.");
+
+					var pivotTableCacheDefinitionPartName = ExcelPivotCacheDefinition.GetCacheDefinitionUriName(this.CacheDefinitionRelationship.TargetUri);
+					foreach (var cacheDefinition in this.WorkSheet.Workbook.PivotCacheDefinitions)
+					{
+						var cacheDefinitionPartName = ExcelPivotCacheDefinition.GetCacheDefinitionUriName(cacheDefinition.CacheDefinitionUri);
+						if (pivotTableCacheDefinitionPartName.IsEquivalentTo(cacheDefinitionPartName))
+						{
+							myCacheDefinition = cacheDefinition;
+							break;
+						}
+					}
+				}
 				return myCacheDefinition;
+			}
+			private set
+			{
+				myCacheDefinition = value;
 			}
 		}
 		
@@ -786,7 +806,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Gets or sets the worksheet-pivot table relationship.
 		/// </summary>
-		internal Packaging.ZipPackageRelationship Relationship { get; set; }
+		internal Packaging.ZipPackageRelationship WorksheetRelationship { get; set; }
+
+		/// <summary>
+		/// Gets or sets the cache definition-pivot table relationship.
+		/// </summary>
+		internal Packaging.ZipPackageRelationship CacheDefinitionRelationship { get; set; }
 		#endregion
 
 		#region Constructors
@@ -800,7 +825,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			this.WorkSheet = sheet;
 			this.PivotTableUri = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
-			this.Relationship = rel;
+			this.WorksheetRelationship = rel;
 			var pck = sheet.Package.Package;
 			this.Part = pck.GetPart(this.PivotTableUri);
 
@@ -810,7 +835,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.TopNode = this.PivotTableXml.DocumentElement;
 			this.Address = new ExcelAddress(base.GetXmlNodeString("d:location/@ref"));
 
-			myCacheDefinition = new ExcelPivotCacheDefinition(sheet.NameSpaceManager, this);
+			var rels = this.Part.GetRelationshipsByType(ExcelPackage.schemaRelationships + "/pivotCacheDefinition");
+			if (rels.Count != 1)
+				throw new InvalidOperationException($"Pivot table had an unexpected number ({rels.Count}) of pivot cache definitions.");
+			this.CacheDefinitionRelationship = rels.FirstOrDefault();
+
 			this.LoadFields();
 
 			// Add row fields.
@@ -879,12 +908,15 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.PivotTableXml.Save(this.Part.GetStream());
 
 			// Worksheet-PivotTable relationship
-			this.Relationship = sheet.Part.CreateRelationship(UriHelper.ResolvePartUri(sheet.WorksheetUri, this.PivotTableUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
+			this.WorksheetRelationship = sheet.Part.CreateRelationship(UriHelper.ResolvePartUri(sheet.WorksheetUri, this.PivotTableUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
 
 			myCacheDefinition = new ExcelPivotCacheDefinition(sheet.NameSpaceManager, this, sourceAddress, tblId);
-			myCacheDefinition.Relationship = this.Part.CreateRelationship(UriHelper.ResolvePartUri(this.PivotTableUri, myCacheDefinition.CacheDefinitionUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheDefinition");
+			sheet.Workbook.PivotCacheDefinitions.Add(myCacheDefinition);
 
-			sheet.Workbook.AddPivotTable(this.CacheID.ToString(), myCacheDefinition.CacheDefinitionUri);
+			// CacheDefinition-PivotTable relationship
+			this.CacheDefinitionRelationship = this.Part.CreateRelationship(UriHelper.ResolvePartUri(this.PivotTableUri, myCacheDefinition.CacheDefinitionUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheDefinition");
+
+			sheet.Workbook.AddPivotTable(this.CacheID.ToString(), this.CacheDefinition.CacheDefinitionUri);
 
 			this.LoadFields();
 
@@ -913,10 +945,14 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// Add fields.
 			index = 0;
-			foreach (XmlElement fieldElem in myCacheDefinition.TopNode.SelectNodes("d:cacheFields/d:cacheField", this.NameSpaceManager))
+			var fieldNodes = this.CacheDefinition.TopNode.SelectNodes("d:cacheFields/d:cacheField", this.NameSpaceManager);
+			if (fieldNodes != null)
 			{
-				var fld = this.Fields[index++];
-				fld.SetCacheFieldNode(fieldElem);
+				foreach (XmlElement fieldElem in fieldNodes)
+				{
+					var fld = this.Fields[index++];
+					fld.SetCacheFieldNode(fieldElem);
+				}
 			}
 		}
 
