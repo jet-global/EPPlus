@@ -111,10 +111,10 @@ namespace OfficeOpenXml.Table.PivotTable
 					if (this.CacheDefinitionRelationship == null)
 						throw new InvalidOperationException($"{nameof(this.CacheDefinitionRelationship)} is null.");
 
-					var pivotTableCacheDefinitionPartName = ExcelPivotCacheDefinition.GetCacheDefinitionUriName(this.CacheDefinitionRelationship.TargetUri);
+					var pivotTableCacheDefinitionPartName = UriHelper.GetUriEndTargetName(this.CacheDefinitionRelationship.TargetUri);
 					foreach (var cacheDefinition in this.WorkSheet.Workbook.PivotCacheDefinitions)
 					{
-						var cacheDefinitionPartName = ExcelPivotCacheDefinition.GetCacheDefinitionUriName(cacheDefinition.CacheDefinitionUri);
+						var cacheDefinitionPartName = UriHelper.GetUriEndTargetName(cacheDefinition.CacheDefinitionUri);
 						if (pivotTableCacheDefinitionPartName.IsEquivalentTo(cacheDefinitionPartName))
 						{
 							myCacheDefinition = cacheDefinition;

@@ -24,38 +24,89 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
+	#region Enums
 	/// <summary>
-	/// Wraps a <s/> node in <pivotcachedefinition-cacheFields-cacheField-sharedItems/>.
+	/// The possible types of values in a record.
 	/// </summary>
-	public class CacheFieldItem
+	public enum PivotCacheRecordType
 	{
+		/// <summary>
+		/// A boolean type.
+		/// </summary>
+		b,
+		/// <summary>
+		/// A date time type.
+		/// </summary>
+		d,
+		/// <summary>
+		/// An error value type.
+		/// </summary>
+		e,
+		/// <summary>
+		/// A no value type.
+		/// </summary>
+		m,
+		/// <summary>
+		/// A numeric type.
+		/// </summary>
+		n,
+		/// <summary>
+		/// A character value type.
+		/// </summary>
+		s,
+		/// <summary>
+		/// A shared items index type.
+		/// </summary>
+		x
+	}
+	#endregion
+
+	/// <summary>
+	/// Wraps a <r/> node in <pivotCacheRecords/>.
+	/// </summary>
+	public class CacheRecordNode
+	{
+		#region Class Variables
+		private List<CacheRecordItem> myItems = new List<CacheRecordItem>();
+		#endregion
+
 		#region Properties
 		/// <summary>
-		/// Gets or sets the value of this item.
+		/// Gets a readonly list of the items in this <see cref="CacheRecordNode"/>.
 		/// </summary>
-		public string Value
+		public IReadOnlyList<CacheRecordItem> Items
 		{
-			get { return this.Node.Attributes["v"].Value; }
-			set { this.Node.Attributes["v"].Value = value; }
+			get { return myItems; }
 		}
 
 		private XmlNode Node { get; set; }
+		private XmlNamespaceManager NameSpaceManager { get; set; }
 		#endregion
 
 		#region Constructors
 		/// <summary>
-		/// Creates an instance of a <see cref="CacheFieldItem"/>.
+		/// Creates an instance of a <see cref="CacheRecordNode"/>.
 		/// </summary>
-		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheFieldItem"/>.</param>
-		public CacheFieldItem(XmlNode node)
+		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheRecordNode"/>.</param>
+		/// <param name="namespaceManager">The namespace manager to use for searching child nodes.</param>
+		public CacheRecordNode(XmlNode node, XmlNamespaceManager namespaceManager)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
+			if (namespaceManager == null)
+				throw new ArgumentNullException(nameof(namespaceManager));
 			this.Node = node;
+			this.NameSpaceManager = namespaceManager;
+			// Selects all possible child node types.
+			foreach (XmlNode cacheRecordItem in this.Node.SelectNodes("d:b | d:d | d:e | d:m | d:n | d:s | d:x", this.NameSpaceManager))
+			{
+				myItems.Add(new CacheRecordItem(cacheRecordItem));
+			}
 		}
 		#endregion
 	}

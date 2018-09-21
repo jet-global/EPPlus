@@ -249,7 +249,11 @@
     <Compile Include="Style\XmlAccess\ExcelFontXmlTest.cs" />
     <Compile Include="Table\PivotTable\CacheFieldItemTest.cs" />
     <Compile Include="Table\PivotTable\CacheFieldNodeTest.cs" />
-    <Compile Include="Table\PivotTable\ExcelPivotCacheDefinitionTest.cs" />
+    <Compile Include="Table\PivotTable\CacheRecordItemTest.cs" />
+    <Compile Include="Table\PivotTable\CacheRecordNodeTest.cs" />
+    <Compile Include="Table\PivotTable\ExcelPivotTableTest.cs" />
+    <Compile Include="TestUtility.cs" />
+    <Compile Include="Utils\UriHelperTests.cs" />
     <Compile Include="Utils\ConvertUtilTest.cs" />
     <Compile Include="DataValidation\CustomValidationTests.cs" />
     <Compile Include="DataValidation\DataValidationTests.cs" />

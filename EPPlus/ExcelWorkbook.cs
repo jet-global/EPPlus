@@ -124,7 +124,7 @@ namespace OfficeOpenXml
 					var cacheDefinitions = this.Part.GetRelationshipsByType(ExcelPackage.schemaPivotCacheRelationship);
 					foreach (var cache in cacheDefinitions)
 					{
-						var pivotCacheTargetUri = $"xl/pivotCache/{ExcelPivotCacheDefinition.GetCacheDefinitionUriName(cache.TargetUri)}";
+						var pivotCacheTargetUri = $"xl/pivotCache/{UriHelper.GetUriEndTargetName(cache.TargetUri)}";
 						var uri = new Uri(pivotCacheTargetUri, UriKind.Relative);
 						var possiblePart = this.Package.GetXmlFromUri(uri);
 						myPivotCacheDefinitions.Add(new ExcelPivotCacheDefinition(this.NameSpaceManager, this.Package, possiblePart, uri));

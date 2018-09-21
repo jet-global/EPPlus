@@ -29,11 +29,16 @@ using System.Xml;
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// Wraps a <s/> node in <pivotcachedefinition-cacheFields-cacheField-sharedItems/>.
+	/// Wraps a node in <pivotCacheRecords-r/>.
 	/// </summary>
-	public class CacheFieldItem
+	public class CacheRecordItem
 	{
 		#region Properties
+		/// <summary>
+		/// Gets or sets the type of this item.
+		/// </summary>
+		public PivotCacheRecordType Type { get; }
+
 		/// <summary>
 		/// Gets or sets the value of this item.
 		/// </summary>
@@ -48,14 +53,15 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Constructors
 		/// <summary>
-		/// Creates an instance of a <see cref="CacheFieldItem"/>.
+		/// Creates an instance of a <see cref="CacheRecordItem"/>.
 		/// </summary>
-		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheFieldItem"/>.</param>
-		public CacheFieldItem(XmlNode node)
+		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheRecordItem"/>.</param>
+		public CacheRecordItem(XmlNode node)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
 			this.Node = node;
+			this.Type = (PivotCacheRecordType)Enum.Parse(typeof(PivotCacheRecordType), node.Name);
 		}
 		#endregion
 	}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace OfficeOpenXml.Utils
 {
@@ -7,40 +8,30 @@ namespace OfficeOpenXml.Utils
 		internal static Uri ResolvePartUri(Uri sourceUri, Uri targetUri)
 		{
 			if (targetUri.OriginalString.StartsWith("/"))
-			{
 				return targetUri;
-			}
 			string[] source = sourceUri.OriginalString.Split('/');
 			string[] target = targetUri.OriginalString.Split('/');
 
 			int t = target.Length - 1;
 			int s;
 			if (sourceUri.OriginalString.EndsWith("/")) //is the source a directory?
-			{
 				s = source.Length - 1;
-			}
 			else
-			{
 				s = source.Length - 2;
-			}
 
 			string file = target[t--];
 
 			while (t >= 0)
 			{
 				if (target[t] == ".")
-				{
 					break;
-				}
 				else if (target[t] == "..")
 				{
 					s--;
 					t--;
 				}
 				else
-				{
 					file = target[t--] + "/" + file;
-				}
 			}
 			if (s >= 0)
 			{
@@ -59,13 +50,9 @@ namespace OfficeOpenXml.Utils
 
 			int slen;
 			if (WorksheetUri.OriginalString.EndsWith("/"))
-			{
 				slen = source.Length;
-			}
 			else
-			{
 				slen = source.Length - 1;
-			}
 			int i = 0;
 			while (i < slen && i < target.Length && source[i] == target[i])
 			{
@@ -83,6 +70,25 @@ namespace OfficeOpenXml.Utils
 				file += (file == "" ? "" : "/") + target[t];
 			}
 			return new Uri(dirUp + file, UriKind.Relative);
+		}
+
+		/// <summary>
+		/// Gets the end uri target path name.
+		/// </summary>
+		/// <param name="uri">The uri.</param>
+		/// <param name="expectedNameType">Name that end target element of URI must begin with (optional).</param>
+		/// <returns>The name of the end target path.</returns>
+		internal static string GetUriEndTargetName(Uri uri, string expectedNameType = null)
+		{
+			if (uri == null)
+				throw new ArgumentNullException(nameof(uri));
+			var splitValues = uri.ToString().Split('/');
+			if (splitValues.Any())
+			{
+				if (expectedNameType == null || splitValues.Last().StartsWith(expectedNameType, StringComparison.InvariantCultureIgnoreCase))
+					return splitValues.Last();
+			}
+			throw new InvalidOperationException($"Name was not found in '{uri}'.");
 		}
 	}
 }
