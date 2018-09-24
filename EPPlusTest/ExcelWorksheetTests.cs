@@ -3523,6 +3523,27 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void InsertRowBetweenUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+
+				worksheet.InsertRow(8, 1);
+
+				Assert.AreEqual("I11:J17", pivotTable.Address.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+			}
+		}
+
+		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeExternal.xlsx")]
 		public void InsertRowUpdatesPivotTableSourceRangeHandlesExternalDataSources()
 		{
@@ -4274,6 +4295,27 @@ namespace EPPlusTest
 
 				Assert.AreEqual("I9:J15", pivotTable.Address.Address);
 				Assert.AreEqual("C2:F5", pivotTable.CacheDefinition.SourceRange.Address);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void DeleteRowBetweenUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+
+				worksheet.DeleteRow(8, 1);
+
+				Assert.AreEqual("I9:J15", pivotTable.Address.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
 			}
 		}
 
