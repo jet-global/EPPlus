@@ -251,7 +251,9 @@
     <Compile Include="Table\PivotTable\CacheFieldNodeTest.cs" />
     <Compile Include="Table\PivotTable\CacheRecordItemTest.cs" />
     <Compile Include="Table\PivotTable\CacheRecordNodeTest.cs" />
+    <Compile Include="Table\PivotTable\ExcelPivotCacheDefinitionTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableTest.cs" />
+    <Compile Include="Table\PivotTable\PivotTableTestBase.cs" />
     <Compile Include="TestUtility.cs" />
     <Compile Include="Utils\UriHelperTests.cs" />
     <Compile Include="Utils\ConvertUtilTest.cs" />

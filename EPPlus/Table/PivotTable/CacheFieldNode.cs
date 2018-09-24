@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using OfficeOpenXml.Extensions;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -87,6 +88,36 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				myItems.Add(new CacheFieldItem(cacheFieldItem));
 			}
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Gets the index of the target value.
+		/// </summary>
+		/// <param name="value">The target value in the list.</param>
+		/// <returns></returns>
+		public int GetSharedItemIndex(string value)
+		{
+			for (int i = 0; i < this.Items.Count; i++)
+			{
+				if (value.IsEquivalentTo(this.Items[i].Value))
+					return i;
+			}
+			return -1;
+		}
+
+		/// <summary>
+		/// Adds a new field item to the list.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The index of the new item.</returns>
+		public int AddItem(string value)
+		{
+			if (string.IsNullOrEmpty(value))
+				throw new ArgumentNullException(nameof(value));
+			myItems.Add(new CacheFieldItem(this.Node, value));
+			return myItems.Count - 1;
 		}
 		#endregion
 	}

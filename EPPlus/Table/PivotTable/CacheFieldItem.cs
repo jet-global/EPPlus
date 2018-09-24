@@ -57,6 +57,21 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(node));
 			this.Node = node;
 		}
+
+		/// <summary>
+		/// Creates an instance of a <see cref="CacheFieldItem"/> with a given value.
+		/// </summary>
+		/// <param name="parentNode">The <see cref="XmlNode"/> for this <see cref="CacheFieldItem"/>.</param>
+		/// <param name="value">The value of this <see cref="CacheFieldItem"/>.</param>
+		public CacheFieldItem(XmlNode parentNode, string value)
+		{
+			if (parentNode == null)
+				throw new ArgumentNullException(nameof(parentNode));
+			this.Node = parentNode.OwnerDocument.CreateNode(XmlNodeType.Element, "s", parentNode.NamespaceURI);
+			var attr = parentNode.OwnerDocument.CreateAttribute("v");
+			this.Node.Attributes.Append(attr);
+			this.Value = value;
+		}
 		#endregion
 	}
 }

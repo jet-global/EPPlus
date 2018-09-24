@@ -84,6 +84,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets or sets the reference to the internal package part.
 		/// </summary>
 		internal Packaging.ZipPackagePart Part { get; set; }
+
+		private ExcelPivotCacheDefinition CacheDefinition { get; }
 		#endregion
 
 		#region Constructors
@@ -93,11 +95,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="ns">The namespace of the worksheet.</param>
 		/// <param name="cacheRecordsXml">The <see cref="ExcelPivotCacheRecords"/> xml document.</param>
 		/// <param name="targetUri">The <see cref="ExcelPivotCacheRecords"/> target uri.</param>
-		public ExcelPivotCacheRecords(XmlNamespaceManager ns, XmlDocument cacheRecordsXml, Uri targetUri) : base(ns, null)
+		/// <param name="cacheDefinition">The cache definition of the pivot table.</param>
+		public ExcelPivotCacheRecords(XmlNamespaceManager ns, XmlDocument cacheRecordsXml, Uri targetUri, ExcelPivotCacheDefinition cacheDefinition) : base(ns, null)
 		{
 			this.CachaRecordsXml = cacheRecordsXml;
 			base.TopNode = cacheRecordsXml.SelectSingleNode($"d:{ExcelPivotCacheRecords.Name}", ns);
 			this.Uri = targetUri;
+			this.CacheDefinition = cacheDefinition;
 
 			var cacheRecordNodes = this.TopNode.SelectNodes("d:r", base.NameSpaceManager);
 			foreach (XmlNode record in cacheRecordNodes)
@@ -112,7 +116,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="ns">The namespace of the worksheet.</param>
 		/// <param name="package">The <see cref="Packaging.ZipPackage"/> of the Excel package.</param>
 		/// <param name="tableId">The <see cref="ExcelPivotTable"/>'s ID.</param>
-		public ExcelPivotCacheRecords(XmlNamespaceManager ns, Packaging.ZipPackage package, ref int tableId) : base(ns, null)
+		/// <param name="cacheDefinition">The cache definition of the pivot table.</param>
+		public ExcelPivotCacheRecords(XmlNamespaceManager ns, Packaging.ZipPackage package, ref int tableId, ExcelPivotCacheDefinition cacheDefinition) : base(ns, null)
 		{
 			// CacheRecord. Create an empty one.
 			this.Uri = XmlHelper.GetNewUri(package, $"/xl/pivotCache/{ExcelPivotCacheRecords.Name}{{0}}.xml", ref tableId);
@@ -122,6 +127,21 @@ namespace OfficeOpenXml.Table.PivotTable
 			cacheRecord.Save(recPart.GetStream());
 
 			base.TopNode = cacheRecord.FirstChild;
+			this.CacheDefinition = cacheDefinition;
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Update the cache items.
+		/// </summary>
+		/// <param name="row">The row in the source table.</param>
+		/// <param name="col">The column in the source table.</param>
+		/// <param name="value">The new value.</param>
+		public void UpdateRecord(int row, int col, object value)
+		{
+			var targetRecord = myRecords[row];
+			targetRecord.UpdateItem(col, value, this.CacheDefinition.CacheFields[col]);
 		}
 		#endregion
 	}

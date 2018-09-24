@@ -10,6 +10,23 @@ namespace EPPlusTest.Table.PivotTable
 	{
 		#region Constructor Tests
 		[TestMethod]
+		public void CacheFieldItemConstructorTest()
+		{
+			XmlDocument document = new XmlDocument();
+			document.LoadXml(@"<cacheField name=""Item"" numFmtId=""0""><sharedItems count=""2""><s v=""Bike""/><s v=""Car""/></sharedItems></cacheField>");
+			var node = document.SelectSingleNode("//cacheField");
+			var item = new CacheFieldItem(node, "jet");
+			Assert.AreEqual("jet", item.Value);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void CacheFieldItemNullParentNodeThrowsException()
+		{
+			new CacheFieldItem(null, "jet");
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void CacheFieldItemNullXmlNodeThrowsException()
 		{

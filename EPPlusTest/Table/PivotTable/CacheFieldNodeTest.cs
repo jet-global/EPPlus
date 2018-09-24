@@ -7,7 +7,7 @@ using OfficeOpenXml.Table.PivotTable;
 namespace EPPlusTest.Table.PivotTable
 {
 	[TestClass]
-	public class CacheFieldNodeTest
+	public class CacheFieldNodeTest : PivotTableTestBase
 	{
 		#region Constructor Tests
 		[TestMethod]
@@ -61,6 +61,51 @@ namespace EPPlusTest.Table.PivotTable
 			Assert.AreEqual("10000", cacheFieldNode.Items[0].Value);
 			Assert.AreEqual("20000", cacheFieldNode.Items[1].Value);
 			Assert.AreEqual("30000", cacheFieldNode.Items[2].Value);
+		}
+		#endregion
+
+		#region AddItem Tests
+		[TestMethod]
+		public void AddItemTest()
+		{
+			var node = base.GetTestCacheFieldNode();
+			node.AddItem("jet");
+			Assert.AreEqual(3, node.Items.Count);
+			Assert.AreEqual("jet", node.Items[2].Value);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void AddItemNullValue()
+		{
+			var node = base.GetTestCacheFieldNode();
+			node.AddItem(null);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void AddItemEmptyStringValue()
+		{
+			var node = base.GetTestCacheFieldNode();
+			node.AddItem(string.Empty);
+		}
+		#endregion
+
+		#region GetSharedItemIndex Tests
+		[TestMethod]
+		public void GetSharedItemIndexTest()
+		{
+			var node = base.GetTestCacheFieldNode();
+			var index = node.GetSharedItemIndex("Car");
+			Assert.AreEqual(1, index);
+		}
+
+		[TestMethod]
+		public void GetSharedItemIndexValueNotFound()
+		{
+			var node = base.GetTestCacheFieldNode();
+			var index = node.GetSharedItemIndex("Mountain");
+			Assert.AreEqual(-1, index);
 		}
 		#endregion
 
