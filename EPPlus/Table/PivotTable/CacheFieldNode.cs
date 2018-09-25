@@ -96,7 +96,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets the index of the target value.
 		/// </summary>
 		/// <param name="value">The target value in the list.</param>
-		/// <returns></returns>
+		/// <returns>The index of the value in the list.</returns>
 		public int GetSharedItemIndex(string value)
 		{
 			for (int i = 0; i < this.Items.Count; i++)

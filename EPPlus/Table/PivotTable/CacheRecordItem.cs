@@ -4,7 +4,7 @@
 * EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
 * See http://www.codeplex.com/EPPlus for details.
 *
-* Copyright (C) 2011-2018 Jan Källman, Evan Schallerer, and others as noted in the source history.
+* Copyright (C) 2011-2018 Michelle Lau, Evan Schallerer, and others as noted in the source history.
 *
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
