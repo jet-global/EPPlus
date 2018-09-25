@@ -4,7 +4,7 @@
 * EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
 * See http://www.codeplex.com/EPPlus for details.
 *
-* Copyright (C) 2011-2018 Jan Källman, Evan Schallerer, and others as noted in the source history.
+* Copyright (C) 2011-2018 Michelle Lau, Evan Schallerer, and others as noted in the source history.
 *
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -26,42 +26,60 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
-using OfficeOpenXml.Extensions;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
+	#region Enums
 	/// <summary>
-	/// Wraps a <cacheField/> node in <pivotcachedefinition-cacheFields/>.
+	/// The possible types of values in a record.
 	/// </summary>
-	public class CacheFieldNode
+	public enum PivotCacheRecordType
+	{
+		/// <summary>
+		/// A boolean type.
+		/// </summary>
+		b,
+		/// <summary>
+		/// A date time type.
+		/// </summary>
+		d,
+		/// <summary>
+		/// An error value type.
+		/// </summary>
+		e,
+		/// <summary>
+		/// A no value type.
+		/// </summary>
+		m,
+		/// <summary>
+		/// A numeric type.
+		/// </summary>
+		n,
+		/// <summary>
+		/// A character value type.
+		/// </summary>
+		s,
+		/// <summary>
+		/// A shared items index type.
+		/// </summary>
+		x
+	}
+	#endregion
+
+	/// <summary>
+	/// Wraps a <r/> node in <pivotCacheRecords/>.
+	/// </summary>
+	public class CacheRecordNode
 	{
 		#region Class Variables
-		private List<CacheFieldItem> myItems = new List<CacheFieldItem>();
+		private List<CacheRecordItem> myItems = new List<CacheRecordItem>();
 		#endregion
 
 		#region Properties
 		/// <summary>
-		/// Gets or sets the name for this <see cref="CacheFieldNode"/>.
+		/// Gets a readonly list of the items in this <see cref="CacheRecordNode"/>.
 		/// </summary>
-		public string Name
-		{
-			get { return this.Node.Attributes["name"].Value; }
-			set { this.Node.Attributes["name"].Value = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets the number format ID for this <see cref="CacheFieldNode"/>.
-		/// </summary>
-		public string NumFormatId
-		{
-			get { return this.Node.Attributes["numFmtId"].Value; }
-			set { this.Node.Attributes["numFmtId"].Value = value; }
-		}
-
-		/// <summary>
-		/// Gets a readonly list of the items in this <see cref="CacheFieldNode"/>.
-		/// </summary>
-		public IReadOnlyList<CacheFieldItem> Items
+		public IReadOnlyList<CacheRecordItem> Items
 		{
 			get { return myItems; }
 		}
@@ -72,11 +90,11 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Constructors
 		/// <summary>
-		/// Creates an instance of a <see cref="CacheFieldNode"/>.
+		/// Creates an instance of a <see cref="CacheRecordNode"/>.
 		/// </summary>
-		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheFieldNode"/>.</param>
+		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheRecordNode"/>.</param>
 		/// <param name="namespaceManager">The namespace manager to use for searching child nodes.</param>
-		public CacheFieldNode(XmlNode node, XmlNamespaceManager namespaceManager)
+		public CacheRecordNode(XmlNode node, XmlNamespaceManager namespaceManager)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
@@ -84,40 +102,26 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(namespaceManager));
 			this.Node = node;
 			this.NameSpaceManager = namespaceManager;
-			foreach (XmlNode cacheFieldItem in this.Node.SelectNodes("d:sharedItems/d:s", this.NameSpaceManager))
+			// Selects all possible child node types.
+			foreach (XmlNode cacheRecordItem in this.Node.SelectNodes("d:b | d:d | d:e | d:m | d:n | d:s | d:x", this.NameSpaceManager))
 			{
-				myItems.Add(new CacheFieldItem(cacheFieldItem));
+				myItems.Add(new CacheRecordItem(cacheRecordItem));
 			}
 		}
 		#endregion
 
 		#region Public Methods
 		/// <summary>
-		/// Gets the index of the target value.
+		/// Update the value of the item.
 		/// </summary>
-		/// <param name="value">The target value in the list.</param>
-		/// <returns>The index of the value in the list.</returns>
-		public int GetSharedItemIndex(string value)
+		/// <param name="index">The index of the item.</param>
+		/// <param name="value">The new value.</param>
+		/// <param name="cacheField">The cache field.</param>
+		public void UpdateItem(int index, object value, CacheFieldNode cacheField)
 		{
-			for (int i = 0; i < this.Items.Count; i++)
-			{
-				if (value.IsEquivalentTo(this.Items[i].Value))
-					return i;
-			}
-			return -1;
-		}
-
-		/// <summary>
-		/// Adds a new field item to the list.
-		/// </summary>
-		/// <param name="value">The value.</param>
-		/// <returns>The index of the new item.</returns>
-		public int AddItem(string value)
-		{
-			if (string.IsNullOrEmpty(value))
-				throw new ArgumentNullException(nameof(value));
-			myItems.Add(new CacheFieldItem(this.Node, value));
-			return myItems.Count - 1;
+			if (index < 0 || index > this.Items.Count)
+				throw new ArgumentOutOfRangeException(nameof(index));
+			myItems[index].UpdateValue(value, this.Node, cacheField);
 		}
 		#endregion
 	}

@@ -3511,14 +3511,35 @@ namespace EPPlusTest
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				var pivotTable = worksheet.PivotTables.First();
-				Assert.AreEqual("I10:K27", pivotTable.Address.Address);
+				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("C3:C5", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
 
 				worksheet.InsertRow(1, 1);
 
-				Assert.AreEqual("I11:K28", pivotTable.Address.Address);
-				Assert.AreEqual("C4:C6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("I11:J17", pivotTable.Address.Address);
+				Assert.AreEqual("C4:F7", pivotTable.CacheDefinition.SourceRange.Address);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void InsertRowBetweenUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+
+				worksheet.InsertRow(8, 1);
+
+				Assert.AreEqual("I11:J17", pivotTable.Address.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
 			}
 		}
 
@@ -3737,14 +3758,14 @@ namespace EPPlusTest
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				var pivotTable = worksheet.PivotTables.First();
-				Assert.AreEqual("I10:K27", pivotTable.Address.Address);
+				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("C3:C5", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
 
 				worksheet.InsertColumn(1, 1);
 
-				Assert.AreEqual("J10:L27", pivotTable.Address.Address);
-				Assert.AreEqual("D3:D5", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("J10:K16", pivotTable.Address.Address);
+				Assert.AreEqual("D3:G6", pivotTable.CacheDefinition.SourceRange.Address);
 			}
 		}
 
@@ -4266,14 +4287,35 @@ namespace EPPlusTest
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				var pivotTable = worksheet.PivotTables.First();
-				Assert.AreEqual("I10:K27", pivotTable.Address.Address);
+				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("C3:C5", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
 
 				worksheet.DeleteRow(1, 1);
 
-				Assert.AreEqual("I9:K26", pivotTable.Address.Address);
-				Assert.AreEqual("C2:C4", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("I9:J15", pivotTable.Address.Address);
+				Assert.AreEqual("C2:F5", pivotTable.CacheDefinition.SourceRange.Address);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void DeleteRowBetweenUpdatesPivotTableSourceRangeHandlesWorksheetDataSources()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
+				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+
+				worksheet.DeleteRow(8, 1);
+
+				Assert.AreEqual("I9:J15", pivotTable.Address.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
 			}
 		}
 
@@ -5388,14 +5430,14 @@ namespace EPPlusTest
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				var pivotTable = worksheet.PivotTables.First();
-				Assert.AreEqual("I10:K27", pivotTable.Address.Address);
+				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("C3:C5", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
 
 				worksheet.DeleteColumn(1, 1);
 
-				Assert.AreEqual("H10:J27", pivotTable.Address.Address);
-				Assert.AreEqual("B3:B5", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("H10:I16", pivotTable.Address.Address);
+				Assert.AreEqual("B3:E6", pivotTable.CacheDefinition.SourceRange.Address);
 			}
 		}
 
