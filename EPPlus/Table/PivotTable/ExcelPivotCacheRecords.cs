@@ -77,7 +77,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int Count
 		{
-			get { return int.Parse(this.TopNode.Attributes["count"].Value); }
+			get { return base.GetXmlNodeInt("@count"); }
+			set { base.SetXmlNodeString("@count", value.ToString()); }
 		}
 
 		/// <summary>
@@ -128,20 +129,6 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			base.TopNode = cacheRecord.FirstChild;
 			this.CacheDefinition = cacheDefinition;
-		}
-		#endregion
-
-		#region Public Methods
-		/// <summary>
-		/// Update the cache items.
-		/// </summary>
-		/// <param name="row">The row in the source table.</param>
-		/// <param name="col">The column in the source table.</param>
-		/// <param name="value">The new value.</param>
-		public void UpdateRecord(int row, int col, object value)
-		{
-			var targetRecord = myRecords[row];
-			targetRecord.UpdateItem(col, value, this.CacheDefinition.CacheFields[col]);
 		}
 		#endregion
 	}

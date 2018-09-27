@@ -43,7 +43,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// A list of fields.
 		/// </summary>
-		internal List<T> myList = new List<T>();
+		internal protected List<T> myList = new List<T>();
 		#endregion
 
 		#region Properties
@@ -105,20 +105,22 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Methods
 		/// <summary>
-		/// Adds a field to the collection.
+		/// Adds a field item to the field collection.
 		/// </summary>
-		/// <param name="field"></param>
-		internal void AddInternal(T field)
+		/// <param name="fieldItem">The new field item.</param>
+		internal void AddInternal(T fieldItem)
 		{
-			myList.Add(field);
+			myList.Add(fieldItem);
 		}
 
 		/// <summary>
-		/// Clears the field collection.
+		/// Adds a field item to the collection.
 		/// </summary>
-		internal void Clear()
+		/// <param name="index">The index of the new field item.</param>
+		/// <param name="fieldItem">The new field item.</param>
+		internal void AddInternal(int index, T fieldItem)
 		{
-			myList.Clear();
+			myList.Insert(index, fieldItem);
 		}
 		#endregion
 	}

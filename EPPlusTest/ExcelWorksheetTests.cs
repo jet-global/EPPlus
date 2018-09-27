@@ -3544,21 +3544,21 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeExternal.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableWithExternalSource.xlsx")]
 		public void InsertRowUpdatesPivotTableSourceRangeHandlesExternalDataSources()
 		{
-			var file = new FileInfo("PivotTableDataSourceTypeExternal.xlsx");
+			var file = new FileInfo("PivotTableWithExternalSource.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				var pivotTable = worksheet.PivotTables.First();
-				Assert.AreEqual("G6:I23", pivotTable.Address.Address);
+				Assert.AreEqual("I2:L5", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.External, pivotTable.CacheDefinition.CacheSource);
 
 				worksheet.InsertRow(1, 1);
 
-				Assert.AreEqual("G7:I24", pivotTable.Address.Address);
+				Assert.AreEqual("I3:L6", pivotTable.Address.Address);
 			}
 		}
 
@@ -3770,21 +3770,21 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeExternal.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableWithExternalSource.xlsx")]
 		public void InsertColumnUpdatesPivotTableSourceRangeHandlesExternalDataSources()
 		{
-			var file = new FileInfo("PivotTableDataSourceTypeExternal.xlsx");
+			var file = new FileInfo("PivotTableWithExternalSource.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				var pivotTable = worksheet.PivotTables.First();
-				Assert.AreEqual("G6:I23", pivotTable.Address.Address);
+				Assert.AreEqual("I2:L5", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.External, pivotTable.CacheDefinition.CacheSource);
 
 				worksheet.InsertColumn(1, 1);
 
-				Assert.AreEqual("H6:J23", pivotTable.Address.Address);
+				Assert.AreEqual("J2:M5", pivotTable.Address.Address);
 			}
 		}
 
@@ -4320,21 +4320,21 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeExternal.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableWithExternalSource.xlsx")]
 		public void DeleteRowUpdatesPivotTableSourceRangeHandlesExternalDataSources()
 		{
-			var file = new FileInfo("PivotTableDataSourceTypeExternal.xlsx");
+			var file = new FileInfo("PivotTableWithExternalSource.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				var pivotTable = worksheet.PivotTables.First();
-				Assert.AreEqual("G6:I23", pivotTable.Address.Address);
+				Assert.AreEqual("I2:L5", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.External, pivotTable.CacheDefinition.CacheSource);
 
 				worksheet.DeleteRow(1, 1);
 
-				Assert.AreEqual("G5:I22", pivotTable.Address.Address);
+				Assert.AreEqual("I1:L4", pivotTable.Address.Address);
 			}
 		}
 		#endregion
@@ -5442,21 +5442,21 @@ namespace EPPlusTest
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeExternal.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableWithExternalSource.xlsx")]
 		public void DeleteColumnUpdatesPivotTableSourceRangeHandlesExternalDataSources()
 		{
-			var file = new FileInfo("PivotTableDataSourceTypeExternal.xlsx");
+			var file = new FileInfo("PivotTableWithExternalSource.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var package = new ExcelPackage(file))
 			{
 				var worksheet = package.Workbook.Worksheets.First();
 				var pivotTable = worksheet.PivotTables.First();
-				Assert.AreEqual("G6:I23", pivotTable.Address.Address);
+				Assert.AreEqual("I2:L5", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.External, pivotTable.CacheDefinition.CacheSource);
 
 				worksheet.DeleteColumn(1, 1);
 
-				Assert.AreEqual("F6:H23", pivotTable.Address.Address);
+				Assert.AreEqual("H2:K5", pivotTable.Address.Address);
 			}
 		}
 		#endregion

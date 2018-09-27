@@ -60,6 +60,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		private ExcelPivotTableRowColumnFieldCollection myColumnFields;
 		private ExcelPivotTableDataFieldCollection myDataFields;
 		private ExcelPivotTableRowColumnFieldCollection myPageFields;
+		private ItemsCollection myRowItems;
+		private ItemsCollection myColumnItems;
 		private TableStyles myTableStyle = Table.TableStyles.Medium6;
 		#endregion
 
@@ -719,7 +721,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				return myDataFields;
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets the report filter fields.
 		/// </summary>
@@ -732,7 +734,33 @@ namespace OfficeOpenXml.Table.PivotTable
 				return myPageFields;
 			}
 		}
-		
+
+		/// <summary>
+		/// Gets the row items.
+		/// </summary>
+		public ItemsCollection RowItems
+		{
+			get
+			{
+				if (myRowItems == null)
+					myRowItems = new ItemsCollection(this.NameSpaceManager, this.TopNode.SelectSingleNode("d:rowItems"));
+				return myRowItems;
+			}
+		}
+
+		/// <summary>
+		/// Gets the column items.
+		/// </summary>
+		public ItemsCollection ColumnItems
+		{
+			get
+			{
+				if (myColumnItems == null)
+					myColumnItems = new ItemsCollection(this.NameSpaceManager, this.TopNode.SelectSingleNode("d:colItems"));
+				return myColumnItems;
+			}
+		}
+
 		/// <summary>
 		/// Gets or sets the pivot style name that is used for custom styles.
 		/// </summary>
@@ -790,11 +818,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get
 			{
-				return GetXmlNodeInt("@cacheId");
+				return base.GetXmlNodeInt("@cacheId");
 			}
 			set
 			{
-				SetXmlNodeString("@cacheId", value.ToString());
+				base.SetXmlNodeString("@cacheId", value.ToString());
 			}
 		}
 
@@ -843,44 +871,16 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.LoadFields();
 
 			// Add row fields.
-			foreach (XmlElement rowElem in this.TopNode.SelectNodes("d:rowFields/d:field", this.NameSpaceManager))
-			{
-				if (int.TryParse(rowElem.GetAttribute("x"), out var x) && x >= 0)
-					this.RowFields.AddInternal(this.Fields[x]);
-				else
-					rowElem.ParentNode.RemoveChild(rowElem);
-			}
+			this.RowFields.PopulateRowColumnFields(this.NameSpaceManager, this.TopNode, "d:rowFields/d:field", this.Fields);
 
 			// Add column fields.
-			foreach (XmlElement colElem in this.TopNode.SelectNodes("d:colFields/d:field", this.NameSpaceManager))
-			{
-				if (int.TryParse(colElem.GetAttribute("x"), out var x) && x >= 0)
-					this.ColumnFields.AddInternal(this.Fields[x]);
-				else
-					colElem.ParentNode.RemoveChild(colElem);
-			}
+			this.ColumnFields.PopulateRowColumnFields(this.NameSpaceManager, this.TopNode, "d:colFields/d:field", this.Fields);
 
 			// Add Page elements
-			foreach (XmlElement pageElem in this.TopNode.SelectNodes("d:pageFields/d:pageField", this.NameSpaceManager))
-			{
-				if (int.TryParse(pageElem.GetAttribute("fld"), out var fld) && fld >= 0)
-				{
-					var field = this.Fields[fld];
-					field.myPageFieldSettings = new ExcelPivotTablePageFieldSettings(this.NameSpaceManager, pageElem, field, fld);
-					this.PageFields.AddInternal(field);
-				}
-			}
+			this.PageFields.PopulatePageFields(this.NameSpaceManager, this.TopNode, "d:pageFields/d:pageField", this.Fields);
 
 			// Add data elements
-			foreach (XmlElement dataElem in this.TopNode.SelectNodes("d:dataFields/d:dataField", this.NameSpaceManager))
-			{
-				if (int.TryParse(dataElem.GetAttribute("fld"), out var fld) && fld >= 0)
-				{
-					var field = this.Fields[fld];
-					var dataField = new ExcelPivotTableDataField(this.NameSpaceManager, dataElem, field);
-					this.DataFields.AddInternal(dataField);
-				}
-			}
+			this.DataFields.PopulateDataFields(this.NameSpaceManager, this.TopNode, "d:dataFields/d:dataField", this.Fields);
 		}
 		
 		/// <summary>
@@ -910,11 +910,25 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Worksheet-PivotTable relationship
 			this.WorksheetRelationship = sheet.Part.CreateRelationship(UriHelper.ResolvePartUri(sheet.WorksheetUri, this.PivotTableUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
 
-			myCacheDefinition = new ExcelPivotCacheDefinition(sheet.NameSpaceManager, this, sourceAddress, tblId);
-			sheet.Workbook.PivotCacheDefinitions.Add(myCacheDefinition);
+			bool cacheDefinitionFound = false;
+			foreach (var cache in this.WorkSheet.Workbook.PivotCacheDefinitions)
+			{
+				if (cache.SourceRange.IsEquivalentRange(sourceAddress))
+				{
+					this.CacheDefinition = cache;
+					cacheDefinitionFound = true;
+					break;
+				}
+			}
+
+			if (!cacheDefinitionFound)
+			{
+				this.CacheDefinition = new ExcelPivotCacheDefinition(sheet.NameSpaceManager, this, sourceAddress, tblId);
+				sheet.Workbook.PivotCacheDefinitions.Add(this.CacheDefinition);
+			}
 
 			// CacheDefinition-PivotTable relationship
-			this.CacheDefinitionRelationship = this.Part.CreateRelationship(UriHelper.ResolvePartUri(this.PivotTableUri, myCacheDefinition.CacheDefinitionUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheDefinition");
+			this.CacheDefinitionRelationship = this.Part.CreateRelationship(UriHelper.ResolvePartUri(this.PivotTableUri, this.CacheDefinition.CacheDefinitionUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheDefinition");
 
 			sheet.Workbook.AddPivotTable(this.CacheID.ToString(), this.CacheDefinition.CacheDefinitionUri);
 
@@ -924,6 +938,17 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				range.Clear();
 			}
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Refresh the pivot table, its cacheDefinition, and any of the 
+		/// cacheDefinition's dependent pivot tables. 
+		/// </summary>
+		public void Refresh()
+		{
+			throw new NotImplementedException();
 		}
 		#endregion
 

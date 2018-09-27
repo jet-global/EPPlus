@@ -101,6 +101,19 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			return false;
 		}
+
+		internal void PopulateDataFields(XmlNamespaceManager namespaceManager, XmlNode parentNode, string nodePath, ExcelPivotTableFieldCollection fields)
+		{
+			foreach (XmlElement dataElem in parentNode.SelectNodes("d:dataFields/d:dataField", namespaceManager))
+			{
+				if (int.TryParse(dataElem.GetAttribute("fld"), out var fld) && fld >= 0)
+				{
+					var field = fields[fld];
+					var dataField = new ExcelPivotTableDataField(namespaceManager, dataElem, field);
+					this.AddInternal(dataField);
+				}
+			}
+		}
 		#endregion
 
 		#region Private Methods

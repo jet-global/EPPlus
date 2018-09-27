@@ -31,7 +31,7 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// <summary>
 	/// Wraps a <s/> node in <pivotcachedefinition-cacheFields-cacheField-sharedItems/>.
 	/// </summary>
-	public class CacheFieldItem
+	public class CacheFieldItem : XmlHelper
 	{
 		#region Properties
 		/// <summary>
@@ -39,11 +39,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string Value
 		{
-			get { return this.Node.Attributes["v"].Value; }
-			set { this.Node.Attributes["v"].Value = value; }
+			get { return base.GetXmlNodeString("@v"); }
+			set { base.SetXmlNodeString("@v", value); }
 		}
-
-		private XmlNode Node { get; set; }
 		#endregion
 
 		#region Constructors
@@ -51,11 +49,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Creates an instance of a <see cref="CacheFieldItem"/>.
 		/// </summary>
 		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheFieldItem"/>.</param>
-		public CacheFieldItem(XmlNode node)
+		public CacheFieldItem(XmlNode node) : base(null, node)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
-			this.Node = node;
 		}
 
 		/// <summary>
@@ -63,13 +60,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		/// <param name="parentNode">The <see cref="XmlNode"/> for this <see cref="CacheFieldItem"/>.</param>
 		/// <param name="value">The value of this <see cref="CacheFieldItem"/>.</param>
-		public CacheFieldItem(XmlNode parentNode, string value)
+		public CacheFieldItem(XmlNode parentNode, string value) : base(null)
 		{
 			if (parentNode == null)
 				throw new ArgumentNullException(nameof(parentNode));
-			this.Node = parentNode.OwnerDocument.CreateNode(XmlNodeType.Element, "s", parentNode.NamespaceURI);
+			base.TopNode = parentNode.OwnerDocument.CreateNode(XmlNodeType.Element, "s", parentNode.NamespaceURI);
 			var attr = parentNode.OwnerDocument.CreateAttribute("v");
-			this.Node.Attributes.Append(attr);
+			base.TopNode.Attributes.Append(attr);
 			this.Value = value;
 		}
 		#endregion

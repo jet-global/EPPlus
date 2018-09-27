@@ -575,7 +575,7 @@ namespace OfficeOpenXml
 			{
 				return;
 			}
-			if (value == "" && removeIfBlank)
+			if (string.IsNullOrEmpty(value) && removeIfBlank)
 			{
 				DeleteAllNode(path);
 			}

@@ -31,26 +31,34 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// Wraps a node in <pivotCacheRecords-r/>.
+	/// Wraps a node in <pivotCacheRecords-x/>.
 	/// </summary>
-	public class CacheRecordItem
+	public class CacheRecordItem : XmlHelper
 	{
 		#region Properties
 		/// <summary>
 		/// Gets or sets the type of this item.
 		/// </summary>
 		public PivotCacheRecordType Type { get; private set; }
-
+		
 		/// <summary>
 		/// Gets or sets the value of this item.
 		/// </summary>
 		public string Value
 		{
-			get { return this.Node.Attributes["v"]?.Value; }
-			private set { this.Node.Attributes["v"].Value = value; }
+			get
+			{
+				if (this.Type == PivotCacheRecordType.m)
+					return null;
+				return base.GetXmlNodeString("@v");
+			}
+			private set
+			{
+				if (this.Type == PivotCacheRecordType.m)
+					value = null;
+				base.SetXmlNodeString("@v", value, true);
+			}
 		}
-
-		private XmlNode Node { get; set; }
 		#endregion
 
 		#region Constructors
@@ -58,62 +66,14 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Creates an instance of a <see cref="CacheRecordItem"/>.
 		/// </summary>
 		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheRecordItem"/>.</param>
-		public CacheRecordItem(XmlNode node)
+		/// <param name="namespaceManager">The namespace manger.</param>
+		public CacheRecordItem(XmlNode node, XmlNamespaceManager namespaceManager) : base(namespaceManager, node)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
-			this.Node = node;
+			if (namespaceManager == null)
+				throw new ArgumentNullException(nameof(namespaceManager));
 			this.Type = (PivotCacheRecordType)Enum.Parse(typeof(PivotCacheRecordType), node.Name);
-		}
-		#endregion
-
-		#region Public Methods
-		/// <summary>
-		/// Update the value of this <see cref="CacheRecordItem"/>.
-		/// </summary>
-		/// <param name="value">The update value.</param>
-		/// <param name="parentNode">The parent node.</param>
-		/// <param name="cacheField">The cache field.</param>
-		public void UpdateValue(object value, XmlNode parentNode, CacheFieldNode cacheField)
-		{
-			if (parentNode == null)
-				throw new ArgumentNullException(nameof(parentNode));
-			if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
-			{
-				// Match values with shared strings.
-				foreach (var item in cacheField.Items)
-				{
-					if (stringValue.IsEquivalentTo(item.Value))
-					{
-						if (this.Type == PivotCacheRecordType.x)
-						{
-							var index = int.Parse(this.Value);
-							if (cacheField.Items[index].Value != stringValue)
-								this.Value = cacheField.GetSharedItemIndex(stringValue).ToString();
-						}
-						else
-						{
-							this.ReplaceNode(PivotCacheRecordType.x, parentNode);
-							this.Value = cacheField.GetSharedItemIndex(stringValue).ToString();
-						}
-						return;
-					}
-				}
-				if (this.Type != PivotCacheRecordType.x)
-					this.ReplaceNode(PivotCacheRecordType.x, parentNode);
-				this.Value = cacheField.AddItem(stringValue).ToString();
-			}
-			else
-			{
-				if (!this.Value.IsEquivalentTo(value?.ToString()))
-				{
-					var type = this.GetObjectType(value);
-					if (this.Type != type)
-						this.ReplaceNode(type, parentNode);
-					if (type != PivotCacheRecordType.m)
-						this.Value = value.ToString();
-				}
-			}
 		}
 		#endregion
 
@@ -138,14 +98,14 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private void ReplaceNode(PivotCacheRecordType type, XmlNode parentNode)
 		{
-			var newNode = parentNode.OwnerDocument.CreateNode(XmlNodeType.Element, type.ToString(), parentNode.NamespaceURI);
+			var newNode = parentNode.OwnerDocument.CreateElement(type.ToString(), parentNode.NamespaceURI);
 			if (type != PivotCacheRecordType.m)
 			{
 				var attr = parentNode.OwnerDocument.CreateAttribute("v");
 				newNode.Attributes.Append(attr);
 			}
-			parentNode.ReplaceChild(newNode, this.Node);
-			this.Node = newNode;
+			parentNode.ReplaceChild(newNode, base.TopNode);
+			base.TopNode = newNode;
 			this.Type = type;
 		}
 		#endregion
