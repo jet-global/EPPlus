@@ -71,35 +71,6 @@ namespace EPPlusTest.Table.PivotTable
 		}
 		#endregion
 
-		#region GetRelatedPivotTables Tests
-		[TestMethod]
-		public void GetRelatedPivotTables()
-		{
-			using (var package = new ExcelPackage())
-			{
-				var sheet1 = package.Workbook.Worksheets.Add("sheet1");
-				sheet1.Cells[1, 1].Value = 1;
-				sheet1.Cells[2, 1].Value = 2;
-				sheet1.Cells[3, 1].Value = 3;
-				sheet1.Cells[4, 1].Value = 4;
-				sheet1.Cells[1, 2].Value = "a";
-				sheet1.Cells[2, 2].Value = "b";
-				sheet1.Cells[3, 2].Value = "c";
-				sheet1.Cells[4, 2].Value = "d";
-				sheet1.Cells[1, 3].Value = true;
-				sheet1.Cells[2, 3].Value = true;
-				sheet1.Cells[3, 3].Value = true;
-				sheet1.Cells[4, 3].Value = false;
-				var pivotTable1 = new ExcelPivotTable(sheet1, sheet1.Cells[10, 10], sheet1.Cells["A1:D3"], "pivotTable1", 1);
-				var pivotTable2 = new ExcelPivotTable(sheet1, sheet1.Cells[50, 10], sheet1.Cells["A1:D3"], "pivotTable2", 2);
-				var pivotTables = package.Workbook.PivotCacheDefinitions.Single().GetRelatedPivotTables();
-				Assert.AreEqual(2, pivotTables.Count);
-				Assert.IsTrue(pivotTables.Any(p => p.Name == pivotTable1.Name));
-				Assert.IsTrue(pivotTables.Any(p => p.Name == pivotTable2.Name));
-			}
-		}
-		#endregion
-
 		#region Helper Methods
 		private void AssertCacheRecord(ExcelPivotCacheRecords records, int row, int col, PivotCacheRecordType type, string value)
 		{
