@@ -305,29 +305,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 		#endregion
 
-		#region Public Methods
-		/// <summary>
-		/// Update the records in <see cref="ExcelPivotCacheRecords"/>.
-		/// </summary>
-		public void UpdateRecords()
-		{
-			int row = 0, col = 0;
-			foreach (var cell in this.SourceRange)
-			{
-				if (col >= this.SourceRange.Columns)
-				{
-					col = 0;
-					row++;
-				}
-				if (row == 0)
-					this.CacheFields[col].Name = cell.Value.ToString();
-				else
-					this.CacheRecords.UpdateRecord(row-1, col, cell.Value);
-				col++;
-			}
-		}
-		#endregion
-
 		#region Private Methods
 		private string GetStartXml(ExcelRangeBase sourceAddress)
 		{
