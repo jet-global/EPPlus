@@ -43,38 +43,5 @@ namespace EPPlusTest.Table.PivotTable
 			new CacheFieldNode(xml.FirstChild, null);
 		}
 		#endregion
-
-		#region UpdateItem Tests
-		[TestMethod]
-		public void UpdateItemTest()
-		{
-			var node = base.GetTestCacheRecordNode();
-			var cacheFieldNode = base.GetTestCacheFieldNode();
-			node.UpdateItem(0, true, cacheFieldNode);
-			Assert.AreEqual(2, node.Items.Count);
-			Assert.AreEqual("True", node.Items[0].Value);
-			Assert.AreEqual(PivotCacheRecordType.b, node.Items[0].Type);
-			Assert.AreEqual("0", node.Items[1].Value);
-			Assert.AreEqual(PivotCacheRecordType.x, node.Items[1].Type);
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void UpdateItemIndexOutOfBottomRange()
-		{
-			var node = base.GetTestCacheRecordNode();
-			var cacheFieldNode = base.GetTestCacheFieldNode();
-			node.UpdateItem(-1, true, cacheFieldNode);
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
-		public void UpdateItemIndexOutOfTopRange()
-		{
-			var node = base.GetTestCacheRecordNode();
-			var cacheFieldNode = base.GetTestCacheFieldNode();
-			node.UpdateItem(5, true, cacheFieldNode);
-		}
-		#endregion
 	}
 }
