@@ -11,7 +11,7 @@ namespace EPPlusTest.Table.PivotTable
 			XmlDocument document = new XmlDocument();
 			document.LoadXml(@"<cacheField xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" name=""Item"" numFmtId=""0""><sharedItems count=""2""><s v=""Bike""/><s v=""Car""/></sharedItems></cacheField>");
 			var ns = TestUtility.CreateDefaultNSM();
-			return new CacheFieldNode(document.SelectSingleNode("//d:cacheField", ns), ns);
+			return new CacheFieldNode(ns, document.SelectSingleNode("//d:cacheField", ns));
 		}
 
 		public CacheRecordNode GetTestCacheRecordNode()
@@ -19,7 +19,7 @@ namespace EPPlusTest.Table.PivotTable
 			XmlDocument document = new XmlDocument();
 			document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""1""><r><n v=""20100076""/><x v=""0""/></r></pivotCacheRecords>");
 			var ns = TestUtility.CreateDefaultNSM();
-			return new CacheRecordNode(document.SelectSingleNode("//d:r", ns), ns);
+			return new CacheRecordNode(ns, document.SelectSingleNode("//d:r", ns));
 		}
 		#endregion
 	}

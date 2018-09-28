@@ -766,9 +766,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="StructuredReference.cs" />
-    <Compile Include="Table\PivotTable\CacheFieldItem.cs" />
     <Compile Include="Table\PivotTable\CacheFieldNode.cs" />
-    <Compile Include="Table\PivotTable\CacheRecordItem.cs" />
+    <Compile Include="Table\PivotTable\CacheItem.cs" />
     <Compile Include="Table\PivotTable\CacheRecordNode.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotCacheRecords.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableDataFieldCollection.cs" />
@@ -779,6 +778,7 @@
     <Compile Include="Table\PivotTable\ExcelPivotTableRowColumnFieldCollection.cs" />
     <Compile Include="Table\PivotTable\ItemsCollection.cs" />
     <Compile Include="Table\PivotTable\RowColumnItem.cs" />
+    <Compile Include="Table\PivotTable\SharedItemsCollection.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\InternationalizationUtility.cs" />
     <Compile Include="Utils\UriHelper.cs" />

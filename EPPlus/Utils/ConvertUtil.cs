@@ -383,6 +383,26 @@ namespace OfficeOpenXml.Utils
 			return ret.ToString();
 		}
 
+		/// <summary>
+		/// Converts an object to the string representation that Excel uses in XML attributes.
+		/// </summary>
+		/// <param name="value">The object value to convert to a string.</param>
+		/// <returns>The string representation of the provided parameter.</returns>
+		internal static string ConvertObjectToXmlAttributeString(object value)
+		{
+			if (value == null)
+				return null;
+			if (value is DateTime dateTimeVal)
+				return dateTimeVal.ToString("yyyy’-‘MM’-‘dd’T’HH’:’mm’:’ss");
+			else if (ConvertUtil.IsNumeric(value, true) || value is string)
+				return value.ToString();
+			else if (value is bool boolVal)
+				return boolVal ? "1" : "0";
+			else if (value is ExcelErrorValue errorValue)
+				return errorValue.ToString();
+			throw new InvalidOperationException($"Unknown type '{value.GetType()}' in cacheRecord value.");
+		}
+
 		#region internal cache objects
 		internal static TextInfo _invariantTextInfo = CultureInfo.InvariantCulture.TextInfo;
 		internal static CompareInfo _invariantCompareInfo = CompareInfo.GetCompareInfo(CultureInfo.InvariantCulture.LCID);

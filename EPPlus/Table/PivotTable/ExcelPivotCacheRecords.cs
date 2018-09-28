@@ -25,6 +25,7 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -65,7 +66,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					var cacheRecordNodes = this.TopNode.SelectNodes("d:r", base.NameSpaceManager);
 					foreach (XmlNode recordsNode in cacheRecordNodes)
 					{
-						myRecords.Add(new CacheRecordNode(recordsNode, base.NameSpaceManager));
+						myRecords.Add(new CacheRecordNode(base.NameSpaceManager, recordsNode));
 					}
 				}
 				return myRecords;
@@ -107,7 +108,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			var cacheRecordNodes = this.TopNode.SelectNodes("d:r", base.NameSpaceManager);
 			foreach (XmlNode record in cacheRecordNodes)
 			{
-				myRecords.Add(new CacheRecordNode(record, base.NameSpaceManager));
+				myRecords.Add(new CacheRecordNode(base.NameSpaceManager, record));
 			}
 		}
 

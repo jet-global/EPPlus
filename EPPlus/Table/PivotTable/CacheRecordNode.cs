@@ -25,7 +25,9 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -72,14 +74,14 @@ namespace OfficeOpenXml.Table.PivotTable
 	public class CacheRecordNode
 	{
 		#region Class Variables
-		private List<CacheRecordItem> myItems = new List<CacheRecordItem>();
+		private List<CacheItem> myItems = new List<CacheItem>();
 		#endregion
 
 		#region Properties
 		/// <summary>
 		/// Gets a readonly list of the items in this <see cref="CacheRecordNode"/>.
 		/// </summary>
-		public IReadOnlyList<CacheRecordItem> Items
+		public IReadOnlyList<CacheItem> Items
 		{
 			get { return myItems; }
 		}
@@ -94,7 +96,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheRecordNode"/>.</param>
 		/// <param name="namespaceManager">The namespace manager to use for searching child nodes.</param>
-		public CacheRecordNode(XmlNode node, XmlNamespaceManager namespaceManager)
+		public CacheRecordNode(XmlNamespaceManager namespaceManager, XmlNode node)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
@@ -105,7 +107,98 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Selects all possible child node types.
 			foreach (XmlNode cacheRecordItem in this.Node.SelectNodes("d:b | d:d | d:e | d:m | d:n | d:s | d:x", this.NameSpaceManager))
 			{
-				myItems.Add(new CacheRecordItem(cacheRecordItem, this.NameSpaceManager));
+				myItems.Add(new CacheItem(this.NameSpaceManager, cacheRecordItem));
+			}
+		}
+
+		/// <summary>
+		/// Creates a new <see cref="CacheRecordNode"/> and items as specified by the <paramref name="row"/> values.
+		/// Adds the resulting <see cref="CacheRecordNode"/> to the specified <paramref name="parentNode"/>.
+		/// </summary>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="parentNode">The parent <see cref="ExcelPivotCacheRecords"/> <see cref="XmlNode"/>.</param>
+		/// <param name="row">A list of object values that this node represents.</param>
+		/// <param name="cacheDefinition">The parent <see cref="ExcelPivotCacheDefinition"/>.</param>
+		public CacheRecordNode(XmlNamespaceManager namespaceManager, XmlNode parentNode, IEnumerable<object> row, ExcelPivotCacheDefinition cacheDefinition)
+		{
+			if (parentNode == null)
+				throw new ArgumentNullException(nameof(parentNode));
+			if (namespaceManager == null)
+				throw new ArgumentNullException(nameof(namespaceManager));
+			if (row == null)
+				throw new ArgumentNullException(nameof(row));
+			if (cacheDefinition == null)
+				throw new ArgumentNullException(nameof(cacheDefinition));
+			this.NameSpaceManager = namespaceManager;
+			var recordNode = parentNode.OwnerDocument.CreateElement("d:r");
+			int col = 0;
+			foreach (var value in row)
+			{
+				var type = CacheItem.GetObjectType(value);
+				var cacheField = cacheDefinition.CacheFields[col];
+				if (cacheField.HasSharedItems)
+				{
+					// The corresponding cacheField has shared items; map the new cacheRecord entry 
+					// into shared items if a matching entry exists, otherwise create a new sharedItem entry and map accordingly.
+					int cacheFieldItemIndex = cacheField.GetSharedItemIndex(type, value);
+					if (cacheFieldItemIndex < 0)
+						cacheFieldItemIndex = cacheField.SharedItems.Add(value);
+					var indexStringValue = ConvertUtil.ConvertObjectToXmlAttributeString(cacheFieldItemIndex);
+					myItems.Add(new CacheItem(namespaceManager, recordNode, PivotCacheRecordType.x, indexStringValue));
+				}
+				else
+				{
+					// If no SharedItems exist, simply create a record item entry.
+					var stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
+					myItems.Add(new CacheItem(namespaceManager, recordNode, type, stringValue));
+				}
+				col++;
+			}
+			parentNode.AppendChild(recordNode);
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Update the existing <see cref="CacheRecordNode"/>.
+		/// </summary>
+		/// <param name="row">The row of data from the source table.</param>
+		/// <param name="cacheDefinition">The cacheDefinition.</param>
+		public void Update(IEnumerable<object> row, ExcelPivotCacheDefinition cacheDefinition)
+		{
+			if (row == null)
+				throw new ArgumentNullException(nameof(row));
+			if (cacheDefinition == null)
+				throw new ArgumentNullException(nameof(cacheDefinition));
+			if (row.Count() != this.Items.Count)
+				throw new InvalidOperationException("An attempt was made to update a CacheRecordNode with a different number of fields.");
+			int col = 0;
+			foreach (var value in row)
+			{
+				var type = CacheItem.GetObjectType(value);
+				string stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
+				var currentItem = myItems[col];
+				var cacheField = cacheDefinition.CacheFields[col];
+				if (cacheField.HasSharedItems)
+				{
+					// If shared items contains value, update this.Value to index
+					// otherwise, create and add new sharedItem, update this.Value to new index
+					int cacheFieldItemIndex = cacheField.GetSharedItemIndex(type, value);
+					if (cacheFieldItemIndex < 0)
+						cacheFieldItemIndex = cacheField.SharedItems.Add(value);
+					var indexStringValue = ConvertUtil.ConvertObjectToXmlAttributeString(cacheFieldItemIndex);
+					currentItem.Value = indexStringValue;
+				}
+				else
+				{
+					// If only the value changed, update it. If the type changed,
+					// replace the node with one of the correct type and value.
+					if (currentItem.Type == type && currentItem.Value != stringValue)
+						currentItem.Value = stringValue;
+					else if (currentItem.Type != type)
+						currentItem.ReplaceNode(type, stringValue, this.Node);
+				}
+				col++;
 			}
 		}
 		#endregion

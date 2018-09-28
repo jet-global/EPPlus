@@ -24,9 +24,9 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
-using System.Collections.Generic;
 using System.Xml;
 using OfficeOpenXml.Extensions;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -35,10 +35,6 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// </summary>
 	public class CacheFieldNode
 	{
-		#region Class Variables
-		private List<CacheFieldItem> myItems = new List<CacheFieldItem>();
-		#endregion
-
 		#region Properties
 		/// <summary>
 		/// Gets or sets the name for this <see cref="CacheFieldNode"/>.
@@ -59,11 +55,16 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets a readonly list of the items in this <see cref="CacheFieldNode"/>.
+		/// Gets the sharedItems for this node.
 		/// </summary>
-		public IReadOnlyList<CacheFieldItem> Items
+		public SharedItemsCollection SharedItems { get; }
+
+		/// <summary>
+		/// Gets a value indicating whether or not this node has shared items.
+		/// </summary>
+		public bool HasSharedItems
 		{
-			get { return myItems; }
+			get { return this.SharedItems.Count > 0; }
 		}
 
 		private XmlNode Node { get; set; }
@@ -76,7 +77,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheFieldNode"/>.</param>
 		/// <param name="namespaceManager">The namespace manager to use for searching child nodes.</param>
-		public CacheFieldNode(XmlNode node, XmlNamespaceManager namespaceManager)
+		public CacheFieldNode(XmlNamespaceManager namespaceManager, XmlNode node)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
@@ -84,10 +85,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(namespaceManager));
 			this.Node = node;
 			this.NameSpaceManager = namespaceManager;
-			foreach (XmlNode cacheFieldItem in this.Node.SelectNodes("d:sharedItems/d:s", this.NameSpaceManager))
-			{
-				myItems.Add(new CacheFieldItem(cacheFieldItem));
-			}
+			var sharedItemsNode = node.SelectSingleNode("d:sharedItems", this.NameSpaceManager);
+			if (sharedItemsNode != null)
+				this.SharedItems = new SharedItemsCollection(this.NameSpaceManager, sharedItemsNode);
 		}
 		#endregion
 
@@ -95,29 +95,19 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Gets the index of the target value.
 		/// </summary>
+		/// <param name="type">The type of the target value.</param>
 		/// <param name="value">The target value in the list.</param>
 		/// <returns>The index of the value in the list.</returns>
-		public int GetSharedItemIndex(string value)
+		public int GetSharedItemIndex(PivotCacheRecordType type, object value)
 		{
-			for (int i = 0; i < this.Items.Count; i++)
+			string stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
+			for (int i = 0; i < this.SharedItems.Count; i++)
 			{
-				if (value.IsEquivalentTo(this.Items[i].Value))
+				var item = this.SharedItems.Items[i];
+				if (type == item.Type && stringValue.IsEquivalentTo(item.Value))
 					return i;
 			}
 			return -1;
-		}
-
-		/// <summary>
-		/// Adds a new field item to the list.
-		/// </summary>
-		/// <param name="value">The value.</param>
-		/// <returns>The index of the new item.</returns>
-		public int AddItem(string value)
-		{
-			if (string.IsNullOrEmpty(value))
-				throw new ArgumentNullException(nameof(value));
-			myItems.Add(new CacheFieldItem(this.Node, value));
-			return myItems.Count - 1;
 		}
 		#endregion
 	}

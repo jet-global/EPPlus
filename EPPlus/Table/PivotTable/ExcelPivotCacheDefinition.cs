@@ -270,7 +270,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			var cacheFieldNodes = this.TopNode.SelectNodes("d:cacheFields/d:cacheField", base.NameSpaceManager);
 			foreach (XmlNode cacheFieldNode in cacheFieldNodes)
 			{
-				myCacheFields.Add(new CacheFieldNode(cacheFieldNode, base.NameSpaceManager));
+				myCacheFields.Add(new CacheFieldNode(base.NameSpaceManager, cacheFieldNode));
 			}
 		}
 

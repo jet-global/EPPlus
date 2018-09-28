@@ -16,7 +16,7 @@ namespace EPPlusTest.Table.PivotTable
 			XmlDocument document = new XmlDocument();
 			document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""1""><r><n v=""20100076""/><x v=""0""/> <b v=""0""/> <m v=""0""/> <e v=""415.75""/><d v=""1""/></r></pivotCacheRecords>");
 			var ns = TestUtility.CreateDefaultNSM();
-			var node = new CacheRecordNode(document.SelectSingleNode("//d:r", ns), ns);
+			var node = new CacheRecordNode(ns, document.SelectSingleNode("//d:r", ns));
 			Assert.AreEqual(6, node.Items.Count);
 			Assert.AreEqual(1, node.Items.Count(i => i.Type == PivotCacheRecordType.b));
 			Assert.AreEqual(1, node.Items.Count(i => i.Type == PivotCacheRecordType.x));
@@ -31,7 +31,7 @@ namespace EPPlusTest.Table.PivotTable
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void CacheFieldNodeTestNullNode()
 		{
-			new CacheFieldNode(null, TestUtility.CreateDefaultNSM());
+			new CacheFieldNode(TestUtility.CreateDefaultNSM(), null);
 		}
 
 		[TestMethod]
@@ -40,7 +40,7 @@ namespace EPPlusTest.Table.PivotTable
 		{
 			var xml = new XmlDocument();
 			xml.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/></r></pivotCacheRecords>");
-			new CacheFieldNode(xml.FirstChild, null);
+			new CacheFieldNode(null, xml.FirstChild);
 		}
 		#endregion
 	}
