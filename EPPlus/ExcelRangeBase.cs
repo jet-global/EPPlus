@@ -1343,7 +1343,7 @@ namespace OfficeOpenXml
 		/// Compares the range of data.
 		/// </summary>
 		/// <param name="excelRange">The range being compared to.</param>
-		/// <returns></returns>
+		/// <returns>A value indicating if this Excel range is equivalent to the specified range.</returns>
 		public bool IsEquivalentRange(ExcelRangeBase excelRange)
 		{
 			return this.Worksheet.Equals(excelRange.Worksheet)
