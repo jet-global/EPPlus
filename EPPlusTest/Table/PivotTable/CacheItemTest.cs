@@ -1,5 +1,4 @@
-﻿using System;
-/*******************************************************************************
+﻿/*******************************************************************************
 * You may amend and distribute as you like, but don't remove this header!
 *
 * EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
@@ -24,6 +23,7 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
