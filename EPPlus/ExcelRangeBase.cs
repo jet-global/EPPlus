@@ -1340,6 +1340,20 @@ namespace OfficeOpenXml
 
 		#region Public Methods
 		/// <summary>
+		/// Compares the range of data.
+		/// </summary>
+		/// <param name="excelRange">The range being compared to.</param>
+		/// <returns>A value indicating if this Excel range is equivalent to the specified range.</returns>
+		public bool IsEquivalentRange(ExcelRangeBase excelRange)
+		{
+			return this.Worksheet.Equals(excelRange.Worksheet)
+				&& this.Start.Row == excelRange.Start.Row
+				&& this.Start.Column == excelRange.Start.Column
+				&& this.End.Row == excelRange.End.Row
+				&& this.End.Column == excelRange.End.Column;
+		}
+
+		/// <summary>
 		/// Conditional Formatting for this range.
 		/// </summary>
 		public IRangeConditionalFormatting ConditionalFormatting

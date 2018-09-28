@@ -808,5 +808,36 @@ namespace EPPlusTest
 			}
 		}
 		#endregion
+
+		#region IsEquivalentRange Tests
+		[TestMethod]
+		public void IsEquivalentRangeAreEqual()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("sheet1");
+				var range1 = new ExcelRangeBase(worksheet, "A1:F6");
+				var range2 = new ExcelRangeBase(worksheet, "A1:F6");
+				Assert.IsTrue(range1.IsEquivalentRange(range2));
+			}
+		}
+
+		[TestMethod]
+		public void IsEquivalentRangeAreNotEqual()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet1 = package.Workbook.Worksheets.Add("sheet1");
+				var worksheet2 = package.Workbook.Worksheets.Add("sheet2");
+				var range1 = new ExcelRangeBase(worksheet1, "A1:F6");
+				var range2 = new ExcelRangeBase(worksheet2, "A1:F6");
+				Assert.IsFalse(range1.IsEquivalentRange(range2));
+				range2 = new ExcelRangeBase(worksheet1, "D1:F6");
+				Assert.IsFalse(range1.IsEquivalentRange(range2));
+				range2 = new ExcelRangeBase(worksheet1, "A2:F6");
+				Assert.IsFalse(range1.IsEquivalentRange(range2));
+			}
+		}
+		#endregion
 	}
 }

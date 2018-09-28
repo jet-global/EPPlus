@@ -24,6 +24,7 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Xml;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -100,6 +101,37 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.SetFlag(field, true);
 			myList.Insert(index, field);
 			return field;
+		}
+
+		/// <summary>
+		/// Populate the <see cref="ExcelPivotTableFieldCollection"/> with row and column fields.
+		/// </summary>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="parentNode">The top node.</param>
+		/// <param name="nodePath">The path to the field nodes.</param>
+		/// <param name="fields">The <see cref="ExcelPivotTableFieldCollection"/> of fields.</param>
+		internal void PopulateRowColumnFields(XmlNamespaceManager namespaceManager, XmlNode parentNode, string nodePath, ExcelPivotTableFieldCollection fields)
+		{
+			foreach (XmlElement element in parentNode.SelectNodes(nodePath, namespaceManager))
+			{
+				if (int.TryParse(element.GetAttribute("x"), out var x) && x >= 0)
+					this.AddInternal(fields[x]);
+				else
+					element.ParentNode.RemoveChild(element);
+			}
+		}
+
+		internal void PopulatePageFields(XmlNamespaceManager namespaceManager, XmlNode parentNode, string nodePath, ExcelPivotTableFieldCollection fields)
+		{
+			foreach (XmlElement pageElem in parentNode.SelectNodes(nodePath, namespaceManager))
+			{
+				if (int.TryParse(pageElem.GetAttribute("fld"), out var fld) && fld >= 0)
+				{
+					var field = fields[fld];
+					field.myPageFieldSettings = new ExcelPivotTablePageFieldSettings(namespaceManager, pageElem, field, fld);
+					this.AddInternal(field);
+				}
+			}
 		}
 		#endregion
 

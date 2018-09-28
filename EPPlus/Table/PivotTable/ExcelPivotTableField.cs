@@ -174,7 +174,7 @@ namespace OfficeOpenXml.Table.PivotTable
 	#endregion
 
 	/// <summary>
-	/// A pivot table field.
+	/// A pivotTable pivotField XML node.
 	/// </summary>
 	public class ExcelPivotTableField : XmlHelper
 	{
@@ -287,6 +287,21 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Gets or sets whether to show the default subtotal.
+		/// </summary>
+		public bool DefaultSubtotal
+		{
+			get
+			{
+				return base.GetXmlNodeBool("@defaultSubtotal");
+			}
+			set
+			{
+				base.SetXmlNodeBool("@defaultSubtotal", value);
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets the type of sort that is applied to this field.
 		/// </summary>
 		public eSortType Sort
@@ -364,7 +379,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (value == eSubTotalFunctions.None)
 				{
 					// For no subtotals, set defaultSubtotal to off
-					base.SetXmlNodeBool("@defaultSubtotal", false);
+					this.DefaultSubtotal = false;
 					this.TopNode.InnerXml = "";
 				}
 				else

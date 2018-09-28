@@ -777,6 +777,8 @@
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldItemCollection.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldNumericGroup.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableRowColumnFieldCollection.cs" />
+    <Compile Include="Table\PivotTable\ItemsCollection.cs" />
+    <Compile Include="Table\PivotTable\RowColumnItem.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\InternationalizationUtility.cs" />
     <Compile Include="Utils\UriHelper.cs" />

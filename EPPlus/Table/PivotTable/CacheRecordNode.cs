@@ -105,23 +105,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Selects all possible child node types.
 			foreach (XmlNode cacheRecordItem in this.Node.SelectNodes("d:b | d:d | d:e | d:m | d:n | d:s | d:x", this.NameSpaceManager))
 			{
-				myItems.Add(new CacheRecordItem(cacheRecordItem));
+				myItems.Add(new CacheRecordItem(cacheRecordItem, this.NameSpaceManager));
 			}
-		}
-		#endregion
-
-		#region Public Methods
-		/// <summary>
-		/// Update the value of the item.
-		/// </summary>
-		/// <param name="index">The index of the item.</param>
-		/// <param name="value">The new value.</param>
-		/// <param name="cacheField">The cache field.</param>
-		public void UpdateItem(int index, object value, CacheFieldNode cacheField)
-		{
-			if (index < 0 || index > this.Items.Count)
-				throw new ArgumentOutOfRangeException(nameof(index));
-			myItems[index].UpdateValue(value, this.Node, cacheField);
 		}
 		#endregion
 	}
