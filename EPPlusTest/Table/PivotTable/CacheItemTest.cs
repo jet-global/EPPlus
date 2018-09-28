@@ -1,4 +1,29 @@
 ﻿using System;
+/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2018 Michelle Lau, Evan Schallerer, and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+* For code change notes, see the source control history.
+*******************************************************************************/
 using System.Collections.Generic;
 using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -175,146 +200,6 @@ namespace EPPlusTest.Table.PivotTable
 		{
 			CacheItem.GetObjectType(new List<int>());
 		}
-		#endregion
-
-		#region UpdateValue Tests
-		//[TestMethod]
-		//public void UpdateValueDifferentType()
-		//{
-		//	XmlDocument document = new XmlDocument();
-		//	document.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/></r></pivotCacheRecords>");
-		//	var node = document.SelectSingleNode("//n");
-		//	var record = new CacheRecordItem(node, TestUtility.CreateDefaultNSM());
-		//	var parentNode = document.SelectSingleNode("//r");
-		//	var cacheFieldNode = base.GetTestCacheFieldNode();
-		//	Assert.IsFalse(record.UpdateValue(true, parentNode, cacheFieldNode));
-		//	Assert.AreEqual("True", record.Value);
-		//	Assert.AreEqual(PivotCacheRecordType.b, record.Type);
-		//}
-
-		//[TestMethod]
-		//public void UpdateValueSameType()
-		//{
-		//	XmlDocument document = new XmlDocument();
-		//	document.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/></r></pivotCacheRecords>");
-		//	var node = document.SelectSingleNode("//n");
-		//	var record = new CacheRecordItem(node, TestUtility.CreateDefaultNSM());
-		//	var parentNode = document.SelectSingleNode("//r");
-		//	var cacheFieldNode = base.GetTestCacheFieldNode();
-		//	Assert.IsFalse(record.UpdateValue(389471230, parentNode, cacheFieldNode));
-		//	Assert.AreEqual("389471230", record.Value);
-		//	Assert.AreEqual(PivotCacheRecordType.n, record.Type);
-		//}
-
-		//[TestMethod]
-		//public void UpdateValueWithNewSharedString()
-		//{
-		//	XmlDocument document = new XmlDocument();
-		//	document.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/></r></pivotCacheRecords>");
-		//	var node = document.SelectSingleNode("//n");
-		//	var record = new CacheRecordItem(node, TestUtility.CreateDefaultNSM());
-		//	var parentNode = document.SelectSingleNode("//r");
-		//	var cacheFieldNode = base.GetTestCacheFieldNode();
-		//	Assert.IsTrue(record.UpdateValue("red", parentNode, cacheFieldNode));
-		//	Assert.AreEqual("2", record.Value);
-		//	Assert.AreEqual(PivotCacheRecordType.x, record.Type);
-		//}
-
-		//[TestMethod]
-		//public void UpdateValueWithNewSharedStringSameType()
-		//{
-		//	XmlDocument document = new XmlDocument();
-		//	document.LoadXml(@"<pivotCacheRecords count=""1""><r><x v=""1""/></r></pivotCacheRecords>");
-		//	var node = document.SelectSingleNode("//x");
-		//	var record = new CacheRecordItem(node, TestUtility.CreateDefaultNSM());
-		//	var parentNode = document.SelectSingleNode("//r");
-		//	var cacheFieldNode = base.GetTestCacheFieldNode();
-		//	Assert.IsTrue(record.UpdateValue("red", parentNode, cacheFieldNode));
-		//	Assert.AreEqual("2", record.Value);
-		//	Assert.AreEqual(PivotCacheRecordType.x, record.Type);
-		//}
-
-		//[TestMethod]
-		//public void UpdateValueWithExistingSharedStringDifferentTypes()
-		//{
-		//	XmlDocument document = new XmlDocument();
-		//	document.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/></r></pivotCacheRecords>");
-		//	var node = document.SelectSingleNode("//n");
-		//	var record = new CacheRecordItem(node, TestUtility.CreateDefaultNSM());
-		//	var parentNode = document.SelectSingleNode("//r");
-		//	var cacheFieldNode = base.GetTestCacheFieldNode();
-		//	Assert.IsFalse(record.UpdateValue("Car", parentNode, cacheFieldNode));
-		//	Assert.AreEqual("1", record.Value);
-		//	Assert.AreEqual(PivotCacheRecordType.x, record.Type);
-		//}
-
-		//[TestMethod]
-		//public void UpdateValueWithExistingSharedStringSameTypes()
-		//{
-		//	XmlDocument document = new XmlDocument();
-		//	document.LoadXml(@"<pivotCacheRecords count=""1""><r><n x=""4""/></r></pivotCacheRecords>");
-		//	var node = document.SelectSingleNode("//n");
-		//	var record = new CacheRecordItem(node, TestUtility.CreateDefaultNSM());
-		//	var parentNode = document.SelectSingleNode("//r");
-		//	var cacheFieldNode = base.GetTestCacheFieldNode();
-		//	Assert.IsFalse(record.UpdateValue("Car", parentNode, cacheFieldNode));
-		//	Assert.AreEqual("1", record.Value);
-		//	Assert.AreEqual(PivotCacheRecordType.x, record.Type);
-		//}
-
-		//[TestMethod]
-		//public void UpdateValueNullValue()
-		//{
-		//	XmlDocument document = new XmlDocument();
-		//	document.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/></r></pivotCacheRecords>");
-		//	var node = document.SelectSingleNode("//n");
-		//	var record = new CacheRecordItem(node, TestUtility.CreateDefaultNSM());
-		//	var parentNode = document.SelectSingleNode("//r");
-		//	var cacheFieldNode = base.GetTestCacheFieldNode();
-		//	Assert.IsFalse(record.UpdateValue(null, parentNode, cacheFieldNode));
-		//	Assert.IsNull(record.Value);
-		//	Assert.AreEqual(PivotCacheRecordType.m, record.Type);
-		//}
-
-		//[TestMethod]
-		//public void UpdateValueEmptyStringValue()
-		//{
-		//	XmlDocument document = new XmlDocument();
-		//	document.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/></r></pivotCacheRecords>");
-		//	var node = document.SelectSingleNode("//n");
-		//	var record = new CacheRecordItem(node, TestUtility.CreateDefaultNSM());
-		//	var parentNode = document.SelectSingleNode("//r");
-		//	var cacheFieldNode = base.GetTestCacheFieldNode();
-		//	Assert.IsFalse(record.UpdateValue(string.Empty, parentNode, cacheFieldNode));
-		//	Assert.IsNull(record.Value);
-		//	Assert.AreEqual(PivotCacheRecordType.m, record.Type);
-		//}
-
-		//[TestMethod]
-		//[ExpectedException(typeof(InvalidOperationException))]
-		//public void UpdateValueNotSupportedType()
-		//{
-		//	XmlDocument document = new XmlDocument();
-		//	document.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/></r></pivotCacheRecords>");
-		//	var node = document.SelectSingleNode("//n");
-		//	var record = new CacheRecordItem(node, TestUtility.CreateDefaultNSM());
-		//	var parentNode = document.SelectSingleNode("//r");
-		//	var cacheFieldNode = base.GetTestCacheFieldNode();
-		//	record.UpdateValue(record, parentNode, cacheFieldNode);
-		//}
-
-		//[TestMethod]
-		//[ExpectedException(typeof(ArgumentNullException))]
-		//public void UpdateValueNullParentNode()
-		//{
-		//	XmlDocument document = new XmlDocument();
-		//	document.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/></r></pivotCacheRecords>");
-		//	var node = document.SelectSingleNode("//n");
-		//	var record = new CacheRecordItem(node, TestUtility.CreateDefaultNSM());
-		//	var parentNode = document.SelectSingleNode("//r");
-		//	var cacheFieldNode = base.GetTestCacheFieldNode();
-		//	record.UpdateValue(record, null, cacheFieldNode);
-		//}
 		#endregion
 	}
 }
