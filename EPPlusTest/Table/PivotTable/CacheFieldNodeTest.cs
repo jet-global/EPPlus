@@ -14,14 +14,14 @@ namespace EPPlusTest.Table.PivotTable
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void SlicerRangeItemNullXmlNodeThrowsException()
 		{
-			new CacheFieldNode(null, TestUtility.CreateDefaultNSM());
+			new CacheFieldNode(TestUtility.CreateDefaultNSM(), null);
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void SlicerRangeItemNullNamespaceManagerThrowsException()
 		{
-			new CacheFieldNode(this.CreateCacheFieldNode(), null);
+			new CacheFieldNode(null, this.CreateCacheFieldNode());
 		}
 		#endregion
 
@@ -30,7 +30,7 @@ namespace EPPlusTest.Table.PivotTable
 		public void SlicerRangeNodeName()
 		{
 			var node = this.CreateCacheFieldNode();
-			var cacheFieldNode = new CacheFieldNode(node, TestUtility.CreateDefaultNSM());
+			var cacheFieldNode = new CacheFieldNode(TestUtility.CreateDefaultNSM(), node);
 			Assert.AreEqual("Customer No.", cacheFieldNode.Name);
 			cacheFieldNode.Name = "Other Name";
 			Assert.AreEqual("Other Name", cacheFieldNode.Name);
@@ -43,7 +43,7 @@ namespace EPPlusTest.Table.PivotTable
 		public void SlicerRangeNodeNumFormatId()
 		{
 			var node = this.CreateCacheFieldNode();
-			var cacheFieldNode = new CacheFieldNode(node, TestUtility.CreateDefaultNSM());
+			var cacheFieldNode = new CacheFieldNode(TestUtility.CreateDefaultNSM(), node);
 			Assert.AreEqual("49", cacheFieldNode.NumFormatId);
 			cacheFieldNode.NumFormatId = "30";
 			Assert.AreEqual("30", cacheFieldNode.NumFormatId);
@@ -56,38 +56,11 @@ namespace EPPlusTest.Table.PivotTable
 		public void SlicerRangeNodeItems()
 		{
 			var node = this.CreateCacheFieldNode();
-			var cacheFieldNode = new CacheFieldNode(node, TestUtility.CreateDefaultNSM());
-			Assert.AreEqual(3, cacheFieldNode.Items.Count);
-			Assert.AreEqual("10000", cacheFieldNode.Items[0].Value);
-			Assert.AreEqual("20000", cacheFieldNode.Items[1].Value);
-			Assert.AreEqual("30000", cacheFieldNode.Items[2].Value);
-		}
-		#endregion
-
-		#region AddItem Tests
-		[TestMethod]
-		public void AddItemTest()
-		{
-			var node = base.GetTestCacheFieldNode();
-			node.AddItem("jet");
-			Assert.AreEqual(3, node.Items.Count);
-			Assert.AreEqual("jet", node.Items[2].Value);
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void AddItemNullValue()
-		{
-			var node = base.GetTestCacheFieldNode();
-			node.AddItem(null);
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void AddItemEmptyStringValue()
-		{
-			var node = base.GetTestCacheFieldNode();
-			node.AddItem(string.Empty);
+			var cacheFieldNode = new CacheFieldNode(TestUtility.CreateDefaultNSM(), node);
+			Assert.AreEqual(3, cacheFieldNode.SharedItems.Count);
+			Assert.AreEqual("10000", cacheFieldNode.SharedItems.Items[0].Value);
+			Assert.AreEqual("20000", cacheFieldNode.SharedItems.Items[1].Value);
+			Assert.AreEqual("30000", cacheFieldNode.SharedItems.Items[2].Value);
 		}
 		#endregion
 
@@ -96,15 +69,23 @@ namespace EPPlusTest.Table.PivotTable
 		public void GetSharedItemIndexTest()
 		{
 			var node = base.GetTestCacheFieldNode();
-			var index = node.GetSharedItemIndex("Car");
+			var index = node.GetSharedItemIndex(PivotCacheRecordType.s, "Car");
 			Assert.AreEqual(1, index);
+		}
+
+		[TestMethod]
+		public void GetSharedItemIndexSameValueDifferentType()
+		{
+			var node = base.GetTestCacheFieldNode();
+			var index = node.GetSharedItemIndex(PivotCacheRecordType.x, "Car");
+			Assert.AreEqual(-1, index);
 		}
 
 		[TestMethod]
 		public void GetSharedItemIndexValueNotFound()
 		{
 			var node = base.GetTestCacheFieldNode();
-			var index = node.GetSharedItemIndex("Mountain");
+			var index = node.GetSharedItemIndex(PivotCacheRecordType.s, "Mountain");
 			Assert.AreEqual(-1, index);
 		}
 		#endregion

@@ -26,81 +26,67 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// A row or column item object.
+	/// Collection class for cacheItems.
 	/// </summary>
-	public class RowColumnItem : XmlHelper
+	public class SharedItemsCollection : XmlHelper
 	{
 		#region Class Variables
-		private List<int> myMemberPropertyIndexes;
+		private List<CacheItem> myItems = new List<CacheItem>();
 		#endregion
 
 		#region Properties
 		/// <summary>
-		/// Gets the list of member property indexes.
+		/// Gets or sets the count.
 		/// </summary>
-		public IReadOnlyList<int> MemberPropertyIndex
+		public int Count
 		{
-			get
-			{
-				if (myMemberPropertyIndexes == null)
-				{
-					myMemberPropertyIndexes = new List<int>();
-					var xNodes = base.TopNode.SelectNodes("d:x", base.NameSpaceManager);
-					foreach (XmlNode xmlNode in xNodes)
-					{
-						var value = xmlNode.Attributes["v"]?.Value;
-						int index = value == null ? 0 : int.Parse(value);
-						myMemberPropertyIndexes.Add(index);
-					}
-				}
-				return myMemberPropertyIndexes;
-			}
+			get { return base.GetXmlNodeIntNull("@count") ?? 0; }
+			private set { base.SetXmlNodeString("@count", value.ToString()); }
 		}
 
 		/// <summary>
-		/// Gets or sets the data field index.
+		/// Gets a readonly list of the items in this <see cref="CacheFieldNode"/>.
 		/// </summary>
-		public int DataFieldIndex
-		{
-			get { return base.GetXmlNodeIntNull("@i") ?? 0; }
-			set { base.SetXmlNodeString("@i", value.ToString()); }
-		}
-
-		/// <summary>
-		/// Gets or sets the repeated items count.
-		/// </summary>
-		public int RepeatedItemsCount
-		{
-			get { return base.GetXmlNodeIntNull("@r") ?? 0; }
-			set { base.SetXmlNodeString("@r", value.ToString()); }
-		}
-
-		/// <summary>
-		/// Gets or sets the item type.
-		/// </summary>
-		public string ItemType
-		{
-			get { return base.GetXmlNodeString("@t"); }
-			set { base.SetXmlNodeString("@t", value, true); }
-		}
+		public IReadOnlyList<CacheItem> Items => myItems;
 		#endregion
 
 		#region Constructors
 		/// <summary>
-		/// Creates a new <see cref="RowColumnItem"/> object.
+		/// Creates an instance of a <see cref="SharedItemsCollection"/>.
 		/// </summary>
 		/// <param name="namespaceManager">The namespace manager.</param>
-		/// <param name="node">The item <see cref="XmlNode"/>.</param>
-		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node)
+		/// <param name="node">The xml top node.</param>
+		public SharedItemsCollection(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
 			if (namespaceManager == null)
 				throw new ArgumentNullException(nameof(namespaceManager));
+			// Selects all possible child node types.
+			foreach (XmlNode sharedItem in base.TopNode.SelectNodes("d:b | d:d | d:e | d:m | d:n | d:s | d:x", this.NameSpaceManager))
+			{
+				myItems.Add(new CacheItem(this.NameSpaceManager, sharedItem));
+			}
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Adds a new field item to the list.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The index of the new item.</returns>
+		public int Add(object value)
+		{
+			string stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
+			myItems.Add(new CacheItem(this.NameSpaceManager, base.TopNode, CacheItem.GetObjectType(value), stringValue));
+			this.Count++;
+			return myItems.Count - 1;
 		}
 		#endregion
 	}

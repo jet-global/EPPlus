@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,6 +11,7 @@ namespace EPPlusTest.Utils
 	[TestClass]
 	public class ConvertUtilTest
 	{
+		#region TryParse Tests
 		[TestMethod]
 		public void TryParseNumericString()
 		{
@@ -75,7 +77,9 @@ namespace EPPlusTest.Utils
 			Assert.IsTrue(ConvertUtil.TryParseDateString(dateString, out result));
 			Assert.AreEqual(new DateTime(2013, 1, 15, 15, 26, 0), result);
 		}
+		#endregion
 
+		#region IsNumeric Tests
 		[TestMethod]
 		public void IsNumeric()
 		{
@@ -96,7 +100,9 @@ namespace EPPlusTest.Utils
 			Assert.IsTrue(ConvertUtil.IsNumeric(new DateTime(2000, 1, 1)));
 			Assert.IsTrue(ConvertUtil.IsNumeric(new TimeSpan(5, 0, 0, 0)));
 		}
+		#endregion
 
+		#region GetValueDouble Tests
 		[TestMethod]
 		public void GetValueDouble()
 		{
@@ -117,6 +123,7 @@ namespace EPPlusTest.Utils
 			Assert.AreEqual(0d, ConvertUtil.GetValueDouble("Not a number"));
 			Assert.AreEqual(double.NaN, ConvertUtil.GetValueDouble("Not a number", false, true));
 		}
+		#endregion
 
 		#region TryParseObjectToDecimal Tests
 		[TestMethod]
@@ -508,6 +515,28 @@ namespace EPPlusTest.Utils
 			var isValidDate = ConvertUtil.TryParseDateObject(0.5, out DateTime resultDate, out eErrorType? resultError);
 			Assert.AreEqual(false, isValidDate);
 			Assert.AreEqual(eErrorType.Num, resultError);
+		}
+		#endregion
+
+		#region ConvertObjectToXmlAttributeString Tests
+		[TestMethod]
+		public void ConvertObjectToXmlAttributeString()
+		{
+			var dateTime = DateTime.Now;
+			Assert.AreEqual(dateTime.ToString("yyyy’-‘MM’-‘dd’T’HH’:’mm’:’ss"), ConvertUtil.ConvertObjectToXmlAttributeString(dateTime));
+			Assert.IsNull(ConvertUtil.ConvertObjectToXmlAttributeString(null));
+			Assert.AreEqual("832", ConvertUtil.ConvertObjectToXmlAttributeString(832));
+			Assert.AreEqual("832.382", ConvertUtil.ConvertObjectToXmlAttributeString(832.382));
+			Assert.AreEqual("jet", ConvertUtil.ConvertObjectToXmlAttributeString("jet"));
+			Assert.AreEqual("0", ConvertUtil.ConvertObjectToXmlAttributeString(false));
+			Assert.AreEqual("#NAME?", ConvertUtil.ConvertObjectToXmlAttributeString(ExcelErrorValue.Create(eErrorType.Name)));
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void ConvertObjectToXmlAttributeStringInvalidType()
+		{
+			ConvertUtil.ConvertObjectToXmlAttributeString(new List<int>());
 		}
 		#endregion
 	}

@@ -25,7 +25,6 @@
 *******************************************************************************/
 using System;
 using System.Xml;
-using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -33,7 +32,7 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// <summary>
 	/// Wraps a node in <pivotCacheRecords-x/>.
 	/// </summary>
-	public class CacheRecordItem : XmlHelper
+	public class CacheItem : XmlHelper
 	{
 		#region Properties
 		/// <summary>
@@ -52,7 +51,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					return null;
 				return base.GetXmlNodeString("@v");
 			}
-			private set
+			set
 			{
 				if (this.Type == PivotCacheRecordType.m)
 					value = null;
@@ -63,11 +62,11 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Constructors
 		/// <summary>
-		/// Creates an instance of a <see cref="CacheRecordItem"/>.
+		/// Creates an instance of a <see cref="CacheItem"/> object.
 		/// </summary>
-		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheRecordItem"/>.</param>
+		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheItem"/>.</param>
 		/// <param name="namespaceManager">The namespace manger.</param>
-		public CacheRecordItem(XmlNode node, XmlNamespaceManager namespaceManager) : base(namespaceManager, node)
+		public CacheItem(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
@@ -75,10 +74,65 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(namespaceManager));
 			this.Type = (PivotCacheRecordType)Enum.Parse(typeof(PivotCacheRecordType), node.Name);
 		}
+
+		/// <summary>
+		/// Creates an instance of a <see cref="CacheItem"/> object given a type and value and adds it to the specified <paramref name="parentNode"/>.
+		/// </summary>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="parentNode">The parent node to add to. It must be a sharedItems <see cref="XmlNode"/> or a cacheRecord <see cref="XmlNode"/>.</param>
+		/// <param name="type">The type of this item.</param>
+		/// <param name="value">The value of this item.</param>
+		public CacheItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, PivotCacheRecordType type, string value) : base (namespaceManager)
+		{
+			if (parentNode == null)
+				throw new ArgumentNullException(nameof(parentNode));
+			if (namespaceManager == null)
+				throw new ArgumentNullException(nameof(namespaceManager));
+			if (parentNode.Name != "sharedItems" && parentNode.Name != "r")
+				throw new ArgumentException($"{nameof(parentNode)} type: '{parentNode.Name}' was not the expected type.");
+			base.TopNode = parentNode.OwnerDocument.CreateElement(type.ToString());
+			this.Type = type;
+			if (!string.IsNullOrEmpty(value))
+			{
+				var attr = parentNode.OwnerDocument.CreateAttribute("v");
+				base.TopNode.Attributes.Append(attr);
+				this.Value = value;
+			}
+			parentNode.AppendChild(this.TopNode);
+		}
 		#endregion
 
-		#region Private Methods
-		private PivotCacheRecordType GetObjectType(object value)
+		#region Public Methods
+		/// <summary>
+		/// Replace <see cref="XmlNode"/> with new node type and value.
+		/// </summary>
+		/// <param name="type">The new <see cref="PivotCacheRecordType"/>.</param>
+		/// <param name="value">The value.</param>
+		/// <param name="parentNode">The parent <see cref="XmlNode"/>.</param>
+		public void ReplaceNode(PivotCacheRecordType type, string value, XmlNode parentNode)
+		{
+			if (parentNode == null)
+				throw new ArgumentNullException(nameof(parentNode));
+			var newNode = parentNode.OwnerDocument.CreateElement(type.ToString(), parentNode.NamespaceURI);
+			if (type != PivotCacheRecordType.m)
+			{
+				var attr = parentNode.OwnerDocument.CreateAttribute("v");
+				newNode.Attributes.Append(attr);
+			}
+			parentNode.ReplaceChild(newNode, base.TopNode);
+			base.TopNode = newNode;
+			this.Value = value;
+			this.Type = type;
+		}
+		#endregion
+
+		#region Public Statics Methods
+		/// <summary>
+		/// Gets the type of the given value.
+		/// </summary>
+		/// <param name="value">The object to get the type of.</param>
+		/// <returns>The item's type.</returns>
+		public static PivotCacheRecordType GetObjectType(object value)
 		{
 			if (value is bool)
 				return PivotCacheRecordType.b;
@@ -94,19 +148,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				return PivotCacheRecordType.s;
 			else
 				throw new InvalidOperationException($"Unknown type of {value.GetType()}.");
-		}
-
-		private void ReplaceNode(PivotCacheRecordType type, XmlNode parentNode)
-		{
-			var newNode = parentNode.OwnerDocument.CreateElement(type.ToString(), parentNode.NamespaceURI);
-			if (type != PivotCacheRecordType.m)
-			{
-				var attr = parentNode.OwnerDocument.CreateAttribute("v");
-				newNode.Attributes.Append(attr);
-			}
-			parentNode.ReplaceChild(newNode, base.TopNode);
-			base.TopNode = newNode;
-			this.Type = type;
 		}
 		#endregion
 	}
