@@ -36,12 +36,34 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 	/// </summary>
 	public abstract class ExcelFunction
 	{
+		#region Class Variables
+		private readonly ArgumentCollectionUtil _argumentCollectionUtil;
+		private readonly ArgumentParsers _argumentParsers;
+		private readonly CompileResultValidators _compileResultValidators;
+		#endregion
+		
+		#region Properties
+		/// <summary>
+		/// Indicates whether or not the function's compiler should resolve arguments as ranges.
+		/// </summary>
+		public bool ResolveArgumentsAsRange { get; protected set; } = false;
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Default constructor for a <see cref="ExcelFunction"/>.
+		/// </summary>
 		public ExcelFunction()
 			 : this(new ArgumentCollectionUtil(), new ArgumentParsers(), new CompileResultValidators())
 		{
-
 		}
 
+		/// <summary>
+		/// Instantiates a new <see cref="ExcelFunction"/> with the specified parameters.
+		/// </summary>
+		/// <param name="argumentCollectionUtil">The argument collection utility.</param>
+		/// <param name="argumentParsers">The argument parsers to use.</param>
+		/// <param name="compileResultValidators">The compile result validators to use.</param>
 		public ExcelFunction(
 			 ArgumentCollectionUtil argumentCollectionUtil,
 			 ArgumentParsers argumentParsers,
@@ -51,25 +73,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			_argumentParsers = argumentParsers;
 			_compileResultValidators = compileResultValidators;
 		}
+		#endregion
 
-		private readonly ArgumentCollectionUtil _argumentCollectionUtil;
-		private readonly ArgumentParsers _argumentParsers;
-		private readonly CompileResultValidators _compileResultValidators;
-
+		#region Public Abstract Methods
 		/// <summary>
-		/// 
+		/// Executes the function.
 		/// </summary>
 		/// <param name="arguments">Arguments to the function, each argument can contain primitive types, lists or <see cref="ExcelDataProvider.IRangeInfo">Excel ranges</see></param>
 		/// <param name="context">The <see cref="ParsingContext"/> contains various data that can be useful in functions.</param>
 		/// <returns>A <see cref="CompileResult"/> containing the calculated value</returns>
 		public abstract CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context);
+		#endregion
 
+		#region Public Virtual Methods
 		/// <summary>
 		/// If overridden, this method is called before Execute is called.
 		/// </summary>
 		/// <param name="context"></param>
 		public virtual void BeforeInvoke(ParsingContext context) { }
+		#endregion
 
+		#region Protected Methods
 		protected object GetFirstValue(IEnumerable<FunctionArgument> val)
 		{
 			var arg = ((IEnumerable<FunctionArgument>)val).FirstOrDefault();
@@ -433,4 +457,5 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			return CreateResult(result, DataType.Enumerable);
 		}
 	}
+	#endregion
 }

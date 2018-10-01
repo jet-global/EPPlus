@@ -3878,8 +3878,8 @@ namespace OfficeOpenXml
 						this.Part.CreateRelationship(UriHelper.GetRelativeUri(WorksheetUri, _comments.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/comments");
 					}
 					_comments.CommentXml.Save(_comments.Part.GetStream(FileMode.Create));
+					ExcelVmlDrawingCommentHelper.AddCommentDrawings(this, _comments);
 				}
-				ExcelVmlDrawingCommentHelper.AddCommentDrawings(this, _comments);
 			}
 		}
 

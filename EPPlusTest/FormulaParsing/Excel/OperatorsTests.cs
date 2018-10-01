@@ -175,6 +175,64 @@ namespace EPPlusTest.Excel
 		}
 
 		[TestMethod]
+		public void OperatorLogicalOperatorsShouldCorrectlyCompareDatesAndTimes()
+		{
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(.89, DataType.Time), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult(43306, DataType.Date), new CompileResult(.89, DataType.Time)).Result);
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.74, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(.74, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43399, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.GreaterThan.Apply(new CompileResult(43399, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.GreaterThan.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+
+			Assert.AreEqual(false, Operator.GreaterThanOrEqual.Apply(new CompileResult(.89, DataType.Time), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult(43306, DataType.Date), new CompileResult(.89, DataType.Time)).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.74, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.GreaterThanOrEqual.Apply(new CompileResult(.74, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.GreaterThanOrEqual.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43399, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult(43399, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.GreaterThanOrEqual.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+
+			Assert.AreEqual(true, Operator.LessThan.Apply(new CompileResult(.89, DataType.Time), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult(43306, DataType.Date), new CompileResult(.89, DataType.Time)).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.74, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.LessThan.Apply(new CompileResult(.74, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.LessThan.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43399, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult(43399, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.LessThan.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(.89, DataType.Time), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.LessThanOrEqual.Apply(new CompileResult(43306, DataType.Date), new CompileResult(.89, DataType.Time)).Result);
+			Assert.AreEqual(false, Operator.LessThanOrEqual.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.74, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(.74, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43399, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.LessThanOrEqual.Apply(new CompileResult(43399, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.LessThanOrEqual.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(new CompileResult(.89, DataType.Time), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(new CompileResult(43306, DataType.Date), new CompileResult(.89, DataType.Time)).Result);
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.74, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(new CompileResult(.74, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.EqualsTo.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43399, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.EqualsTo.Apply(new CompileResult(43399, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.EqualsTo.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(.89, DataType.Time), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(43306, DataType.Date), new CompileResult(.89, DataType.Time)).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.74, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(.74, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.NotEqualsTo.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.89, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43399, DataType.Date)).Result);
+			Assert.AreEqual(true, Operator.NotEqualsTo.Apply(new CompileResult(43399, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+			Assert.AreEqual(false, Operator.NotEqualsTo.Apply(new CompileResult(43306, DataType.Date), new CompileResult(43306, DataType.Date)).Result);
+		}
+
+		[TestMethod]
 		public void OperatorLogicalOperatorsShouldCorrectlyCompareLogicalValues()
 		{
 			// TRUE is strictly greater than FALSE.
@@ -320,6 +378,38 @@ namespace EPPlusTest.Excel
 		}
 
 		[TestMethod]
+		public void OperatorPlusTimeDataTypes()
+		{
+			var result = Operator.Plus.Apply(new CompileResult(.6, DataType.Time), new CompileResult(.8, DataType.Time));
+			Assert.AreEqual(.6d + .8d, result.Result);
+			Assert.AreEqual(DataType.Time, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorPlusDateAndTime()
+		{
+			var result = Operator.Plus.Apply(new CompileResult(43306, DataType.Date), new CompileResult(.8, DataType.Time));
+			Assert.AreEqual(43306 + .8d, result.Result);
+			Assert.AreEqual(DataType.Date, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorPlusTimeAndDate()
+		{
+			var result = Operator.Plus.Apply(new CompileResult(.8, DataType.Time), new CompileResult(43306, DataType.Date));
+			Assert.AreEqual(43306 + .8d, result.Result);
+			Assert.AreEqual(DataType.Time, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorPlusDateDataTypes()
+		{
+			var result = Operator.Plus.Apply(new CompileResult(43309, DataType.Date), new CompileResult(43306, DataType.Date));
+			Assert.AreEqual(43309d + 43306d, result.Result);
+			Assert.AreEqual(DataType.Date, result.DataType);
+		}
+
+		[TestMethod]
 		public void OperatorPlusErrorTypeArguments()
 		{
 			using (ExcelPackage package = new ExcelPackage())
@@ -361,6 +451,38 @@ namespace EPPlusTest.Excel
 		{
 			var result = Operator.Minus.Apply(new CompileResult(5, DataType.Integer), new CompileResult("2", DataType.String));
 			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorMinusTimeDataTypes()
+		{
+			var result = Operator.Minus.Apply(new CompileResult(.8, DataType.Time), new CompileResult(.6, DataType.Time));
+			Assert.AreEqual(.8d - .6d, result.Result);
+			Assert.AreEqual(DataType.Time, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorMinusDateAndTime()
+		{
+			var result = Operator.Minus.Apply(new CompileResult(43306, DataType.Date), new CompileResult(.8, DataType.Time));
+			Assert.AreEqual(43306 - .8d, result.Result);
+			Assert.AreEqual(DataType.Date, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorMinusTimeAndDate()
+		{
+			var result = Operator.Minus.Apply(new CompileResult(.8, DataType.Time), new CompileResult(43306, DataType.Date));
+			Assert.AreEqual(.8d - 43306, result.Result);
+			Assert.AreEqual(DataType.Time, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorMinusDateDataTypes()
+		{
+			var result = Operator.Minus.Apply(new CompileResult(43399, DataType.Date), new CompileResult(43306, DataType.Date));
+			Assert.AreEqual(43399d - 43306d, result.Result);
+			Assert.AreEqual(DataType.Date, result.DataType);
 		}
 
 		[TestMethod]
@@ -419,6 +541,38 @@ namespace EPPlusTest.Excel
 		{
 			var result = Operator.Divide.Apply(new CompileResult(9, DataType.Integer), new CompileResult("3", DataType.String));
 			Assert.AreEqual(3d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorDivideWithTimes()
+		{
+			var result = Operator.Divide.Apply(new CompileResult(.8, DataType.Time), new CompileResult(.5, DataType.Time));
+			Assert.AreEqual(.8 / .5, (double)result.Result, .0000001);
+			Assert.AreEqual(DataType.Time, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorDivideDateWithTime()
+		{
+			var result = Operator.Divide.Apply(new CompileResult(43306, DataType.Date), new CompileResult(.4, DataType.Time));
+			Assert.AreEqual(43306d / .4, (double)result.Result, .0000001);
+			Assert.AreEqual(DataType.Date, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorDivideTimeWithDate()
+		{
+			var result = Operator.Divide.Apply(new CompileResult(.4, DataType.Time), new CompileResult(5, DataType.Date));
+			Assert.AreEqual(.4 / 5d, (double)result.Result, .0000001);
+			Assert.AreEqual(DataType.Time, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorDivideWithDates()
+		{
+			var result = Operator.Divide.Apply(new CompileResult(40336, DataType.Date), new CompileResult(40339, DataType.Date));
+			Assert.AreEqual(40336d / 40339d, (double)result.Result, .0000001);
+			Assert.AreEqual(DataType.Decimal, result.DataType);
 		}
 
 		[TestMethod]
@@ -497,6 +651,38 @@ namespace EPPlusTest.Excel
 		{
 			var result = Operator.Multiply.Apply(new CompileResult(3.3, DataType.Decimal), new CompileResult(-5.6, DataType.Decimal));
 			Assert.AreEqual(-18.48d, (double)result.Result, 0.000001);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithTimes()
+		{
+			var result = Operator.Multiply.Apply(new CompileResult(.89, DataType.Time), new CompileResult(.7, DataType.Time));
+			Assert.AreEqual(.89d * .7d, (double)result.Result, 0.000001);
+			Assert.AreEqual(DataType.Time, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithDateAndTime()
+		{
+			var result = Operator.Multiply.Apply(new CompileResult(43306, DataType.Date), new CompileResult(.7, DataType.Time));
+			Assert.AreEqual(43306d * .7d, (double)result.Result, 0.000001);
+			Assert.AreEqual(DataType.Date, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithTimeAndDate()
+		{
+			var result = Operator.Multiply.Apply(new CompileResult(.7, DataType.Time), new CompileResult(43306, DataType.Date));
+			Assert.AreEqual(43306d * .7d, (double)result.Result, 0.000001);
+			Assert.AreEqual(DataType.Time, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorMultiplyWithDates()
+		{
+			var result = Operator.Multiply.Apply(new CompileResult(4, DataType.Date), new CompileResult(6, DataType.Date));
+			Assert.AreEqual(4d * 6d, result.Result);
+			Assert.AreEqual(DataType.Decimal, result.DataType);
 		}
 
 		[TestMethod]
@@ -635,6 +821,22 @@ namespace EPPlusTest.Excel
 				Assert.AreEqual(.000024d, (double)sheet.Cells[2, 2].Value, .0000000000000001);
 			}
 		}
+
+		[TestMethod]
+		public void OperatorPercentOfDate()
+		{
+			var result = Operator.Percent.Apply(new CompileResult(40663, DataType.Date), new CompileResult(0.01, DataType.Decimal));
+			Assert.AreEqual(40663d * .01d, result.Result);
+			Assert.AreEqual(DataType.Decimal, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorPercentOfTime()
+		{
+			var result = Operator.Percent.Apply(new CompileResult(.87, DataType.Date), new CompileResult(0.01, DataType.Decimal));
+			Assert.AreEqual(.87d * .01d, result.Result);
+			Assert.AreEqual(DataType.Decimal, result.DataType);
+		}
 		#endregion
 
 		#region Operator Concat Tests
@@ -741,6 +943,30 @@ namespace EPPlusTest.Excel
 		{
 			var result = Operator.Exp.Apply(new CompileResult(2, DataType.Integer), new CompileResult(3, DataType.Integer));
 			Assert.AreEqual(8d, result.Result);
+		}
+
+		[TestMethod]
+		public void OperatorExpWithDates()
+		{
+			var result = Operator.Exp.Apply(new CompileResult(40663, DataType.Date), new CompileResult(2, DataType.Date));
+			Assert.AreEqual(Math.Pow(40663d, 2d), result.Result);
+			Assert.AreEqual(DataType.Decimal, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorExpWithTimes()
+		{
+			var result = Operator.Exp.Apply(new CompileResult(.6, DataType.Time), new CompileResult(.7, DataType.Time));
+			Assert.AreEqual(Math.Pow(.6, .7), (double)result.Result, .0000001);
+			Assert.AreEqual(DataType.Decimal, result.DataType);
+		}
+
+		[TestMethod]
+		public void OperatorExpWithDateAndTime()
+		{
+			var result = Operator.Exp.Apply(new CompileResult(40663, DataType.Date), new CompileResult(.7, DataType.Time));
+			Assert.AreEqual(Math.Pow(40663d, .7d), (double)result.Result, .0000001);
+			Assert.AreEqual(DataType.Decimal, result.DataType);
 		}
 		#endregion
 

@@ -7,6 +7,7 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 	[TestClass]
 	public class CompileResultTests
 	{
+		#region TestMethods
 		[TestMethod]
 		public void NumericStringCompileResult()
 		{
@@ -28,5 +29,15 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 			Assert.IsTrue(result.IsDateString);
 			Assert.AreEqual(expected.ToOADate(), result.ResultNumeric);
 		}
+
+		[TestMethod]
+		public void DateCompileResultAsNumeric()
+		{
+			var date = DateTime.Now;
+			var compileResult = new CompileResult(date, DataType.Date);
+			Assert.IsTrue(compileResult.IsNumeric);
+			Assert.AreEqual(date.ToOADate(), compileResult.ResultNumeric);
+		}
+		#endregion
 	}
 }

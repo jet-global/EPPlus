@@ -205,6 +205,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["eomonth"] = new Eomonth();
 			this.Functions["isoweeknum"] = new IsoWeekNum();
 			this.Functions["workday"] = new Workday();
+			this.Functions["workday.intl"] = new WorkdayIntl();
 			this.Functions["networkdays"] = new Networkdays();
 			this.Functions["networkdays.intl"] = new NetworkdaysIntl();
 			this.Functions["datevalue"] = new DateValue();

@@ -31,6 +31,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 					retVal.Add(_dayOfWeekArray[i]);
 				}
 			}
+			
+			if (retVal.Count == 7)
+				return null;
+
 			return new HolidayWeekdays(retVal.ToArray());
 		}
 
@@ -67,7 +71,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime.Workdays
 				case 17:
 					return new HolidayWeekdays(DayOfWeek.Saturday);
 				default:
-					throw new ArgumentException("Invalid code supplied to HolidayWeekdaysFactory: " + code);
+					return null;
 			}
 		}
 	}

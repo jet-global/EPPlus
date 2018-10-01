@@ -42,8 +42,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.DateTimeFunctions
 			var func = new Today();
 			var args = new FunctionArgument[0];
 			var result = func.Execute(args, this.ParsingContext);
-			var resultDate = DateTime.FromOADate((double)result.Result);
-			Assert.AreEqual(DateTime.Now.Date, resultDate);
+			Assert.AreEqual(DateTime.Now.Date, result.Result);
 		}
 		#endregion
 	}

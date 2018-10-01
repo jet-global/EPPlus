@@ -39,14 +39,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime
 	public class Now : ExcelFunction
 	{
 		/// <summary>
-		/// Returns the current date and time on the local computer as an OA Date.
+		/// Returns the current date and time on the local computer.
 		/// </summary>
 		/// <param name="arguments">Unused in method, but necessary to override method.</param>
 		/// <param name="context">Unused in method, but necessary to override method.</param>
-		/// <returns>The current date and time on the local computer as an OA Date.</returns>
+		/// <returns>The current <see cref="DateTime"/> on the local computer.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
-			return this.CreateResult(System.DateTime.Now.ToOADate(), DataType.Date);
+			return this.CreateResult(System.DateTime.Now, DataType.Date);
 		}
 	}
 }

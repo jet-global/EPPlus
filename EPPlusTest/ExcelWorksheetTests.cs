@@ -6445,7 +6445,8 @@ namespace EPPlusTest
 		public void SaveIncludesOnlyThoseTablesThatAreNotDeleted()
 		{
 			var file = new FileInfo(Path.GetTempFileName());
-			file.Delete();
+			if (file.Exists)
+				file.Delete();
 			try
 			{
 				using (var package = new ExcelPackage(file))
@@ -6472,7 +6473,8 @@ namespace EPPlusTest
 			}
 			finally
 			{
-				file.Delete();
+				if (file.Exists)
+					file.Delete();
 			}
 		}
 
@@ -6488,6 +6490,28 @@ namespace EPPlusTest
 				var pivotTable = package.Workbook.Worksheets.ElementAt(1).PivotTables.First();
 				var refAddress = pivotTable.CacheDefinition.GetXmlNodeString(ExcelPivotCacheDefinition._sourceAddressPath);
 				Assert.AreEqual($"'Venta diaria'!$I$9:$U$15", refAddress);
+			}
+		}
+
+		[TestMethod]
+		public void AddingAndSavingWorksheetDoesNotCreateVmlDrawings()
+		{
+			var file = new FileInfo(Path.GetTempFileName());
+			file.Delete();
+			try
+			{
+				using (var package = new ExcelPackage())
+				{
+					var sheet1 = package.Workbook.Worksheets.Add("Sheet1");
+					var sheetCopy = package.Workbook.Worksheets.Add("Sheet2", sheet1);
+					package.SaveAs(file);
+					Assert.IsFalse(package.Package.TryGetPart(new Uri(@"/xl/drawings/vmlDrawing1.vml", UriKind.Relative), out _));
+				}
+			}
+			finally
+			{
+				if (file.Exists)
+					file.Delete();
 			}
 		}
 		#endregion

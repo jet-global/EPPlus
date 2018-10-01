@@ -121,6 +121,7 @@
     <Compile Include="ExternalReferenceCollectionTest.cs" />
     <Compile Include="FormulaParsing\DataProviderTestBase.cs" />
     <Compile Include="FormulaParsing\EpplusExcelDataProviderTest.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\WorkdayTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\AbsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingMathTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CeilingTests.cs" />
@@ -147,7 +148,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\TodayTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\WeekdayTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\WeeknumTests.cs" />
-    <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\WorkdayTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\WorkdayIntlTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\YearFracTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\DateTimeFunctions\YearTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\FunctionRepositoryTests.cs" />
