@@ -100,6 +100,14 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="cacheDefinition">The cache definition of the pivot table.</param>
 		public ExcelPivotCacheRecords(XmlNamespaceManager ns, XmlDocument cacheRecordsXml, Uri targetUri, ExcelPivotCacheDefinition cacheDefinition) : base(ns, null)
 		{
+			if (ns == null)
+				throw new ArgumentNullException(nameof(ns));
+			if (cacheRecordsXml == null)
+				throw new ArgumentNullException(nameof(cacheRecordsXml));
+			if (targetUri == null)
+				throw new ArgumentNullException(nameof(targetUri));
+			if (cacheDefinition == null)
+				throw new ArgumentNullException(nameof(cacheDefinition));
 			this.CachaRecordsXml = cacheRecordsXml;
 			base.TopNode = cacheRecordsXml.SelectSingleNode($"d:{ExcelPivotCacheRecords.Name}", ns);
 			this.Uri = targetUri;
@@ -121,6 +129,14 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="cacheDefinition">The cache definition of the pivot table.</param>
 		public ExcelPivotCacheRecords(XmlNamespaceManager ns, Packaging.ZipPackage package, ref int tableId, ExcelPivotCacheDefinition cacheDefinition) : base(ns, null)
 		{
+			if (ns == null)
+				throw new ArgumentNullException(nameof(ns));
+			if (package == null)
+				throw new ArgumentNullException(nameof(package));
+			if (cacheDefinition == null)
+				throw new ArgumentNullException(nameof(cacheDefinition));
+			if (tableId < 1)
+				throw new ArgumentOutOfRangeException(nameof(tableId));
 			// CacheRecord. Create an empty one.
 			this.Uri = XmlHelper.GetNewUri(package, $"/xl/pivotCache/{ExcelPivotCacheRecords.Name}{{0}}.xml", ref tableId);
 			var cacheRecord = new XmlDocument();
@@ -130,6 +146,34 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			base.TopNode = cacheRecord.FirstChild;
 			this.CacheDefinition = cacheDefinition;
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Update the <see cref="CacheItem"/>s.
+		/// </summary>
+		/// <param name="sourceDataRange">The source range of the data without header row.</param>
+		public void UpdateRecords(ExcelRangeBase sourceDataRange)
+		{
+			// Removes extra records.
+			if (sourceDataRange.Rows < myRecords.Count)
+			{
+				var count = myRecords.Count - sourceDataRange.Rows;
+				myRecords.RemoveRange(sourceDataRange.Rows, count);
+			}
+
+			for (int row = sourceDataRange.Start.Row; row < sourceDataRange.Rows + sourceDataRange.Start.Row; row++)
+			{
+				int recordIndex = row - sourceDataRange.Start.Row;
+				var rowCells = sourceDataRange.Where(c => c.Start.Row == row).Select(c => c.Value);
+				// If the row is within the existing range of cacheRecords, update that cacheRecord. Otherwise, add a new record.
+				if (recordIndex < myRecords.Count)
+					myRecords[recordIndex].Update(rowCells, this.CacheDefinition);
+				else
+					myRecords.Add(new CacheRecordNode(this.NameSpaceManager, base.TopNode, rowCells, this.CacheDefinition));
+			}
+			this.Count = this.Records.Count;
 		}
 		#endregion
 	}

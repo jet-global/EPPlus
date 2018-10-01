@@ -88,7 +88,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(parentNode));
 			if (namespaceManager == null)
 				throw new ArgumentNullException(nameof(namespaceManager));
-			if (parentNode.Name != "sharedItems" && parentNode.Name != "r")
+			if (parentNode.LocalName != "sharedItems" && parentNode.LocalName != "r")
 				throw new ArgumentException($"{nameof(parentNode)} type: '{parentNode.Name}' was not the expected type.");
 			base.TopNode = parentNode.OwnerDocument.CreateElement(type.ToString());
 			this.Type = type;
