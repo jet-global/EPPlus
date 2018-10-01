@@ -37,7 +37,18 @@ namespace OfficeOpenXml
 		/// <returns>The formula with all cross-sheet references updated.</returns>
 		string UpdateFormulaSheetReferences(string formula, string oldSheetName, string newSheetName);
 
+		/// <summary>
+		/// Updates references to deleted sheets.
+		/// </summary>
+		/// <param name="formula">The formula to update.</param>
+		/// <param name="deleteSheetName">The name of the deleted sheet.</param>
+		/// <returns>The new formula.</returns>
 		string UpdateFormulaDeletedSheetReferences(string formula, string deleteSheetName);
+
+		/// <summary>
+		/// Clears out any of the memory associated with this <see cref="IFormulaManager"/>.
+		/// </summary>
+		void FlushCache();
 	}
 	
 	internal class FormulaManager : IFormulaManager
@@ -156,6 +167,11 @@ namespace OfficeOpenXml
 			if (string.IsNullOrEmpty(deletedSheetName))
 				throw new ArgumentNullException(nameof(deletedSheetName));
 			return this.UpdateFormulaWorksheetReferences(originalFormula, deletedSheetName, null);
+		}
+
+		public void FlushCache()
+		{
+
 		}
 		#endregion
 
