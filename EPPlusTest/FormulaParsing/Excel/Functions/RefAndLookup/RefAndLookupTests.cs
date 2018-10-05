@@ -307,43 +307,57 @@ namespace EPPlusTest.Excel.Functions
 		[TestMethod]
 		public void LookupShouldReturnResultFromMatchingSecondArrayHorizontal()
 		{
-			var func = new Lookup();
-			var args = FunctionsHelper.CreateArgs(4, "A1:C1", "A3:C3");
-			var parsingContext = ParsingContext.Create();
-			parsingContext.Scopes.NewScope(RangeAddress.Empty);
-
-			var provider = MockRepository.GenerateStub<ExcelDataProvider>();
-			provider.Stub(x => x.GetCellValue(WorksheetName, 1, 1)).Return(1);
-			provider.Stub(x => x.GetCellValue(WorksheetName, 1, 2)).Return(3);
-			provider.Stub(x => x.GetCellValue(WorksheetName, 1, 3)).Return(5);
-			provider.Stub(x => x.GetCellValue(WorksheetName, 3, 1)).Return("A");
-			provider.Stub(x => x.GetCellValue(WorksheetName, 3, 2)).Return("B");
-			provider.Stub(x => x.GetCellValue(WorksheetName, 3, 3)).Return("C");
-
-			parsingContext.ExcelDataProvider = provider;
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual("B", result.Result);
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[1, 1].Value = 1;
+				worksheet.Cells[1, 2].Value = 3;
+				worksheet.Cells[1, 3].Value = 5;
+				worksheet.Cells[3, 1].Value = "A";
+				worksheet.Cells[3, 2].Value = "B";
+				worksheet.Cells[3, 3].Value = "C";
+				worksheet.Cells[5, 5].Formula = "=LOOKUP(4, A1:C1, A3:C3)";
+				worksheet.Calculate();
+				Assert.AreEqual("B", worksheet.Cells[5, 5].Value);
+			}
 		}
 
 		[TestMethod]
 		public void LookupShouldReturnResultFromMatchingSecondArrayHorizontalWithOffset()
 		{
-			var func = new Lookup();
-			var args = FunctionsHelper.CreateArgs(4, "A1:C1", "B3:D3");
-			var parsingContext = ParsingContext.Create();
-			parsingContext.Scopes.NewScope(RangeAddress.Empty);
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[1, 1].Value = 1;
+				worksheet.Cells[1, 2].Value = 3;
+				worksheet.Cells[1, 3].Value = 5;
+				worksheet.Cells[3, 2].Value = "A";
+				worksheet.Cells[3, 3].Value = "B";
+				worksheet.Cells[3, 4].Value = "C";
+				worksheet.Cells[5, 5].Formula = "=LOOKUP(4, A1:C1, B3:D3)";
+				worksheet.Calculate();
+				Assert.AreEqual("B", worksheet.Cells[5, 5].Value);
+			}
+		}
 
-			var provider = MockRepository.GenerateStub<ExcelDataProvider>();
-			provider.Stub(x => x.GetCellValue(WorksheetName, 1, 1)).Return(1);
-			provider.Stub(x => x.GetCellValue(WorksheetName, 1, 2)).Return(3);
-			provider.Stub(x => x.GetCellValue(WorksheetName, 1, 3)).Return(5);
-			provider.Stub(x => x.GetCellValue(WorksheetName, 3, 2)).Return("A");
-			provider.Stub(x => x.GetCellValue(WorksheetName, 3, 3)).Return("B");
-			provider.Stub(x => x.GetCellValue(WorksheetName, 3, 4)).Return("C");
-
-			parsingContext.ExcelDataProvider = provider;
-			var result = func.Execute(args, parsingContext);
-			Assert.AreEqual("B", result.Result);
+		[TestMethod]
+		public void LookupWithIncompatibleType()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells[1, 1].Value = "A";
+				worksheet.Cells[1, 2].Value = 1;
+				worksheet.Cells[1, 3].Value = 2;
+				worksheet.Cells[1, 4].Value = 3;
+				worksheet.Cells[3, 1].Value = "A";
+				worksheet.Cells[3, 2].Value = "B";
+				worksheet.Cells[3, 3].Value = "C";
+				worksheet.Cells[3, 4].Value = "D";
+				worksheet.Cells[5, 5].Formula = "=LOOKUP(2, A1:D1, A3:D3)";
+				worksheet.Calculate();
+				Assert.AreEqual("C", worksheet.Cells[5, 5].Value);
+			}
 		}
 
 		[TestMethod]

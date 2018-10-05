@@ -41,6 +41,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		public const string Name = "OFFSETADDRESS";
 		#endregion
 
+		#region LookupFunction Members
+		public override List<int> LookupArgumentIndicies { get; } = new List<int> { 0 };
+		#endregion
+
 		#region ExcelFunction Overrides
 		/// <summary>
 		/// Executes the function with the specified <paramref name="arguments"/> in the specified <paramref name="context"/>.

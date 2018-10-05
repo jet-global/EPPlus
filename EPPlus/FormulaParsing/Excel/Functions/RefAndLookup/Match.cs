@@ -31,6 +31,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
 	public class Match : LookupFunction
 	{
+		public override List<int> LookupArgumentIndicies { get; } = new List<int> { 1 };
+
 		private enum MatchType
 		{
 			ClosestAbove = -1,

@@ -31,6 +31,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
 	public class VLookup : LookupFunction
 	{
+		public override List<int> LookupArgumentIndicies { get; } = new List<int> { 1 };
+
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 3, out eErrorType argumentError) == false)

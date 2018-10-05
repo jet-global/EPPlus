@@ -35,6 +35,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 	/// </summary>
 	public class Row : LookupFunction
 	{
+		#region LookupFunction Members
+		public override List<int> LookupArgumentIndicies { get; } = new List<int> { 0 };
+		#endregion
+
 		#region Public ExcelFunction overrides
 		/// <summary>
 		/// Calculates the row of either the given range or the column that the function is executed in.

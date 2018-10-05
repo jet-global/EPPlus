@@ -34,7 +34,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		/// Gets or sets a value representing the indicies of the arguments to the lookup function that
 		/// should be compiled as ExcelAddresses instead of being evaluated.
 		/// </summary>
-		public List<int> LookupArgumentIndicies { get; set; }
+		public abstract List<int> LookupArgumentIndicies { get; }
 
 		protected LookupDirection GetLookupDirection(RangeAddress rangeAddress)
 		{
@@ -60,11 +60,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 					if (lastValue != null && navigator.CurrentValue == null) break;
 
 					if (!lookupArgs.RangeLookup) continue;
-					if (lastValue == null && matchResult < 0)
+					if (lastValue == null && matchResult == -1)
 					{
 						return new CompileResult(eErrorType.NA);
 					}
-					if (lastValue != null && matchResult < 0 && lastMatchResult > 0)
+					if (lastValue != null && matchResult == -1 && lastMatchResult == 1)
 					{
 						return new CompileResultFactory().Create(lastLookupValue);
 					}
