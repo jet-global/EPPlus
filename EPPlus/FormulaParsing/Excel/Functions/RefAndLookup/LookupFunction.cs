@@ -60,11 +60,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 					if (lastValue != null && navigator.CurrentValue == null) break;
 
 					if (!lookupArgs.RangeLookup) continue;
-					if (lastValue == null && matchResult == -1)
+					if (lastValue == null && matchResult < 0)
 					{
 						return new CompileResult(eErrorType.NA);
 					}
-					if (lastValue != null && matchResult == -1 && lastMatchResult == 1)
+					if (lastValue != null && matchResult < 0 && lastMatchResult > 0)
 					{
 						return new CompileResultFactory().Create(lastLookupValue);
 					}

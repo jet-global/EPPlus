@@ -57,7 +57,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			{
 				if (navigator.CurrentValue == null && searchedValue == null)
 					return this.CreateResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
-				int matchResult;
+				int? matchResult;
 				if (matchType == MatchType.ExactMatch)
 					matchResult = new WildCardValueMatcher().IsMatch(searchedValue, navigator.CurrentValue);
 				else

@@ -36,11 +36,23 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 {
 	public class ValueMatcher
 	{
+		#region Private Properties
 		private ArgumentParsers _argumentParsers { get; } = new ArgumentParsers();
+		#endregion
 
-		public const int IncompatibleOperands = -2;
-
-		public virtual int IsMatch(object o1, object o2)
+		#region Public Methods
+		/// <summary>
+		/// Compares the values of <paramref name="o1"/> and <paramref name="o2"/>.
+		/// </summary>
+		/// <param name="o1">The first object.</param>
+		/// <param name="o2">The second object.</param>
+		/// <returns>
+		///	A negative integer if the first object is less than the second, 
+		///	a positive integer if the first object is greater than the second, 
+		///	0 if the two objects are equivalent,
+		///	null if the two objects cannot be compared because of incompatible types.
+		/// </returns>
+		public virtual int? IsMatch(object o1, object o2)
 		{
 			if (o1 != null && o2 == null) return 1;
 			if (o1 == null && o2 != null) return -1;
@@ -65,9 +77,58 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 				return o1d.CompareTo(o2d);
 			}
 			catch { /* Ignore any parse errors that may have occurred. */}
-			return ValueMatcher.IncompatibleOperands;
+			return null;
+		}
+		#endregion
+
+		#region Protected Methods
+		protected virtual int? CompareStringToString(string s1, string s2)
+		{
+			return s1.CompareTo(s2);
 		}
 
+		protected virtual int? CompareStringToObject(string o1, object o2)
+		{
+			double d1;
+			if (double.TryParse(o1, out d1))
+			{
+				var o2d = this._argumentParsers.GetParser(DataType.Decimal).Parse(o2);
+				return d1.CompareTo(o2d);
+			}
+			bool b1;
+			if (bool.TryParse(o1, out b1))
+			{
+				var o2b = this._argumentParsers.GetParser(DataType.Boolean).Parse(o2);
+				return b1.CompareTo(o2b);
+			}
+			DateTime dt1, dt2;
+			if (DateTime.TryParse(o1, out dt1) && DateTime.TryParse(o2.ToString(), out dt2))
+				return dt1.CompareTo(dt2);
+			return null;
+		}
+
+		protected virtual int? CompareObjectToString(object o1, string o2)
+		{
+			double d2;
+			if (double.TryParse(o2, out d2))
+			{
+				var o1d = (double)this._argumentParsers.GetParser(DataType.Decimal).Parse(o1);
+				return o1d.CompareTo(d2);
+			}
+			bool b2;
+			if (bool.TryParse(o2, out b2))
+			{
+				var o1b = (bool)this._argumentParsers.GetParser(DataType.Boolean).Parse(o1);
+				return o1b.CompareTo(b2);
+			}
+			DateTime dt1, dt2;
+			if (DateTime.TryParse(o1.ToString(), out dt1) && DateTime.TryParse(o2, out dt2))
+				return dt1.CompareTo(dt2);
+			return null;
+		}
+		#endregion
+
+		#region Private Methods
 		private static object CheckGetRange(object v)
 		{
 			if (v is ExcelDataProvider.IRangeInfo)
@@ -86,51 +147,6 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 			}
 			return v;
 		}
-
-		protected virtual int CompareStringToString(string s1, string s2)
-		{
-			return s1.CompareTo(s2);
-		}
-
-		protected virtual int CompareStringToObject(string o1, object o2)
-		{
-			double d1;
-			if (double.TryParse(o1, out d1))
-			{
-				var o2d = this._argumentParsers.GetParser(DataType.Decimal).Parse(o2);
-				return d1.CompareTo(o2d);
-			}
-			bool b1;
-			if (bool.TryParse(o1, out b1))
-			{
-				var o2b = this._argumentParsers.GetParser(DataType.Boolean).Parse(o2);
-				return b1.CompareTo(o2b);
-			}
-			DateTime dt1, dt2;
-			if (DateTime.TryParse(o1, out dt1) && DateTime.TryParse(o2.ToString(), out dt2))
-				return dt1.CompareTo(dt2);
-			return ValueMatcher.IncompatibleOperands;
-		}
-
-		protected virtual int CompareObjectToString(object o1, string o2)
-		{
-			double d2;
-			if (double.TryParse(o2, out d2))
-			{
-				var o1d = (double)this._argumentParsers.GetParser(DataType.Decimal).Parse(o1);
-				return o1d.CompareTo(d2);
-			}
-			bool b2;
-			if (bool.TryParse(o2, out b2))
-			{
-				var o1b = (bool)this._argumentParsers.GetParser(DataType.Boolean).Parse(o1);
-				return o1b.CompareTo(b2);
-			}
-			DateTime dt1, dt2;
-			if (DateTime.TryParse(o1.ToString(), out dt1) && DateTime.TryParse(o2, out dt2))
-				return dt1.CompareTo(dt2);
-			return ValueMatcher.IncompatibleOperands;
-		}
-
+		#endregion
 	}
 }

@@ -93,12 +93,12 @@ namespace EPPlusTest.ExcelUtilities
 		}
 
 		[TestMethod]
-		public void ShouldReturnMînus2WhenTypesDifferAndStringConversionToDoubleFails()
+		public void ShouldReturnNullWhenTypesDifferAndStringConversionToDoubleFails()
 		{
 			object o1 = 2d;
 			object o2 = "T";
 			var result = _matcher.IsMatch(o1, o2);
-			Assert.AreEqual(-2, result);
+			Assert.IsNull(result);
 		}
 
 		[TestMethod]
