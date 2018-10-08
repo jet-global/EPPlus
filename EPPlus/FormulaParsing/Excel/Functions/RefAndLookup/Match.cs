@@ -31,13 +31,30 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
 	public class Match : LookupFunction
 	{
+		#region LookupFunction Members
+		/// <summary>
+		/// Gets a value representing the indicies of the arguments to the lookup function that
+		/// should be compiled as ExcelAddresses instead of being evaluated.
+		/// </summary>
+		public override List<int> LookupArgumentIndicies { get; } = new List<int> { 1 };
+		#endregion
+
+		#region Enums
 		private enum MatchType
 		{
 			ClosestAbove = -1,
 			ExactMatch = 0,
 			ClosestBelow = 1
 		}
+		#endregion
 
+		#region ExcelFunction Overrides
+		/// <summary>
+		/// Executes the function with the specified <paramref name="arguments"/> in the specified <paramref name="context"/>.
+		/// </summary>
+		/// <param name="arguments">The arguments with which to evaluate the function.</param>
+		/// <param name="context">The context in which to evaluate the function.</param>
+		/// <returns>An address range <see cref="CompileResult"/> if successful, otherwise an error result.</returns> 
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
@@ -55,7 +72,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			{
 				if (navigator.CurrentValue == null && searchedValue == null)
 					return this.CreateResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
-				int matchResult;
+				int? matchResult;
 				if (matchType == MatchType.ExactMatch)
 					matchResult = new WildCardValueMatcher().IsMatch(searchedValue, navigator.CurrentValue);
 				else
@@ -74,7 +91,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				return this.CreateResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
 			return this.CreateResult(lastValidIndex, DataType.Integer);
 		}
+		#endregion
 
+		#region Private Methods
 		private MatchType GetMatchType(IEnumerable<FunctionArgument> arguments)
 		{
 			var matchType = MatchType.ClosestBelow;
@@ -82,5 +101,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				matchType = (MatchType)this.ArgToInt(arguments, 2);
 			return matchType;
 		}
+		#endregion
 	}
 }

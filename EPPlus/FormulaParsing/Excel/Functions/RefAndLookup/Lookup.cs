@@ -32,21 +32,36 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
 	public class Lookup : LookupFunction
 	{
+		#region LookupFunction Overrides
+		/// <summary>
+		/// Gets a value representing the indicies of the arguments to the lookup function that
+		/// should be compiled as ExcelAddresses instead of being evaluated.
+		/// </summary>
+		public override List<int> LookupArgumentIndicies { get; } = new List<int> { 1, 2 };
+		#endregion
+
+		#region ExcelFunction Overrides
+		/// <summary>
+		/// Executes the function with the specified <paramref name="arguments"/> in the specified <paramref name="context"/>.
+		/// </summary>
+		/// <param name="arguments">The arguments with which to evaluate the function.</param>
+		/// <param name="context">The context in which to evaluate the function.</param>
+		/// <returns>The <see cref="CompileResult"/>.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			if (HaveTwoRanges(arguments))
-			{
-				return HandleTwoRanges(arguments, context);
-			}
-			return HandleSingleRange(arguments, context);
+			if (this.HaveTwoRanges(arguments))
+				return this.HandleTwoRanges(arguments, context);
+			return this.HandleSingleRange(arguments, context);
 		}
+		#endregion
 
+		#region Private Methods
 		private bool HaveTwoRanges(IEnumerable<FunctionArgument> arguments)
 		{
 			if (arguments.Count() == 2) return false;
-			return (ExcelAddressUtil.IsValidAddress(arguments.ElementAt(2).Value.ToString()));
+			return arguments.ElementAt(2).IsExcelRange;
 		}
 
 		private CompileResult HandleSingleRange(IEnumerable<FunctionArgument> arguments, ParsingContext context)
@@ -75,8 +90,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			var searchedValue = arguments.ElementAt(0).Value;
 			Require.That(arguments.ElementAt(1).Value).Named("firstAddress").IsNotNull();
 			Require.That(arguments.ElementAt(2).Value).Named("secondAddress").IsNotNull();
-			var firstAddress = ArgToString(arguments, 1);
-			var secondAddress = ArgToString(arguments, 2);
+			var firstAddress = arguments.ElementAt(1).ValueAsRangeInfo?.Address.Address;
+			var secondAddress = arguments.ElementAt(2).ValueAsRangeInfo?.Address.Address;
 			var rangeAddressFactory = new RangeAddressFactory(context.ExcelDataProvider);
 			var address1 = rangeAddressFactory.Create(firstAddress);
 			var address2 = rangeAddressFactory.Create(secondAddress);
@@ -92,5 +107,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			var navigator = LookupNavigatorFactory.Create(lookupDirection, lookupArgs, context);
 			return Lookup(navigator, lookupArgs, new LookupValueMatcher());
 		}
+		#endregion
 	}
 }
