@@ -32,6 +32,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
 	public class Rows : LookupFunction
 	{
+		/// <summary>
+		/// Gets a value representing the indicies of the arguments to the lookup function that
+		/// should be compiled as ExcelAddresses instead of being evaluated.
+		/// </summary>
 		public override List<int> LookupArgumentIndicies { get; } = new List<int> { 0 };
 
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)

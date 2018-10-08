@@ -31,7 +31,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 	public abstract class LookupFunction : ExcelFunction
 	{
 		/// <summary>
-		/// Gets or sets a value representing the indicies of the arguments to the lookup function that
+		/// Gets a value representing the indicies of the arguments to the lookup function that
 		/// should be compiled as ExcelAddresses instead of being evaluated.
 		/// </summary>
 		public abstract List<int> LookupArgumentIndicies { get; }
