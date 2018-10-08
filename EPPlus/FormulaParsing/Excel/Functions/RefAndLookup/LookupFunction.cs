@@ -28,14 +28,20 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
+	/// <summary>
+	/// The base class for "lookup" type excel functions
+	/// </summary>
 	public abstract class LookupFunction : ExcelFunction
 	{
+		#region Abstract Properties
 		/// <summary>
 		/// Gets a value representing the indicies of the arguments to the lookup function that
 		/// should be compiled as ExcelAddresses instead of being evaluated.
 		/// </summary>
 		public abstract List<int> LookupArgumentIndicies { get; }
+		#endregion
 
+		#region Protected Methods
 		protected LookupDirection GetLookupDirection(RangeAddress rangeAddress)
 		{
 			var nRows = rangeAddress.ToRow - rangeAddress.FromRow;
@@ -105,5 +111,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			var toCol = (width == 0 ? address._toCol : width + address._fromCol - 1) + columnOffset;
 			return new ExcelAddress(targetWorksheetName, fromRow, fromCol, toRow, toCol);
 		}
+		#endregion
 	}
 }

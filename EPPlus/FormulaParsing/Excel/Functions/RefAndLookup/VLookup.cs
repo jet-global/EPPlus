@@ -31,12 +31,21 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
 	public class VLookup : LookupFunction
 	{
+		#region LookupFunction Overrides
 		/// <summary>
 		/// Gets a value representing the indicies of the arguments to the lookup function that
 		/// should be compiled as ExcelAddresses instead of being evaluated.
 		/// </summary>
 		public override List<int> LookupArgumentIndicies { get; } = new List<int> { 1 };
+		#endregion
 
+		#region ExcelFunction Overrides
+		/// <summary>
+		/// Executes the function with the specified <paramref name="arguments"/> in the specified <paramref name="context"/>.
+		/// </summary>
+		/// <param name="arguments">The arguments with which to evaluate the function.</param>
+		/// <param name="context">The context in which to evaluate the function.</param>
+		/// <returns>The <see cref="CompileResult"/>.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 3, out eErrorType argumentError) == false)
@@ -48,5 +57,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			else
 				return Lookup(navigator, lookupArgs, new LookupValueMatcher());
 		}
+		#endregion
 	}
 }
