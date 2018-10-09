@@ -31,30 +31,10 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// Collection class for cacheItems.
+	/// Collection class for <see cref="CacheItem"/>.
 	/// </summary>
-	public class SharedItemsCollection : XmlHelper
+	public class SharedItemsCollection : XmlCollectionBase<CacheItem>
 	{
-		#region Class Variables
-		private List<CacheItem> myItems = new List<CacheItem>();
-		#endregion
-
-		#region Properties
-		/// <summary>
-		/// Gets or sets the count.
-		/// </summary>
-		public int Count
-		{
-			get { return base.GetXmlNodeIntNull("@count") ?? 0; }
-			private set { base.SetXmlNodeString("@count", value.ToString()); }
-		}
-
-		/// <summary>
-		/// Gets a readonly list of the items in this <see cref="CacheFieldNode"/>.
-		/// </summary>
-		public IReadOnlyList<CacheItem> Items => myItems;
-		#endregion
-
 		#region Constructors
 		/// <summary>
 		/// Creates an instance of a <see cref="SharedItemsCollection"/>.
@@ -65,13 +45,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
-			if (namespaceManager == null)
-				throw new ArgumentNullException(nameof(namespaceManager));
-			// Selects all possible child node types.
-			foreach (XmlNode sharedItem in base.TopNode.SelectNodes("d:b | d:d | d:e | d:m | d:n | d:s | d:x", this.NameSpaceManager))
-			{
-				myItems.Add(new CacheItem(this.NameSpaceManager, sharedItem));
-			}
 		}
 		#endregion
 
@@ -81,12 +54,27 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		/// <param name="value">The value.</param>
 		/// <returns>The index of the new item.</returns>
-		public int Add(object value)
+		public void Add(object value)
 		{
 			string stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
-			myItems.Add(new CacheItem(this.NameSpaceManager, base.TopNode, CacheItem.GetObjectType(value), stringValue));
-			this.Count++;
-			return myItems.Count - 1;
+			base.AddItem(new CacheItem(this.NameSpaceManager, base.TopNode, CacheItem.GetObjectType(value), stringValue));
+		}
+		#endregion
+
+		#region XmlCollectionBase Overrides
+		/// <summary>
+		/// Loads the sharedItems from the xml document.
+		/// </summary>
+		/// <returns>The collection of sharedItems.</returns>
+		protected override List<CacheItem> LoadItems()
+		{
+			var items = new List<CacheItem>();
+			// Selects all possible child node types.
+			foreach (XmlNode sharedItem in base.TopNode.SelectNodes("d:b | d:d | d:e | d:m | d:n | d:s | d:x", this.NameSpaceManager))
+			{
+				items.Add(new CacheItem(this.NameSpaceManager, sharedItem));
+			}
+			return items;
 		}
 		#endregion
 	}

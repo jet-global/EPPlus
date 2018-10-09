@@ -29,7 +29,9 @@
  * Jan Källman		Added		21-MAR-2011
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
-using System;
+using System.Collections.Generic;
+using System.Xml;
+using OfficeOpenXml.Extensions;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -48,9 +50,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get
 			{
-				foreach (var field in myList)
+				foreach (var field in this)
 				{
-					if (field.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+					if (field.Name.IsEquivalentTo(name))
 						return field;
 				}
 				return null;
@@ -62,13 +64,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Creates an instance of a <see cref="ExcelPivotTableFieldCollection"/>.
 		/// </summary>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="node">The top xml node.</param>
 		/// <param name="table">The existing pivot table.</param>
-		/// <param name="topNode">The text of the top node in the xml.</param>
-		internal ExcelPivotTableFieldCollection(ExcelPivotTable table, string topNode) :
-			 base(table)
-		{
-
-		}
+		internal ExcelPivotTableFieldCollection(XmlNamespaceManager namespaceManager, XmlNode node, ExcelPivotTable table) 
+			: base(namespaceManager, node, table) { }
 		#endregion
 
 		#region Public Methods
@@ -79,10 +79,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <returns>The matching field or null if none is found.</returns>
 		public ExcelPivotTableField GetDateGroupField(eDateGroupBy groupBy)
 		{
-			foreach (var fld in myList)
+			foreach (var field in this)
 			{
-				if (fld.Grouping is ExcelPivotTableFieldDateGroup && (((ExcelPivotTableFieldDateGroup)fld.Grouping).GroupBy) == groupBy)
-					return fld;
+				if (field.Grouping is ExcelPivotTableFieldDateGroup && (((ExcelPivotTableFieldDateGroup)field.Grouping).GroupBy) == groupBy)
+					return field;
 			}
 			return null;
 		}
@@ -93,12 +93,40 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <returns>The matching field or null if none is found.</returns>
 		public ExcelPivotTableField GetNumericGroupField()
 		{
-			foreach (var fld in myList)
+			foreach (var field in this)
 			{
-				if (fld.Grouping is ExcelPivotTableFieldNumericGroup)
-					return fld;
+				if (field.Grouping is ExcelPivotTableFieldNumericGroup)
+					return field;
 			}
 			return null;
+		}
+
+		/// <summary>
+		/// Adds the specified <paramref name="field"/> to the collection.
+		/// </summary>
+		/// <param name="field">The field being added.</param>
+		/// <remarks>This does not add the field to the XML.</remarks>
+		public void Add(ExcelPivotTableField field)
+		{
+			base.AddItem(field);
+		}
+		#endregion
+
+		#region ExcelPivotTableFieldCollectionBase Overrides
+		/// <summary>
+		/// Loads all the <see cref="ExcelPivotTableFieldItem"/> from the xml document.
+		/// </summary>
+		/// <returns>The collection of <see cref="ExcelPivotTableFieldItem"/>s.</returns>
+		protected override List<ExcelPivotTableField> LoadItems()
+		{
+			var collection = new List<ExcelPivotTableField>();
+			int index = 0;
+			foreach (XmlNode fieldNode in base.TopNode.SelectNodes("d:pivotField", base.NameSpaceManager))
+			{
+				var field = new ExcelPivotTableField(base.NameSpaceManager, fieldNode, base.PivotTable, index, index++);
+				collection.Add(field);
+			}
+			return collection;
 		}
 		#endregion
 	}

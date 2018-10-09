@@ -24,32 +24,67 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
+	#region Enums
+	/// <summary>
+	/// The type of a pivot table item.
+	/// </summary>
+	internal enum PivotTableItemType
+	{
+		/// <summary>
+		/// The row field.
+		/// </summary>
+		Row,
+		/// <summary>
+		/// The column field.
+		/// </summary>
+		Column,
+		/// <summary>
+		/// The page field.
+		/// </summary>
+		Page
+	}
+	#endregion
+
 	/// <summary>
 	/// Collection class for row and column fields in a pivot table.
 	/// </summary>
 	public class ExcelPivotTableRowColumnFieldCollection : ExcelPivotTableFieldCollectionBase<ExcelPivotTableField>
 	{
-		#region Class Variables
+		#region Properties
 		/// <summary>
-		/// The top node.
+		/// Gets the <see cref="PivotTableItemType"/>.
 		/// </summary>
-		internal string myTopNode;
+		internal PivotTableItemType FieldType { get; }
 		#endregion
 
 		#region Constructors
 		/// <summary>
 		/// Creates an instance of a <see cref="ExcelPivotTableRowColumnFieldCollection"/>.
 		/// </summary>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="node">The top xml node.</param>
 		/// <param name="table">The existing pivot table.</param>
-		/// <param name="topNode">The text of the top node in the xml.</param>
-		internal ExcelPivotTableRowColumnFieldCollection(ExcelPivotTable table, string topNode) :
-			 base(table)
+		/// <param name="type">The <see cref="PivotTableItemType"/>.</param>
+		internal ExcelPivotTableRowColumnFieldCollection(XmlNamespaceManager namespaceManager, XmlNode node, ExcelPivotTable table, PivotTableItemType type) 
+			: base(namespaceManager, node, table)
 		{
-			myTopNode = topNode;
+			if (node == null)
+			{
+				if (type == PivotTableItemType.Row)
+					base.TopNode = base.PivotTable.CreateNode("d:rowFields");
+				else if (type == PivotTableItemType.Column)
+					base.TopNode = base.PivotTable.CreateNode("d:colFields");
+				else if (type == PivotTableItemType.Page)
+					base.TopNode = base.PivotTable.CreateNode("d:pageFields");
+				else
+					throw new InvalidOperationException($"The enum value '{this.FieldType}' has not been accounted for.");
+			}
+			this.FieldType = type;
 		}
 		#endregion
 
@@ -62,7 +97,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		public ExcelPivotTableField Add(ExcelPivotTableField field)
 		{
 			this.SetFlag(field, true);
-			myList.Add(field);
+			base.AddItem(field);
 			return field;
 		}
 
@@ -72,22 +107,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="field">The field that is being removed.</param>
 		public void Remove(ExcelPivotTableField field)
 		{
-			if (!myList.Contains(field))
+			if (!base.ContainsItem(field))
 				throw new ArgumentException("Field not in collection");
 			this.SetFlag(field, false);
-			myList.Remove(field);
-		}
-
-		/// <summary>
-		/// Remove a field at a specific position.
-		/// </summary>
-		/// <param name="index">The position of the target field.</param>
-		public void RemoveAt(int index)
-		{
-			if (index > -1 && index < myList.Count)
-				throw (new IndexOutOfRangeException());
-			this.SetFlag(myList[index], false);
-			myList.RemoveAt(index);
+			base.RemoveItem(field);
 		}
 
 		/// <summary>
@@ -99,70 +122,93 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal ExcelPivotTableField Insert(ExcelPivotTableField field, int index)
 		{
 			this.SetFlag(field, true);
-			myList.Insert(index, field);
+			base.InsertItem(index, field);
 			return field;
 		}
+		#endregion
 
+		#region ExcelPivotTableFieldCollectionBase
 		/// <summary>
-		/// Populate the <see cref="ExcelPivotTableFieldCollection"/> with row and column fields.
+		/// Loads the row/column or page fields from the xml document.
 		/// </summary>
-		/// <param name="namespaceManager">The namespace manager.</param>
-		/// <param name="parentNode">The top node.</param>
-		/// <param name="nodePath">The path to the field nodes.</param>
-		/// <param name="fields">The <see cref="ExcelPivotTableFieldCollection"/> of fields.</param>
-		internal void PopulateRowColumnFields(XmlNamespaceManager namespaceManager, XmlNode parentNode, string nodePath, ExcelPivotTableFieldCollection fields)
+		/// <returns>The collection of fields.</returns>
+		protected override List<ExcelPivotTableField> LoadItems()
 		{
-			foreach (XmlElement element in parentNode.SelectNodes(nodePath, namespaceManager))
-			{
-				if (int.TryParse(element.GetAttribute("x"), out var x) && x >= 0)
-					this.AddInternal(fields[x]);
-				else
-					element.ParentNode.RemoveChild(element);
-			}
-		}
-
-		internal void PopulatePageFields(XmlNamespaceManager namespaceManager, XmlNode parentNode, string nodePath, ExcelPivotTableFieldCollection fields)
-		{
-			foreach (XmlElement pageElem in parentNode.SelectNodes(nodePath, namespaceManager))
-			{
-				if (int.TryParse(pageElem.GetAttribute("fld"), out var fld) && fld >= 0)
-				{
-					var field = fields[fld];
-					field.myPageFieldSettings = new ExcelPivotTablePageFieldSettings(namespaceManager, pageElem, field, fld);
-					this.AddInternal(field);
-				}
-			}
+			if (this.FieldType == PivotTableItemType.Row || this.FieldType == PivotTableItemType.Column)
+				return this.LoadRowColumnFields();
+			else if (this.FieldType == PivotTableItemType.Page)
+				return this.LoadPageFields();
+			else
+				throw new InvalidOperationException($"The enum value '{this.FieldType}' has not been accounted for.");
 		}
 		#endregion
 
 		#region Private Methods
 		private void SetFlag(ExcelPivotTableField field, bool value)
 		{
-			switch (myTopNode)
+			switch (this.FieldType)
 			{
-				case "rowFields":
+				case PivotTableItemType.Row:
 					if (field.IsColumnField || field.IsPageField)
 						throw (new Exception("This field is a column or page field. Can't add it to the RowFields collection"));
 					field.IsRowField = value;
 					field.Axis = ePivotFieldAxis.Row;
 					break;
-				case "colFields":
+				case PivotTableItemType.Column:
 					if (field.IsRowField || field.IsPageField)
 						throw (new Exception("This field is a row or page field. Can't add it to the ColumnFields collection"));
 					field.IsColumnField = value;
 					field.Axis = ePivotFieldAxis.Column;
 					break;
-				case "pageFields":
+				case PivotTableItemType.Page:
 					if (field.IsColumnField || field.IsRowField)
 						throw (new Exception("Field is a column or row field. Can't add it to the PageFields collection"));
-					if (myTable.Address._fromRow < 3)
-						throw (new Exception(string.Format("A pivot table with page fields must be located above row 3. Currenct location is {0}", myTable.Address.Address)));
+					if (base.PivotTable.Address._fromRow < 3)
+						throw (new Exception(string.Format("A pivot table with page fields must be located above row 3. Currenct location is {0}", base.PivotTable.Address.Address)));
 					field.IsPageField = value;
 					field.Axis = ePivotFieldAxis.Page;
 					break;
-				case "dataFields":
-					break;
+				default:
+					throw new InvalidOperationException($"The enum value '{this.FieldType}' has not been accounted for.");
 			}
+		}
+
+		private List<ExcelPivotTableField> LoadRowColumnFields()
+		{
+			var collection = new List<ExcelPivotTableField>();
+			var fieldNodes = base.TopNode.SelectNodes("d:field", base.NameSpaceManager);
+			if (fieldNodes == null)
+				return collection;
+			foreach (XmlElement element in fieldNodes)
+			{
+				if (int.TryParse(element.GetAttribute("x"), out var x) && x >= 0)
+					collection.Add(base.PivotTable.Fields[x]);
+				else
+				{
+					// If it doesn't have an 'x' attribute, remove the element.
+					// We have no idea why this is here, but it is legacy logic that we're afraid to remove.
+					base.TopNode.RemoveChild(element);
+				}
+			}
+			return collection;
+		}
+
+		private List<ExcelPivotTableField> LoadPageFields()
+		{
+			var collection = new List<ExcelPivotTableField>();
+			var fieldNodes = base.TopNode.SelectNodes("d:pageField", base.NameSpaceManager);
+			if (fieldNodes == null)
+				return collection;
+			foreach (XmlElement pageElem in base.TopNode.SelectNodes("d:pageField", base.NameSpaceManager))
+			{
+				if (int.TryParse(pageElem.GetAttribute("fld"), out var fld) && fld >= 0)
+				{
+					var field = base.PivotTable.Fields[fld];
+					field.myPageFieldSettings = new ExcelPivotTablePageFieldSettings(base.NameSpaceManager, pageElem, field, fld);
+					collection.Add(field);
+				}
+			}
+			return collection;
 		}
 		#endregion
 	}

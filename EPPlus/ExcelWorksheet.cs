@@ -4010,6 +4010,8 @@ namespace OfficeOpenXml
 					pt.CacheDefinition.SetXmlNodeString(ExcelPivotCacheDefinition.SourceAddressPath, address);
 				}
 
+
+				// TODO: Move all CacheDefinition saving to workbook.save(). This is saving repeatedly for each worksheet.
 				var fields =
 				  pt.CacheDefinition.CacheDefinitionXml.SelectNodes(
 					"d:pivotCacheDefinition/d:cacheFields/d:cacheField", NameSpaceManager);
@@ -4061,6 +4063,7 @@ namespace OfficeOpenXml
 					}
 				}
 				pt.PivotTableXml.Save(pt.Part.GetStream(FileMode.Create));
+				// TODO: Move all CacheDefinition saving to workbook.save(). This is saving repeatedly for each worksheet.
 				pt.CacheDefinition.CacheDefinitionXml.Save(pt.CacheDefinition.Part.GetStream(FileMode.Create));
 			}
 		}

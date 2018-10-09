@@ -196,6 +196,16 @@ namespace OfficeOpenXml.Table.PivotTable
 				col++;
 			}
 		}
+
+
+		/// <summary>
+		/// Removes this child node from the specified <paramref name="parentNode"/>.
+		/// </summary>
+		/// <param name="parentNode">The parent xml node.</param>
+		public void Remove(XmlNode parentNode)
+		{
+			parentNode.RemoveChild(this.Node);
+		}
 		#endregion
 
 		#region Private Methods
@@ -204,7 +214,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			int cacheFieldItemIndex = cacheField.GetSharedItemIndex(type, value);
 			// Adds a new sharedItem if the item does not exist.
 			if (cacheFieldItemIndex < 0)
-				cacheFieldItemIndex = cacheField.SharedItems.Add(value);
+			{
+				cacheField.SharedItems.Add(value);
+				cacheFieldItemIndex = cacheField.SharedItems.Count - 1;
+			}
 			return ConvertUtil.ConvertObjectToXmlAttributeString(cacheFieldItemIndex);
 		}
 		#endregion

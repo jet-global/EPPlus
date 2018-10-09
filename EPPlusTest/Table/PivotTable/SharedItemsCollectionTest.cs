@@ -24,6 +24,7 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.Table.PivotTable;
@@ -42,18 +43,18 @@ namespace EPPlusTest.Table.PivotTable
 			var namespaceManager = TestUtility.CreateDefaultNSM();
 			var sharedItems = new SharedItemsCollection(namespaceManager, document.SelectSingleNode("//d:sharedItems", namespaceManager));
 			Assert.AreEqual(6, sharedItems.Count);
-			Assert.AreEqual("20100076", sharedItems.Items[0].Value);
-			Assert.AreEqual(PivotCacheRecordType.n, sharedItems.Items[0].Type);
-			Assert.AreEqual("0", sharedItems.Items[1].Value);
-			Assert.AreEqual(PivotCacheRecordType.x, sharedItems.Items[1].Type);
-			Assert.AreEqual("0", sharedItems.Items[2].Value);
-			Assert.AreEqual(PivotCacheRecordType.b, sharedItems.Items[2].Type);
-			Assert.IsNull(sharedItems.Items[3].Value);
-			Assert.AreEqual(PivotCacheRecordType.m, sharedItems.Items[3].Type);
-			Assert.AreEqual("415.75", sharedItems.Items[4].Value);
-			Assert.AreEqual(PivotCacheRecordType.e, sharedItems.Items[4].Type);
-			Assert.AreEqual("1", sharedItems.Items[5].Value);
-			Assert.AreEqual(PivotCacheRecordType.d, sharedItems.Items[5].Type);
+			Assert.AreEqual("20100076", sharedItems[0].Value);
+			Assert.AreEqual(PivotCacheRecordType.n, sharedItems[0].Type);
+			Assert.AreEqual("0", sharedItems[1].Value);
+			Assert.AreEqual(PivotCacheRecordType.x, sharedItems[1].Type);
+			Assert.AreEqual("0", sharedItems[2].Value);
+			Assert.AreEqual(PivotCacheRecordType.b, sharedItems[2].Type);
+			Assert.IsNull(sharedItems[3].Value);
+			Assert.AreEqual(PivotCacheRecordType.m, sharedItems[3].Type);
+			Assert.AreEqual("415.75", sharedItems[4].Value);
+			Assert.AreEqual(PivotCacheRecordType.e, sharedItems[4].Type);
+			Assert.AreEqual("1", sharedItems[5].Value);
+			Assert.AreEqual(PivotCacheRecordType.d, sharedItems[5].Type);
 		}
 
 		[TestMethod]
@@ -80,7 +81,51 @@ namespace EPPlusTest.Table.PivotTable
 			var node = base.GetTestCacheFieldNode();
 			node.SharedItems.Add("jet");
 			Assert.AreEqual(3, node.SharedItems.Count);
-			Assert.AreEqual("jet", node.SharedItems.Items[2].Value);
+			Assert.AreEqual("jet", node.SharedItems[2].Value);
+			Assert.AreEqual(PivotCacheRecordType.s, node.SharedItems[2].Type);
+		}
+
+		[TestMethod]
+		public void AddItemNullValueTest()
+		{
+			var node = base.GetTestCacheFieldNode();
+			node.SharedItems.Add(null);
+			Assert.AreEqual(3, node.SharedItems.Count);
+			Assert.IsNull(node.SharedItems[2].Value);
+			Assert.AreEqual(PivotCacheRecordType.m, node.SharedItems[2].Type);
+		}
+		#endregion
+
+		#region LoadItems Tests
+		[TestMethod]
+		public void LoadItems()
+		{
+			var namespaceManager = TestUtility.CreateDefaultNSM();
+			var xmlDoc = new XmlDocument(namespaceManager.NameTable);
+			xmlDoc.LoadXml(
+			@"<sharedItems xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""4"">
+				<n v=""20100076""/>
+				<x v=""0""/>
+				<b v=""0""/>
+				<m/>
+			</sharedItems>");
+			var node = xmlDoc.FirstChild;
+			var itemsCollection = new SharedItemsCollection(namespaceManager, node);
+			var sharedItems = new List<CacheItem>
+			{
+				new CacheItem(namespaceManager, node, PivotCacheRecordType.n, "20100076"),
+				new CacheItem(namespaceManager, node, PivotCacheRecordType.x, "0"),
+				new CacheItem(namespaceManager, node, PivotCacheRecordType.b, "0"),
+				new CacheItem(namespaceManager, node, PivotCacheRecordType.m, ""),
+			};
+			Assert.AreEqual(sharedItems.Count, itemsCollection.Count);
+			for (int i = 0; i < itemsCollection.Count; i++)
+			{
+				var actual = itemsCollection[i];
+				var expected = sharedItems[i];
+				Assert.AreEqual(expected.Type, actual.Type);
+				Assert.AreEqual(expected.Value, actual.Value);
+			}
 		}
 		#endregion
 	}

@@ -79,10 +79,10 @@ namespace EPPlusTest.Table.PivotTable
 				var cacheField2 = cacheDefinition.CacheFields[1];
 				var cacheField3 = cacheDefinition.CacheFields[2];
 				var cacheField4 = cacheDefinition.CacheFields[3];
-				Assert.AreEqual(0, cacheField1.SharedItems.Items.Count);
-				Assert.IsNotNull(cacheField2.SharedItems.Items.SingleOrDefault(i => i.Value == "e" && i.Type == PivotCacheRecordType.s));
-				Assert.IsNotNull(cacheField3.SharedItems.Items.SingleOrDefault(i => i.Value == "0" && i.Type == PivotCacheRecordType.b));
-				Assert.AreEqual(0, cacheField4.SharedItems.Items.Count);
+				Assert.AreEqual(0, cacheField1.SharedItems.Count);
+				Assert.IsNotNull(cacheField2.SharedItems.SingleOrDefault(i => i.Value == "e" && i.Type == PivotCacheRecordType.s));
+				Assert.IsNotNull(cacheField3.SharedItems.SingleOrDefault(i => i.Value == "0" && i.Type == PivotCacheRecordType.b));
+				Assert.AreEqual(0, cacheField4.SharedItems.Count);
 			}
 		}
 
@@ -116,7 +116,7 @@ namespace EPPlusTest.Table.PivotTable
 				var ns = TestUtility.CreateDefaultNSM();
 				var node = document.SelectSingleNode("//d:r", ns);
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
-				var record = cacheDefinition.CacheRecords.Records[0];
+				var record = cacheDefinition.CacheRecords[0];
 				new CacheRecordNode(ns, node, null, cacheDefinition);
 			}
 		}
@@ -135,7 +135,7 @@ namespace EPPlusTest.Table.PivotTable
 				var ns = TestUtility.CreateDefaultNSM();
 				var node = document.SelectSingleNode("//d:r", ns);
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
-				var record = cacheDefinition.CacheRecords.Records[0];
+				var record = cacheDefinition.CacheRecords[0];
 				var row = new List<object> { 5, "e", false, 100 };
 				new CacheRecordNode(ns, node, row, null);
 			}
@@ -156,7 +156,7 @@ namespace EPPlusTest.Table.PivotTable
 				var node = document.SelectSingleNode("//d:r", ns);
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var row = new List<object> { 5, "e", false };
-				var record = cacheDefinition.CacheRecords.Records[0];
+				var record = cacheDefinition.CacheRecords[0];
 				new CacheRecordNode(ns, node, row, cacheDefinition);
 			}
 		}
@@ -173,7 +173,7 @@ namespace EPPlusTest.Table.PivotTable
 				var ns = TestUtility.CreateDefaultNSM();
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var row = new List<object> { 5, "e", false, 100 };
-				var record = cacheDefinition.CacheRecords.Records[0];
+				var record = cacheDefinition.CacheRecords[0];
 				new CacheRecordNode(ns, null, row, cacheDefinition);
 			}
 		}
@@ -192,7 +192,7 @@ namespace EPPlusTest.Table.PivotTable
 				var node = document.SelectSingleNode("//d:r", TestUtility.CreateDefaultNSM());
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var row = new List<object> { 5, "e", false, 100 };
-				var record = cacheDefinition.CacheRecords.Records[0];
+				var record = cacheDefinition.CacheRecords[0];
 				new CacheRecordNode(null, node, row, cacheDefinition);
 			}
 		}
@@ -209,7 +209,7 @@ namespace EPPlusTest.Table.PivotTable
 			{
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var row = new List<object> { 5, "e", false, 100 };
-				var record = cacheDefinition.CacheRecords.Records[0];
+				var record = cacheDefinition.CacheRecords[0];
 				record.Update(row, cacheDefinition);
 				Assert.AreEqual(4, record.Items.Count);
 				Assert.AreEqual("5", record.Items[0].Value);
@@ -220,10 +220,10 @@ namespace EPPlusTest.Table.PivotTable
 				var cacheField2 = cacheDefinition.CacheFields[1];
 				var cacheField3 = cacheDefinition.CacheFields[2];
 				var cacheField4 = cacheDefinition.CacheFields[3];
-				Assert.AreEqual(0, cacheField1.SharedItems.Items.Count);
-				Assert.IsNotNull(cacheField2.SharedItems.Items.SingleOrDefault(i => i.Value == "e" && i.Type == PivotCacheRecordType.s));
-				Assert.IsNotNull(cacheField3.SharedItems.Items.SingleOrDefault(i => i.Value == "0" && i.Type == PivotCacheRecordType.b));
-				Assert.AreEqual(0, cacheField4.SharedItems.Items.Count);
+				Assert.AreEqual(0, cacheField1.SharedItems.Count);
+				Assert.IsNotNull(cacheField2.SharedItems.SingleOrDefault(i => i.Value == "e" && i.Type == PivotCacheRecordType.s));
+				Assert.IsNotNull(cacheField3.SharedItems.SingleOrDefault(i => i.Value == "0" && i.Type == PivotCacheRecordType.b));
+				Assert.AreEqual(0, cacheField4.SharedItems.Count);
 			}
 		}
 
@@ -237,7 +237,7 @@ namespace EPPlusTest.Table.PivotTable
 			using (var package = new ExcelPackage(file))
 			{
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
-				var record = cacheDefinition.CacheRecords.Records[0];
+				var record = cacheDefinition.CacheRecords[0];
 				record.Update(null, cacheDefinition);
 			}
 		}
@@ -252,7 +252,7 @@ namespace EPPlusTest.Table.PivotTable
 			using (var package = new ExcelPackage(file))
 			{
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
-				var record = cacheDefinition.CacheRecords.Records[0];
+				var record = cacheDefinition.CacheRecords[0];
 				var row = new List<object> { 5, "e", false, 100 };
 				record.Update(row, null);
 			}
@@ -269,7 +269,7 @@ namespace EPPlusTest.Table.PivotTable
 			{
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var row = new List<object> { 5, "e", false };
-				var record = cacheDefinition.CacheRecords.Records[0];
+				var record = cacheDefinition.CacheRecords[0];
 				record.Update(row, cacheDefinition);
 			}
 		}

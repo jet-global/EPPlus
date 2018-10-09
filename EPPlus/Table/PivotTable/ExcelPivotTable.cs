@@ -30,6 +30,7 @@
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -355,11 +356,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		///Gets or sets whether the grand totals should be displayed for the PivotTable rows.
 		/// </summary>
+		/// <remarks>A blank value in XML indicates true.</remarks>
 		public bool RowGrandTotals
 		{
 			get
 			{
-				return base.GetXmlNodeBool("@rowGrandTotals");
+				return base.GetXmlNodeBool("@rowGrandTotals", true);
 			}
 			set
 			{
@@ -678,7 +680,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				if (myFields == null)
-					myFields = new ExcelPivotTableFieldCollection(this, "");
+				{
+					var pivotFieldsNode = this.TopNode.SelectSingleNode("d:pivotFields", this.NameSpaceManager);
+					myFields = new ExcelPivotTableFieldCollection(this.NameSpaceManager, pivotFieldsNode, this);
+				}
 				return myFields;
 			}
 		}
@@ -691,7 +696,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				if (myRowFields == null)
-					myRowFields = new ExcelPivotTableRowColumnFieldCollection(this, "rowFields");
+				{
+					var rowFieldsNode = this.TopNode.SelectSingleNode("d:rowFields", this.NameSpaceManager);
+					myRowFields = new ExcelPivotTableRowColumnFieldCollection(this.NameSpaceManager, rowFieldsNode, this, PivotTableItemType.Row);
+				}
 				return myRowFields;
 			}
 		}
@@ -704,7 +712,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				if (myColumnFields == null)
-					myColumnFields = new ExcelPivotTableRowColumnFieldCollection(this, "colFields");
+				{
+					var columnFieldsNode = this.TopNode.SelectSingleNode("d:colFields", this.NameSpaceManager);
+					myColumnFields = new ExcelPivotTableRowColumnFieldCollection(this.NameSpaceManager, columnFieldsNode, this, PivotTableItemType.Column);
+				}
 				return myColumnFields;
 			}
 		}
@@ -717,7 +728,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				if (myDataFields == null)
-					myDataFields = new ExcelPivotTableDataFieldCollection(this);
+				{
+					var dataFieldsNode = this.TopNode.SelectSingleNode("d:dataFields", this.NameSpaceManager);
+					myDataFields = new ExcelPivotTableDataFieldCollection(this.NameSpaceManager, dataFieldsNode, this);
+				}
 				return myDataFields;
 			}
 		}
@@ -730,7 +744,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				if (myPageFields == null)
-					myPageFields = new ExcelPivotTableRowColumnFieldCollection(this, "pageFields");
+				{
+					var pageFieldsNode = this.TopNode.SelectSingleNode("d:pageFields", this.NameSpaceManager);
+					myPageFields = new ExcelPivotTableRowColumnFieldCollection(this.NameSpaceManager, pageFieldsNode, this, PivotTableItemType.Page);
+				}
 				return myPageFields;
 			}
 		}
@@ -743,7 +760,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				if (myRowItems == null)
-					myRowItems = new ItemsCollection(this.NameSpaceManager, this.TopNode.SelectSingleNode("d:rowItems"));
+					myRowItems = new ItemsCollection(this.NameSpaceManager, this.TopNode.SelectSingleNode("d:rowItems", this.NameSpaceManager));
 				return myRowItems;
 			}
 		}
@@ -756,7 +773,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				if (myColumnItems == null)
-					myColumnItems = new ItemsCollection(this.NameSpaceManager, this.TopNode.SelectSingleNode("d:colItems"));
+					myColumnItems = new ItemsCollection(this.NameSpaceManager, this.TopNode.SelectSingleNode("d:colItems", this.NameSpaceManager));
 				return myColumnItems;
 			}
 		}
@@ -869,18 +886,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.CacheDefinitionRelationship = rels.FirstOrDefault();
 
 			this.LoadFields();
-
-			// Add row fields.
-			this.RowFields.PopulateRowColumnFields(this.NameSpaceManager, this.TopNode, "d:rowFields/d:field", this.Fields);
-
-			// Add column fields.
-			this.ColumnFields.PopulateRowColumnFields(this.NameSpaceManager, this.TopNode, "d:colFields/d:field", this.Fields);
-
-			// Add Page elements
-			this.PageFields.PopulatePageFields(this.NameSpaceManager, this.TopNode, "d:pageFields/d:pageField", this.Fields);
-
-			// Add data elements
-			this.DataFields.PopulateDataFields(this.NameSpaceManager, this.TopNode, "d:dataFields/d:dataField", this.Fields);
 		}
 		
 		/// <summary>
@@ -941,18 +946,97 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 		#endregion
 
-		#region Public Methods
+		#region Internal Methods
 		/// <summary>
-		/// Refresh the pivot table, its cacheDefinition, and any of the 
-		/// cacheDefinition's dependent pivot tables. 
+		/// Refresh the <see cref="ExcelPivotTable"/> based on the <see cref="ExcelPivotCacheDefinition"/>.
 		/// </summary>
-		public void Refresh()
+		internal void RefreshFromCache()
 		{
-			throw new NotImplementedException();
+			// Update pivotField items to match corresponding cacheField sharedItems.
+			foreach (var pivotField in this.Fields)
+			{
+				var fieldItems = pivotField.Items;
+				var sharedItemsCount = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.Count;
+
+				if (fieldItems.Count > sharedItemsCount + 1)
+					throw new InvalidOperationException("There are more pivotField items than cacheField sharedItems.");
+
+				if (fieldItems.Count > 0)
+				{
+					for (int fieldIndex = 0; fieldIndex < sharedItemsCount; fieldIndex++)
+					{
+						if (fieldIndex < fieldItems.Count && string.IsNullOrEmpty(fieldItems[fieldIndex].T))
+							fieldItems[fieldIndex].X = fieldIndex;
+						else
+							fieldItems.AddItem(fieldIndex, pivotField.DefaultSubtotal);
+					}
+				}
+			}
+
+			// Update the rowItems.
+			var previousRowItemsCount = this.RowItems.Sum(r => r.Count);
+			this.RowItems.Clear();
+			this.BuildRowItems(0, new List<Tuple<int, int>>());
+			if (this.RowGrandTotals)
+				this.RowItems.AddSumNode("grand");
+			this.UpdateWorksheet(previousRowItemsCount);
 		}
 		#endregion
 
 		#region Private Methods
+		private void BuildRowItems(int rowDepth, List<Tuple<int, int>> parentNodeIndices)
+		{
+			// Base case.
+			if (rowDepth >= this.RowFields.Count)
+				return;
+
+			var pivotFieldIndex = this.RowFields[rowDepth].Index;
+			var pivotField = this.Fields[pivotFieldIndex];
+			int maxIndex = pivotField.DefaultSubtotal ? pivotField.Items.Count - 1 : pivotField.Items.Count;
+			for (int i = 0; i < maxIndex; i++)
+			{
+				var childList = parentNodeIndices.ToList();
+				childList.Add(new Tuple<int, int>(pivotFieldIndex, pivotField.Items[i].X));
+				if (this.CacheDefinition.CacheRecords.Contains(childList))
+				{
+					this.RowItems.Add(rowDepth, i);
+					this.BuildRowItems(rowDepth + 1, childList);
+				}
+			}
+		}
+
+		private void UpdateWorksheet(int previousRowItemsCount)
+		{
+			int startDataRow = this.Address.Start.Row + this.FirstDataRow;
+			var startDataCol = this.Address.Start.Column + this.FirstDataCol - 1;
+			int currentDataRow = startDataRow;
+			foreach (var rowItem in this.RowItems)
+			{
+				if (!string.IsNullOrEmpty(rowItem.ItemType))
+				{
+					this.WorkSheet.Cells[currentDataRow++, startDataCol].Value = "Grand Total";
+					continue;
+				}
+
+				var fieldIndex = this.RowFields[rowItem.RepeatedItemsCount].Index;
+
+				// TODO: Account for grouped rowItems.
+				var fieldItemIndex = rowItem[0];
+
+				var pivotField = this.Fields[fieldIndex]; 
+				var cacheItemIndex = pivotField.Items[fieldItemIndex].X;
+				var cacheField = this.CacheDefinition.CacheFields[fieldIndex];
+				var sharedItem = cacheField.SharedItems[cacheItemIndex].Value;
+				this.WorkSheet.Cells[currentDataRow++, startDataCol].Value = sharedItem;
+			}
+			// Clear out cells after the pivot table if the data was removed.
+			int pivotTableHeight = currentDataRow - startDataRow;
+			for (int i = pivotTableHeight; i < previousRowItemsCount; i++)
+			{
+				this.WorkSheet.Cells[currentDataRow++, startDataCol].Value = null;
+			}
+		}
+
 		private void InitSchemaNodeOrder()
 		{
 			this.SchemaNodeOrder = new string[] { "location", "pivotFields", "rowFields", "rowItems", "colFields", "colItems", "pageFields", "pageItems", "dataFields", "dataItems", "formats", "pivotTableStyleInfo" };
@@ -960,23 +1044,14 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private void LoadFields()
 		{
+			// Add fields.
 			int index = 0;
-			// Add fields.
-			foreach (XmlElement fieldElem in this.TopNode.SelectNodes("d:pivotFields/d:pivotField", this.NameSpaceManager))
-			{
-				var fld = new ExcelPivotTableField(this.NameSpaceManager, fieldElem, this, index, index++);
-				this.Fields.AddInternal(fld);
-			}
-
-			// Add fields.
-			index = 0;
 			var fieldNodes = this.CacheDefinition.TopNode.SelectNodes("d:cacheFields/d:cacheField", this.NameSpaceManager);
 			if (fieldNodes != null)
 			{
-				foreach (XmlElement fieldElem in fieldNodes)
+				foreach (var pivotField in this.Fields)
 				{
-					var fld = this.Fields[index++];
-					fld.SetCacheFieldNode(fieldElem);
+					pivotField.SetCacheFieldNode(fieldNodes[index++]);
 				}
 			}
 		}

@@ -33,6 +33,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -176,7 +177,7 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// <summary>
 	/// A pivotTable pivotField XML node.
 	/// </summary>
-	public class ExcelPivotTableField : XmlHelper
+	public class ExcelPivotTableField : XmlCollectionItemBase
 	{
 		#region Class Variables
 		/// <summary>
@@ -203,7 +204,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Properties
 		/// <summary>
-		/// Gets or sets the index of the field.
+		/// Gets or sets the x attribute index of the field.
 		/// </summary>
 		public int Index { get; set; }
 		
@@ -289,11 +290,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Gets or sets whether to show the default subtotal.
 		/// </summary>
+		/// <remarks>A blank value in XML indicates true.</remarks>
 		public bool DefaultSubtotal
 		{
 			get
 			{
-				return base.GetXmlNodeBool("@defaultSubtotal");
+				return base.GetXmlNodeBool("@defaultSubtotal", true);
 			}
 			set
 			{
@@ -343,7 +345,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				eSubTotalFunctions ret = 0;
-				XmlNodeList nl = this.TopNode.SelectNodes("d:items/d:item/@t", this.NameSpaceManager);
+				XmlNodeList nl = base.TopNode.SelectNodes("d:items/d:item/@t", base.NameSpaceManager);
 				if (nl.Count == 0) return eSubTotalFunctions.None;
 				foreach (XmlAttribute item in nl)
 				{
@@ -366,7 +368,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					throw (new ArgumentException("Value Default can not be combined with other values."));
 				
 				// Remove old attribute                 
-				XmlNodeList nl = this.TopNode.SelectNodes("d:items/d:item/@t", this.NameSpaceManager);
+				XmlNodeList nl = base.TopNode.SelectNodes("d:items/d:item/@t", base.NameSpaceManager);
 				if (nl.Count > 0)
 				{
 					foreach (XmlAttribute item in nl)
@@ -380,7 +382,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					// For no subtotals, set defaultSubtotal to off
 					this.DefaultSubtotal = false;
-					this.TopNode.InnerXml = "";
+					base.TopNode.InnerXml = "";
 				}
 				else
 				{
@@ -587,15 +589,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				if (myItems == null)
-				{
-					myItems = new ExcelPivotTableFieldItemCollection(myTable);
-					foreach (XmlNode node in this.TopNode.SelectNodes("d:items//d:item", this.NameSpaceManager))
-					{
-						var item = new ExcelPivotTableFieldItem(this.NameSpaceManager, node, this);
-						if (item.T == "")
-							myItems.AddInternal(item);
-					}
-				}
+					myItems = new ExcelPivotTableFieldItemCollection(this.NameSpaceManager, this.TopNode.FirstChild, myTable, this);
 				return myItems;
 			}
 		}
@@ -615,14 +609,24 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Creates an instance of a <see cref="ExcelPivotTableField"/>.
 		/// </summary>
-		/// <param name="ns">The namespace of the worksheet.</param>
+		/// <param name="namespaceManager">The namespace of the worksheet.</param>
 		/// <param name="topNode">The xml element.</param>
 		/// <param name="table">The pivot table.</param>
 		/// <param name="index">The index of the field.</param>
 		/// <param name="baseIndex">The base index of the field.</param>
-		internal ExcelPivotTableField(XmlNamespaceManager ns, XmlNode topNode, ExcelPivotTable table, int index, int baseIndex) :
-			 base(ns, topNode)
+		internal ExcelPivotTableField(XmlNamespaceManager namespaceManager, XmlNode topNode, ExcelPivotTable table, int index, int baseIndex) 
+			: base(namespaceManager, topNode)
 		{
+			if (namespaceManager == null)
+				throw new ArgumentNullException(nameof(namespaceManager));
+			if (topNode == null)
+				throw new ArgumentNullException(nameof(topNode));
+			if (table == null)
+				throw new ArgumentNullException(nameof(table));
+			if (index < 0)
+				throw new ArgumentOutOfRangeException(nameof(index));
+			if (baseIndex < 0)
+				throw new ArgumentOutOfRangeException(nameof(baseIndex));
 			this.Index = index;
 			this.BaseIndex = baseIndex;
 			myTable = table;
@@ -889,7 +893,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				else
 					myTable.ColumnFields.Insert(field, index);
 
-				myTable.Fields.AddInternal(field);
+				myTable.Fields.Add(field);
 
 				this.AddCacheField(field, startDate, endDate, interval);
 				return field;

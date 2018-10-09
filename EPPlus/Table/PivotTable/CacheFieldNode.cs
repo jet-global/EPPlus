@@ -103,7 +103,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			string stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
 			for (int i = 0; i < this.SharedItems.Count; i++)
 			{
-				var item = this.SharedItems.Items[i];
+				var item = this.SharedItems[i];
 				if (type == item.Type && stringValue.IsEquivalentTo(item.Value))
 					return i;
 			}

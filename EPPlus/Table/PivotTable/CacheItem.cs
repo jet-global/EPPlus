@@ -32,14 +32,14 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// <summary>
 	/// Wraps a node in <pivotCacheRecords-x/>.
 	/// </summary>
-	public class CacheItem : XmlHelper
+	public class CacheItem : XmlCollectionItemBase
 	{
 		#region Properties
 		/// <summary>
 		/// Gets or sets the type of this item.
 		/// </summary>
 		public PivotCacheRecordType Type { get; private set; }
-		
+
 		/// <summary>
 		/// Gets or sets the value of this item.
 		/// </summary>
@@ -70,27 +70,23 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
-			if (namespaceManager == null)
-				throw new ArgumentNullException(nameof(namespaceManager));
 			this.Type = (PivotCacheRecordType)Enum.Parse(typeof(PivotCacheRecordType), node.Name);
 		}
 
 		/// <summary>
-		/// Creates an instance of a <see cref="CacheItem"/> object given a type and value and adds it to the specified <paramref name="parentNode"/>.
+		/// Creates an instance of a <see cref="CacheItem"/> object given a type and value.
 		/// </summary>
 		/// <param name="namespaceManager">The namespace manager.</param>
-		/// <param name="parentNode">The parent node to add to. It must be a sharedItems <see cref="XmlNode"/> or a cacheRecord <see cref="XmlNode"/>.</param>
+		/// <param name="parentNode">The parent xml node. It must be a sharedItems <see cref="XmlNode"/> or a cacheRecord <see cref="XmlNode"/>.</param>
 		/// <param name="type">The type of this item.</param>
 		/// <param name="value">The value of this item.</param>
-		public CacheItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, PivotCacheRecordType type, string value) : base (namespaceManager)
+		public CacheItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, PivotCacheRecordType type, string value) : base(namespaceManager, null)
 		{
 			if (parentNode == null)
 				throw new ArgumentNullException(nameof(parentNode));
-			if (namespaceManager == null)
-				throw new ArgumentNullException(nameof(namespaceManager));
 			if (parentNode.LocalName != "sharedItems" && parentNode.LocalName != "r")
 				throw new ArgumentException($"{nameof(parentNode)} type: '{parentNode.Name}' was not the expected type.");
-			base.TopNode = parentNode.OwnerDocument.CreateElement(type.ToString());
+			base.TopNode = parentNode.OwnerDocument.CreateElement(type.ToString(), parentNode.NamespaceURI);
 			this.Type = type;
 			if (!string.IsNullOrEmpty(value))
 			{
@@ -98,7 +94,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.TopNode.Attributes.Append(attr);
 				this.Value = value;
 			}
-			parentNode.AppendChild(this.TopNode);
 		}
 		#endregion
 

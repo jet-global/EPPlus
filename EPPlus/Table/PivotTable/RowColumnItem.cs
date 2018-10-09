@@ -24,43 +24,23 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
-	/// A row or column item object.
+	/// A row or column item object. An <i/> node.
 	/// </summary>
-	public class RowColumnItem : XmlHelper
+	public class RowColumnItem : XmlCollectionItemBase, IEnumerable<int>
 	{
 		#region Class Variables
 		private List<int> myMemberPropertyIndexes;
 		#endregion
 
 		#region Properties
-		/// <summary>
-		/// Gets the list of member property indexes.
-		/// </summary>
-		public IReadOnlyList<int> MemberPropertyIndex
-		{
-			get
-			{
-				if (myMemberPropertyIndexes == null)
-				{
-					myMemberPropertyIndexes = new List<int>();
-					var xNodes = base.TopNode.SelectNodes("d:x", base.NameSpaceManager);
-					foreach (XmlNode xmlNode in xNodes)
-					{
-						var value = xmlNode.Attributes["v"]?.Value;
-						int index = value == null ? 0 : int.Parse(value);
-						myMemberPropertyIndexes.Add(index);
-					}
-				}
-				return myMemberPropertyIndexes;
-			}
-		}
-
 		/// <summary>
 		/// Gets or sets the data field index.
 		/// </summary>
@@ -71,7 +51,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets the repeated items count.
+		/// Gets or sets the repeated items count (@r).
 		/// </summary>
 		public int RepeatedItemsCount
 		{
@@ -80,12 +60,53 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets the item type.
+		/// Gets or sets the item type (@t).
 		/// </summary>
 		public string ItemType
 		{
 			get { return base.GetXmlNodeString("@t"); }
 			set { base.SetXmlNodeString("@t", value, true); }
+		}
+
+		/// <summary>
+		/// Gets the 'x' node's v atribute at the given index.
+		/// </summary>
+		/// <param name="Index">The position in the list.</param>
+		/// <returns>An index into the pivotField items.</returns>
+		public int this[int Index]
+		{
+			get
+			{
+				if (Index < 0 || Index >= this.MemberPropertyIndexes.Count)
+					throw (new ArgumentOutOfRangeException("Index out of range"));
+				return this.MemberPropertyIndexes[Index];
+			}
+		}
+
+		/// <summary>
+		/// Gets the count of the member property indexes.
+		/// </summary>
+		public int Count
+		{
+			get { return this.MemberPropertyIndexes.Count; }
+		}
+
+		private List<int> MemberPropertyIndexes
+		{
+			get
+			{
+				if (myMemberPropertyIndexes == null)
+				{
+					myMemberPropertyIndexes = new List<int>();
+					foreach (XmlNode xmlNode in base.TopNode.ChildNodes)
+					{
+						var value = xmlNode.Attributes["v"]?.Value;
+						int index = value == null ? 0 : int.Parse(value);
+						myMemberPropertyIndexes.Add(index);
+					}
+				}
+				return myMemberPropertyIndexes;
+			}
 		}
 		#endregion
 
@@ -99,8 +120,70 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
-			if (namespaceManager == null)
-				throw new ArgumentNullException(nameof(namespaceManager));
+			if (node.LocalName != "i")
+				throw new ArgumentException($"Invalid node type {node.LocalName}.");
+		}
+
+		/// <summary>
+		/// Creates a new <see cref="RowColumnItem"/> object.
+		/// </summary>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="parentNode">The row/colItems xml node.</param>
+		/// <param name="repeatedItemsCount">The value of the 'r' attribute.</param>
+		/// <param name="memberIndex">The value of the 'x' child node.</param>
+		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, int repeatedItemsCount, int memberIndex) : base(namespaceManager, null)
+		{
+			if (parentNode == null)
+				throw new ArgumentNullException(nameof(parentNode));
+			base.TopNode = parentNode.OwnerDocument.CreateElement("i", parentNode.NamespaceURI);
+			if (repeatedItemsCount > 0)
+				this.RepeatedItemsCount = repeatedItemsCount;
+			var xNode = parentNode.OwnerDocument.CreateElement("x", base.TopNode.NamespaceURI);
+			if (memberIndex > 0)
+			{
+				var attr = parentNode.OwnerDocument.CreateAttribute("v");
+				xNode.Attributes.Append(attr);
+				xNode.Attributes["v"].Value = memberIndex.ToString();
+			}
+			base.TopNode.AppendChild(xNode);
+		}
+
+		/// <summary>
+		/// Creates a new <see cref="RowColumnItem"/> object.
+		/// </summary>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="parentNode">The row/colItems xml node.</param>
+		/// <param name="itemType">The value of the 't' attribute.</param>
+		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, string itemType) : base(namespaceManager, null)
+		{
+			if (parentNode == null)
+				throw new ArgumentNullException(nameof(parentNode));
+			if (itemType == null)
+				throw new ArgumentNullException(nameof(itemType));
+			base.TopNode = parentNode.OwnerDocument.CreateElement("i", parentNode.NamespaceURI);
+			this.ItemType = itemType;
+			var xNode = parentNode.OwnerDocument.CreateElement("x", base.TopNode.NamespaceURI);
+			base.TopNode.AppendChild(xNode);
+		}
+		#endregion
+
+		#region IEnumerable Methods
+		/// <summary>
+		/// Gets the int enumerator of the list.
+		/// </summary>
+		/// <returns>The enumerator.</returns>
+		public IEnumerator<int> GetEnumerator()
+		{
+			return myMemberPropertyIndexes.GetEnumerator();
+		}
+
+		/// <summary>
+		/// Gets the specified type enumerator of the list.
+		/// </summary>
+		/// <returns>The enumerator.</returns>
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return myMemberPropertyIndexes.GetEnumerator();
 		}
 		#endregion
 	}

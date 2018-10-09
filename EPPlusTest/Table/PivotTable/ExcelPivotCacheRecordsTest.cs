@@ -23,11 +23,11 @@ namespace EPPlusTest.Table.PivotTable
 				var ns = TestUtility.CreateDefaultNSM();
 				var partUri = new Uri("xl/pivotCache/pivotCacheRecords1.xml", UriKind.Relative);
 				var possiblePart = package.GetXmlFromUri(partUri);
-				var records = new ExcelPivotCacheRecords(ns, possiblePart, partUri, cacheDefinition);
+				var records = new ExcelPivotCacheRecords(ns, package, possiblePart, partUri, cacheDefinition);
 				Assert.AreEqual(3, records.Count);
-				Assert.AreEqual(4, records.Records[0].Items.Count);
-				Assert.AreEqual(4, records.Records[1].Items.Count);
-				Assert.AreEqual(4, records.Records[2].Items.Count);
+				Assert.AreEqual(4, records[0].Items.Count);
+				Assert.AreEqual(4, records[1].Items.Count);
+				Assert.AreEqual(4, records[2].Items.Count);
 			}
 		}
 
@@ -62,7 +62,7 @@ namespace EPPlusTest.Table.PivotTable
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var partUri = new Uri("xl/pivotCache/pivotCacheRecords1.xml", UriKind.Relative);
 				var possiblePart = package.GetXmlFromUri(partUri);
-				new ExcelPivotCacheRecords(null, possiblePart, partUri, cacheDefinition);
+				new ExcelPivotCacheRecords(null, package, possiblePart, partUri, cacheDefinition);
 			}
 		}
 
@@ -77,7 +77,7 @@ namespace EPPlusTest.Table.PivotTable
 			{
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var partUri = new Uri("xl/pivotCache/pivotCacheRecords1.xml", UriKind.Relative);
-				new ExcelPivotCacheRecords(TestUtility.CreateDefaultNSM(), null, partUri, cacheDefinition);
+				new ExcelPivotCacheRecords(TestUtility.CreateDefaultNSM(), package, null, partUri, cacheDefinition);
 			}
 		}
 
@@ -93,7 +93,7 @@ namespace EPPlusTest.Table.PivotTable
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var partUri = new Uri("xl/pivotCache/pivotCacheRecords1.xml", UriKind.Relative);
 				var possiblePart = package.GetXmlFromUri(partUri);
-				new ExcelPivotCacheRecords(TestUtility.CreateDefaultNSM(), possiblePart, null, cacheDefinition);
+				new ExcelPivotCacheRecords(TestUtility.CreateDefaultNSM(), package, possiblePart, null, cacheDefinition);
 			}
 		}
 
@@ -108,7 +108,7 @@ namespace EPPlusTest.Table.PivotTable
 			{
 				var partUri = new Uri("xl/pivotCache/pivotCacheRecords1.xml", UriKind.Relative);
 				var possiblePart = package.GetXmlFromUri(partUri);
-				new ExcelPivotCacheRecords(TestUtility.CreateDefaultNSM(), possiblePart, partUri, null);
+				new ExcelPivotCacheRecords(TestUtility.CreateDefaultNSM(), package, possiblePart, partUri, null);
 			}
 		}
 
@@ -164,9 +164,9 @@ namespace EPPlusTest.Table.PivotTable
 				worksheet.Cells[5, 5].Value = "Orange";
 				worksheet.Cells[5, 6].Value = 98;
 				cacheRecords.UpdateRecords(worksheet.Cells["C4:F6"]);
-				var record1 = cacheRecords.Records[0];
-				var record2 = cacheRecords.Records[1];
-				var record3 = cacheRecords.Records[2];
+				var record1 = cacheRecords[0];
+				var record2 = cacheRecords[1];
+				var record3 = cacheRecords[2];
 				Assert.AreEqual(3, cacheRecords.Count);
 				// record 1
 				this.AssertCacheItem(record1.Items[0], "1", PivotCacheRecordType.n);
@@ -202,10 +202,10 @@ namespace EPPlusTest.Table.PivotTable
 				worksheet.Cells[7, 5].Value = "Orange";
 				worksheet.Cells[7, 6].Value = 98;
 				cacheRecords.UpdateRecords(worksheet.Cells["C4:F7"]);
-				var record1 = cacheRecords.Records[0];
-				var record2 = cacheRecords.Records[1];
-				var record3 = cacheRecords.Records[2];
-				var record4 = cacheRecords.Records[3];
+				var record1 = cacheRecords[0];
+				var record2 = cacheRecords[1];
+				var record3 = cacheRecords[2];
+				var record4 = cacheRecords[3];
 				Assert.AreEqual(4, cacheRecords.Count);
 				// record 1
 				this.AssertCacheItem(record1.Items[0], "1", PivotCacheRecordType.n);
@@ -242,8 +242,8 @@ namespace EPPlusTest.Table.PivotTable
 				var cacheRecords = cacheDefinition.CacheRecords;
 				var worksheet = package.Workbook.Worksheets.First();
 				cacheRecords.UpdateRecords(worksheet.Cells["C4:F5"]);
-				var record1 = cacheRecords.Records[0];
-				var record2 = cacheRecords.Records[1];
+				var record1 = cacheRecords[0];
+				var record2 = cacheRecords[1];
 				Assert.AreEqual(2, cacheRecords.Count);
 				// record 1
 				this.AssertCacheItem(record1.Items[0], "1", PivotCacheRecordType.n);
@@ -265,7 +265,7 @@ namespace EPPlusTest.Table.PivotTable
 			if (item.Type != PivotCacheRecordType.x)
 				throw new InvalidOperationException("The cache item was not a reference item.");
 			int sharedItemIndex = int.Parse(item.Value);
-			return cacheDefinition.CacheFields[fieldIndex].SharedItems.Items[sharedItemIndex];
+			return cacheDefinition.CacheFields[fieldIndex].SharedItems[sharedItemIndex];
 		}
 
 		private void AssertCacheItem(CacheItem item, string value, PivotCacheRecordType type)
