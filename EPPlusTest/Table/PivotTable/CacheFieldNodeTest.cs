@@ -58,9 +58,9 @@ namespace EPPlusTest.Table.PivotTable
 			var node = this.CreateCacheFieldNode();
 			var cacheFieldNode = new CacheFieldNode(TestUtility.CreateDefaultNSM(), node);
 			Assert.AreEqual(3, cacheFieldNode.SharedItems.Count);
-			Assert.AreEqual("10000", cacheFieldNode.SharedItems.Items[0].Value);
-			Assert.AreEqual("20000", cacheFieldNode.SharedItems.Items[1].Value);
-			Assert.AreEqual("30000", cacheFieldNode.SharedItems.Items[2].Value);
+			Assert.AreEqual("10000", cacheFieldNode.SharedItems[0].Value);
+			Assert.AreEqual("20000", cacheFieldNode.SharedItems[1].Value);
+			Assert.AreEqual("30000", cacheFieldNode.SharedItems[2].Value);
 		}
 		#endregion
 

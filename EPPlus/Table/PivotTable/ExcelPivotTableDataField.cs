@@ -33,13 +33,14 @@ using System;
 using System.Globalization;
 using System.Xml;
 using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
 	/// A pivot table data field.
 	/// </summary>
-	public class ExcelPivotTableDataField : XmlHelper
+	public class ExcelPivotTableDataField : XmlCollectionItemBase
 	{
 		#region Properties
 		/// <summary>

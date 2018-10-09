@@ -26,49 +26,15 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
 	/// Collection of row or column items.
 	/// </summary>
-	public class ItemsCollection : XmlHelper
+	public class ItemsCollection : XmlCollectionBase<RowColumnItem>
 	{
-		#region Class Variables
-		private List<RowColumnItem> myItems;
-		#endregion
-
-		#region Properties
-		/// <summary>
-		/// Gets the row/column items.
-		/// </summary>
-		public IReadOnlyList<RowColumnItem> Items
-		{
-			get
-			{
-				if (myItems == null)
-				{
-					myItems = new List<RowColumnItem>();
-					var xNodes = base.TopNode.SelectNodes("d:i", base.NameSpaceManager);
-					foreach (XmlNode xmlNode in xNodes)
-					{
-						myItems.Add(new RowColumnItem(base.NameSpaceManager, base.TopNode));
-					}
-				}
-				return myItems;
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets the count.
-		/// </summary>
-		public int Count
-		{
-			get { return base.GetXmlNodeIntNull("@count") ?? 0; }
-			private set { base.SetXmlNodeString("@count", value.ToString()); }
-		}
-		#endregion
-
 		#region Constructors
 		/// <summary>
 		/// Creates an instance of a <see cref="ItemsCollection"/>.
@@ -79,8 +45,54 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
-			if (namespaceManager == null)
-				throw new ArgumentNullException(nameof(namespaceManager));
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Adds a new <see cref="RowColumnItem"/> to this collection.
+		/// </summary>
+		/// <param name="rowDepth">The row depth of this item in the pivot table.</param>
+		/// <param name="i">The value of it's 'x' attribute.</param>
+		public void Add(int rowDepth, int i)
+		{
+			var iNode = new RowColumnItem(this.NameSpaceManager, base.TopNode, rowDepth, i);
+			base.AddItem(iNode);
+		}
+
+		/// <summary>
+		/// Adds a new <see cref="RowColumnItem"/> to this collection.
+		/// </summary>
+		/// <param name="itemType">The string value of the 't' attribute.</param>
+		public void AddSumNode(string itemType)
+		{
+			var iNode = new RowColumnItem(this.NameSpaceManager, base.TopNode, itemType);
+			base.AddItem(iNode);
+		}
+
+		/// <summary>
+		/// Clears all existing rowItems.
+		/// </summary>
+		public void Clear()
+		{
+			base.ClearItems();
+		}
+		#endregion
+
+		#region XmlCollectionBase Overrides
+		/// <summary>
+		/// Loads the row/column items from the xml document.
+		/// </summary>
+		/// <returns>The collection of items.</returns>
+		protected override List<RowColumnItem> LoadItems()
+		{
+			var items = new List<RowColumnItem>();
+			var xNodes = base.TopNode.SelectNodes("d:i", base.NameSpaceManager);
+			foreach (XmlNode xmlNode in xNodes)
+			{
+				items.Add(new RowColumnItem(base.NameSpaceManager, xmlNode));
+			}
+			return items;
 		}
 		#endregion
 	}

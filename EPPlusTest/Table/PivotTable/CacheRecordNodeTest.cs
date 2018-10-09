@@ -24,9 +24,12 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OfficeOpenXml;
 using OfficeOpenXml.Table.PivotTable;
 
 namespace EPPlusTest.Table.PivotTable
@@ -53,6 +56,37 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void CacheRecordNodeConstructFromRowData()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				XmlDocument document = new XmlDocument();
+				document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""0""><r></r></pivotCacheRecords>");
+				var ns = TestUtility.CreateDefaultNSM();
+				var node = document.SelectSingleNode("//d:r", ns);
+				var row = new List<object> { 5, "e", false, 100 };
+				var cacheRecordNode = new CacheRecordNode(ns, node, row, cacheDefinition);
+				Assert.AreEqual(4, cacheRecordNode.Items.Count);
+				Assert.AreEqual("5", cacheRecordNode.Items[0].Value);
+				Assert.AreEqual("3", cacheRecordNode.Items[1].Value);
+				Assert.AreEqual("2", cacheRecordNode.Items[2].Value);
+				Assert.AreEqual("100", cacheRecordNode.Items[3].Value);
+				var cacheField1 = cacheDefinition.CacheFields[0];
+				var cacheField2 = cacheDefinition.CacheFields[1];
+				var cacheField3 = cacheDefinition.CacheFields[2];
+				var cacheField4 = cacheDefinition.CacheFields[3];
+				Assert.AreEqual(0, cacheField1.SharedItems.Count);
+				Assert.IsNotNull(cacheField2.SharedItems.SingleOrDefault(i => i.Value == "e" && i.Type == PivotCacheRecordType.s));
+				Assert.IsNotNull(cacheField3.SharedItems.SingleOrDefault(i => i.Value == "0" && i.Type == PivotCacheRecordType.b));
+				Assert.AreEqual(0, cacheField4.SharedItems.Count);
+			}
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void CacheFieldNodeTestNullNode()
 		{
@@ -66,6 +100,178 @@ namespace EPPlusTest.Table.PivotTable
 			var xml = new XmlDocument();
 			xml.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/></r></pivotCacheRecords>");
 			new CacheFieldNode(null, xml.FirstChild);
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructCacheRecordNodeWithNullRow()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				XmlDocument document = new XmlDocument();
+				document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""0""><r></r></pivotCacheRecords>");
+				var ns = TestUtility.CreateDefaultNSM();
+				var node = document.SelectSingleNode("//d:r", ns);
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var record = cacheDefinition.CacheRecords[0];
+				new CacheRecordNode(ns, node, null, cacheDefinition);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructCacheRecordNodeWithNullCacheDefinition()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				XmlDocument document = new XmlDocument();
+				document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""0""><r></r></pivotCacheRecords>");
+				var ns = TestUtility.CreateDefaultNSM();
+				var node = document.SelectSingleNode("//d:r", ns);
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var record = cacheDefinition.CacheRecords[0];
+				var row = new List<object> { 5, "e", false, 100 };
+				new CacheRecordNode(ns, node, row, null);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void ConstructCacheRecordNodeWithIncorrectNumberOfFields()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				XmlDocument document = new XmlDocument();
+				document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""0""><r></r></pivotCacheRecords>");
+				var ns = TestUtility.CreateDefaultNSM();
+				var node = document.SelectSingleNode("//d:r", ns);
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var row = new List<object> { 5, "e", false };
+				var record = cacheDefinition.CacheRecords[0];
+				new CacheRecordNode(ns, node, row, cacheDefinition);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructCacheRecordNodeWithNullParentNode()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var ns = TestUtility.CreateDefaultNSM();
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var row = new List<object> { 5, "e", false, 100 };
+				var record = cacheDefinition.CacheRecords[0];
+				new CacheRecordNode(ns, null, row, cacheDefinition);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructCacheRecordNodeWithNullNamespaceManager()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				XmlDocument document = new XmlDocument();
+				document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""0""><r></r></pivotCacheRecords>");
+				var node = document.SelectSingleNode("//d:r", TestUtility.CreateDefaultNSM());
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var row = new List<object> { 5, "e", false, 100 };
+				var record = cacheDefinition.CacheRecords[0];
+				new CacheRecordNode(null, node, row, cacheDefinition);
+			}
+		}
+		#endregion
+
+		#region Update Tests
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void UpdateRecords()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var row = new List<object> { 5, "e", false, 100 };
+				var record = cacheDefinition.CacheRecords[0];
+				record.Update(row, cacheDefinition);
+				Assert.AreEqual(4, record.Items.Count);
+				Assert.AreEqual("5", record.Items[0].Value);
+				Assert.AreEqual("3", record.Items[1].Value);
+				Assert.AreEqual("2", record.Items[2].Value);
+				Assert.AreEqual("100", record.Items[3].Value);
+				var cacheField1 = cacheDefinition.CacheFields[0];
+				var cacheField2 = cacheDefinition.CacheFields[1];
+				var cacheField3 = cacheDefinition.CacheFields[2];
+				var cacheField4 = cacheDefinition.CacheFields[3];
+				Assert.AreEqual(0, cacheField1.SharedItems.Count);
+				Assert.IsNotNull(cacheField2.SharedItems.SingleOrDefault(i => i.Value == "e" && i.Type == PivotCacheRecordType.s));
+				Assert.IsNotNull(cacheField3.SharedItems.SingleOrDefault(i => i.Value == "0" && i.Type == PivotCacheRecordType.b));
+				Assert.AreEqual(0, cacheField4.SharedItems.Count);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void UpdateWithNullRow()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var record = cacheDefinition.CacheRecords[0];
+				record.Update(null, cacheDefinition);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void UpdateWithNullCacheDefinition()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var record = cacheDefinition.CacheRecords[0];
+				var row = new List<object> { 5, "e", false, 100 };
+				record.Update(row, null);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void UpdateWithIncorrectNumberOfFields()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var row = new List<object> { 5, "e", false };
+				var record = cacheDefinition.CacheRecords[0];
+				record.Update(row, cacheDefinition);
+			}
 		}
 		#endregion
 	}

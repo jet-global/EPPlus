@@ -734,6 +734,12 @@ namespace OfficeOpenXml
 				slicerCache.Save(this.Package);
 			}
 
+			// Save all the pivotCacheDefinitions
+			foreach (var pivotCacheDefinition in this.PivotCacheDefinitions)
+			{
+				pivotCacheDefinition.Save();
+			}
+
 			// save the properties of the workbook
 			if (this._properties != null)
 			{

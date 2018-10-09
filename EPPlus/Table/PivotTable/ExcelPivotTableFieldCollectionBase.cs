@@ -24,7 +24,8 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
-using System.Collections.Generic;
+using System.Xml;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -32,95 +33,28 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// Abstract base collection class for pivot table fields.
 	/// </summary>
 	/// <typeparam name="T">An instance of {T}.</typeparam>
-	public abstract class ExcelPivotTableFieldCollectionBase<T> : IEnumerable<T>
+	public abstract class ExcelPivotTableFieldCollectionBase<T> : XmlCollectionBase<T> where T : XmlCollectionItemBase
 	{
-		#region Class Variables
+		#region Properties
 		/// <summary>
 		/// The pivot table.
 		/// </summary>
-		protected ExcelPivotTable myTable;
-
-		/// <summary>
-		/// A list of fields.
-		/// </summary>
-		internal protected List<T> myList = new List<T>();
-		#endregion
-
-		#region Properties
-		/// <summary>
-		/// Gets the generic enumerator of the list.
-		/// </summary>
-		/// <returns>The enumerator.</returns>
-		public IEnumerator<T> GetEnumerator()
-		{
-			return myList.GetEnumerator();
-		}
-
-		/// <summary>
-		/// Gets the specified type enumerator of the list.
-		/// </summary>
-		/// <returns>The enumerator.</returns>
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return myList.GetEnumerator();
-		}
-
-		/// <summary>
-		/// Gets the count of fields in the pivot table.
-		/// </summary>
-		public int Count
-		{
-			get
-			{
-				return myList.Count;
-			}
-		}
-
-		/// <summary>
-		/// Gets the field at the given index.
-		/// </summary>
-		/// <param name="Index">The position of the field in the list.</param>
-		/// <returns>The pivot table field.</returns>
-		public T this[int Index]
-		{
-			get
-			{
-				if (Index < 0 || Index >= myList.Count)
-					throw (new ArgumentOutOfRangeException("Index out of range"));
-				return myList[Index];
-			}
-		}
+		protected ExcelPivotTable PivotTable { get; set; }
 		#endregion
 
 		#region Constructors
 		/// <summary>
 		/// Creates an instance of a <see cref="ExcelPivotTableFieldCollection"/>.
 		/// </summary>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="node">The top xml node.</param>
 		/// <param name="table">The existing pivot table.</param>
-		internal ExcelPivotTableFieldCollectionBase(ExcelPivotTable table)
+		internal ExcelPivotTableFieldCollectionBase(XmlNamespaceManager namespaceManager, XmlNode node, ExcelPivotTable table) 
+			: base(namespaceManager, node)
 		{
-			myTable = table;
-		}
-		#endregion
-
-		#region Methods
-		/// <summary>
-		/// Adds a field item to the field collection.
-		/// </summary>
-		/// <param name="fieldItem">The new field item.</param>
-		internal void AddInternal(T fieldItem)
-		{
-			myList.Add(fieldItem);
-		}
-
-		/// <summary>
-		/// Adds a field item to the collection.
-		/// </summary>
-		/// <param name="index">The index of the new field item.</param>
-		/// <param name="fieldItem">The new field item.</param>
-		internal void AddInternal(int index, T fieldItem)
-		{
-			myList.Insert(index, fieldItem);
+			if (table == null)
+				throw new ArgumentNullException(nameof(table));
+			this.PivotTable = table;
 		}
 		#endregion
 	}

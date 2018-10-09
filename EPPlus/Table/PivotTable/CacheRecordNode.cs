@@ -129,6 +129,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(row));
 			if (cacheDefinition == null)
 				throw new ArgumentNullException(nameof(cacheDefinition));
+			if (row.Count() != cacheDefinition.CacheFields.Count)
+				throw new InvalidOperationException("An attempt was made to create a CacheRecord node with an invalid number of fields.");
 			this.NameSpaceManager = namespaceManager;
 			var recordNode = parentNode.OwnerDocument.CreateElement("d:r");
 			int col = 0;
@@ -140,10 +142,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					// The corresponding cacheField has shared items; map the new cacheRecord entry 
 					// into shared items if a matching entry exists, otherwise create a new sharedItem entry and map accordingly.
-					int cacheFieldItemIndex = cacheField.GetSharedItemIndex(type, value);
-					if (cacheFieldItemIndex < 0)
-						cacheFieldItemIndex = cacheField.SharedItems.Add(value);
-					var indexStringValue = ConvertUtil.ConvertObjectToXmlAttributeString(cacheFieldItemIndex);
+					var indexStringValue = this.GetCacheFieldSharedItemIndexString(cacheField, type, value);
 					myItems.Add(new CacheItem(namespaceManager, recordNode, PivotCacheRecordType.x, indexStringValue));
 				}
 				else
@@ -176,23 +175,19 @@ namespace OfficeOpenXml.Table.PivotTable
 			foreach (var value in row)
 			{
 				var type = CacheItem.GetObjectType(value);
-				string stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
 				var currentItem = myItems[col];
 				var cacheField = cacheDefinition.CacheFields[col];
 				if (cacheField.HasSharedItems)
 				{
 					// If shared items contains value, update this.Value to index
 					// otherwise, create and add new sharedItem, update this.Value to new index
-					int cacheFieldItemIndex = cacheField.GetSharedItemIndex(type, value);
-					if (cacheFieldItemIndex < 0)
-						cacheFieldItemIndex = cacheField.SharedItems.Add(value);
-					var indexStringValue = ConvertUtil.ConvertObjectToXmlAttributeString(cacheFieldItemIndex);
-					currentItem.Value = indexStringValue;
+					currentItem.Value = this.GetCacheFieldSharedItemIndexString(cacheField, type, value);
 				}
 				else
 				{
 					// If only the value changed, update it. If the type changed,
 					// replace the node with one of the correct type and value.
+					string stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
 					if (currentItem.Type == type && currentItem.Value != stringValue)
 						currentItem.Value = stringValue;
 					else if (currentItem.Type != type)
@@ -200,6 +195,29 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				col++;
 			}
+		}
+
+		/// <summary>
+		/// Removes this child node from the specified <paramref name="parentNode"/>.
+		/// </summary>
+		/// <param name="parentNode">The parent xml node.</param>
+		public void Remove(XmlNode parentNode)
+		{
+			parentNode.RemoveChild(this.Node);
+		}
+		#endregion
+
+		#region Private Methods
+		private string GetCacheFieldSharedItemIndexString(CacheFieldNode cacheField, PivotCacheRecordType type, object value)
+		{
+			int cacheFieldItemIndex = cacheField.GetSharedItemIndex(type, value);
+			// Adds a new sharedItem if the item does not exist.
+			if (cacheFieldItemIndex < 0)
+			{
+				cacheField.SharedItems.Add(value);
+				cacheFieldItemIndex = cacheField.SharedItems.Count - 1;
+			}
+			return ConvertUtil.ConvertObjectToXmlAttributeString(cacheFieldItemIndex);
 		}
 		#endregion
 	}

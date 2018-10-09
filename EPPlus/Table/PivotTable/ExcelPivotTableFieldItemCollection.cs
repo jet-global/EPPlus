@@ -23,6 +23,10 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Xml;
+
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
@@ -30,13 +34,60 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// </summary>
 	public class ExcelPivotTableFieldItemCollection : ExcelPivotTableFieldCollectionBase<ExcelPivotTableFieldItem>
 	{
+		#region Properties
+		/// <summary>
+		/// Gets the <see cref="ExcelPivotTableField"/> this collection is a part of.
+		/// </summary>
+		public ExcelPivotTableField Field { get; }
+		#endregion
+
+		#region Constructors
 		/// <summary>
 		/// Creates an instance of a <see cref="ExcelPivotTableFieldCollection"/>.
 		/// </summary>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="topNode">The xml node.</param>
 		/// <param name="table">The existing pivot table.</param>
-		public ExcelPivotTableFieldItemCollection(ExcelPivotTable table) : base(table)
+		/// <param name="field">The <see cref="ExcelPivotTableField"/> of this collection.</param>
+		public ExcelPivotTableFieldItemCollection(XmlNamespaceManager namespaceManager, XmlNode topNode, ExcelPivotTable table, ExcelPivotTableField field) : base(namespaceManager, topNode, table)
 		{
-
+			if (field == null)
+				throw new ArgumentNullException(nameof(field));
+			this.Field = field;
 		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Adds a new <see cref="ExcelPivotTableFieldItem"/> to the collection.
+		/// </summary>
+		/// <param name="pivotFieldIndex">The item's @x attribute value.</param>
+		/// <param name="defaultSubtotal">A flag indicating if there exists an item with a non-null @t attribute.</param>
+		public void AddItem(int pivotFieldIndex, bool defaultSubtotal)
+		{
+			var item = new ExcelPivotTableFieldItem(base.NameSpaceManager, base.TopNode, this.Field, pivotFieldIndex);
+			if (defaultSubtotal)
+				base.InsertItem(pivotFieldIndex, item);
+			else
+				base.AddItem(item);
+		}
+		#endregion
+
+		#region ExcelPivotTableFieldCollectionBase Overrides
+		/// <summary>
+		/// Loads the <see cref="ExcelPivotTableFieldItem"/>s from the xml document.
+		/// </summary>
+		/// <returns>The collection of <see cref="ExcelPivotTableFieldItem"/>s.</returns>
+		protected override List<ExcelPivotTableFieldItem> LoadItems()
+		{
+			var collection = new List<ExcelPivotTableFieldItem>();
+			var items = base.TopNode.SelectNodes("d:item", base.NameSpaceManager);
+			foreach (XmlNode xmlNode in items)
+			{
+				collection.Add(new ExcelPivotTableFieldItem(base.NameSpaceManager, xmlNode, this.Field));
+			}
+			return collection;
+		}
+		#endregion
 	}
 }

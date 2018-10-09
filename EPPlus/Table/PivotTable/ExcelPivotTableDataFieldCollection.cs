@@ -23,8 +23,9 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
+using System.Collections.Generic;
 using System.Xml;
+using OfficeOpenXml.Extensions;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -37,11 +38,14 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Creates an instance of a <see cref="ExcelPivotTableDataFieldCollection"/>.
 		/// </summary>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="node">The top xml node.</param>
 		/// <param name="table">The pivot table.</param>
-		internal ExcelPivotTableDataFieldCollection(ExcelPivotTable table) :
-			 base(table)
+		internal ExcelPivotTableDataFieldCollection(XmlNamespaceManager namespaceManager, XmlNode node, ExcelPivotTable table) 
+			: base(namespaceManager, node, table)
 		{
-
+			if (node == null)
+				base.TopNode = base.PivotTable.CreateNode("d:dataFields");
 		}
 		#endregion
 
@@ -56,11 +60,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			var dataFieldsNode = field.TopNode.SelectSingleNode("../../d:dataFields", field.NameSpaceManager);
 			if (dataFieldsNode == null)
 			{
-				myTable.CreateNode("d:dataFields");
+				base.PivotTable.CreateNode("d:dataFields");
 				dataFieldsNode = field.TopNode.SelectSingleNode("../../d:dataFields", field.NameSpaceManager);
 			}
 
-			XmlElement node = myTable.PivotTableXml.CreateElement("dataField", ExcelPackage.schemaMain);
+			XmlElement node = base.PivotTable.PivotTableXml.CreateElement("dataField", ExcelPackage.schemaMain);
 			node.SetAttribute("fld", field.Index.ToString());
 			dataFieldsNode.AppendChild(node);
 
@@ -68,9 +72,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			field.SetXmlNodeBool("@dataField", true, false);
 
 			var dataField = new ExcelPivotTableDataField(field.NameSpaceManager, node, field);
-			ValidateDupName(dataField);
+			this.ValidateDupName(dataField);
 
-			myList.Add(dataField);
+			base.AddItem(dataField);
 			return dataField;
 		}
 
@@ -82,7 +86,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			if (dataField.Field.TopNode.SelectSingleNode(string.Format("../../d:dataFields/d:dataField[@fld={0}]", dataField.Index), dataField.NameSpaceManager) is XmlElement node)
 				node.ParentNode.RemoveChild(node);
-			myList.Remove(dataField);
+			base.RemoveItem(dataField);
 		}
 
 		/// <summary>
@@ -93,26 +97,31 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <returns>True if the data field exists.</returns>
 		internal bool ExistsDfName(string name, ExcelPivotTableDataField datafield)
 		{
-			foreach (var df in myList)
+			foreach (var dataField in this)
 			{
-				if (((!string.IsNullOrEmpty(df.Name) && df.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) ||
-					  (string.IsNullOrEmpty(df.Name) && df.Field.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)))) && datafield != df)
+				if (((!string.IsNullOrEmpty(dataField.Name) && dataField.Name.IsEquivalentTo(name) ||
+					  (string.IsNullOrEmpty(dataField.Name) && dataField.Field.Name.IsEquivalentTo(name)))) && datafield != dataField)
 					return true;
 			}
 			return false;
 		}
 
-		internal void PopulateDataFields(XmlNamespaceManager namespaceManager, XmlNode parentNode, string nodePath, ExcelPivotTableFieldCollection fields)
+		#endregion
+
+		#region ExcelPivotTableFieldCollectionBase Overrides
+		protected override List<ExcelPivotTableDataField> LoadItems()
 		{
-			foreach (XmlElement dataElem in parentNode.SelectNodes("d:dataFields/d:dataField", namespaceManager))
+			var collection = new List<ExcelPivotTableDataField>();
+			foreach (XmlElement dataElem in base.TopNode.SelectNodes("dataField", base.NameSpaceManager))
 			{
 				if (int.TryParse(dataElem.GetAttribute("fld"), out var fld) && fld >= 0)
 				{
-					var field = fields[fld];
-					var dataField = new ExcelPivotTableDataField(namespaceManager, dataElem, field);
-					this.AddInternal(dataField);
+					var field = base.PivotTable.Fields[fld];
+					var dataField = new ExcelPivotTableDataField(base.NameSpaceManager, dataElem, field);
+					collection.Add(dataField);
 				}
 			}
+			return collection;
 		}
 		#endregion
 

@@ -37,90 +37,66 @@ namespace EPPlusTest.Table.PivotTable
 	{
 		#region Constructor Tests
 		[TestMethod]
-		public void CacheItemParsesTypeCorrectly()
+		public void CacheItemWithoutGivenValue()
 		{
 			XmlDocument document = new XmlDocument();
-			document.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/><x v=""0""/> <b v=""0""/> <m v=""0""/> <e v=""415.75""/><d v=""1""/></r></pivotCacheRecords>");
+			document.LoadXml(@"<pivotCacheRecords><r><n v=""20100076""/><x v=""0""/><b v=""0""/></r></pivotCacheRecords>");
 			var node = document.SelectSingleNode("//n");
 			var namespaceManager = TestUtility.CreateDefaultNSM();
-			var record = new CacheItem(namespaceManager, node);
-			Assert.AreEqual(PivotCacheRecordType.n, record.Type);
-			Assert.AreEqual("20100076", record.Value);
+			var item = new CacheItem(namespaceManager, node);
+			Assert.AreEqual(PivotCacheRecordType.n, item.Type);
+			Assert.AreEqual("20100076", item.Value);
 			node = document.SelectSingleNode("//x");
-			record = new CacheItem(namespaceManager, node);
-			Assert.AreEqual(PivotCacheRecordType.x, record.Type);
-			node = document.SelectSingleNode("//m");
-			record = new CacheItem(namespaceManager, node);
-			Assert.AreEqual(PivotCacheRecordType.m, record.Type);
-			node = document.SelectSingleNode("//e");
-			record = new CacheItem(namespaceManager, node);
-			Assert.AreEqual(PivotCacheRecordType.e, record.Type);
+			item = new CacheItem(namespaceManager, node);
+			Assert.AreEqual(PivotCacheRecordType.x, item.Type);
+			Assert.AreEqual("0", item.Value);
 		}
 
 		[TestMethod]
-		public void CacheItemCacheRecordsTest()
+		public void CacheItemWithGivenTypeAndValue()
 		{
 			XmlDocument document = new XmlDocument();
-			document.LoadXml(@"<pivotCacheRecords count=""1""><r><n v=""20100076""/> <x v=""0""/> <b v=""0""/> <e v=""415.75""/><d v=""1""/></r></pivotCacheRecords>");
+			document.LoadXml(@"<pivotCacheRecords><r><n v=""20100076""/><x v=""0""/><b v=""0""/></r></pivotCacheRecords>");
+			var topNode = document.SelectSingleNode("//r");
 			var namespaceManager = TestUtility.CreateDefaultNSM();
-			var node = document.SelectSingleNode("//r");
-			var record = new CacheItem(namespaceManager, node, PivotCacheRecordType.n, "382");
-			Assert.AreEqual(PivotCacheRecordType.n, record.Type);
-			Assert.AreEqual("382", record.Value);
-			Assert.IsNotNull(node.SelectSingleNode("//n[@v=382]"));
-			record = new CacheItem(namespaceManager, node, PivotCacheRecordType.b, "1");
-			Assert.AreEqual(PivotCacheRecordType.b, record.Type);
-			Assert.AreEqual("1", record.Value);
-			Assert.IsNotNull(node.SelectSingleNode("//b[@v=1]"));
-			record = new CacheItem(namespaceManager, node, PivotCacheRecordType.m, "");
-			Assert.AreEqual(PivotCacheRecordType.m, record.Type);
-			Assert.IsNull(record.Value);
-			Assert.IsNotNull(node.SelectSingleNode("//m"));
-		}
-
-		[TestMethod]
-		public void CacheItemCacheFieldTest()
-		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(@"<sharedItems><n v=""20100076""/> <x v=""0""/> <b v=""0""/> <e v=""415.75""/><d v=""1""/></sharedItems>");
-			var namespaceManager = TestUtility.CreateDefaultNSM();
-			var node = document.SelectSingleNode("//sharedItems");
-			var record = new CacheItem(namespaceManager, node, PivotCacheRecordType.n, "382");
-			Assert.AreEqual(PivotCacheRecordType.n, record.Type);
-			Assert.AreEqual("382", record.Value);
-			Assert.IsNotNull(node.SelectSingleNode("//n[@v=382]"));
-			record = new CacheItem(namespaceManager, node, PivotCacheRecordType.b, "1");
-			Assert.AreEqual(PivotCacheRecordType.b, record.Type);
-			Assert.AreEqual("1", record.Value);
-			Assert.IsNotNull(node.SelectSingleNode("//b[@v=1]"));
-			record = new CacheItem(namespaceManager, node, PivotCacheRecordType.m, "");
-			Assert.AreEqual(PivotCacheRecordType.m, record.Type);
-			Assert.IsNull(record.Value);
-			Assert.IsNotNull(node.SelectSingleNode("//m"));
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
-		public void CacheItemCreateRecordItemWithIncorrectParentNode()
-		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(@"<cacheField name=""Item"" numFmtId=""0""><sharedItems count=""2""><s v=""Bike""/><s v=""Car""/></sharedItems></cacheField>");
-			var node = document.SelectSingleNode("//cacheField", TestUtility.CreateDefaultNSM());
-			var item = new CacheItem(TestUtility.CreateDefaultNSM(), node, PivotCacheRecordType.n, "382");
+			var item = new CacheItem(namespaceManager, topNode, PivotCacheRecordType.n, "493");
+			Assert.AreEqual(PivotCacheRecordType.n, item.Type);
+			Assert.AreEqual("493", item.Value);
+			Assert.AreEqual(3, topNode.ChildNodes.Count);
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
-		public void CacheItemNullNodeTest()
+		public void CacheItemNullNamespaceManager()
+		{
+			XmlDocument document = new XmlDocument();
+			document.LoadXml(@"<pivotCacheRecords><r><n v=""20100076""/><x v=""0""/><b v=""0""/></r></pivotCacheRecords>");
+			var node = document.SelectSingleNode("//n");
+			new CacheItem(null, node);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void CacheItemNullNode()
 		{
 			new CacheItem(TestUtility.CreateDefaultNSM(), null);
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
-		public void CacheItemNullParentNodeThrowsException()
+		public void CacheItemNullParentNode()
 		{
-			new CacheItem(TestUtility.CreateDefaultNSM(), null, PivotCacheRecordType.s, "jet");
+			new CacheItem(TestUtility.CreateDefaultNSM(), null, PivotCacheRecordType.x, "1");
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void CacheItemIncorrectParentNode()
+		{
+			XmlDocument document = new XmlDocument();
+			document.LoadXml(@"<pivotCacheRecords><r><n v=""20100076""/><x v=""0""/><b v=""0""/></r></pivotCacheRecords>");
+			var parentNode = document.SelectSingleNode("//pivotCacheRecords");
+			new CacheItem(TestUtility.CreateDefaultNSM(), parentNode, PivotCacheRecordType.n, "493");
 		}
 		#endregion
 

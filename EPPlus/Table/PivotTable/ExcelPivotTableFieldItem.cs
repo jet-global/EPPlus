@@ -31,13 +31,14 @@
  *******************************************************************************/
 using System;
 using System.Xml;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
 	/// A field Item. Used for grouping
 	/// </summary>
-	public class ExcelPivotTableFieldItem : XmlHelper
+	public class ExcelPivotTableFieldItem : XmlCollectionItemBase
 	{
 		#region Class Variables
 		private ExcelPivotTableField myField;
@@ -74,10 +75,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal int X
 		{
-			get
-			{
-				return base.GetXmlNodeInt("@x");
-			}
+			get { return base.GetXmlNodeInt("@x"); }
+			set { base.SetXmlNodeString("@x", value.ToString()); }
 		}
 
 		/// <summary>
@@ -85,10 +84,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal string T
 		{
-			get
-			{
-				return base.GetXmlNodeString("@t");
-			}
+			get { return base.GetXmlNodeString("@t"); }
 		}
 		#endregion
 
@@ -96,13 +92,44 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Creates an instance of a <see cref="ExcelPivotTableFieldItem"/>.
 		/// </summary>
-		/// <param name="ns">The namespace of the worksheet.</param>
-		/// <param name="topNode">The top node of the xml.</param>
+		/// <param name="namespaceManager">The namespace of the worksheet.</param>
+		/// <param name="topNode">The xml top node.</param>
 		/// <param name="field">The pivot table field.</param>
-		internal ExcelPivotTableFieldItem(XmlNamespaceManager ns, XmlNode topNode, ExcelPivotTableField field) :
-			 base(ns, topNode)
+		internal ExcelPivotTableFieldItem(XmlNamespaceManager namespaceManager, XmlNode topNode, ExcelPivotTableField field) :
+			 base(namespaceManager, topNode)
 		{
+			if (namespaceManager == null)
+				throw new ArgumentNullException(nameof(namespaceManager));
+			if (topNode == null)
+				throw new ArgumentNullException(nameof(topNode));
+			if (field == null)
+				throw new ArgumentNullException(nameof(field));
 			myField = field;
+		}
+
+		/// <summary>
+		/// Creates an instance of a <see cref="ExcelPivotTableFieldItem"/>.
+		/// </summary>
+		/// <param name="namespaceManager">The namespace of the worksheet.</param>
+		/// <param name="parentNode">The xml top node.</param>
+		/// <param name="field">The pivot table field.</param>
+		/// <param name="value">The value of the 'x' attribute.</param>
+		internal ExcelPivotTableFieldItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, ExcelPivotTableField field, int value) :
+			 base(namespaceManager, parentNode)
+		{
+			if (namespaceManager == null)
+				throw new ArgumentNullException(nameof(namespaceManager));
+			if (parentNode == null)
+				throw new ArgumentNullException(nameof(parentNode));
+			if (field == null)
+				throw new ArgumentNullException(nameof(field));
+			if (value < 0)
+				throw new ArgumentOutOfRangeException(nameof(value));
+			myField = field;
+			base.TopNode = parentNode.OwnerDocument.CreateElement("item", parentNode.NamespaceURI);
+			var attr = parentNode.OwnerDocument.CreateAttribute("x");
+			base.TopNode.Attributes.Append(attr);
+			this.X = value;
 		}
 		#endregion
 	}
