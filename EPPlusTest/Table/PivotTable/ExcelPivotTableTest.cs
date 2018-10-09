@@ -121,7 +121,6 @@ namespace EPPlusTest.Table.PivotTable
 				//Assert.AreEqual(10, worksheet.Cells[16, 10].Value);
 				Assert.AreEqual("Grand Total", worksheet.Cells[17, 9].Value);
 				//Assert.AreEqual(90110, worksheet.Cells[17, 10].Value);
-				package.SaveAs(new FileInfo("C:\\users\\mcl\\Downloads\\PivotTables\\Test.xlsx"));
 			}
 		}
 
