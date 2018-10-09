@@ -231,7 +231,6 @@ namespace EPPlusTest.Table.PivotTable
 				this.AssertCacheRecord(cacheRecords, 0, 3, PivotCacheRecordType.n, "100");
 				this.AssertCacheRecord(cacheRecords, 1, 3, PivotCacheRecordType.n, "90000");
 				this.AssertCacheRecord(cacheRecords, 2, 3, PivotCacheRecordType.n, "10");
-				//TODO: Test refreshing all pivot tables.
 			}
 		}
 		#endregion

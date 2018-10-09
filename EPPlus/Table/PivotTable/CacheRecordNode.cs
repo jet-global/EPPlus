@@ -197,7 +197,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-
 		/// <summary>
 		/// Removes this child node from the specified <paramref name="parentNode"/>.
 		/// </summary>

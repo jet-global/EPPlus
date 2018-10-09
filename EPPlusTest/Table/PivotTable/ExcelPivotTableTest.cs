@@ -105,6 +105,8 @@ namespace EPPlusTest.Table.PivotTable
 				var pivotField4 = pivotTable.Fields[3];
 				Assert.AreEqual(0, pivotField4.Items.Count);
 				Assert.AreEqual(7, pivotTable.RowItems.Count);
+				// TODO 8175: Recalculate dataField values. Once this is completed, we can check the values 
+				// in the worksheet cells.
 				Assert.AreEqual("Blue", worksheet.Cells[11, 9].Value);
 				//Assert.AreEqual(100, worksheet.Cells[11, 10].Value);
 				Assert.AreEqual("Bike", worksheet.Cells[12, 9].Value);
@@ -119,7 +121,7 @@ namespace EPPlusTest.Table.PivotTable
 				//Assert.AreEqual(10, worksheet.Cells[16, 10].Value);
 				Assert.AreEqual("Grand Total", worksheet.Cells[17, 9].Value);
 				//Assert.AreEqual(90110, worksheet.Cells[17, 10].Value);
-				package.SaveAs(new FileInfo("C:\\users\\mcl\\Downloads\\Test.xlsx"));
+				package.SaveAs(new FileInfo("C:\\users\\mcl\\Downloads\\PivotTables\\Test.xlsx"));
 			}
 		}
 
@@ -151,6 +153,8 @@ namespace EPPlusTest.Table.PivotTable
 				var pivotField4 = pivotTable.Fields[3];
 				Assert.AreEqual(0, pivotField4.Items.Count);
 				Assert.AreEqual(8, pivotTable.RowItems.Count);
+				// TODO 8175: Recalculate dataField values. Once this is completed, we can check the values 
+				// in the worksheet cells.
 				Assert.AreEqual("Black", worksheet.Cells[11, 9].Value);
 				//Assert.AreEqual(110, worksheet.Cells[11, 10].Value);
 				Assert.AreEqual("Bike", worksheet.Cells[12, 9].Value);
@@ -194,6 +198,8 @@ namespace EPPlusTest.Table.PivotTable
 				var pivotField4 = pivotTable.Fields[3];
 				Assert.AreEqual(0, pivotField4.Items.Count);
 				Assert.AreEqual(5, pivotTable.RowItems.Count);
+				// TODO 8175: Recalculate dataField values. Once this is completed, we can check the values 
+				// in the worksheet cells.
 				Assert.AreEqual("Black", worksheet.Cells[11, 9].Value);
 				//Assert.AreEqual(100, worksheet.Cells[11, 10].Value);
 				Assert.AreEqual("Bike", worksheet.Cells[12, 9].Value);

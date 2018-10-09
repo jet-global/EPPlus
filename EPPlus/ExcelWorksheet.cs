@@ -4009,35 +4009,9 @@ namespace OfficeOpenXml
 						pt.CacheDefinition.SourceRange.Address;
 					pt.CacheDefinition.SetXmlNodeString(ExcelPivotCacheDefinition.SourceAddressPath, address);
 				}
-
-
-				// TODO: Move all CacheDefinition saving to workbook.save(). This is saving repeatedly for each worksheet.
-				var fields =
-				  pt.CacheDefinition.CacheDefinitionXml.SelectNodes(
-					"d:pivotCacheDefinition/d:cacheFields/d:cacheField", NameSpaceManager);
-				int ix = 0;
-				if (fields != null && pt.CacheDefinition.SourceRange != null)
+				
+				if (pt.CacheDefinition.SourceRange != null)
 				{
-					var flds = new HashSet<string>();
-					var ws = Workbook.Worksheets[pt.CacheDefinition.SourceRange.WorkSheet];
-					var t = ws.Tables.GetFromRange(pt.CacheDefinition.SourceRange);
-					foreach (XmlElement node in fields)
-					{
-						if (ix >= pt.CacheDefinition.SourceRange.Columns) break;
-						var fldName = node.GetAttribute("name");                        //Fixes issue 15295 dup name error
-						if (string.IsNullOrEmpty(fldName))
-						{
-							fldName = (t == null
-							  ? pt.CacheDefinition.SourceRange.Offset(0, ix++, 1, 1).Value.ToString()
-							  : t.Columns[ix++].Name);
-						}
-						if (flds.Contains(fldName))
-						{
-							fldName = GetNewName(flds, fldName);
-						}
-						flds.Add(fldName);
-						node.SetAttribute("name", fldName);
-					}
 					foreach (var df in pt.DataFields)
 					{
 						if (string.IsNullOrEmpty(df.Name))
@@ -4063,8 +4037,6 @@ namespace OfficeOpenXml
 					}
 				}
 				pt.PivotTableXml.Save(pt.Part.GetStream(FileMode.Create));
-				// TODO: Move all CacheDefinition saving to workbook.save(). This is saving repeatedly for each worksheet.
-				pt.CacheDefinition.CacheDefinitionXml.Save(pt.CacheDefinition.Part.GetStream(FileMode.Create));
 			}
 		}
 

@@ -1020,7 +1020,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 				var fieldIndex = this.RowFields[rowItem.RepeatedItemsCount].Index;
 
-				// TODO: Account for grouped rowItems.
+				// TODO 8178: Account for grouped rowItems.
 				var fieldItemIndex = rowItem[0];
 
 				var pivotField = this.Fields[fieldIndex]; 

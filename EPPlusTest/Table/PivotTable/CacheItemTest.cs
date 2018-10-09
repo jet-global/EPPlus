@@ -37,7 +37,7 @@ namespace EPPlusTest.Table.PivotTable
 	{
 		#region Constructor Tests
 		[TestMethod]
-		public void CacheItemWihtoutGivenValue()
+		public void CacheItemWithoutGivenValue()
 		{
 			XmlDocument document = new XmlDocument();
 			document.LoadXml(@"<pivotCacheRecords><r><n v=""20100076""/><x v=""0""/><b v=""0""/></r></pivotCacheRecords>");

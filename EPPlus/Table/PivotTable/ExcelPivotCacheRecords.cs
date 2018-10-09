@@ -198,7 +198,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Checks if a given row item exists.
 		/// </summary>
 		/// <param name="nodeIndices">A list of tuples containing the pivotField index and item value.</param>
-		/// <returns></returns>
+		/// <returns>True if the item exists, otherwise false.</returns>
 		public bool Contains(List<Tuple<int, int>> nodeIndices)
 		{
 			foreach (var record in this.Records)

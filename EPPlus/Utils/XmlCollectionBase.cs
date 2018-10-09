@@ -34,7 +34,7 @@ namespace OfficeOpenXml.Utils
 	/// <summary>
 	/// The base class for xml collections.
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
+	/// <typeparam name="T">The type of the collection.</typeparam>
 	public abstract class XmlCollectionBase<T> : XmlHelper, IEnumerable<T> where T : XmlCollectionItemBase
 	{
 		#region Class Variables
