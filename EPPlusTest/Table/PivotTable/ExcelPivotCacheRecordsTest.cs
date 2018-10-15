@@ -257,6 +257,26 @@ namespace EPPlusTest.Table.PivotTable
 				this.AssertCacheItem(record2.Items[3], "90000", PivotCacheRecordType.n);
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		public void UpdateRecordsRemoveMultipleRecords()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var cacheRecords = cacheDefinition.CacheRecords;
+				var worksheet = package.Workbook.Worksheets.First();
+				cacheRecords.UpdateRecords(worksheet.Cells["C4:F4"]);
+				Assert.AreEqual(1, cacheRecords.Count);
+				this.AssertCacheItem(cacheRecords[0].Items[0], "1", PivotCacheRecordType.n);
+				this.AssertCacheItem(this.ResolveXCacheItem(cacheRecords[0].Items[1], 1, cacheDefinition), "Bike", PivotCacheRecordType.s);
+				this.AssertCacheItem(this.ResolveXCacheItem(cacheRecords[0].Items[2], 2, cacheDefinition), "Black", PivotCacheRecordType.s);
+				this.AssertCacheItem(cacheRecords[0].Items[3], "100", PivotCacheRecordType.n);
+			}
+		}
 		#endregion
 
 		#region Helper Methods

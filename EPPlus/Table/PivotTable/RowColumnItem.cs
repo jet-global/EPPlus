@@ -131,7 +131,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="parentNode">The row/colItems xml node.</param>
 		/// <param name="repeatedItemsCount">The value of the 'r' attribute.</param>
 		/// <param name="memberIndex">The value of the 'x' child node.</param>
-		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, int repeatedItemsCount, int memberIndex) : base(namespaceManager, null)
+		/// <param name="itemType">The value of the 't' attribute.</param>
+		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, int repeatedItemsCount, int memberIndex, string itemType = null) : base(namespaceManager, null)
 		{
 			if (parentNode == null)
 				throw new ArgumentNullException(nameof(parentNode));
@@ -146,6 +147,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				xNode.Attributes["v"].Value = memberIndex.ToString();
 			}
 			base.TopNode.AppendChild(xNode);
+			if (itemType != null)
+				this.ItemType = itemType;
 		}
 
 		/// <summary>
@@ -153,17 +156,25 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		/// <param name="namespaceManager">The namespace manager.</param>
 		/// <param name="parentNode">The row/colItems xml node.</param>
-		/// <param name="itemType">The value of the 't' attribute.</param>
-		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, string itemType) : base(namespaceManager, null)
+		/// <param name="memberIndices">The list of member property indices ('x' attributes).</param>
+		/// <param name="repeatedItemsCount">The 'x' attribute value.</param>
+		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, List<Tuple<int, int>> memberIndices, int repeatedItemsCount) : base(namespaceManager, null)
 		{
 			if (parentNode == null)
 				throw new ArgumentNullException(nameof(parentNode));
-			if (itemType == null)
-				throw new ArgumentNullException(nameof(itemType));
+			if (memberIndices == null || memberIndices.Count == 0)
+				throw new ArgumentNullException(nameof(memberIndices));
 			base.TopNode = parentNode.OwnerDocument.CreateElement("i", parentNode.NamespaceURI);
-			this.ItemType = itemType;
-			var xNode = parentNode.OwnerDocument.CreateElement("x", base.TopNode.NamespaceURI);
-			base.TopNode.AppendChild(xNode);
+			if (repeatedItemsCount > 0)
+				this.RepeatedItemsCount = repeatedItemsCount;
+			for (int i = 0; i < memberIndices.Count; i++)
+			{
+				var xNode = parentNode.OwnerDocument.CreateElement("x", base.TopNode.NamespaceURI);
+				var attr = parentNode.OwnerDocument.CreateAttribute("v");
+				xNode.Attributes.Append(attr);
+				xNode.Attributes["v"].Value = memberIndices[i].Item2.ToString();
+				base.TopNode.AppendChild(xNode);
+			}
 		}
 		#endregion
 

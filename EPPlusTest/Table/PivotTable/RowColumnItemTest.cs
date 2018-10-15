@@ -71,7 +71,7 @@ namespace EPPlusTest.Table.PivotTable
 			var xmlDoc = new XmlDocument(TestUtility.CreateDefaultNSM().NameTable);
 			xmlDoc.LoadXml(@"<rowItems><i xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main""><x v=""1""/><x v=""1048832""/><x/></i></rowItems>");
 			var parentNode = xmlDoc.SelectSingleNode("//rowItems");
-			var item = new RowColumnItem(TestUtility.CreateDefaultNSM(), parentNode, "grand");
+			var item = new RowColumnItem(TestUtility.CreateDefaultNSM(), parentNode, 0, 0, "grand");
 			Assert.IsNotNull(item);
 			Assert.AreEqual("grand", item.ItemType);
 			Assert.AreEqual(0, item.RepeatedItemsCount);
@@ -104,16 +104,6 @@ namespace EPPlusTest.Table.PivotTable
 		public void RowColumnItemNullParentNode()
 		{
 			new RowColumnItem(TestUtility.CreateDefaultNSM(), null, 1, 1);
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void RowColumnItemNullItemType()
-		{
-			var xmlDoc = new XmlDocument(TestUtility.CreateDefaultNSM().NameTable);
-			xmlDoc.LoadXml(@"<rowItems><i xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main""><x v=""1""/><x v=""1048832""/><x/></i></rowItems>");
-			var parentNode = xmlDoc.FirstChild;
-			new RowColumnItem(TestUtility.CreateDefaultNSM(), parentNode, null);
 		}
 		#endregion
 	}
