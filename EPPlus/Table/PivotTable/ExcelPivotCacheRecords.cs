@@ -171,12 +171,15 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Removes extra records.
 			if (sourceDataRange.Rows < this.Records.Count)
 			{
-				var count = this.Records.Count - sourceDataRange.Rows;
-				for (int i = sourceDataRange.Rows; i < this.Records.Count; i++)
+				for (int i = this.Records.Count - 1; i >= sourceDataRange.Rows; i--)
 				{
 					this.Records[i].Remove(base.TopNode);
-					this.Records.RemoveAt(i);
 				}
+				var count = this.Records.Count - sourceDataRange.Rows;
+				if (count > 0)
+					this.Records.RemoveRange(sourceDataRange.Rows, count);
+				else
+					this.Records.RemoveAt(sourceDataRange.Rows);
 			}
 
 			for (int row = sourceDataRange.Start.Row; row < sourceDataRange.Rows + sourceDataRange.Start.Row; row++)

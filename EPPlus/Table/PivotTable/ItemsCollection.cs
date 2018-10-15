@@ -56,18 +56,30 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="i">The value of it's 'x' attribute.</param>
 		public void Add(int rowDepth, int i)
 		{
-			var iNode = new RowColumnItem(this.NameSpaceManager, base.TopNode, rowDepth, i);
-			base.AddItem(iNode);
+			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, rowDepth, i));
+		}
+
+		/// <summary>
+		/// Adds a new <see cref="RowColumnItem"/> to this collection.
+		/// </summary>
+		/// <param name="xMembers">The list of member property indices.</param>
+		/// <param name="repeatedItemsCount">The repeated items count value.</param>
+		public void AddColumnItem(List<Tuple<int, int>> xMembers, int repeatedItemsCount)
+		{
+			// Shared member property indexes are implicit to the parent.
+			xMembers.RemoveRange(0, repeatedItemsCount);
+			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, xMembers, repeatedItemsCount));
 		}
 
 		/// <summary>
 		/// Adds a new <see cref="RowColumnItem"/> to this collection.
 		/// </summary>
 		/// <param name="itemType">The string value of the 't' attribute.</param>
-		public void AddSumNode(string itemType)
+		/// <param name="repeatedItemsCount">The 'r' attribute value.</param>
+		/// <param name="xAttribute">The 'x' attribute value.</param>
+		public void AddSumNode(string itemType, int repeatedItemsCount = 0, int xAttribute = 0)
 		{
-			var iNode = new RowColumnItem(this.NameSpaceManager, base.TopNode, itemType);
-			base.AddItem(iNode);
+			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, repeatedItemsCount, xAttribute, itemType));
 		}
 
 		/// <summary>

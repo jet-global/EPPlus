@@ -264,7 +264,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get
 			{
-				return base.GetXmlNodeBool("@subtotalTop");
+				return base.GetXmlNodeBool("@subtotalTop", true);
 			}
 			set
 			{

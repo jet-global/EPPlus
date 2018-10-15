@@ -841,7 +841,7 @@ namespace EPPlusTest
 				var wsAuditPivot = ep.Workbook.Worksheets.Add("Pivot1");
 
 				var pivotTable1 = wsAuditPivot.PivotTables.Add(wsAuditPivot.Cells["A7:C30"], data, "PivotAudit1");
-				pivotTable1.ColumGrandTotals = true;
+				pivotTable1.ColumnGrandTotals = true;
 				var rowField = pivotTable1.RowFields.Add(pivotTable1.Fields["INVOICE_DATE"]);
 
 
@@ -880,7 +880,7 @@ namespace EPPlusTest
 				var wsAuditPivot = ep.Workbook.Worksheets.Add("Pivot2");
 
 				var pivotTable1 = wsAuditPivot.PivotTables.Add(wsAuditPivot.Cells["A7:C30"], data, "PivotAudit2");
-				pivotTable1.ColumGrandTotals = true;
+				pivotTable1.ColumnGrandTotals = true;
 				var rowField = pivotTable1.RowFields.Add(pivotTable1.Fields["INVOICE_DATE"]);
 
 

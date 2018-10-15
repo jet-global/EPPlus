@@ -95,15 +95,15 @@ namespace EPPlusTest.Table.PivotTable
 				worksheet.Cells[6, 5].Value = "Purple";
 				cacheDefinition.UpdateData();
 				Assert.AreEqual(4, pivotTable.Fields.Count);
-				var pivotField1 = pivotTable.Fields[0];
-				Assert.AreEqual(0, pivotField1.Items.Count);
-				var pivotField2 = pivotTable.Fields[1];
-				Assert.AreEqual(4, pivotField2.Items.Count);
-				var pivotField3 = pivotTable.Fields[2];
-				Assert.AreEqual(6, pivotField3.Items.Count);
-				this.CheckFieldItems(pivotField3);
-				var pivotField4 = pivotTable.Fields[3];
-				Assert.AreEqual(0, pivotField4.Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+				Assert.AreEqual(6, pivotTable.Fields[2].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
+				foreach (var field in pivotTable.Fields)
+				{
+					if (field.Items.Count > 0)
+						this.CheckFieldItems(field);
+				}
 				Assert.AreEqual(7, pivotTable.RowItems.Count);
 				// TODO 8175: Recalculate dataField values. Once this is completed, we can check the values 
 				// in the worksheet cells.
@@ -210,6 +210,230 @@ namespace EPPlusTest.Table.PivotTable
 				Assert.AreEqual("Grand Total", worksheet.Cells[15, 9].Value);
 				//Assert.AreEqual(90100, worksheet.Cells[15, 10].Value);
 				Assert.IsNull(worksheet.Cells[16, 9].Value);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshColumnItemsWithChangedData()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+				worksheet.Cells[4, 3].Value = "January";
+				worksheet.Cells[7, 3].Value = "January";
+				cacheDefinition.UpdateData();
+				Assert.AreEqual(7, pivotTable.Fields.Count);
+				Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+				Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[5].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+				foreach (var field in pivotTable.Fields)
+				{
+					if (field.Items.Count > 0)
+						this.CheckFieldItems(field);
+				}
+				Assert.AreEqual("January", worksheet.Cells[13, 3].Value);
+				Assert.AreEqual("Car Rack", worksheet.Cells[14, 3].Value);
+				Assert.AreEqual("San Francisco", worksheet.Cells[15, 3].Value);
+				Assert.AreEqual("Chicago", worksheet.Cells[15, 4].Value);
+				Assert.AreEqual("Nashville", worksheet.Cells[15, 5].Value);
+				Assert.AreEqual("Car Rack Total", worksheet.Cells[14, 6].Value);
+				Assert.AreEqual("Headlamp", worksheet.Cells[14, 7].Value);
+				Assert.AreEqual("Chicago", worksheet.Cells[15, 7].Value);
+				Assert.AreEqual("Headlamp Total", worksheet.Cells[14, 8].Value);
+				Assert.AreEqual("January Total", worksheet.Cells[13, 9].Value);
+				Assert.AreEqual("February", worksheet.Cells[13, 10].Value);
+				Assert.AreEqual("Sleeping Bag", worksheet.Cells[14, 10].Value);
+				Assert.AreEqual("San Francisco", worksheet.Cells[15, 10].Value);
+				Assert.AreEqual("Sleeping Bag Total", worksheet.Cells[14, 11].Value);
+				Assert.AreEqual("Tent", worksheet.Cells[14, 12].Value);
+				Assert.AreEqual("Nashville", worksheet.Cells[15, 12].Value);
+				Assert.AreEqual("Tent Total", worksheet.Cells[14, 13].Value);
+				Assert.AreEqual("February Total", worksheet.Cells[13, 14].Value);
+				Assert.AreEqual("Grand Total", worksheet.Cells[13, 15].Value);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshColumnItemsWithAddedData()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+				worksheet.Cells[9, 1].Value = 20100091;
+				worksheet.Cells[9, 2].Value = "Texas";
+				worksheet.Cells[9, 3].Value = "December";
+				worksheet.Cells[9, 4].Value = "Bike";
+				worksheet.Cells[9, 5].Value = 20;
+				worksheet.Cells[9, 6].Value = 1;
+				worksheet.Cells[9, 7].Value = 20;
+				cacheDefinition.SourceRange = worksheet.Cells["A1:G9"];
+				cacheDefinition.UpdateData();
+				Assert.AreEqual(7, pivotTable.Fields.Count);
+				Assert.AreEqual(9, pivotTable.Fields[0].Items.Count);
+				Assert.AreEqual(5, pivotTable.Fields[1].Items.Count);
+				Assert.AreEqual(5, pivotTable.Fields[2].Items.Count);
+				Assert.AreEqual(6, pivotTable.Fields[3].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[5].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+				foreach (var field in pivotTable.Fields)
+				{
+					if (field.Items.Count > 0)
+						this.CheckFieldItems(field);
+				}
+				Assert.AreEqual("20100076", worksheet.Cells[16, 2].Value);
+				Assert.AreEqual("20100085", worksheet.Cells[17, 2].Value);
+				Assert.AreEqual("20100083", worksheet.Cells[18, 2].Value);
+				Assert.AreEqual("20100007", worksheet.Cells[19, 2].Value);
+				Assert.AreEqual("20100070", worksheet.Cells[20, 2].Value);
+				Assert.AreEqual("20100017", worksheet.Cells[21, 2].Value);
+				Assert.AreEqual("20100090", worksheet.Cells[22, 2].Value);
+				Assert.AreEqual("20100091", worksheet.Cells[23, 2].Value);
+				Assert.AreEqual("January", worksheet.Cells[13, 3].Value);
+				Assert.AreEqual("Car Rack", worksheet.Cells[14, 3].Value);
+				Assert.AreEqual("San Francisco", worksheet.Cells[15, 3].Value);
+				Assert.AreEqual("Chicago", worksheet.Cells[15, 4].Value);
+				Assert.AreEqual("Nashville", worksheet.Cells[15, 5].Value);
+				Assert.AreEqual("Car Rack Total", worksheet.Cells[14, 6].Value);
+				Assert.AreEqual("January Total", worksheet.Cells[13, 7].Value);
+				Assert.AreEqual("February", worksheet.Cells[13, 8].Value);
+				Assert.AreEqual("Sleeping Bag", worksheet.Cells[14, 8].Value);
+				Assert.AreEqual("San Francisco", worksheet.Cells[15, 8].Value);
+				Assert.AreEqual("Sleeping Bag Total", worksheet.Cells[14, 9].Value);
+				Assert.AreEqual("Tent", worksheet.Cells[14, 10].Value);
+				Assert.AreEqual("Nashville", worksheet.Cells[15, 10].Value);
+				Assert.AreEqual("Tent Total", worksheet.Cells[14, 11].Value);
+				Assert.AreEqual("February Total", worksheet.Cells[13, 12].Value);
+				Assert.AreEqual("March", worksheet.Cells[13, 13].Value);
+				Assert.AreEqual("Car Rack", worksheet.Cells[14, 13].Value);
+				Assert.AreEqual("Nashville", worksheet.Cells[15, 13].Value);
+				Assert.AreEqual("Car Rack Total", worksheet.Cells[14, 14].Value);
+				Assert.AreEqual("Headlamp", worksheet.Cells[14, 15].Value);
+				Assert.AreEqual("Chicago", worksheet.Cells[15, 15].Value);
+				Assert.AreEqual("Headlamp Total", worksheet.Cells[14, 16].Value);
+				Assert.AreEqual("March Total", worksheet.Cells[13, 17].Value);
+				Assert.AreEqual("December", worksheet.Cells[13, 18].Value);
+				Assert.AreEqual("Bike", worksheet.Cells[14, 18].Value);
+				Assert.AreEqual("Texas", worksheet.Cells[15, 18].Value);
+				Assert.AreEqual("Bike Total", worksheet.Cells[14, 19].Value);
+				Assert.AreEqual("December Total", worksheet.Cells[13, 20].Value);
+				Assert.AreEqual("Grand Total", worksheet.Cells[13, 21].Value);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshColumnItemsWithRemoveData()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+				cacheDefinition.SourceRange = worksheet.Cells["A1:G5"];
+				cacheDefinition.UpdateData();
+				Assert.AreEqual(7, pivotTable.Fields.Count);
+				Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+				Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[5].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+				foreach (var field in pivotTable.Fields)
+				{
+					if (field.Items.Count > 0)
+						this.CheckFieldItems(field);
+				}
+				Assert.AreEqual("January", worksheet.Cells[13, 3].Value);
+				Assert.AreEqual("Car Rack", worksheet.Cells[14, 3].Value);
+				Assert.AreEqual("San Francisco", worksheet.Cells[15, 3].Value);
+				Assert.AreEqual("Chicago", worksheet.Cells[15, 4].Value);
+				Assert.AreEqual("Car Rack Total", worksheet.Cells[14, 5].Value);
+				Assert.AreEqual("January Total", worksheet.Cells[13, 6].Value);
+				Assert.AreEqual("February", worksheet.Cells[13, 7].Value);
+				Assert.AreEqual("Sleeping Bag", worksheet.Cells[14, 7].Value);
+				Assert.AreEqual("San Francisco", worksheet.Cells[15, 7].Value);
+				Assert.AreEqual("Sleeping Bag Total", worksheet.Cells[14, 8].Value);
+				Assert.AreEqual("February Total", worksheet.Cells[13, 9].Value);
+				Assert.AreEqual("March", worksheet.Cells[13, 10].Value);
+				Assert.AreEqual("Headlamp", worksheet.Cells[14, 10].Value);
+				Assert.AreEqual("Chicago", worksheet.Cells[15, 10].Value);
+				Assert.AreEqual("Headlamp Total", worksheet.Cells[14, 11].Value);
+				Assert.AreEqual("March Total", worksheet.Cells[13, 12].Value);
+				Assert.AreEqual("Grand Total", worksheet.Cells[13, 13].Value);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshDeletingSourceRow()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+				worksheet.DeleteRow(6);
+				cacheDefinition.UpdateData();
+				Assert.AreEqual(7, pivotTable.Fields.Count);
+				Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+				Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+				Assert.AreEqual(4, pivotTable.Fields[5].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+				foreach (var field in pivotTable.Fields)
+				{
+					if (field.Items.Count > 0)
+						this.CheckFieldItems(field);
+				}
+				Assert.AreEqual("20100076", worksheet.Cells[15, 2].Value);
+				Assert.AreEqual("20100085", worksheet.Cells[16, 2].Value);
+				Assert.AreEqual("20100083", worksheet.Cells[17, 2].Value);
+				Assert.AreEqual("20100007", worksheet.Cells[18, 2].Value);
+				Assert.AreEqual("20100017", worksheet.Cells[19, 2].Value);
+				Assert.AreEqual("20100090", worksheet.Cells[20, 2].Value);
+				Assert.AreEqual("January", worksheet.Cells[12, 3].Value);
+				Assert.AreEqual("Car Rack", worksheet.Cells[13, 3].Value);
+				Assert.AreEqual("San Francisco", worksheet.Cells[14, 3].Value);
+				Assert.AreEqual("Chicago", worksheet.Cells[14, 4].Value);
+				Assert.AreEqual("Nashville", worksheet.Cells[14, 5].Value);
+				Assert.AreEqual("Car Rack Total", worksheet.Cells[13, 6].Value);
+				Assert.AreEqual("January Total", worksheet.Cells[12, 7].Value);
+				Assert.AreEqual("February", worksheet.Cells[12, 8].Value);
+				Assert.AreEqual("Sleeping Bag", worksheet.Cells[13, 8].Value);
+				Assert.AreEqual("San Francisco", worksheet.Cells[14, 8].Value);
+				Assert.AreEqual("Sleeping Bag Total", worksheet.Cells[13, 9].Value);
+				Assert.AreEqual("February Total", worksheet.Cells[12, 10].Value);
+				Assert.AreEqual("March", worksheet.Cells[12, 11].Value);
+				Assert.AreEqual("Car Rack", worksheet.Cells[13, 11].Value);
+				Assert.AreEqual("Nashville", worksheet.Cells[14, 11].Value);
+				Assert.AreEqual("Car Rack Total", worksheet.Cells[13, 12].Value);
+				Assert.AreEqual("Headlamp", worksheet.Cells[13, 13].Value);
+				Assert.AreEqual("Chicago", worksheet.Cells[14, 13].Value);
+				Assert.AreEqual("Headlamp Total", worksheet.Cells[13, 14].Value);
+				Assert.AreEqual("March Total", worksheet.Cells[12, 15].Value);
+				Assert.AreEqual("Grand Total", worksheet.Cells[12, 16].Value);
 			}
 		}
 		#endregion
