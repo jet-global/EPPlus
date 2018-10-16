@@ -29,6 +29,9 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
+	/// <summary>
+	/// Implements the Excel MATCH function.
+	/// </summary>
 	public class Match : LookupFunction
 	{
 		#region LookupFunction Members
@@ -59,24 +62,25 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var searchedValue = arguments.ElementAt(0).Value;
-			var address = arguments.ElementAt(1).ValueAsRangeInfo?.Address.Address;
-			var rangeAddressFactory = new RangeAddressFactory(context.ExcelDataProvider);
-			var rangeAddress = rangeAddressFactory.Create(address);
+			
+			if (!this.TryGetSearchValue(arguments.ElementAt(0), context, out var searchValue, out var error))
+				return error;
+
+			var lookupRange = arguments.ElementAt(1).ValueAsRangeInfo;
 			var matchType = this.GetMatchType(arguments);
-			var args = new LookupArguments(searchedValue, address, 0, 0, false, arguments.ElementAt(1).ValueAsRangeInfo);
-			var lookupDirection = this.GetLookupDirection(rangeAddress);
+			var args = new LookupArguments(searchValue, lookupRange.Address.Address, 0, 0, false, lookupRange);
+			var lookupDirection = this.GetLookupDirection(lookupRange.Address);
 			var navigator = LookupNavigatorFactory.Create(lookupDirection, args, context);
 			int? lastValidIndex = null;
 			do
 			{
-				if (navigator.CurrentValue == null && searchedValue == null)
+				if (navigator.CurrentValue == null && searchValue == null)
 					return this.CreateResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
 				int? matchResult;
 				if (matchType == MatchType.ExactMatch)
-					matchResult = new WildCardValueMatcher().IsMatch(searchedValue, navigator.CurrentValue);
+					matchResult = new WildCardValueMatcher().IsMatch(searchValue, navigator.CurrentValue);
 				else
-					matchResult = new LookupValueMatcher().IsMatch(searchedValue, navigator.CurrentValue);
+					matchResult = new LookupValueMatcher().IsMatch(searchValue, navigator.CurrentValue);
 				// For all match types, if the match result indicated equality, return the index (1 based)
 				if (matchResult == 0)
 					return this.CreateResult(navigator.Index + 1, DataType.Integer);
@@ -100,6 +104,39 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			if (arguments.Count() > 2)
 				matchType = (MatchType)this.ArgToInt(arguments, 2);
 			return matchType;
+		}
+
+		private bool TryGetSearchValue(FunctionArgument argument, ParsingContext context, out object searchValue, out CompileResult error)
+		{
+			searchValue = null;
+			error = null;
+			if (argument.Value is ExcelDataProvider.IRangeInfo rangeInfo)
+			{
+				// If the first argument is a range, we take the value in the range that is perpendicular to the function.
+				// If the lookup range and MATCH function are not perpendicular, #NA is returned. 
+				var rangeInfoValue = argument.ValueAsRangeInfo;
+				var addr = rangeInfoValue?.Address;
+				// The lookup range must be one-dimensional.
+				if (addr._fromCol != addr._toCol && addr._fromRow != addr._toRow)
+				{
+					error = new CompileResult(eErrorType.Value);
+					return false;
+				}
+				var direction = this.GetLookupDirection(addr);
+				var functionLocation = context.Scopes.Current.Address;
+				if (direction == LookupDirection.Vertical && addr._fromRow <= functionLocation.FromRow && functionLocation.FromRow <= addr._toRow)
+					searchValue = rangeInfoValue.GetValue(functionLocation.FromRow, addr._fromCol);
+				else if (direction == LookupDirection.Horizontal && addr._fromCol <= functionLocation.FromCol && functionLocation.FromCol <= addr._toCol)
+					searchValue = rangeInfoValue.GetValue(addr._fromRow, functionLocation.FromCol);
+				else
+				{
+					error = new CompileResult(eErrorType.NA);
+					return false;
+				}
+			}
+			else
+				searchValue = argument.Value;
+			return true;
 		}
 		#endregion
 	}

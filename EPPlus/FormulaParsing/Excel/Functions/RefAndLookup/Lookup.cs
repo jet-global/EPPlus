@@ -22,6 +22,7 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
@@ -88,24 +89,23 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		private CompileResult HandleTwoRanges(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			var searchedValue = arguments.ElementAt(0).Value;
-			Require.That(arguments.ElementAt(1).Value).Named("firstAddress").IsNotNull();
-			Require.That(arguments.ElementAt(2).Value).Named("secondAddress").IsNotNull();
-			var firstAddress = arguments.ElementAt(1).ValueAsRangeInfo?.Address.Address;
-			var secondAddress = arguments.ElementAt(2).ValueAsRangeInfo?.Address.Address;
-			var rangeAddressFactory = new RangeAddressFactory(context.ExcelDataProvider);
-			var address1 = rangeAddressFactory.Create(firstAddress);
-			var address2 = rangeAddressFactory.Create(secondAddress);
-			var lookupIndex = (address2.FromCol - address1.FromCol) + 1;
-			var lookupOffset = address2.FromRow - address1.FromRow;
-			var lookupDirection = GetLookupDirection(address1);
+			var firstAddress = arguments.ElementAt(1)?.ValueAsRangeInfo?.Address;
+			var secondAddress = arguments.ElementAt(2)?.ValueAsRangeInfo?.Address;
+			if (firstAddress == null)
+				throw new ArgumentNullException("firstAddress");
+			if (secondAddress == null)
+				throw new ArgumentNullException("secondAddress");
+			var lookupIndex = (secondAddress._fromCol - firstAddress._fromCol) + 1;
+			var lookupOffset = secondAddress._fromRow - firstAddress._fromRow;
+			var lookupDirection = base.GetLookupDirection(firstAddress);
 			if (lookupDirection == LookupDirection.Horizontal)
 			{
-				lookupIndex = (address2.FromRow - address1.FromRow) + 1;
-				lookupOffset = address2.FromCol - address1.FromCol;
+				lookupIndex = (secondAddress._fromRow - firstAddress._fromRow) + 1;
+				lookupOffset = secondAddress._fromCol - firstAddress._fromCol;
 			}
-			var lookupArgs = new LookupArguments(searchedValue, firstAddress, lookupIndex, lookupOffset, true, arguments.ElementAt(1).ValueAsRangeInfo);
+			var lookupArgs = new LookupArguments(searchedValue, firstAddress.Address, lookupIndex, lookupOffset, true, arguments.ElementAt(1).ValueAsRangeInfo);
 			var navigator = LookupNavigatorFactory.Create(lookupDirection, lookupArgs, context);
-			return Lookup(navigator, lookupArgs, new LookupValueMatcher());
+			return base.Lookup(navigator, lookupArgs, new LookupValueMatcher());
 		}
 		#endregion
 	}
