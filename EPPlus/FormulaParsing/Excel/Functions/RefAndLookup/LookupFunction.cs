@@ -42,10 +42,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		#endregion
 
 		#region Protected Methods
-		protected LookupDirection GetLookupDirection(RangeAddress rangeAddress)
+		protected LookupDirection GetLookupDirection(ExcelAddress address)
 		{
-			var nRows = rangeAddress.ToRow - rangeAddress.FromRow;
-			var nCols = rangeAddress.ToCol - rangeAddress.FromCol;
+			var nRows = address._toRow - address._fromRow;
+			var nCols = address._toCol - address._fromCol;
 			return nCols > nRows ? LookupDirection.Horizontal : LookupDirection.Vertical;
 		}
 
