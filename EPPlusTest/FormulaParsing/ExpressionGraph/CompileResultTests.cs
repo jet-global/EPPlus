@@ -63,7 +63,7 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 			var currentCulture = Thread.CurrentThread.CurrentCulture;
 			try
 			{
-				// ambiguous Date
+				// Ambiguous Date
 				// In German, the "." is both the date seperator and the number group seperator.
 				Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
 				// 1.1 should compile to the OADate of january first.
@@ -71,7 +71,7 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 				Assert.IsTrue(compileResult.IsNumericOrDateString);
 				Assert.AreEqual(new DateTime(DateTime.Today.Year, 1, 1).ToOADate(), compileResult.ResultNumeric);
 
-				// Ambiguos Number
+				// Ambiguous Number
 				// In English, 1.1 parses to both a date and a number but should be a number.
 				Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 				compileResult = new CompileResult("1.1", DataType.String);
