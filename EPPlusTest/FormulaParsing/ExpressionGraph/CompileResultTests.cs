@@ -63,7 +63,7 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 			var currentCulture = Thread.CurrentThread.CurrentCulture;
 			try
 			{
-				// Ambiguos Date
+				// ambiguous Date
 				// In German, the "." is both the date seperator and the number group seperator.
 				Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
 				// 1.1 should compile to the OADate of january first.
