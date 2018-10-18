@@ -60,20 +60,28 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 			Assert.IsTrue(compileResult.IsNumericOrDateString);
 			Assert.AreEqual(43394, compileResult.ResultNumeric);
 
-			// Ambiguos Date
-			// In German, the "." is both the date seperator and the number group seperator.
-			Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
-			// 1.1 should compile to the OADate of january first.
-			compileResult = new CompileResult("1.1", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(new DateTime(DateTime.Today.Year, 1, 1).ToOADate(), compileResult.ResultNumeric);
+			var currentCulture = Thread.CurrentThread.CurrentCulture;
+			try
+			{
+				// Ambiguos Date
+				// In German, the "." is both the date seperator and the number group seperator.
+				Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
+				// 1.1 should compile to the OADate of january first.
+				compileResult = new CompileResult("1.1", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(new DateTime(DateTime.Today.Year, 1, 1).ToOADate(), compileResult.ResultNumeric);
 
-			// Ambiguos Number
-			// In English, 1.1 parses to both a date and a number but should be a number.
-			Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-			compileResult = new CompileResult("1.1", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(1.1d, compileResult.ResultNumeric);
+				// Ambiguos Number
+				// In English, 1.1 parses to both a date and a number but should be a number.
+				Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+				compileResult = new CompileResult("1.1", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(1.1d, compileResult.ResultNumeric);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
 		}
 
 		[TestMethod]
@@ -125,57 +133,65 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 			Assert.IsTrue(compileResult.IsNumericOrDateString);
 			Assert.AreEqual(-122345d, compileResult.ResultNumeric);
 
-			Thread.CurrentThread.CurrentCulture = new TestCulture("en-US", new NumberFormatInfo { NumberGroupSizes = new int[4] { 2, 3, 4, 0 }, NumberGroupSeparator = "*" });
-			compileResult = new CompileResult("1", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(1d, compileResult.ResultNumeric);
-			compileResult = new CompileResult("12", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(12d, compileResult.ResultNumeric);
-			compileResult = new CompileResult("123", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(123d, compileResult.ResultNumeric);
-			compileResult = new CompileResult("1*23", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(123d, compileResult.ResultNumeric);
-			compileResult = new CompileResult("123*23", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(12323d, compileResult.ResultNumeric);
-			compileResult = new CompileResult("6*123*23", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(612323d, compileResult.ResultNumeric);
-			compileResult = new CompileResult("9876*123*23", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(987612323d, compileResult.ResultNumeric);
-			compileResult = new CompileResult("9*9876*123*23", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(9987612323d, compileResult.ResultNumeric);
-			compileResult = new CompileResult("1231239*9876*123*23", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(1231239987612323d, compileResult.ResultNumeric);
+			var currentCulture = Thread.CurrentThread.CurrentCulture;
+			try
+			{
+				Thread.CurrentThread.CurrentCulture = new TestCulture("en-US", new NumberFormatInfo { NumberGroupSizes = new int[4] { 2, 3, 4, 0 }, NumberGroupSeparator = "*" });
+				compileResult = new CompileResult("1", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(1d, compileResult.ResultNumeric);
+				compileResult = new CompileResult("12", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(12d, compileResult.ResultNumeric);
+				compileResult = new CompileResult("123", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(123d, compileResult.ResultNumeric);
+				compileResult = new CompileResult("1*23", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(123d, compileResult.ResultNumeric);
+				compileResult = new CompileResult("123*23", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(12323d, compileResult.ResultNumeric);
+				compileResult = new CompileResult("6*123*23", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(612323d, compileResult.ResultNumeric);
+				compileResult = new CompileResult("9876*123*23", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(987612323d, compileResult.ResultNumeric);
+				compileResult = new CompileResult("9*9876*123*23", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(9987612323d, compileResult.ResultNumeric);
+				compileResult = new CompileResult("1231239*9876*123*23", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(1231239987612323d, compileResult.ResultNumeric);
 
-			Thread.CurrentThread.CurrentCulture = new TestCulture("en-US", new NumberFormatInfo { NumberGroupSizes = new int[2] { 2, 3, }, NumberGroupSeparator = "*", NumberDecimalSeparator = "#", NegativeSign = "_" });
-			compileResult = new CompileResult("_123*23#23", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(-12323.23d, compileResult.ResultNumeric);
-			compileResult = new CompileResult("6*123*23#", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(612323d, compileResult.ResultNumeric);
-			compileResult = new CompileResult("126*123*23#8989", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(12612323.8989d, compileResult.ResultNumeric);
+				Thread.CurrentThread.CurrentCulture = new TestCulture("en-US", new NumberFormatInfo { NumberGroupSizes = new int[2] { 2, 3, }, NumberGroupSeparator = "*", NumberDecimalSeparator = "#", NegativeSign = "_" });
+				compileResult = new CompileResult("_123*23#23", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(-12323.23d, compileResult.ResultNumeric);
+				compileResult = new CompileResult("6*123*23#", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(612323d, compileResult.ResultNumeric);
+				compileResult = new CompileResult("126*123*23#8989", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(12612323.8989d, compileResult.ResultNumeric);
 
-			Thread.CurrentThread.CurrentCulture = new TestCulture("en-US", new NumberFormatInfo { NumberGroupSizes = new int[0] });
-			compileResult = new CompileResult("2345", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(2345d, compileResult.ResultNumeric);
+				Thread.CurrentThread.CurrentCulture = new TestCulture("en-US", new NumberFormatInfo { NumberGroupSizes = new int[0] });
+				compileResult = new CompileResult("2345", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(2345d, compileResult.ResultNumeric);
 
-			// In German, the "." is both the date seperator and the number group seperator.
-			Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
-			// So 1.1 is january first and should compile to the OADate.
-			compileResult = new CompileResult("1.1", DataType.String);
-			Assert.IsTrue(compileResult.IsNumericOrDateString);
-			Assert.AreEqual(new DateTime(DateTime.Today.Year, 1, 1).ToOADate(), compileResult.ResultNumeric);
+				// In German, the "." is both the date seperator and the number group seperator.
+				Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
+				// So 1.1 is january first and should compile to the OADate.
+				compileResult = new CompileResult("1.1", DataType.String);
+				Assert.IsTrue(compileResult.IsNumericOrDateString);
+				Assert.AreEqual(new DateTime(DateTime.Today.Year, 1, 1).ToOADate(), compileResult.ResultNumeric);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentCulture = currentCulture;
+			}
 		}
 		#endregion
 
