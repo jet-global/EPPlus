@@ -29,37 +29,58 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
+	/// <summary>
+	/// Implements the Excel MATCH function.
+	/// </summary>
 	public class Match : LookupFunction
 	{
+		#region LookupFunction Members
+		/// <summary>
+		/// Gets a value representing the indicies of the arguments to the lookup function that
+		/// should be compiled as ExcelAddresses instead of being evaluated.
+		/// </summary>
+		public override List<int> LookupArgumentIndicies { get; } = new List<int> { 1 };
+		#endregion
+
+		#region Enums
 		private enum MatchType
 		{
 			ClosestAbove = -1,
 			ExactMatch = 0,
 			ClosestBelow = 1
 		}
+		#endregion
 
+		#region ExcelFunction Overrides
+		/// <summary>
+		/// Executes the function with the specified <paramref name="arguments"/> in the specified <paramref name="context"/>.
+		/// </summary>
+		/// <param name="arguments">The arguments with which to evaluate the function.</param>
+		/// <param name="context">The context in which to evaluate the function.</param>
+		/// <returns>An address range <see cref="CompileResult"/> if successful, otherwise an error result.</returns> 
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var searchedValue = arguments.ElementAt(0).Value;
-			var address = arguments.ElementAt(1).ValueAsRangeInfo?.Address.Address;
-			var rangeAddressFactory = new RangeAddressFactory(context.ExcelDataProvider);
-			var rangeAddress = rangeAddressFactory.Create(address);
+			
+			if (!this.TryGetSearchValue(arguments.ElementAt(0), context, out var searchValue, out var error))
+				return error;
+
+			var lookupRange = arguments.ElementAt(1).ValueAsRangeInfo;
 			var matchType = this.GetMatchType(arguments);
-			var args = new LookupArguments(searchedValue, address, 0, 0, false, arguments.ElementAt(1).ValueAsRangeInfo);
-			var lookupDirection = this.GetLookupDirection(rangeAddress);
+			var args = new LookupArguments(searchValue, lookupRange.Address.Address, 0, 0, false, lookupRange);
+			var lookupDirection = this.GetLookupDirection(lookupRange.Address);
 			var navigator = LookupNavigatorFactory.Create(lookupDirection, args, context);
 			int? lastValidIndex = null;
 			do
 			{
-				if (navigator.CurrentValue == null && searchedValue == null)
+				if (navigator.CurrentValue == null && searchValue == null)
 					return this.CreateResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
-				int matchResult;
+				int? matchResult;
 				if (matchType == MatchType.ExactMatch)
-					matchResult = new WildCardValueMatcher().IsMatch(searchedValue, navigator.CurrentValue);
+					matchResult = new WildCardValueMatcher().IsMatch(searchValue, navigator.CurrentValue);
 				else
-					matchResult = new LookupValueMatcher().IsMatch(searchedValue, navigator.CurrentValue);
+					matchResult = new LookupValueMatcher().IsMatch(searchValue, navigator.CurrentValue);
 				// For all match types, if the match result indicated equality, return the index (1 based)
 				if (matchResult == 0)
 					return this.CreateResult(navigator.Index + 1, DataType.Integer);
@@ -74,7 +95,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				return this.CreateResult(ExcelErrorValue.Create(eErrorType.NA), DataType.ExcelError);
 			return this.CreateResult(lastValidIndex, DataType.Integer);
 		}
+		#endregion
 
+		#region Private Methods
 		private MatchType GetMatchType(IEnumerable<FunctionArgument> arguments)
 		{
 			var matchType = MatchType.ClosestBelow;
@@ -82,5 +105,39 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 				matchType = (MatchType)this.ArgToInt(arguments, 2);
 			return matchType;
 		}
+
+		private bool TryGetSearchValue(FunctionArgument argument, ParsingContext context, out object searchValue, out CompileResult error)
+		{
+			searchValue = null;
+			error = null;
+			if (argument.Value is ExcelDataProvider.IRangeInfo rangeInfo)
+			{
+				// If the first argument is a range, we take the value in the range that is perpendicular to the function.
+				// If the lookup range and MATCH function are not perpendicular, #NA is returned. 
+				var rangeInfoValue = argument.ValueAsRangeInfo;
+				var addr = rangeInfoValue?.Address;
+				// The lookup range must be one-dimensional.
+				if (addr._fromCol != addr._toCol && addr._fromRow != addr._toRow)
+				{
+					error = new CompileResult(eErrorType.Value);
+					return false;
+				}
+				var direction = this.GetLookupDirection(addr);
+				var functionLocation = context.Scopes.Current.Address;
+				if (direction == LookupDirection.Vertical && addr._fromRow <= functionLocation.FromRow && functionLocation.FromRow <= addr._toRow)
+					searchValue = rangeInfoValue.GetValue(functionLocation.FromRow, addr._fromCol);
+				else if (direction == LookupDirection.Horizontal && addr._fromCol <= functionLocation.FromCol && functionLocation.FromCol <= addr._toCol)
+					searchValue = rangeInfoValue.GetValue(addr._fromRow, functionLocation.FromCol);
+				else
+				{
+					error = new CompileResult(eErrorType.NA);
+					return false;
+				}
+			}
+			else
+				searchValue = argument.Value;
+			return true;
+		}
+		#endregion
 	}
 }

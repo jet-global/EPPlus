@@ -22,7 +22,6 @@
  *******************************************************************************
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
@@ -35,6 +34,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 	/// </summary>
 	public class Column : LookupFunction
 	{
+		#region LookupFunction Members
+		/// <summary>
+		/// Gets a value representing the indicies of the arguments to the lookup function that
+		/// should be compiled as ExcelAddresses instead of being evaluated.
+		/// </summary>
+		public override List<int> LookupArgumentIndicies { get; } = new List<int> { 0 };
+		#endregion
+
 		#region Public ExcelFunction overrides
 		/// <summary>
 		/// Calculates the column of either the given range or the column that the function is executed in.
