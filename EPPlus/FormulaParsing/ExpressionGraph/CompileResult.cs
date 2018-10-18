@@ -29,6 +29,7 @@
  * Mats Alm   		                Added       		        2013-03-01 (Prior file history on https://github.com/swmal/ExcelFormulaParser)
  *******************************************************************************/
 using System;
+using System.Globalization;
 using System.Linq;
 using OfficeOpenXml.Utils;
 
@@ -94,7 +95,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 					}
 					// The IsNumericString and IsDateString properties will set _ResultNumeric for efficiency so we just need
 					// to check them here.
-					else if (!this.IsNumericString && !this.IsDateString)
+					else if (!this.IsNumericOrDateString)
 						myResultNumeric = 0;
 				}
 				return myResultNumeric.Value;
@@ -123,37 +124,39 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 		}
 
 		/// <summary>
-		/// Gets the result of the <see cref="CompileResult"/> as a numeric string.
+		/// Gets a value determining if this <see cref="CompileResult"/> is a string that can parse to a number or date.
 		/// </summary>
-		public bool IsNumericString
+		public bool IsNumericOrDateString
 		{
 			get
 			{
-				if (this.DataType == DataType.String && ConvertUtil.TryParseNumericString(this.Result, out var result))
+				if (this.DataType == DataType.String)
 				{
-					myResultNumeric = result;
-					return true;
+					bool isNumber = ConvertUtil.TryParseNumericString(this.Result, out var doubleResult);
+					bool isDate = ConvertUtil.TryParseDateString(this.Result, out var dateResult);
+					if (isNumber)
+					{
+						// If we parse to a number and not a date then we're a number.
+						if (!isDate)
+							myResultNumeric = doubleResult;
+						// If we parse as both a number and a date then we need to validate number group sizes
+						else if (ConvertUtil.ValidateNumberGroupSizes(this.Result.ToString(), CultureInfo.CurrentCulture.NumberFormat))
+							myResultNumeric = doubleResult;
+						// If number group sizes are incorrect then we are a date.
+						else
+							myResultNumeric = dateResult.ToOADate();
+						return true;
+					}
+					else if (isDate)
+					{
+						myResultNumeric = dateResult.ToOADate();
+						return true;
+					}
 				}
 				return false;
 			}
 		}
-
-		/// <summary>
-		/// Gets a value indicating whether the <see cref="CompileResult"/> is a date string.
-		/// </summary>
-		public bool IsDateString
-		{
-			get
-			{
-				if (this.DataType == DataType.String && !this.IsNumericString && ConvertUtil.TryParseDateString(this.Result, out var result))
-				{
-					myResultNumeric = result.ToOADate();
-					return true;
-				}
-				return false;
-			}
-		}
-
+		
 		/// <summary>
 		/// Gets or sets a value indicating whether the <see cref="CompileResult"/> is a result of a subtotal.
 		/// </summary>

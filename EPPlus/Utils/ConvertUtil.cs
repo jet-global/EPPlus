@@ -37,6 +37,7 @@ namespace OfficeOpenXml.Utils
 	/// </summary>
 	public static class ConvertUtil
 	{
+		#region Static Methods
 		internal static bool IsNumeric(object candidate, bool ignoreBool = false)
 		{
 			if (candidate == null)
@@ -45,6 +46,7 @@ namespace OfficeOpenXml.Utils
 				return false;
 			return (candidate.GetType().IsPrimitive || candidate is double || candidate is decimal || candidate is long || candidate is DateTime || candidate is TimeSpan);
 		}
+
 		/// <summary>
 		/// Tries to parse a double from the specified <paramref name="candidate"/> which is expected to be a string value.
 		/// </summary>
@@ -60,8 +62,7 @@ namespace OfficeOpenXml.Utils
 				// for locales outside the United States.
 				var style = NumberStyles.Float | NumberStyles.AllowThousands;
 				var candidateString = candidate.ToString();
-				return double.TryParse(candidateString, style, CultureInfo.CurrentCulture, out result)
-					&& ConvertUtil.ValidateNumberGroupSizes(candidateString, CultureInfo.CurrentCulture.NumberFormat);
+				return double.TryParse(candidateString, style, CultureInfo.CurrentCulture, out result);
 			}
 			result = 0;
 			return false;
@@ -388,14 +389,16 @@ namespace OfficeOpenXml.Utils
 			return ret.ToString();
 		}
 
-		#region internal cache objects
-		internal static TextInfo _invariantTextInfo = CultureInfo.InvariantCulture.TextInfo;
-		internal static CompareInfo _invariantCompareInfo = CompareInfo.GetCompareInfo(CultureInfo.InvariantCulture.LCID);
-		#endregion
-
-		#region Private Static Methods
-		private static bool ValidateNumberGroupSizes(string candidate, NumberFormatInfo info)
+		/// <summary>
+		/// Assumes the candidate string can be parsed to a number and validates the number groups sizes. 
+		/// </summary>
+		/// <param name="candidate">The string to be validated.</param>
+		/// <param name="info">The <see cref="NumberFormatInfo"/> of the current culture.</param>
+		/// <returns>True if the number group sizes are valid, otherwise false.</returns>
+		internal static bool ValidateNumberGroupSizes(string candidate, NumberFormatInfo info)
 		{
+			if (candidate == null)
+				return false;
 			if (!candidate.Contains(info.NumberGroupSeparator))
 				return true;
 			if (!info.NumberGroupSizes.Any())
@@ -419,14 +422,24 @@ namespace OfficeOpenXml.Utils
 				if (i < info.NumberGroupSizes.Count())
 					expectedGroupCount = info.NumberGroupSizes.ElementAt(i);
 				// The last group can have fewer than the expected count.
-				// An expected count of 0 indicates no limit on group size.
 				if (i + 1 == groups.Count())
-					return expectedGroupCount == 0 || groups.Last().Count() <= expectedGroupCount;
+				{
+				// An expected count of 0 indicates no limit on group size.
+					if (expectedGroupCount == 0)
+						return true;
+					var lastGroupCount = groups.Last().Count();
+					return 0 < lastGroupCount && lastGroupCount <= expectedGroupCount;
+				}
 				if (expectedGroupCount != 0 && expectedGroupCount != group.Count())
 					return false;
 			}
 			return true;
 		}
+		#endregion
+
+		#region internal cache objects
+		internal static TextInfo _invariantTextInfo = CultureInfo.InvariantCulture.TextInfo;
+		internal static CompareInfo _invariantCompareInfo = CompareInfo.GetCompareInfo(CultureInfo.InvariantCulture.LCID);
 		#endregion
 	}
 }

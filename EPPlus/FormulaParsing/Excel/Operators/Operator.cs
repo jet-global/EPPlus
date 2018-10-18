@@ -342,8 +342,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Operators
 
 		private static bool IsNumericType(CompileResult result)
 		{
-			return result.IsNumeric || result.IsDateString 
-				|| result.IsNumericString || result.Result is ExcelDataProvider.IRangeInfo;
+			return result.IsNumeric || result.IsNumericOrDateString || result.Result is ExcelDataProvider.IRangeInfo;
 		}
 
 		private static CompileResult GetObjectWithDefaultValueThatMatchesTheOtherObjectType(CompileResult target, CompileResult other)
