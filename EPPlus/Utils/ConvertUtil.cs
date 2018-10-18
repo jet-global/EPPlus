@@ -61,8 +61,7 @@ namespace OfficeOpenXml.Utils
 				// This may not always be true, but it is a better assumption than assuming it is always in the invariant culture, which will probably never be true
 				// for locales outside the United States.
 				var style = NumberStyles.Float | NumberStyles.AllowThousands;
-				var candidateString = candidate.ToString();
-				return double.TryParse(candidateString, style, CultureInfo.CurrentCulture, out result);
+				return double.TryParse(candidate.ToString(), style, CultureInfo.CurrentCulture, out result);
 			}
 			result = 0;
 			return false;

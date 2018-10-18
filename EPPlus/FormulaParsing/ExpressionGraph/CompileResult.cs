@@ -139,7 +139,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 						// If we parse to a number and not a date then we're a number.
 						if (!isDate)
 							myResultNumeric = doubleResult;
-						// If we parse as both a number and a date then we need to validate number group sizes
+						// If we parse as both a number and a date then we need to validate number group sizes.
 						else if (ConvertUtil.ValidateNumberGroupSizes(this.Result.ToString(), CultureInfo.CurrentCulture.NumberFormat))
 							myResultNumeric = doubleResult;
 						// If number group sizes are incorrect then we are a date.
@@ -156,7 +156,7 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 				return false;
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets a value indicating whether the <see cref="CompileResult"/> is a result of a subtotal.
 		/// </summary>
