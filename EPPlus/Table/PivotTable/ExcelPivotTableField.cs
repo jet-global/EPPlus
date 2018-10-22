@@ -204,7 +204,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Properties
 		/// <summary>
-		/// Gets or sets the x attribute index of the field.
+		/// Gets or sets the index of the field.
 		/// </summary>
 		public int Index { get; set; }
 		

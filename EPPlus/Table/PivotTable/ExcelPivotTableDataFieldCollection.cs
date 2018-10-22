@@ -51,10 +51,10 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Public Methods
 		/// <summary>
-		/// Add a new data field.
+		/// Add a new data field to this collection.
 		/// </summary>
-		/// <param name="field">The field being added.</param>
-		/// <returns>The new data field.</returns>
+		/// <param name="field">The <see cref="ExcelPivotTableField"/> being added.</param>
+		/// <returns>The added field.</returns>
 		public ExcelPivotTableDataField Add(ExcelPivotTableField field)
 		{
 			var dataFieldsNode = field.TopNode.SelectSingleNode("../../d:dataFields", field.NameSpaceManager);
@@ -112,7 +112,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		protected override List<ExcelPivotTableDataField> LoadItems()
 		{
 			var collection = new List<ExcelPivotTableDataField>();
-			foreach (XmlElement dataElem in base.TopNode.SelectNodes("dataField", base.NameSpaceManager))
+			foreach (XmlElement dataElem in base.TopNode.SelectNodes("d:dataField", base.NameSpaceManager))
 			{
 				if (int.TryParse(dataElem.GetAttribute("fld"), out var fld) && fld >= 0)
 				{
