@@ -132,11 +132,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="repeatedItemsCount">The value of the 'r' attribute.</param>
 		/// <param name="memberIndex">The value of the 'x' child node.</param>
 		/// <param name="itemType">The value of the 't' attribute.</param>
-		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, int repeatedItemsCount, int memberIndex, string itemType = null) : base(namespaceManager, null)
+		/// <param name="dataFieldIndex">The 'i' attribute value which points to a data field.</param>
+		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, int repeatedItemsCount, int memberIndex, string itemType = null, int dataFieldIndex = 0) : base(namespaceManager, null)
 		{
 			if (parentNode == null)
 				throw new ArgumentNullException(nameof(parentNode));
 			base.TopNode = parentNode.OwnerDocument.CreateElement("i", parentNode.NamespaceURI);
+			this.DataFieldIndex = dataFieldIndex;
 			if (repeatedItemsCount > 0)
 				this.RepeatedItemsCount = repeatedItemsCount;
 			var xNode = parentNode.OwnerDocument.CreateElement("x", base.TopNode.NamespaceURI);
@@ -158,13 +160,15 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="parentNode">The row/colItems xml node.</param>
 		/// <param name="memberIndices">The list of member property indices ('x' attributes).</param>
 		/// <param name="repeatedItemsCount">The 'x' attribute value.</param>
-		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, List<Tuple<int, int>> memberIndices, int repeatedItemsCount) : base(namespaceManager, null)
+		/// <param name="dataFieldIndex">The 'i' attribute value which points to a data field.</param>
+		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, List<Tuple<int, int>> memberIndices, int repeatedItemsCount, int dataFieldIndex) : base(namespaceManager, null)
 		{
 			if (parentNode == null)
 				throw new ArgumentNullException(nameof(parentNode));
 			if (memberIndices == null || memberIndices.Count == 0)
 				throw new ArgumentNullException(nameof(memberIndices));
 			base.TopNode = parentNode.OwnerDocument.CreateElement("i", parentNode.NamespaceURI);
+			this.DataFieldIndex = dataFieldIndex;
 			if (repeatedItemsCount > 0)
 				this.RepeatedItemsCount = repeatedItemsCount;
 			for (int i = 0; i < memberIndices.Count; i++)

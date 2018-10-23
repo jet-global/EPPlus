@@ -339,7 +339,7 @@ namespace EPPlusTest.Table.PivotTable
 			using (var package = new ExcelPackage(file))
 			{
 				var worksheet = package.Workbook.Worksheets.First();
-				var pivotTable = worksheet.PivotTables.First();
+				var pivotTable = worksheet.PivotTables["Sheet1PivotTable1"];
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 				cacheDefinition.SourceRange = worksheet.Cells["A1:G5"];
 				cacheDefinition.UpdateData();
@@ -387,7 +387,7 @@ namespace EPPlusTest.Table.PivotTable
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets.First();
-					var pivotTable = worksheet.PivotTables.First();
+					var pivotTable = worksheet.PivotTables["Sheet1PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					worksheet.DeleteRow(6);
 					cacheDefinition.SourceRange = worksheet.Cells["A1:G7"];
@@ -454,7 +454,7 @@ namespace EPPlusTest.Table.PivotTable
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets["RowItems"];
-					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					var pivotTable = worksheet.PivotTables["RowItemsPivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
@@ -498,12 +498,12 @@ namespace EPPlusTest.Table.PivotTable
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets["RowItems"];
-					var pivotTable = worksheet.PivotTables[1];
+					var pivotTable = worksheet.PivotTables["RowItemsPivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
 					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
@@ -528,15 +528,15 @@ namespace EPPlusTest.Table.PivotTable
 					new ExpectedCellValue(sheetName, 8, 6, "Car Rack"),
 					new ExpectedCellValue(sheetName, 9, 6, "Headlamp"),
 					new ExpectedCellValue(sheetName, 10, 6, "Grand Total"),
-					new ExpectedCellValue(sheetName, 2, 7, "2078.75"),
-					new ExpectedCellValue(sheetName, 3, 7, "2078.75"),
-					new ExpectedCellValue(sheetName, 4, 7, "1293"),
-					new ExpectedCellValue(sheetName, 5, 7, "99"),
-					new ExpectedCellValue(sheetName, 6, 7, "1194"),
-					new ExpectedCellValue(sheetName, 7, 7, "856.49"),
-					new ExpectedCellValue(sheetName, 8, 7, "831.5"),
-					new ExpectedCellValue(sheetName, 9, 7, "24.99"),
-					new ExpectedCellValue(sheetName, 10, 7, "4228.24")
+					new ExpectedCellValue(sheetName, 2, 7, 2078.75),
+					new ExpectedCellValue(sheetName, 3, 7, 2078.75),
+					new ExpectedCellValue(sheetName, 4, 7, 1293d),
+					new ExpectedCellValue(sheetName, 5, 7, 99d),
+					new ExpectedCellValue(sheetName, 6, 7, 1194d),
+					new ExpectedCellValue(sheetName, 7, 7, 856.49),
+					new ExpectedCellValue(sheetName, 8, 7, 831.5),
+					new ExpectedCellValue(sheetName, 9, 7, 24.99),
+					new ExpectedCellValue(sheetName, 10, 7, 4228.24)
 				});
 			}
 		}
@@ -552,7 +552,11 @@ namespace EPPlusTest.Table.PivotTable
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets["RowItems"];
-					var pivotTable = worksheet.PivotTables["PivotTable6"];
+					var pivotTable = worksheet.PivotTables["RowItemsPivotTable2"];
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalTop = false;
+					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
@@ -568,32 +572,33 @@ namespace EPPlusTest.Table.PivotTable
 						if (field.Items.Count > 0)
 							this.CheckFieldItems(field);
 					}
+					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\ThreeRowFields_FalseSubtotalTop.xlsx"));
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "RowItems";
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
 				{
-					new ExpectedCellValue(sheetName, 27, 6, "January"),
-					new ExpectedCellValue(sheetName, 28, 6, "Car Rack"),
-					new ExpectedCellValue(sheetName, 29, 6, "January Total"),
-					new ExpectedCellValue(sheetName, 30, 6, "February"),
-					new ExpectedCellValue(sheetName, 31, 6, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 32, 6, "Tent"),
-					new ExpectedCellValue(sheetName, 33, 6, "February Total"),
-					new ExpectedCellValue(sheetName, 34, 6, "March"),
-					new ExpectedCellValue(sheetName, 35, 6, "Car Rack"),
-					new ExpectedCellValue(sheetName, 36, 6, "Headlamp"),
-					new ExpectedCellValue(sheetName, 37, 6, "March Total"),
-					new ExpectedCellValue(sheetName, 38, 6, "Grand Total"),
-					new ExpectedCellValue(sheetName, 28, 7, "2078.75"),
-					new ExpectedCellValue(sheetName, 29, 7, "2078.75"),
-					new ExpectedCellValue(sheetName, 31, 7, "99"),
-					new ExpectedCellValue(sheetName, 32, 7, "1194"),
-					new ExpectedCellValue(sheetName, 33, 7, "1293"),
-					new ExpectedCellValue(sheetName, 35, 7, "831.5"),
-					new ExpectedCellValue(sheetName, 36, 7, "24.99"),
-					new ExpectedCellValue(sheetName, 37, 7, "856.49"),
-					new ExpectedCellValue(sheetName, 38, 7, "4228.24")
+					new ExpectedCellValue(sheetName, 2, 6, "January"),
+					new ExpectedCellValue(sheetName, 3, 6, "Car Rack"),
+					new ExpectedCellValue(sheetName, 4, 6, "January Total"),
+					new ExpectedCellValue(sheetName, 5, 6, "February"),
+					new ExpectedCellValue(sheetName, 6, 6, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 7, 6, "Tent"),
+					new ExpectedCellValue(sheetName, 8, 6, "February Total"),
+					new ExpectedCellValue(sheetName, 9, 6, "March"),
+					new ExpectedCellValue(sheetName, 10, 6, "Car Rack"),
+					new ExpectedCellValue(sheetName, 11, 6, "Headlamp"),
+					new ExpectedCellValue(sheetName, 12, 6, "March Total"),
+					new ExpectedCellValue(sheetName, 13, 6, "Grand Total"),
+					new ExpectedCellValue(sheetName, 3, 7, 2078.75),
+					new ExpectedCellValue(sheetName, 4, 7, 2078.75),
+					new ExpectedCellValue(sheetName, 6, 7, 99d),
+					new ExpectedCellValue(sheetName, 7, 7, 1194d),
+					new ExpectedCellValue(sheetName, 8, 7, 1293d),
+					new ExpectedCellValue(sheetName, 10, 7, 831.5),
+					new ExpectedCellValue(sheetName, 11, 7, 24.99),
+					new ExpectedCellValue(sheetName, 12, 7, 856.49),
+					new ExpectedCellValue(sheetName, 13, 7, 4228.24)
 				});
 			}
 		}
@@ -609,7 +614,7 @@ namespace EPPlusTest.Table.PivotTable
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets["RowItems"];
-					var pivotTable = worksheet.PivotTables["PivotTable8"];
+					var pivotTable = worksheet.PivotTables["RowItemsPivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
@@ -639,12 +644,12 @@ namespace EPPlusTest.Table.PivotTable
 					new ExpectedCellValue(sheetName, 33, 1, "Car Rack"),
 					new ExpectedCellValue(sheetName, 34, 1, "Headlamp"),
 					new ExpectedCellValue(sheetName, 35, 1, "Grand Total"),
-					new ExpectedCellValue(sheetName, 28, 2, "2078.75"),
-					new ExpectedCellValue(sheetName, 30, 2, "99"),
-					new ExpectedCellValue(sheetName, 31, 2, "1194"),
-					new ExpectedCellValue(sheetName, 33, 2, "831.5"),
-					new ExpectedCellValue(sheetName, 34, 2, "24.99"),
-					new ExpectedCellValue(sheetName, 35, 2, "4228.24")
+					new ExpectedCellValue(sheetName, 28, 2, 2078.75),
+					new ExpectedCellValue(sheetName, 30, 2, 99d),
+					new ExpectedCellValue(sheetName, 31, 2, 1194d),
+					new ExpectedCellValue(sheetName, 33, 2, 831.5),
+					new ExpectedCellValue(sheetName, 34, 2, 24.99),
+					new ExpectedCellValue(sheetName, 35, 2, 4228.24)
 				});
 			}
 		}
@@ -660,7 +665,7 @@ namespace EPPlusTest.Table.PivotTable
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets["RowItems"];
-					var pivotTable = worksheet.PivotTables["PivotTable3"];
+					var pivotTable = worksheet.PivotTables["RowItemsPivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
@@ -697,22 +702,22 @@ namespace EPPlusTest.Table.PivotTable
 					new ExpectedCellValue(sheetName, 15, 12, "Headlamp"),
 					new ExpectedCellValue(sheetName, 16, 12, "Chicago"),
 					new ExpectedCellValue(sheetName, 17, 12, "Grand Total"),
-					new ExpectedCellValue(sheetName, 2, 13, "2078.75"),
-					new ExpectedCellValue(sheetName, 3, 13, "2078.75"),
-					new ExpectedCellValue(sheetName, 4, 13, "415.75"),
-					new ExpectedCellValue(sheetName, 5, 13, "831.5"),
-					new ExpectedCellValue(sheetName, 6, 13, "831.5"),
-					new ExpectedCellValue(sheetName, 7, 13, "1293"),
-					new ExpectedCellValue(sheetName, 8, 13, "99"),
-					new ExpectedCellValue(sheetName, 9, 13, "99"),
-					new ExpectedCellValue(sheetName, 10, 13, "1194"),
-					new ExpectedCellValue(sheetName, 11, 13, "1194"),
-					new ExpectedCellValue(sheetName, 12, 13, "856.49"),
-					new ExpectedCellValue(sheetName, 13, 13, "831.5"),
-					new ExpectedCellValue(sheetName, 14, 13, "831.5"),
-					new ExpectedCellValue(sheetName, 15, 13, "24.99"),
-					new ExpectedCellValue(sheetName, 16, 13, "24.99"),
-					new ExpectedCellValue(sheetName, 17, 13, "4228.24")
+					new ExpectedCellValue(sheetName, 2, 13, 2078.75),
+					new ExpectedCellValue(sheetName, 3, 13, 2078.75),
+					new ExpectedCellValue(sheetName, 4, 13, 415.75),
+					new ExpectedCellValue(sheetName, 5, 13, 831.5),
+					new ExpectedCellValue(sheetName, 6, 13, 831.5),
+					new ExpectedCellValue(sheetName, 7, 13, 1293d),
+					new ExpectedCellValue(sheetName, 8, 13, 99d),
+					new ExpectedCellValue(sheetName, 9, 13, 99d),
+					new ExpectedCellValue(sheetName, 10, 13, 1194d),
+					new ExpectedCellValue(sheetName, 11, 13, 1194d),
+					new ExpectedCellValue(sheetName, 12, 13, 856.49),
+					new ExpectedCellValue(sheetName, 13, 13, 831.5),
+					new ExpectedCellValue(sheetName, 14, 13, 831.5),
+					new ExpectedCellValue(sheetName, 15, 13, 24.99),
+					new ExpectedCellValue(sheetName, 16, 13, 24.99),
+					new ExpectedCellValue(sheetName, 17, 13, 4228.24)
 				});
 			}
 		}
@@ -728,7 +733,11 @@ namespace EPPlusTest.Table.PivotTable
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets["RowItems"];
-					var pivotTable = worksheet.PivotTables["PivotTable7"];
+					var pivotTable = worksheet.PivotTables["RowItemsPivotTable3"];
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalTop = false;
+					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
@@ -749,46 +758,46 @@ namespace EPPlusTest.Table.PivotTable
 				string sheetName = "RowItems";
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
 				{
-					new ExpectedCellValue(sheetName, 27, 12, "January"),
-					new ExpectedCellValue(sheetName, 28, 12, "Car Rack"),
-					new ExpectedCellValue(sheetName, 29, 12, "San Francisco"),
-					new ExpectedCellValue(sheetName, 30, 12, "Chicago"),
-					new ExpectedCellValue(sheetName, 31, 12, "Nashville"),
-					new ExpectedCellValue(sheetName, 32, 12, "Car Rack Total"),
-					new ExpectedCellValue(sheetName, 33, 12, "January Total"),
-					new ExpectedCellValue(sheetName, 34, 12, "February"),
-					new ExpectedCellValue(sheetName, 35, 12, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 36, 12, "San Francisco"),
-					new ExpectedCellValue(sheetName, 37, 12, "Sleeping Bag Total"),
-					new ExpectedCellValue(sheetName, 38, 12, "Tent"),
-					new ExpectedCellValue(sheetName, 39, 12, "Nashville"),
-					new ExpectedCellValue(sheetName, 40, 12, "Tent Total"),
-					new ExpectedCellValue(sheetName, 41, 12, "February Total"),
-					new ExpectedCellValue(sheetName, 42, 12, "March"),
-					new ExpectedCellValue(sheetName, 43, 12, "Car Rack"),
-					new ExpectedCellValue(sheetName, 44, 12, "Nashville"),
-					new ExpectedCellValue(sheetName, 45, 12, "Car Rack Total"),
-					new ExpectedCellValue(sheetName, 46, 12, "Headlamp"),
-					new ExpectedCellValue(sheetName, 47, 12, "Chicago"),
-					new ExpectedCellValue(sheetName, 48, 12, "Headlamp Total"),
-					new ExpectedCellValue(sheetName, 49, 12, "March Total"),
-					new ExpectedCellValue(sheetName, 50, 12, "Grand Total"),
-					new ExpectedCellValue(sheetName, 29, 13, "415.75"),
-					new ExpectedCellValue(sheetName, 30, 13, "831.5"),
-					new ExpectedCellValue(sheetName, 31, 13, "831.5"),
-					new ExpectedCellValue(sheetName, 32, 13, "2078.75"),
-					new ExpectedCellValue(sheetName, 33, 13, "2078.75"),
-					new ExpectedCellValue(sheetName, 36, 13, "99"),
-					new ExpectedCellValue(sheetName, 37, 13, "99"),
-					new ExpectedCellValue(sheetName, 39, 13, "1194"),
-					new ExpectedCellValue(sheetName, 40, 13, "1194"),
-					new ExpectedCellValue(sheetName, 41, 13, "1293"),
-					new ExpectedCellValue(sheetName, 44, 13, "831.5"),
-					new ExpectedCellValue(sheetName, 45, 13, "831.5"),
-					new ExpectedCellValue(sheetName, 47, 13, "24.99"),
-					new ExpectedCellValue(sheetName, 48, 13, "24.99"),
-					new ExpectedCellValue(sheetName, 49, 13, "856.49"),
-					new ExpectedCellValue(sheetName, 50, 13, "4228.24")
+					new ExpectedCellValue(sheetName, 2, 12, "January"),
+					new ExpectedCellValue(sheetName, 3, 12, "Car Rack"),
+					new ExpectedCellValue(sheetName, 4, 12, "San Francisco"),
+					new ExpectedCellValue(sheetName, 5, 12, "Chicago"),
+					new ExpectedCellValue(sheetName, 6, 12, "Nashville"),
+					new ExpectedCellValue(sheetName, 7, 12, "Car Rack Total"),
+					new ExpectedCellValue(sheetName, 8, 12, "January Total"),
+					new ExpectedCellValue(sheetName, 9, 12, "February"),
+					new ExpectedCellValue(sheetName, 10, 12, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 11, 12, "San Francisco"),
+					new ExpectedCellValue(sheetName, 12, 12, "Sleeping Bag Total"),
+					new ExpectedCellValue(sheetName, 13, 12, "Tent"),
+					new ExpectedCellValue(sheetName, 14, 12, "Nashville"),
+					new ExpectedCellValue(sheetName, 15, 12, "Tent Total"),
+					new ExpectedCellValue(sheetName, 16, 12, "February Total"),
+					new ExpectedCellValue(sheetName, 17, 12, "March"),
+					new ExpectedCellValue(sheetName, 18, 12, "Car Rack"),
+					new ExpectedCellValue(sheetName, 19, 12, "Nashville"),
+					new ExpectedCellValue(sheetName, 20, 12, "Car Rack Total"),
+					new ExpectedCellValue(sheetName, 21, 12, "Headlamp"),
+					new ExpectedCellValue(sheetName, 22, 12, "Chicago"),
+					new ExpectedCellValue(sheetName, 23, 12, "Headlamp Total"),
+					new ExpectedCellValue(sheetName, 24, 12, "March Total"),
+					new ExpectedCellValue(sheetName, 25, 12, "Grand Total"),
+					new ExpectedCellValue(sheetName, 4, 13, 415.75),
+					new ExpectedCellValue(sheetName, 5, 13, 831.5),
+					new ExpectedCellValue(sheetName, 6, 13, 831.5),
+					new ExpectedCellValue(sheetName, 7, 13, 2078.75),
+					new ExpectedCellValue(sheetName, 8, 13, 2078.75),
+					new ExpectedCellValue(sheetName, 11, 13, 99d),
+					new ExpectedCellValue(sheetName, 12, 13, 99d),
+					new ExpectedCellValue(sheetName, 14, 13, 1194d),
+					new ExpectedCellValue(sheetName, 15, 13, 1194d),
+					new ExpectedCellValue(sheetName, 16, 13, 1293d),
+					new ExpectedCellValue(sheetName, 19, 13, 831.5),
+					new ExpectedCellValue(sheetName, 20, 13, 831.5),
+					new ExpectedCellValue(sheetName, 22, 13, 24.99),
+					new ExpectedCellValue(sheetName, 23, 13, 24.99),
+					new ExpectedCellValue(sheetName, 24, 13, 856.49),
+					new ExpectedCellValue(sheetName, 25, 13, 4228.24)
 				});
 			}
 		}
@@ -804,7 +813,7 @@ namespace EPPlusTest.Table.PivotTable
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets["NoSubtotals"];
-					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					var pivotTable = worksheet.PivotTables["NoSubtotalsPivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
@@ -820,6 +829,7 @@ namespace EPPlusTest.Table.PivotTable
 						if (field.Items.Count > 0)
 							this.CheckFieldItems(field);
 					}
+					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\NoSubtotalTop.xlsx"));
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "NoSubtotals";
@@ -835,20 +845,237 @@ namespace EPPlusTest.Table.PivotTable
 					new ExpectedCellValue(sheetName, 11, 1, "Tent"),
 					new ExpectedCellValue(sheetName, 12, 1, "6"),
 					new ExpectedCellValue(sheetName, 13, 1, "Grand Total"),
-					new ExpectedCellValue(sheetName, 5, 2, "415.75"),
-					new ExpectedCellValue(sheetName, 13, 2, "415.75"),
-					new ExpectedCellValue(sheetName, 8, 3, "99"),
-					new ExpectedCellValue(sheetName, 13, 3, "99"),
-					new ExpectedCellValue(sheetName, 6, 4, "415.75"),
-					new ExpectedCellValue(sheetName, 13, 4, "415.75"),
-					new ExpectedCellValue(sheetName, 10, 5, "24.99"),
-					new ExpectedCellValue(sheetName, 13, 5, "24.99"),
-					new ExpectedCellValue(sheetName, 6, 6, "415.75"),
-					new ExpectedCellValue(sheetName, 13, 6, "415.75"),
-					new ExpectedCellValue(sheetName, 12, 7, "199"),
-					new ExpectedCellValue(sheetName, 13, 7, "199"),
-					new ExpectedCellValue(sheetName, 6, 8, "415.75"),
-					new ExpectedCellValue(sheetName, 13, 8, "415.75"),
+					new ExpectedCellValue(sheetName, 5, 2, 415.75),
+					new ExpectedCellValue(sheetName, 13, 2, 415.75),
+					new ExpectedCellValue(sheetName, 8, 3, 99d),
+					new ExpectedCellValue(sheetName, 13, 3, 99d),
+					new ExpectedCellValue(sheetName, 6, 4, 415.75),
+					new ExpectedCellValue(sheetName, 13, 4, 415.75),
+					new ExpectedCellValue(sheetName, 10, 5, 24.99),
+					new ExpectedCellValue(sheetName, 13, 5, 24.99),
+					new ExpectedCellValue(sheetName, 6, 6, 415.75),
+					new ExpectedCellValue(sheetName, 13, 6, 415.75),
+					new ExpectedCellValue(sheetName, 12, 7, 199d),
+					new ExpectedCellValue(sheetName, 13, 7, 199d),
+					new ExpectedCellValue(sheetName, 6, 8, 415.75),
+					new ExpectedCellValue(sheetName, 13, 8, 415.75)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshDataFieldsRowsAndColumnsGrandTotalOff()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["GrandTotals"];
+					var pivotTable = worksheet.PivotTables["GrandTotalsPivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					pivotTable.RowGrandTotals = false;
+					pivotTable.ColumnGrandTotals = false;
+					cacheDefinition.UpdateData();
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+					foreach (var field in pivotTable.Fields)
+					{
+						if (field.Items.Count > 0)
+							this.CheckFieldItems(field);
+					}
+					package.SaveAs(newFile.File);
+				}
+				string sheetName = "GrandTotals";
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 4, 1, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 1, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 6, 1, "Headlamp"),
+					new ExpectedCellValue(sheetName, 7, 1, "Tent"),
+					new ExpectedCellValue(sheetName, 2, 2, "January"),
+					new ExpectedCellValue(sheetName, 3, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 4, 2, 415.75),
+					new ExpectedCellValue(sheetName, 3, 3, "Chicago"),
+					new ExpectedCellValue(sheetName, 4, 3, 831.5),
+					new ExpectedCellValue(sheetName, 3, 4, "Nashville"),
+					new ExpectedCellValue(sheetName, 4, 4, 831.5),
+					new ExpectedCellValue(sheetName, 2, 5, "January Total"),
+					new ExpectedCellValue(sheetName, 4, 5, 2078.75),
+					new ExpectedCellValue(sheetName, 2, 6, "February"),
+					new ExpectedCellValue(sheetName, 3, 6, "San Francisco"),
+					new ExpectedCellValue(sheetName, 5, 6, 99d),
+					new ExpectedCellValue(sheetName, 3, 7, "Nashville"),
+					new ExpectedCellValue(sheetName, 7, 7, 1194d),
+					new ExpectedCellValue(sheetName, 2, 8, "February Total"),
+					new ExpectedCellValue(sheetName, 5, 8, 99d),
+					new ExpectedCellValue(sheetName, 7, 8, 1194d),
+					new ExpectedCellValue(sheetName, 2, 9, "March"),
+					new ExpectedCellValue(sheetName, 3, 9, "Chicago"),
+					new ExpectedCellValue(sheetName, 6, 9, 24.99),
+					new ExpectedCellValue(sheetName, 3, 10, "Nashville"),
+					new ExpectedCellValue(sheetName, 4, 10, 831.5),
+					new ExpectedCellValue(sheetName, 2, 11, "March Total"),
+					new ExpectedCellValue(sheetName, 4, 11, 831.5),
+					new ExpectedCellValue(sheetName, 6, 11, 24.99)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshDataFieldsColumnGrandTotalOff()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["GrandTotals"];
+					var pivotTable = worksheet.PivotTables["GrandTotalsPivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					pivotTable.ColumnGrandTotals = false;
+					cacheDefinition.UpdateData();
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+					foreach (var field in pivotTable.Fields)
+					{
+						if (field.Items.Count > 0)
+							this.CheckFieldItems(field);
+					}
+					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\Book3_RowGrandTotalsOff.xlsx"));
+					package.SaveAs(newFile.File);
+				}
+				string sheetName = "GrandTotals";
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 4, 1, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 1, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 6, 1, "Headlamp"),
+					new ExpectedCellValue(sheetName, 7, 1, "Tent"),
+					new ExpectedCellValue(sheetName, 8, 1, "Grand Total"),
+					new ExpectedCellValue(sheetName, 2, 2, "January"),
+					new ExpectedCellValue(sheetName, 3, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 4, 2, 415.75),
+					new ExpectedCellValue(sheetName, 8, 2, 415.75),
+					new ExpectedCellValue(sheetName, 3, 3, "Chicago"),
+					new ExpectedCellValue(sheetName, 4, 3, 831.5),
+					new ExpectedCellValue(sheetName, 8, 3, 831.5),
+					new ExpectedCellValue(sheetName, 3, 4, "Nashville"),
+					new ExpectedCellValue(sheetName, 4, 4, 831.5),
+					new ExpectedCellValue(sheetName, 8, 4, 831.5),
+					new ExpectedCellValue(sheetName, 2, 5, "January Total"),
+					new ExpectedCellValue(sheetName, 4, 5, 2078.75),
+					new ExpectedCellValue(sheetName, 8, 5, 2078.75),
+					new ExpectedCellValue(sheetName, 2, 6, "February"),
+					new ExpectedCellValue(sheetName, 3, 6, "San Francisco"),
+					new ExpectedCellValue(sheetName, 5, 6, 99d),
+					new ExpectedCellValue(sheetName, 8, 6, 99d),
+					new ExpectedCellValue(sheetName, 3, 7, "Nashville"),
+					new ExpectedCellValue(sheetName, 7, 7, 1194d),
+					new ExpectedCellValue(sheetName, 8, 7, 1194d),
+					new ExpectedCellValue(sheetName, 2, 8, "February Total"),
+					new ExpectedCellValue(sheetName, 5, 8, 99d),
+					new ExpectedCellValue(sheetName, 7, 8, 1194d),
+					new ExpectedCellValue(sheetName, 8, 8, 1293d),
+					new ExpectedCellValue(sheetName, 2, 9, "March"),
+					new ExpectedCellValue(sheetName, 3, 9, "Chicago"),
+					new ExpectedCellValue(sheetName, 6, 9, 24.99),
+					new ExpectedCellValue(sheetName, 8, 9, 24.99),
+					new ExpectedCellValue(sheetName, 3, 10, "Nashville"),
+					new ExpectedCellValue(sheetName, 4, 10, 831.5),
+					new ExpectedCellValue(sheetName, 8, 10, 831.5),
+					new ExpectedCellValue(sheetName, 2, 11, "March Total"),
+					new ExpectedCellValue(sheetName, 4, 11, 831.5),
+					new ExpectedCellValue(sheetName, 6, 11, 24.99),
+					new ExpectedCellValue(sheetName, 8, 11, 856.49)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshDataFieldsRowGrandTotalOff()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["GrandTotals"];
+					var pivotTable = worksheet.PivotTables["GrandTotalsPivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					pivotTable.RowGrandTotals = false;
+					cacheDefinition.UpdateData();
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+					foreach (var field in pivotTable.Fields)
+					{
+						if (field.Items.Count > 0)
+							this.CheckFieldItems(field);
+					}
+					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\Book3_RowGrandTotalsOff.xlsx"));
+					package.SaveAs(newFile.File);
+				}
+				string sheetName = "GrandTotals";
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 4, 1, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 1, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 6, 1, "Headlamp"),
+					new ExpectedCellValue(sheetName, 7, 1, "Tent"),
+					new ExpectedCellValue(sheetName, 2, 2, "January"),
+					new ExpectedCellValue(sheetName, 3, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 4, 2, 415.75),
+					new ExpectedCellValue(sheetName, 3, 3, "Chicago"),
+					new ExpectedCellValue(sheetName, 4, 3, 831.5),
+					new ExpectedCellValue(sheetName, 3, 4, "Nashville"),
+					new ExpectedCellValue(sheetName, 4, 4, 831.5),
+					new ExpectedCellValue(sheetName, 2, 5, "January Total"),
+					new ExpectedCellValue(sheetName, 4, 5, 2078.75),
+					new ExpectedCellValue(sheetName, 2, 6, "February"),
+					new ExpectedCellValue(sheetName, 3, 6, "San Francisco"),
+					new ExpectedCellValue(sheetName, 5, 6, 99d),
+					new ExpectedCellValue(sheetName, 3, 7, "Nashville"),
+					new ExpectedCellValue(sheetName, 7, 7, 1194d),
+					new ExpectedCellValue(sheetName, 2, 8, "February Total"),
+					new ExpectedCellValue(sheetName, 5, 8, 99d),
+					new ExpectedCellValue(sheetName, 7, 8, 1194d),
+					new ExpectedCellValue(sheetName, 2, 9, "March"),
+					new ExpectedCellValue(sheetName, 3, 9, "Chicago"),
+					new ExpectedCellValue(sheetName, 6, 9, 24.99),
+					new ExpectedCellValue(sheetName, 3, 10, "Nashville"),
+					new ExpectedCellValue(sheetName, 4, 10, 831.5),
+					new ExpectedCellValue(sheetName, 2, 11, "March Total"),
+					new ExpectedCellValue(sheetName, 4, 11, 831.5),
+					new ExpectedCellValue(sheetName, 6, 11, 24.99d),
+					new ExpectedCellValue(sheetName, 2, 12, "Grand Total"),
+					new ExpectedCellValue(sheetName, 4, 12, 2910.25),
+					new ExpectedCellValue(sheetName, 5, 12, 99d),
+					new ExpectedCellValue(sheetName, 6, 12, 24.99),
+					new ExpectedCellValue(sheetName, 7, 12, 1194d)
 				});
 			}
 		}
