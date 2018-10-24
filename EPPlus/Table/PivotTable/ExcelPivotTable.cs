@@ -860,9 +860,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal Packaging.ZipPackageRelationship CacheDefinitionRelationship { get; set; }
 
-		private List<PivotTableHeader> RowHeaders { get; set; } = new List<PivotTableHeader>();
+		private List<PivotTableHeader> RowHeaders { get; } = new List<PivotTableHeader>();
 
-		private List<PivotTableHeader> ColumnHeaders { get; set; } = new List<PivotTableHeader>();
+		private List<PivotTableHeader> ColumnHeaders { get; } = new List<PivotTableHeader>();
 		#endregion
 
 		#region Constructors
@@ -1197,7 +1197,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					{
 						double value = this.WorkSheet.Cells[dataRow, dataCol].GetValue<double>();
 						// If the subtotals are displayed at the top, then add all the root nodes' values to the column grand totals.
-						// Otherwise, add all leaf nodes.
+						// Otherwise, add all leaf node values.
 						var pivotTableField = this.RowHeaders[j].PivotTableField;
 						if (pivotTableField.SubtotalTop && pivotTableField.DefaultSubtotal)
 						{
@@ -1256,7 +1256,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		private string GetSharedItemValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, int repeatedItemsCount, int xMemberIndex)
 		{
 			var pivotFieldIndex = field[repeatedItemsCount].Index;
-			// -2 is a placeholder for a row/column item that references a dataField.
+			// A field that has an 'x' attribute equal to -2 is a special row/column field that indicates the
+			// pivot table has more than one data field. Excel uses this to display the headings for the data 
+			// values and how to group them in relation to other rows/columns. 
+			// If a special field alrady exists in that collection, then another one will not be generated.
 			if (pivotFieldIndex == -2)
 				return this.DataFields[item.DataFieldIndex].Name;
 			var pivotField = this.Fields[pivotFieldIndex];

@@ -227,7 +227,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="rowTuple">The list of rowItem indices.</param>
 		/// <param name="colTuple">The list of columnItem indices.</param>
 		/// <param name="dataFieldIndex">The index of the data field.</param>
-		/// <returns>The subtotal value or null if no values were found.</returns>
+		/// <returns>The subtotal value or null if no values are found.</returns>
 		public double? CalculateSubtotal(List<Tuple<int, int>> rowTuple, List<Tuple<int, int>> colTuple, int dataFieldIndex)
 		{
 			double? value = null;
@@ -261,7 +261,6 @@ namespace OfficeOpenXml.Table.PivotTable
 					if (!double.TryParse(record.Items[dataFieldIndex].Value, out double recordData))
 						recordData = 0;
 					value = value == null ? recordData : value + recordData;
-
 				}
 			}
 			return value;
