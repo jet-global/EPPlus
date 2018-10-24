@@ -204,7 +204,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Properties
 		/// <summary>
-		/// Gets or sets the x attribute index of the field.
+		/// Gets or sets the index of the field.
 		/// </summary>
 		public int Index { get; set; }
 		
@@ -623,8 +623,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(topNode));
 			if (table == null)
 				throw new ArgumentNullException(nameof(table));
-			if (index < 0)
-				throw new ArgumentOutOfRangeException(nameof(index));
 			if (baseIndex < 0)
 				throw new ArgumentOutOfRangeException(nameof(baseIndex));
 			this.Index = index;

@@ -220,6 +220,51 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			return false;
 		}
+
+		/// <summary>
+		/// Calculate the values for each cell in the pivot table.
+		/// </summary>
+		/// <param name="rowTuple">The list of rowItem indices.</param>
+		/// <param name="colTuple">The list of columnItem indices.</param>
+		/// <param name="dataFieldIndex">The index of the data field.</param>
+		/// <returns>The subtotal value or null if no values are found.</returns>
+		public double? CalculateSubtotal(List<Tuple<int, int>> rowTuple, List<Tuple<int, int>> colTuple, int dataFieldIndex)
+		{
+			double? value = null;
+			foreach (var record in this.Records)
+			{
+				bool match = true;
+				foreach (var rowIndex in rowTuple)
+				{
+					if (int.Parse(record.Items[rowIndex.Item1].Value) != rowIndex.Item2)
+					{
+						match = false;
+						break;
+					}
+				}
+				if (match && colTuple != null)
+				{
+					foreach (var colIndex in colTuple)
+					{
+						if (colIndex.Item1 == -2)
+							continue;
+						if (int.Parse(record.Items[colIndex.Item1].Value) != colIndex.Item2)
+						{
+							match = false;
+							break;
+						}
+					}
+				}
+				if (match)
+				{
+					// Non-numerical values parse as 0.
+					if (!double.TryParse(record.Items[dataFieldIndex].Value, out double recordData))
+						recordData = 0;
+					value = value == null ? recordData : value + recordData;
+				}
+			}
+			return value;
+		}
 		#endregion
 
 		#region Internal Methods

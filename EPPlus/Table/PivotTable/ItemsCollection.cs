@@ -64,11 +64,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		/// <param name="xMembers">The list of member property indices.</param>
 		/// <param name="repeatedItemsCount">The repeated items count value.</param>
-		public void AddColumnItem(List<Tuple<int, int>> xMembers, int repeatedItemsCount)
+		/// <param name="dataFieldIndex">The 'i' attribute value which points to a data field.</param>
+		public void AddColumnItem(List<Tuple<int, int>> xMembers, int repeatedItemsCount, int dataFieldIndex)
 		{
 			// Shared member property indexes are implicit to the parent.
 			xMembers.RemoveRange(0, repeatedItemsCount);
-			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, xMembers, repeatedItemsCount));
+			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, xMembers, repeatedItemsCount, dataFieldIndex));
 		}
 
 		/// <summary>
@@ -77,9 +78,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="itemType">The string value of the 't' attribute.</param>
 		/// <param name="repeatedItemsCount">The 'r' attribute value.</param>
 		/// <param name="xAttribute">The 'x' attribute value.</param>
-		public void AddSumNode(string itemType, int repeatedItemsCount = 0, int xAttribute = 0)
+		/// <param name="dataFieldIndex">The 'i' attribute value which points to a data field.</param>
+		public void AddSumNode(string itemType, int repeatedItemsCount = 0, int xAttribute = 0, int dataFieldIndex = 0)
 		{
-			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, repeatedItemsCount, xAttribute, itemType));
+			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, repeatedItemsCount, xAttribute, itemType, dataFieldIndex));
 		}
 
 		/// <summary>

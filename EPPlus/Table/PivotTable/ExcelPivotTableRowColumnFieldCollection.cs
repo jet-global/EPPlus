@@ -181,8 +181,15 @@ namespace OfficeOpenXml.Table.PivotTable
 				return collection;
 			foreach (XmlElement element in fieldNodes)
 			{
-				if (int.TryParse(element.GetAttribute("x"), out var x) && x >= 0)
-					collection.Add(base.PivotTable.Fields[x]);
+				if (int.TryParse(element.GetAttribute("x"), out var x)) {
+					if (x >= 0)
+						collection.Add(base.PivotTable.Fields[x]);
+					else
+					{
+						// TODO (Task #8178): Figure out what the base index is. (Possibly related to grouping)
+						collection.Add(new ExcelPivotTableField(base.NameSpaceManager, base.TopNode, this.PivotTable, x, 0));
+					}
+				}
 				else
 				{
 					// If it doesn't have an 'x' attribute, remove the element.

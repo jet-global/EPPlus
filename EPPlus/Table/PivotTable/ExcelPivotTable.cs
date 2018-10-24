@@ -36,6 +36,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using OfficeOpenXml.Extensions;
+using OfficeOpenXml.FormulaParsing.Utilities;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -858,6 +859,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets or sets the cache definition-pivot table relationship.
 		/// </summary>
 		internal Packaging.ZipPackageRelationship CacheDefinitionRelationship { get; set; }
+
+		private List<PivotTableHeader> RowHeaders { get; } = new List<PivotTableHeader>();
+
+		private List<PivotTableHeader> ColumnHeaders { get; } = new List<PivotTableHeader>();
 		#endregion
 
 		#region Constructors
@@ -915,7 +920,6 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// Worksheet-PivotTable relationship
 			this.WorksheetRelationship = sheet.Part.CreateRelationship(UriHelper.ResolvePartUri(sheet.WorksheetUri, this.PivotTableUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
-
 			bool cacheDefinitionFound = false;
 			foreach (var cache in this.WorkSheet.Workbook.PivotCacheDefinitions)
 			{
@@ -926,20 +930,15 @@ namespace OfficeOpenXml.Table.PivotTable
 					break;
 				}
 			}
-
 			if (!cacheDefinitionFound)
 			{
 				this.CacheDefinition = new ExcelPivotCacheDefinition(sheet.NameSpaceManager, this, sourceAddress, tblId);
 				sheet.Workbook.PivotCacheDefinitions.Add(this.CacheDefinition);
 			}
-
 			// CacheDefinition-PivotTable relationship
 			this.CacheDefinitionRelationship = this.Part.CreateRelationship(UriHelper.ResolvePartUri(this.PivotTableUri, this.CacheDefinition.CacheDefinitionUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheDefinition");
-
 			sheet.Workbook.AddPivotTable(this.CacheID.ToString(), this.CacheDefinition.CacheDefinitionUri);
-
 			this.LoadFields();
-
 			using (var range = sheet.Cells[address.Address])
 			{
 				range.Clear();
@@ -975,28 +974,36 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 
 			// Update the rowItems.
-			var previousRowItemsCount = this.RowItems.Sum(r => r.Count);
 			this.RowItems.Clear();
 			this.BuildRowItems(0, new List<Tuple<int, int>>());
 			if (this.RowGrandTotals)
+			{
 				this.RowItems.AddSumNode("grand");
+				this.RowHeaders.Add(new PivotTableHeader(null, null, -1, true, true));
+			}
 
 			// Update the colItems.
-			var previousColumnItemsCount = this.ColumnItems.Count;
 			if (this.ColumnFields.Any())
 			{
 				this.ColumnItems.Clear();
 				this.BuildColumnItems(0, new List<Tuple<int, int>>(), false);
 				if (this.ColumnGrandTotals)
-					this.ColumnItems.AddSumNode("grand");
+				{
+					for (int i = 0; i < this.DataFields.Count; i++)
+					{
+						this.ColumnItems.AddSumNode("grand");
+						this.ColumnHeaders.Add(new PivotTableHeader(null, null, i, true, false));
+					}
+				}
 			}
 			else
 			{
 				// If there are no column fields, then remove tag or else it will corrupt the workbook.
 				this.TopNode.RemoveChild(this.TopNode.SelectSingleNode("d:colFields", this.NameSpaceManager));
+				this.ColumnHeaders.Add(new PivotTableHeader(null, null, this.DataFields[0].Index, false, false));
 			}
 
-			this.UpdateWorksheet(previousRowItemsCount, previousColumnItemsCount);
+			this.UpdateWorksheet();
 		}
 		#endregion
 
@@ -1017,11 +1024,15 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (this.CacheDefinition.CacheRecords.Contains(childList))
 				{
 					this.RowItems.Add(rowDepth, i);
+					this.RowHeaders.Add(new PivotTableHeader(childList, pivotField, -1, false, true));
 					this.BuildRowItems(rowDepth + 1, childList);
 				}
 			}
 			if (!pivotField.SubtotalTop && parentNodeIndices.Any())
+			{
 				this.RowItems.AddSumNode("default", rowDepth - 1, parentNodeIndices.Last().Item2);
+				this.RowHeaders.Add(new PivotTableHeader(parentNodeIndices, pivotField, -1, false, true, "default"));
+			}
 		}
 
 		private bool BuildColumnItems(int colDepth, List<Tuple<int, int>> parentNodeIndices, bool itemsCreated)
@@ -1040,16 +1051,18 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (this.CacheDefinition.CacheRecords.Contains(childList))
 				{
 					bool result = this.BuildColumnItems(colDepth + 1, childList, itemsCreated);
-					if (colDepth == 0)
+					if (colDepth == this.ColumnFields.Count - 1)
+					{
+						int repeatedItemsCount = itemsCreated ? rValue : 0;
+						// TODO (Task #8644): Set datafields correctly when we figure out how they work.
+						this.ColumnHeaders.Add(new PivotTableHeader(childList.ToList(), pivotField, this.DataFields[0].Index, false, false));
+						this.ColumnItems.AddColumnItem(childList, repeatedItemsCount, 0);
+						itemsCreated = true;
+					}
+					else if (colDepth == 0)
 						itemsCreated = false;
 					else if (colDepth < this.ColumnFields.Count - 1)
 						itemsCreated = result;
-					else if (colDepth == this.ColumnFields.Count - 1)
-					{
-						int repeatedItemsCount = itemsCreated ? rValue : 0;
-						this.ColumnItems.AddColumnItem(childList, repeatedItemsCount);
-						itemsCreated = true;
-					}
 				}
 			}
 
@@ -1057,54 +1070,169 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				int rAttribute = rValue == colDepth ? rValue - 1 : rValue;
 				this.ColumnItems.AddSumNode("default", rAttribute, parentNodeIndices.Last().Item2);
+				// TODO (Task #8644): Set datafields correctly when we figure out how they work.
+				this.ColumnHeaders.Add(new PivotTableHeader(parentNodeIndices, pivotField, this.DataFields[0].Index, false, false, "default"));
 			}
+
 			return itemsCreated;
 		}
 
-		private void UpdateWorksheet(int previousRowItemsCount, int previousColumnItemsCount)
+		private void UpdateWorksheet()
+		{
+			this.UpdateRowColumnHeaders();
+			this.UpdatePivotTableWorksheetData();
+			this.UpdatePivotTableGrandTotalData();
+		}
+
+		private void UpdateRowColumnHeaders()
 		{
 			// Clear out the pivot table in the worksheet.
-			int removeStartRow = this.Address.Start.Row + this.FirstHeaderRow;
-			int removeStartColumn = this.Address.Start.Column + this.FirstDataCol;
-			int startDataRow = this.Address.Start.Row + this.FirstDataRow;
-			this.WorkSheet.Cells[startDataRow, this.Address.Start.Column, startDataRow + previousRowItemsCount, this.Address.Start.Column].Clear();
-			this.WorkSheet.Cells[removeStartRow, removeStartColumn, this.Address.Start.Row + previousRowItemsCount, this.Address.Start.Column + previousColumnItemsCount].Clear();
+			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
+			int headerColumn = this.Address.Start.Column + this.FirstDataCol;
+			int dataRow = this.Address.Start.Row + this.FirstDataRow;
+			this.WorkSheet.Cells[dataRow, this.Address.Start.Column, this.Address.End.Row, this.Address.Start.Column].Clear();
+			this.WorkSheet.Cells[startRow, headerColumn, this.Address.End.Row, this.Address.End.Column].Clear();
 
-			// Update the rows in the pivot table.
-			int currentDataRow = this.Address.Start.Row + this.FirstDataRow;
+			// Update the row headers in the worksheet.
 			foreach (var rowItem in this.RowItems)
 			{
-				bool itemType = this.SetItemTypeCellValue(this.RowFields, rowItem, currentDataRow, this.Address.Start.Column);
+				bool itemType = this.SetItemTypeCellValue(this.RowFields, rowItem, dataRow, this.Address.Start.Column);
 				if (itemType)
 				{
-					currentDataRow++;
+					dataRow++;
 					continue;
 				}
 				var sharedItem = this.GetSharedItemValue(this.RowFields, rowItem, rowItem.RepeatedItemsCount, 0);
-				this.WorkSheet.Cells[currentDataRow++, this.Address.Start.Column].Value = sharedItem;
+				this.WorkSheet.Cells[dataRow++, this.Address.Start.Column].Value = sharedItem;
 			}
 			
 			// Update the column headers in the worksheet.
-			int currentHeaderColumn = this.Address.Start.Column + this.FirstDataCol;
 			foreach (var colItem in this.ColumnItems)
 			{
-				int startHeaderRow = this.Address.Start.Row + this.FirstHeaderRow;
-				bool itemType = this.SetItemTypeCellValue(this.ColumnFields, colItem, startHeaderRow, currentHeaderColumn);
+				int startHeaderRow = startRow;
+				bool itemType = this.SetItemTypeCellValue(this.ColumnFields, colItem, startHeaderRow, headerColumn);
 				if (itemType)
 				{
-					currentHeaderColumn++;
+					headerColumn++;
 					continue;
 				}
+
+				// Write in sum column header if the pivot table does not specify columns.
+				if (this.TopNode.SelectSingleNode("d:colFields", this.NameSpaceManager) == null)
+					this.WorkSheet.Cells[startHeaderRow++, headerColumn].Value = this.DataFields[colItem.DataFieldIndex].Name;
 
 				for (int i = 0; i < colItem.Count; i++)
 				{
 					var columnFieldIndex = colItem.RepeatedItemsCount == 0 ? i : i + colItem.RepeatedItemsCount;
 					var sharedItem = this.GetSharedItemValue(this.ColumnFields, colItem, columnFieldIndex, i);
 					var cellRow = colItem.RepeatedItemsCount == 0 ? startHeaderRow : startHeaderRow + colItem.RepeatedItemsCount;
-					this.WorkSheet.Cells[cellRow, currentHeaderColumn].Value = sharedItem;
+					this.WorkSheet.Cells[cellRow, headerColumn].Value = sharedItem;
 					startHeaderRow++;
 				}
-				currentHeaderColumn++;
+				headerColumn++;
+			}
+		}
+
+		private void UpdatePivotTableWorksheetData()
+		{
+			int dataStartRow = this.Address.Start.Row + this.FirstDataRow;
+			int dataRow = dataStartRow;
+			int dataCol = this.Address.Start.Column + this.FirstDataCol;
+			var subtotalStack = new List<double?>();
+			foreach (var columnHeader in this.ColumnHeaders)
+			{
+				dataRow = dataStartRow;
+				foreach (var rowHeader in this.RowHeaders)
+				{
+					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
+						continue;
+
+					var subtotal = this.CacheDefinition.CacheRecords.CalculateSubtotal(
+						rowHeader.CacheRecordIndices, 
+						columnHeader.CacheRecordIndices, 
+						columnHeader.DataFieldIndex);
+
+					if (rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
+						this.WorkSheet.Cells[dataRow, dataCol].Value = subtotal; // At a leaf node, write value.
+					else if (rowHeader.PivotTableField.DefaultSubtotal)
+					{
+						// If subtotals are on and the rowItem's field specifies a sum type, then write out the last calculated sum.
+						if (rowHeader.SumType != null)
+						{
+							this.WorkSheet.Cells[dataRow, dataCol].Value = subtotalStack.Last();
+							subtotalStack.RemoveAt(subtotalStack.Count - 1);
+						}
+						else if (rowHeader.PivotTableField.SubtotalTop)
+						{
+							// If subtotalTop is true, then write out value.
+							this.WorkSheet.Cells[dataRow, dataCol].Value = subtotal;
+						}
+						else
+						{
+							// Node is a non-subtotal node.
+							subtotalStack.Add(subtotal);
+						}
+					}
+					dataRow++;
+				}
+				dataCol++;
+			}
+		}
+
+		private void UpdatePivotTableGrandTotalData()
+		{
+			int dataStartRow = this.Address.Start.Row + this.FirstDataRow;
+			var rowGrandTotals = new double?[this.RowHeaders.Count];
+			int dataCol = this.Address.Start.Column + this.FirstDataCol;
+			// Calculating row and column grand totals, write in row grand totals.
+			for (int i = 0; i < this.ColumnHeaders.Count; i++)
+			{
+				int dataRow = dataStartRow;
+				double? grandTotal = null;
+				int rowItemsCount = this.RowGrandTotals ? this.RowHeaders.Count - 1 : this.RowHeaders.Count;
+				int j = 0;
+				for (; j < rowItemsCount; j++)
+				{
+					if (this.WorkSheet.Cells[dataRow, dataCol].Value.IsNumeric())
+					{
+						double value = this.WorkSheet.Cells[dataRow, dataCol].GetValue<double>();
+						// If the subtotals are displayed at the top, then add all the root nodes' values to the column grand totals.
+						// Otherwise, add all leaf node values.
+						var pivotTableField = this.RowHeaders[j].PivotTableField;
+						if (pivotTableField.SubtotalTop && pivotTableField.DefaultSubtotal)
+						{
+							if (string.IsNullOrEmpty(this.RowHeaders[j].SumType) && this.RowItems[j].RepeatedItemsCount == 0)
+								grandTotal = grandTotal == null ? value : value + grandTotal;
+						}
+						else
+						{
+							if (string.IsNullOrEmpty(this.RowHeaders[j].SumType))
+								grandTotal = grandTotal == null ? value : value + grandTotal;
+						}
+
+						// Add the value to the corresponding row grand total.
+						if (string.IsNullOrEmpty(this.ColumnHeaders[i].SumType))
+							rowGrandTotals[j] = rowGrandTotals[j] == null ? value : value + rowGrandTotals[j];
+					}
+					dataRow++;
+				}
+
+				// Write in the row grand totals (grand total for each column).
+				if (this.RowGrandTotals) {
+					this.WorkSheet.Cells[dataRow, dataCol].Value = grandTotal;
+					if (grandTotal != null)
+						rowGrandTotals[j] = rowGrandTotals[j] == null ? grandTotal : rowGrandTotals[j] + grandTotal;
+				}
+				dataCol++;
+			}
+
+			// Write in the column grand totals (grand total for each row).
+			if (this.ColumnGrandTotals)
+			{
+				for (int i = 0; i < rowGrandTotals.Length; i++)
+				{
+					this.WorkSheet.Cells[dataStartRow + i, this.Address.End.Column].Value = rowGrandTotals[i];
+				}
 			}
 		}
 
@@ -1112,7 +1240,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			if (!string.IsNullOrEmpty(item.ItemType))
 			{
-				int rowLabel = row + item.RepeatedItemsCount;
+				int rowLabel = field == this.RowFields ? row : row + item.RepeatedItemsCount;
 				if (item.ItemType.IsEquivalentTo("grand"))
 					this.WorkSheet.Cells[rowLabel, column].Value = "Grand Total";
 				else if (item.ItemType.IsEquivalentTo("default"))
@@ -1128,6 +1256,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		private string GetSharedItemValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, int repeatedItemsCount, int xMemberIndex)
 		{
 			var pivotFieldIndex = field[repeatedItemsCount].Index;
+			// A field that has an 'x' attribute equal to -2 is a special row/column field that indicates the
+			// pivot table has more than one data field. Excel uses this to display the headings for the data 
+			// values and how to group them in relation to other rows/columns. 
+			// If a special field alrady exists in that collection, then another one will not be generated.
+			if (pivotFieldIndex == -2)
+				return this.DataFields[item.DataFieldIndex].Name;
 			var pivotField = this.Fields[pivotFieldIndex];
 			var cacheItemIndex = pivotField.Items[item[xMemberIndex]].X;
 			return this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value;
