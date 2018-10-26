@@ -168,7 +168,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="sourceDataRange">The source range of the data without header row.</param>
 		public void UpdateRecords(ExcelRangeBase sourceDataRange)
 		{
-			// Removes extra records.
+			// Remove extra records.
 			if (sourceDataRange.Rows < this.Records.Count)
 			{
 				for (int i = this.Records.Count - 1; i >= sourceDataRange.Rows; i--)
@@ -257,8 +257,17 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				if (match)
 				{
+					string itemValue = null;
+					if (record.Items[dataFieldIndex].Type == PivotCacheRecordType.x)
+					{
+						int sharedItemIndex = int.Parse(record.Items[dataFieldIndex].Value);
+						var cacheField = this.CacheDefinition.CacheFields[dataFieldIndex];
+						itemValue = cacheField.SharedItems[sharedItemIndex].Value;
+					}
+					else
+						itemValue = record.Items[dataFieldIndex].Value;
 					// Non-numerical values parse as 0.
-					if (!double.TryParse(record.Items[dataFieldIndex].Value, out double recordData))
+					if (!double.TryParse(itemValue, out var recordData))
 						recordData = 0;
 					value = value == null ? recordData : value + recordData;
 				}

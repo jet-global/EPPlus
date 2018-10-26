@@ -10,34 +10,34 @@ namespace OfficeOpenXml.Table.PivotTable
 	{
 		#region Properties
 		/// <summary>
-		/// Gets or sets the list of <see cref="ExcelPivotCacheRecords"/> indices.
+		/// Gets the list of <see cref="ExcelPivotCacheRecords"/> indices.
 		/// </summary>
-		public List<Tuple<int, int>> CacheRecordIndices { get; set; }
+		public List<Tuple<int, int>> CacheRecordIndices { get; }
 		 
 		/// <summary>
-		/// Gets or sets the related <see cref="ExcelPivotTableField"/>.
+		/// Gets the related <see cref="ExcelPivotTableField"/>.
 		/// </summary>
-		public ExcelPivotTableField PivotTableField { get; set; }
+		public ExcelPivotTableField PivotTableField { get; }
 		
 		/// <summary>
-		/// Gets or sets the field index of the <see cref="ExcelPivotTableDataField"/>.
+		/// Gets the index of the <see cref="ExcelPivotTableDataField"/> in the collection.
 		/// </summary>
-		public int DataFieldIndex { get; set; }
+		public int DataFieldCollectionIndex { get; }
 
 		/// <summary>
-		/// Gets or sets the flag indicating if this is a grand total object.
+		/// Gets the flag indicating if this is a grand total object.
 		/// </summary>
-		public bool IsGrandTotal { get; set; }
+		public bool IsGrandTotal { get; }
 
 		/// <summary>
-		/// Gets or sets the flag indicating if this is a row label.
+		/// Gets the flag indicating if this is a row label.
 		/// </summary>
-		public bool IsRowHeader { get; set; }
+		public bool IsRowHeader { get; }
 
 		/// <summary>
-		/// Gets or sets the value if there is a <see cref="RowColumnItem"/>  with a non-null itemType, typically 'default'.
+		/// Gets the value if there is a <see cref="RowColumnItem"/>  with a non-null itemType, typically 'default'.
 		/// </summary>
-		public string SumType { get; set; }
+		public string SumType { get; }
 		#endregion
 
 		#region Constructors
@@ -46,15 +46,15 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		/// <param name="recordIndices">The list of cacheRecord indices.</param>
 		/// <param name="field">The pivot table field.</param>
-		/// <param name="dataFieldIndex">The index of the data field.</param>
+		/// <param name="dataFieldCollectionIndex">The index of the data field in the collection.</param>
 		/// <param name="isGrandTotal">A value indicating if it is a grand total.</param>
 		/// <param name="isRowHeader">A value indicating if it is a row header.</param>
 		/// <param name="sumType">The itemType value of the <see cref="RowColumnItem"/>.</param>
-		public PivotTableHeader(List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldIndex, bool isGrandTotal, bool isRowHeader, string sumType = null)
+		public PivotTableHeader(List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldCollectionIndex, bool isGrandTotal, bool isRowHeader, string sumType = null)
 		{
 			this.CacheRecordIndices = recordIndices;
 			this.PivotTableField = field;
-			this.DataFieldIndex = dataFieldIndex;
+			this.DataFieldCollectionIndex = dataFieldCollectionIndex;
 			this.IsGrandTotal = isGrandTotal;
 			this.IsRowHeader = isRowHeader;
 			this.SumType = sumType;

@@ -138,9 +138,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (parentNode == null)
 				throw new ArgumentNullException(nameof(parentNode));
 			base.TopNode = parentNode.OwnerDocument.CreateElement("i", parentNode.NamespaceURI);
-			this.DataFieldIndex = dataFieldIndex;
 			if (repeatedItemsCount > 0)
 				this.RepeatedItemsCount = repeatedItemsCount;
+			this.DataFieldIndex = dataFieldIndex;
 			var xNode = parentNode.OwnerDocument.CreateElement("x", base.TopNode.NamespaceURI);
 			if (memberIndex > 0)
 			{
@@ -168,9 +168,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (memberIndices == null || memberIndices.Count == 0)
 				throw new ArgumentNullException(nameof(memberIndices));
 			base.TopNode = parentNode.OwnerDocument.CreateElement("i", parentNode.NamespaceURI);
-			this.DataFieldIndex = dataFieldIndex;
 			if (repeatedItemsCount > 0)
 				this.RepeatedItemsCount = repeatedItemsCount;
+			this.DataFieldIndex = dataFieldIndex;
 			for (int i = 0; i < memberIndices.Count; i++)
 			{
 				var xNode = parentNode.OwnerDocument.CreateElement("x", base.TopNode.NamespaceURI);

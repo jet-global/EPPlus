@@ -328,7 +328,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public void UpdateData()
 		{
-			// Update all cacheField names assuming the shape of the pivot table remains unchanged.
+			// Update all cacheField names assuming the shape of the pivot cache definition source range remains unchanged.
 			for (int col = this.SourceRange.Start.Column; col < this.SourceRange.Columns + this.SourceRange.Start.Column; col++)
 			{
 				int fieldIndex = col - this.SourceRange.Start.Column;
