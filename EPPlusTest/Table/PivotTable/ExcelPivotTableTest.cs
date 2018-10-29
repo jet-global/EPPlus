@@ -829,7 +829,6 @@ namespace EPPlusTest.Table.PivotTable
 						if (field.Items.Count > 0)
 							this.CheckFieldItems(field);
 					}
-					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\NoSubtotalTop.xlsx"));
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "NoSubtotals";
@@ -958,7 +957,6 @@ namespace EPPlusTest.Table.PivotTable
 						if (field.Items.Count > 0)
 							this.CheckFieldItems(field);
 					}
-					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\Book3_RowGrandTotalsOff.xlsx"));
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "GrandTotals";
@@ -1036,7 +1034,6 @@ namespace EPPlusTest.Table.PivotTable
 						if (field.Items.Count > 0)
 							this.CheckFieldItems(field);
 					}
-					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\Book3_RowGrandTotalsOff.xlsx"));
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "GrandTotals";
@@ -1076,6 +1073,228 @@ namespace EPPlusTest.Table.PivotTable
 					new ExpectedCellValue(sheetName, 5, 12, 99d),
 					new ExpectedCellValue(sheetName, 6, 12, 24.99),
 					new ExpectedCellValue(sheetName, 7, 12, 1194d)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshMultipleDataFields()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["MultipleDataFields"];
+					var pivotTable = worksheet.PivotTables["MultipleDataFieldsPivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+					foreach (var field in pivotTable.Fields)
+					{
+						if (field.Items.Count > 0)
+							this.CheckFieldItems(field);
+					}
+					package.SaveAs(newFile.File);
+				}
+				string sheetName = "MultipleDataFields";
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 2, 1, "San Francisco"),
+					new ExpectedCellValue(sheetName, 3, 1, "Chicago"),
+					new ExpectedCellValue(sheetName, 4, 1, "Nashville"),
+					new ExpectedCellValue(sheetName, 5, 1, "Grand Total"),
+					new ExpectedCellValue(sheetName, 1, 2, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 2, 2, 2),
+					new ExpectedCellValue(sheetName, 3, 2, 3),
+					new ExpectedCellValue(sheetName, 4, 2, 10),
+					new ExpectedCellValue(sheetName, 5, 2, 15),
+					new ExpectedCellValue(sheetName, 1, 3, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 2, 3, 514.75),
+					new ExpectedCellValue(sheetName, 3, 3, 856.49),
+					new ExpectedCellValue(sheetName, 4, 3, 2857d),
+					new ExpectedCellValue(sheetName, 5, 3, 4228.24),
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshMultipleDataFieldsNoGrandTotal()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["MultipleDataFields"];
+					var pivotTable = worksheet.PivotTables["MultipleDataFieldsPivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					pivotTable.RowGrandTotals = false;
+					cacheDefinition.UpdateData();
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+					foreach (var field in pivotTable.Fields)
+					{
+						if (field.Items.Count > 0)
+							this.CheckFieldItems(field);
+					}
+					package.SaveAs(newFile.File);
+				}
+				string sheetName = "MultipleDataFields";
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 2, 1, "San Francisco"),
+					new ExpectedCellValue(sheetName, 3, 1, "Chicago"),
+					new ExpectedCellValue(sheetName, 4, 1, "Nashville"),
+					new ExpectedCellValue(sheetName, 1, 2, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 2, 2, 2),
+					new ExpectedCellValue(sheetName, 3, 2, 3),
+					new ExpectedCellValue(sheetName, 4, 2, 10),
+					new ExpectedCellValue(sheetName, 1, 3, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 2, 3, 514.75),
+					new ExpectedCellValue(sheetName, 3, 3, 856.49),
+					new ExpectedCellValue(sheetName, 4, 3, 2857d),
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshMultipleDataFieldsAndColumnHeaders()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["MultipleDataFields"];
+					var pivotTable = worksheet.PivotTables["MultipleDataFieldsPivotTable2"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+					foreach (var field in pivotTable.Fields)
+					{
+						if (field.Items.Count > 0)
+							this.CheckFieldItems(field);
+					}
+					package.SaveAs(newFile.File);
+				}
+				string sheetName = "MultipleDataFields";
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 14, 1, "January"),
+					new ExpectedCellValue(sheetName, 15, 1, "February"),
+					new ExpectedCellValue(sheetName, 16, 1, "March"),
+					new ExpectedCellValue(sheetName, 17, 1, "Grand Total"),
+					new ExpectedCellValue(sheetName, 11, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 12, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 13, 2, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 14, 2, 1d),
+					new ExpectedCellValue(sheetName, 17, 2, 1d),
+					new ExpectedCellValue(sheetName, 13, 3, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 14, 3, 415.75),
+					new ExpectedCellValue(sheetName, 17, 3, 415.75),
+					new ExpectedCellValue(sheetName, 12, 4, "Chicago"),
+					new ExpectedCellValue(sheetName, 13, 4, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 14, 4, 2d),
+					new ExpectedCellValue(sheetName, 17, 4, 2d),
+					new ExpectedCellValue(sheetName, 13, 5, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 14, 5, 831.5),
+					new ExpectedCellValue(sheetName, 17, 5, 831.5),
+					new ExpectedCellValue(sheetName, 12, 6, "Nashville"),
+					new ExpectedCellValue(sheetName, 13, 6, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 14, 6, 2d),
+					new ExpectedCellValue(sheetName, 16, 6, 2d),
+					new ExpectedCellValue(sheetName, 17, 6, 4d),
+					new ExpectedCellValue(sheetName, 13, 7, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 14, 7, 831.5),
+					new ExpectedCellValue(sheetName, 16, 7, 831.5),
+					new ExpectedCellValue(sheetName, 17, 7, 1663d),
+					new ExpectedCellValue(sheetName, 11, 8, "Car Rack Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 14, 8, 5d),
+					new ExpectedCellValue(sheetName, 16, 8, 2d),
+					new ExpectedCellValue(sheetName, 17, 8, 7d),
+					new ExpectedCellValue(sheetName, 11, 9, "Car Rack Sum of Total"),
+					new ExpectedCellValue(sheetName, 14, 9, 2078.75),
+					new ExpectedCellValue(sheetName, 16, 9, 831.5),
+					new ExpectedCellValue(sheetName, 17, 9, 2910.25),
+					new ExpectedCellValue(sheetName, 11, 10, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 12, 10, "San Francisco"),
+					new ExpectedCellValue(sheetName, 13, 10, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 15, 10, 1d),
+					new ExpectedCellValue(sheetName, 17, 10, 1d),
+					new ExpectedCellValue(sheetName, 13, 11, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 15, 11, 99d),
+					new ExpectedCellValue(sheetName, 17, 11, 99d),
+					new ExpectedCellValue(sheetName, 11, 12, "Sleeping Bag Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 15, 12, 1d),
+					new ExpectedCellValue(sheetName, 17, 12, 1d),
+					new ExpectedCellValue(sheetName, 11, 13, "Sleeping Bag Sum of Total"),
+					new ExpectedCellValue(sheetName, 15, 13, 99d),
+					new ExpectedCellValue(sheetName, 17, 13, 99d),
+					new ExpectedCellValue(sheetName, 11, 14, "Headlamp"),
+					new ExpectedCellValue(sheetName, 12, 14, "Chicago"),
+					new ExpectedCellValue(sheetName, 13, 14, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 16, 14, 1d),
+					new ExpectedCellValue(sheetName, 17, 14, 1d),
+					new ExpectedCellValue(sheetName, 13, 15, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 16, 15, 24.99),
+					new ExpectedCellValue(sheetName, 17, 15, 24.99),
+					new ExpectedCellValue(sheetName, 11, 16, "Headlamp Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 16, 16, 1d),
+					new ExpectedCellValue(sheetName, 17, 16, 1d),
+					new ExpectedCellValue(sheetName, 11, 17, "Headlamp Sum of Total"),
+					new ExpectedCellValue(sheetName, 16, 17, 24.99),
+					new ExpectedCellValue(sheetName, 17, 17, 24.99),
+					new ExpectedCellValue(sheetName, 11, 18, "Tent"),
+					new ExpectedCellValue(sheetName, 12, 18, "Nashville"),
+					new ExpectedCellValue(sheetName, 13, 18, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 15, 18, 6d),
+					new ExpectedCellValue(sheetName, 17, 18, 6d),
+					new ExpectedCellValue(sheetName, 13, 19, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 15, 19, 1194d),
+					new ExpectedCellValue(sheetName, 17, 19, 1194d),
+					new ExpectedCellValue(sheetName, 11, 20, "Tent Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 15, 20, 6d),
+					new ExpectedCellValue(sheetName, 17, 20, 6d),
+					new ExpectedCellValue(sheetName, 11, 21, "Tent Sum of Total"),
+					new ExpectedCellValue(sheetName, 15, 21, 1194d),
+					new ExpectedCellValue(sheetName, 17, 21, 1194d),
+					new ExpectedCellValue(sheetName, 11, 22, "Total Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 14, 22, 5d),
+					new ExpectedCellValue(sheetName, 15, 22, 7d),
+					new ExpectedCellValue(sheetName, 16, 22, 3d),
+					new ExpectedCellValue(sheetName, 17, 22, 15d),
+					new ExpectedCellValue(sheetName, 11, 23, "Total Sum of Total"),
+					new ExpectedCellValue(sheetName, 14, 23, 2078.75),
+					new ExpectedCellValue(sheetName, 15, 23, 1293d),
+					new ExpectedCellValue(sheetName, 16, 23, 856.49),
+					new ExpectedCellValue(sheetName, 17, 23, 4228.24)
 				});
 			}
 		}
