@@ -572,7 +572,6 @@ namespace EPPlusTest.Table.PivotTable
 						if (field.Items.Count > 0)
 							this.CheckFieldItems(field);
 					}
-					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\ThreeRowFields_FalseSubtotalTop.xlsx"));
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "RowItems";
@@ -1296,6 +1295,26 @@ namespace EPPlusTest.Table.PivotTable
 					new ExpectedCellValue(sheetName, 16, 23, 856.49),
 					new ExpectedCellValue(sheetName, 17, 23, 4228.24)
 				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\Book2.xlsx")]
+		public void PivotTableRefreshRowDataFields()
+		{
+			var file = new FileInfo("Book2.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet1"];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\Book2_UpdateRowDataFields.xlsx"));
+					package.SaveAs(newFile.File);
+				}
 			}
 		}
 		#endregion

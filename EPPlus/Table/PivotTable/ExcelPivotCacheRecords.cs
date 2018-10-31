@@ -209,7 +209,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				bool matched = true;
 				foreach (var indexTuple in nodeIndices)
 				{
-					if (int.Parse(record.Items[indexTuple.Item1].Value) != indexTuple.Item2)
+					if (indexTuple.Item1 != -2 && int.Parse(record.Items[indexTuple.Item1].Value) != indexTuple.Item2)
 					{
 						matched = false;
 						break;

@@ -1054,6 +1054,24 @@ namespace OfficeOpenXml.Table.PivotTable
 					this.RowHeaders.Add(new PivotTableHeader(childList, null, i, false, true, leafNode));
 					this.BuildRowItems(rowDepth + 1, childList, i);
 				}
+
+				// Create subtotal nodes when the data fields are inner nodes and it is created for their direct parents.
+				if (parentNodeIndices.Any() && parentNodeIndices.Last().Item1 != -2 && rowDepth != this.RowFields.Count - 1)
+				{
+					pivotField = this.Fields[parentNodeIndices.Last().Item1];
+					if (pivotField.DefaultSubtotal && parentNodeIndices.Any())
+					{
+						for (int i = 0; i < this.DataFields.Count; i++)
+						{
+							bool isAboveDataField = true;
+							if (parentNodeIndices.Any(x => x.Item1 == -2))
+								isAboveDataField = false;
+							var header = new PivotTableHeader(parentNodeIndices, pivotField, i, false, true, false, "default", isAboveDataField);
+							this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
+								parentNodeIndices.Count - 1, parentNodeIndices.Last().Item2, header, i);
+						}
+					}
+				}
 			}
 			else
 			{
@@ -1067,16 +1085,42 @@ namespace OfficeOpenXml.Table.PivotTable
 					{
 						this.RowItems.Add(rowDepth, i, null, dataFieldIndex);
 						bool leafNode = rowDepth == this.RowFields.Count - 1;
-						this.RowHeaders.Add(new PivotTableHeader(childList, pivotField, dataFieldIndex, false, true, leafNode));
+						bool isAboveDataField = true;
+						if (parentNodeIndices.Any(x => x.Item1 == -2))
+							isAboveDataField = false;
+						this.RowHeaders.Add(new PivotTableHeader(childList, pivotField, dataFieldIndex, false, true, leafNode, null, isAboveDataField));
 						this.BuildRowItems(rowDepth + 1, childList, dataFieldIndex);
 					}
 				}
 
+				// Create subtotal nodes when the data fields are root nodes or when there is only one data field.
 				if (pivotField.DefaultSubtotal && !pivotField.SubtotalTop && parentNodeIndices.Any())
 				{
-					var header = new PivotTableHeader(parentNodeIndices, pivotField, dataFieldIndex, false, true, false, "default");
-					this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
-						rowDepth - 1, parentNodeIndices.Last().Item2, header);
+					if (parentNodeIndices.Last().Item1 != -2)
+					{
+						bool isAboveDataField = true;
+						if (parentNodeIndices.Any(x => x.Item1 == -2))
+							isAboveDataField = false;
+						// If there are data fields in the parent node indices hierarchy, then only create one subtotal node. 
+						// Otherwise, create a subtotal node for every data field.
+						if (parentNodeIndices.Any(x => x.Item1 == -2))
+						{
+							var header = new PivotTableHeader(parentNodeIndices, pivotField, dataFieldIndex, false, true, false, "default", isAboveDataField);
+							this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
+							rowDepth - 1, parentNodeIndices.Last().Item2, header);
+						}
+						else
+						{
+							// Subtotal nodes are created when the data fields are leaf nodes and for all the parent nodes in the hierarchy of the
+							// data field node except it's direct parent.
+							for (int i = 0; i < this.DataFields.Count; i++)
+							{
+								var header = new PivotTableHeader(parentNodeIndices, pivotField, i, false, true, false, "default", isAboveDataField);
+								this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
+								rowDepth - 1, parentNodeIndices.Last().Item2, header, i);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1201,15 +1245,15 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.WorkSheet.Cells[startRow, headerColumn, this.Address.End.Row, this.Address.End.Column].Clear();
 
 			// Update the row headers in the worksheet.
-			foreach (var rowItem in this.RowItems)
+			for (int i = 0; i < this.RowItems.Count; i++)
 			{
-				bool itemType = this.SetTotalCellValue(this.RowFields, rowItem, dataRow, this.Address.Start.Column);
+				bool itemType = this.SetTotalCellValue(this.RowFields, this.RowItems[i], this.RowHeaders[i], dataRow, this.Address.Start.Column);
 				if (itemType)
 				{
 					dataRow++;
 					continue;
 				}
-				var sharedItem = this.GetSharedItemValue(this.RowFields, rowItem, rowItem.RepeatedItemsCount, 0);
+				var sharedItem = this.GetSharedItemValue(this.RowFields, this.RowItems[i], this.RowItems[i].RepeatedItemsCount, 0);
 				this.WorkSheet.Cells[dataRow++, this.Address.Start.Column].Value = sharedItem;
 			}
 			
@@ -1217,7 +1261,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			foreach (var colItem in this.ColumnItems)
 			{
 				int startHeaderRow = startRow;
-				bool itemType = this.SetTotalCellValue(this.ColumnFields, colItem, startHeaderRow, headerColumn);
+				bool itemType = this.SetTotalCellValue(this.ColumnFields, colItem, null, startHeaderRow, headerColumn);
 				if (itemType)
 				{
 					headerColumn++;
@@ -1265,6 +1309,15 @@ namespace OfficeOpenXml.Table.PivotTable
 
 					if (rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
 						this.WorkSheet.Cells[dataRow, dataColumn].Value = subtotal; // At a leaf node, write value.
+					else if (this.HasRowDataFields)
+					{
+						if (rowHeader.PivotTableField != null && rowHeader.PivotTableField.DefaultSubtotal)
+						{
+							if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField) || 
+								rowHeader.SumType.IsEquivalentTo("default"))
+								this.WorkSheet.Cells[dataRow, dataColumn].Value = subtotal;
+						}
+					}
 					else if (rowHeader.PivotTableField.DefaultSubtotal)
 					{
 						if (rowHeader.SumType != null)
@@ -1290,7 +1343,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private bool SetTotalCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, int row, int column)
+		private bool SetTotalCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, int row, int column)
 		{
 			if (!string.IsNullOrEmpty(item.ItemType))
 			{
@@ -1311,7 +1364,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				else if (item.ItemType.IsEquivalentTo("default"))
 				{
 					var itemName = this.GetSharedItemValue(field, item, item.RepeatedItemsCount, 0);
-					if (this.DataFields.Count > 1)
+					if ((this.DataFields.Count > 1) && ((field == this.RowFields && header.IsAboveDataField) || field == this.ColumnFields))
 					{
 						string dataFieldName = this.DataFields[item.DataFieldIndex].Name;
 						this.WorkSheet.Cells[rowLabel, column].Value = $"{itemName} {dataFieldName}";
