@@ -236,6 +236,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				bool match = true;
 				foreach (var rowIndex in rowTuple)
 				{
+					if (rowIndex.Item1 == -2)
+						continue;
 					if (int.Parse(record.Items[rowIndex.Item1].Value) != rowIndex.Item2)
 					{
 						match = false;

@@ -36,7 +36,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using OfficeOpenXml.Extensions;
-using OfficeOpenXml.FormulaParsing.Utilities;
+using OfficeOpenXml.Table.PivotTable.DataCalculation;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -860,9 +860,25 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal Packaging.ZipPackageRelationship CacheDefinitionRelationship { get; set; }
 
-		private List<PivotTableHeader> RowHeaders { get; } = new List<PivotTableHeader>();
+		/// <summary>
+		/// Gets a list of pivot table row header cell models.
+		/// </summary>
+		internal List<PivotTableHeader> RowHeaders { get; } = new List<PivotTableHeader>();
 
-		private List<PivotTableHeader> ColumnHeaders { get; } = new List<PivotTableHeader>();
+		/// <summary>
+		/// Gets a list of pivot table column header cell models.
+		/// </summary>
+		internal List<PivotTableHeader> ColumnHeaders { get; } = new List<PivotTableHeader>();
+
+		/// <summary>
+		/// Gets a value indicating whether there is more than one data field in the row fields.
+		/// </summary>
+		internal bool HasRowDataFields => this.RowFields.Any(c => c.Index == -2);
+
+		/// <summary>
+		/// Gets a value indicating whether there is more than one data field in the column fields.
+		/// </summary>
+		internal bool HasColumnDataFields => this.ColumnFields.Any(c => c.Index == -2);
 		#endregion
 
 		#region Constructors
@@ -976,44 +992,24 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// Update the rowItems.
 			this.RowItems.Clear();
-			this.BuildRowItems(0, new List<Tuple<int, int>>());
+			this.BuildRowItems(0, new List<Tuple<int, int>>(), 0);
 			if (this.RowGrandTotals)
-			{
-				var header = new PivotTableHeader(null, null, -1, true, true);
-				this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "grand", 0, 0, header);
-			}
+				this.CreateGrandTotalNodes(this.RowItems, this.RowHeaders, this.HasRowDataFields, true);
 
 			// Update the colItems.
 			if (this.ColumnFields.Any())
 			{
 				this.ColumnItems.Clear();
 				this.BuildColumnItems(0, new List<Tuple<int, int>>(), false);
-				if (this.ColumnGrandTotals)
-				{
-					// Only create item nodes and headers if there are column headers.
-					if (this.ColumnFields[0].Index != -2)
-					{
-						if (this.DataFields.Count > 0)
-						{
-							for (int i = 0; i < this.DataFields.Count; i++)
-							{
-								var header = new PivotTableHeader(null, null, i, true, false);
-								this.AddSumNodeToCollections(this.ColumnItems, this.ColumnHeaders, "grand", 0, 0, header, i);
-							}
-						}
-						else
-						{
-							var header = new PivotTableHeader(null, null, 0, true, false);
-							this.AddSumNodeToCollections(this.ColumnItems, this.ColumnHeaders, "grand", 0, 0, header);
-						}
-					}
-				}
+				// Only create item nodes and headers if there are column headers.
+				if (this.ColumnGrandTotals && this.ColumnFields[0].Index != -2)
+					this.CreateGrandTotalNodes(this.ColumnItems, this.ColumnHeaders, this.HasColumnDataFields, false);
 			}
 			else
 			{
 				// If there are no column fields, then remove tag or else it will corrupt the workbook.
 				this.TopNode.RemoveChild(this.TopNode.SelectSingleNode("d:colFields", this.NameSpaceManager));
-				this.ColumnHeaders.Add(new PivotTableHeader(null, null, 0, false, false));
+				this.ColumnHeaders.Add(new PivotTableHeader(null, null, 0, false, false, false));
 			}
 
 			this.UpdateWorksheet();
@@ -1021,31 +1017,67 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
-		private void BuildRowItems(int rowDepth, List<Tuple<int, int>> parentNodeIndices)
+		private void CreateGrandTotalNodes(ItemsCollection collection, List<PivotTableHeader> headers, bool hasDataFields, bool isRowHeader)
+		{
+			if (this.DataFields.Count > 0 && hasDataFields)
+			{
+				for (int i = 0; i < this.DataFields.Count; i++)
+				{
+					var header = new PivotTableHeader(null, null, i, true, isRowHeader, false);
+					this.AddSumNodeToCollections(collection, headers, "grand", 0, 0, header, i);
+				}
+			}
+			else
+			{
+				var header = new PivotTableHeader(null, null, 0, true, isRowHeader, false);
+				this.AddSumNodeToCollections(collection, headers, "grand", 0, 0, header);
+			}
+		}
+
+		private void BuildRowItems(int rowDepth, List<Tuple<int, int>> parentNodeIndices, int dataFieldIndex)
 		{
 			// Base case.
 			if (rowDepth >= this.RowFields.Count)
 				return;
 
 			var pivotFieldIndex = this.RowFields[rowDepth].Index;
-			var pivotField = this.Fields[pivotFieldIndex];
-			int maxIndex = pivotField.DefaultSubtotal ? pivotField.Items.Count - 1 : pivotField.Items.Count;
-			for (int i = 0; i < maxIndex; i++)
+			ExcelPivotTableField pivotField = null;
+
+			if (pivotFieldIndex == -2)
 			{
-				var childList = parentNodeIndices.ToList();
-				childList.Add(new Tuple<int, int>(pivotFieldIndex, pivotField.Items[i].X));
-				if (this.CacheDefinition.CacheRecords.Contains(childList))
+				for (int i = 0; i < this.DataFields.Count; i++)
 				{
-					this.RowItems.Add(rowDepth, i);
-					this.RowHeaders.Add(new PivotTableHeader(childList, pivotField, -1, false, true));
-					this.BuildRowItems(rowDepth + 1, childList);
+					var childList = parentNodeIndices.ToList();
+					childList.Add(new Tuple<int, int>(pivotFieldIndex, i));
+					this.RowItems.Add(rowDepth, i, null, i);
+					bool leafNode = rowDepth == this.RowFields.Count - 1;
+					this.RowHeaders.Add(new PivotTableHeader(childList, null, i, false, true, leafNode));
+					this.BuildRowItems(rowDepth + 1, childList, i);
 				}
 			}
-			if (pivotField.DefaultSubtotal && !pivotField.SubtotalTop && parentNodeIndices.Any())
+			else
 			{
-				var header = new PivotTableHeader(parentNodeIndices, pivotField, -1, false, true, "default");
-				this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default", 
-					rowDepth - 1, parentNodeIndices.Last().Item2, header);
+				pivotField = this.Fields[pivotFieldIndex];
+				int maxIndex = pivotField.DefaultSubtotal ? pivotField.Items.Count - 1 : pivotField.Items.Count;
+				for (int i = 0; i < maxIndex; i++)
+				{
+					var childList = parentNodeIndices.ToList();
+					childList.Add(new Tuple<int, int>(pivotFieldIndex, pivotField.Items[i].X));
+					if (this.CacheDefinition.CacheRecords.Contains(childList))
+					{
+						this.RowItems.Add(rowDepth, i, null, dataFieldIndex);
+						bool leafNode = rowDepth == this.RowFields.Count - 1;
+						this.RowHeaders.Add(new PivotTableHeader(childList, pivotField, dataFieldIndex, false, true, leafNode));
+						this.BuildRowItems(rowDepth + 1, childList, dataFieldIndex);
+					}
+				}
+
+				if (pivotField.DefaultSubtotal && !pivotField.SubtotalTop && parentNodeIndices.Any())
+				{
+					var header = new PivotTableHeader(parentNodeIndices, pivotField, dataFieldIndex, false, true, false, "default");
+					this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
+						rowDepth - 1, parentNodeIndices.Last().Item2, header);
+				}
 			}
 		}
 
@@ -1105,7 +1137,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						// Create a xml subtotal node for each data field.
 						for (int i = 0; i < this.DataFields.Count; i++)
 						{
-							var header = new PivotTableHeader(parentNodeIndices, pivotField, i, false, false, "default");
+							var header = new PivotTableHeader(parentNodeIndices, pivotField, i, false, false, false, "default");
 							this.AddSumNodeToCollections(this.ColumnItems, this.ColumnHeaders, "default",
 								rAttribute, parentNodeIndices.Last().Item2, header, i);
 						}
@@ -1113,7 +1145,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					else
 					{
 						// If there are no data fields, then create a single xml subtotal node.
-						var header = new PivotTableHeader(parentNodeIndices, pivotField, 0, false, false, "default");
+						var header = new PivotTableHeader(parentNodeIndices, pivotField, 0, false, false, false, "default");
 						this.AddSumNodeToCollections(this.ColumnItems, this.ColumnHeaders, "default",
 							rAttribute, parentNodeIndices.Last().Item2, header);
 					}
@@ -1133,7 +1165,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		private int CreateColumnItemNode(bool itemsCreated, int rValue, List<Tuple<int, int>> recordIndices, ExcelPivotTableField pivotField, int dataFieldIndex)
 		{
 			int repeatedItemsCount = itemsCreated ? rValue : 0;
-			this.ColumnHeaders.Add(new PivotTableHeader(recordIndices.ToList(), pivotField, dataFieldIndex, false, false));
+			bool leafNode = repeatedItemsCount == this.RowFields.Count - 1;
+			this.ColumnHeaders.Add(new PivotTableHeader(recordIndices.ToList(), pivotField, dataFieldIndex, false, false, leafNode));
 			this.ColumnItems.AddColumnItem(recordIndices, repeatedItemsCount, dataFieldIndex);
 			return repeatedItemsCount;
 		}
@@ -1144,7 +1177,12 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (this.DataFields.Any())
 			{
 				this.UpdatePivotTableWorksheetData();
-				this.UpdatePivotTableGrandTotalData();
+				GrandTotalHelperBase grandTotalHelper = null;
+				if (this.HasRowDataFields)
+					grandTotalHelper = new RowGrandTotalHelper(this);
+				else
+					grandTotalHelper = new ColumnGrandTotalHelper(this);
+				grandTotalHelper.UpdateGrandTotals();
 			}
 			else
 			{
@@ -1214,18 +1252,24 @@ namespace OfficeOpenXml.Table.PivotTable
 					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
 						continue;
 
+					int dataFieldCollectionIndex = 0;
+					if (this.HasRowDataFields)
+						dataFieldCollectionIndex = this.DataFields[rowHeader.DataFieldCollectionIndex].Index;
+					else
+						dataFieldCollectionIndex = this.DataFields[columnHeader.DataFieldCollectionIndex].Index;
+
 					var subtotal = this.CacheDefinition.CacheRecords.CalculateSubtotal(
 						rowHeader.CacheRecordIndices, 
-						columnHeader.CacheRecordIndices, 
-						this.DataFields[columnHeader.DataFieldCollectionIndex].Index);
+						columnHeader.CacheRecordIndices,
+						dataFieldCollectionIndex);
 
 					if (rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
 						this.WorkSheet.Cells[dataRow, dataColumn].Value = subtotal; // At a leaf node, write value.
 					else if (rowHeader.PivotTableField.DefaultSubtotal)
 					{
-						// If subtotals are on and the rowItem's field specifies a sum type, then write out the last calculated sum.
 						if (rowHeader.SumType != null)
 						{
+							// If subtotals are on and the rowItem's field specifies a sum type, then write out the last calculated sum.
 							this.WorkSheet.Cells[dataRow, dataColumn].Value = subtotalStack.Last();
 							subtotalStack.RemoveAt(subtotalStack.Count - 1);
 						}
@@ -1246,96 +1290,20 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private void UpdatePivotTableGrandTotalData()
-		{
-			int dataStartRow = this.Address.Start.Row + this.FirstDataRow;
-			var rowGrandTotals = new double?[this.RowHeaders.Count, this.DataFields.Count];
-			int dataColumn = this.Address.Start.Column + this.FirstDataCol;
-			// Calculating row and column grand totals, write in row grand totals.
-			for (int i = 0; i < this.ColumnHeaders.Count; i++)
-			{
-				var columnHeader = this.ColumnHeaders[i];
-				int dataRow = dataStartRow;
-				double? grandTotal = null;
-				int rowItemsCount = this.RowGrandTotals ? this.RowHeaders.Count - 1 : this.RowHeaders.Count;
-				int j = 0;
-				for (; j < rowItemsCount; j++)
-				{
-					if (this.WorkSheet.Cells[dataRow, dataColumn].Value.IsNumeric())
-					{
-						double value = this.WorkSheet.Cells[dataRow, dataColumn].GetValue<double>();
-						// If the subtotals are displayed at the top, then add all the root nodes' values to the column grand totals.
-						// Otherwise, add all leaf node values.
-						var pivotTableField = this.RowHeaders[j].PivotTableField;
-						if (pivotTableField.SubtotalTop && pivotTableField.DefaultSubtotal)
-						{
-							if (string.IsNullOrEmpty(this.RowHeaders[j].SumType) && this.RowItems[j].RepeatedItemsCount == 0)
-								grandTotal = grandTotal == null ? value : value + grandTotal;
-						}
-						else
-						{
-							if (string.IsNullOrEmpty(this.RowHeaders[j].SumType))
-								grandTotal = grandTotal == null ? value : value + grandTotal;
-						}
-
-						// Add the value to the corresponding row grand total if it is not a subtotal node.
-						if (string.IsNullOrEmpty(columnHeader.SumType))
-						{
-							var totalValue = rowGrandTotals[j, columnHeader.DataFieldCollectionIndex];
-							rowGrandTotals[j, columnHeader.DataFieldCollectionIndex] = totalValue == null ? value : value + totalValue;
-						}
-					}
-					dataRow++;
-				}
-
-				// Write in the row grand totals (grand total for each column).
-				if (this.RowGrandTotals) {
-					this.WorkSheet.Cells[dataRow, dataColumn].Value = grandTotal;
-					// Only sum up the non-subtotal column grand total values.
-					if (grandTotal != null && string.IsNullOrEmpty(columnHeader.SumType))
-					{
-						var totalValue = rowGrandTotals[j, columnHeader.DataFieldCollectionIndex];
-						rowGrandTotals[j, columnHeader.DataFieldCollectionIndex] = totalValue == null ? grandTotal : totalValue + grandTotal;
-					}
-				}
-				dataColumn++;
-			}
-
-			// Write in the column grand totals (grand total for each row).
-			if (this.ColumnGrandTotals)
-			{
-				if (this.ColumnFields.Count > 0 && this.ColumnFields[0].Index != -2)
-				{
-					for (int dataField = 0; dataField < this.DataFields.Count; dataField++)
-					{
-						for (int row = 0; row < rowGrandTotals.GetLength(0); row++)
-						{
-							var column = this.Address.End.Column - (this.DataFields.Count - 1) + dataField;
-							this.WorkSheet.Cells[dataStartRow + row, column].Value = rowGrandTotals[row, dataField];
-						}
-					}
-				}
-			}
-		}
-
 		private bool SetTotalCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, int row, int column)
 		{
 			if (!string.IsNullOrEmpty(item.ItemType))
 			{
+				// If the field is a row field, then use the given row number. 
+				// Otherwise, calculate the correct row number for column fields.
 				int rowLabel = field == this.RowFields ? row : row + item.RepeatedItemsCount;
 				if (item.ItemType.IsEquivalentTo("grand"))
 				{
-					if (field == this.ColumnFields)
+					// If the pivot table has more than one data field, then use the name of the data field in the total.
+					if ((this.HasRowDataFields && field == this.RowFields) || (this.HasColumnDataFields && field == this.ColumnFields))
 					{
-						if (this.DataFields.Count == 1)
-							this.WorkSheet.Cells[rowLabel, column].Value = "Grand Total";
-						else if (this.DataFields.Count > 1)
-						{
-							string dataFieldName = this.DataFields[item.DataFieldIndex].Name;
-							this.WorkSheet.Cells[rowLabel, column].Value = $"Total {dataFieldName}";
-						}
-						else
-							this.WorkSheet.Cells[rowLabel, column].Value = $"Grand Total";
+						string dataFieldName = this.DataFields[item.DataFieldIndex].Name;
+						this.WorkSheet.Cells[rowLabel, column].Value = $"Total {dataFieldName}";
 					}
 					else
 						this.WorkSheet.Cells[rowLabel, column].Value = $"Grand Total";
