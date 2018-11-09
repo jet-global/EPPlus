@@ -572,7 +572,6 @@ namespace EPPlusTest.Table.PivotTable
 						if (field.Items.Count > 0)
 							this.CheckFieldItems(field);
 					}
-					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\ThreeRowFields_FalseSubtotalTop.xlsx"));
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "RowItems";

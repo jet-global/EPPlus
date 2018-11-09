@@ -132,16 +132,16 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get
 			{
-				foreach (var nf in this.Field.myTable.WorkSheet.Workbook.Styles.NumberFormats)
+				foreach (var nf in this.Field.myTable.Worksheet.Workbook.Styles.NumberFormats)
 				{
 					if (nf.NumFmtId == this.NumFmtId)
 						return nf.Format;
 				}
-				return this.Field.myTable.WorkSheet.Workbook.Styles.NumberFormats[0].Format;
+				return this.Field.myTable.Worksheet.Workbook.Styles.NumberFormats[0].Format;
 			}
 			set
 			{
-				var styles = this.Field.myTable.WorkSheet.Workbook.Styles;
+				var styles = this.Field.myTable.Worksheet.Workbook.Styles;
 
 				ExcelNumberFormatXml nf = null;
 				if (!styles.NumberFormats.FindByID(value, ref nf))

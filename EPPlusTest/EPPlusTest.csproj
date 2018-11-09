@@ -229,6 +229,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarPTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\VarSTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\CountBlankTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\GetPivotDataTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\MatchTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Logical\IfErrorTests.cs" />

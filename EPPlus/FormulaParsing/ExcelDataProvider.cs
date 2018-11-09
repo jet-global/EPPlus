@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using OfficeOpenXml.Table.PivotTable;
 
 namespace OfficeOpenXml.FormulaParsing
 {
@@ -132,5 +133,14 @@ namespace OfficeOpenXml.FormulaParsing
 		public abstract void Reset();
 
 		public abstract IRangeInfo GetRange(string worksheet, int fromRow, int fromCol, int toRow, int toCol);
+		
+		/// <summary>
+		/// Retrieves the <see cref="ExcelPivotTable"/> (if any) at the specified <paramref name="address"/>.
+		/// If multiple pivot tables exist within the range, the one that starts closest to 
+		/// cell A1 is returned.
+		/// </summary>
+		/// <param name="address">The <see cref="ExcelAddress"/> to look for a pivot table.</param>
+		/// <returns>The pivot table found at the specified address.</returns>
+		public abstract ExcelPivotTable GetPivotTable(ExcelAddress address); 
 	}
 }
