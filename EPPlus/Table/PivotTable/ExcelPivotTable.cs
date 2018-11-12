@@ -1017,7 +1017,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					this.BuildColumnItems(0, new List<Tuple<int, int>>(), false);
 					// Only create item nodes and headers if there are column headers.
-					// TODO (Task #8644): Fix this when abstracting BuildColumnItems method.
+					// TODO (Task #9062): Fix this when cleaning up building column items.
 					if (this.ColumnGrandTotals && this.ColumnFields[0].Index != -2)
 						this.CreateGrandTotalNodes(collection, this.ColumnHeaders, this.HasColumnDataFields, false);
 				}
