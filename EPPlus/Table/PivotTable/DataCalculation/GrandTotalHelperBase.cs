@@ -121,8 +121,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					this.InnerCellIndex++;
 				}
 
-				// If the pivot table has multiple row data fields and no columns, then calculate the grand totals.
-				if (this.PivotTable.TopNode.SelectSingleNode("d:colFields", this.PivotTable.NameSpaceManager) == null && rowGrandTotalHelper)
+				// If the pivot table has multiple row data fields and no columns, then calculate the grand totals for rows.
+				if (!this.PivotTable.ColumnFields.Any() && rowGrandTotalHelper)
 				{
 					int index = 0;
 					for (; j < outerLoopCount; j++)
@@ -144,15 +144,21 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					}
 					break;
 				}
-
+				// If the pivot table has multiple column data fields and no rows, then calculate the grand totals for the columns.
+				else if (!this.PivotTable.RowFields.Any())
+				{
+					double value = this.GetCell().GetValue<double>();
+					total = this.CalculateTotal(0, value, header, total);
+				}
 				// Write in the grand totals for each outer axis.
-				if (this.HasInnerGrandTotals)
+				else if (this.HasInnerGrandTotals)
 				{
 					this.GetCell().Value = total;
 					// Only sum up the non-subtotal grand total values.
 					if (total != null && string.IsNullOrEmpty(header.SumType))
 						this.StoreTotal(j, header.DataFieldCollectionIndex, total);
 				}
+
 				this.OuterCellIndex++;
 			}
 

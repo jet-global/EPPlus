@@ -991,32 +991,47 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 
 			// Update the rowItems.
-			this.RowItems.Clear();
-			this.BuildRowItems(0, new List<Tuple<int, int>>(), 0);
-			if (this.RowGrandTotals)
-				this.CreateGrandTotalNodes(this.RowItems, this.RowHeaders, this.HasRowDataFields, true);
-
+			this.UpdateRowColumnItems(this.RowFields, this.RowItems, true);
+		
 			// Update the colItems.
-			if (this.ColumnFields.Any())
-			{
-				this.ColumnItems.Clear();
-				this.BuildColumnItems(0, new List<Tuple<int, int>>(), false);
-				// Only create item nodes and headers if there are column headers.
-				if (this.ColumnGrandTotals && this.ColumnFields[0].Index != -2)
-					this.CreateGrandTotalNodes(this.ColumnItems, this.ColumnHeaders, this.HasColumnDataFields, false);
-			}
-			else
-			{
-				// If there are no column fields, then remove tag or else it will corrupt the workbook.
-				this.TopNode.RemoveChild(this.TopNode.SelectSingleNode("d:colFields", this.NameSpaceManager));
-				this.ColumnHeaders.Add(new PivotTableHeader(null, null, 0, false, false, false, false));
-			}
-
+			this.UpdateRowColumnItems(this.ColumnFields, this.ColumnItems, false);
+			
 			this.UpdateWorksheet();
 		}
 		#endregion
 
 		#region Private Methods
+		private void UpdateRowColumnItems(ExcelPivotTableRowColumnFieldCollection field, ItemsCollection collection, bool isRowItems)
+		{
+			// Update the rowItems.
+			if (field.Any())
+			{
+				collection.Clear();
+				if (isRowItems)
+				{
+					this.BuildRowItems(0, new List<Tuple<int, int>>(), 0);
+					if (this.RowGrandTotals)
+						this.CreateGrandTotalNodes(collection, this.RowHeaders, this.HasRowDataFields, true);
+				}
+				else
+				{
+					this.BuildColumnItems(0, new List<Tuple<int, int>>(), false);
+					// Only create item nodes and headers if there are column headers.
+					// TODO (Task #8644): Fix this when abstracting BuildColumnItems method.
+					if (this.ColumnGrandTotals && this.ColumnFields[0].Index != -2)
+						this.CreateGrandTotalNodes(collection, this.ColumnHeaders, this.HasColumnDataFields, false);
+				}
+			}
+			else
+			{
+				string xmlTag = isRowItems ? "d:rowFields" : "d:colFields";
+				// If there are no row/column fields, then remove tag or else it will corrupt the workbook.
+				this.TopNode.RemoveChild(this.TopNode.SelectSingleNode(xmlTag, this.NameSpaceManager));
+				var headerCollection = isRowItems ? this.RowHeaders : this.ColumnHeaders;
+				headerCollection.Add(new PivotTableHeader(null, null, 0, false, false, false, false));
+			}
+		}
+
 		private void CreateGrandTotalNodes(ItemsCollection collection, List<PivotTableHeader> headers, bool hasDataFields, bool isRowHeader)
 		{
 			if (this.DataFields.Count > 0 && hasDataFields)
@@ -1220,18 +1235,24 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.WorkSheet.Cells[startRow, headerColumn, this.Address.End.Row, this.Address.End.Column].Clear();
 
 			// Update the row headers in the worksheet.
-			for (int i = 0; i < this.RowItems.Count; i++)
+			if (this.RowFields.Any())
 			{
-				bool itemType = this.SetTotalCellValue(this.RowFields, this.RowItems[i], this.RowHeaders[i], dataRow, this.Address.Start.Column);
-				if (itemType)
+				for (int i = 0; i < this.RowItems.Count; i++)
 				{
-					dataRow++;
-					continue;
+					bool itemType = this.SetTotalCellValue(this.RowFields, this.RowItems[i], this.RowHeaders[i], dataRow, this.Address.Start.Column);
+					if (itemType)
+					{
+						dataRow++;
+						continue;
+					}
+					var sharedItem = this.GetSharedItemValue(this.RowFields, this.RowItems[i], this.RowItems[i].RepeatedItemsCount, 0);
+					this.WorkSheet.Cells[dataRow++, this.Address.Start.Column].Value = sharedItem;
 				}
-				var sharedItem = this.GetSharedItemValue(this.RowFields, this.RowItems[i], this.RowItems[i].RepeatedItemsCount, 0);
-				this.WorkSheet.Cells[dataRow++, this.Address.Start.Column].Value = sharedItem;
 			}
-			
+			// If there are no row headers and only one data field, print the name of the data field for the row.
+			else if (this.DataFields.Count == 1)
+				this.WorkSheet.Cells[dataRow++, this.Address.Start.Column].Value = this.DataFields.First().Name;
+
 			// Update the column headers in the worksheet.
 			foreach (var colItem in this.ColumnItems)
 			{
@@ -1278,7 +1299,8 @@ namespace OfficeOpenXml.Table.PivotTable
 						columnHeader.CacheRecordIndices,
 						dataFieldCollectionIndex);
 
-					if (rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
+					if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.ColumnFields.Count) || 
+						rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
 						this.WorkSheet.Cells[dataRow, dataColumn].Value = subtotal; // At a leaf node, write value.
 					else if (this.HasRowDataFields)
 					{

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 {
@@ -48,22 +49,30 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <returns>The updated grand total value.</returns>
 		protected override double? CalculateTotal(int innerHeaderIndex, double value, PivotTableHeader outerHeader, double? grandTotal)
 		{
-			// If the subtotals are displayed at the top, then add all the root nodes' values to the column grand totals.
-			// Otherwise, add all leaf node values.
-			var pivotTableField = this.PivotTable.RowHeaders[innerHeaderIndex].PivotTableField;
-			if (pivotTableField.SubtotalTop && pivotTableField.DefaultSubtotal)
-			{
-				if (string.IsNullOrEmpty(this.PivotTable.RowHeaders[innerHeaderIndex].SumType) && this.PivotTable.RowItems[innerHeaderIndex].RepeatedItemsCount == 0)
-					grandTotal = (grandTotal ?? 0) + value;
-			}
-			else if (string.IsNullOrEmpty(this.PivotTable.RowHeaders[innerHeaderIndex].SumType))
-				grandTotal = (grandTotal ?? 0) + value;
-
-			// Add the value to the corresponding row grand total if it is not a subtotal node.
-			if (string.IsNullOrEmpty(outerHeader.SumType))
+			if (!this.PivotTable.RowFields.Any())
 			{
 				var totalValue = base.GrandTotals[innerHeaderIndex, outerHeader.DataFieldCollectionIndex];
 				base.GrandTotals[innerHeaderIndex, outerHeader.DataFieldCollectionIndex] = (totalValue ?? 0) + value;
+			}
+			else
+			{
+				// If the subtotals are displayed at the top, then add all the root nodes' values to the column grand totals.
+				// Otherwise, add all leaf node values.
+				var pivotTableField = this.PivotTable.RowHeaders[innerHeaderIndex].PivotTableField;
+				if (pivotTableField.SubtotalTop && pivotTableField.DefaultSubtotal)
+				{
+					if (string.IsNullOrEmpty(this.PivotTable.RowHeaders[innerHeaderIndex].SumType) && this.PivotTable.RowItems[innerHeaderIndex].RepeatedItemsCount == 0)
+						grandTotal = (grandTotal ?? 0) + value;
+				}
+				else if (string.IsNullOrEmpty(this.PivotTable.RowHeaders[innerHeaderIndex].SumType))
+					grandTotal = (grandTotal ?? 0) + value;
+
+				// Add the value to the corresponding row grand total if it is not a subtotal node.
+				if (string.IsNullOrEmpty(outerHeader.SumType))
+				{
+					var totalValue = base.GrandTotals[innerHeaderIndex, outerHeader.DataFieldCollectionIndex];
+					base.GrandTotals[innerHeaderIndex, outerHeader.DataFieldCollectionIndex] = (totalValue ?? 0) + value;
+				}
 			}
 			return grandTotal;
 		}
