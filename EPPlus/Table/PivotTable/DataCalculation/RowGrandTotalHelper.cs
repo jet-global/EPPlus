@@ -20,7 +20,7 @@
 			base.HasInnerGrandTotals = base.PivotTable.ColumnGrandTotals;
 			base.OuterCellIndex = base.DataStartRow;
 			base.StartIndex = base.InnerCellIndex = base.DataStartColumn;
-			base.ShouldWriteInnerGrandTotals = this.OuterLoop.Count > 0 && base.PivotTable.RowFields[0].Index != -2;
+			base.ShouldWriteInnerGrandTotals = this.OuterLoop.Count > 0;
 		}
 		#endregion
 
@@ -76,6 +76,25 @@
 		{
 			var totalValue = this.GrandTotals[dataFieldCollectionIndex, innerHeaderIndex];
 			this.GrandTotals[dataFieldCollectionIndex, innerHeaderIndex] = (totalValue ?? 0) + total;
+		}
+
+		/// <summary>
+		/// Calculate the grand total values when there are multiple row data fields and no column fields. Only used to calculate row grand total values.
+		/// </summary>
+		/// <param name="innerHeaderIndex">The index for the inner 'for' loop.</param>
+		/// <param name="value">The value in the current cell.</param>
+		/// <param name="outerHeader">The <see cref="PivotTableHeader"/>.</param>
+		/// <param name="grandTotal">The current grand total value that needs to be updated.</param>
+		/// <returns>The updated grand total value.</returns>
+		protected override double? CalculateTotalWithNoColumns(int innerHeaderIndex, double value, PivotTableHeader outerHeader, double? grandTotal)
+		{
+			grandTotal = (grandTotal ?? 0) + value;
+			if (outerHeader.IsLeafNode || string.IsNullOrEmpty(outerHeader.SumType))
+			{
+				var total = base.GrandTotals[innerHeaderIndex, 0];
+				base.GrandTotals[innerHeaderIndex, 0] = (total ?? 0) + value;
+			}
+			return grandTotal;
 		}
 		#endregion
 	}

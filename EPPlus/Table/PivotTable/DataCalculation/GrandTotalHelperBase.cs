@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation
@@ -95,7 +96,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <summary>
 		/// Calculate and update the grand totals in the <see cref="ExcelPivotTable"/>.
 		/// </summary>
-		public void UpdateGrandTotals()
+		/// <param name="rowGrandTotalHelper">A value indicating if the RowGrandTotalHelper is used.</param>
+		public void UpdateGrandTotals(bool rowGrandTotalHelper)
 		{
 			int outerLoopCount = this.OuterLoop.Count;
 			if (this.HasOuterGrandTotals && this.OuterLoop.Count > this.PivotTable.DataFields.Count)
@@ -117,6 +119,30 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 						total = this.CalculateTotal(j, value, header, total);
 					}
 					this.InnerCellIndex++;
+				}
+
+				// If the pivot table has multiple row data fields and no columns, then calculate the grand totals.
+				if (this.PivotTable.TopNode.SelectSingleNode("d:colFields", this.PivotTable.NameSpaceManager) == null && rowGrandTotalHelper)
+				{
+					int index = 0;
+					for (; j < outerLoopCount; j++)
+					{
+						header = this.OuterLoop[j];
+						if (this.GetCell().Value.IsNumeric())
+						{
+							double value = this.GetCell().GetValue<double>();
+							total = this.CalculateTotalWithNoColumns(index, value, header, total);
+						}
+						var dataFieldIndex = this.PivotTable.DataFields[header.DataFieldCollectionIndex].Index;
+						// If the data field header is a leaf node, then increment index to correspond to the appropriate data field grand total.
+						if (header.IsDataField && (dataFieldIndex != this.PivotTable.DataFields.First().Index || header.IsLeafNode)) 
+							index++;
+						// If the data field header is the first data field in the collection, reset the index counter.
+						else if (!header.IsLeafNode && dataFieldIndex == this.PivotTable.DataFields.First().Index)
+							index = 0;
+						this.OuterCellIndex++;
+					}
+					break;
 				}
 
 				// Write in the grand totals for each outer axis.
@@ -171,6 +197,16 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <param name="dataFieldCollectionIndex">The collection index of the data field.</param>
 		/// <param name="total">The value in the current cell.</param>
 		protected abstract void StoreTotal(int innerHeaderIndex, int dataFieldCollectionIndex, double? total);
+
+		/// <summary>
+		/// Calculate the grand total values when there are multiple row data fields and no column fields. Only used to calculate row grand total values.
+		/// </summary>
+		/// <param name="innerHeaderIndex">The index for the inner 'for' loop.</param>
+		/// <param name="value">The value in the current cell.</param>
+		/// <param name="outerHeader">The <see cref="PivotTableHeader"/>.</param>
+		/// <param name="grandTotal">The current grand total value that needs to be updated.</param>
+		/// <returns>The updated grand total value.</returns>
+		protected abstract double? CalculateTotalWithNoColumns(int innerHeaderIndex, double value, PivotTableHeader outerHeader, double? grandTotal);
 		#endregion
 	}
 }

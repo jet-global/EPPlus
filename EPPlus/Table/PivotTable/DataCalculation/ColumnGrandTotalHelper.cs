@@ -1,4 +1,6 @@
-﻿namespace OfficeOpenXml.Table.PivotTable.DataCalculation
+﻿using System;
+
+namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 {
 	/// <summary>
 	/// Calculate column grand totals.
@@ -88,6 +90,19 @@
 		{
 			var totalValue = this.GrandTotals[innerHeaderIndex, dataFieldCollectionIndex];
 			this.GrandTotals[innerHeaderIndex, dataFieldCollectionIndex] = (totalValue ?? 0) + total;
+		}
+
+		/// <summary>
+		/// Calculate the grand total values when there are multiple row data fields and no column fields. Only used to calculate row grand total values.
+		/// </summary>
+		/// <param name="innerHeaderIndex">The index for the inner 'for' loop.</param>
+		/// <param name="value">The value in the current cell.</param>
+		/// <param name="outerHeader">The <see cref="PivotTableHeader"/>.</param>
+		/// <param name="grandTotal">The current grand total value that needs to be updated.</param>
+		/// <returns>The updated grand total value.</returns>
+		protected override double? CalculateTotalWithNoColumns(int innerHeaderIndex, double value, PivotTableHeader outerHeader, double? grandTotal)
+		{
+			throw new NotImplementedException();
 		}
 		#endregion
 	}
