@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation

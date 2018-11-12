@@ -1023,13 +1023,13 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				for (int i = 0; i < this.DataFields.Count; i++)
 				{
-					var header = new PivotTableHeader(null, null, i, true, isRowHeader, false);
+					var header = new PivotTableHeader(null, null, i, true, isRowHeader, false, "grand");
 					this.AddSumNodeToCollections(collection, headers, "grand", 0, 0, header, i);
 				}
 			}
 			else
 			{
-				var header = new PivotTableHeader(null, null, 0, true, isRowHeader, false);
+				var header = new PivotTableHeader(null, null, 0, true, isRowHeader, false, "grand");
 				this.AddSumNodeToCollections(collection, headers, "grand", 0, 0, header);
 			}
 		}
@@ -1041,86 +1041,55 @@ namespace OfficeOpenXml.Table.PivotTable
 				return;
 
 			var pivotFieldIndex = this.RowFields[rowDepth].Index;
+
+			// Initializing local variables and the default case is a pivot table with multiple row data fields (pivotFieldIndex == -2).
 			ExcelPivotTableField pivotField = null;
-
-			if (pivotFieldIndex == -2)
-			{
-				for (int i = 0; i < this.DataFields.Count; i++)
-				{
-					var childList = parentNodeIndices.ToList();
-					childList.Add(new Tuple<int, int>(pivotFieldIndex, i));
-					this.RowItems.Add(rowDepth, i, null, i);
-					bool leafNode = rowDepth == this.RowFields.Count - 1;
-					this.RowHeaders.Add(new PivotTableHeader(childList, null, i, false, true, leafNode));
-					this.BuildRowItems(rowDepth + 1, childList, i);
-				}
-
-				// Create subtotal nodes when the data fields are inner nodes and it is created for their direct parents.
-				if (parentNodeIndices.Any() && parentNodeIndices.Last().Item1 != -2 && rowDepth != this.RowFields.Count - 1)
-				{
-					pivotField = this.Fields[parentNodeIndices.Last().Item1];
-					if (pivotField.DefaultSubtotal && parentNodeIndices.Any())
-					{
-						for (int i = 0; i < this.DataFields.Count; i++)
-						{
-							bool isAboveDataField = true;
-							if (parentNodeIndices.Any(x => x.Item1 == -2))
-								isAboveDataField = false;
-							var header = new PivotTableHeader(parentNodeIndices, pivotField, i, false, true, false, "default", isAboveDataField);
-							this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
-								parentNodeIndices.Count - 1, parentNodeIndices.Last().Item2, header, i);
-						}
-					}
-				}
-			}
-			else
+			int maxIndex = this.DataFields.Count;
+			bool isAboveDataField = false;
+			if (pivotFieldIndex != -2)
 			{
 				pivotField = this.Fields[pivotFieldIndex];
-				int maxIndex = pivotField.DefaultSubtotal ? pivotField.Items.Count - 1 : pivotField.Items.Count;
-				for (int i = 0; i < maxIndex; i++)
+				maxIndex = pivotField.DefaultSubtotal ? pivotField.Items.Count - 1 : pivotField.Items.Count;
+				isAboveDataField = !parentNodeIndices.Any(x => x.Item1 == -2);
+			}
+
+			// Create xml nodes and row headers.
+			for (int i = 0; i < maxIndex; i++)
+			{
+				var childList = parentNodeIndices.ToList();
+				childList.Add(new Tuple<int, int>(pivotFieldIndex, i));
+				bool leafNode = rowDepth == this.RowFields.Count - 1;
+				int myDataFieldIndex = pivotFieldIndex == -2 ? i : dataFieldIndex;
+				if (pivotField == null || this.CacheDefinition.CacheRecords.Contains(childList))
 				{
-					var childList = parentNodeIndices.ToList();
-					childList.Add(new Tuple<int, int>(pivotFieldIndex, pivotField.Items[i].X));
-					if (this.CacheDefinition.CacheRecords.Contains(childList))
+					this.RowItems.Add(rowDepth, i, null, myDataFieldIndex);
+					this.RowHeaders.Add(new PivotTableHeader(childList, pivotField, myDataFieldIndex, false, true, leafNode, null, isAboveDataField));
+					this.BuildRowItems(rowDepth + 1, childList, myDataFieldIndex);
+				}
+			}
+
+			// Get the last pivot field to check if subtotals are used.
+			if (pivotFieldIndex == -2)
+				pivotField = this.Fields[parentNodeIndices.Last().Item1];
+			if (parentNodeIndices.Any() && parentNodeIndices.Last().Item1 != -2 && pivotField.DefaultSubtotal)
+			{
+				var hasDataFieldParent = parentNodeIndices.Any(x => x.Item1 == -2);
+				int repeatedItemsCount = pivotFieldIndex == -2 ? parentNodeIndices.Count - 1 : rowDepth - 1;
+				// If there are multiple data fields, then create a subtotal node for each data field. Otherwise, only create one subtotal node.
+				if (rowDepth != this.RowFields.Count - 1 && (!pivotField.SubtotalTop && !hasDataFieldParent))
+				{
+					for (int i = 0; i < this.DataFields.Count; i++)
 					{
-						this.RowItems.Add(rowDepth, i, null, dataFieldIndex);
-						bool leafNode = rowDepth == this.RowFields.Count - 1;
-						bool isAboveDataField = true;
-						if (parentNodeIndices.Any(x => x.Item1 == -2))
-							isAboveDataField = false;
-						this.RowHeaders.Add(new PivotTableHeader(childList, pivotField, dataFieldIndex, false, true, leafNode, null, isAboveDataField));
-						this.BuildRowItems(rowDepth + 1, childList, dataFieldIndex);
+						var header = new PivotTableHeader(parentNodeIndices, pivotField, i, false, true, false, "default", true);
+						this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
+							repeatedItemsCount, parentNodeIndices.Last().Item2, header, i);
 					}
 				}
-
-				// Create subtotal nodes when the data fields are root nodes or when there is only one data field.
-				if (pivotField.DefaultSubtotal && !pivotField.SubtotalTop && parentNodeIndices.Any())
+				else if (!pivotField.SubtotalTop && (hasDataFieldParent || this.DataFields.Count == 1))
 				{
-					if (parentNodeIndices.Last().Item1 != -2)
-					{
-						bool isAboveDataField = true;
-						if (parentNodeIndices.Any(x => x.Item1 == -2))
-							isAboveDataField = false;
-						// If there are data fields in the parent node indices hierarchy, then only create one subtotal node. 
-						// Otherwise, create a subtotal node for every data field.
-						if (parentNodeIndices.Any(x => x.Item1 == -2))
-						{
-							var header = new PivotTableHeader(parentNodeIndices, pivotField, dataFieldIndex, false, true, false, "default", isAboveDataField);
-							this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
-							rowDepth - 1, parentNodeIndices.Last().Item2, header);
-						}
-						else
-						{
-							// Subtotal nodes are created when the data fields are leaf nodes and for all the parent nodes in the hierarchy of the
-							// data field node except it's direct parent.
-							for (int i = 0; i < this.DataFields.Count; i++)
-							{
-								var header = new PivotTableHeader(parentNodeIndices, pivotField, i, false, true, false, "default", isAboveDataField);
-								this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
-								rowDepth - 1, parentNodeIndices.Last().Item2, header, i);
-							}
-						}
-					}
+					var header = new PivotTableHeader(parentNodeIndices, pivotField, dataFieldIndex, false, true, false, "default", false);
+					this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
+						repeatedItemsCount, parentNodeIndices.Last().Item2, header);
 				}
 			}
 		}
@@ -1268,10 +1237,6 @@ namespace OfficeOpenXml.Table.PivotTable
 					continue;
 				}
 
-				// Write in sum column header if the pivot table does not specify columns.
-				if (this.TopNode.SelectSingleNode("d:colFields", this.NameSpaceManager) == null)
-					this.WorkSheet.Cells[startHeaderRow++, headerColumn].Value = this.DataFields[colItem.DataFieldIndex].Name;
-
 				for (int i = 0; i < colItem.Count; i++)
 				{
 					var columnFieldIndex = colItem.RepeatedItemsCount == 0 ? i : i + colItem.RepeatedItemsCount;
@@ -1320,22 +1285,8 @@ namespace OfficeOpenXml.Table.PivotTable
 					}
 					else if (rowHeader.PivotTableField.DefaultSubtotal)
 					{
-						if (rowHeader.SumType != null)
-						{
-							// If subtotals are on and the rowItem's field specifies a sum type, then write out the last calculated sum.
-							this.WorkSheet.Cells[dataRow, dataColumn].Value = subtotalStack.Last();
-							subtotalStack.RemoveAt(subtotalStack.Count - 1);
-						}
-						else if (rowHeader.PivotTableField.SubtotalTop)
-						{
-							// If subtotalTop is true, then write out value.
+						if (rowHeader.SumType != null || rowHeader.PivotTableField.SubtotalTop)
 							this.WorkSheet.Cells[dataRow, dataColumn].Value = subtotal;
-						}
-						else
-						{
-							// Node is a non-subtotal node.
-							subtotalStack.Add(subtotal);
-						}
 					}
 					dataRow++;
 				}
