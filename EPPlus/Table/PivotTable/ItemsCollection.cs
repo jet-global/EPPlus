@@ -53,10 +53,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Adds a new <see cref="RowColumnItem"/> to this collection.
 		/// </summary>
 		/// <param name="rowDepth">The row depth of this item in the pivot table.</param>
-		/// <param name="i">The value of it's 'x' attribute.</param>
-		public void Add(int rowDepth, int i)
+		/// <param name="value">The value of it's 'x' attribute.</param>
+		/// <param name="itemType">The value of the 't' attribute.</param>
+		/// <param name="dataFieldIndex">The value of the 'i' attribute.</param>
+		public void Add(int rowDepth, int value, string itemType = null, int dataFieldIndex = 0)
 		{
-			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, rowDepth, i));
+			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, rowDepth, value, itemType, dataFieldIndex));
 		}
 
 		/// <summary>

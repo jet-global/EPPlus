@@ -209,7 +209,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				bool matched = true;
 				foreach (var indexTuple in nodeIndices)
 				{
-					if (int.Parse(record.Items[indexTuple.Item1].Value) != indexTuple.Item2)
+					if (indexTuple.Item1 != -2 && int.Parse(record.Items[indexTuple.Item1].Value) != indexTuple.Item2)
 					{
 						matched = false;
 						break;
@@ -234,12 +234,17 @@ namespace OfficeOpenXml.Table.PivotTable
 			foreach (var record in this.Records)
 			{
 				bool match = true;
-				foreach (var rowIndex in rowTuple)
+				if (rowTuple != null)
 				{
-					if (int.Parse(record.Items[rowIndex.Item1].Value) != rowIndex.Item2)
+					foreach (var rowIndex in rowTuple)
 					{
-						match = false;
-						break;
+						if (rowIndex.Item1 == -2)
+							continue;
+						if (int.Parse(record.Items[rowIndex.Item1].Value) != rowIndex.Item2)
+						{
+							match = false;
+							break;
+						}
 					}
 				}
 				if (match && colTuple != null)
