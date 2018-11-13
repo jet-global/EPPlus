@@ -111,6 +111,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <returns>The updated grand total value.</returns>
 		protected override double? CalculateTotalWithNoColumns(int innerHeaderIndex, double value, PivotTableHeader outerHeader, double? grandTotal)
 		{
+			// Only used to calculate row grand total values.
 			throw new NotImplementedException();
 		}
 		#endregion
