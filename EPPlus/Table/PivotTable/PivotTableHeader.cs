@@ -38,6 +38,21 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets the value if there is a <see cref="RowColumnItem"/>  with a non-null itemType, typically 'default'.
 		/// </summary>
 		public string SumType { get; }
+
+		/// <summary>
+		/// Gets the flag indicating if this is the inner-most header. Excludes subtotal and grand total nodes.
+		/// </summary>
+		public bool IsLeafNode { get; }
+
+		/// <summary>
+		/// Gets the flag indicating if this is above a data field header. Only used for row <see cref="PivotTableHeader"/>s.
+		/// </summary>
+		public bool IsAboveDataField { get; }
+
+		/// <summary>
+		/// Gets the flag indicating if this is a data field header.
+		/// </summary>
+		public bool IsDataField { get; }
 		#endregion
 
 		#region Constructors
@@ -49,14 +64,21 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="dataFieldCollectionIndex">The index of the data field in the collection.</param>
 		/// <param name="isGrandTotal">A value indicating if it is a grand total.</param>
 		/// <param name="isRowHeader">A value indicating if it is a row header.</param>
+		/// <param name="isLeafNode">A value indicating if it is a leaf node.</param>
+		/// <param name="isDataField">A value indicating if it is a data field node.</param>
 		/// <param name="sumType">The itemType value of the <see cref="RowColumnItem"/>.</param>
-		public PivotTableHeader(List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldCollectionIndex, bool isGrandTotal, bool isRowHeader, string sumType = null)
+		/// <param name="isAboveDataField">A value indicating if it is above a data field node.</param>
+		public PivotTableHeader(List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldCollectionIndex, bool isGrandTotal,
+			bool isRowHeader, bool isLeafNode, bool isDataField, string sumType = null, bool isAboveDataField = false)
 		{
 			this.CacheRecordIndices = recordIndices;
 			this.PivotTableField = field;
 			this.DataFieldCollectionIndex = dataFieldCollectionIndex;
 			this.IsGrandTotal = isGrandTotal;
 			this.IsRowHeader = isRowHeader;
+			this.IsLeafNode = isLeafNode;
+			this.IsDataField = isDataField;
+			this.IsAboveDataField = isAboveDataField;
 			this.SumType = sumType;
 		}
 		#endregion
