@@ -1280,6 +1280,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			int dataColumn = this.Address.Start.Column + this.FirstDataCol;
 			var subtotalStack = new List<double?>();
+			var totalCalculator = new TotalsFunctionHelper(this);
 			foreach (var columnHeader in this.ColumnHeaders)
 			{
 				int dataRow = this.Address.Start.Row + this.FirstDataRow;
@@ -1287,39 +1288,42 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
 						continue;
-
-					int dataFieldCollectionIndex = 0;
-					if (this.HasRowDataFields)
-						dataFieldCollectionIndex = this.DataFields[rowHeader.DataFieldCollectionIndex].Index;
-					else
-						dataFieldCollectionIndex = this.DataFields[columnHeader.DataFieldCollectionIndex].Index;
-
-					var subtotal = this.CacheDefinition.CacheRecords.CalculateSubtotal(
-						rowHeader.CacheRecordIndices, 
-						columnHeader.CacheRecordIndices,
-						dataFieldCollectionIndex);
-
-					if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.ColumnFields.Count) || 
-						rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
-						this.WorkSheet.Cells[dataRow, dataColumn].Value = subtotal; // At a leaf node, write value.
+					
+					if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.ColumnFields.Count) 
+						|| rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
+					{
+						// At a leaf node, write value.
+						this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalCalculator);
+					}
 					else if (this.HasRowDataFields)
 					{
 						if (rowHeader.PivotTableField != null && rowHeader.PivotTableField.DefaultSubtotal)
 						{
-							if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField) || 
-								rowHeader.SumType.IsEquivalentTo("default"))
-								this.WorkSheet.Cells[dataRow, dataColumn].Value = subtotal;
+							if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField) || rowHeader.SumType.IsEquivalentTo("default"))
+								this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalCalculator);
 						}
 					}
-					else if (rowHeader.PivotTableField.DefaultSubtotal)
-					{
-						if (rowHeader.SumType != null || rowHeader.PivotTableField.SubtotalTop)
-							this.WorkSheet.Cells[dataRow, dataColumn].Value = subtotal;
-					}
+					else if (rowHeader.PivotTableField.DefaultSubtotal && (rowHeader.SumType != null || rowHeader.PivotTableField.SubtotalTop))
+						this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalCalculator);
 					dataRow++;
 				}
 				dataColumn++;
 			}
+		}
+
+		private void WriteCellResult(int row, int column, PivotTableHeader rowHeader, PivotTableHeader columnHeader, bool hasRowDataFields, TotalsFunctionHelper functionCalculator)
+		{
+			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
+			var dataField = this.DataFields[dataFieldCollectionIndex];
+			var matchingValues = this.CacheDefinition.CacheRecords.FindMatchingValues(
+				rowHeader.CacheRecordIndices,
+				columnHeader.CacheRecordIndices,
+				dataField.Index);
+			var cell = this.WorkSheet.Cells[row, column];
+			cell.Value = functionCalculator.Calculate(dataField, matchingValues);
+			var style = this.WorkSheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
+			if (style != null)
+				cell.Style.Numberformat.Format = style.Format;
 		}
 
 		private bool SetTotalCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, int row, int column)
