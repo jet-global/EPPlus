@@ -23,9 +23,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			base.HasOuterDataFields = base.PivotTable.HasColumnDataFields;
 			base.OuterCellIndex = base.DataStartColumn;
 			base.StartIndex = this.InnerCellIndex = base.DataStartRow;
-			base.ShouldWriteInnerGrandTotals = this.OuterLoop.Count > 0 
-				&& base.PivotTable.ColumnFields.Count > 0 
-				&& base.PivotTable.ColumnFields[0].Index != -2;
+			base.ShouldWriteInnerGrandTotals = this.OuterLoop.Count > 0 && base.PivotTable.ColumnFields.Count > 0;
+				//&& base.PivotTable.ColumnFields[0].Index != -2;
 		}
 		#endregion
 
