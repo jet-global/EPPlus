@@ -1102,65 +1102,51 @@ namespace OfficeOpenXml.Table.PivotTable
 				return true;
 
 			var pivotFieldIndex = this.ColumnFields[colDepth].Index;
+			// Variables are set to the default case of a pivot table with multiple column data fields (pivotFieldIndex == -2).
 			ExcelPivotTableField pivotField = null;
-			int rValue = itemsCreated ? colDepth - 1 : colDepth;
-			if (pivotFieldIndex == -2)
-			{
-				// Enumerate the data field collection at the column field node.
-				for (int i = 0; i < this.DataFields.Count; i++)
-				{
-					var childList = parentNodeIndices.ToList();
-					childList.Add(new Tuple<int, int>(-2, i));
-					bool leafNode = colDepth == this.ColumnFields.Count - 1;
-					this.BuildColumnItems(colDepth + 1, childList, itemsCreated, i);
-					// Only generate item/header if data field node is a leaf node.
-					if (leafNode)
-					{
-						this.ColumnHeaders.Add(new PivotTableHeader(childList.ToList(), pivotField, i, false, false, leafNode, false));
-						int repeatedItemsCount = itemsCreated ? rValue : 0;
-						this.ColumnItems.AddColumnItem(childList, repeatedItemsCount, i);
-					}
-					itemsCreated = true;
-				}
-			}
-			else
+			int maxIndex = this.DataFields.Count;
+			// If the pivotFieldIndex is not a data field index, then set the variables accordingly.
+			if (pivotFieldIndex != -2)
 			{
 				pivotField = this.Fields[pivotFieldIndex];
-				int maxIndex = pivotField.DefaultSubtotal ? pivotField.Items.Count - 1 : pivotField.Items.Count;
-				for (int i = 0; i < maxIndex; i++)
+				maxIndex = pivotField.DefaultSubtotal ? pivotField.Items.Count - 1 : pivotField.Items.Count;
+			}
+
+			for (int i = 0; i < maxIndex; i++)
+			{
+				var childList = parentNodeIndices.ToList();
+				int itemIndex = pivotFieldIndex == -2 ? i : pivotField.Items[i].X;
+				childList.Add(new Tuple<int, int>(pivotFieldIndex, itemIndex));
+				if (this.CacheDefinition.CacheRecords.Contains(childList))
 				{
-					var childList = parentNodeIndices.ToList();
-					childList.Add(new Tuple<int, int>(pivotFieldIndex, pivotField.Items[i].X));
-					if (this.CacheDefinition.CacheRecords.Contains(childList))
+					int myDataFieldIndex = pivotFieldIndex == -2 ? i : dataFieldIndex;
+					bool result = this.BuildColumnItems(colDepth + 1, childList, itemsCreated, myDataFieldIndex);
+					if (colDepth == this.ColumnFields.Count - 1)
 					{
-						bool result = this.BuildColumnItems(colDepth + 1, childList, itemsCreated, dataFieldIndex);
-						if (colDepth == this.ColumnFields.Count - 1)
+						int repeatedItemsCount = 0;
+						// Find the value of the repeated items count.
+						if (this.ColumnItems.Count > 0)
 						{
-							int repeatedItemsCount = 0;
-							// Find the value of the repeated items count.
-							if (this.ColumnItems.Count > 0)
+							// Compare current column item node indices to previous to find the index of the differing xNode.
+							var lastColumnHeader = this.ColumnHeaders.Last();
+							for (int j = 0; j < childList.Count; j++)
 							{
-								// Compare current column item node indices to previous to find the index of the differing xNode.
-								var lastColumnHeader = this.ColumnHeaders.Last();
-								for (int j = 0; j < childList.Count; j++)
+								if (lastColumnHeader.CacheRecordIndices[j].Item2 != childList[j].Item2)
 								{
-									if (lastColumnHeader.CacheRecordIndices[j].Item2 != childList[j].Item2)
-									{
-										repeatedItemsCount = j;
-										break;
-									}
+									repeatedItemsCount = j;
+									break;
 								}
 							}
-							bool isAboveDataField = !parentNodeIndices.Any(x => x.Item1 == -2);
-							this.ColumnHeaders.Add(new PivotTableHeader(childList.ToList(), pivotField, dataFieldIndex, false, false, true, false, null, isAboveDataField));
-							this.ColumnItems.AddColumnItem(childList, repeatedItemsCount, dataFieldIndex);
-							itemsCreated = true;
 						}
-						else if (colDepth == 0)
-							itemsCreated = false;
-						else if (colDepth < this.ColumnFields.Count - 1)
-							itemsCreated = result;
+						bool isAboveDataField = pivotFieldIndex == -2 ? false : !parentNodeIndices.Any(x => x.Item1 == -2);
+						this.ColumnHeaders.Add(new PivotTableHeader(childList.ToList(), pivotField, myDataFieldIndex, false, false, true, false, null, isAboveDataField));
+						this.ColumnItems.AddColumnItem(childList, repeatedItemsCount, myDataFieldIndex);
+						itemsCreated = true;
 					}
+					else if (colDepth == 0)
+						itemsCreated = false;
+					else if (colDepth < this.ColumnFields.Count - 1)
+						itemsCreated = result;
 				}
 			}
 
@@ -1170,13 +1156,14 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (pivotField != null && pivotField.DefaultSubtotal && parentNodeIndices.Any() && parentNodeIndices.Last().Item1 != -2)
 			{
 				bool hasDataFieldParent = parentNodeIndices.Any(x => x.Item1 == -2);
+				int rValue = itemsCreated ? colDepth - 1 : colDepth;
 				int rAttribute = rValue == colDepth ? rValue - 1 : rValue;
 				bool isAboveDataField = !parentNodeIndices.Any(x => x.Item1 == -2);
 				bool isLastNonDataField = this.ColumnFields.Skip(rAttribute + 1).All(x => x.Index == -2);
 				// If the node is above a data field node and there are multiple data fields, then create a subtotal node for each data field. 
-				// Otherwise, if the node is not the last non-data field node and is below a data field node, then only create one subtotal node.
 				if (this.DataFields.Count > 0 && !hasDataFieldParent && !isLastNonDataField)
 					this.CreateDefaultNode(true, false, parentNodeIndices, pivotField, rAttribute);
+				// Otherwise, if the node is not the last non-data field node and is below a data field node, then only create one subtotal node.
 				else if (!isLastNonDataField && !isAboveDataField)
 					this.CreateDefaultNode(false, false, parentNodeIndices, pivotField, rAttribute);
 			}
