@@ -1008,19 +1008,15 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				collection.Clear();
 				if (isRowItems)
-				{
 					this.BuildRowItems(0, new List<Tuple<int, int>>(), 0);
-					if (this.RowGrandTotals)
-						this.CreateGrandTotalNodes(collection, this.RowHeaders, this.HasRowDataFields, true);
-				}
 				else
-				{
 					this.BuildColumnItems(0, new List<Tuple<int, int>>(), false, 0);
-					// Only create item nodes and headers if there are column headers.
-					// TODO (Task #9062): Fix this when cleaning up building column items.
-					if (this.ColumnGrandTotals)
-						this.CreateGrandTotalNodes(collection, this.ColumnHeaders, this.HasColumnDataFields, false);
-				}
+				// Create grand total items if necessary.
+				bool grandTotals = isRowItems ? this.RowGrandTotals : this.ColumnGrandTotals;
+				if (grandTotals && isRowItems)
+					this.CreateGrandTotalNodes(collection, this.RowHeaders, this.HasRowDataFields, true);
+				else if (grandTotals && !isRowItems)
+					this.CreateGrandTotalNodes(collection, this.ColumnHeaders, this.HasColumnDataFields, false);
 			}
 			else
 			{
@@ -1094,20 +1090,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				int repeatedItemsCount = pivotFieldIndex == -2 ? parentNodeIndices.Count - 1 : rowDepth - 1;
 				// If there are multiple data fields, then create a subtotal node for each data field. Otherwise, only create one subtotal node.
 				if (rowDepth != this.RowFields.Count - 1 && (!pivotField.SubtotalTop && !hasDataFieldParent))
-				{
-					for (int i = 0; i < this.DataFields.Count; i++)
-					{
-						var header = new PivotTableHeader(parentNodeIndices, pivotField, i, false, true, false, false, "default", true);
-						this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
-							repeatedItemsCount, parentNodeIndices.Last().Item2, header, i);
-					}
-				}
+					this.CreateDefaultNode(true, true, parentNodeIndices, pivotField, repeatedItemsCount);
 				else if (!pivotField.SubtotalTop && (hasDataFieldParent || this.DataFields.Count == 1))
-				{
-					var header = new PivotTableHeader(parentNodeIndices, pivotField, dataFieldIndex, false, true, false, false, "default", false);
-					this.AddSumNodeToCollections(this.RowItems, this.RowHeaders, "default",
-						repeatedItemsCount, parentNodeIndices.Last().Item2, header);
-				}
+					this.CreateDefaultNode(false, true, parentNodeIndices, pivotField, repeatedItemsCount);
 			}
 		}
 
@@ -1191,25 +1176,32 @@ namespace OfficeOpenXml.Table.PivotTable
 				// If the node is above a data field node and there are multiple data fields, then create a subtotal node for each data field. 
 				// Otherwise, if the node is not the last non-data field node and is below a data field node, then only create one subtotal node.
 				if (this.DataFields.Count > 0 && !hasDataFieldParent && !isLastNonDataField)
-				{
-					// Create a xml subtotal node for each data field.
-					for (int i = 0; i < this.DataFields.Count; i++)
-					{
-						var header = new PivotTableHeader(parentNodeIndices, pivotField, i, false, false, false, false, "default", isAboveDataField);
-						this.AddSumNodeToCollections(this.ColumnItems, this.ColumnHeaders, "default",
-							rAttribute, parentNodeIndices.Last().Item2, header, i);
-					}
-				}
+					this.CreateDefaultNode(true, false, parentNodeIndices, pivotField, rAttribute);
 				else if (!isLastNonDataField && !isAboveDataField)
-				{
-					// If there are no data fields, then create a single xml subtotal node.
-					var header = new PivotTableHeader(parentNodeIndices, pivotField, 0, false, false, false, false, "default", isAboveDataField);
-					this.AddSumNodeToCollections(this.ColumnItems, this.ColumnHeaders, "default",
-						rAttribute, parentNodeIndices.Last().Item2, header, dataFieldIndex);
-				}
+					this.CreateDefaultNode(false, false, parentNodeIndices, pivotField, rAttribute);
 			}
 
 			return itemsCreated;
+		}
+
+		private void CreateDefaultNode(bool multipleDataFields, bool isRowItem, List<Tuple<int, int>> indices, ExcelPivotTableField pivotField, int repeatedItemsCount)
+		{
+			bool aboveDataField = isRowItem ? true : !indices.Any(x => x.Item1 == -2);
+			var itemsCollection = isRowItem ? this.RowItems : this.ColumnItems;
+			var headerCollection = isRowItem ? this.RowHeaders : this.ColumnHeaders;
+			if (multipleDataFields)
+			{
+				for (int i = 0; i < this.DataFields.Count; i++)
+				{
+					var header = new PivotTableHeader(indices, pivotField, i, false, isRowItem, false, false, "default", aboveDataField);
+					this.AddSumNodeToCollections(itemsCollection, headerCollection, "default", repeatedItemsCount, indices.Last().Item2, header, i);
+				}
+			}
+			else 
+			{
+				var header = new PivotTableHeader(indices, pivotField, 0, false, isRowItem, false, false, "default", aboveDataField);
+				this.AddSumNodeToCollections(itemsCollection, headerCollection, "default", repeatedItemsCount, indices.Last().Item2, header);
+			}
 		}
 
 		private void AddSumNodeToCollections(ItemsCollection collection, List<PivotTableHeader> headerList, 
