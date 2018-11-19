@@ -1152,7 +1152,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private void CreateColumnItemNode(int index, List<Tuple<int, int>> indices, int pivotFieldIndex, ExcelPivotTableField pivotField, int dataFieldIndex, int colDepth, bool itemsCreated, bool isDataField, bool isAboveDataField)
+		private void CreateColumnItemNode(int index, List<Tuple<int, int>> indices, int pivotFieldIndex, ExcelPivotTableField pivotField, int dataFieldIndex, 
+			int colDepth, bool itemsCreated, bool isDataField, bool isAboveDataField)
 		{
 			for (int i = 0; i < index; i++)
 			{
