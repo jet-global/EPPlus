@@ -215,6 +215,10 @@ namespace EPPlusTest.Excel.Functions.Text
 			var func = new Search();
 			var result = func.Execute(FunctionsHelper.CreateArgs("is", "This is a test case.", 4), this.ParsingContext);
 			Assert.AreEqual(6, result.Result);
+			result = func.Execute(FunctionsHelper.CreateArgs("a", "apple pie", 1), this.ParsingContext);
+			Assert.AreEqual(1, result.Result);
+			result = func.Execute(FunctionsHelper.CreateArgs("a", "banana", 2), this.ParsingContext);
+			Assert.AreEqual(2, result.Result);
 		}
 
 		[TestMethod]

@@ -40,7 +40,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 			var startIndex = 0;
 			if (functionArguments.Count() > 2)
 				startIndex = base.ArgToInt(functionArguments, 2);
-			var result = searchIn.IndexOf(search, startIndex, System.StringComparison.OrdinalIgnoreCase);
+			// Subtract 1 because Excel uses 1-based index
+			int index = functionArguments.Count() > 2 ? startIndex - 1 : startIndex;
+			var result = searchIn.IndexOf(search, index, System.StringComparison.OrdinalIgnoreCase);
 			if (result == -1)
 				return base.CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 			// Adding 1 because Excel uses 1-based index
