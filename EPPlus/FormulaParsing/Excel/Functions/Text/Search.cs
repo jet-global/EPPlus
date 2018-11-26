@@ -41,8 +41,8 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 			if (functionArguments.Count() > 2)
 				startIndex = base.ArgToInt(functionArguments, 2);
 			// Subtract 1 because Excel uses 1-based index
-			int index = functionArguments.Count() > 2 ? startIndex - 1 : startIndex;
-			var result = searchIn.IndexOf(search, index, System.StringComparison.OrdinalIgnoreCase);
+			startIndex = functionArguments.Count() > 2 ? startIndex - 1 : startIndex;
+			var result = searchIn.IndexOf(search, startIndex, System.StringComparison.OrdinalIgnoreCase);
 			if (result == -1)
 				return base.CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 			// Adding 1 because Excel uses 1-based index
