@@ -72,12 +72,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets the xml data representing the pivot table in the package.
 		/// </summary>
 		public XmlDocument PivotTableXml { get; private set; }
-		
+
 		/// <summary>
 		/// Gets or sets the package internal URI to the pivot table xml Document.
 		/// </summary>
 		public Uri PivotTableUri { get; internal set; }
-		
+
 		/// <summary>
 		/// Gets or sets the name of the pivot table object in Excel.
 		/// </summary>
@@ -102,7 +102,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString(DisplayNamePath, this.CleanDisplayName(value));
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets the reference to the pivot table cache definition object.
 		/// </summary>
@@ -133,17 +133,17 @@ namespace OfficeOpenXml.Table.PivotTable
 				myCacheDefinition = value;
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the worksheet where the pivot table is located.
 		/// </summary>
 		public ExcelWorksheet WorkSheet { get; set; }
-		
+
 		/// <summary>
 		/// Gets or sets the location of the pivot table.
 		/// </summary>
 		public ExcelAddress Address { get; internal set; }
-		
+
 		/// <summary>
 		/// Gets or sets whether multiple datafields are displayed in the row area or the column area.
 		/// </summary>
@@ -263,7 +263,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeBool("@showCalcMbrs", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets if the user can enable drill down on a PivotItem or aggregate value.
 		/// </summary>
@@ -400,7 +400,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeBool("@showError", value);
 			}
 		}
-	
+
 		/// <summary>
 		/// Gets or sets the string to be displayed in cells that contain errors.
 		/// </summary>
@@ -415,7 +415,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString("@errorCaption", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the name of the value area field header in the PivotTable. 
 		/// This caption is shown when the PivotTable when two or more fields are in the values area.
@@ -446,7 +446,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeBool("@showHeaders", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the number of page fields to display before starting another row or column.
 		/// </summary>
@@ -463,7 +463,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString("@pageWrap", value.ToString());
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets whether the legacy auto formatting has been applied to the PivotTable view.
 		/// </summary>
@@ -478,7 +478,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeBool("@useAutoFormatting", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets whether the in-grid drop zones should be displayed at runtime, and whether classic layout is applied.
 		/// </summary>
@@ -493,7 +493,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeBool("@gridDropZones", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the indentation increment for compact axis or can be used to set the Report Layout to Compact Form.
 		/// </summary>
@@ -508,7 +508,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString("@indent", value.ToString());
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets whether data fields in the PivotTable should be displayed in outline form.
 		/// </summary>
@@ -523,7 +523,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeBool("@outlineData", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets whether new fields should have their outline flag set to true.
 		/// </summary>
@@ -538,7 +538,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeBool("@outline", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets whether the fields of a PivotTable can have multiple filters set on them.
 		/// </summary>
@@ -553,7 +553,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeBool("@multipleFieldFilters", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets whether new fields should have their compact flag set to true.
 		/// </summary>
@@ -568,7 +568,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeBool("@compact", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets whether the field next to the data field in the PivotTable should be displayed in the same column of the spreadsheet.
 		/// </summary>
@@ -583,7 +583,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeBool("@compactData", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the string to be displayed for grand totals.
 		/// </summary>
@@ -598,7 +598,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString("@grandTotalCaption", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the string to be displayed in row header in compact mode.
 		/// </summary>
@@ -613,7 +613,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString("@rowHeaderCaption", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the string to be displayed in cells with no value.
 		/// </summary>
@@ -628,7 +628,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString("@missingCaption", value);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the first row of the PivotTable header relative to the top left cell in the ref value.
 		/// </summary>
@@ -643,7 +643,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString(FirstHeaderRowPath, value.ToString());
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the first column of the PivotTable data relative to the top left cell in the ref value.
 		/// </summary>
@@ -658,7 +658,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString(FirstDataRowPath, value.ToString());
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the first column of the PivotTable data relative to the top left cell in the ref value.
 		/// </summary>
@@ -673,7 +673,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString(FirstDataColumnPath, value.ToString());
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets the fields in the table .
 		/// </summary>
@@ -689,7 +689,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				return myFields;
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets the row label fields.
 		/// </summary>
@@ -705,7 +705,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				return myRowFields;
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets the column label fields.
 		/// </summary>
@@ -721,7 +721,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				return myColumnFields;
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets the value fields.
 		/// </summary>
@@ -812,7 +812,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString(StyleNamePath, value, true);
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the table style. If this is a custom property, the style from the StyleName propery is used.
 		/// </summary>
@@ -829,7 +829,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					base.SetXmlNodeString(StyleNamePath, "PivotStyle" + value.ToString());
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the cache id of the pivot table.
 		/// </summary>
@@ -909,7 +909,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			this.LoadFields();
 		}
-		
+
 		/// <summary>
 		/// Creates an instance of a <see cref="ExcelPivotTable"/>.
 		/// </summary>
@@ -992,10 +992,10 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// Update the rowItems.
 			this.UpdateRowColumnItems(this.RowFields, this.RowItems, true);
-		
+
 			// Update the colItems.
 			this.UpdateRowColumnItems(this.ColumnFields, this.ColumnItems, false);
-			
+
 			this.UpdateWorksheet();
 		}
 		#endregion
@@ -1117,7 +1117,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				return true;
 
 			var pivotFieldIndex = this.ColumnFields[colDepth].Index;
-			ExcelPivotTableField pivotField = null; 
+			ExcelPivotTableField pivotField = null;
 			int rValue = itemsCreated ? colDepth - 1 : colDepth;
 			if (pivotFieldIndex == -2)
 			{
@@ -1185,7 +1185,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			return itemsCreated;
 		}
 
-		private void AddSumNodeToCollections(ItemsCollection collection, List<PivotTableHeader> headerList, 
+		private void AddSumNodeToCollections(ItemsCollection collection, List<PivotTableHeader> headerList,
 			string itemType, int repeatedItemsCount, int xMemberValue, PivotTableHeader header, int dataFieldIndex = 0)
 		{
 			collection.AddSumNode(itemType, repeatedItemsCount, xMemberValue, dataFieldIndex);
@@ -1280,34 +1280,36 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			int dataColumn = this.Address.Start.Column + this.FirstDataCol;
 			var subtotalStack = new List<double?>();
-			var totalCalculator = new TotalsFunctionHelper(this);
-			foreach (var columnHeader in this.ColumnHeaders)
+			using (var totalsCalculator = new TotalsFunctionHelper(this))
 			{
-				int dataRow = this.Address.Start.Row + this.FirstDataRow;
-				foreach (var rowHeader in this.RowHeaders)
+				foreach (var columnHeader in this.ColumnHeaders)
 				{
-					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
-						continue;
-					
-					if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.ColumnFields.Count) 
-						|| rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
+					int dataRow = this.Address.Start.Row + this.FirstDataRow;
+					foreach (var rowHeader in this.RowHeaders)
 					{
-						// At a leaf node, write value.
-						this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalCalculator);
-					}
-					else if (this.HasRowDataFields)
-					{
-						if (rowHeader.PivotTableField != null && rowHeader.PivotTableField.DefaultSubtotal)
+						if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
+							continue;
+
+						if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.ColumnFields.Count)
+							|| rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
 						{
-							if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField) || rowHeader.SumType.IsEquivalentTo("default"))
-								this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalCalculator);
+							// At a leaf node, write value.
+							this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalsCalculator);
 						}
+						else if (this.HasRowDataFields)
+						{
+							if (rowHeader.PivotTableField != null && rowHeader.PivotTableField.DefaultSubtotal)
+							{
+								if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField) || rowHeader.SumType.IsEquivalentTo("default"))
+									this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalsCalculator);
+							}
+						}
+						else if (rowHeader.PivotTableField.DefaultSubtotal && (rowHeader.SumType != null || rowHeader.PivotTableField.SubtotalTop))
+							this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalsCalculator);
+						dataRow++;
 					}
-					else if (rowHeader.PivotTableField.DefaultSubtotal && (rowHeader.SumType != null || rowHeader.PivotTableField.SubtotalTop))
-						this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalCalculator);
-					dataRow++;
+					dataColumn++;
 				}
-				dataColumn++;
 			}
 		}
 

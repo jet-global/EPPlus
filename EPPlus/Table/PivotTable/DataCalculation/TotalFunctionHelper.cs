@@ -7,12 +7,14 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 	/// <summary>
 	/// Calculates totals for pivot table data fields.
 	/// </summary>
-	internal class TotalsFunctionHelper
+	internal class TotalsFunctionHelper : IDisposable
 	{
 		#region Properties
 		private ExcelPivotTable PivotTable { get; }
 
 		private ExcelWorksheet TempWorksheet { get; }
+
+		private ExcelPackage Package { get; }
 		#endregion
 
 		#region Constructors
@@ -26,8 +28,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 			// TODO: Consider creating a shadow sheet in this workbook instead.
 			//		Be sure to evaluate risks of cross-contamination and the like.
-			var tempPackage = new ExcelPackage();
-			this.TempWorksheet = tempPackage.Workbook.Worksheets.Add("Sheet1");
+			this.Package = new ExcelPackage();
+			this.TempWorksheet = this.Package.Workbook.Worksheets.Add("Sheet1");
 		}
 		#endregion
 
@@ -88,6 +90,13 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				default:
 					throw new InvalidOperationException($"Invalid data field function: {dataFieldFunction}.");
 			}
+		}
+		#endregion
+
+		#region IDisposable Overrides
+		public void Dispose()
+		{
+			this.Package.Dispose();
 		}
 		#endregion
 	}
