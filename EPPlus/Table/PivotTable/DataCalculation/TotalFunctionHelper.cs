@@ -43,8 +43,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <returns>The result of the function.</returns>
 		public object Calculate(ExcelPivotTableDataField dataField, List<object> values)
 		{
-			if (values.Count == 0)
-				return new CompileResult(0, DataType.Decimal);
+			if (values == null || values.Count == 0)
+				return null;
 			// Write the values into a temp worksheet.
 			int row = 1;
 			for (int i = 0; i < values.Count; i++)

@@ -1196,19 +1196,22 @@ namespace OfficeOpenXml.Table.PivotTable
 		private void UpdateWorksheet()
 		{
 			this.UpdateRowColumnHeaders();
+
+			// Update the pivot table's address.
+			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
+			int endColumn = this.Address.Start.Column + this.FirstDataCol + this.ColumnHeaders.Count - 1;
+			this.Address = new ExcelAddress(this.WorkSheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
+			
 			if (this.DataFields.Any())
 			{
-				this.UpdatePivotTableWorksheetData();
-				GrandTotalHelperBase grandTotalHelper = null;
-				bool rowGrandTotalHelper = false;
-				if (this.HasRowDataFields)
-				{
-					grandTotalHelper = new RowGrandTotalHelper(this);
-					rowGrandTotalHelper = true;
-				}
-				else
-					grandTotalHelper = new ColumnGrandTotalHelper(this);
-				grandTotalHelper.UpdateGrandTotals(rowGrandTotalHelper);
+				var backingTableData = this.WritePivotTableBodyData();
+				List<object>[] grandTotalsValuesLists = null;
+				if (this.ColumnGrandTotals)
+					grandTotalsValuesLists = this.WriteSideGrandTotals(backingTableData);
+				if (this.RowGrandTotals)
+					this.WriteBottomGrandTotals(backingTableData);
+				if (this.ColumnGrandTotals && this.RowGrandTotals && this.ColumnFields.Any())
+					this.WriteGrandGrandTotals(grandTotalsValuesLists);
 			}
 			else
 			{
@@ -1231,7 +1234,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				for (int i = 0; i < this.RowItems.Count; i++)
 				{
-					bool itemType = this.SetTotalCellValue(this.RowFields, this.RowItems[i], this.RowHeaders[i], dataRow, this.Address.Start.Column);
+					bool itemType = this.SetHeaderTotalCellValue(this.RowFields, this.RowItems[i], this.RowHeaders[i], dataRow, this.Address.Start.Column);
 					if (itemType)
 					{
 						dataRow++;
@@ -1249,7 +1252,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			for (int i = 0; i < this.ColumnItems.Count; i++)
 			{
 				int startHeaderRow = startRow;
-				bool itemType = this.SetTotalCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], startHeaderRow, headerColumn);
+				bool itemType = this.SetHeaderTotalCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], startHeaderRow, headerColumn);
 				if (itemType)
 				{
 					headerColumn++;
@@ -1268,38 +1271,179 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private void UpdatePivotTableWorksheetData()
+		private List<object>[,] WritePivotTableBodyData()
 		{
+			var backingData = new List<object>[this.RowHeaders.Count(), this.ColumnHeaders.Count()];
 			int dataColumn = this.Address.Start.Column + this.FirstDataCol;
-			var subtotalStack = new List<double?>();
 			using (var totalsCalculator = new TotalsFunctionHelper(this))
 			{
-				foreach (var columnHeader in this.ColumnHeaders)
+				for (int column = 0; column < this.ColumnHeaders.Count; column++)
 				{
-					int dataRow = this.Address.Start.Row + this.FirstDataRow;
-					foreach (var rowHeader in this.RowHeaders)
+					var columnHeader = this.ColumnHeaders[column];
+					int dataRow = this.Address.Start.Row + this.FirstDataRow - 1;
+					for (int row = 0; row < this.RowHeaders.Count; row++)
 					{
+						dataRow++;
+						var rowHeader = this.RowHeaders[row];
 						if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
 							continue;
-						if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.ColumnFields.Count) 
+						if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.ColumnFields.Count)
 							|| rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
 						{
-							// At a leaf node, write value.
-							this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalsCalculator);
+							// At a leaf node.
+							backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader);
 						}
 						else if (this.HasRowDataFields)
 						{
 							if (rowHeader.PivotTableField != null && rowHeader.PivotTableField.DefaultSubtotal)
 							{
-								if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField) || rowHeader.SumType.IsEquivalentTo("default"))
-									this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalsCalculator);
+								if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField) 
+									|| rowHeader.SumType.IsEquivalentTo("default"))
+								{
+									backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader);
+								}
 							}
 						}
 						else if (rowHeader.PivotTableField.DefaultSubtotal && (rowHeader.SumType != null || rowHeader.PivotTableField.SubtotalTop))
-								this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalsCalculator);
-						dataRow++;
+							backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader);
+
+						if (backingData[row, column] != null)
+							this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalsCalculator);
 					}
-					dataColumn++;
+						dataColumn++;
+				}
+			}
+			return backingData;
+		}
+
+		private List<object> GetBackingCellValues(PivotTableHeader rowHeader, PivotTableHeader columnHeader)
+		{
+			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
+			var dataField = this.DataFields[dataFieldCollectionIndex];
+			return this.CacheDefinition.CacheRecords.FindMatchingValues(
+				rowHeader.CacheRecordIndices,
+				columnHeader.CacheRecordIndices,
+				dataField.Index);
+		}
+
+		private void WriteBottomGrandTotals(List<object>[,] backingData)
+		{
+			using (var totalsCalculator = new TotalsFunctionHelper(this))
+			{
+				var matchingValues = new List<object>[this.DataFields.Count];
+				for (int dataColumn = 0; dataColumn < this.ColumnHeaders.Count; dataColumn++)
+				{
+					// Reset values lists.
+					for (int i = 0; i < matchingValues.Count(); i++)
+					{
+						matchingValues[i] = null;
+					}
+					var columnHeader = this.ColumnHeaders[dataColumn];
+					int dataFieldCollectionIndex = -1;
+					for (int dataRow = 0; dataRow < this.RowHeaders.Count; dataRow++)
+					{
+						if (backingData[dataRow, dataColumn] == null)
+							continue;
+						var rowHeader = this.RowHeaders[dataRow];
+						dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
+						if (rowHeader.IsLeafNode)
+						{
+							if (matchingValues[dataFieldCollectionIndex] == null)
+								matchingValues[dataFieldCollectionIndex] = new List<object>();
+							matchingValues[dataFieldCollectionIndex].AddRange(backingData[dataRow, dataColumn]);
+						}
+					}
+					if (dataFieldCollectionIndex != -1)
+					{
+						var row = this.Address.End.Row;
+						if (this.HasRowDataFields)
+							row -= this.DataFields.Count - 1;
+						var column = this.Address.Start.Column + this.FirstDataCol + dataColumn;
+						foreach (var valuesList in matchingValues)
+						{
+							if (valuesList != null)
+								this.WriteCellTotal(row++, column, this.DataFields[dataFieldCollectionIndex], valuesList, totalsCalculator);
+						}
+					}
+				}
+			}
+		}
+
+		private List<object>[] WriteSideGrandTotals(List<object>[,] backingData)
+		{
+			var grandTotalValueLists = new List<object>[this.DataFields.Count]; 
+			using (var totalsCalculator = new TotalsFunctionHelper(this))
+			{
+				var matchingValues = new List<object>[this.DataFields.Count];
+				for (int dataRow = 0; dataRow < this.RowHeaders.Count; dataRow++)
+				{
+					// Reset values lists.
+					for (int i = 0; i < matchingValues.Count(); i++)
+					{
+						matchingValues[i] = null;
+					}
+					var rowHeader = this.RowHeaders[dataRow];
+					int dataFieldCollectionIndex = -1;
+					for (int dataColumn = 0; dataColumn < this.ColumnHeaders.Count; dataColumn++)
+					{
+						if (backingData[dataRow, dataColumn] == null)
+							continue;
+						var columnHeader = this.ColumnHeaders[dataColumn];
+						dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
+						if (columnHeader.IsLeafNode)
+						{
+							if (matchingValues[dataFieldCollectionIndex] == null)
+							{
+								matchingValues[dataFieldCollectionIndex] = new List<object>();
+							}
+							matchingValues[dataFieldCollectionIndex].AddRange(backingData[dataRow, dataColumn]);
+							// Only add rowHeader leaf node values for grand-grand totals.
+							if (rowHeader.IsLeafNode)
+							{
+								if (grandTotalValueLists[dataFieldCollectionIndex] == null)
+									grandTotalValueLists[dataFieldCollectionIndex] = new List<object>();
+								grandTotalValueLists[dataFieldCollectionIndex].AddRange(backingData[dataRow, dataColumn]);
+							}
+						}
+					}
+					if (dataFieldCollectionIndex != -1)
+					{
+						var row = this.Address.Start.Row + this.FirstDataRow + dataRow;
+						var column = this.Address.End.Column;
+						if (this.HasColumnDataFields)
+							column -= this.DataFields.Count - 1;
+						foreach (var valuesList in matchingValues)
+						{
+							if (valuesList != null)
+								this.WriteCellTotal(row, column++, this.DataFields[dataFieldCollectionIndex], valuesList, totalsCalculator);
+						}
+					}
+				}
+			}
+			return grandTotalValueLists;
+		}
+
+		private void WriteGrandGrandTotals(List<object>[] grandTotalValueLists)
+		{
+			using (var totalsCalculator = new TotalsFunctionHelper(this))
+			{
+				if (this.HasRowDataFields)
+				{
+					int startRow = this.Address.End.Row - this.DataFields.Count + 1;
+					for (int i = 0; i < grandTotalValueLists.Length; i++)
+					{
+						var valueList = grandTotalValueLists[i];
+						this.WriteCellTotal(startRow++, this.Address.End.Column, this.DataFields[i], valueList, totalsCalculator);
+					}
+				}
+				else
+				{
+					int startColumn = this.Address.End.Column - this.DataFields.Count + 1;
+					for (int i = 0; i < grandTotalValueLists.Length; i++)
+					{
+						var valueList = grandTotalValueLists[i];
+						this.WriteCellTotal(this.Address.End.Row, startColumn++, this.DataFields[i], valueList, totalsCalculator);
+					}
 				}
 			}
 		}
@@ -1312,14 +1456,19 @@ namespace OfficeOpenXml.Table.PivotTable
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
 				dataField.Index);
+			this.WriteCellTotal(row, column, dataField, matchingValues, functionCalculator);
+		}
+
+		private void WriteCellTotal(int row, int column, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper functionCalculator)
+		{
 			var cell = this.WorkSheet.Cells[row, column];
-			cell.Value = functionCalculator.Calculate(dataField, matchingValues);
+			cell.Value = functionCalculator.Calculate(dataField, values);
 			var style = this.WorkSheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
 			if (style != null)
 				cell.Style.Numberformat.Format = style.Format;
 		}
 
-		private bool SetTotalCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, int row, int column)
+		private bool SetHeaderTotalCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, int row, int column)
 		{
 			if (!string.IsNullOrEmpty(item.ItemType))
 			{
