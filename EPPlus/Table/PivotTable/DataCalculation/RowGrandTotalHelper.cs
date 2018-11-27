@@ -1,4 +1,6 @@
-﻿namespace OfficeOpenXml.Table.PivotTable.DataCalculation
+﻿using System.Collections.Generic;
+
+namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 {
 	/// <summary>
 	/// Calculate row grand totals.
@@ -10,91 +12,75 @@
 		/// Create a new <see cref="RowGrandTotalHelper"/> object.
 		/// </summary>
 		/// <param name="pivotTable">The <see cref="ExcelPivotTable"/>.</param>
-		internal RowGrandTotalHelper(ExcelPivotTable pivotTable) : base(pivotTable)
+		/// <param name="backingData">The data backing the pivot table.</param>
+		internal RowGrandTotalHelper(ExcelPivotTable pivotTable, List<object>[,] backingData) : base(pivotTable, backingData)
 		{
-			base.OuterLoop = base.PivotTable.RowHeaders;
-			base.InnerLoop = base.PivotTable.ColumnHeaders;
-			base.GrandTotals = new double?[base.PivotTable.DataFields.Count, base.InnerLoop.Count];
-			base.HasOuterGrandTotals = base.PivotTable.RowGrandTotals;
-			base.HasOuterDataFields = base.PivotTable.HasRowDataFields;
-			base.HasInnerGrandTotals = base.PivotTable.ColumnGrandTotals;
-			base.OuterCellIndex = base.DataStartRow;
-			base.StartIndex = base.InnerCellIndex = base.DataStartColumn;
-			base.ShouldWriteInnerGrandTotals = this.OuterLoop.Count > 0;
+			this.MajorHeaderCollection = this.PivotTable.RowHeaders;
+			this.MinorHeaderCollection = this.PivotTable.ColumnHeaders;
 		}
 		#endregion
 
 		#region GrandTotalHelperBase Overrides
 		/// <summary>
-		/// Gets the <see cref="ExcelRange"/> of the worksheet to write to.
+		/// Adds matching values to the <paramref name="grandTotalValueLists"/> and <paramref name="grandGrandTotalValueLists"/>.
 		/// </summary>
-		/// <returns>The worksheet cell to write to.</returns>
-		protected override ExcelRange GetCell()
+		/// <param name="majorHeader">The major axis header.</param>
+		/// <param name="majorIndex">The current major axis index.</param>
+		/// <param name="minorIndex">The current minor axis index.</param>
+		/// <param name="dataFieldCollectionIndex">The index of the data field in the data field collection.</param>
+		/// <param name="grandTotalValueLists">The list of values used to calculate grand totals for a row or column.</param>
+		/// <param name="grandGrandTotalValueLists">The list of values used to calcluate the grand-grand total values.</param>
+		/// <returns>The index of the data field in the data field collection.</returns>
+		protected override int AddMatchingValues(
+			PivotTableHeader majorHeader,
+			int majorIndex,
+			int minorIndex,
+			int dataFieldCollectionIndex,
+			List<object>[] grandTotalValueLists,
+			List<object>[] grandGrandTotalValueLists)
 		{
-			return this.PivotTable.WorkSheet.Cells[base.OuterCellIndex, base.InnerCellIndex];
-		}
-
-		/// <summary>
-		/// Calculate the row grand total.
-		/// </summary>
-		/// <param name="innerHeaderIndex">The index of the inner 'for' loop.</param>
-		/// <param name="value">TThe value in the current cell.</param>
-		/// <param name="outerHeader">The <see cref="PivotTableHeader"/>.</param>
-		/// <param name="grandTotal">The current grand total value that needs to be updated.</param>
-		/// <returns>The updated grand total value.</returns>
-		protected override double? CalculateTotal(int innerHeaderIndex, double value, PivotTableHeader outerHeader, double? grandTotal)
-		{
-			grandTotal = (grandTotal ?? 0) + value;
-			if (outerHeader.IsLeafNode || string.IsNullOrEmpty(outerHeader.SumType))
+			if (this.BackingData[majorIndex, minorIndex] == null)
+				return dataFieldCollectionIndex;
+			var minorHeader = this.MinorHeaderCollection[minorIndex];
+			dataFieldCollectionIndex = this.PivotTable.HasRowDataFields ? majorHeader.DataFieldCollectionIndex : minorHeader.DataFieldCollectionIndex;
+			if (minorHeader.IsLeafNode)
 			{
-				var total = base.GrandTotals[outerHeader.DataFieldCollectionIndex, innerHeaderIndex];
-				base.GrandTotals[outerHeader.DataFieldCollectionIndex, innerHeaderIndex] = (total ?? 0) + value;
+				if (grandTotalValueLists[dataFieldCollectionIndex] == null)
+					grandTotalValueLists[dataFieldCollectionIndex] = new List<object>();
+				grandTotalValueLists[dataFieldCollectionIndex].AddRange(base.BackingData[majorIndex, minorIndex]);
+				// Only add row header leaf node values for grand-grand totals.
+				if (majorHeader.IsLeafNode)
+				{
+					if (grandGrandTotalValueLists[dataFieldCollectionIndex] == null)
+						grandGrandTotalValueLists[dataFieldCollectionIndex] = new List<object>();
+					grandGrandTotalValueLists[dataFieldCollectionIndex].AddRange(base.BackingData[majorIndex, minorIndex]);
+				}
 			}
-			return grandTotal;
+			return dataFieldCollectionIndex;
 		}
 
 		/// <summary>
-		/// Write the grand total value to the worksheet.
+		/// Calculates and writes the grand total values to the worksheet.
 		/// </summary>
-		/// <param name="dataField">The data field index.</param>
-		protected override void WriteGrandTotals(int dataField)
+		/// <param name="dataFieldCollectionIndex">The index of the data field in the data field collection.</param>
+		/// <param name="majorIndex">The current major axis index.</param>
+		/// <param name="totalsCalculator">The grand totals calculation helper class.</param>
+		/// <param name="grandTotalValueLists">The values used to calculate grand totals.</param>
+		protected override void WriteGrandTotal(
+			int dataFieldCollectionIndex, 
+			int majorIndex, 
+			TotalsFunctionHelper totalsCalculator, 
+			List<object>[] grandTotalValueLists)
 		{
-			int totalColumn = base.DataStartColumn;
-			for (int column = 0; column < base.GrandTotals.GetLength(1); column++)
+			var row = this.PivotTable.Address.Start.Row + this.PivotTable.FirstDataRow + majorIndex;
+			var column = this.PivotTable.Address.End.Column;
+			if (this.PivotTable.HasColumnDataFields)
+				column -= this.PivotTable.DataFields.Count - 1;
+			foreach (var valuesList in grandTotalValueLists)
 			{
-				base.PivotTable.WorkSheet.Cells[base.OuterCellIndex + dataField, totalColumn + column].Value = base.GrandTotals[dataField, column];
+				if (valuesList != null)
+					base.WriteCellTotal(row, column++, this.PivotTable.DataFields[dataFieldCollectionIndex], valuesList, totalsCalculator);
 			}
-		}
-
-		/// <summary>
-		/// Store the grand total for rows to write out at the end.
-		/// </summary>
-		/// <param name="innerHeaderIndex">The index of the inner 'for' loop.</param>
-		/// <param name="dataFieldCollectionIndex">The collection index of the data field.</param>
-		/// <param name="total">The value in the current cell.</param>
-		protected override void StoreTotal(int innerHeaderIndex, int dataFieldCollectionIndex, double? total)
-		{
-			var totalValue = this.GrandTotals[dataFieldCollectionIndex, innerHeaderIndex];
-			this.GrandTotals[dataFieldCollectionIndex, innerHeaderIndex] = (totalValue ?? 0) + total;
-		}
-
-		/// <summary>
-		/// Calculate the grand total values when there are multiple row data fields and no column fields. Only used to calculate row grand total values.
-		/// </summary>
-		/// <param name="innerHeaderIndex">The index for the inner 'for' loop.</param>
-		/// <param name="value">The value in the current cell.</param>
-		/// <param name="outerHeader">The <see cref="PivotTableHeader"/>.</param>
-		/// <param name="grandTotal">The current grand total value that needs to be updated.</param>
-		/// <returns>The updated grand total value.</returns>
-		protected override double? CalculateTotalWithNoColumns(int innerHeaderIndex, double value, PivotTableHeader outerHeader, double? grandTotal)
-		{
-			grandTotal = (grandTotal ?? 0) + value;
-			if (outerHeader.IsLeafNode || string.IsNullOrEmpty(outerHeader.SumType))
-			{
-				var total = base.GrandTotals[innerHeaderIndex, 0];
-				base.GrandTotals[innerHeaderIndex, 0] = (total ?? 0) + value;
-			}
-			return grandTotal;
 		}
 		#endregion
 	}

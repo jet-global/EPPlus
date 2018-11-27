@@ -1207,9 +1207,15 @@ namespace OfficeOpenXml.Table.PivotTable
 				var backingTableData = this.WritePivotTableBodyData();
 				List<object>[] grandTotalsValuesLists = null;
 				if (this.ColumnGrandTotals)
-					grandTotalsValuesLists = this.WriteSideGrandTotals(backingTableData);
+				{
+					var columnGrandTotalHelper = new RowGrandTotalHelper(this, backingTableData);
+					grandTotalsValuesLists = columnGrandTotalHelper.UpdateGrandTotals();
+				}
 				if (this.RowGrandTotals)
-					this.WriteBottomGrandTotals(backingTableData);
+				{
+					var rowGrandTotalHelper = new ColumnGrandTotalHelper(this, backingTableData);
+					rowGrandTotalHelper.UpdateGrandTotals();
+				}
 				if (this.ColumnGrandTotals && this.RowGrandTotals && this.ColumnFields.Any())
 					this.WriteGrandGrandTotals(grandTotalsValuesLists);
 			}
@@ -1324,103 +1330,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
 				dataField.Index);
-		}
-
-		private void WriteBottomGrandTotals(List<object>[,] backingData)
-		{
-			using (var totalsCalculator = new TotalsFunctionHelper(this))
-			{
-				var matchingValues = new List<object>[this.DataFields.Count];
-				for (int dataColumn = 0; dataColumn < this.ColumnHeaders.Count; dataColumn++)
-				{
-					// Reset values lists.
-					for (int i = 0; i < matchingValues.Count(); i++)
-					{
-						matchingValues[i] = null;
-					}
-					var columnHeader = this.ColumnHeaders[dataColumn];
-					int dataFieldCollectionIndex = -1;
-					for (int dataRow = 0; dataRow < this.RowHeaders.Count; dataRow++)
-					{
-						if (backingData[dataRow, dataColumn] == null)
-							continue;
-						var rowHeader = this.RowHeaders[dataRow];
-						dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
-						if (rowHeader.IsLeafNode)
-						{
-							if (matchingValues[dataFieldCollectionIndex] == null)
-								matchingValues[dataFieldCollectionIndex] = new List<object>();
-							matchingValues[dataFieldCollectionIndex].AddRange(backingData[dataRow, dataColumn]);
-						}
-					}
-					if (dataFieldCollectionIndex != -1)
-					{
-						var row = this.Address.End.Row;
-						if (this.HasRowDataFields)
-							row -= this.DataFields.Count - 1;
-						var column = this.Address.Start.Column + this.FirstDataCol + dataColumn;
-						foreach (var valuesList in matchingValues)
-						{
-							if (valuesList != null)
-								this.WriteCellTotal(row++, column, this.DataFields[dataFieldCollectionIndex], valuesList, totalsCalculator);
-						}
-					}
-				}
-			}
-		}
-
-		private List<object>[] WriteSideGrandTotals(List<object>[,] backingData)
-		{
-			var grandTotalValueLists = new List<object>[this.DataFields.Count]; 
-			using (var totalsCalculator = new TotalsFunctionHelper(this))
-			{
-				var matchingValues = new List<object>[this.DataFields.Count];
-				for (int dataRow = 0; dataRow < this.RowHeaders.Count; dataRow++)
-				{
-					// Reset values lists.
-					for (int i = 0; i < matchingValues.Count(); i++)
-					{
-						matchingValues[i] = null;
-					}
-					var rowHeader = this.RowHeaders[dataRow];
-					int dataFieldCollectionIndex = -1;
-					for (int dataColumn = 0; dataColumn < this.ColumnHeaders.Count; dataColumn++)
-					{
-						if (backingData[dataRow, dataColumn] == null)
-							continue;
-						var columnHeader = this.ColumnHeaders[dataColumn];
-						dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
-						if (columnHeader.IsLeafNode)
-						{
-							if (matchingValues[dataFieldCollectionIndex] == null)
-							{
-								matchingValues[dataFieldCollectionIndex] = new List<object>();
-							}
-							matchingValues[dataFieldCollectionIndex].AddRange(backingData[dataRow, dataColumn]);
-							// Only add rowHeader leaf node values for grand-grand totals.
-							if (rowHeader.IsLeafNode)
-							{
-								if (grandTotalValueLists[dataFieldCollectionIndex] == null)
-									grandTotalValueLists[dataFieldCollectionIndex] = new List<object>();
-								grandTotalValueLists[dataFieldCollectionIndex].AddRange(backingData[dataRow, dataColumn]);
-							}
-						}
-					}
-					if (dataFieldCollectionIndex != -1)
-					{
-						var row = this.Address.Start.Row + this.FirstDataRow + dataRow;
-						var column = this.Address.End.Column;
-						if (this.HasColumnDataFields)
-							column -= this.DataFields.Count - 1;
-						foreach (var valuesList in matchingValues)
-						{
-							if (valuesList != null)
-								this.WriteCellTotal(row, column++, this.DataFields[dataFieldCollectionIndex], valuesList, totalsCalculator);
-						}
-					}
-				}
-			}
-			return grandTotalValueLists;
 		}
 
 		private void WriteGrandGrandTotals(List<object>[] grandTotalValueLists)
