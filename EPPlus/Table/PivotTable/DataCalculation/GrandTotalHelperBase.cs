@@ -77,6 +77,23 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			}
 			return grandGrandTotalValueLists;
 		}
+
+		/// <summary>
+		/// Updates the grand-grand totals in a pivot table (bottom right corner totals).
+		/// </summary>
+		/// <param name="grandTotalValueLists"></param>
+		public void UpdateGrandGrandTotals(List<object>[] grandTotalValueLists)
+		{
+			using (var totalsCalculator = new TotalsFunctionHelper(this.PivotTable))
+			{
+				int startIndex = this.GetStartIndex();
+				for (int i = 0; i < grandTotalValueLists.Length; i++)
+				{
+					var valueList = grandTotalValueLists[i];
+					this.WriteCellTotal(startIndex + i, this.PivotTable.DataFields[i], valueList, totalsCalculator);
+				}
+			}
+		}
 		#endregion
 
 		#region Protected Abstract Methods
@@ -110,6 +127,21 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			int majorIndex, 
 			TotalsFunctionHelper totalsCalculator, 
 			List<object>[] grandTotalValueLists);
+
+		/// <summary>
+		/// Gets the start cell index for the grand-grand total values.
+		/// </summary>
+		/// <returns>The start cell index for the grand-grand total values.</returns>
+		protected abstract int GetStartIndex();
+
+		/// <summary>
+		/// Writes the grand total for the specified <paramref name="values"/> in the cell at the specified <paramref name="index"/>.
+		/// </summary>
+		/// <param name="index">The major index of the cell to write the total to.</param>
+		/// <param name="dataField">The data field to use the number format of.</param>
+		/// <param name="values">The values to use to calculate the total.</param>
+		/// <param name="totalsFunctionHelper">The totals calculation helper class.</param>
+		protected abstract void WriteCellTotal(int index, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper totalsFunctionHelper);
 		#endregion
 
 		#region Protected Methods
@@ -123,7 +155,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <param name="functionCalculator">The totals calcluation helper class.</param>
 		protected void WriteCellTotal(int row, int column, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper functionCalculator)
 		{
-			// TODO: This method was copy/pasted from pivot table class, possibly share?
 			var cell = this.PivotTable.WorkSheet.Cells[row, column];
 			cell.Value = functionCalculator.Calculate(dataField, values);
 			var style = this.PivotTable.WorkSheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);

@@ -1206,18 +1206,26 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				var backingTableData = this.WritePivotTableBodyData();
 				List<object>[] grandTotalsValuesLists = null;
+				RowGrandTotalHelper rowGrandTotalHelper = null;
+				ColumnGrandTotalHelper columnGrandTotalHelper = null;
 				if (this.ColumnGrandTotals)
 				{
-					var columnGrandTotalHelper = new RowGrandTotalHelper(this, backingTableData);
+					columnGrandTotalHelper = new ColumnGrandTotalHelper(this, backingTableData);
 					grandTotalsValuesLists = columnGrandTotalHelper.UpdateGrandTotals();
 				}
 				if (this.RowGrandTotals)
 				{
-					var rowGrandTotalHelper = new ColumnGrandTotalHelper(this, backingTableData);
+					rowGrandTotalHelper = new RowGrandTotalHelper(this, backingTableData);
 					rowGrandTotalHelper.UpdateGrandTotals();
 				}
+				// Write grand-grand totals to worksheet (grand totals at bottom right corner of pivot table).
 				if (this.ColumnGrandTotals && this.RowGrandTotals && this.ColumnFields.Any())
-					this.WriteGrandGrandTotals(grandTotalsValuesLists);
+				{
+					if (this.HasRowDataFields)
+						rowGrandTotalHelper.UpdateGrandGrandTotals(grandTotalsValuesLists);
+					else
+						columnGrandTotalHelper.UpdateGrandGrandTotals(grandTotalsValuesLists);
+				}
 			}
 			else
 			{
@@ -1330,31 +1338,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
 				dataField.Index);
-		}
-
-		private void WriteGrandGrandTotals(List<object>[] grandTotalValueLists)
-		{
-			using (var totalsCalculator = new TotalsFunctionHelper(this))
-			{
-				if (this.HasRowDataFields)
-				{
-					int startRow = this.Address.End.Row - this.DataFields.Count + 1;
-					for (int i = 0; i < grandTotalValueLists.Length; i++)
-					{
-						var valueList = grandTotalValueLists[i];
-						this.WriteCellTotal(startRow++, this.Address.End.Column, this.DataFields[i], valueList, totalsCalculator);
-					}
-				}
-				else
-				{
-					int startColumn = this.Address.End.Column - this.DataFields.Count + 1;
-					for (int i = 0; i < grandTotalValueLists.Length; i++)
-					{
-						var valueList = grandTotalValueLists[i];
-						this.WriteCellTotal(this.Address.End.Row, startColumn++, this.DataFields[i], valueList, totalsCalculator);
-					}
-				}
-			}
 		}
 
 		private void WriteCellResult(int row, int column, PivotTableHeader rowHeader, PivotTableHeader columnHeader, bool hasRowDataFields, TotalsFunctionHelper functionCalculator)
