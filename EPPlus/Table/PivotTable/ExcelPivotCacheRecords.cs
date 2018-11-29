@@ -271,10 +271,8 @@ namespace OfficeOpenXml.Table.PivotTable
 					}
 					else
 						itemValue = record.Items[dataFieldIndex].Value;
-					if (double.TryParse(itemValue, out var recordData))
-						matchingValues.Add(recordData);
-					else
-						matchingValues.Add(recordData);
+					double.TryParse(itemValue, out var recordData);
+					matchingValues.Add(recordData);
 				}
 			}
 			return matchingValues;

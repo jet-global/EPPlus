@@ -25,9 +25,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		public TotalsFunctionHelper(ExcelPivotTable pivotTable)
 		{
 			this.PivotTable = pivotTable;
-
-			// TODO: Consider creating a shadow sheet in this workbook instead.
-			//		Be sure to evaluate risks of cross-contamination and the like.
 			this.Package = new ExcelPackage();
 			this.TempWorksheet = this.Package.Workbook.Worksheets.Add("Sheet1");
 		}
