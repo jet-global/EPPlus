@@ -1131,10 +1131,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				int rAttribute = rValue == colDepth ? rValue - 1 : rValue;
 				bool isLastNonDataField = this.ColumnFields.Skip(rAttribute + 1).All(x => x.Index == -2);
 				// If the node is above a data field node and there are multiple data fields, then create a subtotal node for each data field. 
-				if (this.DataFields.Count > 0 && !hasDataFieldParent && !isLastNonDataField)
+				if (this.DataFields.Count > 0 && !hasDataFieldParent && !isLastNonDataField && this.HasColumnDataFields)
 					this.CreateTotalNodes("default", false, parentNodeIndices, pivotField, rAttribute, true, this.HasColumnDataFields);
 				// Otherwise, if the node is not the last non-data field node and is below a data field node, then only create one subtotal node.
-				else if (!isLastNonDataField && !isAboveDataField)
+				else if (!isLastNonDataField && (!isAboveDataField || !this.HasColumnDataFields))
 					this.CreateTotalNodes("default", false, parentNodeIndices, pivotField, rAttribute, false, this.HasColumnDataFields);
 			}
 
@@ -1263,26 +1263,32 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.WorkSheet.Cells[dataRow++, this.Address.Start.Column].Value = this.DataFields.First().Name;
 
 			// Update the column headers in the worksheet.
-			for (int i = 0; i < this.ColumnItems.Count; i++)
+			if (this.ColumnFields.Any())
 			{
-				int startHeaderRow = startRow;
-				bool itemType = this.SetHeaderTotalCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], startHeaderRow, headerColumn);
-				if (itemType)
+				for (int i = 0; i < this.ColumnItems.Count; i++)
 				{
-					headerColumn++;
-					continue;
-				}
+					int startHeaderRow = startRow;
+					bool itemType = this.SetHeaderTotalCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], startHeaderRow, headerColumn);
+					if (itemType)
+					{
+						headerColumn++;
+						continue;
+					}
 
-				for (int j = 0; j < this.ColumnItems[i].Count; j++)
-				{
-					var columnFieldIndex = this.ColumnItems[i].RepeatedItemsCount == 0 ? j : j + this.ColumnItems[i].RepeatedItemsCount;
-					var sharedItem = this.GetSharedItemValue(this.ColumnFields, this.ColumnItems[i], columnFieldIndex, j);
-					var cellRow = this.ColumnItems[i].RepeatedItemsCount == 0 ? startHeaderRow : startHeaderRow + this.ColumnItems[i].RepeatedItemsCount;
-					this.WorkSheet.Cells[cellRow, headerColumn].Value = sharedItem;
-					startHeaderRow++;
+					for (int j = 0; j < this.ColumnItems[i].Count; j++)
+					{
+						var columnFieldIndex = this.ColumnItems[i].RepeatedItemsCount == 0 ? j : j + this.ColumnItems[i].RepeatedItemsCount;
+						var sharedItem = this.GetSharedItemValue(this.ColumnFields, this.ColumnItems[i], columnFieldIndex, j);
+						var cellRow = this.ColumnItems[i].RepeatedItemsCount == 0 ? startHeaderRow : startHeaderRow + this.ColumnItems[i].RepeatedItemsCount;
+						this.WorkSheet.Cells[cellRow, headerColumn].Value = sharedItem;
+						startHeaderRow++;
+					}
+					headerColumn++;
 				}
-				headerColumn++;
 			}
+			// If there are no column headers and only one data field, print the name of the data field for the column.
+			else if (this.DataFields.Count == 1)
+				this.WorkSheet.Cells[this.Address.Start.Row, headerColumn].Value = this.DataFields.First().Name;
 		}
 
 		private List<object>[,] WritePivotTableBodyData()
@@ -1381,7 +1387,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				else if (item.ItemType.IsEquivalentTo("default"))
 				{
 					var itemName = this.GetSharedItemValue(field, item, item.RepeatedItemsCount, 0);
-					if (this.DataFields.Count > 1 && header.IsAboveDataField)
+					if (this.DataFields.Count > 1 && header.IsAboveDataField && 
+						((this.HasRowDataFields && field == this.RowFields) || (this.HasColumnDataFields && field == this.ColumnFields)))
 					{
 						string dataFieldName = this.DataFields[item.DataFieldIndex].Name;
 						this.WorkSheet.Cells[rowLabel, column].Value = $"{itemName} {dataFieldName}";

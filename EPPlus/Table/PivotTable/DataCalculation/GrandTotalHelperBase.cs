@@ -72,7 +72,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 						dataFieldCollectionIndex = this.AddMatchingValues(majorHeader, majorIndex, minorIndex, dataFieldCollectionIndex, grandTotalValueLists, grandGrandTotalValueLists);
 					}
 					if (dataFieldCollectionIndex != -1)
-						this.WriteGrandTotal(dataFieldCollectionIndex, majorIndex, totalsCalculator, grandTotalValueLists);
+						this.WriteGrandTotal(majorIndex, totalsCalculator, grandTotalValueLists);
 				}
 			}
 			return grandGrandTotalValueLists;
@@ -118,12 +118,10 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <summary>
 		/// Calculates and writes the grand total values to the worksheet.
 		/// </summary>
-		/// <param name="dataFieldCollectionIndex">The index of the data field in the data field collection.</param>
 		/// <param name="majorIndex">The current major axis index.</param>
 		/// <param name="totalsCalculator">The grand totals calculation helper class.</param>
 		/// <param name="grandTotalValueLists">The values used to calculate grand totals.</param>
 		protected abstract void WriteGrandTotal(
-			int dataFieldCollectionIndex, 
 			int majorIndex, 
 			TotalsFunctionHelper totalsCalculator, 
 			List<object>[] grandTotalValueLists);
