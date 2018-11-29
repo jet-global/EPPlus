@@ -35,9 +35,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Resources;
 using System.Security.Cryptography;
 using System.Xml;
 using OfficeOpenXml.Encryption;
+using OfficeOpenXml.Internationalization;
 using OfficeOpenXml.Utils;
 namespace OfficeOpenXml
 {
@@ -185,6 +187,12 @@ namespace OfficeOpenXml
 				this._FormulaManager = value;
 			}
 		}
+
+		/// <summary>
+		/// Gets the <see cref="StringResources"/> for this <see cref="ExcelPackage"/> that 
+		/// can be used to get localized string translations if a <see cref="ResourceManager"/> is loaded.
+		/// </summary>
+		public StringResources StringResources { get; } = new StringResources();
 
 		/// <summary>
 		/// Gets the <see cref="Packaging.ZipPackage"/> that this <see cref="ExcelPackage"/> represents.

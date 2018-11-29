@@ -22,7 +22,7 @@ namespace EPPlusTest
 		{
 			var excelPackage = new ExcelPackage();
 			Assert.IsInstanceOfType(excelPackage.FormulaManager, typeof(FormulaManager));
-			excelPackage.Configure(null);
+			excelPackage.Configure((IFormulaManager)null);
 			Assert.IsInstanceOfType(excelPackage.FormulaManager, typeof(FormulaManager));
 		}
 		#endregion
