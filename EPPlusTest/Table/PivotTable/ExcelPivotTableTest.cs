@@ -25,11 +25,9 @@
 *******************************************************************************/
 using System.IO;
 using System.Linq;
-using System.Xml;
 using EPPlusTest.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
-using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Table.PivotTable;
 
 namespace EPPlusTest.Table.PivotTable
@@ -2138,8 +2136,6 @@ namespace EPPlusTest.Table.PivotTable
 		#endregion
 
 		#region Multiple Column Data Fields
-
-		#endregion
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
 		public void PivotTableRefreshMultipleColumnDataFieldsAtLeafNode()
@@ -3569,6 +3565,7 @@ namespace EPPlusTest.Table.PivotTable
 				});
 			}
 		}
+		#endregion
 		#endregion
 
 		#region Helper Methods

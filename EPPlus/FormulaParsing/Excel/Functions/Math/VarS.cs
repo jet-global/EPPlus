@@ -71,7 +71,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			if (onlyStringInputsGiven)
 				return new CompileResult(eErrorType.Value);
-			if (listToDoVarianceOn.Count() == 0)
+			if (listToDoVarianceOn.Count() < 2)
 				return new CompileResult(eErrorType.Div0);
 			if (!StatisticsFunctionHelper.TryVarSamplePopulationForAValueErrorCheck(listToDoVarianceOn, out double variance))
 				return new CompileResult(eErrorType.Value);

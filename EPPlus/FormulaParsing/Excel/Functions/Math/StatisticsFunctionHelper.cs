@@ -24,9 +24,7 @@
  *******************************************************************************/
 using System.Collections.Generic;
 using System.Linq;
-using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.Utils;
-using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
@@ -146,7 +144,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// </summary>
 		/// <param name="args">A list of inputs to have their variance calculated.</param>
 		/// <returns>The Variance for a entire population</returns>
-		public static double VarianceForAnEntirePopulation(List<double> args)
+		public static double VarianceForAnEntirePopulation(IEnumerable<double> args)
 		{
 			double avg = args.Average();
 			double d = args.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
@@ -159,9 +157,9 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <param name="listToDoStandardDeviationOn">This is the list of the entire population to have their standaerd deviation Calulated.</param>
 		/// <param name="standardDeviation">This is the calculated standard Deviation.</param>
 		/// <returns>Returns true if the standard Deviation succeaded, else false.</returns>
-		public static bool TryStandardDeviationEntirePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
+		public static bool TryStandardDeviationEntirePopulation(IEnumerable<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
-			standardDeviation = MathObj.Sqrt(StatisticsFunctionHelper.VarianceForAnEntirePopulation(listToDoStandardDeviationOn));
+			standardDeviation = System.Math.Sqrt(StatisticsFunctionHelper.VarianceForAnEntirePopulation(listToDoStandardDeviationOn));
 			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
 				return false;
 			return true;
@@ -175,7 +173,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <returns>Returns true if the standard Deviation succeaded, else false.</returns>
 		public static bool TryStandardDeviationOnASamplePopulation(List<double> listToDoStandardDeviationOn, out double standardDeviation)
 		{
-			standardDeviation = MathObj.Sqrt(StatisticsFunctionHelper.VarianceForASample(listToDoStandardDeviationOn));
+			standardDeviation = System.Math.Sqrt(StatisticsFunctionHelper.VarianceForASample(listToDoStandardDeviationOn));
 			if (listToDoStandardDeviationOn.Count() <= 1)
 				return false;
 			if (standardDeviation == 0 && listToDoStandardDeviationOn.All(x => x == -1))
@@ -205,7 +203,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 		/// <param name="listOfDoubles">A list of inputs to have their variance calculated.</param>
 		/// <param name="variance">The out value of the variance.</param>
 		/// <returns>Returns true if it succeads and false if it fails.</returns>
-		public static bool TryVarSamplePopulationForAValueErrorCheck(List<double> listOfDoubles, out double variance)
+		public static bool TryVarSamplePopulationForAValueErrorCheck(IEnumerable<double> listOfDoubles, out double variance)
 		{
 			double avg = listOfDoubles.Average();
 			double d = listOfDoubles.Aggregate(0.0, (total, next) => total += System.Math.Pow(next - avg, 2));
@@ -215,6 +213,27 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			if (variance == 0 && listOfDoubles.All(x => x == -1))
 				return false;
 			return true;
+		}
+
+		/// <summary>
+		/// Calculates the standard deviation of the specified <paramref name="values"/>.
+		/// </summary>
+		/// <param name="values">The values to calculate the standard deviation of.</param>
+		/// <returns>The standard deviation.</returns>
+		public static double Stdev(IEnumerable<double> values)
+		{
+			// https://stackoverflow.com/questions/3141692/standard-deviation-of-generic-list
+			double stdev = 0;
+			if (values.Any())
+			{
+				//Compute the Average
+				double avg = values.Average();
+				//Perform the Sum of (value-avg)_2_2
+				double sum = values.Sum(d => System.Math.Pow(d - avg, 2));
+				//Put it all together
+				stdev = System.Math.Sqrt((sum) / (values.Count() - 1));
+			}
+			return stdev;
 		}
 		#endregion
 	}
