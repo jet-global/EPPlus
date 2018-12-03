@@ -11,12 +11,21 @@ namespace OfficeOpenXml.Internationalization
 	public class StringResources
 	{
 		#region Properties
+		/// <summary>
+		/// Gets the string for a subtotal header that has a value following the 'total' text.
+		/// </summary>
 		[StringResource("The {0} will be replaced with a field name. Place accordingly in your translations.")]
 		public string TotalCaptionWitFollowingValue => this.GetValue("Total {0}");
 
+		/// <summary>
+		/// Gets the string for a subtotal header that has a value preceding the 'total' text.
+		/// </summary>
 		[StringResource("The {0} will be replaced with a field name. Place accordingly in your translations.")]
 		public string TotalCaptionWitPrecedingValue => this.GetValue("{0} Total");
-
+		
+		/// <summary>
+		/// Gets the string for a grand total header.
+		/// </summary>
 		[StringResource]
 		public string GrandTotalCaption => this.GetValue("Grand Total");
 

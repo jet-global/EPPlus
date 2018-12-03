@@ -6,7 +6,7 @@ namespace OfficeOpenXml.Internationalization
 	/// Attribute for <see cref="StringResources"/> properties that can be translated.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-	class StringResource : Attribute
+	public class StringResource : Attribute
 	{
 		#region Properties
 		/// <summary>

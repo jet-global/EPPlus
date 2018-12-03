@@ -996,7 +996,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// Update the colItems.
 			this.UpdateRowColumnItems(this.ColumnFields, this.ColumnItems, false);
-			
+
 			this.UpdateWorksheet(stringResources);
 		}
 		#endregion
