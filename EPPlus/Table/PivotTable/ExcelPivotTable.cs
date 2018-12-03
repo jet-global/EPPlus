@@ -1269,7 +1269,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				for (int i = 0; i < this.ColumnItems.Count; i++)
 				{
 					int startHeaderRow = startRow;
-					bool itemType = this.SetHeaderTotalCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], startHeaderRow, headerColumn, stringResources);
+					bool itemType = this.SetTotalCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], startHeaderRow, headerColumn, stringResources);
 					if (itemType)
 					{
 						headerColumn++;
