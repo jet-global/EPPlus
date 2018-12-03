@@ -55,7 +55,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		{
 			var grandTotalValueLists = new List<object>[this.PivotTable.DataFields.Count];
 			var grandGrandTotalValueLists = new List<object>[this.PivotTable.DataFields.Count];
-			using (var totalsCalculator = new TotalsFunctionHelper(this.PivotTable))
+			using (var totalsCalculator = new TotalsFunctionHelper())
 			{
 				for (int majorIndex = 0; majorIndex < this.MajorHeaderCollection.Count; majorIndex++)
 				{
@@ -84,7 +84,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <param name="grandTotalValueLists"></param>
 		public void UpdateGrandGrandTotals(List<object>[] grandTotalValueLists)
 		{
-			using (var totalsCalculator = new TotalsFunctionHelper(this.PivotTable))
+			using (var totalsCalculator = new TotalsFunctionHelper())
 			{
 				int startIndex = this.GetStartIndex();
 				for (int i = 0; i < grandTotalValueLists.Length; i++)
@@ -154,7 +154,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		protected void WriteCellTotal(int row, int column, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper functionCalculator)
 		{
 			var cell = this.PivotTable.WorkSheet.Cells[row, column];
-			cell.Value = functionCalculator.Calculate(dataField, values);
+			cell.Value = functionCalculator.Calculate(dataField.Function, values);
 			var style = this.PivotTable.WorkSheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
 			if (style != null)
 				cell.Style.Numberformat.Format = style.Format;
