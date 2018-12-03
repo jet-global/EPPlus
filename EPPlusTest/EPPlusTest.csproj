@@ -251,6 +251,14 @@
     <Compile Include="Table\PivotTable\CacheFieldNodeTest.cs" />
     <Compile Include="Table\PivotTable\CacheItemTest.cs" />
     <Compile Include="Table\PivotTable\CacheRecordNodeTest.cs" />
+    <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionAverageTypeTest.cs" />
+    <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionCountTypeTest.cs" />
+    <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionMaxTypeTest.cs" />
+    <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionMinTypeTest.cs" />
+    <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionProductTypeTest.cs" />
+    <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionStandardDeviationTypeTest.cs" />
+    <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionTypeTestBase.cs" />
+    <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionVarTypeTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotCacheDefinitionTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotCacheRecordsTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableTest.cs" />

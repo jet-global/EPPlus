@@ -4,6 +4,7 @@ using System.Linq;
 using OfficeOpenXml.Extensions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.Table.PivotTable;
+using OfficeOpenXml.Table.PivotTable.DataCalculation;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
@@ -40,11 +41,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			if (fieldValueIndices == null || fieldIndex == -1)
 				return new CompileResult(eErrorType.Ref);
 
-			// TODO: CalculateSubtotal(...) doesn't handle pivot table filters. See task #8177 on story #1768.
-			var subtotal = pivotTable.CacheDefinition.CacheRecords.CalculateSubtotal(fieldValueIndices, null, fieldIndex);
-			if (subtotal == null)
-				return new CompileResult(eErrorType.Ref);
-			return new CompileResult(subtotal, DataType.Decimal);
+			using (var totalsCalculator = new TotalsFunctionHelper(pivotTable))
+			{
+				// TODO: FindMatchingValues(...) doesn't handle pivot table filters. See task #8177 on story #1768.
+				var matchingValues = pivotTable.CacheDefinition.CacheRecords.FindMatchingValues(fieldValueIndices, null, fieldIndex);
+				var dataField = pivotTable.DataFields.FirstOrDefault(d => d.Index == fieldIndex);
+				var subtotal = totalsCalculator.Calculate(dataField, matchingValues);
+				if (subtotal == null)
+					return new CompileResult(eErrorType.Ref);
+				return new CompileResult(subtotal, DataType.Decimal);
+			}
 		}
 		#endregion
 
