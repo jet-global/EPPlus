@@ -33,9 +33,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using System.Xml;
 using OfficeOpenXml.Extensions;
+using OfficeOpenXml.Internationalization;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -243,6 +245,12 @@ namespace OfficeOpenXml.Table.PivotTable
 				base.SetXmlNodeString("@r:id", value);
 			}
 		}
+
+		/// <summary>
+		/// Gets the <see cref="StringResources"/> for this <see cref="ExcelPackage"/> that 
+		/// can be used to get localized string translations if a <see cref="ResourceManager"/> is loaded.
+		/// </summary>
+		internal StringResources StringResources { get; } = new StringResources();
 		#endregion
 
 		#region Constructors
@@ -326,7 +334,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Update the records in <see cref="ExcelPivotCacheRecords"/> and any referencing <see cref="ExcelPivotTable"/>s.
 		/// </summary>
-		public void UpdateData()
+		/// <param name="resourceManager">The <see cref="ResourceManager"/> to retrieve translations from (optional).</param>
+		public void UpdateData(ResourceManager resourceManager = null)
 		{
 			// Update all cacheField names assuming the shape of the pivot cache definition source range remains unchanged.
 			for (int col = this.SourceRange.Start.Column; col < this.SourceRange.Columns + this.SourceRange.Start.Column; col++)
@@ -341,10 +350,12 @@ namespace OfficeOpenXml.Table.PivotTable
 			var rangeBase = new ExcelRangeBase(this.SourceRange.Worksheet, range.Address);
 			this.CacheRecords.UpdateRecords(this.SourceRange.Worksheet.Cells[range]);
 
+			this.StringResources.LoadResourceManager(resourceManager);
+
 			// Refresh pivot tables.
 			foreach (var pivotTable in this.GetRelatedPivotTables())
 			{
-				pivotTable.RefreshFromCache();
+				pivotTable.RefreshFromCache(this.StringResources);
 			}
 		}
 

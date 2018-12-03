@@ -9,10 +9,10 @@ namespace EPPlusTest.Internationalization
 	{
 		#region LoadResourceManager Tests
 		[TestMethod]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void LoadResourceManagerNullResourceManagerThrowsException()
 		{
 			var stringResources = new StringResources();
+			// Verify that setting the resource manager to null does not throw an exception.
 			stringResources.LoadResourceManager(null);
 		}
 		#endregion

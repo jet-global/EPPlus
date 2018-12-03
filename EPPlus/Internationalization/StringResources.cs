@@ -30,9 +30,8 @@ namespace OfficeOpenXml.Internationalization
 		/// <param name="manager">The <see cref="ResourceManager"/> to load.</param>
 		public void LoadResourceManager(ResourceManager manager)
 		{
-			if (manager == null)
-				throw new ArgumentNullException(nameof(manager));
-			this.ResourceManager = manager;
+			if (manager != null)
+				this.ResourceManager = manager;
 		}
 
 		/// <summary>

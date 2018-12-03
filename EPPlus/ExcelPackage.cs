@@ -189,12 +189,6 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
-		/// Gets the <see cref="StringResources"/> for this <see cref="ExcelPackage"/> that 
-		/// can be used to get localized string translations if a <see cref="ResourceManager"/> is loaded.
-		/// </summary>
-		public StringResources StringResources { get; } = new StringResources();
-
-		/// <summary>
 		/// Gets the <see cref="Packaging.ZipPackage"/> that this <see cref="ExcelPackage"/> represents.
 		/// </summary>
 		public Packaging.ZipPackage Package { get { return (this._package); } }
