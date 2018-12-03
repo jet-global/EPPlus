@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 {
@@ -10,8 +9,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 	internal class TotalsFunctionHelper : IDisposable
 	{
 		#region Properties
-		private ExcelPivotTable PivotTable { get; }
-
 		private ExcelWorksheet TempWorksheet { get; }
 
 		private ExcelPackage Package { get; }
@@ -21,10 +18,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="pivotTable">The <see cref="ExcelPivotTable"/>.</param>
-		public TotalsFunctionHelper(ExcelPivotTable pivotTable)
+		public TotalsFunctionHelper()
 		{
-			this.PivotTable = pivotTable;
 			this.Package = new ExcelPackage();
 			this.TempWorksheet = this.Package.Workbook.Worksheets.Add("Sheet1");
 		}
@@ -32,13 +27,13 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 		#region Public Methods
 		/// <summary>
-		/// Applies a function specified by the <paramref name="dataField"/>
+		/// Applies a function specified by the <paramref name="dataFieldFunction"/>
 		/// over the specified collection of <paramref name="values"/>.
 		/// </summary>
-		/// <param name="dataField">The dataField containing the function to be applied.</param>
+		/// <param name="dataFieldFunction">The dataField function to be applied.</param>
 		/// <param name="values">The values to apply the function to.</param>
 		/// <returns>The result of the function.</returns>
-		public object Calculate(ExcelPivotTableDataField dataField, List<object> values)
+		public object Calculate(DataFieldFunctions dataFieldFunction, List<object> values)
 		{
 			if (values == null || values.Count == 0)
 				return null;
@@ -50,7 +45,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				this.TempWorksheet.Cells[row, 1].Value = values[i];
 			}
 			var resultCell = this.TempWorksheet.Cells[row + 1, 1];
-			resultCell.Formula = $"={this.GetCorrespondingExcelFunction(dataField.Function)}(A1:A{row})";
+			resultCell.Formula = $"={this.GetCorrespondingExcelFunction(dataFieldFunction)}(A1:A{row})";
 			resultCell.Calculate();
 			return resultCell.Value;
 		}
@@ -83,7 +78,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				case DataFieldFunctions.Var:
 					return "VAR.S";
 				case DataFieldFunctions.VarP:
-					return "VAR.S";
+					return "VAR.P";
 				default:
 					throw new InvalidOperationException($"Invalid data field function: {dataFieldFunction}.");
 			}

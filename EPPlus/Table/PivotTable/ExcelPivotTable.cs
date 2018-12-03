@@ -1296,7 +1296,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			var backingData = new List<object>[this.RowHeaders.Count(), this.ColumnHeaders.Count()];
 			int dataColumn = this.Address.Start.Column + this.FirstDataCol;
-			using (var totalsCalculator = new TotalsFunctionHelper(this))
+			using (var totalsCalculator = new TotalsFunctionHelper())
 			{
 				for (int column = 0; column < this.ColumnHeaders.Count; column++)
 				{
@@ -1361,7 +1361,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		private void WriteCellTotal(int row, int column, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper functionCalculator)
 		{
 			var cell = this.WorkSheet.Cells[row, column];
-			cell.Value = functionCalculator.Calculate(dataField, values);
+			cell.Value = functionCalculator.Calculate(dataField.Function, values);
 			var style = this.WorkSheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
 			if (style != null)
 				cell.Style.Numberformat.Format = style.Format;
