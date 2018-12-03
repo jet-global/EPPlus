@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Resources;
+using System.Runtime.CompilerServices;
 
 namespace OfficeOpenXml.Internationalization
 {
@@ -10,31 +11,14 @@ namespace OfficeOpenXml.Internationalization
 	public class StringResources
 	{
 		#region Properties
-		// TODO: This property is for example only and should be deleted.
 		[StringResource("The {0} will be replaced with a field name. Place accordingly in your translations.")]
-		public string GrandTotalCaption
-		{
-			get
-			{
-				if (this.ResourceManager == null)
-					return "{0} Grand Total";
-				else
-					return this.ResourceManager.GetString(nameof(GrandTotalCaption));
-			}
-		}
+		public string TotalCaptionWitFollowingValue => this.GetValue("Total {0}");
 
-		// TODO: This property is for example only and should be deleted.
+		[StringResource("The {0} will be replaced with a field name. Place accordingly in your translations.")]
+		public string TotalCaptionWitPrecedingValue => this.GetValue("{0} Total");
+
 		[StringResource]
-		public string GroupByCaption
-		{
-			get
-			{
-				if (this.ResourceManager == null)
-					return "Group by";
-				else
-					return this.ResourceManager.GetString(nameof(GroupByCaption));
-			}
-		}
+		public string GrandTotalCaption => this.GetValue("Grand Total");
 
 		private ResourceManager ResourceManager { get; set; }
 		#endregion
@@ -76,6 +60,15 @@ namespace OfficeOpenXml.Internationalization
 				return false;
 			}
 			return true;
+		}
+		#endregion
+
+		#region Private Methods
+		private string GetValue(string defaultValue, [CallerMemberName] string memberName = "")
+		{
+			if (this.ResourceManager == null)
+				return defaultValue;
+			return this.ResourceManager.GetString(memberName);
 		}
 		#endregion
 	}

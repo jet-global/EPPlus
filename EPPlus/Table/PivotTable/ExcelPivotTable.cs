@@ -1320,10 +1320,10 @@ namespace OfficeOpenXml.Table.PivotTable
 					if ((this.HasRowDataFields && field == this.RowFields) || (this.HasColumnDataFields && field == this.ColumnFields))
 					{
 						string dataFieldName = this.DataFields[item.DataFieldIndex].Name;
-						this.WorkSheet.Cells[rowLabel, column].Value = $"Total {dataFieldName}";
+						this.WorkSheet.Cells[rowLabel, column].Value = string.Format(this.WorkSheet.Workbook.Package.StringResources.TotalCaptionWitFollowingValue, dataFieldName);
 					}
 					else
-						this.WorkSheet.Cells[rowLabel, column].Value = $"Grand Total";
+						this.WorkSheet.Cells[rowLabel, column].Value = this.WorkSheet.Workbook.Package.StringResources.GrandTotalCaption;
 				}
 				else if (item.ItemType.IsEquivalentTo("default"))
 				{
@@ -1334,7 +1334,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						this.WorkSheet.Cells[rowLabel, column].Value = $"{itemName} {dataFieldName}";
 					}
 					else
-						this.WorkSheet.Cells[rowLabel, column].Value = $"{itemName} Total";
+						this.WorkSheet.Cells[rowLabel, column].Value = string.Format(this.WorkSheet.Workbook.Package.StringResources.TotalCaptionWitPrecedingValue, itemName);
 				}
 				return true;
 			}
