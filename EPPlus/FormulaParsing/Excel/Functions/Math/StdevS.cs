@@ -71,7 +71,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			}
 			if (onlyStringInputsGiven)
 				return new CompileResult(eErrorType.Value);
-			if (listToDoStandardDeviationOn.Count() == 0)
+			if (listToDoStandardDeviationOn.Count() < 2)
 				return new CompileResult(eErrorType.Div0);
 			if (!StatisticsFunctionHelper.TryStandardDeviationOnASamplePopulation(listToDoStandardDeviationOn, out double standardDeviation))
 				return new CompileResult(eErrorType.Value);

@@ -228,9 +228,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="colTuple">The list of columnItem indices.</param>
 		/// <param name="dataFieldIndex">The index of the data field.</param>
 		/// <returns>The subtotal value or null if no values are found.</returns>
-		public double? CalculateSubtotal(List<Tuple<int, int>> rowTuple, List<Tuple<int, int>> colTuple, int dataFieldIndex)
+		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuple, List<Tuple<int, int>> colTuple, int dataFieldIndex)
 		{
-			double? value = null;
+			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
 				bool match = true;
@@ -271,13 +271,11 @@ namespace OfficeOpenXml.Table.PivotTable
 					}
 					else
 						itemValue = record.Items[dataFieldIndex].Value;
-					// Non-numerical values parse as 0.
-					if (!double.TryParse(itemValue, out var recordData))
-						recordData = 0;
-					value = value == null ? recordData : value + recordData;
+					double.TryParse(itemValue, out var recordData);
+					matchingValues.Add(recordData);
 				}
 			}
-			return value;
+			return matchingValues;
 		}
 		#endregion
 

@@ -23,39 +23,29 @@
  * Mats Alm   		                Added		                2013-12-03
  *******************************************************************************/
 using System.Collections.Generic;
-using System.Linq;
-using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using MathObj = System.Math;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 {
+	/// <summary>
+	/// Implements the Excel STDEV function.
+	/// </summary>
 	public class Stdev : HiddenValuesHandlingFunction
 	{
+		#region HiddenValuesHandlingFunction Overrides
+		/// <summary>
+		/// Executes the Excel STDEV function.
+		/// </summary>
+		/// <param name="arguments">The arguments to execute the function with.</param>
+		/// <param name="context">The context to execute the function under.</param>
+		/// <returns>The result of the function evaluation.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var values = ArgsToDoubleEnumerable(arguments, context, false);
-			return CreateResult(StandardDeviation(values), DataType.Decimal);
+			var values = base.ArgsToDoubleEnumerable(arguments, context, false);
+			return base.CreateResult(StatisticsFunctionHelper.Stdev(values), DataType.Decimal);
 		}
-
-		private double StandardDeviation(IEnumerable<double> values)
-		{
-			double ret = 0;
-			if (values.Any())
-			{
-				var nValues = values.Count();
-				if (nValues == 1) throw new ExcelErrorValueException(eErrorType.Div0);
-				//Compute the Average       
-				double avg = values.Average();
-				//Perform the Sum of (value-avg)_2_2       
-				double sum = values.Sum(d => MathObj.Pow(d - avg, 2));
-				//Put it all together       
-				ret = MathObj.Sqrt(Divide(sum, (values.Count() - 1)));
-			}
-			return ret;
-		}
-
+		#endregion
 	}
 }
