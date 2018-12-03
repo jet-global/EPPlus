@@ -58,7 +58,7 @@ namespace OfficeOpenXml.Internationalization
 				return false;
 			}
 			var resourceKeys = this.GetType()
-				.GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public)
+				.GetProperties()
 				.Where(p => p.GetCustomAttributesData().Any(a => a.AttributeType == typeof(StringResource)))
 				.Select(p => p.Name);
 			var missingStringResources = resourceKeys.Where(k => this.ResourceManager.GetString(k) == null);

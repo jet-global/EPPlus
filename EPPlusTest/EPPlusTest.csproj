@@ -245,6 +245,16 @@
     <Compile Include="FormulaParsing\Excel\Functions\Logical\LogicalFunctionsTestBase.cs" />
     <Compile Include="FormulaParsing\LexicalAnalysis\TokenTest.cs" />
     <Compile Include="Internationalization\StringResourcesTest.cs" />
+    <Compile Include="Internationalization\TestInternationalizationResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TestInternationalizationResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Internationalization\TestInternationalizationResourcesMissingValue.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TestInternationalizationResourcesMissingValue.resx</DependentUpon>
+    </Compile>
     <Compile Include="StructuredReferenceTest.cs" />
     <Compile Include="Style\Dxf\ExcelDxfStyleTest.cs" />
     <Compile Include="Style\XmlAccess\ExcelFontXmlTest.cs" />
@@ -385,6 +395,14 @@
   <ItemGroup>
     <None Include="EPPlusTest.snk" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Internationalization\TestInternationalizationResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TestInternationalizationResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Internationalization\TestInternationalizationResourcesMissingValue.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TestInternationalizationResourcesMissingValue.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\Vector Drawing.wmf" />
     <EmbeddedResource Include="Resources\Vector Drawing2.wmf" />
     <None Include="Workbooks\FormulaTest.xlsx">
