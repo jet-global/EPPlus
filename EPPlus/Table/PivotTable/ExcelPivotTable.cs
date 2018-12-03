@@ -36,6 +36,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using OfficeOpenXml.Extensions;
+using OfficeOpenXml.Internationalization;
 using OfficeOpenXml.Table.PivotTable.DataCalculation;
 using OfficeOpenXml.Utils;
 
@@ -966,7 +967,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Refresh the <see cref="ExcelPivotTable"/> based on the <see cref="ExcelPivotCacheDefinition"/>.
 		/// </summary>
-		internal void RefreshFromCache()
+		internal void RefreshFromCache(StringResources stringResources)
 		{
 			// Update pivotField items to match corresponding cacheField sharedItems.
 			foreach (var pivotField in this.Fields)
@@ -996,7 +997,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Update the colItems.
 			this.UpdateRowColumnItems(this.ColumnFields, this.ColumnItems, false);
 
-			this.UpdateWorksheet();
+			this.UpdateWorksheet(stringResources);
 		}
 		#endregion
 
@@ -1193,9 +1194,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private void UpdateWorksheet()
+		private void UpdateWorksheet(StringResources stringResources)
 		{
-			this.UpdateRowColumnHeaders();
+			this.UpdateRowColumnHeaders(stringResources);
 
 			// Update the pivot table's address.
 			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
@@ -1234,7 +1235,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private void UpdateRowColumnHeaders()
+		private void UpdateRowColumnHeaders(StringResources stringResources)
 		{
 			// Clear out the pivot table in the worksheet.
 			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
@@ -1248,7 +1249,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				for (int i = 0; i < this.RowItems.Count; i++)
 				{
-					bool itemType = this.SetHeaderTotalCellValue(this.RowFields, this.RowItems[i], this.RowHeaders[i], dataRow, this.Address.Start.Column);
+					bool itemType = this.SetTotalCellValue(this.RowFields, this.RowItems[i], this.RowHeaders[i], dataRow, this.Address.Start.Column, stringResources);
 					if (itemType)
 					{
 						dataRow++;
@@ -1268,7 +1269,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				for (int i = 0; i < this.ColumnItems.Count; i++)
 				{
 					int startHeaderRow = startRow;
-					bool itemType = this.SetHeaderTotalCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], startHeaderRow, headerColumn);
+					bool itemType = this.SetTotalCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], startHeaderRow, headerColumn, stringResources);
 					if (itemType)
 					{
 						headerColumn++;
@@ -1366,7 +1367,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				cell.Style.Numberformat.Format = style.Format;
 		}
 
-		private bool SetHeaderTotalCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, int row, int column)
+		private bool SetTotalCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, int row, int column, StringResources stringResources)
 		{
 			if (!string.IsNullOrEmpty(item.ItemType))
 			{
@@ -1379,10 +1380,10 @@ namespace OfficeOpenXml.Table.PivotTable
 					if ((this.HasRowDataFields && field == this.RowFields) || (this.HasColumnDataFields && field == this.ColumnFields))
 					{
 						string dataFieldName = this.DataFields[item.DataFieldIndex].Name;
-						this.WorkSheet.Cells[rowLabel, column].Value = $"Total {dataFieldName}";
+						this.WorkSheet.Cells[rowLabel, column].Value = string.Format(stringResources.TotalCaptionWitFollowingValue, dataFieldName);
 					}
 					else
-						this.WorkSheet.Cells[rowLabel, column].Value = $"Grand Total";
+						this.WorkSheet.Cells[rowLabel, column].Value = stringResources.GrandTotalCaption;
 				}
 				else if (item.ItemType.IsEquivalentTo("default"))
 				{
@@ -1394,7 +1395,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						this.WorkSheet.Cells[rowLabel, column].Value = $"{itemName} {dataFieldName}";
 					}
 					else
-						this.WorkSheet.Cells[rowLabel, column].Value = $"{itemName} Total";
+						this.WorkSheet.Cells[rowLabel, column].Value = string.Format(stringResources.TotalCaptionWitPrecedingValue, itemName);
 				}
 				return true;
 			}

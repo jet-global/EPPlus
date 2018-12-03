@@ -35,9 +35,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Resources;
 using System.Security.Cryptography;
 using System.Xml;
 using OfficeOpenXml.Encryption;
+using OfficeOpenXml.Internationalization;
 using OfficeOpenXml.Utils;
 namespace OfficeOpenXml
 {

@@ -666,6 +666,8 @@
     </Compile>
     <Compile Include="FormulaParsing\Utilities\Require.cs" />
     <Compile Include="ICellStore.cs" />
+    <Compile Include="Internationalization\StringResource.cs" />
+    <Compile Include="Internationalization\StringResources.cs" />
     <Compile Include="Packaging\DotNetZip\ComHelper.cs" />
     <Compile Include="Packaging\DotNetZip\CRC32.cs">
       <SubType>Code</SubType>
