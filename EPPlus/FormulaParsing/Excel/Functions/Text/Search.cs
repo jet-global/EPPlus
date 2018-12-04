@@ -35,20 +35,15 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 			var functionArguments = arguments as FunctionArgument[] ?? arguments.ToArray();
 			if (this.ArgumentsAreValid(functionArguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var search = ArgToString(functionArguments, 0);
-			var searchIn = ArgToString(functionArguments, 1);
-			var startIndex = 0;
-			if (functionArguments.Count() > 2)
-			{
-				startIndex = ArgToInt(functionArguments, 2);
-			}
+			var search = base.ArgToString(functionArguments, 0);
+			var searchIn = base.ArgToString(functionArguments, 1);
+			// Subtract 1 because Excel uses 1-based index
+			var startIndex = functionArguments.Count() > 2 ? base.ArgToInt(functionArguments, 2) - 1 : 0;
 			var result = searchIn.IndexOf(search, startIndex, System.StringComparison.OrdinalIgnoreCase);
 			if (result == -1)
-			{
-				return CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
-			}
+				return base.CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 			// Adding 1 because Excel uses 1-based index
-			return CreateResult(result + 1, DataType.Integer);
+			return base.CreateResult(result + 1, DataType.Integer);
 		}
 	}
 }

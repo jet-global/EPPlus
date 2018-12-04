@@ -172,20 +172,20 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["false"] = new False();
 			// Reference and lookup
 			this.Functions["address"] = new Address();
-			this.Functions["hlookup"] = new HLookup { LookupArgumentIndicies = new List<int> { 1 } };
-			this.Functions["vlookup"] = new VLookup { LookupArgumentIndicies = new List<int> { 1 } };
-			this.Functions["lookup"] = new Lookup { LookupArgumentIndicies = new List<int> { 1, 2 } };
-			this.Functions["match"] = new Match { LookupArgumentIndicies = new List<int> { 1 } };
-			this.Functions["row"] = new Row() { LookupArgumentIndicies = new List<int> { 0 } };
-			this.Functions["rows"] = new Rows() { LookupArgumentIndicies = new List<int> { 0 } };
-			this.Functions["column"] = new Column() { LookupArgumentIndicies = new List<int> { 0 } };
-			this.Functions["columns"] = new Columns() { LookupArgumentIndicies = new List<int> { 0 } };
+			this.Functions["hlookup"] = new HLookup();
+			this.Functions["vlookup"] = new VLookup();
+			this.Functions["lookup"] = new Lookup();
+			this.Functions["match"] = new Match();
+			this.Functions["row"] = new Row();
+			this.Functions["rows"] = new Rows();
+			this.Functions["column"] = new Column();
+			this.Functions["columns"] = new Columns();
 			this.Functions["choose"] = new Choose();
 			this.Functions["index"] = new Index();
 			this.Functions["indirect"] = new Indirect();
 			this.Functions["indirectaddress"] = new IndirectAddress();
-			this.Functions["offset"] = new Offset() { LookupArgumentIndicies = new List<int> { 0 } };
-			this.Functions["offsetaddress"] = new OffsetAddress() { LookupArgumentIndicies = new List<int> { 0 } };
+			this.Functions["offset"] = new Offset();
+			this.Functions["offsetaddress"] = new OffsetAddress();
 			// Date
 			this.Functions["date"] = new Date();
 			this.Functions["today"] = new Today();

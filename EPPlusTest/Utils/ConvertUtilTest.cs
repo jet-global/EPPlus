@@ -13,39 +13,59 @@ namespace EPPlusTest.Utils
 	{
 		#region TryParse Tests
 		[TestMethod]
-		public void TryParseNumericString()
+		public void ValidateNumberGroupSizesTest()
 		{
-			double result;
-			object numericString = null;
-			double expected = 0;
-			Assert.IsFalse(ConvertUtil.TryParseNumericString(numericString, out result));
-			Assert.AreEqual(expected, result);
-			expected = 1442.0;
-			numericString = expected.ToString("e", CultureInfo.CurrentCulture); // 1.442E+003
-			Assert.IsTrue(ConvertUtil.TryParseNumericString(numericString, out result));
-			Assert.AreEqual(expected, result);
-			numericString = expected.ToString("f0", CultureInfo.CurrentCulture); // 1442
-			Assert.IsTrue(ConvertUtil.TryParseNumericString(numericString, out result));
-			Assert.AreEqual(expected, result);
-			numericString = expected.ToString("f2", CultureInfo.CurrentCulture); // 1442.00
-			Assert.IsTrue(ConvertUtil.TryParseNumericString(numericString, out result));
-			Assert.AreEqual(expected, result);
-			numericString = expected.ToString("n", CultureInfo.CurrentCulture); // 1,442.0
-			Assert.IsTrue(ConvertUtil.TryParseNumericString(numericString, out result));
-			Assert.AreEqual(expected, result);
-			expected = -0.00526;
-			numericString = expected.ToString("e", CultureInfo.CurrentCulture); // -5.26E-003
-			Assert.IsTrue(ConvertUtil.TryParseNumericString(numericString, out result));
-			Assert.AreEqual(expected, result);
-			numericString = expected.ToString("f0", CultureInfo.CurrentCulture); // -0
-			Assert.IsTrue(ConvertUtil.TryParseNumericString(numericString, out result));
-			Assert.AreEqual(0.0, result);
-			numericString = expected.ToString("f3", CultureInfo.CurrentCulture); // -0.005
-			Assert.IsTrue(ConvertUtil.TryParseNumericString(numericString, out result));
-			Assert.AreEqual(-0.005, result);
-			numericString = expected.ToString("n6", CultureInfo.CurrentCulture); // -0.005260
-			Assert.IsTrue(ConvertUtil.TryParseNumericString(numericString, out result));
-			Assert.AreEqual(expected, result);
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes(null, CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("1.442E+003", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("1442", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("1442.00", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("1,442.0", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("-5.26E-003", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("-0", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("-0.005", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("-0.005260", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("2,345,656,567", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("123", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("12345", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("-12345", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("-12,345", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("-122,345", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("2,3,45,656,567", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("23,45,656,567", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("2345656,567", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("2345656567,", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("2,345,656,567,", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes(",567", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("-,567", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("2,345,656,7.45E-003", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("2,345,656,567E+003", CultureInfo.CurrentCulture.NumberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("2,345,656,567.45E-003", CultureInfo.CurrentCulture.NumberFormat));
+
+			var numberFormat = new NumberFormatInfo { NumberGroupSizes = new int[4] { 2, 3, 4, 0 }, NumberGroupSeparator = "*" };
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("1", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("12", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("123", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("1*23", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("123*23", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("6*123*23", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("9876*123*23", numberFormat));
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("99876*123*23", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("9*9876*123*23", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("1231239*9876*123*23", numberFormat));
+
+			numberFormat = new NumberFormatInfo { NumberGroupSizes = new int[2] { 2, 3,}, NumberGroupSeparator = "*", NumberDecimalSeparator = "#", NegativeSign = "_" };
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("_123*23#23", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("6*123*23#", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("126*123*23#8989", numberFormat));
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("9126*123*23", numberFormat));
+
+			numberFormat = new NumberFormatInfo { NumberGroupSizes = new int[0] };
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("2,345", numberFormat));
+			Assert.IsTrue(ConvertUtil.ValidateNumberGroupSizes("2345", numberFormat));
+
+			// In German, the "." is both the date seperator and the number group seperator.
+			numberFormat = new CultureInfo("de-DE").NumberFormat;
+			Assert.IsFalse(ConvertUtil.ValidateNumberGroupSizes("1.1", numberFormat));
 		}
 
 		[TestMethod]

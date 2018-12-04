@@ -34,7 +34,7 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 {
 	public class WildCardValueMatcher : ValueMatcher
 	{
-		protected override int CompareStringToString(string searchString, string testValue)
+		protected override int? CompareStringToString(string searchString, string testValue)
 		{
 			if (searchString.Contains("*") || searchString.Contains("?") || searchString.Contains("~"))
 			{
