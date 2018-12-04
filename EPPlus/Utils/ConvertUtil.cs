@@ -434,7 +434,6 @@ namespace OfficeOpenXml.Utils
 			}
 			return true;
 		}
-		#endregion
 
 		/// <summary>
 		/// Converts an object to the string representation that Excel uses in XML attributes.
@@ -455,6 +454,7 @@ namespace OfficeOpenXml.Utils
 				return errorValue.ToString();
 			throw new InvalidOperationException($"Unknown type '{value.GetType()}' in cacheRecord value.");
 		}
+		#endregion
 
 		#region internal cache objects
 		internal static TextInfo _invariantTextInfo = CultureInfo.InvariantCulture.TextInfo;
