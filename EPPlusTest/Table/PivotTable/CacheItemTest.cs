@@ -60,9 +60,11 @@ namespace EPPlusTest.Table.PivotTable
 			var topNode = document.SelectSingleNode("//r");
 			var namespaceManager = TestUtility.CreateDefaultNSM();
 			var item = new CacheItem(namespaceManager, topNode, PivotCacheRecordType.n, "493");
+			Assert.AreEqual(3, topNode.ChildNodes.Count);
+			item.AddSelf(topNode);
 			Assert.AreEqual(PivotCacheRecordType.n, item.Type);
 			Assert.AreEqual("493", item.Value);
-			Assert.AreEqual(3, topNode.ChildNodes.Count);
+			Assert.AreEqual(4, topNode.ChildNodes.Count);
 		}
 
 		[TestMethod]

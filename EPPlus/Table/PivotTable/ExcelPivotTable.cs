@@ -940,7 +940,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			bool cacheDefinitionFound = false;
 			foreach (var cache in this.WorkSheet.Workbook.PivotCacheDefinitions)
 			{
-				if (cache.SourceRange.IsEquivalentRange(sourceAddress))
+				if (cache.GetSourceRangeAddress().IsEquivalentRange(sourceAddress))
 				{
 					this.CacheDefinition = cache;
 					cacheDefinitionFound = true;

@@ -80,7 +80,7 @@ namespace EPPlusTest.Table.PivotTable
 		{
 			var node = base.GetTestCacheFieldNode();
 			node.SharedItems.Add("jet");
-			Assert.AreEqual(3, node.SharedItems.Count);
+			Assert.AreEqual(4, node.SharedItems.Count);
 			Assert.AreEqual("jet", node.SharedItems[2].Value);
 			Assert.AreEqual(PivotCacheRecordType.s, node.SharedItems[2].Type);
 		}
@@ -90,7 +90,7 @@ namespace EPPlusTest.Table.PivotTable
 		{
 			var node = base.GetTestCacheFieldNode();
 			node.SharedItems.Add(null);
-			Assert.AreEqual(3, node.SharedItems.Count);
+			Assert.AreEqual(4, node.SharedItems.Count);
 			Assert.IsNull(node.SharedItems[2].Value);
 			Assert.AreEqual(PivotCacheRecordType.m, node.SharedItems[2].Type);
 		}
@@ -111,6 +111,7 @@ namespace EPPlusTest.Table.PivotTable
 			</sharedItems>");
 			var node = xmlDoc.FirstChild;
 			var itemsCollection = new SharedItemsCollection(namespaceManager, node);
+			Assert.AreEqual(4, itemsCollection.Count);
 			var sharedItems = new List<CacheItem>
 			{
 				new CacheItem(namespaceManager, node, PivotCacheRecordType.n, "20100076"),

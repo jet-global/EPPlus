@@ -1418,12 +1418,14 @@ namespace OfficeOpenXml
 				{
 					if (rowFrom <= ptbl.Address.End.Row)
 						ptbl.Address = ptbl.Address.AddRow(rowFrom, rows);
-
-					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
-						ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
-						ptbl.CacheDefinition.SourceRange.IsName == false &&
-						rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
-						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
+				}
+				foreach (var cacheDefinition in this.Workbook.PivotCacheDefinitions)
+				{
+					if (cacheDefinition.CacheSource == eSourceType.Worksheet &&
+						cacheDefinition.GetSourceRangeAddress()?.Worksheet == this &&
+						cacheDefinition.GetSourceRangeAddress().IsName == false &&
+						rowFrom <= cacheDefinition.GetSourceRangeAddress().End.Row)
+						cacheDefinition.SetSourceRangeAddress(this, cacheDefinition.GetSourceRangeAddress().AddRow(rowFrom, rows).Address);
 				}
 				this.UpdateCharts(rows, 0, rowFrom, 0);
 				// Update cross-sheet references.
@@ -1431,14 +1433,6 @@ namespace OfficeOpenXml
 				{
 					sheet.Names.Insert(rowFrom, 0, rows, 0, this);
 					sheet.UpdateCrossSheetReferences(this.Name, rowFrom, rows, 0, 0);
-					foreach (var ptbl in sheet.PivotTables)
-					{
-						if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
-							ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
-							ptbl.CacheDefinition.SourceRange.IsName == false &&
-							rowFrom <= ptbl.CacheDefinition.SourceRange.End.Row)
-							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddRow(rowFrom, rows).Address;
-					}
 				}
 				this.Workbook.Names.Insert(rowFrom, 0, rows, 0, this);
 				this.UpdateDataValidationRanges(rowFrom, rows, 0, 0);
@@ -1615,11 +1609,14 @@ namespace OfficeOpenXml
 				{
 					if (columnFrom <= ptbl.Address.End.Column)
 						ptbl.Address = ptbl.Address.AddColumn(columnFrom, columns);
-					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
-						ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
-						ptbl.CacheDefinition.SourceRange.IsName == false &&
-						columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
-						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
+				}
+				foreach (var cacheDefinition in this.Workbook.PivotCacheDefinitions)
+				{
+					if (cacheDefinition.CacheSource == eSourceType.Worksheet &&
+						cacheDefinition.GetSourceRangeAddress()?.Worksheet == this &&
+						cacheDefinition.GetSourceRangeAddress().IsName == false &&
+						columnFrom <= cacheDefinition.GetSourceRangeAddress().End.Row)
+						cacheDefinition.SetSourceRangeAddress(this, cacheDefinition.GetSourceRangeAddress().AddColumn(columnFrom, columns).Address);
 				}
 				this.UpdateCharts(0, columns, 0, columnFrom);
 				// Update cross-sheet references.
@@ -1627,14 +1624,6 @@ namespace OfficeOpenXml
 				{
 					sheet.Names.Insert(0, columnFrom, 0, columns, this);
 					sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, columns);
-					foreach (var ptbl in sheet.PivotTables)
-					{
-						if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
-							ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
-							ptbl.CacheDefinition.SourceRange.IsName == false &&
-							columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
-							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.AddColumn(columnFrom, columns).Address;
-					}
 				}
 				this.Workbook.Names.Insert(0, columnFrom, 0, columns, this);
 				this.UpdateDataValidationRanges(0, 0, columnFrom, columns);
@@ -1683,26 +1672,23 @@ namespace OfficeOpenXml
 				{
 					if (rowFrom <= pivotTable.Address.End.Row)
 						pivotTable.Address = pivotTable.Address.DeleteRow(rowFrom, rows);
-					if (pivotTable.CacheDefinition.CacheSource == eSourceType.Worksheet &&
-						pivotTable.CacheDefinition.SourceRange != null &&
-						pivotTable.CacheDefinition.SourceRange.Worksheet == this &&
-						pivotTable.CacheDefinition.SourceRange.IsName == false &&
-						rowFrom <= pivotTable.CacheDefinition.SourceRange.End.Row)
-						pivotTable.CacheDefinition.SourceRange.Address = pivotTable.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows).Address;
+				}
+				foreach (var cacheDefinition in this.Workbook.PivotCacheDefinitions)
+				{
+					if (cacheDefinition.CacheSource == eSourceType.Worksheet &&
+						cacheDefinition.GetSourceRangeAddress()?.Worksheet == this &&
+						cacheDefinition.GetSourceRangeAddress().IsName == false &&
+						rowFrom <= cacheDefinition.GetSourceRangeAddress().End.Row)
+					{
+						var shiftedAddress = cacheDefinition.GetSourceRangeAddress().DeleteRow(rowFrom, rows)?.Address;
+						var setAddress = shiftedAddress ?? ExcelErrorValue.Create(eErrorType.Ref).ToString();
+						cacheDefinition.SetSourceRangeAddress(this, setAddress);
+					}
 				}
 				foreach (var sheet in this.Workbook.Worksheets.Where(sheet => sheet != this))
 				{
 					sheet.Names.Delete(rowFrom, 0, rows, 0, this);
 					sheet.UpdateCrossSheetReferences(this.Name, rowFrom, -rows, 0, 0);
-					foreach (var pivotTable in sheet.PivotTables)
-					{
-						if (pivotTable.CacheDefinition.CacheSource == eSourceType.Worksheet &&
-							pivotTable.CacheDefinition.SourceRange != null &&
-							pivotTable.CacheDefinition.SourceRange.Worksheet == this &&
-							pivotTable.CacheDefinition.SourceRange.IsName == false &&
-							rowFrom <= pivotTable.CacheDefinition.SourceRange.End.Row)
-							pivotTable.CacheDefinition.SourceRange.Address = pivotTable.CacheDefinition.SourceRange.DeleteRow(rowFrom, rows)?.Address ?? ExcelErrorValue.Values.Ref;
-					}
 				}
 				this.Workbook.Names.Delete(rowFrom, 0, rows, 0, this);
 				this.UpdateSparkLines(-rows, rowFrom, 0, 0);
@@ -1798,24 +1784,23 @@ namespace OfficeOpenXml
 				{
 					if (columnFrom <= ptbl.Address.End.Column)
 						ptbl.Address = ptbl.Address.DeleteColumn(columnFrom, columns);
-					if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
-						ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
-						ptbl.CacheDefinition.SourceRange.IsName == false &&
-						columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
-						ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns).Address;
+				}
+				foreach (var cacheDefinition in this.Workbook.PivotCacheDefinitions)
+				{
+					if (cacheDefinition.CacheSource == eSourceType.Worksheet &&
+						cacheDefinition.GetSourceRangeAddress()?.Worksheet == this &&
+						cacheDefinition.GetSourceRangeAddress().IsName == false &&
+						columnFrom <= cacheDefinition.GetSourceRangeAddress().End.Row)
+					{
+						var shiftedAddress = cacheDefinition.GetSourceRangeAddress().DeleteColumn(columnFrom, columns)?.Address;
+						var setAddress = shiftedAddress ?? ExcelErrorValue.Create(eErrorType.Ref).ToString();
+						cacheDefinition.SetSourceRangeAddress(this, setAddress);
+					}
 				}
 				foreach (var sheet in this.Workbook.Worksheets.Where(sheet => sheet != this))
 				{
 					sheet.Names.Delete(0, columnFrom, 0, columns, this);
 					sheet.UpdateCrossSheetReferences(this.Name, 0, 0, columnFrom, -columns);
-					foreach (var ptbl in sheet.PivotTables)
-					{
-						if (ptbl.CacheDefinition.CacheSource == eSourceType.Worksheet &&
-							ptbl.CacheDefinition.SourceRange?.Worksheet == this &&
-							ptbl.CacheDefinition.SourceRange.IsName == false &&
-							columnFrom <= ptbl.CacheDefinition.SourceRange.End.Column)
-							ptbl.CacheDefinition.SourceRange.Address = ptbl.CacheDefinition.SourceRange.DeleteColumn(columnFrom, columns)?.Address ?? ExcelErrorValue.Values.Ref;
-					}
 				}
 				this.Workbook.Names.Delete(0, columnFrom, 0, columns, this);
 				this.UpdateCharts(0, -columns, 0, columnFrom);
@@ -4001,16 +3986,16 @@ namespace OfficeOpenXml
 
 				//Rewrite the pivottable address again if any rows or columns have been inserted or deleted
 				pt.SetXmlNodeString("d:location/@ref", pt.Address.Address);
-				if (pt.CacheDefinition.SourceRange != null && !pt.CacheDefinition.SourceRange.IsName)
+				if (pt.CacheDefinition.GetSourceRangeAddress() != null && !pt.CacheDefinition.GetSourceRangeAddress().IsName)
 				{
 					string pivotTableReferenceSheet = pt.CacheDefinition.GetXmlNodeString(ExcelPivotCacheDefinition.SourceWorksheetPath);
 					string address = string.IsNullOrEmpty(pivotTableReferenceSheet) ?
-						pt.CacheDefinition.SourceRange.FullAddress :
-						pt.CacheDefinition.SourceRange.Address;
+						pt.CacheDefinition.GetSourceRangeAddress().FullAddress :
+						pt.CacheDefinition.GetSourceRangeAddress().Address;
 					pt.CacheDefinition.SetXmlNodeString(ExcelPivotCacheDefinition.SourceAddressPath, address);
 				}
 				
-				if (pt.CacheDefinition.SourceRange != null)
+				if (pt.CacheDefinition.GetSourceRangeAddress() != null)
 				{
 					foreach (var df in pt.DataFields)
 					{

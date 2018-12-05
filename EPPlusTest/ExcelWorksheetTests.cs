@@ -26,6 +26,7 @@ namespace EPPlusTest
 		[TestMethod]
 		public void RunWorksheetTests()
 		{
+			// TODO (Task #8178): Fix grouping/test.
 			InsertDeleteTestRows();
 			InsertDeleteTestColumns();
 			LoadData();
@@ -2270,7 +2271,7 @@ namespace EPPlusTest
 
 			var pivot4 = pck.Workbook.Worksheets[4].PivotTables[0];
 			var pivot5 = pck.Workbook.Worksheets[5].PivotTables[0];
-			pivot5.CacheDefinition.SourceRange = pck.Workbook.Worksheets[1].Cells["Q1:X300"];
+			pivot5.CacheDefinition.SetSourceRangeAddress(pck.Workbook.Worksheets[1], pck.Workbook.Worksheets[1].Cells["Q1:X300"]);
 
 			var pivot6 = pck.Workbook.Worksheets[6].PivotTables[0];
 
@@ -3487,17 +3488,17 @@ namespace EPPlusTest
 				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
 				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet1.InsertRow(1, 1);
 
 				Assert.AreEqual("'sheet1'!C4:D5", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet2.InsertRow(1, 1);
 
 				Assert.AreEqual("'sheet1'!C4:D5", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E6:E8", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E6:E8", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 			}
 		}
 
@@ -3513,12 +3514,12 @@ namespace EPPlusTest
 				var pivotTable = worksheet.PivotTables.First();
 				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 
 				worksheet.InsertRow(1, 1);
 
 				Assert.AreEqual("I11:J17", pivotTable.Address.Address);
-				Assert.AreEqual("C4:F7", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C4:F7", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 			}
 		}
 
@@ -3534,12 +3535,12 @@ namespace EPPlusTest
 				var pivotTable = worksheet.PivotTables.First();
 				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 
 				worksheet.InsertRow(8, 1);
 
 				Assert.AreEqual("I11:J17", pivotTable.Address.Address);
-				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 			}
 		}
 
@@ -3596,6 +3597,26 @@ namespace EPPlusTest
 			finally
 			{
 				tempWorkbook.Delete();
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void InsertRowUpdatePivotTableSourceRange()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				worksheet.InsertRow(1, 1);
+				var pivotTable = worksheet.PivotTables.First();
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+				Assert.AreEqual("A2:G9", cacheDefinition.GetSourceRangeAddress().ToString());
+
+				worksheet = package.Workbook.Worksheets["RowItems"];
+				worksheet.InsertColumn(1, 1);
+				Assert.AreEqual("A2:G9", cacheDefinition.GetSourceRangeAddress().ToString());
 			}
 		}
 
@@ -3734,17 +3755,17 @@ namespace EPPlusTest
 				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
 				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet1.InsertColumn(1, 1);
 
 				Assert.AreEqual("'sheet1'!D3:E4", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet2.InsertColumn(1, 1);
 
 				Assert.AreEqual("'sheet1'!D3:E4", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!F5:F7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!F5:F7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 			}
 		}
 
@@ -3760,12 +3781,12 @@ namespace EPPlusTest
 				var pivotTable = worksheet.PivotTables.First();
 				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 
 				worksheet.InsertColumn(1, 1);
 
 				Assert.AreEqual("J10:K16", pivotTable.Address.Address);
-				Assert.AreEqual("D3:G6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("D3:G6", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 			}
 		}
 
@@ -4158,17 +4179,17 @@ namespace EPPlusTest
 				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
 				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet1.DeleteRow(1, 1);
 
 				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet2.DeleteRow(1, 1);
 
 				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E4:E6", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E4:E6", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 			}
 		}
 
@@ -4289,12 +4310,12 @@ namespace EPPlusTest
 				var pivotTable = worksheet.PivotTables.First();
 				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 
 				worksheet.DeleteRow(1, 1);
 
 				Assert.AreEqual("I9:J15", pivotTable.Address.Address);
-				Assert.AreEqual("C2:F5", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C2:F5", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 			}
 		}
 
@@ -4310,12 +4331,12 @@ namespace EPPlusTest
 				var pivotTable = worksheet.PivotTables.First();
 				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 
 				worksheet.DeleteRow(8, 1);
 
 				Assert.AreEqual("I9:J15", pivotTable.Address.Address);
-				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 			}
 		}
 
@@ -4659,17 +4680,17 @@ namespace EPPlusTest
 				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
 				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet1.DeleteRow(1, 1);
 
 				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet2.DeleteRow(1, 5);
 
 				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E1:E2", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E1:E2", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 			}
 		}
 		#endregion
@@ -4788,17 +4809,17 @@ namespace EPPlusTest
 				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
 				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet1.DeleteRow(1, 1);
 
 				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet2.DeleteRow(1, 10);
 
 				Assert.AreEqual("'sheet1'!C2:D3", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!#REF!", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!#REF!", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 			}
 		}
 		#endregion
@@ -5301,17 +5322,17 @@ namespace EPPlusTest
 				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:E7"], "PivotTable");
 				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet1.DeleteColumn(1, 1);
 
 				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:E7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet2.DeleteColumn(1, 1);
 
 				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!D5:D7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!D5:D7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 			}
 		}
 
@@ -5432,12 +5453,12 @@ namespace EPPlusTest
 				var pivotTable = worksheet.PivotTables.First();
 				Assert.AreEqual("I10:J16", pivotTable.Address.Address);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 
 				worksheet.DeleteColumn(1, 1);
 
 				Assert.AreEqual("H10:I16", pivotTable.Address.Address);
-				Assert.AreEqual("B3:E6", pivotTable.CacheDefinition.SourceRange.Address);
+				Assert.AreEqual("B3:E6", pivotTable.CacheDefinition.GetSourceRangeAddress().Address);
 			}
 		}
 
@@ -5611,17 +5632,17 @@ namespace EPPlusTest
 				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:G7"], "PivotTable");
 				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet1.DeleteColumn(1, 1);
 
 				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet2.DeleteColumn(1, 5);
 
 				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!A5:B7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!A5:B7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 			}
 		}
 		#endregion
@@ -5810,17 +5831,17 @@ namespace EPPlusTest
 				var pivotTable = sheet1.PivotTables.Add(sheet1.Cells["C3:D4"], sheet2.Cells["E5:G7"], "PivotTable");
 				Assert.AreEqual("'sheet1'!C3:D4", pivotTable.Address.FullAddress);
 				Assert.AreEqual(eSourceType.Worksheet, pivotTable.CacheDefinition.CacheSource);
-				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet1.DeleteColumn(1, 1);
 
 				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!E5:G7", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 
 				sheet2.DeleteColumn(1, 16);
 
 				Assert.AreEqual("'sheet1'!B3:C4", pivotTable.Address.FullAddress);
-				Assert.AreEqual("'sheet2'!#REF!", pivotTable.CacheDefinition.SourceRange.FullAddress);
+				Assert.AreEqual("'sheet2'!#REF!", pivotTable.CacheDefinition.GetSourceRangeAddress().FullAddress);
 			}
 		}
 

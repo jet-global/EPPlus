@@ -143,13 +143,17 @@ namespace OfficeOpenXml.Table.PivotTable
 					// The corresponding cacheField has shared items; map the new cacheRecord entry 
 					// into shared items if a matching entry exists, otherwise create a new sharedItem entry and map accordingly.
 					var indexStringValue = this.GetCacheFieldSharedItemIndexString(cacheField, type, value);
-					myItems.Add(new CacheItem(namespaceManager, recordNode, PivotCacheRecordType.x, indexStringValue));
+					var item = new CacheItem(namespaceManager, recordNode, PivotCacheRecordType.x, indexStringValue);
+					item.AddSelf(recordNode);
+					myItems.Add(item);
 				}
 				else
 				{
 					// If no SharedItems exist, simply create a record item entry.
 					var stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
-					myItems.Add(new CacheItem(namespaceManager, recordNode, type, stringValue));
+					var item = new CacheItem(namespaceManager, recordNode, type, stringValue);
+					item.AddSelf(recordNode);
+					myItems.Add(item);
 				}
 				col++;
 			}
