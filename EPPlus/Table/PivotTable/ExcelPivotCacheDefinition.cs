@@ -197,7 +197,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private ExcelRangeBase SourceRange
 		{
-			/// The range must be in the same workbook as the pivot table.
+			// The range must be in the same workbook as the pivot table.
 			get
 			{
 				if (mySourceRange == null)
@@ -331,16 +331,21 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="resourceManager">The <see cref="ResourceManager"/> to retrieve translations from (optional).</param>
 		public void UpdateData(ResourceManager resourceManager = null)
 		{
+			var sourceRange = this.GetSourceRangeAddress();
+			// If the source range is an Excel pivot table or named range, resolve the address.
+			if (sourceRange.IsName)
+				sourceRange = AddressUtility.GetFormulaAsCellRange(this.Workbook, sourceRange.Worksheet, sourceRange.Address);
+
 			// Update all cacheField names assuming the shape of the pivot cache definition source range remains unchanged.
-			for (int col = this.GetSourceRangeAddress().Start.Column; col < this.GetSourceRangeAddress().Columns + this.GetSourceRangeAddress().Start.Column; col++)
+			for (int col = sourceRange.Start.Column; col < sourceRange.Columns + sourceRange.Start.Column; col++)
 			{
-				int fieldIndex = col - this.GetSourceRangeAddress().Start.Column;
-				this.CacheFields[fieldIndex].Name = this.GetSourceRangeAddress().Worksheet.Cells[this.GetSourceRangeAddress().Start.Row, col].Value.ToString();
+				int fieldIndex = col - sourceRange.Start.Column;
+				this.CacheFields[fieldIndex].Name = sourceRange.Worksheet.Cells[sourceRange.Start.Row, col].Value.ToString();
 			}
 
 			// Update all cache record values.
-			var worksheet = this.GetSourceRangeAddress().Worksheet;
-			var range = new ExcelRange(worksheet, worksheet.Cells[this.GetSourceRangeAddress().Start.Row + 1, this.GetSourceRangeAddress().Start.Column, this.GetSourceRangeAddress().End.Row, this.GetSourceRangeAddress().End.Column]);
+			var worksheet = sourceRange.Worksheet;
+			var range = new ExcelRange(worksheet, worksheet.Cells[sourceRange.Start.Row + 1, sourceRange.Start.Column, sourceRange.End.Row, sourceRange.End.Column]);
 			this.CacheRecords.UpdateRecords(range);
 
 			this.StringResources.LoadResourceManager(resourceManager);

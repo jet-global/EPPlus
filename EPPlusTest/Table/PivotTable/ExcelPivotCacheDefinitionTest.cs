@@ -233,6 +233,31 @@ namespace EPPlusTest.Table.PivotTable
 				this.AssertCacheRecord(cacheRecords, 2, 3, PivotCacheRecordType.n, "10");
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableBackedByExcelTable.xlsx")]
+		public void UpdateDataOfPivotTableBackedByExcelTableTest()
+		{
+			var file = new FileInfo("PivotTableBackedByExcelTable.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var worksheet = package.Workbook.Worksheets.First();
+				var pivotTable = worksheet.PivotTables.First();
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+				cacheDefinition.UpdateData();
+				Assert.AreEqual("Transaction", cacheDefinition.CacheFields.First().Name);
+				Assert.AreEqual(3, cacheDefinition.CacheFields[2].SharedItems.Count);
+				Assert.AreEqual("January", worksheet.Cells[17, 2].Value);
+				Assert.AreEqual("February", worksheet.Cells[18, 2].Value);
+				Assert.AreEqual("March", worksheet.Cells[19, 2].Value);
+				Assert.AreEqual("Grand Total", worksheet.Cells[20, 2].Value);
+				Assert.AreEqual(2078.75, worksheet.Cells[17, 3].Value);
+				Assert.AreEqual(1293d, worksheet.Cells[18, 3].Value);
+				Assert.AreEqual(856.49, worksheet.Cells[19, 3].Value);
+				Assert.AreEqual(4228.24, worksheet.Cells[20, 3].Value);
+			}
+		}
 		#endregion
 
 		#region GetRelatedPivotTables Tests
