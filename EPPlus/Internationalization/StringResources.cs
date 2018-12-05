@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Resources;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace OfficeOpenXml.Internationalization
 {
@@ -76,7 +77,7 @@ namespace OfficeOpenXml.Internationalization
 		{
 			if (this.ResourceManager == null)
 				return defaultValue;
-			return this.ResourceManager.GetString(memberName);
+			return this.ResourceManager.GetString(memberName, Thread.CurrentThread.CurrentCulture);
 		}
 		#endregion
 	}

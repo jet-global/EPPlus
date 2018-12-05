@@ -397,7 +397,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal void Save()
 		{
 			this.CacheDefinitionXml.Save(this.Part.GetStream(FileMode.Create));
-			this.CacheRecords.Save();
+			this.CacheRecords?.Save();
 		}
 		#endregion
 
