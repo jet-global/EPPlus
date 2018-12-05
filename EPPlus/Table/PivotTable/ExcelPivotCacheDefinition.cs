@@ -116,61 +116,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets the source data range when the pivot table has a worksheet data source. 
-		/// The number of columns in the range must be intact if this property is changed.
-		/// The range must be in the same workbook as the pivot table.
-		/// </summary>
-		private ExcelRangeBase SourceRange
-		{
-			get
-			{
-				if (mySourceRange == null)
-				{
-					if (this.CacheSource == eSourceType.Worksheet)
-					{
-						var ws = this.Workbook.Worksheets[base.GetXmlNodeString(SourceWorksheetPath)];
-						if (ws == null)
-						{
-							var name = base.GetXmlNodeString(SourceNamePath);
-							if (this.Workbook.Names.ContainsKey(name))
-							{
-								mySourceRange = this.Workbook.Names[name].GetFormulaAsCellRange();
-								return mySourceRange;
-							}
-							foreach (var worksheet in this.Workbook.Worksheets)
-							{
-								if (worksheet.Tables.TableNames.ContainsKey(name))
-								{
-									mySourceRange = new ExcelRangeBase(worksheet.Workbook, worksheet, name, true);
-									break;
-								}
-								else if (worksheet.Names.ContainsKey(name))
-								{
-									mySourceRange = worksheet.Names[name].GetFormulaAsCellRange();
-									break;
-								}
-							}
-						}
-						else
-							mySourceRange = ws.Cells[base.GetXmlNodeString(SourceAddressPath)];
-					}
-					else
-						return null;
-				}
-				return mySourceRange;
-			}
-			set
-			{
-				if (this.Workbook != value.Worksheet.Workbook)
-					throw (new ArgumentException("Range must be in the same package as the pivottable"));
-				var sourceRange = this.SourceRange;
-				base.SetXmlNodeString(SourceWorksheetPath, value.Worksheet.Name);
-				base.SetXmlNodeString(SourceAddressPath, value.FirstAddress);
-				mySourceRange = value;
-			}
-		}
-
-		/// <summary>
 		/// Gets the type of source data.
 		/// </summary>
 		public eSourceType CacheSource
@@ -249,6 +194,57 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// can be used to get localized string translations if a <see cref="ResourceManager"/> is loaded.
 		/// </summary>
 		internal StringResources StringResources { get; } = new StringResources();
+
+		private ExcelRangeBase SourceRange
+		{
+			/// The range must be in the same workbook as the pivot table.
+			get
+			{
+				if (mySourceRange == null)
+				{
+					if (this.CacheSource == eSourceType.Worksheet)
+					{
+						var ws = this.Workbook.Worksheets[base.GetXmlNodeString(SourceWorksheetPath)];
+						if (ws == null)
+						{
+							var name = base.GetXmlNodeString(SourceNamePath);
+							if (this.Workbook.Names.ContainsKey(name))
+							{
+								mySourceRange = this.Workbook.Names[name].GetFormulaAsCellRange();
+								return mySourceRange;
+							}
+							foreach (var worksheet in this.Workbook.Worksheets)
+							{
+								if (worksheet.Tables.TableNames.ContainsKey(name))
+								{
+									mySourceRange = new ExcelRangeBase(worksheet.Workbook, worksheet, name, true);
+									break;
+								}
+								else if (worksheet.Names.ContainsKey(name))
+								{
+									mySourceRange = worksheet.Names[name].GetFormulaAsCellRange();
+									break;
+								}
+							}
+						}
+						else
+							mySourceRange = ws.Cells[base.GetXmlNodeString(SourceAddressPath)];
+					}
+					else
+						return null;
+				}
+				return mySourceRange;
+			}
+			set
+			{
+				if (this.Workbook != value.Worksheet.Workbook)
+					throw (new ArgumentException("Range must be in the same package as the pivottable"));
+				var sourceRange = this.SourceRange;
+				base.SetXmlNodeString(SourceWorksheetPath, value.Worksheet.Name);
+				base.SetXmlNodeString(SourceAddressPath, value.FirstAddress);
+				mySourceRange = value;
+			}
+		}
 		#endregion
 
 		#region Constructors
