@@ -32,11 +32,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
-using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml
 {
@@ -196,56 +193,7 @@ namespace OfficeOpenXml
 		/// <returns>The formula as an <see cref="ExcelRangeBase"/> if it is an address, null otherwise.</returns>
 		public ExcelRangeBase GetFormulaAsCellRange()
 		{
-			var stringBuilder = new StringBuilder();
-			var tokens = this.Workbook.FormulaParser.Lexer.Tokenize(this.NameFormula).ToList();
-			for (int i = 0; i < tokens.Count; ++i)
-			{
-				var token = tokens[i];
-				if (token.TokenType == TokenType.ExcelAddress ||
-					token.TokenType == TokenType.InvalidReference ||
-					token.TokenType == TokenType.Comma)
-				{
-					stringBuilder.Append(token.Value);
-				}
-				else if (token.TokenType == TokenType.OpeningParenthesis || token.TokenType == TokenType.ClosingParenthesis)
-					continue;
-				else if (token.TokenType == TokenType.Function)
-				{
-					if (this.TryCalculateReferenceFunction(tokens, i, out string address, out i))
-						stringBuilder.Append(address);
-					else
-						return null;
-				}
-				else if (token.TokenType == TokenType.NameValue)
-				{
-					if (this.LocalSheet != null && this.LocalSheet.Names.ContainsKey(token.Value))
-					{
-						var address = this.LocalSheet.Names[token.Value].GetFormulaAsCellRange();
-						if (address == null)
-							return null;
-						stringBuilder.Append(address);
-					}
-					else if (this.Workbook.Names.ContainsKey(token.Value))
-					{
-						var address = this.Workbook.Names[token.Value].GetFormulaAsCellRange();
-						if (address == null)
-							return null;
-						stringBuilder.Append(address);
-					}
-					else
-						return null;
-				}
-				else
-					return null;
-			}
-			var addressString = stringBuilder.ToString();
-			ExcelRangeBase.SplitAddress(addressString, out string workbook, out string worksheetName, out _);
-			if (string.IsNullOrEmpty(worksheetName))
-				throw new InvalidOperationException("References in named ranges must be fully-qualified with sheet names.");
-			var worksheet = this.Workbook.Worksheets[worksheetName];
-			if (worksheet == null)
-				throw new InvalidOperationException($"The worksheet '{worksheetName}' in the named range formula {this.NameFormula} does not exist.");
-			return new ExcelRangeBase(worksheet, addressString);
+			return AddressUtility.GetFormulaAsCellRange(this.Workbook, this.LocalSheet, this.NameFormula);
 		}
 		#endregion
 
@@ -258,44 +206,6 @@ namespace OfficeOpenXml
 			if (row > maximum)
 				return row - maximum;
 			return row;
-		}
-
-		private bool TryCalculateReferenceFunction(List<Token> tokens, int index, out string address, out int i)
-		{
-			address = null;
-			i = index;
-			int parenCount = 0;
-			var formula = string.Empty;
-			var token = tokens[index];
-
-			if (token.Value.StartsWith(Offset.Name, StringComparison.InvariantCultureIgnoreCase))
-				formula += OffsetAddress.Name;
-			else if (token.Value.StartsWith(Indirect.Name, StringComparison.InvariantCultureIgnoreCase))
-				formula += IndirectAddress.Name;
-			else
-				return false;
-
-			for (i = index + 1; i < tokens.Count; ++i)
-			{
-				token = tokens[i];
-				formula += token.Value;
-				if (token.TokenType == TokenType.OpeningParenthesis)
-					parenCount++;
-				else if (token.TokenType == TokenType.ClosingParenthesis)
-				{
-					parenCount--;
-					if (parenCount == 0)
-						break;
-				}
-			}
-			address = this.LocalSheet.Calculate(formula) as string;
-			if (!string.IsNullOrEmpty(address) && ExcelAddressUtil.IsValidAddress(address))
-				return true;
-			else
-			{
-				address = null;
-				return false;
-			}
 		}
 		#endregion
 
