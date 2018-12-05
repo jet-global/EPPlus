@@ -138,7 +138,7 @@ namespace EPPlusTest.Table.PivotTable
 				worksheet.Cells[7, 4].Value = "Scooter";
 				worksheet.Cells[7, 5].Value = "Purple";
 				worksheet.Cells[7, 6].Value = 28;
-				cacheDefinition.SourceRange = worksheet.Cells["C3:F7"];
+				cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["C3:F7"]);
 				cacheDefinition.UpdateData();
 				Assert.AreEqual(4, pivotTable.Fields.Count);
 				var pivotField1 = pivotTable.Fields[0];
@@ -181,7 +181,7 @@ namespace EPPlusTest.Table.PivotTable
 				var worksheet = package.Workbook.Worksheets.First();
 				var pivotTable = worksheet.PivotTables.First();
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-				cacheDefinition.SourceRange = worksheet.Cells["C3:F5"];
+				cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["C3:F5"]);
 				cacheDefinition.UpdateData();
 				Assert.AreEqual(4, pivotTable.Fields.Count);
 				var pivotField1 = pivotTable.Fields[0];
@@ -275,7 +275,7 @@ namespace EPPlusTest.Table.PivotTable
 				worksheet.Cells[9, 5].Value = 20;
 				worksheet.Cells[9, 6].Value = 1;
 				worksheet.Cells[9, 7].Value = 20;
-				cacheDefinition.SourceRange = worksheet.Cells["A1:G9"];
+				cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["A1:G9"]);
 				cacheDefinition.UpdateData();
 				Assert.AreEqual(7, pivotTable.Fields.Count);
 				Assert.AreEqual(9, pivotTable.Fields[0].Items.Count);
@@ -341,7 +341,7 @@ namespace EPPlusTest.Table.PivotTable
 				var worksheet = package.Workbook.Worksheets.First();
 				var pivotTable = worksheet.PivotTables["Sheet1PivotTable1"];
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-				cacheDefinition.SourceRange = worksheet.Cells["A1:G5"];
+				cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["A1:G5"]);
 				cacheDefinition.UpdateData();
 				Assert.AreEqual(7, pivotTable.Fields.Count);
 				Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
@@ -390,7 +390,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["Sheet1PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					worksheet.DeleteRow(6);
-					cacheDefinition.SourceRange = worksheet.Cells["A1:G7"];
+					cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["A1:G7"]);
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);

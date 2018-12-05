@@ -49,7 +49,7 @@ namespace EPPlusTest.Table.PivotTable
 				var cacheDefinition = new ExcelPivotCacheDefinition(TestUtility.CreateDefaultNSM(), package, possiblePart, uri);
 				Assert.IsNotNull(cacheDefinition);
 				Assert.AreEqual(4, cacheDefinition.CacheFields.Count);
-				Assert.AreEqual("C3:F6", cacheDefinition.SourceRange.Address);
+				Assert.AreEqual("C3:F6", cacheDefinition.GetSourceRangeAddress().Address);
 			}
 		}
 

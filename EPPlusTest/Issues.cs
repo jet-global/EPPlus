@@ -767,6 +767,7 @@ namespace EPPlusTest
 		/**** Pivottable issue ****/
 		public void Issue()
 		{
+			// TODO (Task #8178): Fix grouping/test.
 			DirectoryInfo outputDir = new DirectoryInfo(@"c:\ExcelPivotTest");
 			FileInfo MyFile = new FileInfo(@"c:\temp\bug\pivottable.xlsx");
 			LoadData(MyFile);

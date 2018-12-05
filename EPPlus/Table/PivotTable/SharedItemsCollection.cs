@@ -57,7 +57,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		public void Add(object value)
 		{
 			string stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
-			base.AddItem(new CacheItem(this.NameSpaceManager, base.TopNode, CacheItem.GetObjectType(value), stringValue));
+			var item = new CacheItem(this.NameSpaceManager, base.TopNode, CacheItem.GetObjectType(value), stringValue);
+			item.AddSelf(base.TopNode);
+			base.AddItem(item);
 		}
 		#endregion
 

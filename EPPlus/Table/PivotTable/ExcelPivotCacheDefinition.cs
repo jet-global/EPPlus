@@ -120,7 +120,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// The number of columns in the range must be intact if this property is changed.
 		/// The range must be in the same workbook as the pivot table.
 		/// </summary>
-		public ExcelRangeBase SourceRange
+		private ExcelRangeBase SourceRange
 		{
 			get
 			{
@@ -164,8 +164,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (this.Workbook != value.Worksheet.Workbook)
 					throw (new ArgumentException("Range must be in the same package as the pivottable"));
 				var sourceRange = this.SourceRange;
-				if (value.End.Column - value.Start.Column != sourceRange.End.Column - sourceRange.Start.Column)
-					throw (new ArgumentException("Can not change the number of columns(fields) in the SourceRange"));
 				base.SetXmlNodeString(SourceWorksheetPath, value.Worksheet.Name);
 				base.SetXmlNodeString(SourceAddressPath, value.FirstAddress);
 				mySourceRange = value;
@@ -338,17 +336,16 @@ namespace OfficeOpenXml.Table.PivotTable
 		public void UpdateData(ResourceManager resourceManager = null)
 		{
 			// Update all cacheField names assuming the shape of the pivot cache definition source range remains unchanged.
-			for (int col = this.SourceRange.Start.Column; col < this.SourceRange.Columns + this.SourceRange.Start.Column; col++)
+			for (int col = this.GetSourceRangeAddress().Start.Column; col < this.GetSourceRangeAddress().Columns + this.GetSourceRangeAddress().Start.Column; col++)
 			{
-				int fieldIndex = col - this.SourceRange.Start.Column;
-				this.CacheFields[fieldIndex].Name = this.SourceRange.Worksheet.Cells[this.SourceRange.Start.Row, col].Value.ToString();
+				int fieldIndex = col - this.GetSourceRangeAddress().Start.Column;
+				this.CacheFields[fieldIndex].Name = this.GetSourceRangeAddress().Worksheet.Cells[this.GetSourceRangeAddress().Start.Row, col].Value.ToString();
 			}
 
 			// Update all cache record values.
-			var worksheet = this.SourceRange.Worksheet;
-			var range = new ExcelRange(worksheet, worksheet.Cells[this.SourceRange.Start.Row + 1, this.SourceRange.Start.Column, this.SourceRange.End.Row, this.SourceRange.End.Column]);
-			var rangeBase = new ExcelRangeBase(this.SourceRange.Worksheet, range.Address);
-			this.CacheRecords.UpdateRecords(this.SourceRange.Worksheet.Cells[range]);
+			var worksheet = this.GetSourceRangeAddress().Worksheet;
+			var range = new ExcelRange(worksheet, worksheet.Cells[this.GetSourceRangeAddress().Start.Row + 1, this.GetSourceRangeAddress().Start.Column, this.GetSourceRangeAddress().End.Row, this.GetSourceRangeAddress().End.Column]);
+			this.CacheRecords.UpdateRecords(range);
 
 			this.StringResources.LoadResourceManager(resourceManager);
 
@@ -375,6 +372,25 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 			return pivotTables;
+		}
+
+		/// <summary>
+		/// Gets the source range of the source data table.
+		/// </summary>
+		/// <returns>The source range.</returns>
+		public ExcelRangeBase GetSourceRangeAddress()
+		{
+			return this.SourceRange;
+		}
+
+		/// <summary>
+		/// Sets the source range of the source data table.
+		/// </summary>
+		/// <param name="worksheet">The worksheet that the source data table is on.</param>
+		/// <param name="address">The updated address.</param>
+		public void SetSourceRangeAddress(ExcelWorksheet worksheet, string address)
+		{
+			this.SourceRange = new ExcelRangeBase(worksheet, address);
 		}
 		#endregion
 

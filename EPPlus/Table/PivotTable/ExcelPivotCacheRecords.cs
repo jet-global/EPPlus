@@ -185,7 +185,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			for (int row = sourceDataRange.Start.Row; row < sourceDataRange.Rows + sourceDataRange.Start.Row; row++)
 			{
 				int recordIndex = row - sourceDataRange.Start.Row;
-				var rowCells = sourceDataRange.Where(c => c.Start.Row == row).Select(c => c.Value);
+				var rowCells = new List<object>();
+				for (int column = sourceDataRange.Start.Column; column < sourceDataRange.End.Column + 1; column++)
+				{
+					rowCells.Add(sourceDataRange.Worksheet.Cells[row, column].Value);
+				}
 				// If the row is within the existing range of cacheRecords, update that cacheRecord. Otherwise, add a new record.
 				if (recordIndex < this.Records.Count)
 					this.Records[recordIndex].Update(rowCells, this.CacheDefinition);
