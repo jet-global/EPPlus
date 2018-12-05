@@ -55,37 +55,10 @@ namespace OfficeOpenXml.Utils
 				}
 				else if (token.TokenType == TokenType.NameValue)
 				{
-					if (localSheet != null && localSheet.Names.ContainsKey(token.Value))
-					{
-						var address = localSheet.Names[token.Value].GetFormulaAsCellRange();
-						if (address == null)
-							return null;
-						stringBuilder.Append(address);
-					}
-					else if (workbook.Names.ContainsKey(token.Value))
-					{
-						var address = workbook.Names[token.Value].GetFormulaAsCellRange();
-						if (address == null)
-							return null;
-						stringBuilder.Append(address);
-					}
-					else
-					{
-						bool success = false;
-						foreach (var sheet in workbook.Worksheets)
-						{
-							if (sheet.Tables.TableNames.ContainsKey(token.Value))
-							{
-								var address = sheet.Tables[token.Value].Address;
-								address.ChangeWorksheet(address.WorkSheet, sheet.Name);
-								stringBuilder.Append(address.ToString());
-								success = true;
-								break;
-							}
-						}
-						if (!success)
-							return null;
-					}
+					var address = AddressUtility.HandleNameValue(workbook, localSheet, token.Value);
+					if (address == null)
+						return null;
+					stringBuilder.Append(address);
 				}
 				else
 					return null;
@@ -102,6 +75,37 @@ namespace OfficeOpenXml.Utils
 		#endregion
 
 		#region Private Static Methods
+		private static string HandleNameValue(ExcelWorkbook workbook, ExcelWorksheet localSheet, string tokenValue)
+		{
+			if (localSheet != null && localSheet.Names.ContainsKey(tokenValue))
+			{
+				var address = localSheet.Names[tokenValue].GetFormulaAsCellRange();
+				if (address == null)
+					return null;
+				return address;
+			}
+			else if (workbook.Names.ContainsKey(tokenValue))
+			{
+				var address = workbook.Names[tokenValue].GetFormulaAsCellRange();
+				if (address == null)
+					return null;
+				return address;
+			}
+			else
+			{
+				foreach (var sheet in workbook.Worksheets)
+				{
+					if (sheet.Tables.TableNames.ContainsKey(tokenValue))
+					{
+						var address = sheet.Tables[tokenValue].Address;
+						address.ChangeWorksheet(address.WorkSheet, sheet.Name);
+						return address.ToString();
+					}
+				}
+				return null;
+			}
+		}
+
 		private static bool TryCalculateReferenceFunction(List<Token> tokens, ExcelWorksheet localSheet, int index, out string address, out int i)
 		{
 			address = null;

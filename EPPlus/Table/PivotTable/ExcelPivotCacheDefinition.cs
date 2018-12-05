@@ -332,7 +332,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		public void UpdateData(ResourceManager resourceManager = null)
 		{
 			var sourceRange = this.GetSourceRangeAddress();
-			// If the source range is an Excel pivot table, get the address of the table.
+			// If the source range is an Excel pivot table or named range, resolve the address.
 			if (sourceRange.IsName)
 				sourceRange = AddressUtility.GetFormulaAsCellRange(this.Workbook, sourceRange.Worksheet, sourceRange.Address);
 
