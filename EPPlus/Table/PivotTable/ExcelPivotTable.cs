@@ -1200,7 +1200,9 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// Update the pivot table's address.
 			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
-			int endColumn = this.Address.Start.Column + this.FirstDataCol + this.ColumnHeaders.Count - 1;
+			// If there are no column headers (also no data fields), then don't find the offset to obtain the first data.
+			int endColumn = this.ColumnFields.Any() ? this.Address.Start.Column + this.FirstDataCol + this.ColumnHeaders.Count - 1 
+				: this.Address.Start.Column;
 			this.Address = new ExcelAddress(this.WorkSheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
 			
 			if (this.DataFields.Any())
