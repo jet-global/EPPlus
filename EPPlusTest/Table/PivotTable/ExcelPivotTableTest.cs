@@ -223,12 +223,12 @@ namespace EPPlusTest.Table.PivotTable
 				worksheet.Cells[7, 3].Value = "January";
 				cacheDefinition.UpdateData();
 				Assert.AreEqual(7, pivotTable.Fields.Count);
-				Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
-				Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
 				Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-				Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
 				Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
-				Assert.AreEqual(4, pivotTable.Fields[5].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
 				Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
 				foreach (var field in pivotTable.Fields)
 				{
@@ -278,12 +278,12 @@ namespace EPPlusTest.Table.PivotTable
 				cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["A1:G9"]);
 				cacheDefinition.UpdateData();
 				Assert.AreEqual(7, pivotTable.Fields.Count);
-				Assert.AreEqual(9, pivotTable.Fields[0].Items.Count);
-				Assert.AreEqual(5, pivotTable.Fields[1].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
 				Assert.AreEqual(5, pivotTable.Fields[2].Items.Count);
-				Assert.AreEqual(6, pivotTable.Fields[3].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
 				Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
-				Assert.AreEqual(4, pivotTable.Fields[5].Items.Count);
+				Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
 				Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
 				foreach (var field in pivotTable.Fields)
 				{
@@ -437,6 +437,93 @@ namespace EPPlusTest.Table.PivotTable
 					new ExpectedCellValue(sheetName, 13, 14, "Headlamp Total"),
 					new ExpectedCellValue(sheetName, 12, 15, "March Total"),
 					new ExpectedCellValue(sheetName, 12, 16, "Grand Total")
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshSingleColumnNoDataFields()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet1"];
+					var pivotTable = worksheet.PivotTables["Sheet1PivotTable2"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+					foreach (var field in pivotTable.Fields)
+					{
+						if (field.Items.Count > 0)
+							this.CheckFieldItems(field);
+					}
+					package.SaveAs(newFile.File);
+				}
+				string sheetName = "Sheet1";
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 28, 2, "January"),
+					new ExpectedCellValue(sheetName, 29, 2, "February"),
+					new ExpectedCellValue(sheetName, 30, 2, "March"),
+					new ExpectedCellValue(sheetName, 31, 2, "Grand Total")
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void PivotTableRefreshSingleColumnTwoRowFieldsAndNoDataFields()
+		{
+			var file = new FileInfo("PivotTableColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet1"];
+					var pivotTable = worksheet.PivotTables["Sheet1PivotTable3"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+					foreach (var field in pivotTable.Fields)
+					{
+						if (field.Items.Count > 0)
+							this.CheckFieldItems(field);
+					}
+					package.SaveAs(newFile.File);
+				}
+				string sheetName = "Sheet1";
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 28, 5, "January"),
+					new ExpectedCellValue(sheetName, 29, 5, "San Francisco"),
+					new ExpectedCellValue(sheetName, 30, 5, "Chicago"),
+					new ExpectedCellValue(sheetName, 31, 5, "Nashville"),
+					new ExpectedCellValue(sheetName, 32, 5, "February"),
+					new ExpectedCellValue(sheetName, 33, 5, "San Francisco"),
+					new ExpectedCellValue(sheetName, 34, 5, "Nashville"),
+					new ExpectedCellValue(sheetName, 35, 5, "March"),
+					new ExpectedCellValue(sheetName, 36, 5, "Chicago"),
+					new ExpectedCellValue(sheetName, 37, 5, "Nashville"),
+					new ExpectedCellValue(sheetName, 38, 5, "Grand Total")
 				});
 			}
 		}
