@@ -1013,12 +1013,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				if (pivotField.Items.Count > 0)
 				{
-					var fieldItems = pivotField.Items;
-					for (int i = 0; i < pivotField.Items.Count; i++)
+					foreach (var item in pivotField.Items)
 					{
-						var mAttribute = fieldItems[i].TopNode.Attributes["m"];
+						var mAttribute = item.TopNode.Attributes["m"];
 						if (mAttribute != null && int.Parse(mAttribute.Value) == 1)
-							fieldItems[i].TopNode.Attributes.Remove(mAttribute);
+							item.TopNode.Attributes.Remove(mAttribute);
 					}
 				}
 			}

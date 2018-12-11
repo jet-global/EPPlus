@@ -115,11 +115,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public void RemoveXmlUAttribute()
 		{
-			for (int i = 0; i < this.SharedItems.Count; i++)
+			foreach (var item in this.SharedItems)
 			{
-				var unusedAttribute = this.SharedItems[i].TopNode.Attributes["u"];
+				var unusedAttribute = item.TopNode.Attributes["u"];
 				if (unusedAttribute != null && int.Parse(unusedAttribute.Value) == 1)
-					this.SharedItems[i].TopNode.Attributes.Remove(unusedAttribute);
+					item.TopNode.Attributes.Remove(unusedAttribute);
 			}
 		}
 		#endregion
