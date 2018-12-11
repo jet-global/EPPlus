@@ -90,6 +90,29 @@ namespace EPPlusTest.Table.PivotTable
 		}
 		#endregion
 
+		#region RemoveXmlUAttribute Tests
+		[TestMethod]
+		public void RemoveXmlUAttributeTest()
+		{
+			XmlDocument document = new XmlDocument();
+			document.LoadXml(@"<cacheField xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" name=""Item"" numFmtId=""0"">
+					<sharedItems count=""2"">
+						<s v=""Bike"" u=""1""/>
+						<s v=""Car""/>
+						<s v=""Scooter"" u=""1""/>
+						<s v=""Skateboard""/>
+					</sharedItems>
+				</cacheField>");
+			var node = new CacheFieldNode(TestUtility.CreateDefaultNSM(), document.FirstChild);
+			node.RemoveXmlUAttribute();
+			foreach (var item in node.SharedItems)
+			{
+				Assert.IsNull(item.TopNode.Attributes["u"]);
+				Assert.AreEqual(1, item.TopNode.Attributes.Count);
+			}
+		}
+		#endregion
+
 		#region Helper Methods
 		private XmlNode CreateCacheFieldNode()
 		{

@@ -97,7 +97,10 @@ namespace OfficeOpenXml.Utils
 				{
 					if (sheet.Tables.TableNames.ContainsKey(tokenValue))
 					{
-						var address = sheet.Tables[tokenValue].Address;
+						var table = sheet.Tables[tokenValue];
+						// If the table has a total in the last row, update the address so that it does not include it.
+						var address = table.ShowTotal ? new ExcelAddress(table.Address.Start.Row, table.Address.Start.Column, 
+							table.Address.End.Row - 1, table.Address.End.Column) : table.Address;
 						address.ChangeWorksheet(address.WorkSheet, sheet.Name);
 						return address.ToString();
 					}
