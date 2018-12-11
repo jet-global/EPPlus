@@ -109,6 +109,19 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			return -1;
 		}
+
+		/// <summary>
+		/// Remove the 'u' (unused) xml attribute from each <see cref="CacheItem"/> in the <see cref="SharedItemsCollection"/>.
+		/// </summary>
+		public void RemoveXmlUAttribute()
+		{
+			for (int i = 0; i < this.SharedItems.Count; i++)
+			{
+				var unusedAttribute = this.SharedItems[i].TopNode.Attributes["u"];
+				if (unusedAttribute != null && int.Parse(unusedAttribute.Value) == 1)
+					this.SharedItems[i].TopNode.Attributes.Remove(unusedAttribute);
+			}
+		}
 		#endregion
 	}
 }

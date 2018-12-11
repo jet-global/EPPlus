@@ -527,6 +527,60 @@ namespace EPPlusTest.Table.PivotTable
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableWithMAttrbuteFieldItems.xlsx")]
+		public void PivotTableRefreshFieldItemsWithMAttributes()
+		{
+			var file = new FileInfo("PivotTableWithMAttrbuteFieldItems.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets["Sheet1"];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					worksheet.Cells[2, 3].Value = "December";
+					worksheet.Cells[5, 3].Value = "December";
+					worksheet.Cells[8, 3].Value = "December";
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(5, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+					foreach (var field in pivotTable.Fields)
+					{
+						if (field.Items.Count > 0)
+						{
+							foreach (var item in field.Items)
+							{
+								Assert.IsNull(item.TopNode.Attributes["m"]);
+								Assert.AreEqual(1, item.TopNode.Attributes.Count);
+							}
+						}
+					}
+					package.SaveAs(newFile.File);
+				}
+				string sheetName = "Sheet1";
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 16, 3, "February"),
+					new ExpectedCellValue(sheetName, 17, 3, "March"),
+					new ExpectedCellValue(sheetName, 18, 3, "December"),
+					new ExpectedCellValue(sheetName, 19, 3, "Grand Total"),
+					new ExpectedCellValue(sheetName, 15, 4, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 16, 4, 7d),
+					new ExpectedCellValue(sheetName, 17, 4, 3d),
+					new ExpectedCellValue(sheetName, 18, 4, 5d),
+					new ExpectedCellValue(sheetName, 19, 4, 15d)
+				});
+			}
+		}
 		#endregion
 
 		#region UpdateData Field Values Tests

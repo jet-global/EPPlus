@@ -997,11 +997,33 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Update the colItems.
 			this.UpdateRowColumnItems(this.ColumnFields, this.ColumnItems, false);
 
+			// Update the pivot table data.
 			this.UpdateWorksheet(stringResources);
+
+			// Remove the 'm' (missing) xml attribute from each pivot field item, if it exists, to prevent 
+			// corrupting the workbook, since Excel automatically adds them.
+			this.RemovePivotFieldItemMAttribute();
 		}
 		#endregion
 
 		#region Private Methods
+		private void RemovePivotFieldItemMAttribute()
+		{
+			foreach (var pivotField in this.Fields)
+			{
+				if (pivotField.Items.Count > 0)
+				{
+					var fieldItems = pivotField.Items;
+					for (int i = 0; i < pivotField.Items.Count; i++)
+					{
+						var mAttribute = fieldItems[i].TopNode.Attributes["m"];
+						if (mAttribute != null && int.Parse(mAttribute.Value) == 1)
+							fieldItems[i].TopNode.Attributes.Remove(mAttribute);
+					}
+				}
+			}
+		}
+
 		private void UpdateRowColumnItems(ExcelPivotTableRowColumnFieldCollection field, ItemsCollection collection, bool isRowItems)
 		{
 			// Update the rowItems.
@@ -1200,8 +1222,8 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// Update the pivot table's address.
 			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
-			// If there are no column headers (also no data fields), then don't find the offset to obtain the first data.
-			int endColumn = this.ColumnFields.Any() ? this.Address.Start.Column + this.FirstDataCol + this.ColumnHeaders.Count - 1 
+			// If there are no data fields, then don't find the offset to obtain the first data column.
+			int endColumn = this.DataFields.Any() ? this.Address.Start.Column + this.FirstDataCol + this.ColumnHeaders.Count - 1 
 				: this.Address.Start.Column;
 			this.Address = new ExcelAddress(this.WorkSheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
 			

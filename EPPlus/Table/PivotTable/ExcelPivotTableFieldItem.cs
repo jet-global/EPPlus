@@ -71,7 +71,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets the reference values.
+		/// Gets or sets the reference values.
 		/// </summary>
 		internal int X
 		{

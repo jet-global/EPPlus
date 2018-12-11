@@ -39,6 +39,7 @@ using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OfficeOpenXml.Style;
+using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml
 {
@@ -125,6 +126,8 @@ namespace OfficeOpenXml
 			Init(range.myWorkbook);
 			var parser = range.myWorkbook.FormulaParser;
 			parser.InitNewCalc();
+			if (range.IsName)
+				range = AddressUtility.GetFormulaAsCellRange(range.Worksheet.Workbook, range.Worksheet, range.Address);
 			var dc = DependencyChainFactory.Create(range, options);
 			CalcChain(range.myWorkbook, parser, dc, setResultStyle);
 		}
