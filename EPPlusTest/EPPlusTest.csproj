@@ -233,6 +233,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\Math\SumIfsTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Logical\IfErrorTests.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\OffsetTests.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Text\SearchTest.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\Text\ValueFunctionTest.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\TimeStringParserTests.cs" />
     <Compile Include="FormulaParsing\ExpressionGraph\CompileResultFactoryTests.cs" />
