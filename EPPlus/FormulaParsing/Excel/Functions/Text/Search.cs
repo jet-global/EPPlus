@@ -24,6 +24,8 @@
  *******************************************************************************/
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
@@ -39,9 +41,24 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 			var searchIn = base.ArgToString(functionArguments, 1);
 			// Subtract 1 because Excel uses 1-based index
 			var startIndex = functionArguments.Count() > 2 ? base.ArgToInt(functionArguments, 2) - 1 : 0;
-			var result = searchIn.IndexOf(search, startIndex, System.StringComparison.OrdinalIgnoreCase);
-			if (result == -1)
-				return base.CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
+			int result = -1;
+			// If the search string contains Excel wildcard values, convert it to regular expression values and find match.
+			if (search.Contains('~') || search.Contains('?') || search.Contains('*'))
+			{
+				var pattern = new WildCardValueMatcher().ExcelWildcardToRegex(search);
+				var matches = Regex.Match(searchIn.Substring(startIndex), pattern, RegexOptions.IgnoreCase);
+				if (matches == Match.Empty)
+					return base.CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
+				else
+					result = matches.Index + startIndex;
+			}
+			// Otherwise, find the index of the search string.
+			else
+			{
+				result = searchIn.IndexOf(search, startIndex, System.StringComparison.OrdinalIgnoreCase);
+				if (result == -1)
+					return base.CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
+			}
 			// Adding 1 because Excel uses 1-based index
 			return base.CreateResult(result + 1, DataType.Integer);
 		}
