@@ -35,44 +35,19 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 {
 	public class WildCardValueMatcher : ValueMatcher
 	{
-		protected override int? CompareStringToString(string searchString, string testValue)
-		{
-			if (searchString.Contains("*") || searchString.Contains("?") || searchString.Contains("~"))
-			{
-				Regex regex = this.TranslateExcelMatchStringToRegex(searchString);
-				if (regex.IsMatch(testValue))
-					return 0;
-			}
-			return base.CompareStringToString(searchString, testValue);
-		}
-
-		private Regex TranslateExcelMatchStringToRegex(string searchString)
-		{
-			// Escape all regex special characters (including * and ?).
-			var regexPattern = Regex.Escape(searchString);
-			// Un-escape * and replace with ".*" because we want * to act as a wild card.
-			regexPattern = regexPattern.Replace(@"\*", ".*");
-			// Check for Excel escaped wildcards ("~*" (which is now "~.*" (see above))) and replaced with Regex escaped wildcards.
-			regexPattern = regexPattern.Replace(@"~.*", @"\*");
-			// Un-escape ? and replace with . because we want ? to match a single character.
-			regexPattern = regexPattern.Replace(@"\?", ".");
-			// Check for Excel escaped single character match ("~?" (which is now "~." (see above))) and replace with Regex escaped question mark.
-			regexPattern = regexPattern.Replace(@"~.", @"\?");
-			// Un-escape any escaped Excel escape characters since it's not a special character in regex.
-			regexPattern = regexPattern.Replace("~~", "~");
-			// Start and end characters for full string match.
-			return new Regex(string.Format("^{0}$", regexPattern));
-		}
-
+		#region Public Methods
+		/// <summary>
+		/// Convert Excel wildcard values to regular expression values in a given string.
+		/// </summary>
+		/// <param name="searchString">The string that contains Excel wildcard values.</param>
+		/// <returns>A string with only regular expression values.</returns>
 		public string ExcelWildcardToRegex(string searchString)
 		{
-			// Replace the search string that contains Excel wildcard values with equivalent 
-			// regular expression values reading the string from left to right.
 			var regexString = new StringBuilder();
 			for (int i = 0; i < searchString.Length; i++)
 			{
 				var currentCharacter = searchString[i];
-				// Check if there are escaped characters.
+				// Check if there are any escaped characters.
 				if (currentCharacter == '~' && i != searchString.Length - 1)
 				{
 					var escapeCharacter = searchString[i + 1];
@@ -92,8 +67,39 @@ namespace OfficeOpenXml.FormulaParsing.ExcelUtilities
 				else
 					regexString.Append(currentCharacter);
 			}
-			// Return a string that does not have any Excel wildcard values.
 			return regexString.ToString();
 		}
+
+		protected override int? CompareStringToString(string searchString, string testValue)
+		{
+			if (searchString.Contains("*") || searchString.Contains("?") || searchString.Contains("~"))
+			{
+				Regex regex = this.TranslateExcelMatchStringToRegex(searchString);
+				if (regex.IsMatch(testValue))
+					return 0;
+			}
+			return base.CompareStringToString(searchString, testValue);
+		}
+		#endregion
+
+		#region Private Methods
+		private Regex TranslateExcelMatchStringToRegex(string searchString)
+		{
+			// Escape all regex special characters (including * and ?).
+			var regexPattern = Regex.Escape(searchString);
+			// Un-escape * and replace with ".*" because we want * to act as a wild card.
+			regexPattern = regexPattern.Replace(@"\*", ".*");
+			// Check for Excel escaped wildcards ("~*" (which is now "~.*" (see above))) and replaced with Regex escaped wildcards.
+			regexPattern = regexPattern.Replace(@"~.*", @"\*");
+			// Un-escape ? and replace with . because we want ? to match a single character.
+			regexPattern = regexPattern.Replace(@"\?", ".");
+			// Check for Excel escaped single character match ("~?" (which is now "~." (see above))) and replace with Regex escaped question mark.
+			regexPattern = regexPattern.Replace(@"~.", @"\?");
+			// Un-escape any escaped Excel escape characters since it's not a special character in regex.
+			regexPattern = regexPattern.Replace("~~", "~");
+			// Start and end characters for full string match.
+			return new Regex(string.Format("^{0}$", regexPattern));
+		}
+		#endregion
 	}
 }
