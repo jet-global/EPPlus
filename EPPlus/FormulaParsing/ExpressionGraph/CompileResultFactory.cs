@@ -33,8 +33,17 @@ using System.Collections;
 
 namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 {
+	/// <summary>
+	/// A factory class for creating <see cref="CompileResult"/>s.
+	/// </summary>
 	public class CompileResultFactory
 	{
+		#region Public Methods
+		/// <summary>
+		/// Creates a <see cref="CompileResult"/> from the <paramref name="obj"/>.
+		/// </summary>
+		/// <param name="obj">The object</param>
+		/// <returns>The <see cref="CompileResult"/>.</returns>
 		public CompileResult Create(object obj)
 		{
 			if ((obj is ExcelDataProvider.INameInfo))
@@ -59,9 +68,12 @@ namespace OfficeOpenXml.FormulaParsing.ExpressionGraph
 				return new CompileResult(obj, DataType.ExcelError);
 			if (obj is DateTime dateTimeValue)
 				return new CompileResult(dateTimeValue, DataType.Date);
+			if (obj is byte)
+				return new CompileResult(obj, DataType.Integer);
 			if (obj is IEnumerable && !(obj is string))
 				return new CompileResult(obj, DataType.Enumerable);
 			throw new ArgumentException("Non supported type " + obj.GetType().FullName);
 		}
+		#endregion
 	}
 }
