@@ -47,7 +47,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		public int DataFieldIndex
 		{
 			get { return base.GetXmlNodeIntNull("@i") ?? 0; }
-			set { base.SetXmlNodeString("@i", value.ToString()); }
+			set
+			{
+				string val = value == 0 ? string.Empty : value.ToString();
+				base.SetXmlNodeString("@i", val, true);
+			}
 		}
 
 		/// <summary>
