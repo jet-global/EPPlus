@@ -104,7 +104,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			for (int i = 0; i < this.SharedItems.Count; i++)
 			{
 				var item = this.SharedItems[i];
-				if (type == item.Type && stringValue.IsEquivalentTo(item.Value))
+				// Empty strings are sometimes put in as string values by Excel
+				// so we will let empty types match with empty string shared items.
+				if ((type == PivotCacheRecordType.m || type == item.Type) && stringValue.IsEquivalentTo(item.Value))
 					return i;
 			}
 			return -1;

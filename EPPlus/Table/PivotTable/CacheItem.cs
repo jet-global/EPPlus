@@ -116,8 +116,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			parentNode.ReplaceChild(newNode, base.TopNode);
 			base.TopNode = newNode;
-			this.Value = value;
 			this.Type = type;
+			this.Value = value;
 		}
 		#endregion
 

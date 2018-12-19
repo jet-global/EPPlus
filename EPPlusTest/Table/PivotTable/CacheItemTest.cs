@@ -138,6 +138,23 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
+		public void ReplaceNodeMTypeWithValueType()
+		{
+			XmlDocument document = new XmlDocument();
+			document.LoadXml(@"<cacheField name=""Item"" numFmtId=""0""><sharedItems count=""1""><m /></sharedItems></cacheField>");
+			var namespaceManager = TestUtility.CreateDefaultNSM();
+			var parentNode = document.SelectSingleNode("//sharedItems", namespaceManager);
+			var itemNode = document.SelectSingleNode("//m", namespaceManager);
+			var cacheItem = new CacheItem(namespaceManager, itemNode);
+			cacheItem.ReplaceNode(PivotCacheRecordType.n, "123456.21", parentNode);
+			Assert.AreEqual("123456.21", cacheItem.Value);
+			Assert.AreEqual(PivotCacheRecordType.n, cacheItem.Type);
+			Assert.AreEqual(1, parentNode.ChildNodes.Count);
+			Assert.AreEqual("n", parentNode.FirstChild.Name);
+			Assert.AreEqual("123456.21", parentNode.FirstChild.Attributes["v"].Value);
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void ReplaceNodeNullParentNode()
 		{
