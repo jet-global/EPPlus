@@ -118,5 +118,14 @@ namespace EPPlusTest.FormulaParsing.ExpressionGraph
 			Assert.AreEqual(value, compileResult.Result);
 			Assert.AreEqual(DataType.Decimal, compileResult.DataType);
 		}
+
+		[TestMethod]
+		public void CreateResultByteConvertsToInt()
+		{
+			byte value = 7;
+			CompileResult compileResult = new CompileResultFactory().Create(value);
+			Assert.AreEqual(value, compileResult.Result);
+			Assert.AreEqual(DataType.Integer, compileResult.DataType);
+		}
 	}
 }

@@ -200,27 +200,7 @@ namespace EPPlusTest.Excel.Functions.Text
 			var result = func.Execute(FunctionsHelper.CreateArgs("hopp", "hopp hopp", 2), this.ParsingContext);
 			Assert.AreEqual(6, result.Result);
 		}
-
-		[TestMethod]
-		public void SearchShouldReturnStartIndexOfFindText()
-		{
-			var func = new Search();
-			var result = func.Execute(FunctionsHelper.CreateArgs("is", "This is a test case."), this.ParsingContext);
-			Assert.AreEqual(3, result.Result);
-		}
-
-		[TestMethod]
-		public void SearchShouldReturnStartIndexOfFindTextAfterGivenIndex()
-		{
-			var func = new Search();
-			var result = func.Execute(FunctionsHelper.CreateArgs("is", "This is a test case.", 4), this.ParsingContext);
-			Assert.AreEqual(6, result.Result);
-			result = func.Execute(FunctionsHelper.CreateArgs("a", "apple pie", 1), this.ParsingContext);
-			Assert.AreEqual(1, result.Result);
-			result = func.Execute(FunctionsHelper.CreateArgs("a", "banana", 2), this.ParsingContext);
-			Assert.AreEqual(2, result.Result);
-		}
-
+		
 		[TestMethod]
 		public void ProperShouldSetFirstLetterToUpperCase()
 		{
@@ -378,23 +358,6 @@ namespace EPPlusTest.Excel.Functions.Text
 			var parsingContext = ParsingContext.Create();
 			var args = FunctionsHelper.CreateArgs();
 			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void SearchWithInvalidArgumentReturnsPoundValue()
-		{
-			var func = new Search();
-			var args = FunctionsHelper.CreateArgs();
-			var result = func.Execute(args, this.ParsingContext);
-			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
-		}
-
-		[TestMethod]
-		public void SearchShouldReturnPoundValueErrorIfPhraseNotFound()
-		{
-			var func = new Search();
-			var result = func.Execute(FunctionsHelper.CreateArgs("abc", "This is a test case."), this.ParsingContext);
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 
