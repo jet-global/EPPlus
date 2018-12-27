@@ -57,7 +57,17 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		#endregion
 
 		#region Index Tests
-
+		[TestMethod]
+		public void IndexWithSingleCellReferenceReturnsCellValue()
+		{
+			this.Worksheet.Cells["A1"].Value = 1d;
+			this.Worksheet.Cells["A2"].Formula = "INDEX(A1,0)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(1d, this.Worksheet.Cells["A2"].Value);
+			this.Worksheet.Cells["A2"].Formula = "INDEX(A1,234234)";
+			this.Worksheet.Calculate();
+			Assert.AreEqual(1d, this.Worksheet.Cells["A2"].Value);
+		}
 
 		[TestMethod]
 		public void IndexReturnsValueByIndex()
