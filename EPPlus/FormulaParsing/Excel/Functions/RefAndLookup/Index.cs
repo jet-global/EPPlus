@@ -27,7 +27,6 @@ using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.Exceptions;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
-using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 {
@@ -43,17 +42,16 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 		/// </summary>
 		/// <param name="arguments">The cell range, the row value, and the column value.</param>
 		/// <param name="context">The context in which the function is called.</param>
-		/// <returns></returns>
+		/// <returns>A <see cref="CompileResult"/> result.</returns>
 		public override CompileResult Execute(IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			if (this.ArgumentsAreValid(arguments, 2, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
 			var cellRange = arguments.ElementAt(0);
 			var rowDataCandidate = arguments.ElementAt(1);
-		
-			var args = cellRange.Value as IEnumerable<FunctionArgument>;
+
 			var result = new CompileResultFactory();
-			if (args != null)
+			if (cellRange.Value is IEnumerable<FunctionArgument> args)
 			{
 				var index = this.ArgToInt(arguments, 1);
 				if (index > args.Count())
@@ -63,7 +61,11 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			}
 			if (rowDataCandidate != null && rowDataCandidate.Value is ExcelErrorValue && rowDataCandidate.Value.ToString() == ExcelErrorValue.Values.NA)
 				return base.CreateResult(rowDataCandidate.Value, DataType.Integer);
-			if (cellRange.IsExcelRange)
+
+			// A single cell array ignores the row number and column number arguments, returning the single value in the array.
+			if (!cellRange.IsExcelRange)
+				return new CompileResult(cellRange.Value, cellRange.DataType);
+			else
 			{
 				var rowCandidate = arguments.ElementAt(1).DataType;
 				if (rowCandidate == DataType.Date)
@@ -112,7 +114,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 					candidate = rangeInfo.GetOffset(row - 1, column);
 				return base.CreateResult(candidate, DataType.Integer);
 			}
-			throw new NotImplementedException();
 		}
 	}
 }
