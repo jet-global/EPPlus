@@ -114,7 +114,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 					candidate = rangeInfo.GetOffset(row - 1, column);
 				return base.CreateResult(candidate, DataType.Integer);
 			}
-			throw new NotImplementedException();
 		}
 	}
 }
