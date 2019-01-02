@@ -81,18 +81,18 @@ namespace EPPlusTest.Internationalization {
         /// <summary>
         ///   Looks up a localized string similar to Different Total {0}.
         /// </summary>
-        internal static string TotalCaptionWitFollowingValue {
+        internal static string TotalCaptionWithFollowingValue {
             get {
-                return ResourceManager.GetString("TotalCaptionWitFollowingValue", resourceCulture);
+                return ResourceManager.GetString("TotalCaptionWithFollowingValue", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to {0} Default Total.
         /// </summary>
-        internal static string TotalCaptionWitPrecedingValue {
+        internal static string TotalCaptionWithPrecedingValue {
             get {
-                return ResourceManager.GetString("TotalCaptionWitPrecedingValue", resourceCulture);
+                return ResourceManager.GetString("TotalCaptionWithPrecedingValue", resourceCulture);
             }
         }
     }

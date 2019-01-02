@@ -21,8 +21,8 @@ namespace EPPlusTest.Internationalization
 		{
 			var stringResources = new StringResources();
 			stringResources.LoadResourceManager(TestInternationalizationResources.ResourceManager);
-			Assert.AreEqual("Different Total {0}", stringResources.TotalCaptionWitFollowingValue);
-			Assert.AreEqual("{0} Default Total", stringResources.TotalCaptionWitPrecedingValue);
+			Assert.AreEqual("Different Total {0}", stringResources.TotalCaptionWithFollowingValue);
+			Assert.AreEqual("{0} Default Total", stringResources.TotalCaptionWithPrecedingValue);
 			Assert.AreEqual("Grand Total Sum", stringResources.GrandTotalCaption);
 		}
 		#endregion
@@ -54,7 +54,7 @@ namespace EPPlusTest.Internationalization
 			stringResources.LoadResourceManager(TestInternationalizationResourcesMissingValue.ResourceManager);
 			var result = stringResources.ValidateLoadedResourceManager(out string error);
 			Assert.IsFalse(result);
-			var expectedError = $"The following string resources were missing:{Environment.NewLine}{nameof(stringResources.TotalCaptionWitPrecedingValue)}";
+			var expectedError = $"The following string resources were missing:{Environment.NewLine}{nameof(stringResources.TotalCaptionWithPrecedingValue)}";
 			Assert.AreEqual(expectedError, error);
 		}
 		#endregion

@@ -72,9 +72,9 @@ namespace EPPlusTest.Internationalization {
         /// <summary>
         ///   Looks up a localized string similar to Different Total {0}.
         /// </summary>
-        internal static string TotalCaptionWitFollowingValue {
+        internal static string TotalCaptionWithFollowingValue {
             get {
-                return ResourceManager.GetString("TotalCaptionWitFollowingValue", resourceCulture);
+                return ResourceManager.GetString("TotalCaptionWithFollowingValue", resourceCulture);
             }
         }
     }
