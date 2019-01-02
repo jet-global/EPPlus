@@ -1035,9 +1035,9 @@ namespace OfficeOpenXml.Table.PivotTable
 					this.BuildColumnItems(0, new List<Tuple<int, int>>(), false, 0);
 				// Create grand total items if necessary.
 				bool grandTotals = isRowItems ? this.RowGrandTotals : this.ColumnGrandTotals;
-				if (grandTotals && isRowItems)
+				if (grandTotals && isRowItems && !(this.RowFields.Count == 1 && this.RowFields.First().Index == -2))
 					this.CreateTotalNodes("grand", true, null, null, 0, false, this.HasRowDataFields);
-				else if (grandTotals && !isRowItems)
+				else if (grandTotals && !isRowItems && !(this.ColumnFields.Count == 1 && this.ColumnFields.First().Index == -2))
 					this.CreateTotalNodes("grand", false, null, null, 0, false, this.HasColumnDataFields);
 			}
 			else
@@ -1111,7 +1111,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 
 			// Get the last pivot field to check if subtotals are used.
-			if (pivotFieldIndex == -2 && parentNodeIndices.Last().Item1 != -2)
+			if (pivotFieldIndex == -2 && parentNodeIndices.Count > 0 && parentNodeIndices.Last().Item1 != -2)
 				pivotField = this.Fields[parentNodeIndices.Last().Item1];
 			if (parentNodeIndices.Any() && parentNodeIndices.Last().Item1 != -2 && pivotField.DefaultSubtotal)
 			{
