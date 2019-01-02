@@ -66,6 +66,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		private ItemsCollection myRowItems;
 		private ItemsCollection myColumnItems;
 		private TableStyles myTableStyle = Table.TableStyles.Medium6;
+		private ExcelAddress myAddress;
 		#endregion
 
 		#region Properties
@@ -90,14 +91,14 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			set
 			{
-				if (this.WorkSheet.Workbook.ExistsTableName(value))
+				if (this.Worksheet.Workbook.ExistsTableName(value))
 					throw (new ArgumentException("PivotTable name is not unique"));
 				string prevName = this.Name;
-				if (this.WorkSheet.Tables.TableNames.ContainsKey(prevName))
+				if (this.Worksheet.Tables.TableNames.ContainsKey(prevName))
 				{
-					int ix = this.WorkSheet.Tables.TableNames[prevName];
-					this.WorkSheet.Tables.TableNames.Remove(prevName);
-					this.WorkSheet.Tables.TableNames.Add(value, ix);
+					int ix = this.Worksheet.Tables.TableNames[prevName];
+					this.Worksheet.Tables.TableNames.Remove(prevName);
+					this.Worksheet.Tables.TableNames.Add(value, ix);
 				}
 				base.SetXmlNodeString(NamePath, value);
 				base.SetXmlNodeString(DisplayNamePath, this.CleanDisplayName(value));
@@ -117,7 +118,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						throw new InvalidOperationException($"{nameof(this.CacheDefinitionRelationship)} is null.");
 
 					var pivotTableCacheDefinitionPartName = UriHelper.GetUriEndTargetName(this.CacheDefinitionRelationship.TargetUri);
-					foreach (var cacheDefinition in this.WorkSheet.Workbook.PivotCacheDefinitions)
+					foreach (var cacheDefinition in this.Worksheet.Workbook.PivotCacheDefinitions)
 					{
 						var cacheDefinitionPartName = UriHelper.GetUriEndTargetName(cacheDefinition.CacheDefinitionUri);
 						if (pivotTableCacheDefinitionPartName.IsEquivalentTo(cacheDefinitionPartName))
@@ -136,14 +137,32 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets the worksheet where the pivot table is located.
+		/// Gets the worksheet where the pivot table is located.
 		/// </summary>
-		public ExcelWorksheet WorkSheet { get; set; }
+		public ExcelWorksheet Worksheet
+		{
+			get
+			{
+				return this.Workbook.Worksheets[this.Address.WorkSheet];
+			}
+		}
 
 		/// <summary>
 		/// Gets or sets the location of the pivot table.
 		/// </summary>
-		public ExcelAddress Address { get; internal set; }
+		public ExcelAddress Address
+		{
+			get
+			{
+				return myAddress;
+			}
+			internal set
+			{
+				if (string.IsNullOrEmpty(value.WorkSheet))
+					throw new InvalidOperationException("PivotTable address must specify a worsheet.");
+				myAddress = value;
+			}
+		}
 
 		/// <summary>
 		/// Gets or sets whether multiple datafields are displayed in the row area or the column area.
@@ -880,6 +899,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets a value indicating whether there is more than one data field in the column fields.
 		/// </summary>
 		internal bool HasColumnDataFields => this.ColumnFields.Any(c => c.Index == -2);
+
+		private ExcelWorkbook Workbook { get; set; }
 		#endregion
 
 		#region Constructors
@@ -891,7 +912,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal ExcelPivotTable(Packaging.ZipPackageRelationship rel, ExcelWorksheet sheet) :
 			 base(sheet.NameSpaceManager)
 		{
-			this.WorkSheet = sheet;
+			this.Workbook = sheet.Workbook;
 			this.PivotTableUri = UriHelper.ResolvePartUri(rel.SourceUri, rel.TargetUri);
 			this.WorksheetRelationship = rel;
 			var pck = sheet.Package.Package;
@@ -901,7 +922,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			XmlHelper.LoadXmlSafe(this.PivotTableXml, this.Part.GetStream());
 			this.InitSchemaNodeOrder();
 			this.TopNode = this.PivotTableXml.DocumentElement;
-			this.Address = new ExcelAddress(base.GetXmlNodeString("d:location/@ref"));
+			this.Address = new ExcelAddress(sheet.Name, base.GetXmlNodeString("d:location/@ref"));
 
 			var rels = this.Part.GetRelationshipsByType(ExcelPackage.schemaRelationships + "/pivotCacheDefinition");
 			if (rels.Count != 1)
@@ -922,7 +943,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal ExcelPivotTable(ExcelWorksheet sheet, ExcelAddress address, ExcelRangeBase sourceAddress, string name, int tblId) :
 			 base(sheet.NameSpaceManager)
 		{
-			this.WorkSheet = sheet;
+			this.Workbook = sheet.Workbook;
+			this.Address = new ExcelAddress(sheet.Name, address.Address);
 			this.Address = address;
 			var pck = sheet.Package.Package;
 
@@ -938,7 +960,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Worksheet-PivotTable relationship
 			this.WorksheetRelationship = sheet.Part.CreateRelationship(UriHelper.ResolvePartUri(sheet.WorksheetUri, this.PivotTableUri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotTable");
 			bool cacheDefinitionFound = false;
-			foreach (var cache in this.WorkSheet.Workbook.PivotCacheDefinitions)
+			foreach (var cache in this.Worksheet.Workbook.PivotCacheDefinitions)
 			{
 				if (cache.GetSourceRangeAddress().IsEquivalentRange(sourceAddress))
 				{
@@ -1228,7 +1250,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// If there are no data fields, then don't find the offset to obtain the first data column.
 			int endColumn = this.DataFields.Any() ? this.Address.Start.Column + this.FirstDataCol + this.ColumnHeaders.Count - 1 
 				: this.Address.Start.Column;
-			this.Address = new ExcelAddress(this.WorkSheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
+			this.Address = new ExcelAddress(this.Worksheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
 			
 			if (this.DataFields.Any())
 			{
@@ -1268,8 +1290,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
 			int headerColumn = this.Address.Start.Column + this.FirstDataCol;
 			int dataRow = this.Address.Start.Row + this.FirstDataRow;
-			this.WorkSheet.Cells[dataRow, this.Address.Start.Column, this.Address.End.Row, this.Address.Start.Column].Clear();
-			this.WorkSheet.Cells[startRow, headerColumn, this.Address.End.Row, this.Address.End.Column].Clear();
+			this.Worksheet.Cells[dataRow, this.Address.Start.Column, this.Address.End.Row, this.Address.Start.Column].Clear();
+			this.Worksheet.Cells[startRow, headerColumn, this.Address.End.Row, this.Address.End.Column].Clear();
 
 			// Update the row headers in the worksheet.
 			if (this.RowFields.Any())
@@ -1283,12 +1305,12 @@ namespace OfficeOpenXml.Table.PivotTable
 						continue;
 					}
 					var sharedItem = this.GetSharedItemValue(this.RowFields, this.RowItems[i], this.RowItems[i].RepeatedItemsCount, 0);
-					this.WorkSheet.Cells[dataRow++, this.Address.Start.Column].Value = sharedItem;
+					this.Worksheet.Cells[dataRow++, this.Address.Start.Column].Value = sharedItem;
 				}
 			}
 			// If there are no row headers and only one data field, print the name of the data field for the row.
 			else if (this.DataFields.Count == 1)
-				this.WorkSheet.Cells[dataRow++, this.Address.Start.Column].Value = this.DataFields.First().Name;
+				this.Worksheet.Cells[dataRow++, this.Address.Start.Column].Value = this.DataFields.First().Name;
 
 			// Update the column headers in the worksheet.
 			if (this.ColumnFields.Any())
@@ -1308,7 +1330,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						var columnFieldIndex = this.ColumnItems[i].RepeatedItemsCount == 0 ? j : j + this.ColumnItems[i].RepeatedItemsCount;
 						var sharedItem = this.GetSharedItemValue(this.ColumnFields, this.ColumnItems[i], columnFieldIndex, j);
 						var cellRow = this.ColumnItems[i].RepeatedItemsCount == 0 ? startHeaderRow : startHeaderRow + this.ColumnItems[i].RepeatedItemsCount;
-						this.WorkSheet.Cells[cellRow, headerColumn].Value = sharedItem;
+						this.Worksheet.Cells[cellRow, headerColumn].Value = sharedItem;
 						startHeaderRow++;
 					}
 					headerColumn++;
@@ -1316,7 +1338,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			// If there are no column headers and only one data field, print the name of the data field for the column.
 			else if (this.DataFields.Count == 1)
-				this.WorkSheet.Cells[this.Address.Start.Row, headerColumn].Value = this.DataFields.First().Name;
+				this.Worksheet.Cells[this.Address.Start.Row, headerColumn].Value = this.DataFields.First().Name;
 		}
 
 		private List<object>[,] WritePivotTableBodyData()
@@ -1387,9 +1409,9 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private void WriteCellTotal(int row, int column, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper functionCalculator)
 		{
-			var cell = this.WorkSheet.Cells[row, column];
+			var cell = this.Worksheet.Cells[row, column];
 			cell.Value = functionCalculator.Calculate(dataField.Function, values);
-			var style = this.WorkSheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
+			var style = this.Worksheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
 			if (style != null)
 				cell.Style.Numberformat.Format = style.Format;
 		}
@@ -1407,10 +1429,10 @@ namespace OfficeOpenXml.Table.PivotTable
 					if ((this.HasRowDataFields && field == this.RowFields) || (this.HasColumnDataFields && field == this.ColumnFields))
 					{
 						string dataFieldName = this.DataFields[item.DataFieldIndex].Name;
-						this.WorkSheet.Cells[rowLabel, column].Value = string.Format(stringResources.TotalCaptionWitFollowingValue, dataFieldName);
+						this.Worksheet.Cells[rowLabel, column].Value = string.Format(stringResources.TotalCaptionWitFollowingValue, dataFieldName);
 					}
 					else
-						this.WorkSheet.Cells[rowLabel, column].Value = stringResources.GrandTotalCaption;
+						this.Worksheet.Cells[rowLabel, column].Value = stringResources.GrandTotalCaption;
 				}
 				else if (item.ItemType.IsEquivalentTo("default"))
 				{
@@ -1419,10 +1441,10 @@ namespace OfficeOpenXml.Table.PivotTable
 						((this.HasRowDataFields && field == this.RowFields) || (this.HasColumnDataFields && field == this.ColumnFields)))
 					{
 						string dataFieldName = this.DataFields[item.DataFieldIndex].Name;
-						this.WorkSheet.Cells[rowLabel, column].Value = $"{itemName} {dataFieldName}";
+						this.Worksheet.Cells[rowLabel, column].Value = $"{itemName} {dataFieldName}";
 					}
 					else
-						this.WorkSheet.Cells[rowLabel, column].Value = string.Format(stringResources.TotalCaptionWitPrecedingValue, itemName);
+						this.Worksheet.Cells[rowLabel, column].Value = string.Format(stringResources.TotalCaptionWitPrecedingValue, itemName);
 				}
 				return true;
 			}

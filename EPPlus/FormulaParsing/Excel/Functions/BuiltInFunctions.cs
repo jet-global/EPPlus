@@ -186,6 +186,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["indirectaddress"] = new IndirectAddress();
 			this.Functions["offset"] = new Offset();
 			this.Functions["offsetaddress"] = new OffsetAddress();
+			this.Functions["getpivotdata"] = new GetPivotData();
 			// Date
 			this.Functions["date"] = new Date();
 			this.Functions["today"] = new Today();

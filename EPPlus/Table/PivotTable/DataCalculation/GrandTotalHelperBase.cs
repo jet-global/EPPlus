@@ -153,9 +153,9 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <param name="functionCalculator">The totals calcluation helper class.</param>
 		protected void WriteCellTotal(int row, int column, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper functionCalculator)
 		{
-			var cell = this.PivotTable.WorkSheet.Cells[row, column];
+			var cell = this.PivotTable.Worksheet.Cells[row, column];
 			cell.Value = functionCalculator.Calculate(dataField.Function, values);
-			var style = this.PivotTable.WorkSheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
+			var style = this.PivotTable.Worksheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
 			if (style != null)
 				cell.Style.Numberformat.Format = style.Format;
 		}

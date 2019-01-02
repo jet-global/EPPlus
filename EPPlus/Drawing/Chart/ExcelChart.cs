@@ -1498,7 +1498,7 @@ namespace OfficeOpenXml.Drawing.Chart
 
 			var pivotSource = this.ChartXml.CreateElement("pivotSource", ExcelPackage.schemaChart);
 			chart.ParentNode.InsertBefore(pivotSource, chart);
-			pivotSource.InnerXml = string.Format("<c:name>[]{0}!{1}</c:name><c:fmtId val=\"0\"/>", this.PivotTableSource.WorkSheet.Name, pivotTableSource.Name);
+			pivotSource.InnerXml = string.Format("<c:name>[]{0}!{1}</c:name><c:fmtId val=\"0\"/>", this.PivotTableSource.Worksheet.Name, pivotTableSource.Name);
 
 			var fmts = this.ChartXml.CreateElement("pivotFmts", ExcelPackage.schemaChart);
 			chart.PrependChild(fmts);

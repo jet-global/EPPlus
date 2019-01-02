@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
 
@@ -11,6 +12,7 @@ namespace EPPlusTest.FormulaParsing
 		private EpplusExcelDataProvider DataProviderWithDataAndHeaders { get; set; }
 		private EpplusExcelDataProvider DataProviderWithDataAndTotals { get; set; }
 		private EpplusExcelDataProvider DataProviderWithDataHeadersAndTotals { get; set; }
+		private EpplusExcelDataProvider DataProviderWithPivotTables { get; set; }
 		#endregion
 
 		#region Test Setup
@@ -648,6 +650,72 @@ namespace EPPlusTest.FormulaParsing
 			Assert.AreEqual("h4_r6", result.GetOffset(6, 3));
 		}
 		#endregion
+		#endregion
+
+		#region GetPivotTable
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void GetSinglePivotTableFromSingleCellReference()
+		{
+			using (var package = new ExcelPackage(new FileInfo("PivotTableColumnFields.xlsx")))
+			{
+				var provider = new EpplusExcelDataProvider(package);
+				var pt = provider.GetPivotTable(new ExcelAddress("NoSubtotals!A1"));
+				Assert.AreEqual("NoSubtotalsPivotTable1", pt.Name);
+				pt = provider.GetPivotTable(new ExcelAddress("NoSubtotals!D8"));
+				Assert.AreEqual("NoSubtotalsPivotTable1", pt.Name);
+				pt = provider.GetPivotTable(new ExcelAddress("NoSubtotals!I13"));
+				Assert.AreEqual("NoSubtotalsPivotTable1", pt.Name);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void GetSinglePivotTableFromRangeInsideCellReference()
+		{
+			using (var package = new ExcelPackage(new FileInfo("PivotTableColumnFields.xlsx")))
+			{
+				var provider = new EpplusExcelDataProvider(package);
+				var pt = provider.GetPivotTable(new ExcelAddress("NoSubtotals!B2:G11"));
+				Assert.AreEqual("NoSubtotalsPivotTable1", pt.Name);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void GetSinglePivotTableFromRangePartialCellReference()
+		{
+			using (var package = new ExcelPackage(new FileInfo("PivotTableColumnFields.xlsx")))
+			{
+				var provider = new EpplusExcelDataProvider(package);
+				var pt = provider.GetPivotTable(new ExcelAddress("NoSubtotals!H12:K15"));
+				Assert.AreEqual("NoSubtotalsPivotTable1", pt.Name);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void GetSinglePivotTableFromRangeWithMultiplePivotTables()
+		{
+			using (var package = new ExcelPackage(new FileInfo("PivotTableColumnFields.xlsx")))
+			{
+				var provider = new EpplusExcelDataProvider(package);
+				// RowItems!B3:M7 contains three pivot tables. The first one (closest to A1) should be returned.
+				var pt = provider.GetPivotTable(new ExcelAddress("RowItems!B3:M7"));
+				Assert.AreEqual("RowItemsPivotTable1", pt.Name);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableColumnFields.xlsx")]
+		public void GetSinglePivotTableFromReferenceNoPivotTable()
+		{
+			using (var package = new ExcelPackage(new FileInfo("PivotTableColumnFields.xlsx")))
+			{
+				var provider = new EpplusExcelDataProvider(package);
+				Assert.IsNull(provider.GetPivotTable(new ExcelAddress("Sheet1!ZZ999")));
+			}
+		}
 		#endregion
 	}
 }

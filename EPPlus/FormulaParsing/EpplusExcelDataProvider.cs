@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OfficeOpenXml.Style.XmlAccess;
+using OfficeOpenXml.Table.PivotTable;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.FormulaParsing
@@ -510,6 +512,29 @@ namespace OfficeOpenXml.FormulaParsing
 			return address;
 		}
 
+		/// <summary>
+		/// Retrieves the <see cref="ExcelPivotTable"/> (if any) at the specified <paramref name="address"/>.
+		/// If multiple pivot tables exist within the range, the one that starts closest to 
+		/// cell A1 is returned.
+		/// </summary>
+		/// <param name="address">The <see cref="ExcelAddress"/> to look for a pivot table.</param>
+		/// <returns>The pivot table found at the specified address.</returns>
+		public override ExcelPivotTable GetPivotTable(ExcelAddress address)
+		{
+			var worksheet = _package.Workbook.Worksheets[address.WorkSheet];
+			var collidingTables = worksheet.PivotTables.Where(pt => pt.Address.Collide(address) != ExcelAddress.eAddressCollition.No);
+			var count = collidingTables.Count();
+			if (count == 0)
+				return null;
+			else if (count == 1)
+				return collidingTables.First();
+			// More than one pivot table matching the specified range was found. 
+			// Determine which is first in the sheet (closest to cell A1).
+			return collidingTables
+				.OrderBy(pt => Math.Sqrt(((pt.Address._fromRow - 1) ^ 2) + ((pt.Address._fromCol - 1) ^ 2)))
+				.First();
+		}
+
 		private void SetCurrentWorksheet(ExcelAddressInfo addressInfo)
 		{
 			if (addressInfo.WorksheetIsSpecified)
@@ -534,16 +559,6 @@ namespace OfficeOpenXml.FormulaParsing
 			}
 
 		}
-
-		//public override void SetCellValue(string address, object value)
-		//{
-		//    var addressInfo = ExcelAddressInfo.Parse(address);
-		//    var ra = _rangeAddressFactory.Create(address);
-		//    SetCurrentWorksheet(addressInfo);
-		//    //var valueInfo = (ICalcEngineValueInfo)_currentWorksheet;
-		//    //valueInfo.SetFormulaValue(ra.FromRow + 1, ra.FromCol + 1, value);
-		//    _currentWorksheet.Cells[ra.FromRow + 1, ra.FromCol + 1].Value = value;
-		//}
 
 		public override void Dispose()
 		{

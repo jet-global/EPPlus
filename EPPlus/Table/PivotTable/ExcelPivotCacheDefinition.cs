@@ -303,9 +303,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(sourceAddress));
 			if (tableId < 1)
 				throw new ArgumentOutOfRangeException(nameof(tableId));
-			this.Workbook = pivotTable.WorkSheet.Workbook;
+			this.Workbook = pivotTable.Worksheet.Workbook;
 
-			var pck = pivotTable.WorkSheet.Package.Package;
+			var pck = pivotTable.Worksheet.Package.Package;
 
 			// CacheDefinition
 			this.CacheDefinitionXml = new XmlDocument();

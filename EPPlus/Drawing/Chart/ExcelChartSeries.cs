@@ -293,7 +293,7 @@ namespace OfficeOpenXml.Drawing.Chart
 		bool _isPivot;
 		internal void AddPivotSerie(ExcelPivotTable pivotTableSource)
 		{
-			var r = pivotTableSource.WorkSheet.Cells[pivotTableSource.Address.Address];
+			var r = pivotTableSource.Worksheet.Cells[pivotTableSource.Address.Address];
 			_isPivot = true;
 			AddSeries(r.Offset(0, 1, r._toRow - r._fromRow + 1, 1).FullAddressAbsolute, r.Offset(0, 0, r._toRow - r._fromRow + 1, 1).FullAddressAbsolute, "");
 		}
