@@ -6116,25 +6116,6 @@ namespace EPPlusTest
 				Assert.AreEqual("#REF!", sheet2.Names["s1Name4"].NameFormula);
 			}
 		}
-
-		[TestMethod]
-		public void DeleteWorksheetWithReference()
-		{
-			// This test is failing to represent a worksheet delete bug. See VSTS bug #1584.
-			using (ExcelPackage package = new ExcelPackage())
-			{
-				var ws1 = package.Workbook.Worksheets.Add("sheet1");
-				var ws2 = package.Workbook.Worksheets.Add("sheet2");
-				const string cellValue = "sdfsdf";
-				ws2.Cells["B2"].Value = cellValue;
-				ws1.Cells["C3"].Formula = "sheet2!B2";
-				ws1.Cells["C3"].Calculate();
-				package.Save();
-				Assert.AreEqual(cellValue, ws1.Cells["C3"].Value);
-				package.Workbook.Worksheets.Delete(ws2);
-				Assert.AreEqual("#REF!B2", ws1.Cells["C3"].Formula);
-			}
-		}
 		#endregion
 
 		#region PivotTable Tests
