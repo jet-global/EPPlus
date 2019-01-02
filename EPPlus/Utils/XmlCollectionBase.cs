@@ -59,7 +59,12 @@ namespace OfficeOpenXml.Utils
 		/// <returns>The item at the specified index.</returns>
 		public T this[int index]
 		{
-			get { return this.Collection[index]; }
+			get
+			{
+				if (index < 0 || index >= this.Collection.Count)
+					throw new IndexOutOfRangeException($"Index out of range: {index}");
+				return this.Collection[index];
+			}
 		}
 
 		private List<T> Collection
