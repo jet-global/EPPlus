@@ -1116,9 +1116,13 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (parentNodeIndices.Any() && parentNodeIndices.Last().Item1 != -2 && pivotField.DefaultSubtotal)
 			{
 				var hasDataFieldParent = parentNodeIndices.Any(x => x.Item1 == -2);
-				int repeatedItemsCount = pivotFieldIndex == -2 ? parentNodeIndices.Count - 1 : rowDepth - 1;
+				int repeatedItemsCount = rowDepth - 1;
+
+				// Last row field is a datafield, there are no column fields and we are not at a leaf node.
+				if (rowDepth != this.RowFields.Count - 1 && this.RowFields.Last().Index == -2 && this.ColumnFields.Count == 0)
+					this.CreateTotalNodes("default", true, parentNodeIndices, pivotField, repeatedItemsCount, true, this.HasRowDataFields);
 				// If there are multiple data fields, then create a subtotal node for each data field. Otherwise, only create one subtotal node.
-				if (rowDepth != this.RowFields.Count - 1 && (!pivotField.SubtotalTop && !hasDataFieldParent))
+				else if (rowDepth != this.RowFields.Count - 1 && (!pivotField.SubtotalTop && !hasDataFieldParent))
 					this.CreateTotalNodes("default", true, parentNodeIndices, pivotField, repeatedItemsCount, true, this.HasRowDataFields);
 				else if (!pivotField.SubtotalTop && (hasDataFieldParent || this.DataFields.Count == 1))
 					this.CreateTotalNodes("default", true, parentNodeIndices, pivotField, repeatedItemsCount, false, this.HasRowDataFields);
