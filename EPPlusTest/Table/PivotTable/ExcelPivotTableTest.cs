@@ -1231,6 +1231,10 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["MultipleDataFieldsPivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
+					Assert.AreEqual(1, pivotTable.Address.Start.Row);
+					Assert.AreEqual(1, pivotTable.Address.Start.Column);
+					Assert.AreEqual(5, pivotTable.Address.End.Row);
+					Assert.AreEqual(3, pivotTable.Address.End.Column);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
