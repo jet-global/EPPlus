@@ -120,7 +120,7 @@
   <data name="GrandTotalCaption" xml:space="preserve">
     <value>Grand Total Sum</value>
   </data>
-  <data name="TotalCaptionWitFollowingValue" xml:space="preserve">
+  <data name="TotalCaptionWithFollowingValue" xml:space="preserve">
     <value>Different Total {0}</value>
   </data>
 </root>

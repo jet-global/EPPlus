@@ -123,10 +123,10 @@
   <data name="String1" xml:space="preserve">
     <value>ABC</value>
   </data>
-  <data name="TotalCaptionWitFollowingValue" xml:space="preserve">
+  <data name="TotalCaptionWithFollowingValue" xml:space="preserve">
     <value>Different Total {0}</value>
   </data>
-  <data name="TotalCaptionWitPrecedingValue" xml:space="preserve">
+  <data name="TotalCaptionWithPrecedingValue" xml:space="preserve">
     <value>{0} Default Total</value>
   </data>
 </root>

@@ -16,13 +16,13 @@ namespace OfficeOpenXml.Internationalization
 		/// Gets the string for a subtotal header that has a value following the 'total' text.
 		/// </summary>
 		[StringResource("The {0} will be replaced with a field name. Place accordingly in your translations.")]
-		public string TotalCaptionWitFollowingValue => this.GetValue("Total {0}");
+		public string TotalCaptionWithFollowingValue => this.GetValue("Total {0}");
 
 		/// <summary>
 		/// Gets the string for a subtotal header that has a value preceding the 'total' text.
 		/// </summary>
 		[StringResource("The {0} will be replaced with a field name. Place accordingly in your translations.")]
-		public string TotalCaptionWitPrecedingValue => this.GetValue("{0} Total");
+		public string TotalCaptionWithPrecedingValue => this.GetValue("{0} Total");
 		
 		/// <summary>
 		/// Gets the string for a grand total header.

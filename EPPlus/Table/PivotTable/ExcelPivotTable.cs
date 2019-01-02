@@ -1429,7 +1429,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					if ((this.HasRowDataFields && field == this.RowFields) || (this.HasColumnDataFields && field == this.ColumnFields))
 					{
 						string dataFieldName = this.DataFields[item.DataFieldIndex].Name;
-						this.Worksheet.Cells[rowLabel, column].Value = string.Format(stringResources.TotalCaptionWitFollowingValue, dataFieldName);
+						this.Worksheet.Cells[rowLabel, column].Value = string.Format(stringResources.TotalCaptionWithFollowingValue, dataFieldName);
 					}
 					else
 						this.Worksheet.Cells[rowLabel, column].Value = stringResources.GrandTotalCaption;
@@ -1444,7 +1444,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						this.Worksheet.Cells[rowLabel, column].Value = $"{itemName} {dataFieldName}";
 					}
 					else
-						this.Worksheet.Cells[rowLabel, column].Value = string.Format(stringResources.TotalCaptionWitPrecedingValue, itemName);
+						this.Worksheet.Cells[rowLabel, column].Value = string.Format(stringResources.TotalCaptionWithPrecedingValue, itemName);
 				}
 				return true;
 			}
