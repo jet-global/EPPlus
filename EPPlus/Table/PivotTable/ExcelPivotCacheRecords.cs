@@ -228,42 +228,21 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Calculate the values for each cell in the pivot table.
 		/// </summary>
+		/// <param name="pivotTable">The pivot table.</param>
 		/// <param name="rowTuple">The list of rowItem indices.</param>
 		/// <param name="colTuple">The list of columnItem indices.</param>
 		/// <param name="dataFieldIndex">The index of the data field.</param>
 		/// <returns>The subtotal value or null if no values are found.</returns>
-		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuple, List<Tuple<int, int>> colTuple, int dataFieldIndex)
+		public List<object> FindMatchingValues(ExcelPivotTable pivotTable, List<Tuple<int, int>> rowTuple, List<Tuple<int, int>> colTuple, int dataFieldIndex)
 		{
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
 				bool match = true;
 				if (rowTuple != null)
-				{
-					foreach (var rowIndex in rowTuple)
-					{
-						if (rowIndex.Item1 == -2)
-							continue;
-						if (int.Parse(record.Items[rowIndex.Item1].Value) != rowIndex.Item2)
-						{
-							match = false;
-							break;
-						}
-					}
-				}
+					match = this.DetermineCacheRecordAndTupleMatch(rowTuple, record, pivotTable);
 				if (match && colTuple != null)
-				{
-					foreach (var colIndex in colTuple)
-					{
-						if (colIndex.Item1 == -2)
-							continue;
-						if (int.Parse(record.Items[colIndex.Item1].Value) != colIndex.Item2)
-						{
-							match = false;
-							break;
-						}
-					}
-				}
+					match = this.DetermineCacheRecordAndTupleMatch(colTuple, record, pivotTable);
 				if (match)
 				{
 					string itemValue = null;
@@ -290,6 +269,23 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal void Save()
 		{
 			this.CacheRecordsXml.Save(this.Part.GetStream(System.IO.FileMode.Create));
+		}
+		#endregion
+
+		#region Private Methods
+		private bool DetermineCacheRecordAndTupleMatch(List<Tuple<int, int>> tuple, CacheRecordNode record, ExcelPivotTable pivotTable)
+		{
+			foreach (var index in tuple)
+			{
+				if (index.Item1 == -2)
+					continue;
+				var sharedItems = this.CacheDefinition.CacheFields[index.Item1].SharedItems;
+				int recordValue = int.Parse(record.Items[index.Item1].Value);
+				int pivotFieldValue = pivotTable.Fields[index.Item1].Items[index.Item2].X;
+				if (sharedItems[recordValue].Value != sharedItems[pivotFieldValue].Value)
+					return false;
+			}
+			return true;
 		}
 		#endregion
 

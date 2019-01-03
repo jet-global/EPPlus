@@ -71,6 +71,28 @@ namespace OfficeOpenXml.Table.PivotTable
 			else
 				base.AddItem(item);
 		}
+
+		public void AddItem(int insertIndex, int pivotFieldIndex, bool defaultSubtotal)
+		{
+			var item = new ExcelPivotTableFieldItem(base.NameSpaceManager, base.TopNode, this.Field, pivotFieldIndex);
+			if (defaultSubtotal)
+				base.InsertItem(insertIndex, item);
+			else
+				base.AddItem(item);
+		}
+
+		public void Clear(ExcelPivotTableField field)
+		{
+			if (field.DefaultSubtotal)
+			{
+				while (string.IsNullOrEmpty(base[0].T))
+				{
+					base.RemoveItem(base[0]);
+				}
+			}
+			else
+				base.ClearItems();
+		}
 		#endregion
 
 		#region ExcelPivotTableFieldCollectionBase Overrides

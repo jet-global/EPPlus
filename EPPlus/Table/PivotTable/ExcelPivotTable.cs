@@ -31,6 +31,7 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -1000,15 +1001,20 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (fieldItems.Count > sharedItemsCount + 1)
 					throw new InvalidOperationException("There are more pivotField items than cacheField sharedItems.");
 
-				// TODO (Task #8179): Change this to alphabetize the items.
 				if (fieldItems.Count > 0)
 				{
-					for (int fieldIndex = 0; fieldIndex < sharedItemsCount; fieldIndex++)
+					fieldItems.Clear(pivotField);
+					var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
+					// Sort the items alphabetically/numerically.
+					var sortedList = sharedItemsList.OrderBy(x => x.Value);
+					// Sort the items chronologically.
+					if (pivotField.Name.IsEquivalentTo("Month"))
+						sortedList = sharedItemsList.OrderBy(m => DateTime.ParseExact(m.Value, "MMMMM", new CultureInfo("en-US")));
+					// Assign the correct index value to each item.
+					for (int i = 0; i < sortedList.Count(); i++)
 					{
-						if (fieldIndex < fieldItems.Count && string.IsNullOrEmpty(fieldItems[fieldIndex].T))
-							fieldItems[fieldIndex].X = fieldIndex;
-						else
-							fieldItems.AddItem(fieldIndex, pivotField.DefaultSubtotal);
+						int index = sharedItemsList.FindIndex(x => x == sortedList.ElementAt(i));
+						fieldItems.AddItem(i, index, pivotField.DefaultSubtotal);
 					}
 				}
 			}
@@ -1178,6 +1184,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				int rValue = itemsCreated ? colDepth - 1 : colDepth;
 				int rAttribute = rValue == colDepth ? rValue - 1 : rValue;
 				bool isLastNonDataField = this.ColumnFields.Skip(rAttribute + 1).All(x => x.Index == -2);
+				parentNodeIndices = this.FindIndices(parentNodeIndices);
 				// If the node is above a data field node and there are multiple data fields, then create a subtotal node for each data field. 
 				if (this.DataFields.Count > 0 && !hasDataFieldParent && !isLastNonDataField && this.HasColumnDataFields)
 					this.CreateTotalNodes("default", false, parentNodeIndices, pivotField, rAttribute, true, this.HasColumnDataFields);
@@ -1215,6 +1222,8 @@ namespace OfficeOpenXml.Table.PivotTable
 					if (colDepth == this.ColumnFields.Count - 1)
 					{
 						int repeatedItemsCount = 0;
+						// Convert the second value in the tuple to the index in the list.
+						childList = this.FindIndices(childList);
 						// Find the value of the repeated items count.
 						if (this.ColumnItems.Count > 0)
 						{
@@ -1239,6 +1248,17 @@ namespace OfficeOpenXml.Table.PivotTable
 						itemsCreated = result;
 				}
 			}
+		}
+
+		private List<Tuple<int, int>> FindIndices(List<Tuple<int, int>> indices)
+		{
+			for (int i = 0; i < indices.Count; i++)
+			{
+				var pivotField = this.Fields[indices[i].Item1];
+				var index = pivotField.Items.ToList().FindIndex(x => x.X == indices[i].Item2);
+				indices[i] = new Tuple<int, int>(indices[i].Item1, index);
+			}
+			return indices;
 		}
 
 		private void UpdateWorksheet(StringResources stringResources)
@@ -1391,6 +1411,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 			var dataField = this.DataFields[dataFieldCollectionIndex];
 			return this.CacheDefinition.CacheRecords.FindMatchingValues(
+				this,
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
 				dataField.Index);
@@ -1401,6 +1422,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 			var dataField = this.DataFields[dataFieldCollectionIndex];
 			var matchingValues = this.CacheDefinition.CacheRecords.FindMatchingValues(
+				this,
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
 				dataField.Index);
