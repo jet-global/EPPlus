@@ -1547,9 +1547,9 @@ namespace EPPlusTest.Table.PivotTable
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(3, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
@@ -1778,10 +1778,10 @@ namespace EPPlusTest.Table.PivotTable
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
-					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(7, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(3, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
@@ -2127,8 +2127,8 @@ namespace EPPlusTest.Table.PivotTable
 					cacheDefinition.UpdateData();
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(3, pivotTable.Fields[2].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
