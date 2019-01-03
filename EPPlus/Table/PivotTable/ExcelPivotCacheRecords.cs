@@ -208,62 +208,29 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <returns>True if the item exists, otherwise false.</returns>
 		public bool Contains(List<Tuple<int, int>> nodeIndices)
 		{
-			foreach (var record in this.Records)
-			{
-				bool matched = true;
-				foreach (var indexTuple in nodeIndices)
-				{
-					if (indexTuple.Item1 != -2 && int.Parse(record.Items[indexTuple.Item1].Value) != indexTuple.Item2)
-					{
-						matched = false;
-						break;
-					}
-				}
-				if (matched)
-					return true;
-			}
-			return false;
+			return this.Records.Any(r => this.FindMatch(nodeIndices, r));
 		}
 
 		/// <summary>
 		/// Calculate the values for each cell in the pivot table.
 		/// </summary>
-		/// <param name="rowTuple">The list of rowItem indices.</param>
-		/// <param name="colTuple">The list of columnItem indices.</param>
+		/// <param name="rowTuples">The list of rowItem indices.</param>
+		/// <param name="columnTuples">The list of columnItem indices.</param>
+		/// <param name="filterIndices">The list of filter (page field) indices.</param>
 		/// <param name="dataFieldIndex">The index of the data field.</param>
 		/// <returns>The subtotal value or null if no values are found.</returns>
-		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuple, List<Tuple<int, int>> colTuple, int dataFieldIndex)
+		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, List<Tuple<int, int>> filterIndices, int dataFieldIndex)
 		{
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
 				bool match = true;
-				if (rowTuple != null)
-				{
-					foreach (var rowIndex in rowTuple)
-					{
-						if (rowIndex.Item1 == -2)
-							continue;
-						if (int.Parse(record.Items[rowIndex.Item1].Value) != rowIndex.Item2)
-						{
-							match = false;
-							break;
-						}
-					}
-				}
-				if (match && colTuple != null)
-				{
-					foreach (var colIndex in colTuple)
-					{
-						if (colIndex.Item1 == -2)
-							continue;
-						if (int.Parse(record.Items[colIndex.Item1].Value) != colIndex.Item2)
-						{
-							match = false;
-							break;
-						}
-					}
-				}
+				if (rowTuples != null)
+					match = this.FindMatch(rowTuples, record);
+				if (match && columnTuples != null)
+					match = this.FindMatch(columnTuples, record);
+				if (match && filterIndices != null)
+					match = this.FindMatch(filterIndices, record);
 				if (match)
 				{
 					string itemValue = null;
@@ -293,6 +260,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 		#endregion
 
+		#region Private Methods
+		private bool FindMatch(IEnumerable<Tuple<int, int>> indexTupleList, CacheRecordNode record)
+		{
+			return indexTupleList.All(i => i.Item1 == -2 || int.Parse(record.Items[i.Item1].Value) == i.Item2);
+		}
+		#endregion
+		
 		#region IEnumerable Methods
 		/// <summary>
 		/// Gets the CacheItem enumerator of the list.

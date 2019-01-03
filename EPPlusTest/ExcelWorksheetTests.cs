@@ -2178,7 +2178,8 @@ namespace EPPlusTest
 			wsPivot6.Drawings.AddChart("Pivotchart6", OfficeOpenXml.Drawing.Chart.eChartType.BarStacked3D, pt);
 
 			pt = wsPivot7.PivotTables.Add(wsPivot7.Cells["A3"], ws.Cells["K1:N11"], "Pivottable7");
-			pt.PageFields.Add(pt.Fields[1]);
+			// Commented out because this is not how page fields work.
+			//pt.PageFields.Add(pt.Fields[1]);
 			pt.RowFields.Add(pt.Fields[0]);
 			pt.DataFields.Add(pt.Fields[3]);
 			pt.DataFields.Add(pt.Fields[2]);
@@ -2214,7 +2215,8 @@ namespace EPPlusTest
 			pt.DataOnRows = true;
 
 			pt = wsPivot9.PivotTables.Add(wsPivot9.Cells["A3"], ws.Cells["K1:N11"], "Pivottable9");
-			pt.PageFields.Add(pt.Fields[1]);
+			// Commented out because this is not how page fields work.
+			//pt.PageFields.Add(pt.Fields[1]);
 			pt.RowFields.Add(pt.Fields[3]);
 			pt.RowFields[0].AddNumericGrouping(-3.3, 5.5, 4.0);
 			pt.DataFields.Add(pt.Fields[2]);

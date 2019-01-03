@@ -62,7 +62,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		private ExcelPivotTableRowColumnFieldCollection myRowFields;
 		private ExcelPivotTableRowColumnFieldCollection myColumnFields;
 		private ExcelPivotTableDataFieldCollection myDataFields;
-		private ExcelPivotTableRowColumnFieldCollection myPageFields;
+		private ExcelPageFieldCollection myPageFields;
 		private ItemsCollection myRowItems;
 		private ItemsCollection myColumnItems;
 		private TableStyles myTableStyle = Table.TableStyles.Medium6;
@@ -759,16 +759,18 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets the report filter fields.
+		/// Gets the pivot table filter fields.
 		/// </summary>
-		public ExcelPivotTableRowColumnFieldCollection PageFields
+		public ExcelPageFieldCollection PageFields
 		{
 			get
 			{
 				if (myPageFields == null)
 				{
 					var pageFieldsNode = this.TopNode.SelectSingleNode("d:pageFields", this.NameSpaceManager);
-					myPageFields = new ExcelPivotTableRowColumnFieldCollection(this.NameSpaceManager, pageFieldsNode, this, PivotTableItemType.Page);
+					if (pageFieldsNode == null)
+						return null;
+					myPageFields = new ExcelPageFieldCollection(this.NameSpaceManager, pageFieldsNode, this);
 				}
 				return myPageFields;
 			}
@@ -1026,6 +1028,15 @@ namespace OfficeOpenXml.Table.PivotTable
 			// corrupting the workbook, since Excel automatically adds them.
 			this.RemovePivotFieldItemMAttribute();
 		}
+
+		/// <summary>
+		/// Builds a list of int tuples (CacheField, CacheItem) specified by the pivot table page fields.
+		/// </summary>
+		/// <returns>A list of int tuples (CacheField, CacheItem).</returns>
+		internal List<Tuple<int, int>> GetPageFieldIndices()
+		{
+			return this.PageFields?.Where(p => p.Item != null)?.Select(p => new Tuple<int, int>(p.Field, p.Item.Value)).ToList();
+		}
 		#endregion
 
 		#region Private Methods
@@ -1051,10 +1062,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (field.Any())
 			{
 				collection.Clear();
+				var pageFieldIndices = this.GetPageFieldIndices();
 				if (isRowItems)
-					this.BuildRowItems(0, new List<Tuple<int, int>>(), 0);
+					this.BuildRowItems(0, new List<Tuple<int, int>>(), pageFieldIndices, 0);
 				else
-					this.BuildColumnItems(0, new List<Tuple<int, int>>(), false, 0);
+					this.BuildColumnItems(0, new List<Tuple<int, int>>(), pageFieldIndices, false, 0);
 				// Create grand total items if necessary.
 				bool grandTotals = isRowItems ? this.RowGrandTotals : this.ColumnGrandTotals;
 				if (grandTotals && isRowItems && !(this.RowFields.Count == 1 && this.RowFields.First().Index == -2))
@@ -1101,7 +1113,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private void BuildRowItems(int rowDepth, List<Tuple<int, int>> parentNodeIndices, int dataFieldIndex)
+		private void BuildRowItems(int rowDepth, List<Tuple<int, int>> parentNodeIndices, List<Tuple<int, int>> pageFieldIndices, int dataFieldIndex)
 		{
 			// Base case.
 			if (rowDepth >= this.RowFields.Count)
@@ -1124,11 +1136,12 @@ namespace OfficeOpenXml.Table.PivotTable
 				childList.Add(new Tuple<int, int>(pivotFieldIndex, i));
 				bool leafNode = rowDepth == this.RowFields.Count - 1;
 				int myDataFieldIndex = pivotFieldIndex == -2 ? i : dataFieldIndex;
-				if (pivotField == null || this.CacheDefinition.CacheRecords.Contains(childList))
+				var childListWithFilters = pageFieldIndices?.Concat(childList)?.ToList() ?? childList;
+				if (pivotField == null || this.CacheDefinition.CacheRecords.Contains(childListWithFilters))
 				{
 					this.RowItems.Add(rowDepth, i, null, myDataFieldIndex);
 					this.RowHeaders.Add(new PivotTableHeader(childList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
-					this.BuildRowItems(rowDepth + 1, childList, myDataFieldIndex);
+					this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
 				}
 			}
 
@@ -1151,7 +1164,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private bool BuildColumnItems(int colDepth, List<Tuple<int, int>> parentNodeIndices, bool itemsCreated, int dataFieldIndex)
+		private bool BuildColumnItems(int colDepth, List<Tuple<int, int>> parentNodeIndices, List<Tuple<int, int>> pageFieldIndices, bool itemsCreated, int dataFieldIndex)
 		{
 			if (colDepth >= this.ColumnFields.Count)
 				return true;
@@ -1167,7 +1180,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.SetNonDataFieldVariables(pivotFieldIndex, parentNodeIndices, ref pivotField, ref maxIndex, ref isAboveDataField, ref isDataField);
 
 			// Create xml nodes and column headers.
-			this.CreateColumnItemNode(maxIndex, parentNodeIndices, pivotFieldIndex, pivotField, dataFieldIndex, colDepth, itemsCreated, isDataField, isAboveDataField);
+			this.CreateColumnItemNode(maxIndex, parentNodeIndices, pageFieldIndices, pivotFieldIndex, 
+				pivotField, dataFieldIndex, colDepth, itemsCreated, isDataField, isAboveDataField);
 
 			// Get the last pivot field to check if subtotals are used.
 			if (pivotFieldIndex == -2 && parentNodeIndices.Count > 0 && parentNodeIndices.Last().Item1 != -2)
@@ -1200,18 +1214,19 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private void CreateColumnItemNode(int index, List<Tuple<int, int>> indices, int pivotFieldIndex, ExcelPivotTableField pivotField, int dataFieldIndex, 
-			int colDepth, bool itemsCreated, bool isDataField, bool isAboveDataField)
+		private void CreateColumnItemNode(int index, List<Tuple<int, int>> indices, List<Tuple<int, int>> pageFieldIndices, int pivotFieldIndex, 
+			ExcelPivotTableField pivotField, int dataFieldIndex, int colDepth, bool itemsCreated, bool isDataField, bool isAboveDataField)
 		{
 			for (int i = 0; i < index; i++)
 			{
 				var childList = indices.ToList();
 				int itemIndex = pivotFieldIndex == -2 ? i : pivotField.Items[i].X;
 				childList.Add(new Tuple<int, int>(pivotFieldIndex, itemIndex));
-				if (this.CacheDefinition.CacheRecords.Contains(childList))
+				var childListWithFilters = pageFieldIndices?.Concat(childList)?.ToList() ?? childList;
+				if (this.CacheDefinition.CacheRecords.Contains(childListWithFilters))
 				{
 					int myDataFieldIndex = pivotFieldIndex == -2 ? i : dataFieldIndex;
-					bool result = this.BuildColumnItems(colDepth + 1, childList, itemsCreated, myDataFieldIndex);
+					bool result = this.BuildColumnItems(colDepth + 1, childList, pageFieldIndices, itemsCreated, myDataFieldIndex);
 					if (colDepth == this.ColumnFields.Count - 1)
 					{
 						int repeatedItemsCount = 0;
@@ -1244,14 +1259,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		private void UpdateWorksheet(StringResources stringResources)
 		{
 			this.UpdateRowColumnHeaders(stringResources);
-
 			// Update the pivot table's address.
 			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
 			// If there are no data fields, then don't find the offset to obtain the first data column.
-			int endColumn = this.DataFields.Any() ? this.Address.Start.Column + this.FirstDataCol + this.ColumnHeaders.Count - 1 
+			int endColumn = this.DataFields.Any() ? this.Address.Start.Column + this.FirstDataCol + this.ColumnHeaders.Count - 1
 				: this.Address.Start.Column;
 			this.Address = new ExcelAddress(this.Worksheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
-			
 			if (this.DataFields.Any())
 			{
 				var backingTableData = this.WritePivotTableBodyData();
@@ -1393,6 +1406,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			return this.CacheDefinition.CacheRecords.FindMatchingValues(
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
+				this.GetPageFieldIndices(),
 				dataField.Index);
 		}
 
@@ -1403,6 +1417,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			var matchingValues = this.CacheDefinition.CacheRecords.FindMatchingValues(
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
+				this.GetPageFieldIndices(),
 				dataField.Index);
 			this.WriteCellTotal(row, column, dataField, matchingValues, functionCalculator);
 		}
