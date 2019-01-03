@@ -1003,7 +1003,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 				if (fieldItems.Count > 0)
 				{
-					fieldItems.Clear(pivotField);
+					fieldItems.Clear(pivotField.DefaultSubtotal);
 					var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
 					// Sort the items alphabetically/numerically.
 					var sortedList = sharedItemsList.OrderBy(x => x.Value);
