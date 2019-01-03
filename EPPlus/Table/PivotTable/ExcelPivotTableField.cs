@@ -290,14 +290,15 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Gets or sets whether to show the default subtotal.
 		/// </summary>
-		/// <remarks>A blank value in XML indicates true.</remarks>
+		/// <remarks>A blank value in XML indicates true. Setting this value to false will remove the subtotal nodes from 
+		/// the <see cref="ExcelPivotTableField"/>.</remarks>
 		public bool DefaultSubtotal
 		{
 			get
 			{
 				return base.GetXmlNodeBool("@defaultSubtotal", true);
 			}
-			set
+			private set
 			{
 				base.SetXmlNodeBool("@defaultSubtotal", value);
 			}
@@ -786,6 +787,16 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			myGrouping = group;
 			return group;
+		}
+
+		/// <summary>
+		/// Sets the <see cref="DefaultSubtotal"/> property to false and removes 
+		/// the last "default" subtotal item from the <see cref="ExcelPivotTableField"/>.
+		/// </summary>
+		internal void DisableDefaultSubtotal()
+		{
+			this.DefaultSubtotal = false;
+			this.Items.RemoveLastSubtotalItem();
 		}
 		#endregion
 
