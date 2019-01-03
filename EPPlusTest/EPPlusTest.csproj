@@ -274,6 +274,7 @@
     <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionVarTypeTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotCacheDefinitionTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotCacheRecordsTest.cs" />
+    <Compile Include="Table\PivotTable\ExcelPivotTableFieldTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableTest.cs" />
     <Compile Include="Table\PivotTable\ItemsCollectionTest.cs" />
     <Compile Include="Table\PivotTable\PivotTableTestBase.cs" />

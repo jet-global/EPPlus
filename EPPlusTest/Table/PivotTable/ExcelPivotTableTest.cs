@@ -1541,7 +1541,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["RowDataFieldsPivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = false;
+						field.DisableDefaultSubtotal();
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -1773,7 +1773,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["RowDataFieldsPivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = false;
+						field.DisableDefaultSubtotal();
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -2121,7 +2121,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["RowDataFieldsPivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = false;
+						field.DisableDefaultSubtotal();
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
