@@ -226,7 +226,29 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Calculate the values for each cell in the pivot table.
+		/// Calculate the values for each cell in the pivot table for GetPivotData.
+		/// </summary>
+		/// <param name="rowTuple">The list of rowItem indices.</param>
+		/// <param name="colTuple">The list of columnItem indices.</param>
+		/// <param name="dataFieldIndex">The index of the data field.</param>
+		/// <returns>The subtotal value or null if no values are found.</returns>
+		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuple, List<Tuple<int, int>> colTuple, int dataFieldIndex)
+		{
+			var matchingValues = new List<object>();
+			foreach (var record in this.Records)
+			{
+				bool match = true;
+				if (rowTuple != null)
+					match = this.FindCacheRecordIndexAndTupleIndexMatch(rowTuple, record);
+				if (match && colTuple != null)
+					match = this.FindCacheRecordIndexAndTupleIndexMatch(colTuple, record);
+				this.AddToList(match, record, dataFieldIndex, matchingValues);
+			}
+			return matchingValues;
+		}
+
+		/// <summary>
+		/// Calculate the values for each cell in the pivot table by de-referencing the tuple using the cache definition.
 		/// </summary>
 		/// <param name="pivotTable">The pivot table.</param>
 		/// <param name="rowTuple">The list of rowItem indices.</param>
@@ -240,23 +262,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				bool match = true;
 				if (rowTuple != null)
-					match = this.DetermineCacheRecordAndTupleMatch(rowTuple, record, pivotTable);
+					match = this.DetermineCacheRecordValueAndTupleValueMatch(rowTuple, record, pivotTable);
 				if (match && colTuple != null)
-					match = this.DetermineCacheRecordAndTupleMatch(colTuple, record, pivotTable);
-				if (match)
-				{
-					string itemValue = null;
-					if (record.Items[dataFieldIndex].Type == PivotCacheRecordType.x)
-					{
-						int sharedItemIndex = int.Parse(record.Items[dataFieldIndex].Value);
-						var cacheField = this.CacheDefinition.CacheFields[dataFieldIndex];
-						itemValue = cacheField.SharedItems[sharedItemIndex].Value;
-					}
-					else
-						itemValue = record.Items[dataFieldIndex].Value;
-					double.TryParse(itemValue, out var recordData);
-					matchingValues.Add(recordData);
-				}
+					match = this.DetermineCacheRecordValueAndTupleValueMatch(colTuple, record, pivotTable);
+				this.AddToList(match, record, dataFieldIndex, matchingValues);
 			}
 			return matchingValues;
 		}
@@ -273,19 +282,49 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
-		private bool DetermineCacheRecordAndTupleMatch(List<Tuple<int, int>> tuple, CacheRecordNode record, ExcelPivotTable pivotTable)
+		private bool FindCacheRecordIndexAndTupleIndexMatch(List<Tuple<int, int>> list, CacheRecordNode record)
 		{
-			foreach (var index in tuple)
+			foreach (var tuple in list)
 			{
-				if (index.Item1 == -2)
+				if (tuple.Item1 == -2)
 					continue;
-				var sharedItems = this.CacheDefinition.CacheFields[index.Item1].SharedItems;
-				int recordValue = int.Parse(record.Items[index.Item1].Value);
-				int pivotFieldValue = pivotTable.Fields[index.Item1].Items[index.Item2].X;
+				if (int.Parse(record.Items[tuple.Item1].Value) != tuple.Item2)
+					return false;
+			}
+			return true;
+		}
+
+		private bool DetermineCacheRecordValueAndTupleValueMatch(List<Tuple<int, int>> list, CacheRecordNode record, ExcelPivotTable pivotTable)
+		{
+			foreach (var tuple in list)
+			{
+				if (tuple.Item1 == -2)
+					continue;
+				var sharedItems = this.CacheDefinition.CacheFields[tuple.Item1].SharedItems;
+				int recordValue = int.Parse(record.Items[tuple.Item1].Value);
+				int pivotFieldValue = pivotTable.Fields[tuple.Item1].Items[tuple.Item2].X;
 				if (sharedItems[recordValue].Value != sharedItems[pivotFieldValue].Value)
 					return false;
 			}
 			return true;
+		}
+
+		private void AddToList(bool match, CacheRecordNode record, int dataFieldIndex, List<object> matchingValues)
+		{
+			if (match)
+			{
+				string itemValue = null;
+				if (record.Items[dataFieldIndex].Type == PivotCacheRecordType.x)
+				{
+					int sharedItemIndex = int.Parse(record.Items[dataFieldIndex].Value);
+					var cacheField = this.CacheDefinition.CacheFields[dataFieldIndex];
+					itemValue = cacheField.SharedItems[sharedItemIndex].Value;
+				}
+				else
+					itemValue = record.Items[dataFieldIndex].Value;
+				double.TryParse(itemValue, out var recordData);
+				matchingValues.Add(recordData);
+			}
 		}
 		#endregion
 
