@@ -205,21 +205,22 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Checks if a given row item exists.
 		/// </summary>
 		/// <param name="nodeIndices">A list of tuples containing the pivotField index and item value.</param>
+		/// <param name="pageFieldIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
 		/// <returns>True if the item exists, otherwise false.</returns>
-		public bool Contains(List<Tuple<int, int>> nodeIndices)
+		public bool Contains(List<Tuple<int, int>> nodeIndices, Dictionary<int, List<int>> pageFieldIndices)
 		{
-			return this.Records.Any(r => this.FindMatch(nodeIndices, r));
+			return this.Records.Any(r => this.FindMatch(nodeIndices, r, pageFieldIndices));
 		}
 
 		/// <summary>
 		/// Calculate the values for each cell in the pivot table.
 		/// </summary>
-		/// <param name="rowTuples">The list of rowItem indices.</param>
-		/// <param name="columnTuples">The list of columnItem indices.</param>
-		/// <param name="filterIndices">The list of filter (page field) indices.</param>
+		/// <param name="rowTuples">A list of rowItem indices.</param>
+		/// <param name="columnTuples">A list of columnItem indices.</param>
+		/// <param name="filterIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
 		/// <param name="dataFieldIndex">The index of the data field.</param>
 		/// <returns>The subtotal value or null if no values are found.</returns>
-		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, List<Tuple<int, int>> filterIndices, int dataFieldIndex)
+		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, Dictionary<int, List<int>> filterIndices, int dataFieldIndex)
 		{
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
@@ -261,9 +262,35 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
-		private bool FindMatch(IEnumerable<Tuple<int, int>> indexTupleList, CacheRecordNode record)
+		private bool FindMatch(IEnumerable<Tuple<int, int>> indexTupleList, CacheRecordNode record, Dictionary<int, List<int>> pageFieldIndices = null)
 		{
-			return indexTupleList.All(i => i.Item1 == -2 || int.Parse(record.Items[i.Item1].Value) == i.Item2);
+			var indexTupleMatch = indexTupleList.All(i => i.Item1 == -2 || int.Parse(record.Items[i.Item1].Value) == i.Item2);
+			// If a match was found and page field indices are specified, they must also match the record's values.
+			if (indexTupleMatch && (pageFieldIndices == null || this.FindMatch(pageFieldIndices, record)))
+				return true;
+			return false;
+		}
+
+		private bool FindMatch(Dictionary<int, List<int>> pageFieldIndices, CacheRecordNode record)
+		{
+			// Only least one of the page field's items must match to succeed.
+			bool allMatch = true;
+			foreach (var pageField in pageFieldIndices)
+			{
+				bool pageFieldMatch = false;
+				int recordValue = int.Parse(record.Items[pageField.Key].Value);
+				foreach (var item in pageField.Value)
+				{
+					if (recordValue == item)
+					{
+						pageFieldMatch = true;
+						break;
+					}
+				}
+				if (pageFieldMatch == false)
+					return false;
+			}
+			return allMatch;
 		}
 		#endregion
 		

@@ -47,7 +47,6 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 
 			using (var totalsCalculator = new TotalsFunctionHelper())
 			{
-				// TODO: FindMatchingValues(...) doesn't handle pivot table filters. See task #8177 on story #9150
 				var pageFieldIndices = pivotTable.GetPageFieldIndices();
 				var matchingValues = pivotTable.CacheDefinition.CacheRecords.FindMatchingValues(fieldValueIndices, null, pageFieldIndices, fieldIndex);
 				var dataField = pivotTable.DataFields.FirstOrDefault(d => d.Index == fieldIndex);
