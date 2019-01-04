@@ -189,10 +189,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal XmlHelperInstance myCacheFieldHelper;
 		/// <summary>
-		/// The pivot table pageFieldSettings object.
-		/// </summary>
-		internal ExcelPivotTablePageFieldSettings myPageFieldSettings;
-		/// <summary>
 		/// The pivot table field groupings object.
 		/// </summary>
 		internal ExcelPivotTableFieldGroup myGrouping;
@@ -526,50 +522,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 		
 		/// <summary>
-		/// Gets or sets whether the field is a page field.
-		/// </summary>
-		public bool IsPageField
-		{
-			get
-			{
-				return (this.Axis == ePivotFieldAxis.Page);
-			}
-			internal set
-			{
-				if (value)
-				{
-					var dataFieldsNode = this.TopNode.SelectSingleNode("../../d:pageFields", this.NameSpaceManager);
-					if (dataFieldsNode == null)
-					{
-						myTable.CreateNode("d:pageFields");
-						dataFieldsNode = this.TopNode.SelectSingleNode("../../d:pageFields", this.NameSpaceManager);
-					}
-
-					this.TopNode.InnerXml = "<items count=\"1\"><item t=\"default\" /></items>";
-
-					XmlElement node = this.AppendField(dataFieldsNode, this.Index, "pageField", "fld");
-					myPageFieldSettings = new ExcelPivotTablePageFieldSettings(this.NameSpaceManager, node, this, this.Index);
-				}
-				else
-				{
-					myPageFieldSettings = null;
-					if (TopNode.SelectSingleNode(string.Format("../../d:pageFields/d:pageField[@fld={0}]", Index), NameSpaceManager) is XmlElement node)
-						node.ParentNode.RemoveChild(node);
-				}
-			}
-		}
-		
-		/// <summary>
-		/// Gets the page field settings.
-		/// </summary>
-		public ExcelPivotTablePageFieldSettings PageFieldSettings
-		{
-			get
-			{
-				return myPageFieldSettings;
-			}
-		}
-
 		/// <summary>
 		/// Gets the grouping settings. 
 		/// Null if the field has no grouping otherwise ExcelPivotTableFieldNumericGroup or ExcelPivotTableFieldNumericGroup.
