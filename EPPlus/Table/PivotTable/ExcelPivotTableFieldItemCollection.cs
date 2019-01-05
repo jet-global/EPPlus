@@ -61,15 +61,33 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Adds a new <see cref="ExcelPivotTableFieldItem"/> to the collection.
 		/// </summary>
+		/// <param name="insertIndex">The index to insert the item at.</param>
 		/// <param name="pivotFieldIndex">The item's @x attribute value.</param>
 		/// <param name="defaultSubtotal">A flag indicating if there exists an item with a non-null @t attribute.</param>
-		public void AddItem(int pivotFieldIndex, bool defaultSubtotal)
+		public void AddItem(int insertIndex, int pivotFieldIndex, bool defaultSubtotal)
 		{
 			var item = new ExcelPivotTableFieldItem(base.NameSpaceManager, base.TopNode, this.Field, pivotFieldIndex);
 			if (defaultSubtotal)
-				base.InsertItem(pivotFieldIndex, item);
+				base.InsertItem(insertIndex, item);
 			else
 				base.AddItem(item);
+		}
+
+		/// <summary>
+		/// Clear all the items in the collection except the 'default' item.
+		/// </summary>
+		/// <param name="defaultSubtotal">A value indicating if there is a 'default' item.</param>
+		public void Clear(bool defaultSubtotal)
+		{
+			if (defaultSubtotal)
+			{
+				while (string.IsNullOrEmpty(base[0].T))
+				{
+					base.RemoveItem(base[0]);
+				}
+			}
+			else
+				base.ClearItems();
 		}
 		#endregion
 
