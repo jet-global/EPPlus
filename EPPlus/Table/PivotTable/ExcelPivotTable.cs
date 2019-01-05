@@ -31,10 +31,10 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Xml;
 using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Internationalization;
@@ -1009,7 +1009,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					var sortedList = sharedItemsList.OrderBy(x => x.Value);
 					// Sort the items chronologically.
 					if (pivotField.Name.IsEquivalentTo("Month"))
-						sortedList = sharedItemsList.OrderBy(m => DateTime.ParseExact(m.Value, "MMMMM", new CultureInfo("en-US")));
+						sortedList = sharedItemsList.OrderBy(m => DateTime.ParseExact(m.Value, "MMMMM", Thread.CurrentThread.CurrentCulture));
 					// Assign the correct index value to each item.
 					for (int i = 0; i < sortedList.Count(); i++)
 					{

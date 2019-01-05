@@ -769,6 +769,83 @@ namespace EPPlusTest.Table.PivotTable
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithMonthInSpanish.xlsx")]
+		public void PivotTableRefreshSortMonthsInSpanishCorrectly()
+		{
+			var file = new FileInfo("PivotTableWithMonthInSpanish.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets.First();
+					var pivotTable = worksheet.PivotTables.First();
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					this.CheckPivotTableAddress(new ExcelAddress("A13:F25"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
+					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
+					package.SaveAs(newFile.File);
+				}
+				string sheetName = "Sheet1";
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 15, 1, "Chicago"),
+					new ExpectedCellValue(sheetName, 16, 1, "enero"),
+					new ExpectedCellValue(sheetName, 17, 1, "febrero"),
+					new ExpectedCellValue(sheetName, 18, 1, "Nashville"),
+					new ExpectedCellValue(sheetName, 19, 1, "enero"),
+					new ExpectedCellValue(sheetName, 20, 1, "febrero"),
+					new ExpectedCellValue(sheetName, 21, 1, "marzo"),
+					new ExpectedCellValue(sheetName, 22, 1, "San Francisco"),
+					new ExpectedCellValue(sheetName, 23, 1, "enero"),
+					new ExpectedCellValue(sheetName, 24, 1, "marzo"),
+					new ExpectedCellValue(sheetName, 25, 1, "Grand Total"),
+					new ExpectedCellValue(sheetName, 14, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 15, 2, 831.5),
+					new ExpectedCellValue(sheetName, 16, 2, 831.5),
+					new ExpectedCellValue(sheetName, 18, 2, 1663),
+					new ExpectedCellValue(sheetName, 19, 2, 831.5),
+					new ExpectedCellValue(sheetName, 21, 2, 831.5),
+					new ExpectedCellValue(sheetName, 22, 2, 415.75),
+					new ExpectedCellValue(sheetName, 24, 2, 415.75),
+					new ExpectedCellValue(sheetName, 25, 2, 2910.25),
+					new ExpectedCellValue(sheetName, 14, 3, "Headlamp"),
+					new ExpectedCellValue(sheetName, 15, 3, 24.99),
+					new ExpectedCellValue(sheetName, 17, 3, 24.99),
+					new ExpectedCellValue(sheetName, 25, 3, 24.99),
+					new ExpectedCellValue(sheetName, 14, 4, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 22, 4, 99d),
+					new ExpectedCellValue(sheetName, 23, 4, 99d),
+					new ExpectedCellValue(sheetName, 25, 4, 99d),
+					new ExpectedCellValue(sheetName, 14, 5, "Tent"),
+					new ExpectedCellValue(sheetName, 18, 5, 1194d),
+					new ExpectedCellValue(sheetName, 20, 5, 1194d),
+					new ExpectedCellValue(sheetName, 25, 5, 1194d),
+					new ExpectedCellValue(sheetName, 14, 6, "Grand Total"),
+					new ExpectedCellValue(sheetName, 15, 6, 856.49),
+					new ExpectedCellValue(sheetName, 16, 6, 831.5),
+					new ExpectedCellValue(sheetName, 17, 6, 24.99),
+					new ExpectedCellValue(sheetName, 18, 6, 2857d),
+					new ExpectedCellValue(sheetName, 19, 6, 831.5),
+					new ExpectedCellValue(sheetName, 20, 6, 1194d),
+					new ExpectedCellValue(sheetName, 21, 6, 831.5),
+					new ExpectedCellValue(sheetName, 22, 6, 514.75),
+					new ExpectedCellValue(sheetName, 23, 6, 99d),
+					new ExpectedCellValue(sheetName, 24, 6, 415.75),
+					new ExpectedCellValue(sheetName, 25, 6, 4228.24)
+
+				});
+			}
+		}
 		#endregion
 
 		#region UpdateData Field Values Tests
