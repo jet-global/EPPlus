@@ -19,7 +19,7 @@ namespace EPPlusTest.TestHelpers
 		/// <summary>
 		/// Constructor for using temporary test files.
 		/// </summary>
-		/// <param name="tempFileName">The temp file name to use (optional).</param>
+		/// <param name="tempFileName">The temp file name to use (optional--Note that this file WILL BE DELETED).</param>
 		/// <remarks>The <paramref name="tempFileName"/> file WILL BE DELETED.</remarks>
 		public TempTestFile(string tempFileName = null)
 		{

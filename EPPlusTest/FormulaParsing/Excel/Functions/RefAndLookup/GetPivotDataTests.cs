@@ -242,24 +242,28 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.RefAndLookup
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\Pivot Tables\PivotTableWithPageFields.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithPageFields.xlsx")]
 		public void GetPivotDataFilterConflictsWithPivotTablePageFieldMonthFilter()
 		{
 			var file = new FileInfo("PivotTableWithPageFields.xlsx");
-			using (var package = new ExcelPackage(file))
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
 			{
-				var sheet1 = package.Workbook.Worksheets["Sheet1"];
-				var pivotTable = sheet1.PivotTables["PivotTable1"];
-				pivotTable.PageFields[0].Item = 1;
-				pivotTable.CacheDefinition.UpdateData();
-				sheet1.Cells[2, 10].Formula = @"GETPIVOTDATA(""Sum of Units Sold"", K12, ""Month"", ""March"")";
-				sheet1.Cells[2, 10].Calculate();
-				Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)sheet1.Cells[2, 10].Value).Type);
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet1 = package.Workbook.Worksheets["Sheet1"];
+					var pivotTable = sheet1.PivotTables["PivotTable1"];
+					pivotTable.PageFields[0].Item = 1;
+					pivotTable.CacheDefinition.UpdateData();
+					sheet1.Cells[2, 10].Formula = @"GETPIVOTDATA(""Sum of Units Sold"", K12, ""Month"", ""March"")";
+					sheet1.Cells[2, 10].Calculate();
+					Assert.AreEqual(eErrorType.Ref, ((ExcelErrorValue)sheet1.Cells[2, 10].Value).Type);
+				}
 			}
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\Pivot Tables\PivotTableWithPageFields.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithPageFields.xlsx")]
 		public void GetPivotDataFilterOnPivotTableWithMultiSelectPageField()
 		{
 			var file = new FileInfo("PivotTableWithPageFields.xlsx");

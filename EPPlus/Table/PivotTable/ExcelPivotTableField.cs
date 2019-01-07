@@ -284,7 +284,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets whether to show the default subtotal.
+		/// Gets whether to show the default subtotal.
 		/// </summary>
 		/// <remarks>A blank value in XML indicates true. Setting this value to false will remove the subtotal nodes from 
 		/// the <see cref="ExcelPivotTableField"/>.</remarks>

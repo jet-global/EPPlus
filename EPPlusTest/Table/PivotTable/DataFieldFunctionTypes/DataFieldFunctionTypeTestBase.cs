@@ -16,7 +16,7 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 
 		#region Tests
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTableDataFieldFunctionTypes.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDataFieldFunctionTypes.xlsx")]
 		public void PivotTableRefreshDataFieldSumFunction()
 		{
 			var file = new FileInfo("PivotTableDataFieldFunctionTypes.xlsx");
@@ -30,6 +30,7 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					this.ConfigurePivotTableDataFieldFunction();
 					cacheDefinition.UpdateData();
+					this.CheckPivotTableAddress(new ExcelAddress("A12:F17"), this.PivotTable.Address);
 					Assert.AreEqual(7, this.PivotTable.Fields.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[1].Items.Count);
@@ -39,10 +40,6 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 					Assert.AreEqual(0, this.PivotTable.Fields[5].Items.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[6].Items.Count);
 					foreach (var field in this.PivotTable.Fields)
-					{
-						if (field.Items.Count > 0)
-							this.CheckFieldItems(field);
-					}
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "Sheet1";
@@ -51,7 +48,7 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTableDataFieldFunctionTypes.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDataFieldFunctionTypes.xlsx")]
 		public void PivotTableRefreshDataFieldSumFunctionMultipleColumnDataFields()
 		{
 			var file = new FileInfo("PivotTableDataFieldFunctionTypes.xlsx");
@@ -65,6 +62,7 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					this.ConfigurePivotTableMultipleColumnDataFieldsFunction();
 					cacheDefinition.UpdateData();
+					this.CheckPivotTableAddress(new ExcelAddress("A21:I32"), this.PivotTable.Address);
 					Assert.AreEqual(7, this.PivotTable.Fields.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, this.PivotTable.Fields[1].Items.Count);
@@ -73,11 +71,6 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 					Assert.AreEqual(0, this.PivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[5].Items.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[6].Items.Count);
-					foreach (var field in this.PivotTable.Fields)
-					{
-						if (field.Items.Count > 0)
-							this.CheckFieldItems(field);
-					}
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "Sheet1";
@@ -86,7 +79,7 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTableDataFieldFunctionTypes.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDataFieldFunctionTypes.xlsx")]
 		public void PivotTableRefreshDataFieldSumFunctionMultipleRowDataFields()
 		{
 			var file = new FileInfo("PivotTableDataFieldFunctionTypes.xlsx");
@@ -100,6 +93,7 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					this.ConfigurePivotTableMultipleRowDataFieldsFunction();
 					cacheDefinition.UpdateData();
+					this.CheckPivotTableAddress(new ExcelAddress("A36:K49"), this.PivotTable.Address);
 					Assert.AreEqual(7, this.PivotTable.Fields.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, this.PivotTable.Fields[1].Items.Count);
@@ -108,11 +102,6 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 					Assert.AreEqual(0, this.PivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[5].Items.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[6].Items.Count);
-					foreach (var field in this.PivotTable.Fields)
-					{
-						if (field.Items.Count > 0)
-							this.CheckFieldItems(field);
-					}
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "Sheet1";
@@ -141,13 +130,13 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 				new ExpectedCellValue(sheetName, 16, 2, 831.5),
 				new ExpectedCellValue(sheetName, 17, 2, 2910.25),
 
-				new ExpectedCellValue(sheetName, 13, 3, "Sleeping Bag"),
-				new ExpectedCellValue(sheetName, 15, 3, 99d),
-				new ExpectedCellValue(sheetName, 17, 3, 99d),
+				new ExpectedCellValue(sheetName, 13, 3, "Headlamp"),
+				new ExpectedCellValue(sheetName, 16, 3, 24.99),
+				new ExpectedCellValue(sheetName, 17, 3, 24.99),
 
-				new ExpectedCellValue(sheetName, 13, 4, "Headlamp"),
-				new ExpectedCellValue(sheetName, 16, 4, 24.99),
-				new ExpectedCellValue(sheetName, 17, 4, 24.99),
+				new ExpectedCellValue(sheetName, 13, 4, "Sleeping Bag"),
+				new ExpectedCellValue(sheetName, 15, 4, 99d),
+				new ExpectedCellValue(sheetName, 17, 4, 99d),
 
 				new ExpectedCellValue(sheetName, 13, 5, "Tent"),
 				new ExpectedCellValue(sheetName, 15, 5, 1194d),
@@ -182,54 +171,54 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 				new ExpectedCellValue(sheetName, 31, 1, "Headlamp"),
 				new ExpectedCellValue(sheetName, 32, 1, "Grand Total"),
 
-				new ExpectedCellValue(sheetName, 22, 2, "San Francisco"),
+				new ExpectedCellValue(sheetName, 22, 2, "Chicago"),
 				new ExpectedCellValue(sheetName, 23, 2, "Sum of Total"),
-				new ExpectedCellValue(sheetName, 24, 2, 415.75),
-				new ExpectedCellValue(sheetName, 25, 2, 415.75),
-				new ExpectedCellValue(sheetName, 26, 2, 99),
-				new ExpectedCellValue(sheetName, 26, 2, 99),
-				new ExpectedCellValue(sheetName, 32, 2, 514.75),
+				new ExpectedCellValue(sheetName, 24, 2, 831.5),
+				new ExpectedCellValue(sheetName, 25, 2, 831.5),
+				new ExpectedCellValue(sheetName, 29, 2, 24.99),
+				new ExpectedCellValue(sheetName, 31, 2, 24.99),
+				new ExpectedCellValue(sheetName, 32, 2, 856.49),
 
 				new ExpectedCellValue(sheetName, 23, 3, "Sum of Units Sold"),
-				new ExpectedCellValue(sheetName, 24, 3, 1d),
-				new ExpectedCellValue(sheetName, 25, 3, 1d),
-				new ExpectedCellValue(sheetName, 26, 3, 1d),
-				new ExpectedCellValue(sheetName, 27, 3, 1d),
-				new ExpectedCellValue(sheetName, 32, 3, 2d),
+				new ExpectedCellValue(sheetName, 24, 3, 2d),
+				new ExpectedCellValue(sheetName, 25, 3, 2d),
+				new ExpectedCellValue(sheetName, 29, 3, 1d),
+				new ExpectedCellValue(sheetName, 31, 3, 1d),
+				new ExpectedCellValue(sheetName, 32, 3, 3d),
 
-				new ExpectedCellValue(sheetName, 22, 4, "Chicago"),
+				new ExpectedCellValue(sheetName, 22, 4, "Nashville"),
 				new ExpectedCellValue(sheetName, 23, 4, "Sum of Total"),
 				new ExpectedCellValue(sheetName, 24, 4, 831.5),
 				new ExpectedCellValue(sheetName, 25, 4, 831.5),
-				new ExpectedCellValue(sheetName, 29, 4, 24.99),
-				new ExpectedCellValue(sheetName, 31, 4, 24.99),
-				new ExpectedCellValue(sheetName, 32, 4, 856.49),
+				new ExpectedCellValue(sheetName, 26, 4, 1194d),
+				new ExpectedCellValue(sheetName, 28, 4, 1194d),
+				new ExpectedCellValue(sheetName, 29, 4, 831.5),
+				new ExpectedCellValue(sheetName, 30, 4, 831.5),
+				new ExpectedCellValue(sheetName, 32, 4, 2857d),
 
 				new ExpectedCellValue(sheetName, 23, 5, "Sum of Units Sold"),
 				new ExpectedCellValue(sheetName, 24, 5, 2d),
 				new ExpectedCellValue(sheetName, 25, 5, 2d),
-				new ExpectedCellValue(sheetName, 29, 5, 1d),
-				new ExpectedCellValue(sheetName, 31, 5, 1d),
-				new ExpectedCellValue(sheetName, 32, 5, 3d),
+				new ExpectedCellValue(sheetName, 26, 5, 6d),
+				new ExpectedCellValue(sheetName, 28, 5, 6d),
+				new ExpectedCellValue(sheetName, 29, 5, 2d),
+				new ExpectedCellValue(sheetName, 30, 5, 2d),
+				new ExpectedCellValue(sheetName, 32, 5, 10d),
 
-				new ExpectedCellValue(sheetName, 22, 6, "Nashville"),
+				new ExpectedCellValue(sheetName, 22, 6, "San Francisco"),
 				new ExpectedCellValue(sheetName, 23, 6, "Sum of Total"),
-				new ExpectedCellValue(sheetName, 24, 6, 831.5),
-				new ExpectedCellValue(sheetName, 25, 6, 831.5),
-				new ExpectedCellValue(sheetName, 26, 6, 1194d),
-				new ExpectedCellValue(sheetName, 28, 6, 1194d),
-				new ExpectedCellValue(sheetName, 29, 6, 831.5),
-				new ExpectedCellValue(sheetName, 30, 6, 831.5),
-				new ExpectedCellValue(sheetName, 32, 6, 2857d),
+				new ExpectedCellValue(sheetName, 24, 6, 415.75),
+				new ExpectedCellValue(sheetName, 25, 6, 415.75),
+				new ExpectedCellValue(sheetName, 26, 6, 99),
+				new ExpectedCellValue(sheetName, 26, 6, 99),
+				new ExpectedCellValue(sheetName, 32, 6, 514.75),
 
 				new ExpectedCellValue(sheetName, 23, 7, "Sum of Units Sold"),
-				new ExpectedCellValue(sheetName, 24, 7, 2d),
-				new ExpectedCellValue(sheetName, 25, 7, 2d),
-				new ExpectedCellValue(sheetName, 26, 7, 6d),
-				new ExpectedCellValue(sheetName, 28, 7, 6d),
-				new ExpectedCellValue(sheetName, 29, 7, 2d),
-				new ExpectedCellValue(sheetName, 30, 7, 2d),
-				new ExpectedCellValue(sheetName, 32, 7, 10d),
+				new ExpectedCellValue(sheetName, 24, 7, 1d),
+				new ExpectedCellValue(sheetName, 25, 7, 1d),
+				new ExpectedCellValue(sheetName, 26, 7, 1d),
+				new ExpectedCellValue(sheetName, 27, 7, 1d),
+				new ExpectedCellValue(sheetName, 32, 7, 2d),
 
 				new ExpectedCellValue(sheetName, 22, 8, "Total Sum of Total"),
 				new ExpectedCellValue(sheetName, 24, 8, 2078.75),
@@ -278,72 +267,73 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 				new ExpectedCellValue(sheetName, 48, 1, "Total Sum of Total"),
 				new ExpectedCellValue(sheetName, 49, 1, "Total Sum of Units Sold"),
 
-				new ExpectedCellValue(sheetName, 37, 2, "San Francisco"),
+				new ExpectedCellValue(sheetName, 37, 2, "Chicago"),
 				new ExpectedCellValue(sheetName, 38, 2, "Car Rack"),
-				new ExpectedCellValue(sheetName, 40, 2, 415.75),
-				new ExpectedCellValue(sheetName, 41, 2, 1d),
-				new ExpectedCellValue(sheetName, 48, 2, 415.75),
-				new ExpectedCellValue(sheetName, 49, 2, 1d),
+				new ExpectedCellValue(sheetName, 40, 2, 831.5),
+				new ExpectedCellValue(sheetName, 41, 2, 2d),
+				new ExpectedCellValue(sheetName, 48, 2, 831.5),
+				new ExpectedCellValue(sheetName, 49, 2, 2d),
 
-				new ExpectedCellValue(sheetName, 38, 3, "Sleeping Bag"),
-				new ExpectedCellValue(sheetName, 43, 3, 99d),
-				new ExpectedCellValue(sheetName, 44, 3, 1d),
-				new ExpectedCellValue(sheetName, 48, 3, 99d),
+				new ExpectedCellValue(sheetName, 38, 3, "Headlamp"),
+				new ExpectedCellValue(sheetName, 46, 3, 24.99),
+				new ExpectedCellValue(sheetName, 47, 3, 1d),
+				new ExpectedCellValue(sheetName, 48, 3, 24.99),
 				new ExpectedCellValue(sheetName, 49, 3, 1d),
 
-				new ExpectedCellValue(sheetName, 37, 4, "San Francisco Total"),
-				new ExpectedCellValue(sheetName, 40, 4, 415.75),
-				new ExpectedCellValue(sheetName, 41, 4, 1d),
-				new ExpectedCellValue(sheetName, 43, 4, 99d),
-				new ExpectedCellValue(sheetName, 44, 4, 1d),
-				new ExpectedCellValue(sheetName, 48, 4, 514.75),
-				new ExpectedCellValue(sheetName, 49, 4, 2d),
+				new ExpectedCellValue(sheetName, 37, 4, "Chicago Total"),
+				new ExpectedCellValue(sheetName, 40, 4, 831.5),
+				new ExpectedCellValue(sheetName, 41, 4, 2d),
+				new ExpectedCellValue(sheetName, 46, 4, 24.99),
+				new ExpectedCellValue(sheetName, 47, 4, 1d),
+				new ExpectedCellValue(sheetName, 48, 4, 856.49),
+				new ExpectedCellValue(sheetName, 49, 4, 3d),
 
-				new ExpectedCellValue(sheetName, 37, 5, "Chicago"),
+				new ExpectedCellValue(sheetName, 37, 5, "Nashville"),
 				new ExpectedCellValue(sheetName, 38, 5, "Car Rack"),
 				new ExpectedCellValue(sheetName, 40, 5, 831.5),
 				new ExpectedCellValue(sheetName, 41, 5, 2d),
-				new ExpectedCellValue(sheetName, 48, 5, 831.5),
-				new ExpectedCellValue(sheetName, 49, 5, 2d),
+				new ExpectedCellValue(sheetName, 46, 5, 831.5),
+				new ExpectedCellValue(sheetName, 47, 5, 2d),
+				new ExpectedCellValue(sheetName, 48, 5, 1663d),
+				new ExpectedCellValue(sheetName, 49, 5, 4d),
 
-				new ExpectedCellValue(sheetName, 38, 6, "Headlamp"),
-				new ExpectedCellValue(sheetName, 46, 6, 24.99),
-				new ExpectedCellValue(sheetName, 47, 6, 1d),
-				new ExpectedCellValue(sheetName, 48, 6, 24.99),
-				new ExpectedCellValue(sheetName, 49, 6, 1d),
+				new ExpectedCellValue(sheetName, 38, 6, "Tent"),
+				new ExpectedCellValue(sheetName, 43, 6, 1194d),
+				new ExpectedCellValue(sheetName, 44, 6, 6d),
+				new ExpectedCellValue(sheetName, 48, 6, 1194d),
+				new ExpectedCellValue(sheetName, 49, 6, 6d),
 
-				new ExpectedCellValue(sheetName, 37, 7, "Chicago Total"),
+				new ExpectedCellValue(sheetName, 37, 7, "Nashville Total"),
 				new ExpectedCellValue(sheetName, 40, 7, 831.5),
 				new ExpectedCellValue(sheetName, 41, 7, 2d),
-				new ExpectedCellValue(sheetName, 46, 7, 24.99),
-				new ExpectedCellValue(sheetName, 47, 7, 1d),
-				new ExpectedCellValue(sheetName, 48, 7, 856.49),
-				new ExpectedCellValue(sheetName, 49, 7, 3d),
+				new ExpectedCellValue(sheetName, 43, 7, 1194d),
+				new ExpectedCellValue(sheetName, 44, 7, 6d),
+				new ExpectedCellValue(sheetName, 46, 7, 831.5),
+				new ExpectedCellValue(sheetName, 47, 7, 2d),
+				new ExpectedCellValue(sheetName, 48, 7, 2857d),
+				new ExpectedCellValue(sheetName, 49, 7, 10d),
 
-				new ExpectedCellValue(sheetName, 37, 8, "Nashville"),
+				new ExpectedCellValue(sheetName, 37, 8, "San Francisco"),
 				new ExpectedCellValue(sheetName, 38, 8, "Car Rack"),
-				new ExpectedCellValue(sheetName, 40, 8, 831.5),
-				new ExpectedCellValue(sheetName, 41, 8, 2d),
-				new ExpectedCellValue(sheetName, 46, 8, 831.5),
-				new ExpectedCellValue(sheetName, 47, 8, 2d),
-				new ExpectedCellValue(sheetName, 48, 8, 1663d),
-				new ExpectedCellValue(sheetName, 49, 8, 4d),
+				new ExpectedCellValue(sheetName, 40, 8, 415.75),
+				new ExpectedCellValue(sheetName, 41, 8, 1d),
+				new ExpectedCellValue(sheetName, 48, 8, 415.75),
+				new ExpectedCellValue(sheetName, 49, 8, 1d),
 
-				new ExpectedCellValue(sheetName, 38, 9, "Tent"),
-				new ExpectedCellValue(sheetName, 43, 9, 1194d),
-				new ExpectedCellValue(sheetName, 44, 9, 6d),
-				new ExpectedCellValue(sheetName, 48, 9, 1194d),
-				new ExpectedCellValue(sheetName, 49, 9, 6d),
+				new ExpectedCellValue(sheetName, 38, 9, "Sleeping Bag"),
+				new ExpectedCellValue(sheetName, 43, 9, 99d),
+				new ExpectedCellValue(sheetName, 44, 9, 1d),
+				new ExpectedCellValue(sheetName, 48, 9, 99d),
+				new ExpectedCellValue(sheetName, 49, 9, 1d),
 
-				new ExpectedCellValue(sheetName, 37, 10, "Nashville Total"),
-				new ExpectedCellValue(sheetName, 40, 10, 831.5),
-				new ExpectedCellValue(sheetName, 41, 10, 2d),
-				new ExpectedCellValue(sheetName, 43, 10, 1194d),
-				new ExpectedCellValue(sheetName, 44, 10, 6d),
-				new ExpectedCellValue(sheetName, 46, 10, 831.5),
-				new ExpectedCellValue(sheetName, 47, 10, 2d),
-				new ExpectedCellValue(sheetName, 48, 10, 2857d),
-				new ExpectedCellValue(sheetName, 49, 10, 10d),
+				new ExpectedCellValue(sheetName, 37, 10, "San Francisco Total"),
+				new ExpectedCellValue(sheetName, 40, 10, 415.75),
+				new ExpectedCellValue(sheetName, 41, 10, 1d),
+				new ExpectedCellValue(sheetName, 43, 10, 99d),
+				new ExpectedCellValue(sheetName, 44, 10, 1d),
+				new ExpectedCellValue(sheetName, 48, 10, 514.75),
+				new ExpectedCellValue(sheetName, 49, 10, 2d),
+
 
 				new ExpectedCellValue(sheetName, 37, 11, "Grand Total"),
 				new ExpectedCellValue(sheetName, 40, 11, 2078.75),
@@ -359,16 +349,12 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 		#endregion
 
 		#region Helper Methods
-		private void CheckFieldItems(ExcelPivotTableField field)
+		private void CheckPivotTableAddress(ExcelAddress expectedAddress, ExcelAddress pivotTableAddress)
 		{
-			int i = 0;
-			for (; i < field.Items.Count - 1; i++)
-			{
-				Assert.AreEqual(i, field.Items[i].X);
-			}
-			var lastItem = field.Items[field.Items.Count - 1];
-			if (string.IsNullOrEmpty(lastItem.T))
-				Assert.AreEqual(i, lastItem.X);
+			Assert.AreEqual(expectedAddress.Start.Row, pivotTableAddress.Start.Row);
+			Assert.AreEqual(expectedAddress.Start.Column, pivotTableAddress.Start.Column);
+			Assert.AreEqual(expectedAddress.End.Row, pivotTableAddress.End.Row);
+			Assert.AreEqual(expectedAddress.End.Column, pivotTableAddress.End.Column);
 		}
 		#endregion
 	}
