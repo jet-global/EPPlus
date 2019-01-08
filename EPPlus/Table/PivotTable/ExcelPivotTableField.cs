@@ -189,10 +189,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal XmlHelperInstance myCacheFieldHelper;
 		/// <summary>
-		/// The pivot table pageFieldSettings object.
-		/// </summary>
-		internal ExcelPivotTablePageFieldSettings myPageFieldSettings;
-		/// <summary>
 		/// The pivot table field groupings object.
 		/// </summary>
 		internal ExcelPivotTableFieldGroup myGrouping;
@@ -288,16 +284,17 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets whether to show the default subtotal.
+		/// Gets whether to show the default subtotal.
 		/// </summary>
-		/// <remarks>A blank value in XML indicates true.</remarks>
+		/// <remarks>A blank value in XML indicates true. Setting this value to false will remove the subtotal nodes from 
+		/// the <see cref="ExcelPivotTableField"/>.</remarks>
 		public bool DefaultSubtotal
 		{
 			get
 			{
 				return base.GetXmlNodeBool("@defaultSubtotal", true);
 			}
-			set
+			private set
 			{
 				base.SetXmlNodeBool("@defaultSubtotal", value);
 			}
@@ -525,50 +522,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 		
 		/// <summary>
-		/// Gets or sets whether the field is a page field.
-		/// </summary>
-		public bool IsPageField
-		{
-			get
-			{
-				return (this.Axis == ePivotFieldAxis.Page);
-			}
-			internal set
-			{
-				if (value)
-				{
-					var dataFieldsNode = this.TopNode.SelectSingleNode("../../d:pageFields", this.NameSpaceManager);
-					if (dataFieldsNode == null)
-					{
-						myTable.CreateNode("d:pageFields");
-						dataFieldsNode = this.TopNode.SelectSingleNode("../../d:pageFields", this.NameSpaceManager);
-					}
-
-					this.TopNode.InnerXml = "<items count=\"1\"><item t=\"default\" /></items>";
-
-					XmlElement node = this.AppendField(dataFieldsNode, this.Index, "pageField", "fld");
-					myPageFieldSettings = new ExcelPivotTablePageFieldSettings(this.NameSpaceManager, node, this, this.Index);
-				}
-				else
-				{
-					myPageFieldSettings = null;
-					if (TopNode.SelectSingleNode(string.Format("../../d:pageFields/d:pageField[@fld={0}]", Index), NameSpaceManager) is XmlElement node)
-						node.ParentNode.RemoveChild(node);
-				}
-			}
-		}
-		
-		/// <summary>
-		/// Gets the page field settings.
-		/// </summary>
-		public ExcelPivotTablePageFieldSettings PageFieldSettings
-		{
-			get
-			{
-				return myPageFieldSettings;
-			}
-		}
-
 		/// <summary>
 		/// Gets the grouping settings. 
 		/// Null if the field has no grouping otherwise ExcelPivotTableFieldNumericGroup or ExcelPivotTableFieldNumericGroup.
@@ -786,6 +739,16 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			myGrouping = group;
 			return group;
+		}
+
+		/// <summary>
+		/// Sets the <see cref="DefaultSubtotal"/> property to false and removes 
+		/// the last "default" subtotal item from the <see cref="ExcelPivotTableField"/>.
+		/// </summary>
+		internal void DisableDefaultSubtotal()
+		{
+			this.DefaultSubtotal = false;
+			this.Items.RemoveLastSubtotalItem();
 		}
 		#endregion
 
