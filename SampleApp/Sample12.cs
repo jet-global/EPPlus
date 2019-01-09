@@ -129,9 +129,6 @@ namespace EPPlusSamples
 				quaterField.Items[4].Text = "Q4";
 				quaterField.Items[5].Text = ">"; //Values above max date, but we use auto so its not used
 
-				//Add a pagefield
-				var pageField = pivotTable2.PageFields.Add(pivotTable2.Fields["Title"]);
-
 				//Add the data fields and format them
 				dataField = pivotTable2.DataFields.Add(pivotTable2.Fields["SubTotal"]);
 				dataField.Format = "#,##0";

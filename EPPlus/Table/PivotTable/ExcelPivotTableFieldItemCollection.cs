@@ -89,6 +89,18 @@ namespace OfficeOpenXml.Table.PivotTable
 			else
 				base.ClearItems();
 		}
+
+		/// <summary>
+		/// Removes the last subtotal item in a pivot field.
+		/// </summary>
+		public void RemoveLastSubtotalItem()
+		{
+			if (this.Count == 0)
+				return;
+			var item = this[this.Count - 1];
+			if (!string.IsNullOrEmpty(item.T))
+				base.RemoveItem(item);
+		}
 		#endregion
 
 		#region ExcelPivotTableFieldCollectionBase Overrides

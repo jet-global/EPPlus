@@ -203,44 +203,35 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Checks if a given row item exists.
 		/// </summary>
 		/// <param name="nodeIndices">A list of tuples containing the pivotField index and item value.</param>
+		/// <param name="pageFieldIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
 		/// <returns>True if the item exists, otherwise false.</returns>
-		public bool Contains(List<Tuple<int, int>> nodeIndices)
+		public bool Contains(List<Tuple<int, int>> nodeIndices, Dictionary<int, List<int>> pageFieldIndices)
 		{
-			foreach (var record in this.Records)
-			{
-				bool matched = true;
-				foreach (var indexTuple in nodeIndices)
-				{
-					if (indexTuple.Item1 != -2 && int.Parse(record.Items[indexTuple.Item1].Value) != indexTuple.Item2)
-					{
-						matched = false;
-						break;
-					}
-				}
-				if (matched)
-					return true;
-			}
-			return false;
+			return this.Records.Any(r => this.FindCacheRecordIndexAndTupleIndexMatch(nodeIndices, r, pageFieldIndices));
 		}
 
 		/// <summary>
 		/// Calculate the values for each cell in the pivot table for GetPivotData.
 		/// </summary>
-		/// <param name="rowTuple">The list of rowItem indices.</param>
-		/// <param name="colTuple">The list of columnItem indices.</param>
+		/// <param name="rowTuples">The list of rowItem indices.</param>
+		/// <param name="columnTuples">The list of columnItem indices.</param>
+		/// <param name="filterIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
 		/// <param name="dataFieldIndex">The index of the data field.</param>
 		/// <returns>The subtotal value or null if no values are found.</returns>
-		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuple, List<Tuple<int, int>> colTuple, int dataFieldIndex)
+		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, Dictionary<int, List<int>> filterIndices, int dataFieldIndex)
 		{
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
 				bool match = true;
-				if (rowTuple != null)
-					match = this.FindCacheRecordIndexAndTupleIndexMatch(rowTuple, record);
-				if (match && colTuple != null)
-					match = this.FindCacheRecordIndexAndTupleIndexMatch(colTuple, record);
-				this.AddToList(match, record, dataFieldIndex, matchingValues);
+				if (rowTuples != null)
+					match = this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record);
+				if (match && columnTuples != null)
+					match = this.FindCacheRecordIndexAndTupleIndexMatch(columnTuples, record);
+				if (match && filterIndices != null)
+					match = this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record);
+				if (match)
+					this.AddToList(record, dataFieldIndex, matchingValues);
 			}
 			return matchingValues;
 		}
@@ -249,21 +240,26 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Calculate the values for each cell in the pivot table by de-referencing the tuple using the cache definition.
 		/// </summary>
 		/// <param name="pivotTable">The pivot table.</param>
-		/// <param name="rowTuple">The list of rowItem indices.</param>
-		/// <param name="colTuple">The list of columnItem indices.</param>
+		/// <param name="rowTuples">The list of rowItem indices.</param>
+		/// <param name="columnTuples">The list of columnItem indices.</param>
+		/// <param name="filterIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
 		/// <param name="dataFieldIndex">The index of the data field.</param>
 		/// <returns>The subtotal value or null if no values are found.</returns>
-		public List<object> FindMatchingValues(ExcelPivotTable pivotTable, List<Tuple<int, int>> rowTuple, List<Tuple<int, int>> colTuple, int dataFieldIndex)
+		public List<object> FindMatchingValues(ExcelPivotTable pivotTable, List<Tuple<int, int>> rowTuples, 
+			List<Tuple<int, int>> columnTuples, Dictionary<int, List<int>> filterIndices, int dataFieldIndex)
 		{
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
 				bool match = true;
-				if (rowTuple != null)
-					match = this.DetermineCacheRecordValueAndTupleValueMatch(rowTuple, record, pivotTable);
-				if (match && colTuple != null)
-					match = this.DetermineCacheRecordValueAndTupleValueMatch(colTuple, record, pivotTable);
-				this.AddToList(match, record, dataFieldIndex, matchingValues);
+				if (rowTuples != null)
+					match = this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
+				if (match && columnTuples != null)
+					match = this.FindCacheRecordValueAndTupleValueMatch(columnTuples, record, pivotTable);
+				if (match && filterIndices != null)
+					match = this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record);
+				if (match)
+					this.AddToList(record, dataFieldIndex, matchingValues);
 			}
 			return matchingValues;
 		}
@@ -298,19 +294,16 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
-		private bool FindCacheRecordIndexAndTupleIndexMatch(List<Tuple<int, int>> list, CacheRecordNode record)
+		private bool FindCacheRecordIndexAndTupleIndexMatch(IEnumerable<Tuple<int, int>> indexTupleList, CacheRecordNode record, Dictionary<int, List<int>> pageFieldIndices = null)
 		{
-			foreach (var tuple in list)
-			{
-				if (tuple.Item1 == -2)
-					continue;
-				if (int.Parse(record.Items[tuple.Item1].Value) != tuple.Item2)
-					return false;
-			}
-			return true;
+			var indexTupleMatch = indexTupleList.All(i => i.Item1 == -2 || int.Parse(record.Items[i.Item1].Value) == i.Item2);
+			// If a match was found and page field indices are specified, they must also match the record's values.
+			if (indexTupleMatch && (pageFieldIndices == null || this.FindCacheRecordValueAndPageFieldTupleValueMatch(pageFieldIndices, record)))
+				return true;
+			return false;
 		}
 
-		private bool DetermineCacheRecordValueAndTupleValueMatch(List<Tuple<int, int>> list, CacheRecordNode record, ExcelPivotTable pivotTable)
+		private bool FindCacheRecordValueAndTupleValueMatch(List<Tuple<int, int>> list, CacheRecordNode record, ExcelPivotTable pivotTable)
 		{
 			foreach (var tuple in list)
 			{
@@ -325,22 +318,41 @@ namespace OfficeOpenXml.Table.PivotTable
 			return true;
 		}
 
-		private void AddToList(bool match, CacheRecordNode record, int dataFieldIndex, List<object> matchingValues)
+		private bool FindCacheRecordValueAndPageFieldTupleValueMatch(Dictionary<int, List<int>> pageFieldIndices, CacheRecordNode record)
 		{
-			if (match)
+			// At least one of the page field's items must match to succeed.
+			bool allMatch = true;
+			foreach (var pageField in pageFieldIndices)
 			{
-				string itemValue = null;
-				if (record.Items[dataFieldIndex].Type == PivotCacheRecordType.x)
+				bool pageFieldMatch = false;
+				int recordValue = int.Parse(record.Items[pageField.Key].Value);
+				foreach (var item in pageField.Value)
 				{
-					int sharedItemIndex = int.Parse(record.Items[dataFieldIndex].Value);
-					var cacheField = this.CacheDefinition.CacheFields[dataFieldIndex];
-					itemValue = cacheField.SharedItems[sharedItemIndex].Value;
+					if (recordValue == item)
+					{
+						pageFieldMatch = true;
+						break;
+					}
 				}
-				else
-					itemValue = record.Items[dataFieldIndex].Value;
-				double.TryParse(itemValue, out var recordData);
-				matchingValues.Add(recordData);
+				if (pageFieldMatch == false)
+					return false;
 			}
+			return allMatch;
+		}
+
+		private void AddToList(CacheRecordNode record, int dataFieldIndex, List<object> matchingValues)
+		{
+			string itemValue = null;
+			if (record.Items[dataFieldIndex].Type == PivotCacheRecordType.x)
+			{
+				int sharedItemIndex = int.Parse(record.Items[dataFieldIndex].Value);
+				var cacheField = this.CacheDefinition.CacheFields[dataFieldIndex];
+				itemValue = cacheField.SharedItems[sharedItemIndex].Value;
+			}
+			else
+				itemValue = record.Items[dataFieldIndex].Value;
+			double.TryParse(itemValue, out var recordData);
+			matchingValues.Add(recordData);
 		}
 		#endregion
 

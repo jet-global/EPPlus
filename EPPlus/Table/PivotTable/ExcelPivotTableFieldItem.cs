@@ -86,6 +86,16 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get { return base.GetXmlNodeString("@t"); }
 		}
+
+		/// <summary>
+		/// Gets or sets whether or not the item is hidden.
+		/// </summary>
+		/// <remarks>Corresponds to the "h" attribute.</remarks>
+		internal bool Hidden
+		{
+			get { return base.GetXmlNodeBool("@h", false); }
+			set { base.SetXmlNodeBool("@h", value, false); }
+		}
 		#endregion
 
 		#region Constructors

@@ -42,11 +42,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// The column field.
 		/// </summary>
-		Column,
-		/// <summary>
-		/// The page field.
-		/// </summary>
-		Page
+		Column
 	}
 	#endregion
 
@@ -79,10 +75,8 @@ namespace OfficeOpenXml.Table.PivotTable
 					base.TopNode = base.PivotTable.CreateNode("d:rowFields");
 				else if (type == PivotTableItemType.Column)
 					base.TopNode = base.PivotTable.CreateNode("d:colFields");
-				else if (type == PivotTableItemType.Page)
-					base.TopNode = base.PivotTable.CreateNode("d:pageFields");
 				else
-					throw new InvalidOperationException($"The enum value '{this.FieldType}' has not been accounted for.");
+					throw new InvalidOperationException($"The enum value '{this.FieldType}' Is not supported.");
 			}
 			this.FieldType = type;
 		}
@@ -136,10 +130,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			if (this.FieldType == PivotTableItemType.Row || this.FieldType == PivotTableItemType.Column)
 				return this.LoadRowColumnFields();
-			else if (this.FieldType == PivotTableItemType.Page)
-				return this.LoadPageFields();
 			else
-				throw new InvalidOperationException($"The enum value '{this.FieldType}' has not been accounted for.");
+				throw new InvalidOperationException($"The enum value '{this.FieldType}' is not supported as a pivot table field type.");
 		}
 		#endregion
 
@@ -149,24 +141,16 @@ namespace OfficeOpenXml.Table.PivotTable
 			switch (this.FieldType)
 			{
 				case PivotTableItemType.Row:
-					if (field.IsColumnField || field.IsPageField)
+					if (field.IsColumnField)
 						throw (new Exception("This field is a column or page field. Can't add it to the RowFields collection"));
 					field.IsRowField = value;
 					field.Axis = ePivotFieldAxis.Row;
 					break;
 				case PivotTableItemType.Column:
-					if (field.IsRowField || field.IsPageField)
+					if (field.IsRowField)
 						throw (new Exception("This field is a row or page field. Can't add it to the ColumnFields collection"));
 					field.IsColumnField = value;
 					field.Axis = ePivotFieldAxis.Column;
-					break;
-				case PivotTableItemType.Page:
-					if (field.IsColumnField || field.IsRowField)
-						throw (new Exception("Field is a column or row field. Can't add it to the PageFields collection"));
-					if (base.PivotTable.Address._fromRow < 3)
-						throw (new Exception(string.Format("A pivot table with page fields must be located above row 3. Currenct location is {0}", base.PivotTable.Address.Address)));
-					field.IsPageField = value;
-					field.Axis = ePivotFieldAxis.Page;
 					break;
 				default:
 					throw new InvalidOperationException($"The enum value '{this.FieldType}' has not been accounted for.");
@@ -195,24 +179,6 @@ namespace OfficeOpenXml.Table.PivotTable
 					// If it doesn't have an 'x' attribute, remove the element.
 					// We have no idea why this is here, but it is legacy logic that we're afraid to remove.
 					base.TopNode.RemoveChild(element);
-				}
-			}
-			return collection;
-		}
-
-		private List<ExcelPivotTableField> LoadPageFields()
-		{
-			var collection = new List<ExcelPivotTableField>();
-			var fieldNodes = base.TopNode.SelectNodes("d:pageField", base.NameSpaceManager);
-			if (fieldNodes == null)
-				return collection;
-			foreach (XmlElement pageElem in base.TopNode.SelectNodes("d:pageField", base.NameSpaceManager))
-			{
-				if (int.TryParse(pageElem.GetAttribute("fld"), out var fld) && fld >= 0)
-				{
-					var field = base.PivotTable.Fields[fld];
-					field.myPageFieldSettings = new ExcelPivotTablePageFieldSettings(base.NameSpaceManager, pageElem, field, fld);
-					collection.Add(field);
 				}
 			}
 			return collection;

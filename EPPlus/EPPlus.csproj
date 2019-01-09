@@ -776,6 +776,8 @@
     <Compile Include="Table\PivotTable\DataCalculation\GrandTotalHelperBase.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\ColumnGrandTotalHelper.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\TotalFunctionHelper.cs" />
+    <Compile Include="Table\PivotTable\ExcelPageField.cs" />
+    <Compile Include="Table\PivotTable\ExcelPageFieldCollection.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotCacheRecords.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableDataFieldCollection.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldCollectionBase.cs" />
@@ -813,7 +815,6 @@
     <Compile Include="Style\XmlAccess\ExcelGradientFillXml.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldGroup.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldItem.cs" />
-    <Compile Include="Table\PivotTable\ExcelPivotTablePageFieldSettings.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableDataField.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldCollection.cs" />
     <Compile Include="Style\IStyle.cs" />
