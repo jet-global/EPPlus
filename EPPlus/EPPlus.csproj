@@ -787,6 +787,8 @@
     <Compile Include="Table\PivotTable\PivotTableHeader.cs" />
     <Compile Include="Table\PivotTable\RowColumnItem.cs" />
     <Compile Include="Table\PivotTable\SharedItemsCollection.cs" />
+    <Compile Include="Table\PivotTable\SortingScope\AutoSortScopeReference.cs" />
+    <Compile Include="Table\PivotTable\SortingScope\AutoSortScopeReferencesCollection.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\InternationalizationUtility.cs" />
     <Compile Include="Utils\UriHelper.cs" />

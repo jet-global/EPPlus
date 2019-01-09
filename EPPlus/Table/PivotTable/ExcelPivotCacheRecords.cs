@@ -198,9 +198,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			this.Count = this.Records.Count;
 		}
-		#endregion
 
-		#region Public Methods
 		/// <summary>
 		/// Checks if a given row item exists.
 		/// </summary>
@@ -268,6 +266,24 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.AddToList(match, record, dataFieldIndex, matchingValues);
 			}
 			return matchingValues;
+		}
+
+		/// <summary>
+		/// Calculate the total of a specified data field for a row/columnn header for custom sorting.
+		/// </summary>
+		/// <param name="tupleList">A list of tuples containing the pivotField index and item value.</param>
+		/// <param name="dataFieldIndex">The index of the referenced data field.</param>
+		/// <returns></returns>
+		public double CalculateSortingValues(List<Tuple<int, int>> tupleList, int dataFieldIndex)
+		{
+			double total = 0;
+			foreach (var record in this.Records)
+			{
+				var findMatch = this.FindCacheRecordIndexAndTupleIndexMatch(tupleList, record);
+				if (findMatch)
+					total += double.Parse(record.Items[dataFieldIndex].Value);
+			}
+			return total;
 		}
 		#endregion
 
