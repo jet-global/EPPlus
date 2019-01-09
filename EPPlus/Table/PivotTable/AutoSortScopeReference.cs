@@ -11,12 +11,12 @@ namespace OfficeOpenXml.Table.PivotTable
 	{
 		#region Properties
 		/// <summary>
-		/// Gets or sets the type of this reference.
+		/// Gets the type of this reference.
 		/// </summary>
 		public PivotCacheRecordType Type { get; private set; }
 
 		/// <summary>
-		/// Gets or sets the value of this reference.
+		/// Gets the value of this reference.
 		/// </summary>
 		public string Value
 		{
