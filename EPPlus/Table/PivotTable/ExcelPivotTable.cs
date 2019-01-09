@@ -1010,11 +1010,10 @@ namespace OfficeOpenXml.Table.PivotTable
 					fieldItems.Clear(pivotField.DefaultSubtotal);
 
 					var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
-					// Sort the items alphabetically/numerically.
-					var sortedList = sharedItemsList.OrderBy(x => x.Value);
-					// Sort the items chronologically.
-					if (pivotField.Name.IsEquivalentTo("Month"))
-						sortedList = sharedItemsList.OrderBy(m => DateTime.ParseExact(m.Value, "MMMMM", Thread.CurrentThread.CurrentCulture));
+
+					// Sort the row/column headers.
+					var sortedList = this.SortField(pivotField.Sort, pivotField);
+
 					// Assign the correct index value to each item.
 					for (int i = 0; i < sortedList.Count(); i++)
 					{
@@ -1078,6 +1077,28 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
+		private IOrderedEnumerable<CacheItem> SortField(eSortType sortOrder, ExcelPivotTableField pivotField)
+		{
+			var fieldItems = pivotField.Items;
+			var sharedItems = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems;
+
+			IOrderedEnumerable<CacheItem> sortedList = null;
+			if (sortOrder == eSortType.Descending && pivotField.AutoSortScopeReferences.Count == 0)
+			{
+				sortedList = sharedItems.ToList().OrderByDescending(x => x.Value);
+				if (pivotField.Name.IsEquivalentTo("Month"))
+					sortedList = sharedItems.ToList().OrderByDescending(m => DateTime.ParseExact(m.Value, "MMMMM", Thread.CurrentThread.CurrentCulture));
+			}
+			else
+			{
+				sortedList = sharedItems.ToList().OrderBy(x => x.Value);
+				if (pivotField.Name.IsEquivalentTo("Month"))
+					sortedList = sharedItems.ToList().OrderBy(m => DateTime.ParseExact(m.Value, "MMMMM", Thread.CurrentThread.CurrentCulture));
+			}
+
+			return sortedList;
+		}
+
 		private void RemovePivotFieldItemMAttribute()
 		{
 			foreach (var pivotField in this.Fields)
@@ -1177,19 +1198,24 @@ namespace OfficeOpenXml.Table.PivotTable
 			// If the pivotFieldIndex is not a data field index, then set the variables accordingly.
 			this.SetNonDataFieldVariables(pivotFieldIndex, parentNodeIndices, ref pivotField, ref maxIndex, ref isAboveDataField, ref isDataField);
 
+			// Apply the custom sort referencing data fields if necessary.
+			var reorderedPivotFieldItems = this.ApplyCustomSorting(pivotField, maxIndex, parentNodeIndices, pivotFieldIndex);
+
 			// Create xml nodes and row headers.
 			for (int i = 0; i < maxIndex; i++)
 			{
 				var childList = parentNodeIndices.ToList();
 				int itemIndex = pivotFieldIndex == -2 ? i : pivotField.Items[i].X;
+				if (reorderedPivotFieldItems != null)
+					itemIndex = reorderedPivotFieldItems[i];
 				childList.Add(new Tuple<int, int>(pivotFieldIndex, itemIndex));
 				bool leafNode = rowDepth == this.RowFields.Count - 1;
 				int myDataFieldIndex = pivotFieldIndex == -2 ? i : dataFieldIndex;
 				if (pivotField == null || this.CacheDefinition.CacheRecords.Contains(childList, pageFieldIndices))
 				{
-					this.RowItems.Add(rowDepth, i, null, myDataFieldIndex);
 					// Convert the second value in the tuple to the index in the list.
 					var indicesList = this.FindIndices(childList.ToList());
+					this.RowItems.Add(rowDepth, indicesList.Last().Item2, null, myDataFieldIndex);
 					this.RowHeaders.Add(new PivotTableHeader(indicesList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
 					this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
 				}
@@ -1272,10 +1298,15 @@ namespace OfficeOpenXml.Table.PivotTable
 		private void CreateColumnItemNode(int index, List<Tuple<int, int>> indices, Dictionary<int, List<int>> pageFieldIndices, int pivotFieldIndex, 
 			ExcelPivotTableField pivotField, int dataFieldIndex, int colDepth, bool itemsCreated, bool isDataField, bool isAboveDataField)
 		{
+			// Apply the custom sort referencing data fields if necessary.
+			var reorderedPivotFieldItems = this.ApplyCustomSorting(pivotField, index, indices, pivotFieldIndex);
+			
 			for (int i = 0; i < index; i++)
 			{
 				var childList = indices.ToList();
 				int itemIndex = pivotFieldIndex == -2 ? i : pivotField.Items[i].X;
+				if (reorderedPivotFieldItems != null)
+					itemIndex = reorderedPivotFieldItems[i];
 				childList.Add(new Tuple<int, int>(pivotFieldIndex, itemIndex));
 				if (this.CacheDefinition.CacheRecords.Contains(childList, pageFieldIndices))
 				{
@@ -1310,6 +1341,54 @@ namespace OfficeOpenXml.Table.PivotTable
 						itemsCreated = result;
 				}
 			}
+		}
+
+		private List<int> ApplyCustomSorting(ExcelPivotTableField pivotField, int index, List<Tuple<int, int>> indices, int pivotFieldIndex)
+		{
+			// Apply the custom sort referencing data fields.
+			List<int> reorderedPivotFieldItems = null;
+			if (pivotField != null && pivotField.AutoSortScopeReferences.Count > 0)
+			{
+				int sortScopeIndex = int.Parse(pivotField.AutoSortScopeReferences[0].Value);
+				int referenceDataField = this.DataFields[sortScopeIndex].Index;
+
+				// The first value is the pivot field item's X value and the second value is the sorting total.
+				var list = new List<Tuple<int, double>>();
+				for (int i = 0; i < index; i++)
+				{
+					var tempList = indices.ToList();
+					tempList.Add(new Tuple<int, int>(pivotFieldIndex, pivotField.Items[i].X));
+					double totalSortingValue = this.CacheDefinition.CacheRecords.CalculateSortingValues(tempList, referenceDataField);
+					list.Add(new Tuple<int, double>(pivotField.Items[i].X, totalSortingValue));
+				}
+
+				// Sort the new list accordingly.
+				var sortedList = pivotField.Sort == eSortType.Ascending ? list.OrderBy(x => x.Item2) : list.OrderByDescending(x => x.Item2);
+
+				reorderedPivotFieldItems = new List<int>();
+				// Find all duplicated Item2 values.
+				var duplicate = sortedList.GroupBy(x => x.Item2).Where(g => g.Count() > 1);
+				int prevItem1Index = sortedList.ElementAt(0).Item1;
+				for (int i = 0; i < sortedList.Count(); i++)
+				{
+					var currentTuple = sortedList.ElementAt(i);
+					// Remember the last Item1 value if the current Item2 value in the tuple is not a duplicated value and not the same as the previous Item2 value.
+					if (reorderedPivotFieldItems.Count > 0 && (!duplicate.Any(x => x.Key == currentTuple.Item2) || currentTuple.Item2 != sortedList.ElementAt(i - 1).Item2))
+						prevItem1Index = currentTuple.Item1;
+					// If Item2 value in the tuple is the same as the previous value in the sorted list, compare the Item1 value and add it to the list.
+					if (reorderedPivotFieldItems.Count > 0 && currentTuple.Item2 == sortedList.ElementAt(i - 1).Item2)
+					{
+						if (pivotField.Sort == eSortType.Descending && currentTuple.Item1 > prevItem1Index ||
+							pivotField.Sort == eSortType.Ascending && currentTuple.Item1 < prevItem1Index)
+						{
+							reorderedPivotFieldItems.Insert(reorderedPivotFieldItems.Count - 1, currentTuple.Item1);
+							continue;
+						}
+					}
+					reorderedPivotFieldItems.Add(currentTuple.Item1);
+				}
+			}
+			return reorderedPivotFieldItems;
 		}
 
 		private List<Tuple<int, int>> FindIndices(List<Tuple<int, int>> indices)
@@ -1473,11 +1552,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 			var dataField = this.DataFields[dataFieldCollectionIndex];
 			return this.CacheDefinition.CacheRecords.FindMatchingValues(
-				this,
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
 				this.GetPageFieldIndices(),
-				dataField.Index);
+				dataField.Index,
+				this);
 		}
 
 		private void WriteCellResult(int row, int column, PivotTableHeader rowHeader, PivotTableHeader columnHeader, bool hasRowDataFields, TotalsFunctionHelper functionCalculator)
@@ -1485,11 +1564,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 			var dataField = this.DataFields[dataFieldCollectionIndex];
 			var matchingValues = this.CacheDefinition.CacheRecords.FindMatchingValues(
-				this,
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
 				this.GetPageFieldIndices(),
-				dataField.Index);
+				dataField.Index,
+				this);
 			this.WriteCellTotal(row, column, dataField, matchingValues, functionCalculator);
 		}
 
