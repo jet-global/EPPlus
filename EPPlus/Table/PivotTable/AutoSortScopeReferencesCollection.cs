@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Xml;
 
-namespace OfficeOpenXml.Table.PivotTable.SortingScope
+namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
 	/// Collection class for <see cref="AutoSortScopeReference"/>.
@@ -15,10 +15,7 @@ namespace OfficeOpenXml.Table.PivotTable.SortingScope
 		/// <param name="namespaceManager">The namespace manager.</param>
 		/// <param name="node">The xml node.</param>
 		/// <param name="table">The existing pivot table.</param>
-		public AutoSortScopeReferencesCollection(XmlNamespaceManager namespaceManager, XmlNode node, ExcelPivotTable table) : base(namespaceManager, node, table)
-		{
-
-		}
+		public AutoSortScopeReferencesCollection(XmlNamespaceManager namespaceManager, XmlNode node, ExcelPivotTable table) : base(namespaceManager, node, table) { }
 		#endregion
 
 		#region XmlCollectionBase Overrides

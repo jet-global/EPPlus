@@ -2,7 +2,7 @@
 using System.Xml;
 using OfficeOpenXml.Utils;
 
-namespace OfficeOpenXml.Table.PivotTable.SortingScope
+namespace OfficeOpenXml.Table.PivotTable
 {
 	/// <summary>
 	/// A reference item used for custom sorting.

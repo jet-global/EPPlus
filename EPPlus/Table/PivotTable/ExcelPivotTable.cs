@@ -1198,7 +1198,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// If the pivotFieldIndex is not a data field index, then set the variables accordingly.
 			this.SetNonDataFieldVariables(pivotFieldIndex, parentNodeIndices, ref pivotField, ref maxIndex, ref isAboveDataField, ref isDataField);
 
-			// Apply the custom sorting referencing data fields if necessary.
+			// Apply the custom sort referencing data fields if necessary.
 			var reorderedPivotFieldItems = this.ApplyCustomSorting(pivotField, maxIndex, parentNodeIndices, pivotFieldIndex);
 
 			// Create xml nodes and row headers.
@@ -1298,7 +1298,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		private void CreateColumnItemNode(int index, List<Tuple<int, int>> indices, Dictionary<int, List<int>> pageFieldIndices, int pivotFieldIndex, 
 			ExcelPivotTableField pivotField, int dataFieldIndex, int colDepth, bool itemsCreated, bool isDataField, bool isAboveDataField)
 		{
-			// Apply the custom sorting referencing data fields if necessary.
+			// Apply the custom sort referencing data fields if necessary.
 			var reorderedPivotFieldItems = this.ApplyCustomSorting(pivotField, index, indices, pivotFieldIndex);
 			
 			for (int i = 0; i < index; i++)
@@ -1345,7 +1345,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private List<int> ApplyCustomSorting(ExcelPivotTableField pivotField, int index, List<Tuple<int, int>> indices, int pivotFieldIndex)
 		{
-			// Apply the custom sorting referencing data fields
+			// Apply the custom sort referencing data fields.
 			List<int> reorderedPivotFieldItems = null;
 			if (pivotField != null && pivotField.AutoSortScopeReferences.Count > 0)
 			{
@@ -1552,11 +1552,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 			var dataField = this.DataFields[dataFieldCollectionIndex];
 			return this.CacheDefinition.CacheRecords.FindMatchingValues(
-				this,
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
 				this.GetPageFieldIndices(),
-				dataField.Index);
+				dataField.Index,
+				this);
 		}
 
 		private void WriteCellResult(int row, int column, PivotTableHeader rowHeader, PivotTableHeader columnHeader, bool hasRowDataFields, TotalsFunctionHelper functionCalculator)
@@ -1564,11 +1564,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 			var dataField = this.DataFields[dataFieldCollectionIndex];
 			var matchingValues = this.CacheDefinition.CacheRecords.FindMatchingValues(
-				this,
 				rowHeader.CacheRecordIndices,
 				columnHeader.CacheRecordIndices,
 				this.GetPageFieldIndices(),
-				dataField.Index);
+				dataField.Index,
+				this);
 			this.WriteCellTotal(row, column, dataField, matchingValues, functionCalculator);
 		}
 

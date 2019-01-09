@@ -33,7 +33,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
-using OfficeOpenXml.Table.PivotTable.SortingScope;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable

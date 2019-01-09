@@ -260,6 +260,7 @@
     <Compile Include="StructuredReferenceTest.cs" />
     <Compile Include="Style\Dxf\ExcelDxfStyleTest.cs" />
     <Compile Include="Style\XmlAccess\ExcelFontXmlTest.cs" />
+    <Compile Include="Table\PivotTable\AutoSortScopeReferenceTest.cs" />
     <Compile Include="Table\PivotTable\CacheFieldNodeTest.cs" />
     <Compile Include="Table\PivotTable\CacheItemTest.cs" />
     <Compile Include="Table\PivotTable\CacheRecordNodeTest.cs" />
