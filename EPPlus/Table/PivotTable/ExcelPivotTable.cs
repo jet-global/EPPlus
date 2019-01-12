@@ -998,9 +998,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			foreach (var pivotField in this.Fields)
 			{
 				var fieldItems = pivotField.Items;
-				var sharedItemsCount = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.Count;
 
-				if (fieldItems.Count > sharedItemsCount + 1)
+				var cacheField = this.CacheDefinition.CacheFields[pivotField.Index];
+				if (!cacheField.HasSharedItems)
+					continue;
+				if (fieldItems.Count > cacheField.SharedItems.Count + 1)
 					throw new InvalidOperationException("There are more pivotField items than cacheField sharedItems.");
 
 				if (fieldItems.Count > 0)
@@ -1429,6 +1431,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			int dataColumn = this.Address.Start.Column + this.FirstDataCol;
 			using (var totalsCalculator = new TotalsFunctionHelper())
 			{
+				// If the workbook has calculated fields, configure the calculation helper and cache fields appropriately.
+				var calculatedFields = this.CacheDefinition.CacheFields.Where(c => !string.IsNullOrEmpty(c.Formula));
+				if (calculatedFields.Any())
+					this.SetUpCalculatedFields(calculatedFields, totalsCalculator);
+
 				for (int column = 0; column < this.ColumnHeaders.Count; column++)
 				{
 					var columnHeader = this.ColumnHeaders[column];
@@ -1443,7 +1450,7 @@ namespace OfficeOpenXml.Table.PivotTable
 							|| rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
 						{
 							// At a leaf node.
-							backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader);
+							backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
 						}
 						else if (this.HasRowDataFields)
 						{
@@ -1452,51 +1459,86 @@ namespace OfficeOpenXml.Table.PivotTable
 								if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField) 
 									|| rowHeader.SumType.IsEquivalentTo("default"))
 								{
-									backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader);
+									backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
 								}
 							}
 						}
 						else if (rowHeader.PivotTableField.DefaultSubtotal && (rowHeader.SumType != null || rowHeader.PivotTableField.SubtotalTop))
-							backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader);
-
-						if (backingData[row, column] != null)
-							this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, this.HasRowDataFields, totalsCalculator);
+							backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
+						this.WriteCellResult(dataRow, dataColumn, rowHeader, columnHeader, backingData[row, column], totalsCalculator);
 					}
-						dataColumn++;
+					dataColumn++;
 				}
 			}
 			return backingData;
 		}
 
-		private List<object> GetBackingCellValues(PivotTableHeader rowHeader, PivotTableHeader columnHeader)
+		private void SetUpCalculatedFields(IEnumerable<CacheFieldNode> calculatedFields, TotalsFunctionHelper totalsCalculator)
+		{
+			var cacheFieldNames = this.CacheDefinition.CacheFields.Select(c => c.Name);
+			totalsCalculator.AddNames(cacheFieldNames);
+
+			// Coalesce all of the fields and their respective cache field indices used by calculated field formulas.
+			foreach (var cacheField in calculatedFields)
+			{
+				cacheField.ReferencedCacheFieldsToIndex = new Dictionary<string, int>();
+				foreach (var token in totalsCalculator.GetTokenNameValues(cacheField.Formula))
+				{
+					if (!cacheField.ReferencedCacheFieldsToIndex.ContainsKey(token.Value))
+						cacheField.ReferencedCacheFieldsToIndex.Add(token.Value, -1);
+				}
+
+				for (int i = 0; i < this.CacheDefinition.CacheFields.Count; i++)
+				{
+					var cacheFieldName = this.CacheDefinition.CacheFields[i].Name;
+					if (cacheField.ReferencedCacheFieldsToIndex.ContainsKey(cacheFieldName))
+						cacheField.ReferencedCacheFieldsToIndex[cacheFieldName] = i;
+				}
+			}
+		}
+
+		private List<object> GetBackingCellValues(PivotTableHeader rowHeader, PivotTableHeader columnHeader, TotalsFunctionHelper functionCalculator)
 		{
 			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 			var dataField = this.DataFields[dataFieldCollectionIndex];
-			return this.CacheDefinition.CacheRecords.FindMatchingValues(
-				this,
-				rowHeader.CacheRecordIndices,
-				columnHeader.CacheRecordIndices,
-				this.GetPageFieldIndices(),
-				dataField.Index);
+
+			var cacheField = this.CacheDefinition.CacheFields[dataField.Index];
+			if (string.IsNullOrEmpty(cacheField.Formula))
+			{
+				return this.CacheDefinition.CacheRecords.FindMatchingValues(
+					this,
+					rowHeader.CacheRecordIndices,
+					columnHeader.CacheRecordIndices,
+					this.GetPageFieldIndices(),
+					dataField.Index);
+			}
+
+			// If a formula is present, it is a calculated field which needs to be evaluated.
+			var nameToValues = new Dictionary<string, List<object>>();
+			foreach (var cacheFieldName in cacheField.ReferencedCacheFieldsToIndex.Keys)
+			{
+				var values = this.CacheDefinition.CacheRecords.FindMatchingValues(
+					this,
+					rowHeader.CacheRecordIndices,
+					null,
+					this.GetPageFieldIndices(),
+					cacheField.ReferencedCacheFieldsToIndex[cacheFieldName]);
+				nameToValues.Add(cacheFieldName, values);
+			}
+			return new List<object> { functionCalculator.EvaluateCalculatedFieldFormula(nameToValues, cacheField.Formula) };
 		}
 
-		private void WriteCellResult(int row, int column, PivotTableHeader rowHeader, PivotTableHeader columnHeader, bool hasRowDataFields, TotalsFunctionHelper functionCalculator)
+		private void WriteCellResult(int row, int column, PivotTableHeader rowHeader, PivotTableHeader columnHeader, List<object> matchingValues, TotalsFunctionHelper functionCalculator)
 		{
 			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 			var dataField = this.DataFields[dataFieldCollectionIndex];
-			var matchingValues = this.CacheDefinition.CacheRecords.FindMatchingValues(
-				this,
-				rowHeader.CacheRecordIndices,
-				columnHeader.CacheRecordIndices,
-				this.GetPageFieldIndices(),
-				dataField.Index);
-			this.WriteCellTotal(row, column, dataField, matchingValues, functionCalculator);
-		}
-
-		private void WriteCellTotal(int row, int column, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper functionCalculator)
-		{
 			var cell = this.Worksheet.Cells[row, column];
-			cell.Value = functionCalculator.Calculate(dataField.Function, values);
+			// If the cache field has a formula, we have already calculated the value and can just write it in.
+			var cacheField = this.CacheDefinition.CacheFields[dataField.Index];
+			if (string.IsNullOrEmpty(cacheField.Formula))
+				cell.Value = functionCalculator.Calculate(dataField.Function, matchingValues);
+			else
+				cell.Value = matchingValues[0];
 			var style = this.Worksheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
 			if (style != null)
 				cell.Style.Numberformat.Format = style.Format;

@@ -220,12 +220,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="filterIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
 		/// <param name="dataFieldIndex">The index of the data field.</param>
 		/// <returns>The subtotal value or null if no values are found.</returns>
-		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, Dictionary<int, List<int>> filterIndices, int dataFieldIndex)
+		public List<object> FindGetPivotDataMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, Dictionary<int, List<int>> filterIndices, int dataFieldIndex)
 		{
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
-				bool match = true;
+				bool match = false;
 				if (rowTuples != null)
 					match = this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record);
 				if (match && columnTuples != null)
@@ -251,9 +251,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			List<Tuple<int, int>> columnTuples, Dictionary<int, List<int>> filterIndices, int dataFieldIndex)
 		{
 			var matchingValues = new List<object>();
+			if (!string.IsNullOrEmpty(this.CacheDefinition.CacheFields[dataFieldIndex].Formula))
+				return null;
 			foreach (var record in this.Records)
 			{
-				bool match = true;
+				bool match = false;
 				if (rowTuples != null)
 					match = this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
 				if (match && columnTuples != null)

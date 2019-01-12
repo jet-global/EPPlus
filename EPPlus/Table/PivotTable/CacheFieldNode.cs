@@ -24,6 +24,7 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Xml;
 using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Utils;
@@ -33,7 +34,7 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// <summary>
 	/// Wraps a <cacheField/> node in <pivotcachedefinition-cacheFields/>.
 	/// </summary>
-	public class CacheFieldNode
+	public class CacheFieldNode : XmlHelper
 	{
 		#region Properties
 		/// <summary>
@@ -41,18 +42,32 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string Name
 		{
-			get { return this.Node.Attributes["name"].Value; }
-			set { this.Node.Attributes["name"].Value = value; }
+			get { return base.GetXmlNodeString("@name"); }
+			set { base.SetXmlNodeString("@name", value); }
 		}
 
 		/// <summary>
 		/// Gets or sets the number format ID for this <see cref="CacheFieldNode"/>.
 		/// </summary>
-		public string NumFormatId
+		public int NumFormatId
 		{
-			get { return this.Node.Attributes["numFmtId"].Value; }
-			set { this.Node.Attributes["numFmtId"].Value = value; }
+			get { return base.GetXmlNodeInt("@numFmtId"); }
+			set { base.SetXmlNodeString("@numFmtId", value.ToString()); }
 		}
+
+		/// <summary>
+		/// Gets the formula that defines the <see cref="CacheFieldNode"/>.
+		/// </summary>
+		public string Formula
+		{
+			get { return base.GetXmlNodeString("@formula"); }
+		}
+
+		/// <summary>
+		/// Gets or sets a dictionary of a cache field name that was referenced in the cacheField formula 
+		/// to its index in the cache definition.
+		/// </summary>
+		public Dictionary<string, int> ReferencedCacheFieldsToIndex { get; set; }
 
 		/// <summary>
 		/// Gets the sharedItems for this node.
@@ -64,11 +79,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool HasSharedItems
 		{
-			get { return this.SharedItems.Count > 0; }
+			get { return this.SharedItems?.Count > 0; }
 		}
-
-		private XmlNode Node { get; set; }
-		private XmlNamespaceManager NameSpaceManager { get; set; }
 		#endregion
 
 		#region Constructors
@@ -77,15 +89,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="CacheFieldNode"/>.</param>
 		/// <param name="namespaceManager">The namespace manager to use for searching child nodes.</param>
-		public CacheFieldNode(XmlNamespaceManager namespaceManager, XmlNode node)
+		public CacheFieldNode(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
 			if (namespaceManager == null)
 				throw new ArgumentNullException(nameof(namespaceManager));
-			this.Node = node;
-			this.NameSpaceManager = namespaceManager;
-			var sharedItemsNode = node.SelectSingleNode("d:sharedItems", this.NameSpaceManager);
+			var sharedItemsNode = base.TopNode.SelectSingleNode("d:sharedItems", this.NameSpaceManager);
 			if (sharedItemsNode != null)
 				this.SharedItems = new SharedItemsCollection(this.NameSpaceManager, sharedItemsNode);
 		}

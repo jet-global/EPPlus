@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml.Table.PivotTable.DataCalculation;
 
@@ -113,6 +114,136 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 			var totalFunctionHelper = new TotalsFunctionHelper();
 			var result = totalFunctionHelper.Calculate(OfficeOpenXml.Table.PivotTable.DataFieldFunctions.Average, new List<object>());
 			Assert.IsNull(result);
+		}
+		#endregion
+
+		#region GetTokenNameValues Test
+		[TestMethod]
+		public void GetTokenNameValuesTest()
+		{
+			using (var helper = new TotalsFunctionHelper())
+			{
+				helper.AddNames(new[] { "Cost", "Count" });
+				var names = helper.GetTokenNameValues("Count*Cost");
+				Assert.AreEqual("Count", names.ElementAt(0).Value);
+				Assert.AreEqual("Cost", names.ElementAt(1).Value);
+			}
+		}
+
+		[TestMethod]
+		public void GetTokenNameValuesWithFunctionTest()
+		{
+			using (var helper = new TotalsFunctionHelper())
+			{
+				helper.AddNames(new[] { "Cost", "Count", "Item" });
+				var names = helper.GetTokenNameValues("SUM(Count)*COUNT(Cost) - Item");
+				Assert.AreEqual("Count", names.ElementAt(0).Value);
+				Assert.AreEqual("Cost", names.ElementAt(1).Value);
+			}
+		}
+
+		[TestMethod]
+		public void GetTokenNameValuesEmptyFormulaTest()
+		{
+			using (var helper = new TotalsFunctionHelper())
+			{
+				helper.AddNames(new[] { "Count", "Item" });
+				var names = helper.GetTokenNameValues(string.Empty);
+				Assert.AreEqual(0, names.Count());
+			}
+		}
+
+		[TestMethod]
+		public void GetTokenNameValuesNullFormulaTest()
+		{
+			using (var helper = new TotalsFunctionHelper())
+			{
+				helper.AddNames(new[] { "Count", "Item" });
+				var names = helper.GetTokenNameValues(null);
+				Assert.AreEqual(0, names.Count());
+			}
+		}
+		#endregion
+
+		#region EvaluateCalculatedFieldFormula Tests
+		[TestMethod]
+		public void EvaluateCalculatedFieldFormula()
+		{
+			using (var helper = new TotalsFunctionHelper())
+			{
+				var fieldValues = new Dictionary<string, List<object>>
+				{
+					{ "Count", new List<object> { 1, 2, 3, 4} },
+					{ "Cost", new List<object> {5, 6, 7, 8 } }
+				};
+				helper.AddNames(fieldValues.Keys);
+				var result = helper.EvaluateCalculatedFieldFormula(fieldValues, "Count*Cost");
+				Assert.AreEqual(260d, result);
+			}
+		}
+
+		[TestMethod]
+		public void EvaluateCalculatedFieldFormulaWithFunction()
+		{
+			using (var helper = new TotalsFunctionHelper())
+			{
+				var fieldValues = new Dictionary<string, List<object>>
+				{
+					{ "Count", new List<object> { 1, 2, 3, 4} },
+					{ "Cost", new List<object> {5, 6, 7, 8 } }
+				};
+				helper.AddNames(fieldValues.Keys);
+				var result = helper.EvaluateCalculatedFieldFormula(fieldValues, "COUNT(Count)*Cost");
+				Assert.AreEqual(26d, result);
+			}
+		}
+
+		[TestMethod]
+		public void EvaluateCalculatedFieldFormulaSingleValue()
+		{
+			using (var helper = new TotalsFunctionHelper())
+			{
+				var fieldValues = new Dictionary<string, List<object>>
+				{
+					{ "Count", new List<object> { 1, 2, 3, 4} },
+					{ "Cost", new List<object> {5, 6, 7, 8 } }
+				};
+				helper.AddNames(fieldValues.Keys);
+				var result = helper.EvaluateCalculatedFieldFormula(fieldValues, "Count");
+				Assert.AreEqual(10d, result);
+			}
+		}
+
+		[TestMethod]
+		public void EvaluateCalculatedFieldFormulaEmptyValue()
+		{
+			using (var helper = new TotalsFunctionHelper())
+			{
+				var fieldValues = new Dictionary<string, List<object>>
+				{
+					{ "Count", new List<object> { 1, 2, 3, 4} },
+					{ "Cost", new List<object> {5, 6, 7, 8 } }
+				};
+				helper.AddNames(fieldValues.Keys);
+				var result = helper.EvaluateCalculatedFieldFormula(fieldValues, string.Empty);
+				Assert.AreEqual(null, result);
+			}
+		}
+
+		[TestMethod]
+		public void EvaluateCalculatedFieldFormulaNullValue()
+		{
+			using (var helper = new TotalsFunctionHelper())
+			{
+				var fieldValues = new Dictionary<string, List<object>>
+				{
+					{ "Count", new List<object> { 1, 2, 3, 4} },
+					{ "Cost", new List<object> {5, 6, 7, 8 } }
+				};
+				helper.AddNames(fieldValues.Keys);
+				var result = helper.EvaluateCalculatedFieldFormula(fieldValues, null);
+				Assert.AreEqual(null, result);
+			}
 		}
 		#endregion
 	}

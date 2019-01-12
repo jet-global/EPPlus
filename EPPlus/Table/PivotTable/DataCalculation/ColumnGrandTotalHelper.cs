@@ -99,7 +99,18 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <param name="totalsFunctionHelper">The totals calculation helper class.</param>
 		protected override void WriteCellTotal(int index, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper totalsFunctionHelper)
 		{
-			this.WriteCellTotal(this.PivotTable.Address.End.Row, index, dataField, values, totalsFunctionHelper);
+			string cacheFieldFormula = this.PivotTable.CacheDefinition.CacheFields[dataField.Index].Formula;
+			if (string.IsNullOrEmpty(cacheFieldFormula))
+				this.WriteCellTotal(this.PivotTable.Address.End.Row, index, dataField, values, totalsFunctionHelper);
+			else
+			{
+				// TODO: Calculating grand totals for calculated fields requires all of the values
+				// that were used to calculate the subtotals. 
+				// Instead of passing in the list of values, consider adding the full backing pivot table data
+				// to the totals function helper and using that data to calculate the calculated field.
+				throw new System.NotImplementedException();
+			}
+
 		}
 		#endregion
 	}
