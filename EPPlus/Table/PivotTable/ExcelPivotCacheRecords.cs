@@ -211,35 +211,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Calculate the values for each cell in the pivot table by de-referencing the tuple using the cache definition if a pivot table is given.
-		/// Otherwise, calculate the values for each cell in the pivot table for GetPivotData.
-		/// </summary>
-		/// <param name="rowTuples">The list of rowItem indices.</param>
-		/// <param name="columnTuples">The list of columnItem indices.</param>
-		/// <param name="filterIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
-		/// <param name="dataFieldIndex">The index of the data field.</param>
-		/// <param name="pivotTable">The pivot table (optional).</param>
-		/// <returns>The subtotal value or null if no values are found.</returns>
-		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples,
-			List<Tuple<int, int>> columnTuples, Dictionary<int, List<int>> filterIndices, int dataFieldIndex, ExcelPivotTable pivotTable = null)
-		{
-			var matchingValues = new List<object>();
-			foreach (var record in this.Records)
-			{
-				bool match = true;
-				if (rowTuples != null)
-					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
-				if (match && columnTuples != null)
-					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(columnTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(columnTuples, record, pivotTable);
-				if (match && filterIndices != null)
-					match = this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record);
-				if (match)
-					this.AddToList(record, dataFieldIndex, matchingValues);
-			}
-			return matchingValues;
-		}
-
-		/// <summary>
 		/// Calculate the total of a specified data field for a row/columnn header for custom sorting.
 		/// </summary>
 		/// <param name="tupleList">A list of tuples containing the pivotField index and item value.</param>
@@ -255,6 +226,37 @@ namespace OfficeOpenXml.Table.PivotTable
 					total += double.Parse(record.Items[dataFieldIndex].Value);
 			}
 			return total;
+		}
+
+		/// <summary>
+		/// Calculate the values for each cell in the pivot table by de-referencing the tuple using the cache definition if a pivot table is given.
+		/// Otherwise, calculate the values for each cell in the pivot table for GetPivotData.
+		/// </summary>
+		/// <param name="rowTuples">The list of rowItem indices.</param>
+		/// <param name="columnTuples">The list of columnItem indices.</param>
+		/// <param name="filterIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
+		/// <param name="dataFieldIndex">The index of the data field.</param>
+		/// <param name="pivotTable">The pivot table (optional).</param>
+		/// <returns>The subtotal value or null if no values are found.</returns>
+		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, 
+			Dictionary<int, List<int>> filterIndices, int dataFieldIndex, ExcelPivotTable pivotTable = null)
+		{
+			if (!string.IsNullOrEmpty(this.CacheDefinition.CacheFields[dataFieldIndex].Formula))
+				return null;
+			var matchingValues = new List<object>();
+			foreach (var record in this.Records)
+			{
+				bool match = false;
+				if (rowTuples != null)
+					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
+				if (match && columnTuples != null)
+					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(columnTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(columnTuples, record, pivotTable);
+				if (match && filterIndices != null)
+					match = this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record);
+				if (match)
+					this.AddToList(record, dataFieldIndex, matchingValues);
+			}
+			return matchingValues;
 		}
 		#endregion
 
