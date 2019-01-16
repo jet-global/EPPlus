@@ -48,7 +48,7 @@ namespace OfficeOpenXml
 
 		#region Constants
 		/// <summary>
-		/// An (mostly) complete list of ASCII characters that are not allowed in Excel named ranges.
+		/// A list of known characters that are not allowed in Excel named ranges.
 		/// </summary>
 		public static readonly char[] IllegalCharacters = 
 		{
