@@ -1626,7 +1626,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				var values = this.CacheDefinition.CacheRecords.FindMatchingValues(
 					rowHeader.CacheRecordIndices,
-					null,
+					columnHeader.CacheRecordIndices,
 					this.GetPageFieldIndices(),
 					cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
 					this);
