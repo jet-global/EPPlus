@@ -18,7 +18,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <summary>
 		/// Gets the data that backs the pivot table values.
 		/// </summary>
-		protected List<object>[,] BackingData { get; }
+		protected PivotCellBackingData[,] BackingData { get; }
 
 		/// <summary>
 		/// Gets or sets the major axis <see cref="PivotTableHeader"/> collection.
@@ -29,6 +29,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// Gets or sets the minor axis <see cref="PivotTableHeader"/> collection.
 		/// </summary>
 		protected List<PivotTableHeader> MinorHeaderCollection { get; set; }
+
+		/// <summary>
+		/// Gets the totals calculation helper class.
+		/// </summary>
+		protected TotalsFunctionHelper TotalsCalculator { get; }
 		#endregion
 
 		#region Constructors
@@ -37,12 +42,14 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// </summary>
 		/// <param name="pivotTable">The <see cref="ExcelPivotTable"/>.</param>
 		/// <param name="backingData">The data backing the pivot table.</param>
-		protected GrandTotalHelperBase(ExcelPivotTable pivotTable, List<object>[,] backingData)
+		/// <param name="totalsCalculator">The calculation helper.</param>
+		protected GrandTotalHelperBase(ExcelPivotTable pivotTable, PivotCellBackingData[,] backingData, TotalsFunctionHelper totalsCalculator)
 		{
 			if (pivotTable == null)
 				throw new ArgumentNullException(nameof(pivotTable));
 			this.PivotTable = pivotTable;
 			this.BackingData = backingData;
+			this.TotalsCalculator = totalsCalculator;
 		}
 		#endregion
 
@@ -51,29 +58,27 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// Updates the grand totals in the pivot table.
 		/// </summary>
 		/// <returns>The list of values used to calcluate grand-grand totals.</returns>
-		public List<object>[] UpdateGrandTotals()
+		public PivotCellBackingData[] UpdateGrandTotals()
 		{
-			var grandTotalValueLists = new List<object>[this.PivotTable.DataFields.Count];
-			var grandGrandTotalValueLists = new List<object>[this.PivotTable.DataFields.Count];
-			using (var totalsCalculator = new TotalsFunctionHelper())
+			var grandTotalValueLists = new PivotCellBackingData[this.PivotTable.DataFields.Count];
+			var grandGrandTotalValueLists = new PivotCellBackingData[this.PivotTable.DataFields.Count];
+			for (int majorIndex = 0; majorIndex < this.MajorHeaderCollection.Count; majorIndex++)
 			{
-				for (int majorIndex = 0; majorIndex < this.MajorHeaderCollection.Count; majorIndex++)
+				// Reset values lists.
+				for (int i = 0; i < grandTotalValueLists.Count(); i++)
 				{
-					// Reset values lists.
-					for (int i = 0; i < grandTotalValueLists.Count(); i++)
-					{
-						grandTotalValueLists[i] = null;
-					}
-					var majorHeader = this.MajorHeaderCollection[majorIndex];
-					int dataFieldCollectionIndex = -1;
-					int minorIndex = 0;
-					for (; minorIndex < this.MinorHeaderCollection.Count; minorIndex++)
-					{
-						dataFieldCollectionIndex = this.AddMatchingValues(majorHeader, majorIndex, minorIndex, dataFieldCollectionIndex, grandTotalValueLists, grandGrandTotalValueLists);
-					}
-					if (dataFieldCollectionIndex != -1)
-						this.WriteGrandTotal(majorIndex, totalsCalculator, grandTotalValueLists);
+					grandTotalValueLists[i] = null;
 				}
+				var majorHeader = this.MajorHeaderCollection[majorIndex];
+				int dataFieldCollectionIndex = -1;
+				int minorIndex = 0;
+				for (; minorIndex < this.MinorHeaderCollection.Count; minorIndex++)
+				{
+					dataFieldCollectionIndex = this.AddMatchingValues(majorHeader, majorIndex, minorIndex, 
+						dataFieldCollectionIndex, grandTotalValueLists, grandGrandTotalValueLists);
+				}
+				if (dataFieldCollectionIndex != -1)
+					this.WriteGrandTotal(majorIndex, grandTotalValueLists);
 			}
 			return grandGrandTotalValueLists;
 		}
@@ -81,17 +86,14 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <summary>
 		/// Updates the grand-grand totals in a pivot table (bottom right corner totals).
 		/// </summary>
-		/// <param name="grandTotalValueLists"></param>
-		public void UpdateGrandGrandTotals(List<object>[] grandTotalValueLists)
+		/// <param name="grandTotalsBackingData">The data backing the grand totals.</param>
+		public void UpdateGrandGrandTotals(PivotCellBackingData[] grandTotalsBackingData)
 		{
-			using (var totalsCalculator = new TotalsFunctionHelper())
+			int startIndex = this.GetStartIndex();
+			for (int i = 0; i < grandTotalsBackingData.Length; i++)
 			{
-				int startIndex = this.GetStartIndex();
-				for (int i = 0; i < grandTotalValueLists.Length; i++)
-				{
-					var valueList = grandTotalValueLists[i];
-					this.WriteCellTotal(startIndex + i, this.PivotTable.DataFields[i], valueList, totalsCalculator);
-				}
+				var totalsBackingDatas = grandTotalsBackingData[i];
+				this.WriteCellTotal(startIndex + i, this.PivotTable.DataFields[i], totalsBackingDatas);
 			}
 		}
 		#endregion
@@ -112,19 +114,17 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			int majorIndex, 
 			int minorIndex, 
 			int dataFieldCollectionIndex,
-			List<object>[] grandTotalValueLists,
-			List<object>[] grandGrandTotalValueLists);
+			PivotCellBackingData[] grandTotalValueLists,
+			PivotCellBackingData[] grandGrandTotalValueLists);
 
 		/// <summary>
 		/// Calculates and writes the grand total values to the worksheet.
 		/// </summary>
 		/// <param name="majorIndex">The current major axis index.</param>
-		/// <param name="totalsCalculator">The grand totals calculation helper class.</param>
 		/// <param name="grandTotalValueLists">The values used to calculate grand totals.</param>
 		protected abstract void WriteGrandTotal(
 			int majorIndex, 
-			TotalsFunctionHelper totalsCalculator, 
-			List<object>[] grandTotalValueLists);
+			PivotCellBackingData[] grandTotalValueLists);
 
 		/// <summary>
 		/// Gets the start cell index for the grand-grand total values.
@@ -133,31 +133,28 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		protected abstract int GetStartIndex();
 
 		/// <summary>
-		/// Writes the grand total for the specified <paramref name="values"/> in the cell at the specified <paramref name="index"/>.
+		/// Writes the grand total for the specified <paramref name="backingData"/> in the cell at the specified <paramref name="index"/>.
 		/// </summary>
 		/// <param name="index">The major index of the cell to write the total to.</param>
 		/// <param name="dataField">The data field to use the number format of.</param>
-		/// <param name="values">The values to use to calculate the total.</param>
-		/// <param name="totalsFunctionHelper">The totals calculation helper class.</param>
-		protected abstract void WriteCellTotal(int index, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper totalsFunctionHelper);
+		/// <param name="backingData">The values to use to calculate the total.</param>
+		protected abstract void WriteCellTotal(int index, ExcelPivotTableDataField dataField, PivotCellBackingData backingData);
 		#endregion
 
 		#region Protected Methods
 		/// <summary>
-		/// Calculates and writes a grand total value to a cell at the specified <paramref name="row"/> and <paramref name="column"/>.
+		/// Adds backing data to the grand totals collection.
 		/// </summary>
-		/// <param name="row">The row to write the total value to.</param>
-		/// <param name="column">The column to write the total value to.</param>
-		/// <param name="dataField">The dataField to get the number format from.</param>
-		/// <param name="values">The values to use to calculate the grand total.</param>
-		/// <param name="functionCalculator">The totals calcluation helper class.</param>
-		protected void WriteCellTotal(int row, int column, ExcelPivotTableDataField dataField, List<object> values, TotalsFunctionHelper functionCalculator)
+		/// <param name="index1">The major index of the backing data.</param>
+		/// <param name="index2">The minor index of the backing data.</param>
+		/// <param name="dataFieldCollectionIndex">The index into the data field collection.</param>
+		/// <param name="backingDatas">The pivot table backing data.</param>
+		protected void AddGrandTotalsBackingData(int index1, int index2, int dataFieldCollectionIndex, PivotCellBackingData[] backingDatas)
 		{
-			var cell = this.PivotTable.Worksheet.Cells[row, column];
-			cell.Value = functionCalculator.Calculate(dataField.Function, values);
-			var style = this.PivotTable.Worksheet.Workbook.Styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
-			if (style != null)
-				cell.Style.Numberformat.Format = style.Format;
+			if (backingDatas[dataFieldCollectionIndex] == null)
+				backingDatas[dataFieldCollectionIndex] = this.BackingData[index1, index2].Clone();
+			else
+				backingDatas[dataFieldCollectionIndex].Merge(this.BackingData[index1, index2]);
 		}
 		#endregion
 	}

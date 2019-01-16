@@ -46,6 +46,17 @@ namespace OfficeOpenXml
 		private string myFormula;
 		#endregion
 
+		#region Constants
+		/// <summary>
+		/// An (mostly) complete list of ASCII characters that are not allowed in Excel named ranges.
+		/// </summary>
+		public static readonly char[] IllegalCharacters = 
+		{
+			'~','!','@','#','$','%','^','&','*','(',')','+','-','=','[',']','{','}','|',
+			'<','>','?',',','/',';','\'',':','"','¥','¢','£','«', '»','®','©',' ','	'
+		};
+		#endregion
+
 		#region Properties
 		/// <summary>
 		/// Gets or set the name of this <see cref="ExcelNamedRange"/>.

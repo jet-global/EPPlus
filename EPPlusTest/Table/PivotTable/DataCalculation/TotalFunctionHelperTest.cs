@@ -123,10 +123,11 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 		{
 			using (var helper = new TotalsFunctionHelper())
 			{
-				helper.AddNames(new[] { "Cost", "Count" });
-				var names = helper.GetTokenNameValues("Count*Cost");
-				Assert.AreEqual("Count", names.ElementAt(0).Value);
-				Assert.AreEqual("Cost", names.ElementAt(1).Value);
+				helper.AddNames(new HashSet<string> { "Cost", "Count" });
+				var tokens = helper.Tokenize("Count*Cost");
+				Assert.AreEqual("Count", tokens.ElementAt(0).Value);
+				Assert.AreEqual("*", tokens.ElementAt(1).Value);
+				Assert.AreEqual("Cost", tokens.ElementAt(2).Value);
 			}
 		}
 
@@ -135,10 +136,19 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 		{
 			using (var helper = new TotalsFunctionHelper())
 			{
-				helper.AddNames(new[] { "Cost", "Count", "Item" });
-				var names = helper.GetTokenNameValues("SUM(Count)*COUNT(Cost) - Item");
-				Assert.AreEqual("Count", names.ElementAt(0).Value);
-				Assert.AreEqual("Cost", names.ElementAt(1).Value);
+				helper.AddNames(new HashSet<string> { "Cost", "Count", "Item" });
+				var tokens = helper.Tokenize("SUM(Count)*COUNT(Cost) - Item");
+				Assert.AreEqual("SUM", tokens.ElementAt(0).Value);
+				Assert.AreEqual("(", tokens.ElementAt(1).Value);
+				Assert.AreEqual("Count", tokens.ElementAt(2).Value);
+				Assert.AreEqual(")", tokens.ElementAt(3).Value);
+				Assert.AreEqual("*", tokens.ElementAt(4).Value);
+				Assert.AreEqual("COUNT", tokens.ElementAt(5).Value);
+				Assert.AreEqual("(", tokens.ElementAt(6).Value);
+				Assert.AreEqual("Cost", tokens.ElementAt(7).Value);
+				Assert.AreEqual(")", tokens.ElementAt(8).Value);
+				Assert.AreEqual("-", tokens.ElementAt(9).Value);
+				Assert.AreEqual("Item", tokens.ElementAt(10).Value);
 			}
 		}
 
@@ -147,9 +157,9 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 		{
 			using (var helper = new TotalsFunctionHelper())
 			{
-				helper.AddNames(new[] { "Count", "Item" });
-				var names = helper.GetTokenNameValues(string.Empty);
-				Assert.AreEqual(0, names.Count());
+				helper.AddNames(new HashSet<string> { "Count", "Item" });
+				var tokens = helper.Tokenize(string.Empty);
+				Assert.IsNull(tokens);
 			}
 		}
 
@@ -158,9 +168,9 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 		{
 			using (var helper = new TotalsFunctionHelper())
 			{
-				helper.AddNames(new[] { "Count", "Item" });
-				var names = helper.GetTokenNameValues(null);
-				Assert.AreEqual(0, names.Count());
+				helper.AddNames(new HashSet<string> { "Count", "Item" });
+				var tokens = helper.Tokenize(null);
+				Assert.IsNull(tokens);
 			}
 		}
 		#endregion
@@ -176,7 +186,7 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 					{ "Count", new List<object> { 1, 2, 3, 4} },
 					{ "Cost", new List<object> {5, 6, 7, 8 } }
 				};
-				helper.AddNames(fieldValues.Keys);
+				helper.AddNames(new HashSet<string>(fieldValues.Keys));
 				var result = helper.EvaluateCalculatedFieldFormula(fieldValues, "Count*Cost");
 				Assert.AreEqual(260d, result);
 			}
@@ -192,7 +202,7 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 					{ "Count", new List<object> { 1, 2, 3, 4} },
 					{ "Cost", new List<object> {5, 6, 7, 8 } }
 				};
-				helper.AddNames(fieldValues.Keys);
+				helper.AddNames(new HashSet<string>(fieldValues.Keys));
 				var result = helper.EvaluateCalculatedFieldFormula(fieldValues, "COUNT(Count)*Cost");
 				Assert.AreEqual(26d, result);
 			}
@@ -208,7 +218,7 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 					{ "Count", new List<object> { 1, 2, 3, 4} },
 					{ "Cost", new List<object> {5, 6, 7, 8 } }
 				};
-				helper.AddNames(fieldValues.Keys);
+				helper.AddNames(new HashSet<string>(fieldValues.Keys));
 				var result = helper.EvaluateCalculatedFieldFormula(fieldValues, "Count");
 				Assert.AreEqual(10d, result);
 			}
@@ -224,7 +234,7 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 					{ "Count", new List<object> { 1, 2, 3, 4} },
 					{ "Cost", new List<object> {5, 6, 7, 8 } }
 				};
-				helper.AddNames(fieldValues.Keys);
+				helper.AddNames(new HashSet<string>(fieldValues.Keys));
 				var result = helper.EvaluateCalculatedFieldFormula(fieldValues, string.Empty);
 				Assert.AreEqual(null, result);
 			}
@@ -240,7 +250,7 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 					{ "Count", new List<object> { 1, 2, 3, 4} },
 					{ "Cost", new List<object> {5, 6, 7, 8 } }
 				};
-				helper.AddNames(fieldValues.Keys);
+				helper.AddNames(new HashSet<string>(fieldValues.Keys));
 				var result = helper.EvaluateCalculatedFieldFormula(fieldValues, null);
 				Assert.AreEqual(null, result);
 			}

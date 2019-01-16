@@ -74,7 +74,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// The path of the data source worksheet.
 		/// </summary>
 		internal const string SourceWorksheetPath = "d:cacheSource/d:worksheetSource/@sheet";
-		
+
 		/// <summary>
 		/// The path of the data source cell range.
 		/// </summary>
@@ -399,6 +399,21 @@ namespace OfficeOpenXml.Table.PivotTable
 		public void SetSourceRangeAddress(ExcelWorksheet worksheet, string address)
 		{
 			this.SourceRange = new ExcelRangeBase(worksheet, address);
+		}
+
+		/// <summary>
+		/// Gets the index of the a cache field with the specified <paramref name="fieldName"/>.
+		/// </summary>
+		/// <param name="fieldName">The name of the cache field to find the index of.</param>
+		/// <returns>The index of a cache field matching the specified name, -1 if not found.</returns>
+		public int GetCacheFieldIndex(string fieldName)
+		{
+			for (int i = 0; i < this.CacheFields.Count; i++)
+			{
+				if (this.CacheFields[i].Name.IsEquivalentTo(fieldName))
+					return i;
+			}
+			return -1;
 		}
 		#endregion
 

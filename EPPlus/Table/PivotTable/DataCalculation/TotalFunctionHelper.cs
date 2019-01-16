@@ -20,6 +20,12 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		private ExcelWorksheet TempWorksheet { get; }
 
 		private ExcelPackage Package { get; }
+
+		private Dictionary<string, string> FieldNamesToSanitizedFieldNames { get; } = new Dictionary<string, string>();
+
+		private Dictionary<string, string> SanitizedFieldNamesToFieldNames { get; } = new Dictionary<string, string>();
+
+		private Dictionary<string, string> SanitizedFormulas { get; } = new Dictionary<string, string>();
 		#endregion
 
 		#region Constructors
@@ -59,32 +65,61 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		}
 
 		/// <summary>
-		/// Tokenizes the specified specified <paramref name="formula"/> and returns
-		/// the <see cref="TokenType.NameValue"/>s in the formula. <see cref="AddNames(IEnumerable{string})"/>
-		/// must be called before this method in order to parse the name values correctly.
+		/// Tokenizes the specified specified <paramref name="formula"/>. 
+		/// <see cref="AddNames(HashSet{string})"/> must be called before this 
+		/// method in order to parse the name values correctly.
 		/// </summary>
 		/// <param name="formula">The formula to tokenize.</param>
-		/// <returns>A collection of the <see cref="TokenType.NameValue"/>s in the formula.</returns>
-		public IEnumerable<Token> GetTokenNameValues(string formula)
+		/// <returns>A collection of the tokens in the formula.</returns>
+		public List<Token> Tokenize(string formula)
 		{
-			return this.Package.Workbook.FormulaParser.Lexer.Tokenize(formula, this.TempWorksheet.Name)
-				.Where(t => t.TokenType == TokenType.NameValue);
+			if (string.IsNullOrEmpty(formula))
+				return null;
+			formula = this.SanitizeFormula(formula);
+			var tokens = this.Package.Workbook.FormulaParser.Lexer.Tokenize(formula, this.TempWorksheet.Name);
+			var nameValues = tokens.Where(t => t.TokenType == TokenType.NameValue).Select(t => t.Value);
+			foreach (var formulaFieldName in nameValues)
+			{
+				string fieldName = formulaFieldName;
+				if (this.SanitizedFieldNamesToFieldNames.ContainsKey(formulaFieldName))
+					fieldName = this.SanitizedFieldNamesToFieldNames[formulaFieldName];
+			}
+
+			// Reconstruct the token list with the un-sanitized field names.
+			var dirtyTokens = new List<Token>();
+			foreach (var token in tokens)
+			{
+				if (this.SanitizedFieldNamesToFieldNames.ContainsKey(token.Value))
+					dirtyTokens.Add(new Token(this.SanitizedFieldNamesToFieldNames[token.Value], TokenType.NameValue));
+				else
+					dirtyTokens.Add(token);
+			}
+			return dirtyTokens;
 		}
 
 		/// <summary>
-		/// Adds the collection of names to the temp worksheet to prepare for evaluating a calculated field.
+		/// Adds the set of names to the temp worksheet to prepare for evaluating a calculated field.
+		/// Names with illegal characters are mapped to new names.
 		/// </summary>
-		/// <param name="fieldNames">The field names to add.</param>
-		public void AddNames(IEnumerable<string> fieldNames)
+		/// <param name="fieldNames">The set of field names to add.</param>
+		public void AddNames(HashSet<string> fieldNames)
 		{
 			// Create named ranges for each one of the fields in the pivot table source data
 			// so that the field references in formulas will tokenize as named ranges.
 			var row = 1;
 			foreach (var fieldName in fieldNames)
 			{
+				// Map field names with characters that are not valid for a named range to a GUID.
+				var sanitizedName = fieldName;
+				if (sanitizedName.IndexOfAny(ExcelNamedRange.IllegalCharacters) != -1)
+				{
+					sanitizedName = Guid.NewGuid().ToString("N");
+					this.FieldNamesToSanitizedFieldNames.Add(fieldName, sanitizedName);
+					this.SanitizedFieldNamesToFieldNames.Add(sanitizedName, fieldName);
+				}
 				var cell = this.TempWorksheet.Cells[row, TotalsFunctionHelper.NameValueColumn];
-				if (!this.TempWorksheet.Names.ContainsKey(fieldName))
-					this.TempWorksheet.Names.Add(fieldName, cell.FullAddressAbsolute);
+				if (!this.TempWorksheet.Names.ContainsKey(sanitizedName))
+					this.TempWorksheet.Names.Add(sanitizedName, cell.FullAddressAbsolute);
 				row++;
 			}
 		}
@@ -100,30 +135,42 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		{
 			if (string.IsNullOrEmpty(formula))
 				return null;
-			// Write in a row of values for each field name.
-			int row = 1;
+			// Create a named range that calculates each field referenced by the formula.
 			foreach (var nameToValues in namesToValues)
 			{
-				string sumArgument = "0";
-				if (nameToValues.Value.Any())
-				{
-					int column = TotalsFunctionHelper.NameValueColumn;
-					foreach (var value in nameToValues.Value)
-					{
-						this.TempWorksheet.Cells[row, column].Value = value;
-						column++;
-					}
-					sumArgument = new ExcelRange(this.TempWorksheet, row, TotalsFunctionHelper.NameValueColumn, row, column - 1).FullAddressAbsolute;
-				}
-				// Update the formula of the named range with the name of the field to be the sum of the 
-				// field values.
-				this.TempWorksheet.Names[nameToValues.Key].NameFormula = $"SUM({sumArgument})";
-				row++;
+				var excelName = nameToValues.Key;
+				if (this.FieldNamesToSanitizedFieldNames.ContainsKey(excelName))
+					excelName = this.FieldNamesToSanitizedFieldNames[excelName];
+				// Update the formula of the named range with the name of the field 
+				// to be the sum of the field values.
+				this.TempWorksheet.Names[excelName].NameFormula = $"SUM({string.Join(",", nameToValues.Value)})";
 			}
+			formula = this.SanitizeFormula(formula);
 			// Evaluate the formula. The fields that are referenced in it
 		  // are now named ranges in this workbook, so they will resolve to the appropriate values.
 			var result = this.TempWorksheet.Calculate(formula);
 			return result;
+		}
+
+		/// <summary>
+		/// Calculates and writes the value for a cell into a worksheet.
+		/// </summary>
+		/// <param name="cell">The cell to write a value into.</param>
+		/// <param name="dataField">The data field that the value is under.</param>
+		/// <param name="backingData">The data used to calculated the cell's value.</param>
+		/// <param name="styles">The style to apply to the cell.</param>
+		public void WriteCellTotal(ExcelRange cell, ExcelPivotTableDataField dataField, PivotCellBackingData backingData, ExcelStyles styles)
+		{
+			if (backingData == null)
+				return;
+
+			if (string.IsNullOrEmpty(backingData.Formula))
+				cell.Value = this.Calculate(dataField.Function, backingData.GetBackingValues());
+			else
+				cell.Value = this.EvaluateCalculatedFieldFormula(backingData.GetCalculatedCellBackingValues(), backingData.Formula);
+			var style = styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
+			if (style != null)
+				cell.Style.Numberformat.Format = style.Format;
 		}
 		#endregion
 
@@ -158,6 +205,23 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				default:
 					throw new InvalidOperationException($"Invalid data field function: {dataFieldFunction}.");
 			}
+		}
+
+		private string SanitizeFormula(string formula)
+		{
+			string sanitizedFormula = formula;
+			if (this.SanitizedFormulas.ContainsKey(formula))
+				return this.SanitizedFormulas[formula];
+			foreach (var fieldName in this.FieldNamesToSanitizedFieldNames.Keys)
+			{
+				var quotedValue = $"'{fieldName}'";
+				if (sanitizedFormula.Contains(quotedValue))
+					sanitizedFormula = sanitizedFormula.Replace(quotedValue, this.FieldNamesToSanitizedFieldNames[fieldName]);
+				else if (sanitizedFormula.Contains(fieldName))
+					sanitizedFormula = sanitizedFormula.Replace(fieldName, this.FieldNamesToSanitizedFieldNames[fieldName]);
+			}
+			this.SanitizedFormulas.Add(formula, sanitizedFormula);
+			return sanitizedFormula;
 		}
 		#endregion
 

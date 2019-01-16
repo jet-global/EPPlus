@@ -589,6 +589,15 @@ namespace OfficeOpenXml
 		}
 
 		/// <summary>
+		/// Saves the workbook to a new file. The package is closed after it has been saved.
+		/// </summary>
+		/// <param name="fileName">The filename to save the workbook to.</param>
+		public void SaveAs(string fileName)
+		{
+			this.SaveAs(new FileInfo(fileName));
+		}
+
+		/// <summary>
 		/// Saves the workbook to a new file
 		/// The package is closed after it has been saved
 		/// </summary>

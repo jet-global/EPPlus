@@ -61,13 +61,20 @@ namespace OfficeOpenXml.Table.PivotTable
 		public string Formula
 		{
 			get { return base.GetXmlNodeString("@formula"); }
+			set { base.SetXmlNodeString("@formula", value); }
 		}
 
 		/// <summary>
-		/// Gets or sets a dictionary of a cache field name that was referenced in the cacheField formula 
-		/// to its index in the cache definition.
+		/// Gets or sets the formula for this cache field that has had any 
+		/// references to other calculated cache fields resolved.
 		/// </summary>
-		public Dictionary<string, int> ReferencedCacheFieldsToIndex { get; set; }
+		public string ResolvedFormula { get; set; }
+
+		/// <summary>
+		/// Gets or sets a dictionary of a cache field name that was referenced in the cacheField formula 
+		/// to the referenced cache field's index in the cache definition.
+		/// </summary>
+		public Dictionary<string, int> ReferencedCacheFieldsToIndex { get; set; } = new Dictionary<string, int>();
 
 		/// <summary>
 		/// Gets the sharedItems for this node.

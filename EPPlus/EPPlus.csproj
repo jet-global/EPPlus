@@ -772,6 +772,7 @@
     <Compile Include="Table\PivotTable\CacheFieldNode.cs" />
     <Compile Include="Table\PivotTable\CacheItem.cs" />
     <Compile Include="Table\PivotTable\CacheRecordNode.cs" />
+    <Compile Include="Table\PivotTable\DataCalculation\PivotCellBackingData.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\RowGrandTotalHelper.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\GrandTotalHelperBase.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\ColumnGrandTotalHelper.cs" />
