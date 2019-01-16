@@ -196,6 +196,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// The pivot table field items.
 		/// </summary>
 		internal ExcelPivotTableFieldItemCollection myItems;
+		/// <summary>
+		/// The pivot field sorting references.
+		/// </summary>
+		internal AutoSortScopeReferencesCollection mySortingReferences;
 		#endregion
 
 		#region Properties
@@ -544,6 +548,20 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (myItems == null)
 					myItems = new ExcelPivotTableFieldItemCollection(this.NameSpaceManager, this.TopNode.FirstChild, myTable, this);
 				return myItems;
+			}
+		}
+
+		/// <summary>
+		/// Gets the pivot field references that is used for custom sorting.
+		/// </summary>
+		public AutoSortScopeReferencesCollection AutoSortScopeReferences
+		{
+			get
+			{
+				if (mySortingReferences == null)
+					// Select all 'references' nodes that are descendants of the top node.
+					mySortingReferences = new AutoSortScopeReferencesCollection(this.NameSpaceManager, this.TopNode.SelectSingleNode(".//d:references", this.NameSpaceManager), myTable);
+				return mySortingReferences;
 			}
 		}
 

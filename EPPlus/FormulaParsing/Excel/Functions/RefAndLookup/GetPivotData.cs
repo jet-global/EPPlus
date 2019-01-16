@@ -48,7 +48,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup
 			using (var totalsCalculator = new TotalsFunctionHelper())
 			{
 				var pageFieldIndices = pivotTable.GetPageFieldIndices();
-				var matchingValues = pivotTable.CacheDefinition.CacheRecords.FindGetPivotDataMatchingValues(fieldValueIndices, null, pageFieldIndices, fieldIndex);
+				var matchingValues = pivotTable.CacheDefinition.CacheRecords.FindMatchingValues(fieldValueIndices, null, pageFieldIndices, fieldIndex);
 				var dataField = pivotTable.DataFields.FirstOrDefault(d => d.Index == fieldIndex);
 				var subtotal = totalsCalculator.Calculate(dataField.Function, matchingValues);
 				if (subtotal == null)
