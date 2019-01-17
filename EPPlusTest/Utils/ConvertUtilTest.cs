@@ -542,8 +542,8 @@ namespace EPPlusTest.Utils
 		[TestMethod]
 		public void ConvertObjectToXmlAttributeString()
 		{
-			var dateTime = DateTime.Now;
-			Assert.AreEqual(dateTime.ToString("yyyy’-‘MM’-‘dd’T’HH’:’mm’:’ss"), ConvertUtil.ConvertObjectToXmlAttributeString(dateTime));
+			var dateTime = DateTime.Parse("2007-07-23T00:00:00");
+			Assert.AreEqual("2007-07-23T00:00:00", ConvertUtil.ConvertObjectToXmlAttributeString(dateTime));
 			Assert.IsNull(ConvertUtil.ConvertObjectToXmlAttributeString(null));
 			Assert.AreEqual("832", ConvertUtil.ConvertObjectToXmlAttributeString(832));
 			Assert.AreEqual("832.382", ConvertUtil.ConvertObjectToXmlAttributeString(832.382));
