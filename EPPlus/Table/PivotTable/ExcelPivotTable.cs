@@ -1355,6 +1355,11 @@ namespace OfficeOpenXml.Table.PivotTable
 				int sortScopeIndex = int.Parse(pivotField.AutoSortScopeReferences[0].Value);
 				int referenceDataField = this.DataFields[sortScopeIndex].Index;
 
+				// TODO: Implement sorting for calculated fields. Logged in VSTS bug #10277.
+				// Skip sorting if this is a calculated field.
+				if (!string.IsNullOrEmpty(this.CacheDefinition.CacheFields[referenceDataField].Formula))
+					return null;
+
 				// The first value is the pivot field item's X value and the second value is the sorting total.
 				var list = new List<Tuple<int, double>>();
 				for (int i = 0; i < index; i++)
