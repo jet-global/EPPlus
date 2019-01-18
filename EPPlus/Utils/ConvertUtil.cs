@@ -453,10 +453,10 @@ namespace OfficeOpenXml.Utils
 				var stringNumericValue = value.ToString();
 				if (value is double || value is decimal)
 				{
-					// Numbers left at full precision will cause corruptions in Excel.
-					var x = (double)value;
-					double rounded = Math.Round(x);
-					if (Math.Abs(rounded - x) < Double.Epsilon)
+					double doublValue = (double)Convert.ChangeType(value, typeof(double));
+					// Numbers left at full precision can cause corruptions in Excel.
+					double rounded = Math.Round(doublValue);
+					if (Math.Abs(rounded - doublValue) < Double.Epsilon)
 						return rounded.ToString();
 				}
 				return value.ToString();

@@ -1040,6 +1040,14 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Remove the 'm' (missing) xml attribute from each pivot field item, if it exists, to prevent 
 			// corrupting the workbook, since Excel automatically adds them.
 			this.RemovePivotFieldItemMAttribute();
+
+			if (this.DataFields.Count == 0)
+			{
+				// Leaving a dataFields node with no data fields can corrupt a workbook.
+				var dataFieldsNode = base.TopNode.SelectSingleNode("d:dataFields", base.NameSpaceManager);
+				if (dataFieldsNode != null)
+					base.TopNode.RemoveChild(dataFieldsNode);
+			}
 		}
 
 		/// <summary>
