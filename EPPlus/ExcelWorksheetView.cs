@@ -87,6 +87,16 @@ namespace OfficeOpenXml
 				}
 			}
 
+			/// <summary>
+			/// Removes the 'activeCellId' attribute from the selection if it exists.
+			/// </summary>
+			public void RemoveActiveCellIdAttribute()
+			{
+				var activeCellIdAttribute = base.TopNode.Attributes["activeCellId"];
+				if (activeCellIdAttribute != null)
+					base.TopNode.Attributes.Remove(activeCellIdAttribute);
+			}
+
 			private void CreateSelectionElement()
 			{
 				_selectionNode = TopNode.OwnerDocument.CreateElement("selection", ExcelPackage.schemaMain);
@@ -192,7 +202,7 @@ namespace OfficeOpenXml
 		#endregion
 		#region Public Methods & Properties
 		/// <summary>
-		/// The active cell. Single Cell address.                
+		/// The active cell. Single Cell address.
 		/// This cell must be inside the selected range. If not, the selected range is set to the active cell address
 		/// </summary>
 		public string ActiveCell
@@ -223,7 +233,8 @@ namespace OfficeOpenXml
 		/// <summary>
 		/// Selected Cells in the worksheet. Used in combination with ActiveCell.
 		/// If the active cell is not inside the selected range, the active cell will be set to the first cell in the selected range.
-		/// If the selected range has multiple adresses, these are separated with space. If the active cell is not within the first address in this list, the attribute ActiveCellId must be set (not supported, so it must be set via the XML).
+		/// If the selected range has multiple adresses, these are separated with space. 
+		/// If the active cell is not within the first address in this list, the attribute ActiveCellId must be set (not supported, so it must be set via the XML).
 		/// </summary>
 		public string SelectedRange
 		{
@@ -233,6 +244,10 @@ namespace OfficeOpenXml
 			}
 			set
 			{
+				// NOTE: Removing the 'activeCellId' attribute for now as it causes corruptions if set incorrectly.
+				// Its actual value should be the index (zero-indexed) of the 'activeCell' into the 'sqref' address(es).
+				this.Panes[this.Panes.GetUpperBound(0)].RemoveActiveCellIdAttribute();
+
 				var ac = new ExcelAddress(ActiveCell);
 
 				/*** Active cell must be inside SelectedRange ***/

@@ -455,7 +455,7 @@ namespace OfficeOpenXml
 		public int PositionID { get { return (this._positionID); } internal set { this._positionID = value; } }
 
 		/// <summary>
-		/// Returns a ExcelWorksheetView object that allows you to set the view state properties of the worksheet
+		/// Returns a ExcelWorksheetView object that allows you to set the view state properties of the worksheet.
 		/// </summary>
 		public ExcelWorksheetView View
 		{
@@ -464,10 +464,11 @@ namespace OfficeOpenXml
 				if (this.SheetView == null)
 				{
 					XmlNode node = this.TopNode.SelectSingleNode("d:sheetViews/d:sheetView", NameSpaceManager);
+					// Should always exist, but check anyways.
 					if (node == null)
 					{
-						this.CreateNode("d:sheetViews/d:sheetView");     //this one shouls always exist. but check anyway
-						node = TopNode.SelectSingleNode("d:sheetViews/d:sheetView", NameSpaceManager);
+						this.CreateNode("d:sheetViews/d:sheetView");
+						node = base.TopNode.SelectSingleNode("d:sheetViews/d:sheetView", base.NameSpaceManager);
 					}
 					this.SheetView = new ExcelWorksheetView(this.NameSpaceManager, node, this);
 				}
