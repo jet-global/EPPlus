@@ -445,7 +445,7 @@ namespace OfficeOpenXml.Utils
 			if (value == null)
 				return null;
 			if (value is DateTime dateTimeVal)
-				return dateTimeVal.ToString("yyyy’-‘MM’-‘dd’T’HH’:’mm’:’ss");
+				return dateTimeVal.ToString("yyyy-MM-ddTHH:mm:ss");
 			else if (ConvertUtil.IsNumeric(value, true) || value is string)
 				return value.ToString();
 			else if (value is bool boolVal)
