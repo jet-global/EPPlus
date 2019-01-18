@@ -446,8 +446,21 @@ namespace OfficeOpenXml.Utils
 				return null;
 			if (value is DateTime dateTimeVal)
 				return dateTimeVal.ToString("yyyy-MM-ddTHH:mm:ss");
-			else if (ConvertUtil.IsNumeric(value, true) || value is string)
+			if (value is string stringValue)
+				return stringValue;
+			else if (ConvertUtil.IsNumeric(value, true))
+			{
+				var stringNumericValue = value.ToString();
+				if (value is double || value is decimal)
+				{
+					// Numbers left at full precision will cause corruptions in Excel.
+					var x = (double)value;
+					double rounded = Math.Round(x);
+					if (Math.Abs(rounded - x) < Double.Epsilon)
+						return rounded.ToString();
+				}
 				return value.ToString();
+			}
 			else if (value is bool boolVal)
 				return boolVal ? "1" : "0";
 			else if (value is ExcelErrorValue errorValue)
