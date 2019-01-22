@@ -1042,6 +1042,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			// corrupting the workbook, since Excel automatically adds them.
 			this.RemovePivotFieldItemMAttribute();
 
+			// pivotSelections are causing corruptions when left. Deleting for meow.
+			this.Worksheet.View.RemovePivotSelections();
+
 			if (this.DataFields.Count == 0)
 			{
 				// Leaving a dataFields node with no data fields can corrupt a workbook.

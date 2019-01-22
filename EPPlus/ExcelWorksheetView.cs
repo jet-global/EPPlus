@@ -284,6 +284,21 @@ namespace OfficeOpenXml
 			}
 			return false;
 		}
+
+		/// <summary>
+		/// Removes all pivot selection nodes from the sheet view.
+		/// </summary>
+		public void RemovePivotSelections()
+		{
+			var pivotSelectionNodes = base.TopNode.SelectNodes("//d:pivotSelection", base.NameSpaceManager);
+			if (pivotSelectionNodes == null)
+				return;
+			foreach (XmlNode pivotSelectionNode in pivotSelectionNodes)
+			{
+				base.TopNode.RemoveChild(pivotSelectionNode);
+			}
+		}
+
 		/// <summary>
 		/// Indicates if the worksheet is selected within the workbook
 		/// </summary>
