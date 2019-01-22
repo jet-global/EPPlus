@@ -1015,12 +1015,13 @@ namespace OfficeOpenXml.Table.PivotTable
 					var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
 
 					// Sort the row/column headers.
-					var sortedList = this.SortField(pivotField.Sort, pivotField);
+					var sortedList = this.SortField(pivotField.Sort, pivotField).ToList();
 
 					// Assign the correct index value to each item.
 					for (int i = 0; i < sortedList.Count(); i++)
 					{
-						int index = sharedItemsList.FindIndex(x => x == sortedList.ElementAt(i));
+						var field = sortedList[i];
+						int index = sharedItemsList.FindIndex(x => x == field);
 						fieldItems.AddItem(i, index, pivotField.DefaultSubtotal);
 						if (hiddenFieldItemsDictionary.ContainsKey(index))
 							fieldItems[i].Hidden = hiddenFieldItemsDictionary[index];
