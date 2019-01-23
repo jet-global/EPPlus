@@ -998,30 +998,36 @@ namespace OfficeOpenXml.Table.PivotTable
 			foreach (var pivotField in this.Fields)
 			{
 				var fieldItems = pivotField.Items;
-				var sharedItemsCount = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.Count;
+				var sharedItemsCount = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems?.Count;
 
-				if (fieldItems.Count > sharedItemsCount + 1)
-					throw new InvalidOperationException("There are more pivotField items than cacheField sharedItems.");
+				//if (fieldItems.Count > sharedItemsCount + 1)
+				//	throw new InvalidOperationException("There are more pivotField items than cacheField sharedItems.");
 
 				if (fieldItems.Count > 0)
 				{
 					// Preserve the "@h" attribute for fields marked as hidden.
 					var hiddenFieldItemsDictionary = fieldItems.ToDictionary(f => f.X, f => f.Hidden);
-					fieldItems.Clear(pivotField.DefaultSubtotal);
 
-					var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
-
-					// Sort the row/column headers.
-					var sortedList = this.SortField(pivotField.Sort, pivotField);
-
-					// Assign the correct index value to each item.
-					for (int i = 0; i < sortedList.Count(); i++)
+					// TODO: When date times are involved, group items will exist so sorting is not needed.
+					if (this.CacheDefinition.CacheFields[pivotField.Index].FieldGroup == null)
 					{
-						int index = sharedItemsList.FindIndex(x => x == sortedList.ElementAt(i));
-						fieldItems.AddItem(i, index, pivotField.DefaultSubtotal);
-						if (hiddenFieldItemsDictionary.ContainsKey(index))
-							fieldItems[i].Hidden = hiddenFieldItemsDictionary[index];
+						fieldItems.Clear(pivotField.DefaultSubtotal);
+						var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
+
+						// Sort the row/column headers.
+						var sortedList = this.SortField(pivotField.Sort, pivotField);
+
+						// Assign the correct index value to each item.
+						for (int i = 0; i < sortedList.Count(); i++)
+						{
+							int index = sharedItemsList.FindIndex(x => x == sortedList.ElementAt(i));
+							fieldItems.AddItem(i, index, pivotField.DefaultSubtotal);
+							if (hiddenFieldItemsDictionary.ContainsKey(index))
+								fieldItems[i].Hidden = hiddenFieldItemsDictionary[index];
+						}
+
 					}
+
 				}
 			}
 
@@ -1204,6 +1210,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Create xml nodes and row headers.
 			for (int i = 0; i < maxIndex; i++)
 			{
+				// When dates are used, the pivot field items refer to the group items in the cache definition instead of the shared items.
+				// Given the Month, Quarters and/or Years, check if that date exists in the cache definition shared items list and if it does,
+				// check if it exists in the cache records to ensure it is being used in.
 				var childList = parentNodeIndices.ToList();
 				int itemIndex = pivotFieldIndex == -2 ? i : pivotField.Items[i].X;
 				if (reorderedPivotFieldItems != null)
@@ -1211,13 +1220,263 @@ namespace OfficeOpenXml.Table.PivotTable
 				childList.Add(new Tuple<int, int>(pivotFieldIndex, itemIndex));
 				bool leafNode = rowDepth == this.RowFields.Count - 1;
 				int myDataFieldIndex = pivotFieldIndex == -2 ? i : dataFieldIndex;
-				if (pivotField == null || this.CacheDefinition.CacheRecords.Contains(childList, pageFieldIndices))
+				if (pivotFieldIndex >= this.CacheDefinition.CacheRecords[0].Items.Count)
 				{
-					// Convert the second value in the tuple to the index in the list.
-					var indicesList = this.FindIndices(childList.ToList());
-					this.RowItems.Add(rowDepth, indicesList.Last().Item2, null, myDataFieldIndex);
-					this.RowHeaders.Add(new PivotTableHeader(indicesList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
-					this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
+					if (this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup != null && this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems == null)
+					{
+						// When referencing a field group groupItems collection, ignore the first and last item because it is in the format '&lt;...'.
+						if (i != 0 && i != pivotField.Items.Count - 1)
+						{
+							CacheFieldNode cacheField = null;
+							string year = "";
+							string quarter = "";
+							string mt = "";
+							foreach (var tuple in childList)
+							{
+								if (tuple.Item1 >= this.CacheDefinition.CacheRecords[0].Items.Count)
+								{
+									cacheField = this.CacheDefinition.CacheFields[tuple.Item1];
+									int baseIndex = cacheField.FieldGroup.BaseField;
+
+									if (cacheField.Name.IsEquivalentTo("Years") && (childList.Count == 1 || tuple == childList.Last()))
+									{
+										string value = cacheField.FieldGroup.GroupItems[itemIndex].Value;
+										year = value;
+										var baseCacheField = this.CacheDefinition.CacheFields[baseIndex];
+										int indexInCacheRecords = 0;
+										for (int j = 0; j < baseCacheField.SharedItems.Count; j++)
+										{
+											var valueSplit = baseCacheField.SharedItems[j].Value.Split('-');
+											var dateTime = new DateTime(int.Parse(valueSplit[0]), int.Parse(valueSplit[1]), int.Parse(valueSplit[2].Substring(0, 2)));
+											int currentDateQuarter = (dateTime.Month - 1) / 3 + 1;
+											// If Quarters is a parent node of Years, then check that the quarter of the current item is correct and then check the year.
+											if (!string.IsNullOrEmpty(quarter) && quarter.IsEquivalentTo("Qtr" + currentDateQuarter) || string.IsNullOrEmpty(quarter))
+											{
+												// Check if the year is correct and if Month is a parent node of Quarters, then make sure the month is correct as well.
+												if (value.IsEquivalentTo(valueSplit[0]) && !string.IsNullOrEmpty(mt) && mt.IsEquivalentTo(dateTime.ToString("MMM")) 
+													|| value.IsEquivalentTo(valueSplit[0]) && string.IsNullOrEmpty(mt))
+												{
+													// Convert the second value in the tuple to the index in the list.
+													var indicesList = this.FindIndices(childList.ToList());
+													this.RowItems.Add(rowDepth, indicesList.Last().Item2, null, myDataFieldIndex);
+													this.RowHeaders.Add(new PivotTableHeader(indicesList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
+													this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
+													break;
+												}
+											}
+											// Otherwise, if Quarters is not a parent node of Years, then only check if the year is correct.
+											else if (string.IsNullOrEmpty(quarter) && baseCacheField.SharedItems[j].Value.Contains(value))
+											{
+												indexInCacheRecords = j;
+												var list = new List<Tuple<int, int>>
+												{
+													new Tuple<int, int>(baseIndex, indexInCacheRecords)
+												};
+												if (this.CacheDefinition.CacheRecords.Contains(list, pageFieldIndices))
+												{
+													// Convert the second value in the tuple to the index in the list.
+													var indicesList = this.FindIndices(childList.ToList());
+													this.RowItems.Add(rowDepth, indicesList.Last().Item2, null, myDataFieldIndex);
+													this.RowHeaders.Add(new PivotTableHeader(indicesList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
+													this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
+													break;
+												}
+											}
+										}
+										break;
+									}
+									else if (cacheField.Name.IsEquivalentTo("Years"))
+									{
+										// Set year variable if Years is not the first and only node or the last node.
+										year = cacheField.FieldGroup.GroupItems[tuple.Item2].Value;
+									}
+									else if (cacheField.Name.IsEquivalentTo("Quarters") && (childList.Count == 1 || tuple == childList.Last()))
+									{
+										string value = cacheField.FieldGroup.GroupItems[itemIndex].Value;
+										var baseCacheField = this.CacheDefinition.CacheFields[baseIndex];
+										for (int j = 0; j < baseCacheField.SharedItems.Count; j++)
+										{
+											// Convert the date time shared item into a DateTime object to easily access the year and month.
+											var dateSplit = baseCacheField.SharedItems[j].Value.Split('-');
+											var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+											int qtrValue = (dateTime.Month - 1) / 3 + 1;
+											quarter = "Qtr" + qtrValue;
+											
+											// If Years is either not a parent node of Quarters or if it is, then check that the item has correct year and then check that the quarter is correct.
+											if (!string.IsNullOrEmpty(year) && baseCacheField.SharedItems[j].Value.Contains(year) 
+												|| string.IsNullOrEmpty(year))
+											{
+												// Check if the quarter is correct and if a Month is a parent node of Quarters, then make sure the month is correct as well.
+												if ((value.IsEquivalentTo(quarter) && !string.IsNullOrEmpty(mt) && mt.IsEquivalentTo(dateTime.ToString("MMM")))
+													|| (value.IsEquivalentTo(quarter) && string.IsNullOrEmpty(mt)))
+												{
+													// Convert the second value in the tuple to the index in the list.
+													var indicesList = this.FindIndices(childList.ToList());
+													this.RowItems.Add(rowDepth, indicesList.Last().Item2, null, myDataFieldIndex);
+													this.RowHeaders.Add(new PivotTableHeader(indicesList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
+													this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
+													break;
+												}
+											}
+										}
+										break;
+									}
+									else if (cacheField.Name.IsEquivalentTo("Quarters"))
+									{
+										// Set quarter variable if Years is not the first and only node or the last node.
+										quarter = cacheField.FieldGroup.GroupItems[tuple.Item2].Value;
+									}
+								}
+								else if (this.CacheDefinition.CacheFields[tuple.Item1].Name.IsEquivalentTo("Month"))
+								{
+									// Set month variable if Month is a child node of either Years or Quarters.
+									mt = this.CacheDefinition.CacheFields[tuple.Item1].FieldGroup.GroupItems[tuple.Item2].Value;
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					// If Quarters or Years is used along with Month.
+					if (pivotFieldIndex != -2 && childList.Any(x => x.Item1 >= this.CacheDefinition.CacheRecords[0].Items.Count) && pivotField.Name.IsEquivalentTo("Month") && this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup != null)
+					{
+						if (i != 0 && i != pivotField.Items.Count - 1)
+						{
+							int year = -1;
+							string quarter = "";
+							foreach (var tuple in childList)
+							{
+								if (tuple.Item1 >= this.CacheDefinition.CacheRecords[0].Items.Count)
+								{
+									var cacheField = this.CacheDefinition.CacheFields[tuple.Item1];
+									if (cacheField.Name.IsEquivalentTo("Years"))
+									{
+										year = int.Parse(cacheField.FieldGroup.GroupItems[tuple.Item2].Value);
+									}
+									else if (cacheField.Name.IsEquivalentTo("Quarters"))
+									{
+										quarter = cacheField.FieldGroup.GroupItems[tuple.Item2].Value;
+									}
+								}
+							}
+
+							string value = this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup.GroupItems[i].Value;
+							foreach (var date in this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems)
+							{
+								var dateSplit = date.Value.Split('-');
+								var datetime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+								var dateQuarter = (datetime.Month - 1) / 3 + 1;
+								if ((year == datetime.Year && quarter.IsEquivalentTo("Qtr" + dateQuarter) && value.IsEquivalentTo(datetime.ToString("MMM"))) 
+									|| (string.IsNullOrEmpty(quarter) && (year != -1 && year == datetime.Year) && value.IsEquivalentTo(datetime.ToString("MMM"))) 
+									|| (year == -1 && !string.IsNullOrEmpty(quarter) && quarter.IsEquivalentTo("Qtr" + dateQuarter) && value.IsEquivalentTo(datetime.ToString("MMM"))))
+								{
+									var indicesList = this.FindIndices(childList.ToList());
+									this.RowItems.Add(rowDepth, indicesList.Last().Item2, null, myDataFieldIndex);
+									this.RowHeaders.Add(new PivotTableHeader(indicesList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
+									this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
+									break;
+								}
+							}
+						}
+					}
+					else
+					{
+						var cacheField = pivotFieldIndex == -2 ? null : this.CacheDefinition.CacheFields[pivotFieldIndex];
+						// Month is the parent node of Years/Quarters.
+						if (cacheField != null && cacheField.Name.IsEquivalentTo("Month") && cacheField.FieldGroup != null)
+						{
+							if (i != 0 && i != pivotField.Items.Count - 1)
+							{
+								string month = cacheField.FieldGroup.GroupItems[i].Value;
+								for (int j = 0; j < cacheField.SharedItems.Count; j++)
+								{
+									var dateSplit = cacheField.SharedItems[j].Value.Split('-');
+									var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+									if (month.IsEquivalentTo(dateTime.ToString("MMM")))
+									{
+										// Item1 is pivot field index and Item2 is the index of the current DateTime cacheItem in the sharedItems collection.
+										var newList = childList.ToList();
+										if (newList.Last().Item1 == pivotFieldIndex)
+										{
+											newList.Remove(newList.Last());
+											newList.Add(new Tuple<int, int>(pivotFieldIndex, j));
+										}
+										else
+											newList.Add(new Tuple<int, int>(pivotFieldIndex, j));
+
+										if (this.CacheDefinition.CacheRecords.Contains(newList, pageFieldIndices))
+										{
+											var indicesList = this.FindIndices(childList.ToList());
+											this.RowItems.Add(rowDepth, indicesList.Last().Item2, null, myDataFieldIndex);
+											this.RowHeaders.Add(new PivotTableHeader(indicesList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
+											this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
+											break;
+										}
+									}
+								}
+							}
+						}
+						else
+						{
+							// Build row item if it is a data field pivot field.
+							if (pivotField == null)
+							{
+								//Convert the second value in the tuple to the index in the list.
+								var indicesList = this.FindIndices(childList.ToList());
+								this.RowItems.Add(rowDepth, indicesList.Last().Item2, null, myDataFieldIndex);
+								this.RowHeaders.Add(new PivotTableHeader(indicesList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
+								this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
+							}
+							else
+							{
+								if (childList.Any(x => x.Item1 != -2 && this.CacheDefinition.CacheFields[x.Item1].Name.IsEquivalentTo("Month") && this.CacheDefinition.CacheFields[x.Item1].FieldGroup != null) && childList.Count > 1)
+								{
+									var newList = new List<Tuple<int, int>>();
+									for (int k = 0; k < childList.Count(); k++)
+									{
+										if (this.CacheDefinition.CacheFields[childList[k].Item1].Name.IsEquivalentTo("Month"))
+										{
+											for (int j = 0; j < this.CacheDefinition.CacheFields[childList[k].Item1].SharedItems.Count; j++)
+											{
+												var dateSplit = this.CacheDefinition.CacheFields[childList[k].Item1].SharedItems[j].Value.Split('-');
+												var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+												if (childList[k].Item2 == dateTime.Month)
+												{
+													newList.Add(new Tuple<int, int>(childList[k].Item1, j));
+													newList.AddRange(childList.Skip(k + 1));
+													if (this.CacheDefinition.CacheRecords.Contains(newList, pageFieldIndices))
+													{
+														//Convert the second value in the tuple to the index in the list.
+														var indicesList = this.FindIndices(childList.ToList());
+														this.RowItems.Add(rowDepth, indicesList.Last().Item2, null, myDataFieldIndex);
+														this.RowHeaders.Add(new PivotTableHeader(indicesList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
+														this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
+													}
+													newList.RemoveRange(k, childList.Count() - k);
+												}
+											}
+										}
+										else
+										{
+											newList.Add(childList[k]);
+										}
+									}
+								}
+								else
+								{
+									if (this.CacheDefinition.CacheRecords.Contains(childList, pageFieldIndices))
+									{
+										//Convert the second value in the tuple to the index in the list.
+										var indicesList = this.FindIndices(childList.ToList());
+										this.RowItems.Add(rowDepth, indicesList.Last().Item2, null, myDataFieldIndex);
+										this.RowHeaders.Add(new PivotTableHeader(indicesList, pivotField, myDataFieldIndex, false, true, leafNode, isDataField, null, isAboveDataField));
+										this.BuildRowItems(rowDepth + 1, childList, pageFieldIndices, myDataFieldIndex);
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 
@@ -1627,7 +1886,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				return this.DataFields[item.DataFieldIndex].Name;
 			var pivotField = this.Fields[pivotFieldIndex];
 			var cacheItemIndex = pivotField.Items[item[xMemberIndex]].X;
-			return this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value;
+			var returnVal = this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup == null ? this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value :
+				this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup.GroupItems[cacheItemIndex].Value;
+			//return this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value;
+			return returnVal;
 		}
 
 		private void InitSchemaNodeOrder()
