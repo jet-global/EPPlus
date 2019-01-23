@@ -44,9 +44,9 @@ namespace EPPlusTest.Table.PivotTable
 		{
 			var node = this.CreateCacheFieldNode();
 			var cacheFieldNode = new CacheFieldNode(TestUtility.CreateDefaultNSM(), node);
-			Assert.AreEqual("49", cacheFieldNode.NumFormatId);
-			cacheFieldNode.NumFormatId = "30";
-			Assert.AreEqual("30", cacheFieldNode.NumFormatId);
+			Assert.AreEqual(49, cacheFieldNode.NumFormatId);
+			cacheFieldNode.NumFormatId = 30;
+			Assert.AreEqual(30, cacheFieldNode.NumFormatId);
 			Assert.AreEqual($@"<cacheField name=""Customer No."" numFmtId=""30"" xmlns=""{ExcelPackage.schemaMain}""><sharedItems count=""3""><s v=""10000"" /><s v=""20000"" /><s v=""30000"" /></sharedItems></cacheField>", node.OuterXml);
 		}
 		#endregion

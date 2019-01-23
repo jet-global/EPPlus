@@ -39,7 +39,6 @@ namespace EPPlusTest.Table.PivotTable.DataFieldFunctionTypes
 					Assert.AreEqual(0, this.PivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[5].Items.Count);
 					Assert.AreEqual(0, this.PivotTable.Fields[6].Items.Count);
-					foreach (var field in this.PivotTable.Fields)
 					package.SaveAs(newFile.File);
 				}
 				string sheetName = "Sheet1";

@@ -74,7 +74,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// The path of the data source worksheet.
 		/// </summary>
 		internal const string SourceWorksheetPath = "d:cacheSource/d:worksheetSource/@sheet";
-		
+
 		/// <summary>
 		/// The path of the data source cell range.
 		/// </summary>
@@ -331,6 +331,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="resourceManager">The <see cref="ResourceManager"/> to retrieve translations from (optional).</param>
 		public void UpdateData(ResourceManager resourceManager = null)
 		{
+			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.UpdateData));
 			var sourceRange = this.GetSourceRangeAddress();
 			// If the source range is an Excel pivot table or named range, resolve the address.
 			if (sourceRange.IsName)
@@ -346,7 +347,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Update all cache record values.
 			var worksheet = sourceRange.Worksheet;
 			var range = new ExcelRange(worksheet, worksheet.Cells[sourceRange.Start.Row + 1, sourceRange.Start.Column, sourceRange.End.Row, sourceRange.End.Column]);
-			this.CacheRecords.UpdateRecords(range);
+
+			this.CacheRecords.UpdateRecords(range, this.Workbook.FormulaParser.Logger);
 
 			this.StringResources.LoadResourceManager(resourceManager);
 
@@ -399,6 +401,21 @@ namespace OfficeOpenXml.Table.PivotTable
 		public void SetSourceRangeAddress(ExcelWorksheet worksheet, string address)
 		{
 			this.SourceRange = new ExcelRangeBase(worksheet, address);
+		}
+
+		/// <summary>
+		/// Gets the index of the a cache field with the specified <paramref name="fieldName"/>.
+		/// </summary>
+		/// <param name="fieldName">The name of the cache field to find the index of.</param>
+		/// <returns>The index of a cache field matching the specified name, -1 if not found.</returns>
+		public int GetCacheFieldIndex(string fieldName)
+		{
+			for (int i = 0; i < this.CacheFields.Count; i++)
+			{
+				if (this.CacheFields[i].Name.IsEquivalentTo(fieldName))
+					return i;
+			}
+			return -1;
 		}
 		#endregion
 

@@ -28,6 +28,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using OfficeOpenXml.FormulaParsing.Logging;
 using OfficeOpenXml.Extensions;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -167,8 +168,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Update the <see cref="CacheItem"/>s.
 		/// </summary>
 		/// <param name="sourceDataRange">The source range of the data without header row.</param>
-		public void UpdateRecords(ExcelRangeBase sourceDataRange)
+		/// <param name="logger">The logger to use to log method calls.</param>
+		public void UpdateRecords(ExcelRangeBase sourceDataRange, IFormulaParserLogger logger)
 		{
+			logger?.LogFunction(nameof(this.UpdateRecords));
 			// Remove extra records.
 			if (sourceDataRange.Rows < this.Records.Count)
 			{
@@ -212,6 +215,24 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Calculate the total of a specified data field for a row/columnn header for custom sorting.
+		/// </summary>
+		/// <param name="tupleList">A list of tuples containing the pivotField index and item value.</param>
+		/// <param name="dataFieldIndex">The index of the referenced data field.</param>
+		/// <returns>The calculated total.</returns>
+		public double CalculateSortingValues(List<Tuple<int, int>> tupleList, int dataFieldIndex)
+		{
+			double total = 0;
+			foreach (var record in this.Records)
+			{
+				var findMatch = this.FindCacheRecordIndexAndTupleIndexMatch(tupleList, record);
+				if (findMatch)
+					total += double.Parse(record.Items[dataFieldIndex].Value);
+			}
+			return total;
+		}
+
+		/// <summary>
 		/// Calculate the values for each cell in the pivot table by de-referencing the tuple using the cache definition if a pivot table is given.
 		/// Otherwise, calculate the values for each cell in the pivot table for GetPivotData.
 		/// </summary>
@@ -221,13 +242,15 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="dataFieldIndex">The index of the data field.</param>
 		/// <param name="pivotTable">The pivot table (optional).</param>
 		/// <returns>The subtotal value or null if no values are found.</returns>
-		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples,
-			List<Tuple<int, int>> columnTuples, Dictionary<int, List<int>> filterIndices, int dataFieldIndex, ExcelPivotTable pivotTable = null)
+		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, 
+			Dictionary<int, List<int>> filterIndices, int dataFieldIndex, ExcelPivotTable pivotTable = null)
 		{
+			if (!string.IsNullOrEmpty(this.CacheDefinition.CacheFields[dataFieldIndex].Formula))
+				return null;
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
-				bool match = true;
+				bool match = false;
 				if (rowTuples != null)
 				{
 					if (pivotTable == null)
@@ -259,24 +282,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			//		this.AddToList(record, dataFieldIndex, matchingValues);
 			//}
 			//return matchingValues;
-		}
-
-		/// <summary>
-		/// Calculate the total of a specified data field for a row/columnn header for custom sorting.
-		/// </summary>
-		/// <param name="tupleList">A list of tuples containing the pivotField index and item value.</param>
-		/// <param name="dataFieldIndex">The index of the referenced data field.</param>
-		/// <returns>The calculated total.</returns>
-		public double CalculateSortingValues(List<Tuple<int, int>> tupleList, int dataFieldIndex)
-		{
-			double total = 0;
-			foreach (var record in this.Records)
-			{
-				var findMatch = this.FindCacheRecordIndexAndTupleIndexMatch(tupleList, record);
-				if (findMatch)
-					total += double.Parse(record.Items[dataFieldIndex].Value);
-			}
-			return total;
 		}
 		#endregion
 
