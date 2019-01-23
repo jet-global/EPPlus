@@ -331,6 +331,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="resourceManager">The <see cref="ResourceManager"/> to retrieve translations from (optional).</param>
 		public void UpdateData(ResourceManager resourceManager = null)
 		{
+			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.UpdateData));
 			var sourceRange = this.GetSourceRangeAddress();
 			// If the source range is an Excel pivot table or named range, resolve the address.
 			if (sourceRange.IsName)
@@ -346,7 +347,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Update all cache record values.
 			var worksheet = sourceRange.Worksheet;
 			var range = new ExcelRange(worksheet, worksheet.Cells[sourceRange.Start.Row + 1, sourceRange.Start.Column, sourceRange.End.Row, sourceRange.End.Column]);
-			this.CacheRecords.UpdateRecords(range);
+
+			this.CacheRecords.UpdateRecords(range, this.Workbook.FormulaParser.Logger);
 
 			this.StringResources.LoadResourceManager(resourceManager);
 
