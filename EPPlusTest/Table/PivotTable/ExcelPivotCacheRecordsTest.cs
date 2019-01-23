@@ -163,7 +163,7 @@ namespace EPPlusTest.Table.PivotTable
 				worksheet.Cells[5, 4].Value = "Scooter";
 				worksheet.Cells[5, 5].Value = "Orange";
 				worksheet.Cells[5, 6].Value = 98;
-				cacheRecords.UpdateRecords(worksheet.Cells["C4:F6"]);
+				cacheRecords.UpdateRecords(worksheet.Cells["C4:F6"], null);
 				var record1 = cacheRecords[0];
 				var record2 = cacheRecords[1];
 				var record3 = cacheRecords[2];
@@ -201,7 +201,7 @@ namespace EPPlusTest.Table.PivotTable
 				worksheet.Cells[7, 4].Value = "Scooter";
 				worksheet.Cells[7, 5].Value = "Orange";
 				worksheet.Cells[7, 6].Value = 98;
-				cacheRecords.UpdateRecords(worksheet.Cells["C4:F7"]);
+				cacheRecords.UpdateRecords(worksheet.Cells["C4:F7"], null);
 				var record1 = cacheRecords[0];
 				var record2 = cacheRecords[1];
 				var record3 = cacheRecords[2];
@@ -241,7 +241,7 @@ namespace EPPlusTest.Table.PivotTable
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var cacheRecords = cacheDefinition.CacheRecords;
 				var worksheet = package.Workbook.Worksheets.First();
-				cacheRecords.UpdateRecords(worksheet.Cells["C4:F5"]);
+				cacheRecords.UpdateRecords(worksheet.Cells["C4:F5"], null);
 				var record1 = cacheRecords[0];
 				var record2 = cacheRecords[1];
 				Assert.AreEqual(2, cacheRecords.Count);
@@ -269,7 +269,7 @@ namespace EPPlusTest.Table.PivotTable
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var cacheRecords = cacheDefinition.CacheRecords;
 				var worksheet = package.Workbook.Worksheets.First();
-				cacheRecords.UpdateRecords(worksheet.Cells["C4:F4"]);
+				cacheRecords.UpdateRecords(worksheet.Cells["C4:F4"], null);
 				Assert.AreEqual(1, cacheRecords.Count);
 				this.AssertCacheItem(cacheRecords[0].Items[0], "1", PivotCacheRecordType.n);
 				this.AssertCacheItem(this.ResolveXCacheItem(cacheRecords[0].Items[1], 1, cacheDefinition), "Bike", PivotCacheRecordType.s);

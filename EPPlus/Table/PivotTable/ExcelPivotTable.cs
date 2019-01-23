@@ -995,6 +995,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal void RefreshFromCache(StringResources stringResources)
 		{
+			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.RefreshFromCache));
 			// Update pivotField items to match corresponding cacheField sharedItems.
 			foreach (var pivotField in this.Fields)
 			{
@@ -1030,17 +1031,23 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 
 			// Update the rowItems.
+			this.Workbook.FormulaParser.Logger?.LogFunction($"{nameof(this.UpdateRowColumnItems)}: Rows");
 			this.UpdateRowColumnItems(this.RowFields, this.RowItems, true);
 
 			// Update the colItems.
+			this.Workbook.FormulaParser.Logger?.LogFunction($"{nameof(this.UpdateRowColumnItems)}: Columns");
 			this.UpdateRowColumnItems(this.ColumnFields, this.ColumnItems, false);
 
 			// Update the pivot table data.
+			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.UpdateWorksheet));
 			this.UpdateWorksheet(stringResources);
 
 			// Remove the 'm' (missing) xml attribute from each pivot field item, if it exists, to prevent 
 			// corrupting the workbook, since Excel automatically adds them.
 			this.RemovePivotFieldItemMAttribute();
+
+			// pivotSelections are causing corruptions when left. Deleting for meow.
+			this.Worksheet.View.RemovePivotSelections();
 
 			if (this.DataFields.Count == 0)
 			{

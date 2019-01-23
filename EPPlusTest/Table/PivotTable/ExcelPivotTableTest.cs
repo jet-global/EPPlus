@@ -4450,7 +4450,7 @@ namespace EPPlusTest.Table.PivotTable
 		}
 		#endregion
 		#endregion
-
+		
 		#region Sorting Tests
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableSorting.xlsx")]

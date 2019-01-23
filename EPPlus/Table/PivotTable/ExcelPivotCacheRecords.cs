@@ -28,6 +28,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using OfficeOpenXml.FormulaParsing.Logging;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -166,8 +167,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Update the <see cref="CacheItem"/>s.
 		/// </summary>
 		/// <param name="sourceDataRange">The source range of the data without header row.</param>
-		public void UpdateRecords(ExcelRangeBase sourceDataRange)
+		/// <param name="logger">The logger to use to log method calls.</param>
+		public void UpdateRecords(ExcelRangeBase sourceDataRange, IFormulaParserLogger logger)
 		{
+			logger?.LogFunction(nameof(this.UpdateRecords));
 			// Remove extra records.
 			if (sourceDataRange.Rows < this.Records.Count)
 			{
