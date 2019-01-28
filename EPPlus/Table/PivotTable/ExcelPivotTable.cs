@@ -31,6 +31,7 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -1058,6 +1059,150 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
+		private void BuildRowItems2(PivotItemTreeNode root, List<Tuple<int, int>> indices)
+		{
+			if (!root.Children.Any())
+			{
+				// leaf node, do something
+				return;
+			}
+
+			if (root.Children.Count == 1)
+			{
+				var onlyChild = root.Children.First();
+				if (onlyChild.Value == -2 && onlyChild.CacheRecordIndex == -2)
+				{
+					// child is a datafield node, create a node for each datafield and update with the index into the datafield collection.
+					for (int i = 0; i < this.DataFields.Count - 1; i++)
+					{
+						root.AddChild(onlyChild.Clone());
+					}
+
+					for (int i = 0; i < root.Children.Count; i++)
+					{
+						root.Children[i].RecursivelySetDataFieldIndex(i);
+					}
+				}
+			}
+
+			foreach (var child in root.Children)
+			{
+				var rowDepth = indices.Count;
+				var pivotFieldIndex = this.RowFields[rowDepth].Index;
+				ExcelPivotTableField pivotField = null;
+				int pivotFieldItemIndex = 0;
+
+				if (pivotFieldIndex != -2)
+				{
+					// Child is not a data field.
+					pivotField = this.Fields[pivotFieldIndex];
+					pivotFieldItemIndex = child.PivotFieldItemIndex;
+				}
+				else
+					pivotFieldItemIndex = child.DataFieldIndex;
+
+				var childIndices = indices.ToList();
+				childIndices.Add(new Tuple<int, int>(pivotFieldIndex, pivotFieldItemIndex));
+
+				this.RowItems.Add(rowDepth, pivotFieldItemIndex, null, child.DataFieldIndex);
+				bool isLeafNode = !child.Children.Any();
+				bool isAboveDataField = !childIndices.Any(x => x.Item1 == -2);
+				this.RowHeaders.Add(new PivotTableHeader(childIndices, pivotField, child.DataFieldIndex, false, true, isLeafNode, false, null, isAboveDataField));
+
+				this.BuildRowItems2(child, childIndices);
+				if (pivotField?.DefaultSubtotal == true)
+				{
+					if (this.HasRowDataFields && isAboveDataField)
+					{
+						// !!!!
+						// TODO: Do not write out a subtotal node for nodes that are directly above a datafield when the datafield is the leaf node.
+						
+						if (!(this.RowFields[this.RowFields.Count - 2].Index == pivotFieldIndex && this.RowFields.Last().Index == -2))
+						// If above a datafield, subtotals are always shown if defaultSubtotal is enabled.
+							this.CreateTotalNodes("default", true, childIndices, pivotField, rowDepth, true, this.HasRowDataFields, child.DataFieldIndex);
+					}
+					else if (!child.SubtotalTop)
+					{
+						// If this child is only followed by datafields, do not write out a subtotal node.
+						// In other words, treat this child as the leaf node.
+						if (!isAboveDataField)
+							this.CreateTotalNodes("default", true, childIndices, pivotField, rowDepth, false, this.HasRowDataFields, child.DataFieldIndex);
+						else if (child.Children.Any(c => !c.IsDataField || c.Children.Any()))
+							this.CreateTotalNodes("default", true, childIndices, pivotField, rowDepth, true, this.HasRowDataFields, child.DataFieldIndex);
+					}
+				}
+			}
+		}
+
+		private PivotItemTreeNode BuildRowTree(Dictionary<int, List<int>> cacheRecordPageFieldIndices)
+		{
+			// TODO: handle case when there are no rowFields
+			var rootNode = new PivotItemTreeNode(-1, -1);
+			this.RowItems.Clear();
+			for (int i = 0; i < this.CacheDefinition.CacheRecords.Count; i++)
+			{
+				var cacheRecord = this.CacheDefinition.CacheRecords[i];
+				var currentNode = rootNode;
+
+				ExcelPivotTableField pivotField = null;
+				var indices = new List<Tuple<int, int>>();
+				for (int j = 0; j < this.RowFields.Count; j++)
+				{
+					int rowFieldIndex = this.RowFields[j].Index;
+					if (currentNode.Children.Any(c => c.IsDataField))
+						currentNode = currentNode.GetChildNode(-2);
+					else if (rowFieldIndex == -2)
+					{
+						if (pivotField != null)
+							currentNode.SubtotalTop = pivotField.SubtotalTop;
+						var child = new PivotItemTreeNode(-2, -2);
+						currentNode.AddChild(child);
+						currentNode = child;
+					}
+					else
+					{
+						pivotField = this.Fields[rowFieldIndex];
+						int recordItemValue = int.Parse(cacheRecord.Items[rowFieldIndex].Value);
+						if (currentNode.HasChild(recordItemValue))
+						{
+							currentNode = currentNode.GetChildNode(recordItemValue);
+						}
+						else
+						{
+							if (cacheRecordPageFieldIndices?.Any() == true && !this.ContainsPageFieldIndices(cacheRecord, cacheRecordPageFieldIndices))
+								break;
+							currentNode.SubtotalTop = pivotField.SubtotalTop;
+							var child = new PivotItemTreeNode(recordItemValue, i);
+							child.PivotFieldIndex = rowFieldIndex;
+				
+							// Apply the custom sort referencing data fields if necessary.
+							int maxIndex = pivotField.DefaultSubtotal ? pivotField.Items.Count - 1 : pivotField.Items.Count;
+							var reorderedPivotFieldItems = this.ApplyCustomSorting(pivotField, maxIndex, indices);
+
+							child.PivotFieldItemIndex = pivotField.Items.ToList().FindIndex(c => c.X == child.Value);
+							currentNode.AddChild(child);
+							currentNode = child;
+						}
+					}
+					indices.Add(new Tuple<int, int>(currentNode.PivotFieldIndex, currentNode.PivotFieldItemIndex));
+				}
+			}
+			return rootNode;
+		}
+
+		// TODO: Put this method on the cacheRecord (?)
+		private bool ContainsPageFieldIndices(CacheRecordNode cacheRecord, Dictionary<int, List<int>> cacheRecordPageFieldIndices)
+		{
+			// Map of indices into a cacheRecord to cacheRecordItem values.
+			foreach (var keyValue in cacheRecordPageFieldIndices)
+			{
+				int cacheRecordValue = int.Parse(cacheRecord.Items[keyValue.Key].Value);
+				if (!keyValue.Value.Any(v => v == cacheRecordValue))
+					return false;
+			}
+			return true;
+		}
+
 		/// <summary>
 		/// Gets a dictionary of field index to a list of items that are to be included in the pivot table.
 		/// </summary>
@@ -1141,8 +1286,36 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				collection.Clear();
 				var pageFieldIndices = this.GetPageFieldIndices();
+
+				// TODO: Extract to a method. Find other page field indices usages and use this instead where possible.
+				Dictionary<int, List<int>> cacheRecordPageFieldIndices = null;
+				if (pageFieldIndices != null)
+				{
+					cacheRecordPageFieldIndices = new Dictionary<int, List<int>>();
+					foreach (var keyValue in pageFieldIndices)
+					{
+						if (keyValue.Value.Any())
+						{
+							// Map the index into a cache record to a list of valid values.
+							var cacheRecordItemValues = keyValue.Value.Select(i => this.Fields[keyValue.Key].Items[i].X).ToList();
+							cacheRecordPageFieldIndices.Add(keyValue.Key, cacheRecordItemValues);
+						}
+					}
+				}
+				///////////////////////////////////
+
 				if (isRowItems)
-					this.BuildRowItems(0, new List<Tuple<int, int>>(), pageFieldIndices, 0);
+				{
+					var clock = Stopwatch.StartNew();
+
+					//this.BuildRowItems(0, new List<Tuple<int, int>>(), pageFieldIndices, 0);
+
+					var root = this.BuildRowTree(cacheRecordPageFieldIndices);
+					this.BuildRowItems2(root, new List<Tuple<int, int>>());
+
+					clock.Stop();
+					System.IO.File.AppendAllText(@"C:\Users\ems\Downloads\time.txt", Environment.NewLine + clock.ElapsedMilliseconds.ToString());
+				}
 				else
 					this.BuildColumnItems(0, new List<Tuple<int, int>>(), pageFieldIndices, false, 0);
 				// Create grand total items if necessary.
@@ -1162,7 +1335,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private void CreateTotalNodes(string itemType, bool isRowItem, List<Tuple<int, int>> indices, ExcelPivotTableField pivotField, int repeatedItemsCount, bool multipleDataFields, bool hasDataFields, int dataFieldIndex = 0)
+		private void CreateTotalNodes(string itemType, bool isRowItem, List<Tuple<int, int>> indices, ExcelPivotTableField pivotField, 
+			int repeatedItemsCount, bool multipleDataFields, bool hasDataFields, int dataFieldIndex = 0)
 		{
 			var itemsCollection = isRowItem ? this.RowItems : this.ColumnItems;
 			var headerCollection = isRowItem ? this.RowHeaders : this.ColumnHeaders;
@@ -1176,14 +1350,14 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Reset variables if item type is a default total.
 			if (itemType.IsEquivalentTo("default"))
 			{
-				index = multipleDataFields ? this.DataFields.Count : 1;
+				index = multipleDataFields && this.DataFields.Any() ? this.DataFields.Count : 1;
 				xMember = indices.Last().Item2;
-				aboveDataField = isRowItem ? true : !indices.Any(x => x.Item1 == -2);
+				aboveDataField = !indices.Any(x => x.Item1 == -2);
 				grandTotal = false;
 			}
 
 			// Create one xml node if the header is below a data field header with the correct data field index (not necessarily zero).
-			if (!isRowItem && !aboveDataField && !grandTotal)
+			if (!aboveDataField && !grandTotal)
 			{
 				var header = new PivotTableHeader(indices, pivotField, dataFieldIndex, grandTotal, isRowItem, false, false, itemType, aboveDataField);
 				itemsCollection.AddSumNode(itemType, repeatedItemsCount, xMember, dataFieldIndex);
@@ -1218,7 +1392,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.SetNonDataFieldVariables(pivotFieldIndex, parentNodeIndices, ref pivotField, ref maxIndex, ref isAboveDataField, ref isDataField);
 
 			// Apply the custom sort referencing data fields if necessary.
-			var reorderedPivotFieldItems = this.ApplyCustomSorting(pivotField, maxIndex, parentNodeIndices, pivotFieldIndex);
+			var reorderedPivotFieldItems = this.ApplyCustomSorting(pivotField, maxIndex, parentNodeIndices);
 
 			// Create xml nodes and row headers.
 			for (int i = 0; i < maxIndex; i++)
@@ -1253,10 +1427,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (rowDepth != this.RowFields.Count - 1 && this.RowFields.Last().Index == -2 && this.ColumnFields.Count == 0)
 					this.CreateTotalNodes("default", true, parentNodeIndices, pivotField, repeatedItemsCount, true, this.HasRowDataFields);
 				// If there are multiple row data fields and we are not a leaf node (regardless if subtotalTop is true or false).
-				else if (rowDepth != this.RowFields.Count - 1 && (this.HasRowDataFields && !hasDataFieldParent))
+				else if (rowDepth != this.RowFields.Count - 1 && this.HasRowDataFields && !hasDataFieldParent)
 					this.CreateTotalNodes("default", true, parentNodeIndices, pivotField, repeatedItemsCount, true, this.HasRowDataFields);
 				// If there are multiple data fields, then create a subtotal node for each data field. Otherwise, only create one subtotal node.
-				else if (rowDepth != this.RowFields.Count - 1 && (!pivotField.SubtotalTop && !hasDataFieldParent))
+				else if (rowDepth != this.RowFields.Count - 1 && !pivotField.SubtotalTop && !hasDataFieldParent)
 					this.CreateTotalNodes("default", true, parentNodeIndices, pivotField, repeatedItemsCount, true, this.HasRowDataFields);
 				else if (!pivotField.SubtotalTop && (hasDataFieldParent || this.DataFields.Count == 1))
 					this.CreateTotalNodes("default", true, parentNodeIndices, pivotField, repeatedItemsCount, false, this.HasRowDataFields);
@@ -1318,7 +1492,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			ExcelPivotTableField pivotField, int dataFieldIndex, int colDepth, bool itemsCreated, bool isDataField, bool isAboveDataField)
 		{
 			// Apply the custom sort referencing data fields if necessary.
-			var reorderedPivotFieldItems = this.ApplyCustomSorting(pivotField, index, indices, pivotFieldIndex);
+			var reorderedPivotFieldItems = this.ApplyCustomSorting(pivotField, index, indices);
 			
 			for (int i = 0; i < index; i++)
 			{
@@ -1362,7 +1536,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private List<int> ApplyCustomSorting(ExcelPivotTableField pivotField, int index, List<Tuple<int, int>> indices, int pivotFieldIndex)
+		private List<int> ApplyCustomSorting(ExcelPivotTableField pivotField, int index, List<Tuple<int, int>> indices)
 		{
 			// Apply the custom sort referencing data fields.
 			List<int> reorderedPivotFieldItems = null;
@@ -1381,7 +1555,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				for (int i = 0; i < index; i++)
 				{
 					var tempList = indices.ToList();
-					tempList.Add(new Tuple<int, int>(pivotFieldIndex, pivotField.Items[i].X));
+					tempList.Add(new Tuple<int, int>(pivotField.Index, pivotField.Items[i].X));
 					double totalSortingValue = this.CacheDefinition.CacheRecords.CalculateSortingValues(tempList, referenceDataField);
 					list.Add(new Tuple<int, double>(pivotField.Items[i].X, totalSortingValue));
 				}
@@ -1748,3 +1922,4 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 	}
 }
+ 

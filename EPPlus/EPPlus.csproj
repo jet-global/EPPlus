@@ -787,6 +787,7 @@
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldNumericGroup.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableRowColumnFieldCollection.cs" />
     <Compile Include="Table\PivotTable\ItemsCollection.cs" />
+    <Compile Include="Table\PivotTable\PivotItemTreeNode.cs" />
     <Compile Include="Table\PivotTable\PivotTableHeader.cs" />
     <Compile Include="Table\PivotTable\RowColumnItem.cs" />
     <Compile Include="Table\PivotTable\SharedItemsCollection.cs" />
