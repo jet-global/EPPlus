@@ -1294,7 +1294,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Gets a dictionary of field index to a list of items that are to be included in the pivot table.
 		/// </summary>
-		/// <returns>A dictionary of field index to a list of field item indices.</returns>
+		/// <returns>A dictionary of pivot field index to a list of field item value indices.</returns>
 		internal Dictionary<int, List<int>> GetPageFieldIndices()
 		{
 			if (this.PageFields == null || this.PageFields.Count == 0)
@@ -1303,27 +1303,27 @@ namespace OfficeOpenXml.Table.PivotTable
 			foreach (var pageField in this.PageFields)
 			{
 				if (pageField.Item != null)
-					pageFieldIndices.Add(pageField.Field, new List<int> { pageField.Item.Value });
+				{
+					int pivotFieldItemValue = this.Fields[pageField.Field].Items[pageField.Item.Value].X;
+					pageFieldIndices.Add(pageField.Field, new List<int> { pivotFieldItemValue });
+				}
 				else
 				{
 					// If page fields are multi-selected, pivot field items that are 
 					// not selected are flagged as hidden.
 					var pageFieldItems = this.Fields[pageField.Field].Items;
-					if (pageFieldItems != null && pageFieldItems.Any(p => p.Hidden))
+					if (pageFieldItems != null)
 					{
-						for (int i = 0; i < pageFieldItems.Count; i++)
+						foreach (var item in pageFieldItems.Where(i => !i.Hidden))
 						{
-							var item = pageFieldItems[i];
-							if (!item.Hidden)
-							{
-								if (!pageFieldIndices.ContainsKey(pageField.Field))
-									pageFieldIndices.Add(pageField.Field, new List<int>());
-								pageFieldIndices[pageField.Field].Add(i);
-							}
+							if (!pageFieldIndices.ContainsKey(pageField.Field))
+								pageFieldIndices.Add(pageField.Field, new List<int>());
+							pageFieldIndices[pageField.Field].Add(item.X);
 						}
 					}
 				}
 			}
+
 			return pageFieldIndices;
 		}
 		#endregion
@@ -1375,30 +1375,13 @@ namespace OfficeOpenXml.Table.PivotTable
 				collection.Clear();
 				var pageFieldIndices = this.GetPageFieldIndices();
 
-				// TODO: Extract to a method. Find other page field indices usages and use this instead where possible.
-				Dictionary<int, List<int>> cacheRecordPageFieldIndices = null;
-				if (pageFieldIndices != null)
-				{
-					cacheRecordPageFieldIndices = new Dictionary<int, List<int>>();
-					foreach (var keyValue in pageFieldIndices)
-					{
-						if (keyValue.Value.Any())
-						{
-							// Map the index into a cache record to a list of valid values.
-							var cacheRecordItemValues = keyValue.Value.Select(i => this.Fields[keyValue.Key].Items[i].X).ToList();
-							cacheRecordPageFieldIndices.Add(keyValue.Key, cacheRecordItemValues);
-						}
-					}
-				}
-				///////////////////////////////////
-
 				if (isRowItems)
 				{
 					var clock = Stopwatch.StartNew();
 
 					//this.BuildRowItems(0, new List<Tuple<int, int>>(), pageFieldIndices, 0);
 
-					var root = this.BuildRowTree(cacheRecordPageFieldIndices);
+					var root = this.BuildRowTree(pageFieldIndices);
 					this.SortTree(root);
 					this.BuildRowItems2(root, new List<Tuple<int, int>>());
 
