@@ -1070,7 +1070,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (root.Children.Count == 1)
 			{
 				var onlyChild = root.Children.First();
-				if (onlyChild.Value == -2 && onlyChild.CacheRecordIndex == -2)
+				if (onlyChild.IsDataField)
 				{
 					// child is a datafield node, create a node for each datafield and update with the index into the datafield collection.
 					for (int i = 0; i < this.DataFields.Count - 1; i++)
@@ -1137,7 +1137,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		private PivotItemTreeNode BuildRowTree(Dictionary<int, List<int>> cacheRecordPageFieldIndices)
 		{
 			// TODO: handle case when there are no rowFields
-			var rootNode = new PivotItemTreeNode(-1, -1);
+			var rootNode = new PivotItemTreeNode(-1);
 			this.RowItems.Clear();
 			for (int i = 0; i < this.CacheDefinition.CacheRecords.Count; i++)
 			{
@@ -1155,7 +1155,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					{
 						if (pivotField != null)
 							currentNode.SubtotalTop = pivotField.SubtotalTop;
-						var child = new PivotItemTreeNode(-2, -2);
+						var child = new PivotItemTreeNode(-2);
 						currentNode.AddChild(child);
 						currentNode = child;
 					}
@@ -1172,22 +1172,110 @@ namespace OfficeOpenXml.Table.PivotTable
 							if (cacheRecordPageFieldIndices?.Any() == true && !this.ContainsPageFieldIndices(cacheRecord, cacheRecordPageFieldIndices))
 								break;
 							currentNode.SubtotalTop = pivotField.SubtotalTop;
-							var child = new PivotItemTreeNode(recordItemValue, i);
+							var child = new PivotItemTreeNode(recordItemValue);
 							child.PivotFieldIndex = rowFieldIndex;
-				
-							// Apply the custom sort referencing data fields if necessary.
-							int maxIndex = pivotField.DefaultSubtotal ? pivotField.Items.Count - 1 : pivotField.Items.Count;
-							var reorderedPivotFieldItems = this.ApplyCustomSorting(pivotField, maxIndex, indices);
-
 							child.PivotFieldItemIndex = pivotField.Items.ToList().FindIndex(c => c.X == child.Value);
 							currentNode.AddChild(child);
 							currentNode = child;
 						}
 					}
 					indices.Add(new Tuple<int, int>(currentNode.PivotFieldIndex, currentNode.PivotFieldItemIndex));
+					if (!currentNode.CacheRecordIndices.Contains(i))
+						currentNode.CacheRecordIndices.Add(i);
 				}
 			}
 			return rootNode;
+		}
+
+		private PivotItemTreeNode SortTree(PivotItemTreeNode root)
+		{
+			if (root.Children.Count == 0)
+				return root;
+
+			foreach (var child in root.Children.ToList())
+			{
+				// Set the pivot table field.
+				ExcelPivotTableField pivotField = null;
+				if (child.PivotFieldIndex == -2 && child.Children.Count == 0)
+					continue;
+				else if (child.PivotFieldIndex == -2)
+					pivotField = this.Fields[child.Children[0].PivotFieldIndex];
+				else 
+					pivotField = this.Fields[child.PivotFieldIndex];
+
+				// Sort the children, so that they are in alphabetical/chronological order.
+				var orderNodes = root.Children.OrderBy(x => x.PivotFieldItemIndex).ToList();
+				if (!root.Children.SequenceEqual(orderNodes))
+				{
+					var newChildList = root.Children.ToList();
+					root.Children.Clear();
+					for (int i = 0; i < orderNodes.Count(); i++)
+					{
+						int orderListIndex = newChildList.FindIndex(x => x.PivotFieldItemIndex == orderNodes.ElementAt(i).PivotFieldItemIndex);
+						root.AddChild(newChildList[orderListIndex]);
+					}
+				}
+
+				// Sort items with references to datafields.
+				if (pivotField.AutoSortScopeReferences.Count != 0)
+					this.SortWithDataFields(pivotField, root);
+
+				// Recursively sort the children of the current node.
+				this.SortTree(child);
+			}
+
+			return root;
+		}
+
+		private void SortWithDataFields(ExcelPivotTableField pivotField, PivotItemTreeNode root)
+		{
+			int autoScopeIndex = int.Parse(pivotField.AutoSortScopeReferences[0].Value);
+			var referenceDataFieldIndex = this.DataFields[autoScopeIndex].Index;
+
+			// TODO: Implement sorting for calculated fields. Logged in VSTS bug #10277.
+			// Skip sorting if this is a calculated field.
+			if (!string.IsNullOrEmpty(this.CacheDefinition.CacheFields[referenceDataFieldIndex].Formula))
+				return;
+
+			var orderedList = new List<Tuple<int, double>>();
+			// Get the total value for every child at the given data field index.
+			foreach (var c in root.Children.ToList())
+			{
+				double sortingTotal = this.CacheDefinition.CacheRecords.CalculateSortingValues(c, referenceDataFieldIndex);
+				orderedList.Add(new Tuple<int, double>(c.Value, sortingTotal));
+			}
+
+			// Sort the list of total values accordingly.
+			if (pivotField.Sort == eSortType.Ascending)
+				orderedList = orderedList.OrderBy(i => i.Item2).ToList();
+			else if (pivotField.Sort == eSortType.Descending)
+				orderedList = orderedList.OrderByDescending(i => i.Item2).ToList();
+
+			// Check if there are multiple values that are the same and if there are, sort it based on the value of the first tuple.
+			var duplicates = orderedList.GroupBy(x => x.Item2).Where(g => g.Count() > 1).Select(k => k.Key);
+			if (duplicates.Count() > 0)
+			{
+				for (int i = 0; i < duplicates.ToList().Count(); i++)
+				{
+					var duplicatedList = orderedList.FindAll(j => j.Item2 == duplicates.ElementAt(i));
+					int startingIndex = orderedList.FindIndex(y => y == duplicatedList.ElementAt(0));
+					if (pivotField.Sort == eSortType.Ascending)
+						duplicatedList = duplicatedList.OrderBy(w => w.Item1).ToList();
+					else
+						duplicatedList = duplicatedList.OrderByDescending(w => w.Item1).ToList();
+					orderedList.RemoveRange(startingIndex, duplicatedList.Count());
+					orderedList.InsertRange(startingIndex, duplicatedList);
+				}
+			}
+
+			// Add children back to the root node in sorted order.
+			var newChildList = root.Children.ToList();
+			root.Children.Clear();
+			for (int i = 0; i < orderedList.Count(); i++)
+			{
+				int index = newChildList.FindIndex(x => x.Value == orderedList.ElementAt(i).Item1);
+				root.AddChild(newChildList[index]);
+			}
 		}
 
 		// TODO: Put this method on the cacheRecord (?)
@@ -1311,10 +1399,11 @@ namespace OfficeOpenXml.Table.PivotTable
 					//this.BuildRowItems(0, new List<Tuple<int, int>>(), pageFieldIndices, 0);
 
 					var root = this.BuildRowTree(cacheRecordPageFieldIndices);
+					this.SortTree(root);
 					this.BuildRowItems2(root, new List<Tuple<int, int>>());
 
 					clock.Stop();
-					System.IO.File.AppendAllText(@"C:\Users\ems\Downloads\time.txt", Environment.NewLine + clock.ElapsedMilliseconds.ToString());
+					//System.IO.File.AppendAllText(@"C:\Users\ems\Downloads\time.txt", Environment.NewLine + clock.ElapsedMilliseconds.ToString());
 				}
 				else
 					this.BuildColumnItems(0, new List<Tuple<int, int>>(), pageFieldIndices, false, 0);

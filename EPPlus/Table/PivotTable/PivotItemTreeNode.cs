@@ -6,7 +6,7 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// <summary>
 	/// Maintains state for a tree data structure that represents a pivot table.
 	/// </summary>
-	internal class PivotItemTreeNode
+	public class PivotItemTreeNode
 	{
 		#region Properties
 		/// <summary>
@@ -15,9 +15,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		public int Value { get; set; }
 		
 		/// <summary>
-		/// Gets or sets the index of the cache record.
+		/// Gets or sets the list of cache record indices.
 		/// </summary>
-		public int CacheRecordIndex { get; set; }
+		public List<int> CacheRecordIndices { get; set; } = new List<int>();
 
 		/// <summary>
 		/// Gets or sets the index of the datafield referenced.
@@ -42,7 +42,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Gets whether or not this node represents a datafield.
 		/// </summary>
-		public bool IsDataField => this.CacheRecordIndex == -2 && this.Value == -2;
+		public bool IsDataField => this.Value == -2;
 
 		/// <summary>
 		/// Gets or sets the list of children that this node parents.
@@ -55,33 +55,49 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Constructor.
 		/// </summary>
 		/// <param name="value">The cache record item node "v" index.</param>
-		/// <param name="cacheRecordIndex">The index of the cache record.</param>
-		public PivotItemTreeNode(int value, int cacheRecordIndex)
+		public PivotItemTreeNode(int value)
 		{
 			this.Value = value;
-			this.CacheRecordIndex = cacheRecordIndex;
 		}
 		#endregion
 
 		#region Public Methods
+		/// <summary>
+		/// Add the given node as a child of this node.
+		/// </summary>
+		/// <param name="child">The node to add.</param>
 		public void AddChild(PivotItemTreeNode child)
 		{
 			this.Children.Add(child);
 		}
 
+		/// <summary>
+		/// Checks whether or not a child already exists with the specified value.
+		/// </summary>
+		/// <param name="value">The value to look for in the children list.</param>
+		/// <returns>True if the child exists, otherwise false.</returns>
 		public bool HasChild(int value)
 		{
 			return this.Children?.Any(i => i.Value == value) ?? false;
 		}
 
+		/// <summary>
+		/// Gets the child node that has the specified value.
+		/// </summary>
+		/// <param name="value">The value to look for in the children list.</param>
+		/// <returns>The child node if it exists.</returns>
 		public PivotItemTreeNode GetChildNode(int value)
 		{
 			return this.Children.Find(i => i.Value == value);
 		}
 
+		/// <summary>
+		/// Creates a deep copy of this node.
+		/// </summary>
+		/// <returns>The newly created node.</returns>
 		public PivotItemTreeNode Clone()
 		{
-			var clone = new PivotItemTreeNode(this.Value, this.CacheRecordIndex);
+			var clone = new PivotItemTreeNode(this.Value);
 			clone.DataFieldIndex = this.DataFieldIndex;
 			clone.PivotFieldIndex = this.PivotFieldIndex;
 			clone.PivotFieldItemIndex = this.PivotFieldItemIndex;
@@ -94,6 +110,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			return clone;
 		}
 
+		/// <summary>
+		/// Sets the data field index for this node and all it's children.
+		/// </summary>
+		/// <param name="index">The specified data field index.</param>
 		public void RecursivelySetDataFieldIndex(int index)
 		{
 			this.DataFieldIndex = index;
