@@ -232,6 +232,23 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Calculate the total of a specified data field for a row/columnn header for custom sorting.
+		/// </summary>
+		/// <param name="node">The current node that is being evaluated.</param>
+		/// <param name="dataFieldIndex">The index of the referenced data field.</param>
+		/// <returns>The calculated total.</returns>
+		public double CalculateSortingValues(PivotItemTreeNode node, int dataFieldIndex)
+		{
+			double sortingTotal = 0;
+			foreach (var record in node.CacheRecordIndices)
+			{
+				string dataFieldValue = this.Records[record].Items[dataFieldIndex].Value;
+				sortingTotal += double.Parse(dataFieldValue);
+			}
+			return sortingTotal;
+		}
+
+		/// <summary>
 		/// Calculate the values for each cell in the pivot table by de-referencing the tuple using the cache definition if a pivot table is given.
 		/// Otherwise, calculate the values for each cell in the pivot table for GetPivotData.
 		/// </summary>
