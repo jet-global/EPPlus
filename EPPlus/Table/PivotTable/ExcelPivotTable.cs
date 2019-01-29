@@ -1251,7 +1251,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			else if (pivotField.Sort == eSortType.Descending)
 				orderedList = orderedList.OrderByDescending(i => i.Item2).ToList();
 
-			// Check if there are multiple values that are the same and if there are, sort it based on the value of the first tuple.
+			// If there are duplicated values, sort it based on the value of the first tuple.
 			var duplicates = orderedList.GroupBy(x => x.Item2).Where(g => g.Count() > 1).Select(k => k.Key);
 			if (duplicates.Count() > 0)
 			{
