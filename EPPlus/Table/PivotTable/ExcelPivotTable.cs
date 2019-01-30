@@ -1092,26 +1092,31 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.BuildRowItems(child, childIndices);
 
 				// Create subtotal nodes if default subtotal is enabled.
-				if (pivotField?.DefaultSubtotal == true)
-				{
-					if (this.HasRowDataFields && isAboveDataField &&
-						(child.Children.FirstOrDefault()?.HasChildren == true || this.RowFields.Last().Index != -2))
-					{
-						// If above a datafield, subtotals are always shown if defaultSubtotal is enabled.
-							this.CreateTotalNodes("default", true, childIndices, pivotField, rowDepth, true, this.HasRowDataFields, child.DataFieldIndex);
-					}
-					else if (!child.SubtotalTop)
-					{
-						// If this child is only followed by datafields, do not write out a subtotal node.
-						// In other words, treat this child as the leaf node.
-						if (!isAboveDataField)
-							this.CreateTotalNodes("default", true, childIndices, pivotField, rowDepth, false, this.HasRowDataFields, child.DataFieldIndex);
-						else if (child.Children.Any(c => !c.IsDataField || c.Children.Any()))
-							this.CreateTotalNodes("default", true, childIndices, pivotField, rowDepth, true, this.HasRowDataFields, child.DataFieldIndex);
-					}
-				}
+				this.CreateRowSubtotalNode(child, childIndices, pivotField, rowDepth, isAboveDataField);
 			}
 		}
+
+		private void CreateRowSubtotalNode(PivotItemTreeNode child, List<Tuple<int, int>> childIndices, ExcelPivotTableField pivotField, int rowDepth, bool isAboveDataField)
+		{
+			if (pivotField?.DefaultSubtotal == true)
+			{
+				if (this.HasRowDataFields && isAboveDataField &&
+					(child.Children.FirstOrDefault()?.HasChildren == true || this.RowFields.Last().Index != -2))
+				{
+					// If above a datafield, subtotals are always shown if defaultSubtotal is enabled.
+					this.CreateTotalNodes("default", true, childIndices, pivotField, rowDepth, true, this.HasRowDataFields, child.DataFieldIndex);
+				}
+				else if (!child.SubtotalTop)
+				{
+					// If this child is only followed by datafields, do not write out a subtotal node.
+					// In other words, treat this child as the leaf node.
+					if (!isAboveDataField)
+						this.CreateTotalNodes("default", true, childIndices, pivotField, rowDepth, false, this.HasRowDataFields, child.DataFieldIndex);
+					else if (child.Children.Any(c => !c.IsDataField || c.Children.Any()))
+						this.CreateTotalNodes("default", true, childIndices, pivotField, rowDepth, true, this.HasRowDataFields, child.DataFieldIndex);
+				}
+			}
+		} 
 
 		private List<Tuple<int, int>> BuildColumnItems(PivotItemTreeNode node, List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices)
 		{
@@ -1145,10 +1150,17 @@ namespace OfficeOpenXml.Table.PivotTable
 				lastChildIndices = this.BuildColumnItems(child, childIndices, lastChildIndices);
 			}
 
+			this.CreateColumnSubtotalNode(node, repeatedItemsCount, indices);
+			
+			return lastChildIndices;
+		}
+
+		private void CreateColumnSubtotalNode(PivotItemTreeNode node, int repeatedItemsCount, List<Tuple<int, int>> indices)
+		{
 			// Create subtotal nodes if default subtotal is enabled and we are not at the root node.
 			// Also, if node has a grandchild or the leaf node is not data field create a subtotal node.
 			var defaultSubtotal = node.PivotFieldIndex == -2 ? false : this.Fields[node.PivotFieldIndex].DefaultSubtotal;
-			if (defaultSubtotal && node.Value != -1 && 
+			if (defaultSubtotal && node.Value != -1 &&
 				(node.Children.FirstOrDefault()?.HasChildren == true || this.ColumnFields.Last().Index != -2))
 			{
 				bool isLastNonDataField = this.ColumnFields.Skip(repeatedItemsCount).All(x => x.Index == -2);
@@ -1161,7 +1173,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				else if (!isLastNonDataField && (!isAboveDataField || !this.HasColumnDataFields))
 					this.CreateTotalNodes("default", false, indices, null, repeatedItemsCount, false, this.HasColumnDataFields, node.DataFieldIndex);
 			}
-			return lastChildIndices;
 		}
 
 		private PivotItemTreeNode BuildRowColTree(ExcelPivotTableRowColumnFieldCollection rowColFields, Dictionary<int, List<int>> cacheRecordPageFieldIndices)
