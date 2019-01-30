@@ -204,32 +204,20 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Checks if a given row item exists.
-		/// </summary>
-		/// <param name="nodeIndices">A list of tuples containing the pivotField index and item value.</param>
-		/// <param name="pageFieldIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
-		/// <returns>True if the item exists, otherwise false.</returns>
-		public bool Contains(List<Tuple<int, int>> nodeIndices, Dictionary<int, List<int>> pageFieldIndices)
-		{
-			return this.Records.Any(r => this.FindCacheRecordIndexAndTupleIndexMatch(nodeIndices, r, pageFieldIndices));
-		}
-
-		/// <summary>
 		/// Calculate the total of a specified data field for a row/columnn header for custom sorting.
 		/// </summary>
-		/// <param name="tupleList">A list of tuples containing the pivotField index and item value.</param>
+		/// <param name="node">The current node that is being evaluated.</param>
 		/// <param name="dataFieldIndex">The index of the referenced data field.</param>
 		/// <returns>The calculated total.</returns>
-		public double CalculateSortingValues(List<Tuple<int, int>> tupleList, int dataFieldIndex)
+		public double CalculateSortingValues(PivotItemTreeNode node, int dataFieldIndex)
 		{
-			double total = 0;
-			foreach (var record in this.Records)
+			double sortingTotal = 0;
+			foreach (var record in node.CacheRecordIndices)
 			{
-				var findMatch = this.FindCacheRecordIndexAndTupleIndexMatch(tupleList, record);
-				if (findMatch)
-					total += double.Parse(record.Items[dataFieldIndex].Value);
+				string dataFieldValue = this.Records[record].Items[dataFieldIndex].Value;
+				sortingTotal += double.Parse(dataFieldValue);
 			}
-			return total;
+			return sortingTotal;
 		}
 
 		/// <summary>

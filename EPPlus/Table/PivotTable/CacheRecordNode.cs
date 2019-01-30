@@ -214,6 +214,25 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			parentNode.RemoveChild(this.Node);
 		}
+
+		/// <summary>
+		/// Determines whether this cache record node contains indices that exist within the 
+		/// specified <paramref name="cacheRecordPageFieldIndices"/>.
+		/// </summary>
+		/// <param name="cacheRecordPageFieldIndices">A mapping of cache field indices to shared item indices.</param>
+		/// <returns>True if the mapping contains the cache record indices.</returns>
+		public bool ContainsPageFieldIndices(Dictionary<int, List<int>> cacheRecordPageFieldIndices)
+		{
+			// Map of indices into a cacheRecord to cacheRecordItem values.
+			foreach (var keyValue in cacheRecordPageFieldIndices)
+			{
+				int cacheRecordValue = int.Parse(this.Items[keyValue.Key].Value);
+				if (!keyValue.Value.Any(v => v == cacheRecordValue))
+					return false;
+			}
+			return true;
+		}
+
 		#endregion
 
 		#region Private Methods
