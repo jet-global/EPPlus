@@ -40,7 +40,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		public List<Tuple<int, int>> CacheRecordIndices { get; }
 		 
 		/// <summary>
-		/// Gets the related <see cref="ExcelPivotTableField"/>.
+		/// Gets the related <see cref="ExcelPivotTableField"/>. 
+		/// NOTE: Only used for row headers.
 		/// </summary>
 		public ExcelPivotTableField PivotTableField { get; }
 		

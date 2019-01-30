@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -45,6 +46,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool IsDataField => this.Value == -2;
 
 		/// <summary>
+		/// Gets a value indicating whether or not this node has any children.
+		/// </summary>
+		public bool HasChildren => this.Children.Any();
+
+		/// <summary>
 		/// Gets or sets the list of children that this node parents.
 		/// </summary>
 		public List<PivotItemTreeNode> Children { get; set; } = new List<PivotItemTreeNode>();
@@ -63,12 +69,20 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Public Methods
 		/// <summary>
-		/// Add the given node as a child of this node.
+		/// Adds a new child with the specified values to this node.
 		/// </summary>
-		/// <param name="child">The node to add.</param>
-		public void AddChild(PivotItemTreeNode child)
+		/// <param name="value">The cache record item node "v" index of the new child.</param>
+		/// <param name="pivotFieldIndex">The index of the pivot field referenced by the new child.</param>
+		/// <param name="pivotFieldItemIndex">The index of the pivot field item referenced by the new child.</param>
+		public PivotItemTreeNode AddChild(int value, int pivotFieldIndex = -2, int pivotFieldItemIndex = -2)
 		{
+			var child = new PivotItemTreeNode(value)
+			{
+				PivotFieldIndex = pivotFieldIndex,
+				PivotFieldItemIndex = pivotFieldItemIndex
+			};
 			this.Children.Add(child);
+			return child;
 		}
 
 		/// <summary>
@@ -105,7 +119,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			foreach (var child in this.Children)
 			{
-				clone.AddChild(child.Clone());
+				clone.Children.Add(child.Clone());
 			}
 			return clone;
 		}
@@ -122,7 +136,123 @@ namespace OfficeOpenXml.Table.PivotTable
 				child.RecursivelySetDataFieldIndex(index);
 			}
 		}
+
+		/// <summary>
+		/// If the only child of this node is a datafield node, expand it by duplicating 
+		/// each child for each data field and setting the respective data field indices 
+		/// on the duplicated node paths.
+		/// </summary>
+		/// <param name="dataFieldCount">The number of data fields on the pivot table.</param>
+		public void ExpandIfDataFieldNode(int dataFieldCount)
+		{
+			if (this.Children.Count == 1)
+			{
+				var onlyChild = this.Children.First();
+				if (onlyChild.IsDataField)
+				{
+					onlyChild.RecursivelySetDataFieldIndex(0);
+					// child is a datafield node, create a node for each datafield and update with the index into the datafield collection.
+					for (int i = 0; i < dataFieldCount - 1; i++)
+					{
+						var newChild = onlyChild.Clone();
+						newChild.RecursivelySetDataFieldIndex(i + 1);
+						this.Children.Add(newChild);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Sorts this node's children.
+		/// </summary>
+		/// <param name="pivotTable">The pivot table that defines sorting.</param>
+		public void SortChildren(ExcelPivotTable pivotTable)
+		{
+			foreach (var child in this.Children.ToList())
+			{
+				// Set the pivot table field.
+				ExcelPivotTableField pivotField = null;
+				if (child.PivotFieldIndex == -2 && !child.HasChildren)
+					continue;
+				else if (child.PivotFieldIndex == -2)
+					pivotField = pivotTable.Fields[child.Children[0].PivotFieldIndex];
+				else
+					pivotField = pivotTable.Fields[child.PivotFieldIndex];
+
+				// Sort the children, so that they are in alphabetical/chronological order.
+				var orderNodes = this.Children.OrderBy(x => x.PivotFieldItemIndex).ToList();
+				if (!this.Children.SequenceEqual(orderNodes))
+				{
+					var newChildList = this.Children.ToList();
+					this.Children.Clear();
+					for (int i = 0; i < orderNodes.Count(); i++)
+					{
+						int orderListIndex = newChildList.FindIndex(x => x.PivotFieldItemIndex == orderNodes.ElementAt(i).PivotFieldItemIndex);
+						this.Children.Add(newChildList[orderListIndex]);
+					}
+				}
+
+				// Sort items with references to datafields.
+				if (pivotField.AutoSortScopeReferences.Count != 0)
+					this.SortWithDataFields(pivotTable, pivotField, this);
+
+				// Recursively sort the children of the current node.
+				child.SortChildren(pivotTable);
+			}
+		}
 		#endregion
 
+		#region Private Methods
+		private void SortWithDataFields(ExcelPivotTable pivotTable, ExcelPivotTableField pivotField, PivotItemTreeNode root)
+		{
+			int autoScopeIndex = int.Parse(pivotField.AutoSortScopeReferences[0].Value);
+			var referenceDataFieldIndex = pivotTable.DataFields[autoScopeIndex].Index;
+
+			// TODO: Implement sorting for calculated fields. Logged in VSTS bug #10277.
+			// Skip sorting if this is a calculated field.
+			if (!string.IsNullOrEmpty(pivotTable.CacheDefinition.CacheFields[referenceDataFieldIndex].Formula))
+				return;
+
+			var orderedList = new List<Tuple<int, double>>();
+			// Get the total value for every child at the given data field index.
+			foreach (var c in root.Children.ToList())
+			{
+				double sortingTotal = pivotTable.CacheDefinition.CacheRecords.CalculateSortingValues(c, referenceDataFieldIndex);
+				orderedList.Add(new Tuple<int, double>(c.Value, sortingTotal));
+			}
+
+			// Sort the list of total values accordingly.
+			if (pivotField.Sort == eSortType.Ascending)
+				orderedList = orderedList.OrderBy(i => i.Item2).ToList();
+			else if (pivotField.Sort == eSortType.Descending)
+				orderedList = orderedList.OrderByDescending(i => i.Item2).ToList();
+
+			// If there are duplicated sortingTotal values, sort it based on the value of the first tuple.
+			var duplicates = orderedList.GroupBy(x => x.Item2).Where(g => g.Count() > 1).Select(k => k.Key);
+			if (duplicates.Count() > 0)
+			{
+				for (int i = 0; i < duplicates.ToList().Count(); i++)
+				{
+					var duplicatedList = orderedList.FindAll(j => j.Item2 == duplicates.ElementAt(i));
+					int startingIndex = orderedList.FindIndex(y => y == duplicatedList.ElementAt(0));
+					if (pivotField.Sort == eSortType.Ascending)
+						duplicatedList = duplicatedList.OrderBy(w => w.Item1).ToList();
+					else
+						duplicatedList = duplicatedList.OrderByDescending(w => w.Item1).ToList();
+					orderedList.RemoveRange(startingIndex, duplicatedList.Count());
+					orderedList.InsertRange(startingIndex, duplicatedList);
+				}
+			}
+
+			// Add children back to the root node in sorted order.
+			var newChildList = root.Children.ToList();
+			root.Children.Clear();
+			for (int i = 0; i < orderedList.Count(); i++)
+			{
+				int index = newChildList.FindIndex(x => x.Value == orderedList.ElementAt(i).Item1);
+				root.Children.Add(newChildList[index]);
+			}
+		}
+		#endregion
 	}
 }
