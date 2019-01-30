@@ -3118,7 +3118,7 @@ namespace EPPlusTest.Table.PivotTable
 					var worksheet = package.Workbook.Worksheets["Sheet1"];
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					pivotTable.PageFields[0].Item = 1;
-					pivotTable.PageFields[1].Item = 4;
+					pivotTable.PageFields[1].Item = 2;
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					this.CheckPivotTableAddress(new ExcelAddress("J9:L15"), pivotTable.Address);
@@ -4450,7 +4450,7 @@ namespace EPPlusTest.Table.PivotTable
 		}
 		#endregion
 		#endregion
-		
+
 		#region Sorting Tests
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableSorting.xlsx")]

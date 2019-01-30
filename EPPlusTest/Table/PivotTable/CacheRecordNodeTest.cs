@@ -274,5 +274,27 @@ namespace EPPlusTest.Table.PivotTable
 			}
 		}
 		#endregion
+
+		#region ContainsPageFieldIndices Tests
+		[TestMethod]
+		public void CacheRecordContainsPageFieldIndices()
+		{
+			XmlDocument document = new XmlDocument();
+			document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""1""><r><x v=""1""/><x v=""2""/> <x v=""3""/> <x v=""4""/> <x v=""5""/><x v=""6""/></r></pivotCacheRecords>");
+			var ns = TestUtility.CreateDefaultNSM();
+			var node = new CacheRecordNode(ns, document.SelectSingleNode("//d:r", ns));
+			Assert.AreEqual(6, node.Items.Count);
+
+			var cacheRecordPageFieldIndices = new Dictionary<int, List<int>>
+			{
+				{ 0, new List<int> { 2, 3, 1, 7 } },
+				{ 1, new List<int> { 0, 2, 9, 4 } },
+				{ 3, new List<int> { 5, 6, 4 } }
+			};
+			Assert.IsTrue(node.ContainsPageFieldIndices(cacheRecordPageFieldIndices));
+			cacheRecordPageFieldIndices[0].Remove(1);
+			Assert.IsFalse(node.ContainsPageFieldIndices(cacheRecordPageFieldIndices));
+		}
+		#endregion
 	}
 }
