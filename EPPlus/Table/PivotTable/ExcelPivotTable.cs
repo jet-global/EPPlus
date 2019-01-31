@@ -1324,13 +1324,14 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		private void CreateTotalNodes(string itemType, bool isRowItem, List<Tuple<int, int>> indices, ExcelPivotTableField pivotField, 
-			int repeatedItemsCount, bool multipleDataFields, bool hasDataFields, int dataFieldIndex = 0)
+			int repeatedItemsCount, bool multipleSubtotalDataFields, bool hasDataFields, int dataFieldIndex = 0)
 		{
 			var itemsCollection = isRowItem ? this.RowItems : this.ColumnItems;
 			var headerCollection = isRowItem ? this.RowHeaders : this.ColumnHeaders;
 
 			// Variables are set for the default case where item type is a grand total.
-			int index = this.DataFields.Count > 0 && hasDataFields ? this.DataFields.Count : 1;
+			bool hasMultipleDataFields = this.DataFields.Any() && hasDataFields;
+			int index = hasMultipleDataFields ? this.DataFields.Count : 1;
 			int xMember = 0;
 			bool aboveDataField = false;
 			bool grandTotal = true;
@@ -1338,7 +1339,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Reset variables if item type is a default total.
 			if (itemType.IsEquivalentTo("default"))
 			{
-				index = multipleDataFields && this.DataFields.Any() ? this.DataFields.Count : 1;
+				index = multipleSubtotalDataFields && hasMultipleDataFields ? this.DataFields.Count : 1;
 				xMember = indices.Last().Item2;
 				aboveDataField = !indices.Any(x => x.Item1 == -2);
 				grandTotal = false;
