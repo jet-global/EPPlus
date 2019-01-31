@@ -31,7 +31,6 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -1062,7 +1061,9 @@ namespace OfficeOpenXml.Table.PivotTable
 					base.TopNode.RemoveChild(dataFieldsNode);
 			}
 		}
+		#endregion
 
+		#region Private Methods
 		private void BuildRowItems(PivotItemTreeNode root, List<Tuple<int, int>> indices)
 		{
 			if (!root.Children.Any())
@@ -1193,6 +1194,16 @@ namespace OfficeOpenXml.Table.PivotTable
 				for (int j = 0; j < rowColFields.Count; j++)
 				{
 					int rowColFieldIndex = rowColFields[j].Index;
+					var groupFieldName = "";
+					int tempIndex = rowColFieldIndex;
+					// If there are date groupings.
+					if (rowColFieldIndex >= cacheRecord.Items.Count)
+					{
+						int baseIndex = this.myCacheDefinition.CacheFields[rowColFieldIndex].FieldGroup.BaseField; // 2
+						groupFieldName = this.myCacheDefinition.CacheFields[rowColFieldIndex].Name; // Years
+						rowColFieldIndex = baseIndex;
+					}
+
 					if (currentNode.Children.Any(c => c.IsDataField))
 						currentNode = currentNode.GetChildNode(-2);
 					else if (rowColFieldIndex == -2)
@@ -1203,15 +1214,75 @@ namespace OfficeOpenXml.Table.PivotTable
 						// Otherwise, create a new child.
 						pivotField = this.Fields[rowColFieldIndex];
 						int recordItemValue = int.Parse(cacheRecord.Items[rowColFieldIndex].Value);
-						if (currentNode.HasChild(recordItemValue))
-							currentNode = currentNode.GetChildNode(recordItemValue);
+
+						if (!string.IsNullOrEmpty(groupFieldName))
+						{
+							var groupedPivotField = this.Fields[tempIndex];
+							var value = this.CacheDefinition.CacheFields[rowColFieldIndex].SharedItems[recordItemValue];
+							if (value.Type == PivotCacheRecordType.d)
+							{
+								var dateSplit = value.Value.Split('-');
+								var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+								if (groupFieldName.IsEquivalentTo("Years"))
+								{
+									string year = dateTime.Year.ToString();
+									if (currentNode.HasChild(year))
+										currentNode = currentNode.GetChildNode(year);
+									else
+									{
+										// Get the index of year in the group items collection.
+										int pivotFieldItemIndex = this.CacheDefinition.CacheFields[tempIndex].FieldGroup.GroupItems.ToList().FindIndex(x => x.Value.IsEquivalentTo(year));
+										currentNode.SubtotalTop = pivotField.SubtotalTop;
+										currentNode = currentNode.AddChild(recordItemValue, tempIndex, pivotFieldItemIndex, year);
+									}
+								}
+								else if (groupFieldName.IsEquivalentTo("Quarters"))
+								{
+									int quarterNumber = (dateTime.Month - 1) / 3 + 1;
+									string quarter = "Qtr" + quarterNumber;
+									if (currentNode.HasChild(quarter))
+										currentNode = currentNode.GetChildNode(quarter);
+									else
+									{
+										// Get the index of quarter in the group items collection.
+										int pivotFieldItemIndex = this.CacheDefinition.CacheFields[tempIndex].FieldGroup.GroupItems.ToList().FindIndex(x => x.Value.IsEquivalentTo(quarter));
+										currentNode.SubtotalTop = pivotField.SubtotalTop;
+										currentNode = currentNode.AddChild(recordItemValue, tempIndex, pivotFieldItemIndex, quarter);
+									}
+								}
+							}
+						}
+						else if (pivotField.Name.IsEquivalentTo("Month") && this.CacheDefinition.CacheFields[rowColFieldIndex].FieldGroup != null)
+						{
+							var value = this.CacheDefinition.CacheFields[rowColFieldIndex].SharedItems[recordItemValue];
+							if (value.Type == PivotCacheRecordType.d)
+							{
+								var dateSplit = value.Value.Split('-');
+								var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+								string month = dateTime.ToString("MMM");
+								if (currentNode.HasChild(month))
+									currentNode = currentNode.GetChildNode(month);
+								else
+								{
+									currentNode.SubtotalTop = pivotField.SubtotalTop;
+									// Get the index of quarter in the group items collection.
+									int pivotFieldItemIndex = this.CacheDefinition.CacheFields[rowColFieldIndex].FieldGroup.GroupItems.ToList().FindIndex(c => c.Value.IsEquivalentTo(month));
+									currentNode = currentNode.AddChild(recordItemValue, rowColFieldIndex, pivotFieldItemIndex, month);
+								}
+							}
+						}
 						else
 						{
-							if (cacheRecordPageFieldIndices?.Any() == true && !cacheRecord.ContainsPageFieldIndices(cacheRecordPageFieldIndices))
-								break;
-							currentNode.SubtotalTop = pivotField.SubtotalTop;
-							int pivotFieldItemIndex = pivotField.Items.ToList().FindIndex(c => c.X == recordItemValue);
-							currentNode = currentNode.AddChild(recordItemValue, rowColFieldIndex, pivotFieldItemIndex);
+							if (currentNode.HasChild(recordItemValue))
+								currentNode = currentNode.GetChildNode(recordItemValue);
+							else
+							{
+								if (cacheRecordPageFieldIndices?.Any() == true && !cacheRecord.ContainsPageFieldIndices(cacheRecordPageFieldIndices))
+									break;
+								currentNode.SubtotalTop = pivotField.SubtotalTop;
+								int pivotFieldItemIndex = pivotField.Items.ToList().FindIndex(c => c.X == recordItemValue);
+								currentNode = currentNode.AddChild(recordItemValue, rowColFieldIndex, pivotFieldItemIndex);
+							}
 						}
 					}
 					if (!currentNode.CacheRecordIndices.Contains(i))
@@ -1255,9 +1326,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			return pageFieldIndices;
 		}
-		#endregion
-
-		#region Private Methods
+		
 		private IOrderedEnumerable<CacheItem> SortField(eSortType sortOrder, ExcelPivotTableField pivotField)
 		{
 			var fieldItems = pivotField.Items;
@@ -1690,4 +1759,3 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 	}
 }
- 

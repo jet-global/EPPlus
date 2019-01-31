@@ -233,21 +233,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, 
 			Dictionary<int, List<int>> filterIndices, int dataFieldIndex, ExcelPivotTable pivotTable = null)
 		{
-			if (!string.IsNullOrEmpty(this.CacheDefinition.CacheFields[dataFieldIndex].Formula))
-				return null;
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
-				bool match = false;
+				bool match = true;
 				if (rowTuples != null)
-				{
-					if (pivotTable == null)
-						match = this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record);
-					else if (rowTuples.Any(x => x.Item1 >= record.Items.Count) || pivotTable.RowFields.Any(x => x.Index >= record.Items.Count))
-						match = this.FindCacheRecordValueAndTupleValueMatch2(rowTuples, record, pivotTable);
-					else
-						match = this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
-				}
+					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
 				if (match && columnTuples != null)
 					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(columnTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(columnTuples, record, pivotTable);
 				if (match && filterIndices != null)
@@ -256,20 +247,6 @@ namespace OfficeOpenXml.Table.PivotTable
 					this.AddToList(record, dataFieldIndex, matchingValues);
 			}
 			return matchingValues;
-			//var matchingValues = new List<object>();
-			//foreach (var record in this.Records)
-			//{
-			//	bool match = true;
-			//	if (rowTuples != null)
-			//		match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
-			//	if (match && columnTuples != null)
-			//		match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(columnTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(columnTuples, record, pivotTable);
-			//	if (match && filterIndices != null)
-			//		match = this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record);
-			//	if (match)
-			//		this.AddToList(record, dataFieldIndex, matchingValues);
-			//}
-			//return matchingValues;
 		}
 		#endregion
 
@@ -297,308 +274,61 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			foreach (var tuple in list)
 			{
+				// Ignore data field tuples or group pivot field tuples.
 				if (tuple.Item1 == -2)
 					continue;
-				var sharedItems = this.CacheDefinition.CacheFields[tuple.Item1].SharedItems;
-				int recordValue = int.Parse(record.Items[tuple.Item1].Value);
-				int pivotFieldValue = pivotTable.Fields[tuple.Item1].Items[tuple.Item2].X;
-				if (sharedItems[recordValue].Value != sharedItems[pivotFieldValue].Value)
-					return false;
-			}
-			return true;
-		}
 
-		private bool FindCacheRecordValueAndTupleValueMatch2(List<Tuple<int, int>> list, CacheRecordNode record, ExcelPivotTable pivotTable)
-		{
-			var indicesMatch = new List<Tuple<int, int>>();
-			string yr = "";
-			string qtr = "";
-			foreach (var tuple in list)
-			{
-				if (tuple.Item1 == -2)
-					continue;
-				else if (tuple.Item1 >= this.Records[0].Items.Count)
+				var cacheField = this.CacheDefinition.CacheFields[tuple.Item1];
+				// Handles grouped fields.
+				if (cacheField.FieldGroup != null)
 				{
-					// If field groups are used (specifically date field groups for now).
-					string cacheFieldGroupName = pivotTable.CacheDefinition.CacheFields[tuple.Item1].Name; // Years
-					string value = pivotTable.CacheDefinition.CacheFields[tuple.Item1].FieldGroup.GroupItems[tuple.Item2].Value; // 2016
-					int baseFieldIndex = pivotTable.CacheDefinition.CacheFields[tuple.Item1].FieldGroup.BaseField; // 2
-					var baseCacheField = pivotTable.CacheDefinition.CacheFields[baseFieldIndex]; // Month
-					yr = cacheFieldGroupName.IsEquivalentTo("Years") ? value : yr ;
-					qtr = cacheFieldGroupName.IsEquivalentTo("Quarters") ? value : qtr;
-					for (int i = 0; i < baseCacheField.SharedItems.Count; i++)
+					var recordIndices = new List<int>();
+					// Go through all the shared items and if the item is the targeted value (tuple.Item2 or groupItems[tuple.Item2]), 
+					// add the index of the shared item to the list.
+					if (cacheField.Name.IsEquivalentTo("Month"))
 					{
-						var dateTimeSplit = baseCacheField.SharedItems[i].Value.Split('-');
-						var dateTimeSplit2 = new DateTime(int.Parse(dateTimeSplit[0]), int.Parse(dateTimeSplit[1]), int.Parse(dateTimeSplit[2].Substring(0, 2)));
-						if (cacheFieldGroupName.IsEquivalentTo("Years"))
+						var sharedItems = cacheField.SharedItems;
+						for (int i = 0; i < sharedItems.Count; i++)
 						{
-							// If this is an inner node.
-							if (tuple == list.Last() && tuple != list.First())
-							{
-								foreach (var pair in indicesMatch.ToList())
-								{
-									var itemSplit = baseCacheField.SharedItems[pair.Item2].Value.Split('-');
-									// If the year is incorrect, remove it from the list.
-									if (!value.IsEquivalentTo(itemSplit[0]))
-										indicesMatch.Remove(pair);
-								}
-								break;
-							}
-							else
-							{
-								var tup = new Tuple<int, int>(baseFieldIndex, i);
-								int quarter = (dateTimeSplit2.Month - 1) / 3 + 1;
-								if (value.IsEquivalentTo(dateTimeSplit[0]) && !indicesMatch.Contains(tup))
-								{
-									// If Quarters is a parent node of Years, then check that the quarter matches. Otherwise, only check for the year value.
-									if (!string.IsNullOrEmpty(qtr) && qtr.IsEquivalentTo("Qtr" + quarter))
-									{
-										yr = value;
-										indicesMatch.Add(tup);
-									}
-									else if (string.IsNullOrEmpty(qtr) && value.IsEquivalentTo(dateTimeSplit[0]))
-									{
-										indicesMatch.Add(tup);
-									}
-								}
-								else if (indicesMatch.Contains(tup))
-								{
-									// If Quarters is a parent node of Years, then check that the quarter matches. Otherwise, only check for the year value.
-									if ((!string.IsNullOrEmpty(qtr) && !qtr.IsEquivalentTo("Qtr" + quarter)) || string.IsNullOrEmpty(qtr) && !value.IsEquivalentTo(dateTimeSplit[0]))
-									{
-										indicesMatch.Remove(tup);
-									}
-								}
-							}
-						}
-						else if (cacheFieldGroupName.IsEquivalentTo("Quarters"))
-						{
-							// Since it is the last tuple in the list, go through the indicesMatch list and check that the tuples have the correct month.
-							if (tuple == list.Last() && tuple != list.First())
-							{
-								foreach (var pair in indicesMatch.ToList())
-								{
-									var itemSplit = baseCacheField.SharedItems[pair.Item2].Value.Split('-');
-									int month = int.Parse(itemSplit[1]);
-									int quarter = (month - 1) / 3 + 1;
-									// If the quarter is incorrect, remove it from the list.
-									if (!value.IsEquivalentTo("Qtr" + quarter))
-										indicesMatch.Remove(pair);
-								}
-								break;
-							}
-							else
-							{
-								int month = int.Parse(dateTimeSplit[1]);
-								int quarter = (month - 1) / 3 + 1;
-								var tup = new Tuple<int, int>(baseFieldIndex, i);
-								if (value.IsEquivalentTo("Qtr" + quarter) && !indicesMatch.Contains(tup))
-								{
-									// If Years is a parent node of Quarters, then check that the year matches. Otherwise, only check for the quarter value.
-									if (!string.IsNullOrEmpty(yr) && yr.IsEquivalentTo(dateTimeSplit[0]))
-									{
-										qtr = "Qtr" + quarter;
-										indicesMatch.Add(tup);
-									}
-									else if (string.IsNullOrEmpty(yr) && value.IsEquivalentTo("Qtr" + quarter))
-									{
-										indicesMatch.Add(tup);
-									}
-								}
-								else if (indicesMatch.Contains(tup))
-								{
-									if ((!string.IsNullOrEmpty(yr) && !yr.IsEquivalentTo(dateTimeSplit[0])) || string.IsNullOrEmpty(yr) && !value.IsEquivalentTo("Qtr" + quarter))
-									{
-										indicesMatch.Remove(tup);
-									}
-								}
-							}
-						}
-					}
-				}
-				else
-				{
-					// This is a normal pivot field index.
-					if (pivotTable.CacheDefinition.CacheFields[tuple.Item1].Name.IsEquivalentTo("Month"))
-					{
-						// If Month is the very first node.
-						if (tuple == list.First())
-						{
-							// Get the month from groupItems
-							var cacheField = pivotTable.CacheDefinition.CacheFields[tuple.Item1];
-							string monthName = cacheField.FieldGroup.GroupItems[tuple.Item2].Value;
-							if (list.Count == 1)
-							{
-								for (int i = 0; i < cacheField.SharedItems.Count; i++)
-								{
-									var dateSplit = cacheField.SharedItems[i].Value.Split('-');
-									var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
-									if (monthName.IsEquivalentTo(dateTime.ToString("MMM")) && int.Parse(record.Items[tuple.Item1].Value) == i)
-									{
-										return true;
-									}
-								}
-								return false;
-							}
-							else
-							{
-								bool matchFound = false;
-								for (int i = 0; i < cacheField.SharedItems.Count; i++)
-								{
-									var dateSplit = cacheField.SharedItems[i].Value.Split('-');
-									var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
-									if (monthName.IsEquivalentTo(dateTime.ToString("MMM")) && int.Parse(record.Items[tuple.Item1].Value) == i)
-									{
-										matchFound = true;
-										indicesMatch.Add(new Tuple<int, int>(tuple.Item1, i));
-									}
-								}
-								// If a match is not found, then return false and continue onto the next record.
-								if (!matchFound)
-									return matchFound;
-							}
-						}
-						// If Month is the last node.
-						else if (tuple == list.Last())
-						{
-							int year = -1;
-							string quarter = "";
-							foreach (var tup in list)
-							{
-								if (tup.Item1 >= record.Items.Count)
-								{
-									if (this.CacheDefinition.CacheFields[tup.Item1].Name.IsEquivalentTo("Years"))
-										year = int.Parse(this.CacheDefinition.CacheFields[tup.Item1].FieldGroup.GroupItems[tup.Item2].Value);
-									else if (this.CacheDefinition.CacheFields[tup.Item1].Name.IsEquivalentTo("Quarters"))
-										quarter = this.CacheDefinition.CacheFields[tup.Item1].FieldGroup.GroupItems[tup.Item2].Value;
-								}
-							}
-
-							var sharedItems = pivotTable.CacheDefinition.CacheFields[tuple.Item1].SharedItems;
-
-							// If non-date grouping fields are parent nodes of a month field.
-							if (indicesMatch.Count == 0)
-							{
-								string month = pivotTable.CacheDefinition.CacheFields[tuple.Item1].FieldGroup.GroupItems[tuple.Item2].Value; // Mar
-								for (int i = 0; i < sharedItems.Count; i++)
-								{
-									var date = sharedItems[i].Value.Split('-');
-									var dateTime = new DateTime(int.Parse(date[0]), int.Parse(date[1]), int.Parse(date[2].Substring(0, 2)));
-									int quarterValue = (dateTime.Month - 1) / 3 + 1;
-									// Check that the month's are correct and it exists in the cache records.
-									// Case 1: If Years and Quarters are a parent node of Month, then also check that the shared item's year and quarter is correct.
-									// Case 2: If Quarters is a parent node of Month, then check then also check that the shared item's quarter is correct.
-									// Case 3: If Years is a parent node of Month, then check then also check that the shared item's year is correct.
-									// Case 4: If both Years and Quarters is not a parent node of Month, then ignore it.
-									if (dateTime.Month == tuple.Item2 && int.Parse(record.Items[tuple.Item1].Value) == i &&
-										((year == dateTime.Year && quarter.IsEquivalentTo("Qtr" + quarterValue)
-										|| (year == -1 & quarter.IsEquivalentTo("Qtr" + quarterValue))
-										|| (string.IsNullOrEmpty(quarter) && year == dateTime.Year))
-										|| (year == -1 && string.IsNullOrEmpty(quarter))))
-									{
-										return true;
-									}
-								}
-							}
-							else
-							{
-								for (int i = 0; i < indicesMatch.Count; i++)
-								{
-									var item = sharedItems[indicesMatch[i].Item2];
-									var date = item.Value.Split('-');
-									var dateTime = new DateTime(int.Parse(date[0]), int.Parse(date[1]), int.Parse(date[2].Substring(0, 2)));
-									int quarterValue = (dateTime.Month - 1) / 3 + 1;
-									// Check that the month's are correct and it exists in the cache records.
-									// Case 1: If Years and Quarters are a parent node of Month, then also check that the shared item's year and quarter is correct.
-									// Case 2: If Quarters is a parent node of Month, then check then also check that the shared item's quarter is correct.
-									// Case 3: If Years is a parent node of Month, then check then also check that the shared item's year is correct.
-									if (dateTime.Month == tuple.Item2 && int.Parse(record.Items[tuple.Item1].Value) == indicesMatch[i].Item2 &&
-										((year == dateTime.Year && quarter.IsEquivalentTo("Qtr" + quarterValue)
-										|| (year == -1 & quarter.IsEquivalentTo("Qtr" + quarterValue))
-										|| (string.IsNullOrEmpty(quarter) && year == dateTime.Year))))
-									{
-										return true;
-									}
-								}
-							}
-							
-							return false;
-						}
-						// If Month is an inner node.
-						else
-						{
-							var sharedItems = pivotTable.CacheDefinition.CacheFields[tuple.Item1].SharedItems;
-
-							// If Month is a parent node of Years/Quarters and a child node of a non-date grouping field, then add to the indicesMatch list.
-							if (indicesMatch.Count == 0)
-							{
-								string month = pivotTable.CacheDefinition.CacheFields[tuple.Item1].FieldGroup.GroupItems[tuple.Item2].Value; // Mar
-								for (int i = 0; i < sharedItems.Count; i++)
-								{
-									var date = sharedItems[i].Value.Split('-');
-									var dateTime = new DateTime(int.Parse(date[0]), int.Parse(date[1]), int.Parse(date[2].Substring(0, 2)));
-									if (dateTime.Month == tuple.Item2 && int.Parse(record.Items[tuple.Item1].Value) == i)
-									{
-										indicesMatch.Add(new Tuple<int, int>(tuple.Item1, i));
-									}
-								}
-							}
-							else
-							{
-								int index = 0;
-								while (index < indicesMatch.Count)
-								{
-									var item = sharedItems[indicesMatch[index].Item2];
-									var date = item.Value.Split('-');
-									int month = int.Parse(date[1]);
-									if (month != tuple.Item2 || int.Parse(record.Items[tuple.Item1].Value) != indicesMatch[index].Item2)
-									{
-										indicesMatch.Remove(indicesMatch[index]);
-									}
-									else
-										index++;
-								}
-							}
-							
-							if (indicesMatch.Count == 0)
-								break;
+							var dateSplit = sharedItems[i].Value.Split('-')[1];
+							if (int.Parse(dateSplit) == tuple.Item2)
+								recordIndices.Add(i);
 						}
 					}
 					else
 					{
-						
-						var sharedItems = this.CacheDefinition.CacheFields[tuple.Item1].SharedItems;
-						int recordValue = int.Parse(record.Items[tuple.Item1].Value);
-						int pivotFieldValue = pivotTable.Fields[tuple.Item1].Items[tuple.Item2].X;
-						if (sharedItems[recordValue].Value != sharedItems[pivotFieldValue].Value)
-							return false;
-						if (list.Count == 1)
-							return true;
+						int baseFieldIndex = cacheField.FieldGroup.BaseField;
+						string groupFieldItemsValue = cacheField.FieldGroup.GroupItems[tuple.Item2].Value;
+						var sharedItems = this.CacheDefinition.CacheFields[baseFieldIndex].SharedItems;
+						for (int i = 0; i < sharedItems.Count; i++)
+						{
+							var dateSplit = sharedItems[i].Value.Split('-');
+							var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+							if (cacheField.Name.IsEquivalentTo("Years") && groupFieldItemsValue.IsEquivalentTo(dateTime.Year.ToString()))
+								recordIndices.Add(i);
+							else if (cacheField.Name.IsEquivalentTo("Quarters"))
+							{
+								int quarter = (dateTime.Month - 1) / 3 + 1;
+								if (groupFieldItemsValue.IsEquivalentTo("Qtr" + quarter))
+									recordIndices.Add(i);
+							}
+						}
 					}
-				}
-			}
-
-			var duplicates = indicesMatch.GroupBy(x => x.Item1).Where(g => g.Count() > 1).Select(y => y.Key);
-			if (indicesMatch.Count == 0)
-				return false;
-			foreach (var pair in indicesMatch)
-			{
-				int item1 = pair.Item1;
-				if (duplicates.Contains(item1))
-				{
-					var item2Values = indicesMatch.FindAll(j => j.Item1 == item1).Select(x => x.Item2);
-					int recordValue = int.Parse(record.Items[item1].Value);
-					if (!item2Values.Contains(recordValue))
+					// Get the index of the current record in the collection.
+					// If the index is in the list, the record value and tuple matches.
+					int recordIndex = this.Records.IndexOf(record);
+					if (!recordIndices.Contains(recordIndex))
 						return false;
 				}
 				else
 				{
-					int recordValue = int.Parse(record.Items[pair.Item1].Value);
-					if (recordValue != pair.Item2)
+					var sharedItems = this.CacheDefinition.CacheFields[tuple.Item1].SharedItems;
+					int recordValue = int.Parse(record.Items[tuple.Item1].Value);
+					int pivotFieldValue = pivotTable.Fields[tuple.Item1].Items[tuple.Item2].X;
+					if (sharedItems[recordValue].Value != sharedItems[pivotFieldValue].Value)
 						return false;
 				}
 			}
-
 			return true;
 		}
 
