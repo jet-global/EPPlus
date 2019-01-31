@@ -6220,16 +6220,6 @@ namespace EPPlusTest.Table.PivotTable
 		}
 		#endregion
 
-		[TestMethod]
-		public void SKDjfsdfsdf()
-		{
-			using (var package = new ExcelPackage(new FileInfo(@"C:\Users\ems\Downloads\test1.xlsx")))
-			{
-				package.Workbook.PivotCacheDefinitions.First().UpdateData();
-				package.SaveAs(@"C:\Users\ems\Downloads\OUT.xlsx");
-			}
-		}
-
 		#region Helper Methods
 		private void CheckPivotTableAddress(ExcelAddress expectedAddress, ExcelAddress pivotTableAddress)
 		{
