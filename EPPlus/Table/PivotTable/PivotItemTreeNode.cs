@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OfficeOpenXml.Extensions;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -76,6 +77,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool HasChildren => this.Children.Any();
 
 		/// <summary>
+		/// Gets or sets the shared item value.
+		/// </summary>
+		public string SharedItemValue { get; set; }
+
+		/// <summary>
 		/// Gets or sets the list of children that this node parents.
 		/// </summary>
 		public List<PivotItemTreeNode> Children { get; set; } = new List<PivotItemTreeNode>();
@@ -99,12 +105,14 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="value">The cache record item node "v" index of the new child.</param>
 		/// <param name="pivotFieldIndex">The index of the pivot field referenced by the new child.</param>
 		/// <param name="pivotFieldItemIndex">The index of the pivot field item referenced by the new child.</param>
-		public PivotItemTreeNode AddChild(int value, int pivotFieldIndex = -2, int pivotFieldItemIndex = -2)
+		/// <param name="sharedItemValue">The shared item "v" value. (Only used for date groupings).</param>
+		public PivotItemTreeNode AddChild(int value, int pivotFieldIndex = -2, int pivotFieldItemIndex = -2, string sharedItemValue = null)
 		{
 			var child = new PivotItemTreeNode(value)
 			{
 				PivotFieldIndex = pivotFieldIndex,
-				PivotFieldItemIndex = pivotFieldItemIndex
+				PivotFieldItemIndex = pivotFieldItemIndex,
+				SharedItemValue = sharedItemValue
 			};
 			this.Children.Add(child);
 			return child;
@@ -121,6 +129,16 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Checks whether or not a child already exists with the specified string value.
+		/// </summary>
+		/// <param name="value">The value to look for in the children list.</param>
+		/// <returns>True if the child exists, otherwise false.</returns>
+		public bool HasChild(string value)
+		{
+			return this.Children?.Any(i => i.SharedItemValue.IsEquivalentTo(value)) ?? false;
+		}
+
+		/// <summary>
 		/// Gets the child node that has the specified value.
 		/// </summary>
 		/// <param name="value">The value to look for in the children list.</param>
@@ -128,6 +146,17 @@ namespace OfficeOpenXml.Table.PivotTable
 		public PivotItemTreeNode GetChildNode(int value)
 		{
 			return this.Children.Find(i => i.Value == value);
+		}
+
+		/// <summary>
+		/// Gets the child node that has the specified string value.
+		/// Note: Used for date groupings only.
+		/// </summary>
+		/// <param name="value">The value to look for in the children list.</param>
+		/// <returns>The child node if it exists.</returns>
+		public PivotItemTreeNode GetChildNode(string value)
+		{
+			return this.Children.Find(i => i.SharedItemValue.IsEquivalentTo(value));
 		}
 
 		/// <summary>

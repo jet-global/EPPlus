@@ -31,7 +31,6 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -1005,28 +1004,30 @@ namespace OfficeOpenXml.Table.PivotTable
 				var cacheField = this.CacheDefinition.CacheFields[pivotField.Index];
 				if (!cacheField.HasSharedItems)
 					continue;
-				if (fieldItems.Count > cacheField.SharedItems.Count + 1)
-					throw new InvalidOperationException("There are more pivotField items than cacheField sharedItems.");
 
 				if (fieldItems.Count > 0)
 				{
 					// Preserve the "@h" attribute for fields marked as hidden.
 					var hiddenFieldItemsDictionary = fieldItems.ToDictionary(f => f.X, f => f.Hidden);
-					fieldItems.Clear(pivotField.DefaultSubtotal);
 
-					var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
-
-					// Sort the row/column headers.
-					var sortedList = this.SortField(pivotField.Sort, pivotField).ToList();
-
-					// Assign the correct index value to each item.
-					for (int i = 0; i < sortedList.Count(); i++)
+					// Only sort pivot field items if the pivot field is not part of a date grouping.
+					if (this.CacheDefinition.CacheFields[pivotField.Index].FieldGroup == null)
 					{
-						var field = sortedList[i];
-						int index = sharedItemsList.FindIndex(x => x == field);
-						fieldItems.AddItem(i, index, pivotField.DefaultSubtotal);
-						if (hiddenFieldItemsDictionary.ContainsKey(index))
-							fieldItems[i].Hidden = hiddenFieldItemsDictionary[index];
+						fieldItems.Clear(pivotField.DefaultSubtotal);
+						var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
+
+						// Sort the row/column headers.
+						var sortedList = this.SortField(pivotField.Sort, pivotField).ToList();
+
+						// Assign the correct index value to each item.
+						for (int i = 0; i < sortedList.Count(); i++)
+						{
+							var field = sortedList[i];
+							int index = sharedItemsList.FindIndex(x => x == field);
+							fieldItems.AddItem(i, index, pivotField.DefaultSubtotal);
+							if (hiddenFieldItemsDictionary.ContainsKey(index))
+								fieldItems[i].Hidden = hiddenFieldItemsDictionary[index];
+						}
 					}
 				}
 			}
@@ -1059,6 +1060,43 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
+		/// <summary>
+		/// Gets a dictionary of field index to a list of items that are to be included in the pivot table.
+		/// </summary>
+		/// <returns>A dictionary of pivot field index to a list of field item value indices.</returns>
+		internal Dictionary<int, List<int>> GetPageFieldIndices()
+		{
+			if (this.PageFields == null || this.PageFields.Count == 0)
+				return null;
+			var pageFieldIndices = new Dictionary<int, List<int>>();
+			foreach (var pageField in this.PageFields)
+			{
+				if (pageField.Item != null)
+				{
+					int pivotFieldItemValue = this.Fields[pageField.Field].Items[pageField.Item.Value].X;
+					pageFieldIndices.Add(pageField.Field, new List<int> { pivotFieldItemValue });
+				}
+				else
+				{
+					// If page fields are multi-selected, pivot field items that are 
+					// not selected are flagged as hidden.
+					var pageFieldItems = this.Fields[pageField.Field].Items;
+					if (pageFieldItems != null)
+					{
+						foreach (var item in pageFieldItems.Where(i => !i.Hidden))
+						{
+							if (!pageFieldIndices.ContainsKey(pageField.Field))
+								pageFieldIndices.Add(pageField.Field, new List<int>());
+							pageFieldIndices[pageField.Field].Add(item.X);
+						}
+					}
+				}
+			}
+			return pageFieldIndices;
+		}
+		#endregion
+
+		#region Private Methods
 		private void BuildRowItems(PivotItemTreeNode root, List<Tuple<int, int>> indices)
 		{
 			if (!root.Children.Any())
@@ -1189,26 +1227,34 @@ namespace OfficeOpenXml.Table.PivotTable
 				for (int j = 0; j < rowColFields.Count; j++)
 				{
 					int rowColFieldIndex = rowColFields[j].Index;
+					var cacheFields = this.myCacheDefinition.CacheFields;
+
+					// These variables are only used for date groupings.
+					// Since rowColFieldIndex can be set to the base field index if there are date groupings, this keeps track of the original row field index.
+					int originalIndex = rowColFieldIndex;
+					string groupBy = rowColFieldIndex == -2 ? string.Empty : cacheFields[originalIndex].FieldGroup?.RangeGroupingProperties;
+					// Reset rowColFieldIndex to the base field index if the row/column field index refers to a date grouping field.
+					rowColFieldIndex = rowColFieldIndex >= cacheRecord.Items.Count ? cacheFields[rowColFieldIndex].FieldGroup.BaseField : rowColFieldIndex;
+
 					if (currentNode.Children.Any(c => c.IsDataField))
 						currentNode = currentNode.GetChildNode(-2);
 					else if (rowColFieldIndex == -2)
 						currentNode = currentNode.AddChild(-2);  // Create a datafield node.
 					else
 					{
-						// If an identical child already exists, continue.
-						// Otherwise, create a new child.
 						pivotField = this.Fields[rowColFieldIndex];
 						int recordItemValue = int.Parse(cacheRecord.Items[rowColFieldIndex].Value);
-						if (currentNode.HasChild(recordItemValue))
-							currentNode = currentNode.GetChildNode(recordItemValue);
+						var sharedItemValue = cacheFields[rowColFieldIndex].SharedItems[recordItemValue];
+						
+						// A sharedItem value of type DateTime indicates the current pivot field is part of a date grouping. Otherwise, create a new node if necessary.
+						if (sharedItemValue.Type == PivotCacheRecordType.d && cacheFields[rowColFieldIndex].FieldGroup != null)
+							currentNode = this.CreateDateGroupingNode(currentNode, sharedItemValue.Value, groupBy, rowColFieldIndex, originalIndex, pivotField, cacheRecordPageFieldIndices, cacheRecord, cacheFields);
 						else
-						{
-							if (cacheRecordPageFieldIndices?.Any() == true && !cacheRecord.ContainsPageFieldIndices(cacheRecordPageFieldIndices))
-								break;
-							currentNode.SubtotalTop = pivotField.SubtotalTop;
-							int pivotFieldItemIndex = pivotField.Items.ToList().FindIndex(c => c.X == recordItemValue);
-							currentNode = currentNode.AddChild(recordItemValue, rowColFieldIndex, pivotFieldItemIndex);
-						}
+							currentNode = this.CreateTreeNode(false, currentNode, pivotField, recordItemValue, rowColFieldIndex, cacheRecordPageFieldIndices, cacheRecord, sharedItemValue.Value);
+
+						// This cache record does not contain the page field indices, so continue to the next record.
+						if (currentNode == null)
+							break;
 					}
 					if (!currentNode.CacheRecordIndices.Contains(i))
 						currentNode.CacheRecordIndices.Add(i);
@@ -1217,43 +1263,51 @@ namespace OfficeOpenXml.Table.PivotTable
 			return rootNode;
 		}
 
-		/// <summary>
-		/// Gets a dictionary of field index to a list of items that are to be included in the pivot table.
-		/// </summary>
-		/// <returns>A dictionary of pivot field index to a list of field item value indices.</returns>
-		internal Dictionary<int, List<int>> GetPageFieldIndices()
+		private PivotItemTreeNode CreateDateGroupingNode(PivotItemTreeNode currentNode, string sharedItemValue, string groupBy, int rowColFieldIndex, int originalIndex, 
+			ExcelPivotTableField pivotField, Dictionary<int, List<int>> cacheRecordPageFieldIndices, CacheRecordNode cacheRecord, IReadOnlyList<CacheFieldNode> cacheFields)
 		{
-			if (this.PageFields == null || this.PageFields.Count == 0)
-					return null;
-			var pageFieldIndices = new Dictionary<int, List<int>>();
-			foreach (var pageField in this.PageFields)
+			var dateSplit = sharedItemValue.Split('-');
+			var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+
+			string sharedItemGroupingValue = string.Empty;
+			if (groupBy.IsEquivalentTo("years"))
+				sharedItemGroupingValue = dateTime.Year.ToString();
+			else if (groupBy.IsEquivalentTo("quarters"))
 			{
-				if (pageField.Item != null)
+				int quarter = (dateTime.Month - 1) / 3 + 1;
+				sharedItemGroupingValue = "Qtr" + quarter;
+			}
+			else if (cacheFields[rowColFieldIndex].FieldGroup != null && cacheFields[rowColFieldIndex].FieldGroup.RangeGroupingProperties.IsEquivalentTo("months"))
+				sharedItemGroupingValue = dateTime.ToString("MMM");
+
+			int index = groupBy.IsEquivalentTo("months") ? rowColFieldIndex : originalIndex;
+			int recordItemValue = int.Parse(cacheRecord.Items[rowColFieldIndex].Value);
+			return this.CreateTreeNode(true, currentNode, pivotField, recordItemValue, index, cacheRecordPageFieldIndices, cacheRecord, sharedItemGroupingValue, groupBy, cacheFields);
+		}
+
+		private PivotItemTreeNode CreateTreeNode(bool isDateGrouping, PivotItemTreeNode currentNode, ExcelPivotTableField pivotField, int recordItemValue, int pivotFieldIndex,
+			Dictionary<int, List<int>> cacheRecordPageFieldIndices, CacheRecordNode cacheRecord, string searchValue, string groupBy = null, IReadOnlyList<CacheFieldNode> cacheFields = null)
+		{
+			// If an identical child already exists, continue. Otherwise, create a new child.
+			if (currentNode.HasChild(searchValue))
+				return currentNode.GetChildNode(searchValue);
+			else
+			{
+				if (cacheRecordPageFieldIndices?.Any() == true && !cacheRecord.ContainsPageFieldIndices(cacheRecordPageFieldIndices))
+					return null;
+				currentNode.SubtotalTop = pivotField.SubtotalTop;
+				int pivotFieldItemIndex = 0;
+				if (isDateGrouping)
 				{
-					int pivotFieldItemValue = this.Fields[pageField.Field].Items[pageField.Item.Value].X;
-					pageFieldIndices.Add(pageField.Field, new List<int> { pivotFieldItemValue });
+					var cacheFieldGroupItems = cacheFields[pivotFieldIndex].FieldGroup.GroupItems;
+					pivotFieldItemIndex = cacheFieldGroupItems.ToList().FindIndex(x => x.Value.IsEquivalentTo(searchValue));
 				}
 				else
-				{
-					// If page fields are multi-selected, pivot field items that are 
-					// not selected are flagged as hidden.
-					var pageFieldItems = this.Fields[pageField.Field].Items;
-					if (pageFieldItems != null)
-					{
-						foreach (var item in pageFieldItems.Where(i => !i.Hidden))
-						{
-							if (!pageFieldIndices.ContainsKey(pageField.Field))
-								pageFieldIndices.Add(pageField.Field, new List<int>());
-							pageFieldIndices[pageField.Field].Add(item.X);
-						}
-					}
-				}
+					pivotFieldItemIndex = pivotField.Items.ToList().FindIndex(c => c.X == recordItemValue);
+				return currentNode.AddChild(recordItemValue, pivotFieldIndex, pivotFieldItemIndex, searchValue);
 			}
-			return pageFieldIndices;
 		}
-		#endregion
 
-		#region Private Methods
 		private IOrderedEnumerable<CacheItem> SortField(eSortType sortOrder, ExcelPivotTableField pivotField)
 		{
 			var fieldItems = pivotField.Items;
@@ -1638,7 +1692,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				return this.DataFields[item.DataFieldIndex].Name;
 			var pivotField = this.Fields[pivotFieldIndex];
 			var cacheItemIndex = pivotField.Items[item[xMemberIndex]].X;
-			return this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value;
+			var returnVal = this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup == null ? this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value :
+				this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup.GroupItems[cacheItemIndex].Value;
+			return returnVal;
 		}
 
 		private void InitSchemaNodeOrder()
@@ -1684,4 +1740,3 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 	}
 }
- 

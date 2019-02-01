@@ -361,7 +361,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Remove the 'u' xml attribute from each cache item to prevent corrupting the workbook, since Excel automatically adds them.
 			foreach (var cacheField in this.CacheFields)
 			{
-				if (cacheField.HasSharedItems)
+				if (cacheField.FieldGroup != null || cacheField.HasSharedItems)
 					cacheField.RemoveXmlUAttribute();
 			}
 		}

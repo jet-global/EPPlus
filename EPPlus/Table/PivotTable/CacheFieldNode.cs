@@ -82,6 +82,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		public SharedItemsCollection SharedItems { get; }
 
 		/// <summary>
+		/// Gets the fieldGroup for this node.
+		/// </summary>
+		public ExcelPivotTableFieldGroup FieldGroup{ get; }
+
+		/// <summary>
 		/// Gets a value indicating whether or not this node has shared items.
 		/// </summary>
 		public bool HasSharedItems
@@ -105,6 +110,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			var sharedItemsNode = base.TopNode.SelectSingleNode("d:sharedItems", this.NameSpaceManager);
 			if (sharedItemsNode != null)
 				this.SharedItems = new SharedItemsCollection(this.NameSpaceManager, sharedItemsNode);
+			var fieldGroupNode = node.SelectSingleNode("d:fieldGroup", this.NameSpaceManager);
+			if (fieldGroupNode != null)
+				this.FieldGroup = new ExcelPivotTableFieldGroup(this.NameSpaceManager, fieldGroupNode);
 		}
 		#endregion
 
@@ -134,7 +142,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public void RemoveXmlUAttribute()
 		{
-			foreach (var item in this.SharedItems)
+			var list = this.FieldGroup == null ? this.SharedItems : this.FieldGroup.GroupItems;
+			foreach (var item in list)
 			{
 				var unusedAttribute = item.TopNode.Attributes["u"];
 				if (unusedAttribute != null && int.Parse(unusedAttribute.Value) == 1)
