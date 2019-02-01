@@ -71,17 +71,19 @@ namespace EPPlusTest.Table.PivotTable
 			Assert.IsTrue(child.SubtotalTop);
 			Assert.IsFalse(child.IsDataField);
 			Assert.IsFalse(child.HasChildren);
+			Assert.IsNull(child.SharedItemValue);
 		}
 
 		[TestMethod]
 		public void AddChildWithNonDefaultValues()
 		{
 			var node = new PivotItemTreeNode(-1);
-			var child = node.AddChild(4, 2, 3);
+			var child = node.AddChild(4, 2, 3, "Car");
 			Assert.AreEqual(child, node.Children.Single());
 			Assert.AreEqual(2, child.PivotFieldIndex);
 			Assert.AreEqual(3, child.PivotFieldItemIndex);
 			Assert.AreEqual(4, child.Value);
+			Assert.AreEqual("Car", child.SharedItemValue);
 			Assert.IsTrue(child.SubtotalTop);
 			Assert.IsFalse(child.IsDataField);
 			Assert.IsFalse(child.HasChildren);
@@ -98,11 +100,27 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
+		public void HasChildStringTrue()
+		{
+			var node = new PivotItemTreeNode(-1);
+			var child = node.AddChild(4, 3, 4, "Bike");
+			Assert.IsTrue(node.HasChild("Bike"));
+		}
+
+		[TestMethod]
 		public void HasChildFalse()
 		{
 			var node = new PivotItemTreeNode(-1);
 			var child = node.AddChild(4);
 			Assert.IsFalse(node.HasChild(3));
+		}
+
+		[TestMethod]
+		public void HasChildStringFalse ()
+		{
+			var node = new PivotItemTreeNode(-1);
+			var child = node.AddChild(4, 3, 4, "Bike");
+			Assert.IsFalse(node.HasChild("Scooter"));
 		}
 		#endregion
 
@@ -116,11 +134,27 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
+		public void GetChildNodeStringHasChild()
+		{
+			var node = new PivotItemTreeNode(-1);
+			var child = node.AddChild(4, 5, 3, "Blue");
+			Assert.AreEqual(child, node.GetChildNode("Blue"));
+		}
+
+		[TestMethod]
 		public void GetChildNodeDoesNotHaveChild()
 		{
 			var node = new PivotItemTreeNode(-1);
 			var child = node.AddChild(4);
 			Assert.IsNull(node.GetChildNode(5));
+		}
+
+		[TestMethod]
+		public void GetChildNodeStringDoesNotHaveChild()
+		{
+			var node = new PivotItemTreeNode(-1);
+			var child = node.AddChild(4, 5, 3, "Blue");
+			Assert.IsNull(node.GetChildNode("Red"));
 		}
 		#endregion
 

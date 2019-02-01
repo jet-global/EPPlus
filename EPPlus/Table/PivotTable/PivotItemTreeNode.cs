@@ -129,7 +129,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Checks whether or not a child already exists with the specified value.
+		/// Checks whether or not a child already exists with the specified string value.
 		/// </summary>
 		/// <param name="value">The value to look for in the children list.</param>
 		/// <returns>True if the child exists, otherwise false.</returns>

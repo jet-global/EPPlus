@@ -46,7 +46,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		public string RangeGroupingProperties
 		{
-			get { return base.GetXmlNodeString("@groupBy"); }
+			get { return base.GetXmlNodeString("d:rangePr/@groupBy"); }
 		}
 
 		public SharedItemsCollection GroupItems { get; }

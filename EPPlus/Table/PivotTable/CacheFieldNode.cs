@@ -81,6 +81,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public SharedItemsCollection SharedItems { get; }
 
+		/// <summary>
+		/// Gets the fieldGroup for this node.
+		/// </summary>
 		public ExcelPivotTableFieldGroup FieldGroup{ get; }
 
 		/// <summary>

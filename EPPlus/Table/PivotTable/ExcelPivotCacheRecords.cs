@@ -282,38 +282,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				// Handles grouped fields.
 				if (cacheField.FieldGroup != null)
 				{
-					var recordIndices = new List<int>();
-					// Go through all the shared items and if the item is the targeted value (tuple.Item2 or groupItems[tuple.Item2]), 
-					// add the index of the shared item to the list.
-					if (cacheField.Name.IsEquivalentTo("Month"))
-					{
-						var sharedItems = cacheField.SharedItems;
-						for (int i = 0; i < sharedItems.Count; i++)
-						{
-							var dateSplit = sharedItems[i].Value.Split('-')[1];
-							if (int.Parse(dateSplit) == tuple.Item2)
-								recordIndices.Add(i);
-						}
-					}
-					else
-					{
-						int baseFieldIndex = cacheField.FieldGroup.BaseField;
-						string groupFieldItemsValue = cacheField.FieldGroup.GroupItems[tuple.Item2].Value;
-						var sharedItems = this.CacheDefinition.CacheFields[baseFieldIndex].SharedItems;
-						for (int i = 0; i < sharedItems.Count; i++)
-						{
-							var dateSplit = sharedItems[i].Value.Split('-');
-							var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
-							if (cacheField.Name.IsEquivalentTo("Years") && groupFieldItemsValue.IsEquivalentTo(dateTime.Year.ToString()))
-								recordIndices.Add(i);
-							else if (cacheField.Name.IsEquivalentTo("Quarters"))
-							{
-								int quarter = (dateTime.Month - 1) / 3 + 1;
-								if (groupFieldItemsValue.IsEquivalentTo("Qtr" + quarter))
-									recordIndices.Add(i);
-							}
-						}
-					}
+					var recordIndices = this.DateGroupingRecordValueTupleMatch(cacheField, tuple.Item2);
 					// Get the index of the current record in the collection.
 					// If the index is in the list, the record value and tuple matches.
 					int recordIndex = this.Records.IndexOf(record);
@@ -330,6 +299,40 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 			return true;
+		}
+
+		private List<int> DateGroupingRecordValueTupleMatch(CacheFieldNode cacheField, int tupleItem2)
+		{
+			var recordIndices = new List<int>();
+			// Go through all the shared items and if the item is the targeted value (tuple.Item2 or groupItems[tuple.Item2]), 
+			// add the index of the shared item to the list.
+			var rangeGroupingProperty = cacheField.FieldGroup.RangeGroupingProperties;
+			string groupFieldItemsValue = cacheField.FieldGroup.GroupItems[tupleItem2].Value;
+			SharedItemsCollection sharedItems = null;
+			if (rangeGroupingProperty.IsEquivalentTo("months"))
+				sharedItems = cacheField.SharedItems;
+			else
+			{
+				int baseFieldIndex = cacheField.FieldGroup.BaseField;
+				sharedItems = this.CacheDefinition.CacheFields[baseFieldIndex].SharedItems;
+			}
+
+			for (int i = 0; i < sharedItems.Count; i++)
+			{
+				var dateSplit = sharedItems[i].Value.Split('-');
+				var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+
+				if ((rangeGroupingProperty.IsEquivalentTo("months") && tupleItem2 == dateTime.Month)
+					|| (rangeGroupingProperty.IsEquivalentTo("years") && groupFieldItemsValue.IsEquivalentTo(dateTime.Year.ToString())))
+					recordIndices.Add(i);
+				else if (cacheField.FieldGroup.RangeGroupingProperties.IsEquivalentTo("quarters"))
+				{
+					int quarter = (dateTime.Month - 1) / 3 + 1;
+					if (groupFieldItemsValue.IsEquivalentTo("Qtr" + quarter))
+						recordIndices.Add(i);
+				}
+			}
+			return recordIndices;
 		}
 
 		private bool FindCacheRecordValueAndPageFieldTupleValueMatch(Dictionary<int, List<int>> pageFieldIndices, CacheRecordNode record)
