@@ -1004,8 +1004,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				var cacheField = this.CacheDefinition.CacheFields[pivotField.Index];
 				if (!cacheField.HasSharedItems)
 					continue;
-				//if (fieldItems.Count > cacheField.SharedItems.Count + 1)
-				//	throw new InvalidOperationException("There are more pivotField items than cacheField sharedItems.");
 
 				if (fieldItems.Count > 0)
 				{
@@ -1695,7 +1693,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			var cacheItemIndex = pivotField.Items[item[xMemberIndex]].X;
 			var returnVal = this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup == null ? this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value :
 				this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup.GroupItems[cacheItemIndex].Value;
-			//return this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value;
 			return returnVal;
 		}
 

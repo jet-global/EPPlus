@@ -236,7 +236,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
-				bool match = true;
+				bool match = false;
 				if (rowTuples != null)
 					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
 				if (match && columnTuples != null)
@@ -263,7 +263,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		#region Private Methods
 		private bool FindCacheRecordIndexAndTupleIndexMatch(IEnumerable<Tuple<int, int>> indexTupleList, CacheRecordNode record, Dictionary<int, List<int>> pageFieldIndices = null)
 		{
-			var indexTupleMatch = indexTupleList.All(i => i.Item1 == -2 || i.Item1 >= record.Items.Count || int.Parse(record.Items[i.Item1].Value) == i.Item2);
+			var indexTupleMatch = indexTupleList.All(i => i.Item1 == -2  || int.Parse(record.Items[i.Item1].Value) == i.Item2);
 			// If a match was found and page field indices are specified, they must also match the record's values.
 			if (indexTupleMatch && (pageFieldIndices == null || this.FindCacheRecordValueAndPageFieldTupleValueMatch(pageFieldIndices, record)))
 				return true;
