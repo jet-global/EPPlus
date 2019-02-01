@@ -39,16 +39,25 @@ namespace OfficeOpenXml.Table.PivotTable
 	public class ExcelPivotTableFieldGroup : XmlHelper
 	{
 		#region Properties
+		/// <summary>
+		/// Get the base field index for this group field.
+		/// </summary>
 		public int BaseField
 		{
 			get { return base.GetXmlNodeInt("@base"); }
 		}
 
+		/// <summary>
+		/// Get the groupBy value to indicate how this field is grouped.
+		/// </summary>
 		public string RangeGroupingProperties
 		{
 			get { return base.GetXmlNodeString("d:rangePr/@groupBy"); }
 		}
 
+		/// <summary>
+		/// Get the collection of group items.
+		/// </summary>
 		public SharedItemsCollection GroupItems { get; }
 		#endregion
 

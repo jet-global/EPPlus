@@ -1010,7 +1010,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					// Preserve the "@h" attribute for fields marked as hidden.
 					var hiddenFieldItemsDictionary = fieldItems.ToDictionary(f => f.X, f => f.Hidden);
 
-					// TODO: When date times are involved, group items will exist so sorting is not needed.
+					// Only sort pivot field items if the pivot field is not part of a date grouping.
 					if (this.CacheDefinition.CacheFields[pivotField.Index].FieldGroup == null)
 					{
 						fieldItems.Clear(pivotField.DefaultSubtotal);
@@ -1232,7 +1232,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					// These variables are only used for date groupings.
 					// Since rowColFieldIndex can be set to the base field index if there are date groupings, this keeps track of the original row field index.
 					int originalIndex = rowColFieldIndex;
-					string groupBy = rowColFieldIndex == -2 ? "" : cacheFields[originalIndex].FieldGroup?.RangeGroupingProperties;
+					string groupBy = rowColFieldIndex == -2 ? string.Empty : cacheFields[originalIndex].FieldGroup?.RangeGroupingProperties;
 					// Reset rowColFieldIndex to the base field index if the row/column field index refers to a date grouping field.
 					rowColFieldIndex = rowColFieldIndex >= cacheRecord.Items.Count ? cacheFields[rowColFieldIndex].FieldGroup.BaseField : rowColFieldIndex;
 
@@ -1269,7 +1269,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			var dateSplit = sharedItemValue.Split('-');
 			var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
 
-			string sharedItemGroupingValue = "";
+			string sharedItemGroupingValue = string.Empty;
 			if (groupBy.IsEquivalentTo("years"))
 				sharedItemGroupingValue = dateTime.Year.ToString();
 			else if (groupBy.IsEquivalentTo("quarters"))
