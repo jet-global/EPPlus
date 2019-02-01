@@ -263,7 +263,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		#region Private Methods
 		private bool FindCacheRecordIndexAndTupleIndexMatch(IEnumerable<Tuple<int, int>> indexTupleList, CacheRecordNode record, Dictionary<int, List<int>> pageFieldIndices = null)
 		{
-			var indexTupleMatch = indexTupleList.All(i => i.Item1 == -2  || int.Parse(record.Items[i.Item1].Value) == i.Item2);
+			var indexTupleMatch = indexTupleList.All(i => i.Item1 == -2 || int.Parse(record.Items[i.Item1].Value) == i.Item2);
 			// If a match was found and page field indices are specified, they must also match the record's values.
 			if (indexTupleMatch && (pageFieldIndices == null || this.FindCacheRecordValueAndPageFieldTupleValueMatch(pageFieldIndices, record)))
 				return true;
