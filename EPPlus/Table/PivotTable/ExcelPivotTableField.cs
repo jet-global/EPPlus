@@ -526,7 +526,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 		
 		/// <summary>
-		/// <summary>
 		/// Gets the grouping settings. 
 		/// Null if the field has no grouping otherwise ExcelPivotTableFieldNumericGroup or ExcelPivotTableFieldNumericGroup.
 		/// </summary>        
