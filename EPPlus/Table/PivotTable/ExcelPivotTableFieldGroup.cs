@@ -29,10 +29,48 @@
  * Jan Källman		Added		21-MAR-2011
  * Jan Källman		License changed GPL-->LGPL 2011-12-16
  *******************************************************************************/
+using System;
 using System.Xml;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
+	#region Enums
+	/// <summary>
+	/// The possible types of date groupings for a field.
+	/// </summary>
+	public enum PivotFieldDateGrouping
+	{
+		/// <summary>
+		/// Group a pivot field items by seconds.
+		/// </summary>
+		Seconds,
+		/// <summary>
+		/// Group a pivot field items by minutes.
+		/// </summary>
+		Minutes,
+		/// <summary>
+		/// Group a pivot field items by hours.
+		/// </summary>
+		Hours,
+		/// <summary>
+		/// Group a pivot field items by days.
+		/// </summary>
+		Days,
+		/// <summary>
+		/// Group a pivot field items by months.
+		/// </summary>
+		Months,
+		/// <summary>
+		/// Group a pivot field items by quarters.
+		/// </summary>
+		Quarters,
+		/// <summary>
+		/// Group a pivot field items by years.
+		/// </summary>
+		Years
+	}
+	#endregion
+
 	/// <summary>
 	/// Base class for pivot table field groups.
 	/// </summary>
@@ -48,17 +86,19 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Get the groupBy value to indicate how this field is grouped.
-		/// </summary>
-		public string RangeGroupingProperties
-		{
-			get { return base.GetXmlNodeString("d:rangePr/@groupBy"); }
-		}
-
-		/// <summary>
 		/// Get the collection of group items.
 		/// </summary>
 		public SharedItemsCollection GroupItems { get; }
+
+		/// <summary>
+		/// Get the grouping type of how this field is grouped.
+		/// </summary>
+		public PivotFieldDateGrouping GroupBy { get; }
+
+		private string RangeGroupingProperties
+		{
+			get { return base.GetXmlNodeString("d:rangePr/@groupBy"); }
+		}
 		#endregion
 
 		#region Constructors
@@ -73,6 +113,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			var groupItemsNode = topNode.SelectSingleNode("d:groupItems", this.NameSpaceManager);
 			if (groupItemsNode != null)
 				this.GroupItems = new SharedItemsCollection(this.NameSpaceManager, groupItemsNode);
+			this.GroupBy = (PivotFieldDateGrouping)Enum.Parse(typeof(PivotFieldDateGrouping), this.RangeGroupingProperties, true);
 		}
 		#endregion
 	}

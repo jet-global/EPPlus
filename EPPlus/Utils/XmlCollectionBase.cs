@@ -51,7 +51,6 @@ namespace OfficeOpenXml.Utils
 			private set { base.SetXmlNodeString("@count", value.ToString()); }
 		}
 
-
 		/// <summary>
 		/// Gets the item at the given index.
 		/// </summary>
