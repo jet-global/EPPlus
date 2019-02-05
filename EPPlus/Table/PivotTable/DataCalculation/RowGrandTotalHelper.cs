@@ -68,7 +68,7 @@
 					var dataField = this.PivotTable.DataFields[i];
 					var cacheField = this.PivotTable.CacheDefinition.CacheFields[dataField.Index];
 					var styles = this.PivotTable.Worksheet.Workbook.Styles;
-					base.TotalsCalculator.WriteCellTotal(cell, dataField, grandTotalValueLists[i], styles, null, totalType);
+					base.TotalsCalculator.WriteCellTotal(cell, dataField, grandTotalValueLists[i], styles, columnTotalType: totalType);
 				}
 			}
 		}
