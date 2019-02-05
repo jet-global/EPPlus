@@ -38,6 +38,29 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// </summary>
 	public class ExcelPivotTableFieldGroup : XmlHelper
 	{
+		#region Properties
+		/// <summary>
+		/// Get the base field index for this group field.
+		/// </summary>
+		public int BaseField
+		{
+			get { return base.GetXmlNodeInt("@base"); }
+		}
+
+		/// <summary>
+		/// Get the groupBy value to indicate how this field is grouped.
+		/// </summary>
+		public string RangeGroupingProperties
+		{
+			get { return base.GetXmlNodeString("d:rangePr/@groupBy"); }
+		}
+
+		/// <summary>
+		/// Get the collection of group items.
+		/// </summary>
+		public SharedItemsCollection GroupItems { get; }
+		#endregion
+
 		#region Constructors
 		/// <summary>
 		/// Creates an instance of a <see cref="ExcelPivotTableFieldGroup"/>.
@@ -47,7 +70,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal ExcelPivotTableFieldGroup(XmlNamespaceManager ns, XmlNode topNode) :
 			 base(ns, topNode)
 		{
-
+			var groupItemsNode = topNode.SelectSingleNode("d:groupItems", this.NameSpaceManager);
+			if (groupItemsNode != null)
+				this.GroupItems = new SharedItemsCollection(this.NameSpaceManager, groupItemsNode);
 		}
 		#endregion
 	}
