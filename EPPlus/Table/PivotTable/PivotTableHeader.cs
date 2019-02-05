@@ -61,9 +61,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool IsRowHeader { get; }
 
 		/// <summary>
-		/// Gets the value if there is a <see cref="RowColumnItem"/>  with a non-null itemType, typically 'default'.
+		/// Gets the value if there is a <see cref="RowColumnItem"/> with a non-null itemType, typically 'default'.
 		/// </summary>
-		public string SumType { get; }
+		public string TotalType { get; }
 
 		/// <summary>
 		/// Gets the flag indicating if this is the inner-most header. Excludes subtotal and grand total nodes.
@@ -79,6 +79,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets the flag indicating if this is a data field header.
 		/// </summary>
 		public bool IsDataField { get; }
+
+		/// <summary>
+		/// Gets or sets a value indicating that this header is a placeholder for 
+		/// when there are no row or column fields.
+		/// </summary>
+		public bool IsPlaceHolder { get; set; }
 		#endregion
 
 		#region Constructors
@@ -92,10 +98,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="isRowHeader">A value indicating if it is a row header.</param>
 		/// <param name="isLeafNode">A value indicating if it is a leaf node.</param>
 		/// <param name="isDataField">A value indicating if it is a data field node.</param>
-		/// <param name="sumType">The itemType value of the <see cref="RowColumnItem"/>.</param>
+		/// <param name="totalType">The itemType value of the <see cref="RowColumnItem"/>.</param>
 		/// <param name="isAboveDataField">A value indicating if it is above a data field node.</param>
 		public PivotTableHeader(List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldCollectionIndex, bool isGrandTotal,
-			bool isRowHeader, bool isLeafNode, bool isDataField, string sumType = null, bool isAboveDataField = false)
+			bool isRowHeader, bool isLeafNode, bool isDataField, string totalType = null, bool isAboveDataField = false)
 		{
 			this.CacheRecordIndices = recordIndices;
 			this.PivotTableField = field;
@@ -105,7 +111,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.IsLeafNode = isLeafNode;
 			this.IsDataField = isDataField;
 			this.IsAboveDataField = isAboveDataField;
-			this.SumType = sumType;
+			this.TotalType = totalType;
 		}
 		#endregion
 	}

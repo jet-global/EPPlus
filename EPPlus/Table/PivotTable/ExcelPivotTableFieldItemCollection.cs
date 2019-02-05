@@ -61,46 +61,34 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Adds a new <see cref="ExcelPivotTableFieldItem"/> to the collection.
 		/// </summary>
-		/// <param name="insertIndex">The index to insert the item at.</param>
 		/// <param name="pivotFieldIndex">The item's @x attribute value.</param>
-		/// <param name="defaultSubtotal">A flag indicating if there exists an item with a non-null @t attribute.</param>
-		public void AddItem(int insertIndex, int pivotFieldIndex, bool defaultSubtotal)
+		public void AddItem(int pivotFieldIndex)
 		{
-			var item = new ExcelPivotTableFieldItem(base.NameSpaceManager, base.TopNode, this.Field, pivotFieldIndex);
-			if (defaultSubtotal)
-				base.InsertItem(insertIndex, item);
-			else
-				base.AddItem(item);
+			base.AddItem(new ExcelPivotTableFieldItem(base.NameSpaceManager, base.TopNode, this.Field, pivotFieldIndex));
 		}
 
 		/// <summary>
-		/// Clear all the items in the collection except the 'default' item.
+		/// Appends the specified <paramref name="items"/> to the collection.
 		/// </summary>
-		/// <param name="defaultSubtotal">A value indicating if there is a 'default' item.</param>
-		public void Clear(bool defaultSubtotal)
+		/// <param name="items">The items to add.</param>
+		public void AppendItems(IEnumerable<ExcelPivotTableFieldItem> items)
 		{
-			if (defaultSubtotal)
+			foreach (var item in items)
 			{
-				while (string.IsNullOrEmpty(base[0].T))
-				{
-					base.RemoveItem(base[0]);
-				}
+				base.AddItem(item);
 			}
-			else
-				base.ClearItems();
 		}
 
 		/// <summary>
-		/// Removes the last subtotal item in a pivot field.
+		/// Clear all the items in the collection.
 		/// </summary>
-		public void RemoveLastSubtotalItem()
-		{
-			if (this.Count == 0)
-				return;
-			var item = this[this.Count - 1];
-			if (!string.IsNullOrEmpty(item.T))
-				base.RemoveItem(item);
-		}
+		public void Clear() => base.ClearItems();
+
+		/// <summary>
+		/// Removes the specified <paramref name="item"/> from the underlying collection.
+		/// </summary>
+		/// <param name="item">The item to remove.</param>
+		public void Remove(ExcelPivotTableFieldItem item) => base.RemoveItem(item);
 		#endregion
 
 		#region ExcelPivotTableFieldCollectionBase Overrides

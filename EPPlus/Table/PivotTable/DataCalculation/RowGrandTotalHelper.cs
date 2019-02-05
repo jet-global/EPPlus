@@ -53,7 +53,8 @@
 		/// </summary>
 		/// <param name="majorIndex">The current major axis index.</param>
 		/// <param name="grandTotalValueLists">The values used to calculate grand totals.</param>
-		protected override void WriteGrandTotal(int majorIndex, PivotCellBackingData[] grandTotalValueLists)
+		/// <param name="totalType">The type of function that the subtotal should be calculated with.</param>
+		protected override void WriteGrandTotal(int majorIndex, PivotCellBackingData[] grandTotalValueLists, string totalType)
 		{
 			var row = this.PivotTable.Address.End.Row;
 			if (this.PivotTable.HasRowDataFields)
@@ -67,7 +68,7 @@
 					var dataField = this.PivotTable.DataFields[i];
 					var cacheField = this.PivotTable.CacheDefinition.CacheFields[dataField.Index];
 					var styles = this.PivotTable.Worksheet.Workbook.Styles;
-					base.TotalsCalculator.WriteCellTotal(cell, dataField, grandTotalValueLists[i], styles);
+					base.TotalsCalculator.WriteCellTotal(cell, dataField, grandTotalValueLists[i], styles, null, totalType);
 				}
 			}
 		}
