@@ -27,6 +27,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Xml;
 using OfficeOpenXml.FormulaParsing.Logging;
 using OfficeOpenXml.Extensions;
@@ -190,9 +191,17 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				int recordIndex = row - sourceDataRange.Start.Row;
 				var rowCells = new List<object>();
+				int cacheFieldIndex = 0;
 				for (int column = sourceDataRange.Start.Column; column < sourceDataRange.End.Column + 1; column++)
 				{
-					rowCells.Add(sourceDataRange.Worksheet.Cells[row, column].Value);
+					var cacheField = this.CacheDefinition.CacheFields[cacheFieldIndex];
+					var cell = sourceDataRange.Worksheet.Cells[row, column];
+					// If the cell value is a DateTime, convert it to an date.
+					if (cacheField.HasSharedItems && !string.IsNullOrEmpty(cacheField.SharedItems.MinDate) && cell.Value is double)
+						rowCells.Add(DateTime.FromOADate((double)cell.Value));
+					else
+						rowCells.Add(cell.Value);
+					cacheFieldIndex++;
 				}
 				// If the row is within the existing range of cacheRecords, update that cacheRecord. Otherwise, add a new record.
 				if (recordIndex < this.Records.Count)
@@ -306,31 +315,40 @@ namespace OfficeOpenXml.Table.PivotTable
 			var recordIndices = new List<int>();
 			// Go through all the shared items and if the item is the targeted value (tuple.Item2 or groupItems[tuple.Item2]), 
 			// add the index of the shared item to the list.
-			var rangeGroupingProperty = cacheField.FieldGroup.RangeGroupingProperties;
+			var groupByType = cacheField.FieldGroup.GroupBy;
 			string groupFieldItemsValue = cacheField.FieldGroup.GroupItems[tupleItem2].Value;
-			SharedItemsCollection sharedItems = null;
-			if (rangeGroupingProperty.IsEquivalentTo("months"))
-				sharedItems = cacheField.SharedItems;
-			else
-			{
-				int baseFieldIndex = cacheField.FieldGroup.BaseField;
-				sharedItems = this.CacheDefinition.CacheFields[baseFieldIndex].SharedItems;
-			}
+
+			int baseFieldIndex = cacheField.FieldGroup.BaseField;
+			var sharedItems = this.CacheDefinition.CacheFields[baseFieldIndex].SharedItems;
 
 			for (int i = 0; i < sharedItems.Count; i++)
 			{
 				var dateSplit = sharedItems[i].Value.Split('-');
 				var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+				var groupByValue = string.Empty;
 
-				if ((rangeGroupingProperty.IsEquivalentTo("months") && tupleItem2 == dateTime.Month)
-					|| (rangeGroupingProperty.IsEquivalentTo("years") && groupFieldItemsValue.IsEquivalentTo(dateTime.Year.ToString())))
+				// Get the sharedItem's groupBy value, unless the groupBy value is months.
+				if (groupByType == PivotFieldDateGrouping.Months && tupleItem2 == dateTime.Month)
 					recordIndices.Add(i);
-				else if (cacheField.FieldGroup.RangeGroupingProperties.IsEquivalentTo("quarters"))
+				else if (groupByType == PivotFieldDateGrouping.Years)
+					groupByValue = dateTime.Year.ToString();
+				else if (groupByType == PivotFieldDateGrouping.Quarters)
+					groupByValue = "Qtr" + ((dateTime.Month - 1) / 3 + 1);
+				else if (groupByType == PivotFieldDateGrouping.Days)
+					groupByValue = dateTime.Day + "-" + dateTime.ToString("MMM");
+				else if (groupByType == PivotFieldDateGrouping.Minutes)
+					groupByValue = ":" + dateTime.ToString("mm");
+				else if (groupByType == PivotFieldDateGrouping.Seconds)
+					groupByValue = ":" + dateTime.ToString("ss");
+				else if (groupByType == PivotFieldDateGrouping.Hours)
 				{
-					int quarter = (dateTime.Month - 1) / 3 + 1;
-					if (groupFieldItemsValue.IsEquivalentTo("Qtr" + quarter))
-						recordIndices.Add(i);
+					int hour = dateTime.Hour == 00 ? 12 : dateTime.Hour;
+					groupByValue= hour + " " + dateTime.ToString("tt", Thread.CurrentThread.CurrentCulture);
 				}
+
+				// Check if the sharedItem's groupBy value matches the groupFieldItem's value in the cacheField.
+				if (groupFieldItemsValue.IsEquivalentTo(groupByValue))
+					recordIndices.Add(i);
 			}
 			return recordIndices;
 		}

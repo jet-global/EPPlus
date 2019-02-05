@@ -35,6 +35,17 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// </summary>
 	public class SharedItemsCollection : XmlCollectionBase<CacheItem>
 	{
+		#region Properties
+		/// <summary>
+		/// Gets the minimum date value in the shared items collection.
+		/// Note: This property is only used for date groupings.
+		/// </summary>
+		public string MinDate
+		{
+			get { return base.GetXmlNodeString("@minDate") ?? string.Empty; }
+		}
+		#endregion
+
 		#region Constructors
 		/// <summary>
 		/// Creates an instance of a <see cref="SharedItemsCollection"/>.
