@@ -137,7 +137,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="memberIndex">The value of the 'x' child node.</param>
 		/// <param name="itemType">The value of the 't' attribute.</param>
 		/// <param name="dataFieldIndex">The 'i' attribute value which points to a data field.</param>
-		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, int repeatedItemsCount, int memberIndex, string itemType = null, int dataFieldIndex = 0) : base(namespaceManager, null)
+		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, int repeatedItemsCount, int memberIndex, 
+			string itemType = null, int dataFieldIndex = 0) : base(namespaceManager, null)
 		{
 			if (parentNode == null)
 				throw new ArgumentNullException(nameof(parentNode));

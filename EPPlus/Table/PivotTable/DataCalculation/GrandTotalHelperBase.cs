@@ -78,7 +78,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 						dataFieldCollectionIndex, grandTotalValueLists, grandGrandTotalValueLists);
 				}
 				if (dataFieldCollectionIndex != -1)
-					this.WriteGrandTotal(majorIndex, grandTotalValueLists);
+					this.WriteGrandTotal(majorIndex, grandTotalValueLists, majorHeader.TotalType);
 			}
 			return grandGrandTotalValueLists;
 		}
@@ -122,9 +122,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// </summary>
 		/// <param name="majorIndex">The current major axis index.</param>
 		/// <param name="grandTotalValueLists">The values used to calculate grand totals.</param>
+		/// <param name="totalFunctionType">The type of function that the subtotal should be calculated with.</param>
 		protected abstract void WriteGrandTotal(
 			int majorIndex, 
-			PivotCellBackingData[] grandTotalValueLists);
+			PivotCellBackingData[] grandTotalValueLists,
+			string totalFunctionType);
 
 		/// <summary>
 		/// Gets the start cell index for the grand-grand total values.

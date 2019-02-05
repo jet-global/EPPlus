@@ -60,9 +60,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// </summary>
 		/// <param name="majorIndex">The current major axis index.</param>
 		/// <param name="grandTotalValueLists">The values used to calculate grand totals.</param>
+		/// <param name="totalFunctionType">The type of function that the subtotal should be calculated with.</param>
 		protected override void WriteGrandTotal(
 			int majorIndex, 
-			PivotCellBackingData[] grandTotalValueLists)
+			PivotCellBackingData[] grandTotalValueLists,
+			string totalFunctionType)
 		{
 			var row = this.PivotTable.Address.Start.Row + this.PivotTable.FirstDataRow + majorIndex;
 			var column = this.PivotTable.Address.End.Column;
@@ -75,7 +77,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					var cell = this.PivotTable.Worksheet.Cells[row, column++];
 					var dataField = this.PivotTable.DataFields[i];
 					var cacheField = this.PivotTable.CacheDefinition.CacheFields[dataField.Index];
-					base.TotalsCalculator.WriteCellTotal(cell, dataField, grandTotalValueLists[i], this.PivotTable.Worksheet.Workbook.Styles);
+					base.TotalsCalculator.WriteCellTotal(cell, dataField, grandTotalValueLists[i], this.PivotTable.Worksheet.Workbook.Styles, totalFunctionType);
 				}
 			}
 		}
