@@ -288,14 +288,10 @@ namespace OfficeOpenXml.Table.PivotTable
 					continue;
 
 				var cacheField = this.CacheDefinition.CacheFields[tuple.Item1];
-				// Handles grouped fields.
-				if (cacheField.FieldGroup != null)
+				if (cacheField.IsGroupField)
 				{
-					var recordIndices = this.DateGroupingRecordValueTupleMatch(cacheField, tuple.Item2);
-					// Get the index of the current record in the collection.
-					// If the index is in the list, the record value and tuple matches.
-					int recordIndex = this.Records.IndexOf(record);
-					if (!recordIndices.Contains(recordIndex))
+					bool groupMatch = this.FindGroupingRecordValueAndTupleMatch(cacheField, record, tuple, pivotTable);
+					if (!groupMatch)
 						return false;
 				}
 				else
@@ -303,9 +299,40 @@ namespace OfficeOpenXml.Table.PivotTable
 					var sharedItems = this.CacheDefinition.CacheFields[tuple.Item1].SharedItems;
 					int recordValue = int.Parse(record.Items[tuple.Item1].Value);
 					int pivotFieldValue = pivotTable.Fields[tuple.Item1].Items[tuple.Item2].X;
-					if (sharedItems[recordValue].Value != sharedItems[pivotFieldValue].Value)
+					if (!sharedItems[recordValue].Value.IsEquivalentTo(sharedItems[pivotFieldValue].Value))
 						return false;
 				}
+			}
+			return true;
+		}
+
+		private bool FindGroupingRecordValueAndTupleMatch(CacheFieldNode cacheField, CacheRecordNode record, Tuple<int, int> tuple, ExcelPivotTable pivotTable)
+		{
+			if (cacheField.FieldGroup.GroupBy != PivotFieldDateGrouping.None)
+			{
+				// Find record indices for date groupings fields.
+				var recordIndices = this.DateGroupingRecordValueTupleMatch(cacheField, tuple.Item2);
+				// Get the index of the current record in the collection.
+				// If the index is in the list, the record value and tuple matches.
+				int recordIndex = this.Records.IndexOf(record);
+				if (!recordIndices.Contains(recordIndex))
+					return false;
+			}
+			else
+			{
+				// Use discrete grouping property collection to determine match.
+				int baseIndex = cacheField.FieldGroup.BaseField;
+				// Get the pivot field item's x value and the record item's v value.
+				int pivotFieldValue = pivotTable.Fields[tuple.Item1].Items[tuple.Item2].X;
+				var recordValue = int.Parse(record.Items[baseIndex].Value);
+				var fieldGroup = cacheField.FieldGroup;
+				// Get the shared item string the pivot field item and record item is pointing to.
+				var pivotFieldPtrValue = fieldGroup.GroupItems[pivotFieldValue].Value;
+				var recordDiscretePtrValue = int.Parse(fieldGroup.DiscreteGroupingProperties[recordValue].Value);
+				var recordPtrValue = fieldGroup.GroupItems[recordDiscretePtrValue].Value;
+				// Check if the pivot field item and record item is pointing to the same shared string.
+				if (!pivotFieldPtrValue.IsEquivalentTo(recordPtrValue))
+					return false;
 			}
 			return true;
 		}

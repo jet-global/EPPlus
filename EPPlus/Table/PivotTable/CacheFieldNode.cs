@@ -93,6 +93,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get { return this.SharedItems?.Count > 0; }
 		}
+
+		/// <summary>
+		/// Gets a value indicating whether or not this node is a group field.
+		/// Note: A base cacheField can have a fieldGroup, but the base field index is set to the default value.
+		/// </summary>
+		public bool IsGroupField => this.FieldGroup != null && this.FieldGroup.BaseField > -1;
 		#endregion
 
 		#region Constructors
@@ -142,8 +148,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public void RemoveXmlUAttribute()
 		{
-			var list = this.FieldGroup == null ? this.SharedItems : this.FieldGroup.GroupItems;
-			foreach (var item in list)
+			// Grouping fields do not have a shared items collection.
+			if (this.SharedItems == null)
+				return;
+			foreach (var item in this.SharedItems)
 			{
 				var unusedAttribute = item.TopNode.Attributes["u"];
 				if (unusedAttribute != null && int.Parse(unusedAttribute.Value) == 1)

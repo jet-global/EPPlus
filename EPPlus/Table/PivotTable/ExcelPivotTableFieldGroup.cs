@@ -67,7 +67,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Group a pivot field items by years.
 		/// </summary>
-		Years
+		Years,
+		/// <summary>
+		/// Not a date grouping field.
+		/// </summary>
+		None
 	}
 	#endregion
 
@@ -84,7 +88,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get { return base.GetXmlNodeInt("@base"); }
 		}
-
+		
 		/// <summary>
 		/// Get the collection of group items.
 		/// </summary>
@@ -94,6 +98,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Get the grouping type of how this field is grouped.
 		/// </summary>
 		public PivotFieldDateGrouping GroupBy { get; }
+
+		/// <summary>
+		/// Get the discrete grouping properties collection.
+		/// </summary>
+		public DiscreteGroupingPropertiesCollection DiscreteGroupingProperties { get; }
 
 		private string RangeGroupingProperties
 		{
@@ -110,10 +119,20 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal ExcelPivotTableFieldGroup(XmlNamespaceManager ns, XmlNode topNode) :
 			 base(ns, topNode)
 		{
+			if (ns == null)
+				throw new ArgumentNullException(nameof(ns));
+			if (topNode == null)
+				throw new ArgumentNullException(nameof(topNode));
 			var groupItemsNode = topNode.SelectSingleNode("d:groupItems", this.NameSpaceManager);
 			if (groupItemsNode != null)
 				this.GroupItems = new SharedItemsCollection(this.NameSpaceManager, groupItemsNode);
-			this.GroupBy = (PivotFieldDateGrouping)Enum.Parse(typeof(PivotFieldDateGrouping), this.RangeGroupingProperties, true);
+			var discretePrNode = topNode.SelectSingleNode("d:discretePr", this.NameSpaceManager);
+			if (discretePrNode != null)
+				this.DiscreteGroupingProperties = new DiscreteGroupingPropertiesCollection(this.NameSpaceManager, discretePrNode);
+			if (string.IsNullOrEmpty(this.RangeGroupingProperties))
+				this.GroupBy = PivotFieldDateGrouping.None;
+			else
+				this.GroupBy = (PivotFieldDateGrouping)Enum.Parse(typeof(PivotFieldDateGrouping), this.RangeGroupingProperties, true);
 		}
 		#endregion
 	}
