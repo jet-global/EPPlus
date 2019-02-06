@@ -777,6 +777,7 @@
     <Compile Include="Table\PivotTable\DataCalculation\GrandTotalHelperBase.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\ColumnGrandTotalHelper.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\TotalFunctionHelper.cs" />
+    <Compile Include="Table\PivotTable\DiscreteGroupingPropertiesCollection.cs" />
     <Compile Include="Table\PivotTable\ExcelPageField.cs" />
     <Compile Include="Table\PivotTable\ExcelPageFieldCollection.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotCacheRecords.cs" />

@@ -1223,7 +1223,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				var cacheRecord = this.CacheDefinition.CacheRecords[i];
 				var currentNode = rootNode;
 
-				ExcelPivotTableField pivotField = null;
 				for (int j = 0; j < rowColFields.Count; j++)
 				{
 					int rowColFieldIndex = rowColFields[j].Index;
@@ -1242,19 +1241,13 @@ namespace OfficeOpenXml.Table.PivotTable
 						currentNode = currentNode.AddChild(-2);  // Create a datafield node.
 					else
 					{
-						pivotField = this.Fields[rowColFieldIndex];
 						int recordItemValue = int.Parse(cacheRecord.Items[rowColFieldIndex].Value);
 						var sharedItemValue = cacheFields[rowColFieldIndex].SharedItems[recordItemValue];
 						
-						// A sharedItem value of type DateTime indicates the current pivot field is part of a date grouping. Otherwise, create a new node if necessary.
-						if (sharedItemValue.Type == PivotCacheRecordType.d && cacheFields[rowColFieldIndex].FieldGroup != null)
-						{
-							int index = rowColFieldIndex == originalIndex ? rowColFieldIndex : originalIndex;
-							var searchValue = this.GetItemValueByGroupingType(sharedItemValue.Value, groupBy);
-							currentNode = this.CreateTreeNode(true, currentNode, pivotField, recordItemValue, index, cacheRecordPageFieldIndices, cacheRecord, searchValue, cacheFields[index]);
-						}
+						if (cacheFields[originalIndex].IsGroupField)
+							currentNode = this.CreateTreeNodeWithGrouping(sharedItemValue, originalIndex, currentNode, recordItemValue, groupBy, cacheFields, cacheRecordPageFieldIndices, cacheRecord);
 						else
-							currentNode = this.CreateTreeNode(false, currentNode, pivotField, recordItemValue, rowColFieldIndex, cacheRecordPageFieldIndices, cacheRecord, sharedItemValue.Value);
+							currentNode = this.CreateTreeNode(false, currentNode, this.Fields[rowColFieldIndex], recordItemValue, rowColFieldIndex, cacheRecordPageFieldIndices, cacheRecord, sharedItemValue.Value);
 
 						// This cache record does not contain the page field indices, so continue to the next record.
 						if (currentNode == null)
@@ -1265,6 +1258,28 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 			return rootNode;
+		}
+
+		private PivotItemTreeNode CreateTreeNodeWithGrouping(CacheItem sharedItemValue, int groupingIndex, PivotItemTreeNode currentNode, int recordItemValue, PivotFieldDateGrouping? groupBy,
+			IReadOnlyList<CacheFieldNode> cacheFields, Dictionary<int, List<int>> cacheRecordPageFieldIndices, CacheRecordNode cacheRecord)
+		{
+			var pivotField = this.Fields[groupingIndex];
+			// A sharedItem value of type DateTime indicates the current pivot field is part of a date grouping. Otherwise, create a new node if necessary.
+			if (sharedItemValue.Type == PivotCacheRecordType.d)
+			{
+				// Handles field date groupings.
+				var searchValue = this.GetItemValueByGroupingType(sharedItemValue.Value, groupBy);
+				currentNode =  this.CreateTreeNode(true, currentNode, pivotField, recordItemValue, groupingIndex, cacheRecordPageFieldIndices, cacheRecord, searchValue, cacheFields[groupingIndex]);
+			}
+			else if (cacheFields[groupingIndex].FieldGroup.DiscreteGroupingProperties != null)
+			{
+				// Handles custom field groupings.
+				var groupingFieldGroup = cacheFields[groupingIndex].FieldGroup;
+				int discretePrValue = int.Parse(groupingFieldGroup.DiscreteGroupingProperties[recordItemValue].Value);
+				var groupingSearchValue = groupingFieldGroup.GroupItems[discretePrValue].Value;
+				currentNode = this.CreateTreeNode(false, currentNode, pivotField, discretePrValue, groupingIndex, cacheRecordPageFieldIndices, cacheRecord, groupingSearchValue);
+			}
+			return currentNode;
 		}
 
 		private string GetItemValueByGroupingType(string sharedItemValue, PivotFieldDateGrouping? groupBy)
@@ -1298,7 +1313,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		private PivotItemTreeNode CreateTreeNode(bool isDateGrouping, PivotItemTreeNode currentNode, ExcelPivotTableField pivotField, int recordItemValue, int pivotFieldIndex,
-			Dictionary<int, List<int>> cacheRecordPageFieldIndices, CacheRecordNode cacheRecord, string searchValue, CacheFieldNode cacheFields = null)
+			Dictionary<int, List<int>> cacheRecordPageFieldIndices, CacheRecordNode cacheRecord, string searchValue, CacheFieldNode cacheField = null)
 		{
 			// If an identical child already exists, continue. Otherwise, create a new child.
 			if (currentNode.HasChild(searchValue))
@@ -1311,7 +1326,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				int pivotFieldItemIndex = 0;
 				if (isDateGrouping)
 				{
-					var cacheFieldGroupItems = cacheFields.FieldGroup.GroupItems;
+					var cacheFieldGroupItems = cacheField.FieldGroup.GroupItems;
 					pivotFieldItemIndex = cacheFieldGroupItems.ToList().FindIndex(x => x.Value.IsEquivalentTo(searchValue));
 				}
 				else
@@ -1704,9 +1719,11 @@ namespace OfficeOpenXml.Table.PivotTable
 				return this.DataFields[item.DataFieldIndex].Name;
 			var pivotField = this.Fields[pivotFieldIndex];
 			var cacheItemIndex = pivotField.Items[item[xMemberIndex]].X;
-			var returnVal = this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup == null ? this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value :
-				this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup.GroupItems[cacheItemIndex].Value;
-			return returnVal;
+			// If the pivot field is a part of a grouping, use the groupItems collection. Otherwise, use the sharedItems collection.
+			if (this.CacheDefinition.CacheFields[pivotFieldIndex].IsGroupField)
+				return this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup.GroupItems[cacheItemIndex].Value;
+			else
+				return this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value;
 		}
 
 		private void InitSchemaNodeOrder()
