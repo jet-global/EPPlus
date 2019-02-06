@@ -297,10 +297,11 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		/// <summary>
 		/// Gets or sets whether the items in this field should be shown in Outline form.
+		/// A value of false corresponds to "tabular form".
 		/// </summary>
 		public bool Outline
 		{
-			get { return base.GetXmlNodeBool("@outline"); }
+			get { return base.GetXmlNodeBool("@outline", true); }
 			set { base.SetXmlNodeBool("@outline", value); }
 		}
 

@@ -82,6 +82,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		public string SharedItemValue { get; set; }
 
 		/// <summary>
+		/// Gets a value indicating if this node's pivot field is set as tabular form (outline form is false).
+		/// </summary>
+		public bool IsTabularForm { get; private set; }
+
+		/// <summary>
 		/// Gets or sets the list of children that this node parents.
 		/// </summary>
 		public List<PivotItemTreeNode> Children { get; set; } = new List<PivotItemTreeNode>();
@@ -106,13 +111,15 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="pivotFieldIndex">The index of the pivot field referenced by the new child.</param>
 		/// <param name="pivotFieldItemIndex">The index of the pivot field item referenced by the new child.</param>
 		/// <param name="sharedItemValue">The shared item "v" value. (Only used for date groupings).</param>
-		public PivotItemTreeNode AddChild(int value, int pivotFieldIndex = -2, int pivotFieldItemIndex = -2, string sharedItemValue = null)
+		/// <param name="isTabularForm">A value indicating if this node's pivot field is set as tabular form (outline form is false).</param>
+		public PivotItemTreeNode AddChild(int value, int pivotFieldIndex = -2, int pivotFieldItemIndex = -2, string sharedItemValue = null, bool isTabularForm = false)
 		{
 			var child = new PivotItemTreeNode(value)
 			{
 				PivotFieldIndex = pivotFieldIndex,
 				PivotFieldItemIndex = pivotFieldItemIndex,
-				SharedItemValue = sharedItemValue
+				SharedItemValue = sharedItemValue,
+				IsTabularForm = isTabularForm
 			};
 			this.Children.Add(child);
 			return child;

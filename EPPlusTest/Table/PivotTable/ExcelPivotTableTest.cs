@@ -5935,6 +5935,72 @@ namespace EPPlusTest.Table.PivotTable
 			}
 		}
 		#endregion
+
+		#region Pivot Field Settings
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableFieldSettings.xlsx")]
+		public void PivotTableRefreshWithFieldSettingsTabularModeOnlyRowFields()
+		{
+			var file = new FileInfo("PivotTableFieldSettings.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalTop = false;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					this.CheckPivotTableAddress(new ExcelAddress("B2:C13"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 2, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 2, 3, "Location"),
+					new ExpectedCellValue(sheetName, 3, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 3, 3, "Chicago"),
+					new ExpectedCellValue(sheetName, 4, 2, null),
+					new ExpectedCellValue(sheetName, 4, 3, "Nashville"),
+					new ExpectedCellValue(sheetName, 5, 2, null),
+					new ExpectedCellValue(sheetName, 5, 3, "San Francisco"),
+					new ExpectedCellValue(sheetName, 6, 2, "Car Rack Total"),
+					new ExpectedCellValue(sheetName, 6, 3, null),
+					new ExpectedCellValue(sheetName, 7, 2, "Headlamp"),
+					new ExpectedCellValue(sheetName, 7, 3, "Chicago"),
+					new ExpectedCellValue(sheetName, 8, 2, "Headlamp Total"),
+					new ExpectedCellValue(sheetName, 8, 3, null),
+					new ExpectedCellValue(sheetName, 9, 2, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 9, 3, "San Francisco"),
+					new ExpectedCellValue(sheetName, 10, 2, "Sleeping Bag Total"),
+					new ExpectedCellValue(sheetName, 10, 3, null),
+					new ExpectedCellValue(sheetName, 11, 2, "Tent"),
+					new ExpectedCellValue(sheetName, 11, 3, "Nashville"),
+					new ExpectedCellValue(sheetName, 12, 2, "Tent Total"),
+					new ExpectedCellValue(sheetName, 12, 3, null),
+					new ExpectedCellValue(sheetName, 13, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 13, 3, null),
+				});
+			}
+		}
+
+		[TestMethod]
+		public void SDfksdlfksjdlfkjsdf()
+		{
+			using (var package = new ExcelPackage(new FileInfo(@"C:\Users\ems\Downloads\PivotTableFieldSettings.xlsx")))
+			{
+				package.Workbook.PivotCacheDefinitions.First().UpdateData();
+				package.SaveAs(@"C:\Users\ems\Downloads\OUT.xlsx");
+				Assert.Fail();
+			}
+		}
+		#endregion
 		#endregion
 
 		#region Sorting Tests

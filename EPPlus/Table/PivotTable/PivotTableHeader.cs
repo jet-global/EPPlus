@@ -85,6 +85,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// when there are no row or column fields.
 		/// </summary>
 		public bool IsPlaceHolder { get; set; }
+
+		/// <summary>
+		/// Gets a value indicating that this is a header for a tabular form field.
+		/// </summary>
+		public bool IsTabularHeader { get; }
 		#endregion
 
 		#region Constructors
@@ -112,6 +117,17 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.IsDataField = isDataField;
 			this.IsAboveDataField = isAboveDataField;
 			this.TotalType = totalType;
+		}
+
+		/// <summary>
+		/// Creates a new <see cref="PivotTableHeader"/> object with only a <see cref="PivotTableField"/>.
+		/// Used for tabular form and other non-compact form headers.
+		/// </summary>
+		/// <param name="field">The field that this header corresponds to.</param>
+		public PivotTableHeader(ExcelPivotTableField field)
+		{
+			this.PivotTableField = field;
+			this.IsTabularHeader = true;
 		}
 		#endregion
 	}

@@ -895,6 +895,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal List<PivotTableHeader> ColumnHeaders { get; } = new List<PivotTableHeader>();
 
 		/// <summary>
+		/// Gets a list of headers for tabular row fields. These are basically column headers.
+		/// </summary>
+		internal List<PivotTableHeader> TabularHeaders { get; } = new List<PivotTableHeader>();
+
+		/// <summary>
 		/// Gets a value indicating whether there is more than one data field in the row fields.
 		/// </summary>
 		internal bool HasRowDataFields => this.RowFields.Any(c => c.Index == -2);
@@ -1035,6 +1040,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 
+			this.RowHeaders.Clear();
+			this.ColumnHeaders.Clear();
+
 			// Update the rowItems.
 			this.Workbook.FormulaParser.Logger?.LogFunction($"{nameof(this.UpdateRowColumnItems)}: Rows");
 			this.UpdateRowColumnItems(this.RowFields, this.RowItems, true);
@@ -1100,12 +1108,75 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
+		private List<Tuple<int, int>> BuildRowItemsTabular(PivotItemTreeNode root, List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices)
+		{
+			int repeatedItemsCount = 0;
+			if (!root.HasChildren /*|| !root.HasTabularChildren*/)
+			{
+				// TODO: Extract into a method (shared with buildColumnItems)
+				for (; repeatedItemsCount < lastChildIndices.Count; repeatedItemsCount++)
+				{
+					if (indices[repeatedItemsCount].Item2 != lastChildIndices[repeatedItemsCount].Item2)
+						break;
+				}
+				// TODO: Ensure that datafields are handled here if necessary.
+				if (root.PivotFieldIndex == -2)
+					throw new NotImplementedException("Handle data fields");
+				var pivotField = this.Fields[root.PivotFieldIndex];
+
+				bool isLeafNode = !root.HasChildren;
+				string subtotalType = this.GetRowFieldSubtotalType(pivotField);
+				bool isAboveDataField = !indices.Any(x => x.Item1 == -2);
+				this.RowHeaders.Add(new PivotTableHeader(indices, pivotField, root.DataFieldIndex, false, true, isLeafNode, false, subtotalType, isAboveDataField));
+
+				// If this is the first child of a tabular form parent, add a column header
+				if (!this.TabularHeaders.Any(c => c.IsTabularHeader && c.PivotTableField == pivotField))
+				{
+					var header = new PivotTableHeader(pivotField);
+					// TODO: Update BuildColumnItems so that it doesn't clear headers created by this
+					this.TabularHeaders.Add(header);
+				}
+
+				this.RowItems.AddColumnItem(indices.ToList(), repeatedItemsCount, root.DataFieldIndex);
+				return indices.ToList();
+			}
+
+			root.ExpandIfDataFieldNode(this.DataFields.Count);
+
+			for (int i = 0; i < root.Children.Count; i++)
+			{
+				var child = root.Children[i];
+				int pivotFieldItemIndex = child.PivotFieldIndex == -2 ? child.DataFieldIndex : child.PivotFieldItemIndex;
+
+				var childIndices = indices.ToList();
+				childIndices.Add(new Tuple<int, int>(child.PivotFieldIndex, pivotFieldItemIndex));
+
+				// TODO: Switch on tabular-ness
+				lastChildIndices = this.BuildRowItemsTabular(child, childIndices, lastChildIndices);
+			}
+
+
+			// TODO: Create subtotal nodes
+
+
+			return lastChildIndices;
+		}
+
 		private void BuildRowItems(PivotItemTreeNode root, List<Tuple<int, int>> indices)
 		{
-			if (!root.Children.Any())
+			if (!root.HasChildren)
 				return;
 
 			root.ExpandIfDataFieldNode(this.DataFields.Count);
+
+			//if (parentIsTabularFormat)
+			//{
+			//	// Add a new ColumnHeader for the child type.
+			//	//   Ensure to preserve it in buildColumnItems -- currently it will be cleared.
+
+			//	// 
+			//	throw new NotImplementedException();
+			//}
 
 			foreach (var child in root.Children)
 			{
@@ -1113,11 +1184,13 @@ namespace OfficeOpenXml.Table.PivotTable
 				ExcelPivotTableField pivotField = null;
 
 				int pivotFieldItemIndex = 0;
+				bool isTabularFormat = false;
 				if (child.PivotFieldIndex != -2)
 				{
 					// Child is not a data field.
 					pivotField = this.Fields[child.PivotFieldIndex];
 					pivotFieldItemIndex = child.PivotFieldItemIndex;
+					isTabularFormat = pivotField.Outline == false;
 				}
 				else
 					pivotFieldItemIndex = child.DataFieldIndex;
@@ -1127,29 +1200,32 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.RowItems.Add(rowDepth, pivotFieldItemIndex, null, child.DataFieldIndex);
 				bool isLeafNode = !child.HasChildren;
 				bool isAboveDataField = !childIndices.Any(x => x.Item1 == -2);
+				string subtotalType = this.GetRowFieldSubtotalType(pivotField);
 
-				string subtotalType = null;
-				if (pivotField != null && pivotField.SubtotalTop)
-				{
-					// If a pivot field only has one subtotal function type, subtotal top is respected.
-					// If there are multiple functions, subtotals will be put at the bottom for each custom function.
-					var subtotalTypes = pivotField.GetEnabledSubtotalTypes();
-					if (subtotalTypes.Count == 1)
-					{
-						var type = subtotalTypes.First();
-						if (!type.IsEquivalentTo("default"))
-							subtotalType = type;
-					}
-					else if (subtotalTypes.Count > 1)
-						subtotalType = "none";
-				}
 				this.RowHeaders.Add(new PivotTableHeader(childIndices, pivotField, child.DataFieldIndex, false, true, isLeafNode, false, subtotalType, isAboveDataField));
-
 				this.BuildRowItems(child, childIndices);
-
 				// Create subtotal nodes if default subtotal is enabled.
 				this.CreateRowSubtotalNodes(child, childIndices, pivotField, rowDepth, isAboveDataField);
 			}
+		}
+
+		private string GetRowFieldSubtotalType(ExcelPivotTableField pivotField)
+		{
+			if (pivotField?.SubtotalTop == true)
+			{
+				// If a pivot field only has one subtotal function type, subtotal top is respected.
+				// If there are multiple functions, subtotals will be put at the bottom for each custom function.
+				var subtotalTypes = pivotField.GetEnabledSubtotalTypes();
+				if (subtotalTypes.Count == 1)
+				{
+					var type = subtotalTypes.First();
+					if (!type.IsEquivalentTo("default"))
+						return type;
+				}
+				else if (subtotalTypes.Count > 1)
+					return "none";
+			}
+			return null;
 		}
 
 		private void CreateRowSubtotalNodes(PivotItemTreeNode child, List<Tuple<int, int>> childIndices, ExcelPivotTableField pivotField, int rowDepth, bool isAboveDataField)
@@ -1187,7 +1263,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (!node.HasChildren)
 			{
 				// Find the number of matching parent pivot field indices (a.k.a. repeated items count a.k.a "r" attribute)
-				repeatedItemsCount = 0;
 				for (; repeatedItemsCount < lastChildIndices.Count; repeatedItemsCount++)
 				{
 					if (indices[repeatedItemsCount].Item2 != lastChildIndices[repeatedItemsCount].Item2)
@@ -1361,7 +1436,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				else
 					pivotFieldItemIndex = pivotField.Items.ToList().FindIndex(c => c.X == recordItemValue);
-				return currentNode.AddChild(recordItemValue, pivotFieldIndex, pivotFieldItemIndex, searchValue);
+				bool isTabularForm = pivotField?.Outline == false;
+				return currentNode.AddChild(recordItemValue, pivotFieldIndex, pivotFieldItemIndex, searchValue, isTabularForm);
 			}
 		}
 
@@ -1413,7 +1489,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				var root = this.BuildRowColTree(rowColFieldCollection, pageFieldIndices);
 				root.SortChildren(this);
 				if (isRowItems)
-					this.BuildRowItems(root, new List<Tuple<int, int>>());
+				{
+					this.BuildRowItemsTabular(root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>());
+					//this.BuildRowItems(root, new List<Tuple<int, int>>());
+				}
 				else
 					this.BuildColumnItems(root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>());
 
@@ -1485,7 +1564,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
 			// If there are no data fields, then don't find the offset to obtain the first data column.
 			int endColumn = this.DataFields.Any() ? this.Address.Start.Column + this.FirstDataCol + this.ColumnHeaders.Count - 1
-				: this.Address.Start.Column;
+				: this.Address.Start.Column + this.TabularHeaders.Count;
 			this.Address = new ExcelAddress(this.Worksheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
 			if (this.DataFields.Any())
 			{
@@ -1527,15 +1606,52 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
+		private void ClearTable()
+		{
+			// Clear out the pivot table in the worksheet except for the "<Row/Column> Labels" cell in the top left-ish corner.
+			ExcelRange columnLabelsCell = null, rowLabelsCell = null, singleDataFieldLabelCell = null;
+			string columnLabel = null, rowLabel = null, singleDataFieldLabel = null;
+			if (this.ColumnFields.Any())
+			{
+				columnLabelsCell = this.Worksheet.Cells[this.Address.Start.Row, this.Address.Start.Column + this.FirstDataCol];
+				columnLabel = columnLabelsCell.Value?.ToString();
+			}
+			if (this.RowFields.Any())
+			{
+				rowLabelsCell = this.Worksheet.Cells[this.Address.Start.Row + this.FirstDataRow - 1, this.Address.Start.Column];
+				rowLabel = rowLabelsCell.Value?.ToString();
+			}
+			if (this.DataFields.Count == 1)
+			{
+				singleDataFieldLabelCell = this.Worksheet.Cells[this.Address.Start.Row, this.Address.Start.Column];
+				singleDataFieldLabel = singleDataFieldLabelCell.Value?.ToString();
+			}
+
+			this.Worksheet.Cells[this.Address.Address].Clear();
+
+			// Write the labels back into the header cells.
+			if (columnLabelsCell != null)
+				columnLabelsCell.Value = columnLabel;
+			if (rowLabelsCell != null)
+				rowLabelsCell.Value = rowLabel;
+			if (singleDataFieldLabelCell != null)
+				singleDataFieldLabelCell.Value = singleDataFieldLabel;
+		}
+
 		private void UpdateRowColumnHeaders(StringResources stringResources)
 		{
-			// Clear out the pivot table in the worksheet.
-			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
-			int headerColumn = this.Address.Start.Column + this.FirstDataCol;
-			int dataRow = this.Address.Start.Row + this.FirstDataRow;
-			this.Worksheet.Cells[dataRow, this.Address.Start.Column, this.Address.End.Row, this.Address.Start.Column].Clear();
-			this.Worksheet.Cells[startRow, headerColumn, this.Address.End.Row, this.Address.End.Column].Clear();
+			this.ClearTable();
+			
+			// Clear out the pivot table in the worksheet except for the "<Row/Column> Labels" cell in the top left-ish corner.
+			//int startRow = this.Address.Start.Row + this.FirstHeaderRow;
+			//int headerColumn = this.Address.Start.Column + this.FirstDataCol - this.TabularHeaders.Count;
+			//int dataRow = this.Address.Start.Row + this.FirstDataRow;
+			//this.Worksheet.Cells[dataRow, this.Address.Start.Column, this.Address.End.Row, this.Address.Start.Column].Clear();
+			//this.Worksheet.Cells[startRow, headerColumn, this.Address.End.Row, this.Address.End.Column].Clear();
 
+			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
+			int headerColumn = this.Address.Start.Column + this.FirstDataCol - this.TabularHeaders.Count;
+			int dataRow = this.Address.Start.Row + this.FirstDataRow;
 			// Update the row headers in the worksheet.
 			if (this.RowFields.Any())
 			{
