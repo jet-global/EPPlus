@@ -5686,7 +5686,6 @@ namespace EPPlusTest.Table.PivotTable
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					package.SaveAs(@"C:\Users\ems\Downloads\OUT.xlsx");
 					this.CheckPivotTableAddress(new ExcelAddress("F16:Q38"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
