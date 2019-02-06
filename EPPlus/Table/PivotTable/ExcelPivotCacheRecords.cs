@@ -248,7 +248,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				bool match = false;
 				if (rowTuples != null)
 					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
-				if (match && columnTuples != null)
+				if ((match && columnTuples != null) || rowTuples == null)
 					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(columnTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(columnTuples, record, pivotTable);
 				if (match && filterIndices != null)
 					match = this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record);

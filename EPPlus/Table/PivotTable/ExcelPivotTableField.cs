@@ -31,6 +31,7 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Xml;
 using OfficeOpenXml.Utils;
@@ -202,12 +203,70 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal AutoSortScopeReferencesCollection mySortingReferences;
 		#endregion
 
+		#region Constants
+		/// <summary>
+		/// A dictionary of function names as they exist in XML to the EN-US captions for them.
+		/// </summary>
+		public static IReadOnlyDictionary<string, string> FunctionTypesToUserFunctionCaptions = new Dictionary<string, string>
+		{
+			{ "sum", "Sum" },
+			{ "countA", "Count" },
+			{ "avg", "Average" },
+			{ "max", "Max" },
+			{ "min", "Min" },
+			{ "product", "Product" },
+			{ "count", "Count" },
+			{ "stdDev", "StdDev" },
+			{ "stdDevP", "StdDevp" },
+			{ "var", "Var" },
+			{ "varP", "Varp" }
+		};
+
+		/// <summary>
+		/// A dictionary of function names as they exist in XML to the corresponding <see cref="DataFieldFunctions"/> enum values.
+		/// </summary>
+		public static IReadOnlyDictionary<string, DataFieldFunctions> SubtotalFunctionTypeToDataFieldFunctionEnum = new Dictionary<string, DataFieldFunctions>
+		{
+			{ "sum", DataFieldFunctions.Sum },
+			{ "none", DataFieldFunctions.Sum },
+			{ "countA", DataFieldFunctions.Count },
+			{ "avg", DataFieldFunctions.Average },
+			{ "max", DataFieldFunctions.Max },
+			{ "min", DataFieldFunctions.Min },
+			{ "product", DataFieldFunctions.Product },
+			{ "count", DataFieldFunctions.Count },
+			{ "stdDev", DataFieldFunctions.StdDev },
+			{ "stdDevP", DataFieldFunctions.StdDevP},
+			{ "var", DataFieldFunctions.Var },
+			{ "varP", DataFieldFunctions.VarP }
+		};
+
+		/// <summary>
+		/// Gets a mapping of pivot field function names (values of the "t" attribute on a pivot field item) to
+		/// the corresponding name of attribute on the pivot field.
+		/// </summary>
+		private readonly OrderedDictionary FunctionTypesToAttributeNames = new OrderedDictionary
+		{
+			{ "sum", "@sumSubtotal" },
+			{ "countA", "@countASubtotal" },
+			{ "avg", "@avgSubtotal" },
+			{ "max", "@maxSubtotal" },
+			{ "min", "@minSubtotal" },
+			{ "product", "@productSubtotal" },
+			{ "count", "@countSubtotal" },
+			{ "stdDev", "@stdDevSubtotal" },
+			{ "stdDevP", "@stdDevPSubtotal" },
+			{ "var", "@varSubtotal" },
+			{ "varP", "@varPSubtotal" }
+		};
+		#endregion
+
 		#region Properties
 		/// <summary>
 		/// Gets or sets the index of the field.
 		/// </summary>
 		public int Index { get; set; }
-		
+
 		/// <summary>
 		/// Gets or sets the name of the field.
 		/// </summary>
@@ -232,14 +291,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool Compact
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@compact");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@compact", value);
-			}
+			get { return base.GetXmlNodeBool("@compact"); }
+			set { base.SetXmlNodeBool("@compact", value); }
 		}
 
 		/// <summary>
@@ -247,14 +300,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool Outline
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@outline");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@outline", value);
-			}
+			get { return base.GetXmlNodeBool("@outline"); }
+			set { base.SetXmlNodeBool("@outline", value); }
 		}
 
 		/// <summary>
@@ -262,14 +309,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool SubtotalTop
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@subtotalTop", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@subtotalTop", value);
-			}
+			get { return base.GetXmlNodeBool("@subtotalTop", true); }
+			set { base.SetXmlNodeBool("@subtotalTop", value); }
 		}
 
 		/// <summary>
@@ -277,14 +318,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowAll
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showAll");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showAll", value);
-			}
+			get { return base.GetXmlNodeBool("@showAll"); }
+			set { base.SetXmlNodeBool("@showAll", value); }
 		}
 
 		/// <summary>
@@ -294,14 +329,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// the <see cref="ExcelPivotTableField"/>.</remarks>
 		public bool DefaultSubtotal
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@defaultSubtotal", true);
-			}
-			private set
-			{
-				base.SetXmlNodeBool("@defaultSubtotal", value);
-			}
+			get { return base.GetXmlNodeBool("@defaultSubtotal", true); }
+			private set { base.SetXmlNodeBool("@defaultSubtotal", value); }
 		}
 
 		/// <summary>
@@ -328,14 +357,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool IncludeNewItemsInFilter
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@includeNewItemsInFilter");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@includeNewItemsInFilter", value);
-			}
+			get { return base.GetXmlNodeBool("@includeNewItemsInFilter"); }
+			set { base.SetXmlNodeBool("@includeNewItemsInFilter", value); }
 		}
 
 		/// <summary>
@@ -367,23 +390,25 @@ namespace OfficeOpenXml.Table.PivotTable
 					throw (new ArgumentException("Value None can not be combined with other values."));
 				if ((value & eSubTotalFunctions.Default) == eSubTotalFunctions.Default && (value != eSubTotalFunctions.Default))
 					throw (new ArgumentException("Value Default can not be combined with other values."));
-				
-				// Remove old attribute                 
-				XmlNodeList nl = base.TopNode.SelectNodes("d:items/d:item/@t", base.NameSpaceManager);
-				if (nl.Count > 0)
+
+				// Remove any child subtotal items (items with @t set).
+				if (this.Items.Count == 0)
+					return;
+				var subtotalItems = new List<ExcelPivotTableFieldItem>();
+				foreach (var item in this.Items)
 				{
-					foreach (XmlAttribute item in nl)
-					{
-						base.DeleteNode("@" + item.Value + "Subtotal");
-						item.OwnerElement.ParentNode.RemoveChild(item.OwnerElement);
-					}
+					if (!string.IsNullOrEmpty(item.T))
+						subtotalItems.Add(item);
+				}
+				foreach (var item in subtotalItems)
+				{
+					this.Items.Remove(item);
 				}
 
 				if (value == eSubTotalFunctions.None)
 				{
 					// For no subtotals, set defaultSubtotal to off
 					this.DefaultSubtotal = false;
-					base.TopNode.InnerXml = "";
 				}
 				else
 				{
@@ -405,7 +430,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the type of axis.
 		/// </summary>
@@ -449,7 +474,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets whether the field is a row field.
 		/// </summary>
@@ -481,7 +506,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets whether the field is a column field.
 		/// </summary>
@@ -513,28 +538,22 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets whether the field is a data field.
 		/// </summary>
 		public bool IsDataField
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@dataField", false);
-			}
+			get { return base.GetXmlNodeBool("@dataField", false); }
 		}
-		
+
 		/// <summary>
 		/// Gets the grouping settings. 
 		/// Null if the field has no grouping otherwise ExcelPivotTableFieldNumericGroup or ExcelPivotTableFieldNumericGroup.
-		/// </summary>        
+		/// </summary>
 		public ExcelPivotTableFieldGroup Grouping
 		{
-			get
-			{
-				return myGrouping;
-			}
+			get { return myGrouping; }
 		}
 
 		/// <summary>
@@ -584,7 +603,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="table">The pivot table.</param>
 		/// <param name="index">The index of the field.</param>
 		/// <param name="baseIndex">The base index of the field.</param>
-		internal ExcelPivotTableField(XmlNamespaceManager namespaceManager, XmlNode topNode, ExcelPivotTable table, int index, int baseIndex) 
+		internal ExcelPivotTableField(XmlNamespaceManager namespaceManager, XmlNode topNode, ExcelPivotTable table, int index, int baseIndex)
 			: base(namespaceManager, topNode)
 		{
 			if (namespaceManager == null)
@@ -759,13 +778,21 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Sets the <see cref="DefaultSubtotal"/> property to false and removes 
-		/// the last "default" subtotal item from the <see cref="ExcelPivotTableField"/>.
+		/// Gets an ordered list of the subtotal function names enabled for this pivot field.
+		/// These names are the "t" attribute values.
 		/// </summary>
-		internal void DisableDefaultSubtotal()
+		/// <returns>An ordered list of the enabled subtotal function names.</returns>
+		internal List<string> GetEnabledSubtotalTypes()
 		{
-			this.DefaultSubtotal = false;
-			this.Items.RemoveLastSubtotalItem();
+			var names = new List<string>();
+			foreach (string key in this.FunctionTypesToAttributeNames.Keys)
+			{
+				if (base.GetXmlNodeBool((string)this.FunctionTypesToAttributeNames[key], false))
+					names.Add(key);
+			}
+			if (names.Count == 0)
+				names.Add("default");
+			return names;
 		}
 		#endregion
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using OfficeOpenXml.Extensions;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation
@@ -159,12 +160,32 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <param name="dataField">The data field that the value is under.</param>
 		/// <param name="backingData">The data used to calculated the cell's value.</param>
 		/// <param name="styles">The style to apply to the cell.</param>
-		public void WriteCellTotal(ExcelRange cell, ExcelPivotTableDataField dataField, PivotCellBackingData backingData, ExcelStyles styles)
+		/// <param name="rowTotalType">The total type of the row header (optional).</param>
+		/// <param name="columnTotalType">The total type of the column header (optional).</param>
+		public void WriteCellTotal(ExcelRange cell, ExcelPivotTableDataField dataField, 
+			PivotCellBackingData backingData, ExcelStyles styles, string rowTotalType = null, string columnTotalType = null)
 		{
 			if (backingData == null)
 				return;
 
-			if (string.IsNullOrEmpty(backingData.Formula))
+			if (!string.IsNullOrEmpty(rowTotalType) && !rowTotalType.IsEquivalentTo("default"))
+			{
+				// Only calculate a value if the row and column functions match up, or if there is no column function specified.
+				if (string.IsNullOrEmpty(columnTotalType) || rowTotalType.IsEquivalentTo(columnTotalType))
+				{
+					// Calculate the value with rowTotalType as the function.
+					var function = ExcelPivotTableField.SubtotalFunctionTypeToDataFieldFunctionEnum[rowTotalType];
+					cell.Value = this.Calculate(function, backingData.GetBackingValues());
+				}
+			}
+			else if (!string.IsNullOrEmpty(columnTotalType) && !columnTotalType.IsEquivalentTo("default"))
+			{
+				// We already know that the row subtotal function type is either empty or default because of the previous condition.
+				// Calculate the value with columnTotalType as the function.
+				var function = ExcelPivotTableField.SubtotalFunctionTypeToDataFieldFunctionEnum[columnTotalType];
+				cell.Value = this.Calculate(function, backingData.GetBackingValues());
+			}
+			else if (string.IsNullOrEmpty(backingData.Formula))
 				cell.Value = this.Calculate(dataField.Function, backingData.GetBackingValues());
 			else
 				cell.Value = this.EvaluateCalculatedFieldFormula(backingData.GetCalculatedCellBackingValues(), backingData.Formula);
