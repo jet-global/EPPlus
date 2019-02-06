@@ -77,13 +77,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Adds a new <see cref="RowColumnItem"/> to this collection.
 		/// </summary>
-		/// <param name="itemType">The string value of the 't' attribute.</param>
+		/// <param name="totalType">The total function type.</param>
 		/// <param name="repeatedItemsCount">The 'r' attribute value.</param>
 		/// <param name="xAttribute">The 'x' attribute value.</param>
 		/// <param name="dataFieldIndex">The 'i' attribute value which points to a data field.</param>
-		public void AddSumNode(string itemType, int repeatedItemsCount = 0, int xAttribute = 0, int dataFieldIndex = 0)
+		public void AddSumNode(string totalType, int repeatedItemsCount = 0, int xAttribute = 0, int dataFieldIndex = 0)
 		{
-			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, repeatedItemsCount, xAttribute, itemType, dataFieldIndex));
+			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, repeatedItemsCount, xAttribute, totalType, dataFieldIndex));
 		}
 
 		/// <summary>
