@@ -173,6 +173,43 @@ namespace OfficeOpenXml.Table.PivotTable
 		Ascending,
 		Descending
 	}
+
+	/// <summary>
+	/// Represents the pivot table field setting options for "Show Values As".
+	/// </summary>
+	public enum ShowDataAs
+	{
+		/// <summary>
+		/// Data is shown as it was calculated.
+		/// </summary>
+		NoCalculation,
+		/// <summary>
+		/// Data is shown as a percentage of the grand total.
+		/// Corresponds to "% of Grand Total" in Excel.
+		/// </summary>
+		PercentOfTotal,
+		/// <summary>
+		/// Data is shown as a percentage of the column total.
+		/// Corresponds to "% of Column Total" in Excel.
+		/// </summary>
+		PercentOfCol,
+		/// <summary>
+		/// Data is shown as a percentage of the row total.
+		/// Corresponds to "% of Row Total" in Excel.
+		/// </summary>
+		PercentOfRow,
+		/// <summary>
+		/// Data is shown as a percentage of a base field and item, specified by <see cref="ExcelPivotTableDataField.BaseField"/>
+		/// and <see cref="ExcelPivotTableDataField.BaseItem"/>.
+		/// Corresponds to "% of" in Excel.
+		/// </summary>
+		Percent,
+		/// <summary>
+		/// Data is shown as a percentage of the parent row total.
+		/// Corresponds to "% of Parent Row Total" in Excel.
+		/// </summary>
+		PercentOfParentRow
+	}
 	#endregion
 
 	/// <summary>
@@ -324,13 +361,14 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		/// <summary>
 		/// Gets whether to show the default subtotal.
+		/// NOTE: To set this value, use <see cref="SubTotalFunctions"/>.
 		/// </summary>
-		/// <remarks>A blank value in XML indicates true. Setting this value to false will remove the subtotal nodes from 
-		/// the <see cref="ExcelPivotTableField"/>.</remarks>
+		/// <remarks>A blank value in XML indicates true. Setting this value to false needs to remove the subtotal nodes from 
+		/// the <see cref="ExcelPivotTableField"/>. Use <see cref="SubTotalFunctions"/> to do this.</remarks>
 		public bool DefaultSubtotal
 		{
 			get { return base.GetXmlNodeBool("@defaultSubtotal", true); }
-			private set { base.SetXmlNodeBool("@defaultSubtotal", value); }
+			// setting this value must be done from SubTotalFunctions.
 		}
 
 		/// <summary>
@@ -408,7 +446,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (value == eSubTotalFunctions.None)
 				{
 					// For no subtotals, set defaultSubtotal to off
-					this.DefaultSubtotal = false;
+					base.SetXmlNodeBool("@defaultSubtotal", false);
 				}
 				else
 				{

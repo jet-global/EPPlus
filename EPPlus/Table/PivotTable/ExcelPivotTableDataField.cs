@@ -54,13 +54,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		public int Index
 		{
 			get
-			{
-				return base.GetXmlNodeInt("@fld");
-			}
-			internal set
-			{
-				base.SetXmlNodeString("@fld", value.ToString());
-			}
+			{ return base.GetXmlNodeInt("@fld"); }
+			internal set { base.SetXmlNodeString("@fld", value.ToString()); }
 		}
 		
 		/// <summary>
@@ -68,10 +63,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string Name
 		{
-			get
-			{
-				return base.GetXmlNodeString("@name");
-			}
+			get { return base.GetXmlNodeString("@name"); }
 			set
 			{
 				if (this.Field.myTable.DataFields.ExistsDfName(value, this))
@@ -85,14 +77,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int BaseField
 		{
-			get
-			{
-				return base.GetXmlNodeInt("@baseField");
-			}
-			set
-			{
-				base.SetXmlNodeString("@baseField", value.ToString());
-			}
+			get { return base.GetXmlNodeInt("@baseField"); }
+			set { base.SetXmlNodeString("@baseField", value.ToString()); }
 		}
 		
 		/// <summary>
@@ -100,29 +86,68 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int BaseItem
 		{
+			get { return base.GetXmlNodeInt("@baseItem"); }
+			set { base.SetXmlNodeString("@baseItem", value.ToString()); }
+		}
+		
+		/// <summary>
+		/// Gets or sets the 'showDataAs' attribute.
+		/// </summary>
+		public ShowDataAs ShowDataAs
+		{
 			get
 			{
-				return base.GetXmlNodeInt("@baseItem");
+				string value = base.GetXmlNodeString("@showDataAs");
+				if (string.IsNullOrEmpty(value))
+				{
+					var pivotShowAsExtAttribute = base.TopNode.SelectSingleNode("d:extLst/d:ext/x14:dataField/@pivotShowAs", base.NameSpaceManager);
+					if (pivotShowAsExtAttribute?.Value == "percentOfParentRow")
+						return ShowDataAs.PercentOfParentRow;
+					return ShowDataAs.NoCalculation;
+				}
+				if (Enum.TryParse(value, true, out ShowDataAs result))
+					return result;
+				throw new InvalidOperationException($"Unknown value '{value}' found for data field ShowDataAs attribute.");
 			}
 			set
 			{
-				base.SetXmlNodeString("@baseItem", value.ToString());
+				if (value == ShowDataAs.NoCalculation)
+				{
+					base.SetXmlNodeString("@showDataAs", null, true);
+					// Remove extLst/ext/x14:dataField/@pivotShowAs if it exists.
+					this.RemoveExtDataFieldPivotShowAs();
+					this.NumFmtId = 0;
+				}
+				else
+				{
+					string valueString = value.ToString();
+					string attributeValue = char.ToLowerInvariant(valueString[0]) + valueString.Substring(1);
+					if (value == ShowDataAs.PercentOfParentRow)
+					{
+						// Unfortunately, the "percentOfParentRow" value is stored in extLst/ext/x14:dataField/@pivotShowAs.
+						var extDataFieldNode = base.TopNode.SelectSingleNode("d:extLst/d:ext/x14:dataField", base.NameSpaceManager);
+						if (extDataFieldNode == null)
+							extDataFieldNode = base.CreateComplexNode("d:extLst/d:ext/x14:dataField");
+						if (extDataFieldNode.Attributes["pivotShowAs"] == null)
+							extDataFieldNode.Attributes.Append(base.TopNode.OwnerDocument.CreateAttribute("pivotShowAs"));
+						extDataFieldNode.Attributes["pivotShowAs"].Value = attributeValue;
+					}
+					else
+					{
+						base.SetXmlNodeString("@showDataAs", attributeValue);
+						this.RemoveExtDataFieldPivotShowAs();
+					}
+				}
 			}
 		}
-		
+
 		/// <summary>
 		/// Gets or sets the number format id. 
 		/// </summary>
 		internal int NumFmtId
 		{
-			get
-			{
-				return base.GetXmlNodeInt("@numFmtId");
-			}
-			set
-			{
-				base.SetXmlNodeString("@numFmtId", value.ToString());
-			}
+			get { return base.GetXmlNodeInt("@numFmtId"); }
+			set { base.SetXmlNodeString("@numFmtId", value.ToString()); }
 		}
 		
 		/// <summary>
@@ -161,7 +186,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			get
 			{
 				string s = base.GetXmlNodeString("@subtotal");
-				if (s == "")
+				if (s == string.Empty)
 					return DataFieldFunctions.None;
 				else
 					return (DataFieldFunctions)Enum.Parse(typeof(DataFieldFunctions), s, true);
@@ -209,6 +234,16 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.BaseItem = 0;
 			}
 			this.Field = field;
+		}
+		#endregion
+
+		#region Private Methods
+		private void RemoveExtDataFieldPivotShowAs()
+		{
+			var dataFieldExt = base.TopNode.SelectSingleNode("d:extLst/d:ext/x14:dataField", base.NameSpaceManager);
+			var dataFieldExtAttribute = dataFieldExt?.Attributes?["pivotShowAs"];
+			if (dataFieldExtAttribute != null)
+				dataFieldExt.Attributes.Remove(dataFieldExtAttribute);
 		}
 		#endregion
 	}

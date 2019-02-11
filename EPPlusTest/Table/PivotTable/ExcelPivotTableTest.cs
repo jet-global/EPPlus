@@ -1309,6 +1309,117 @@ namespace EPPlusTest.Table.PivotTable
 			}
 		}
 		#endregion
+
+		#region ShowDataAs Tests
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
+		public void PivotTableRefreshShowDataAs()
+		{
+			var file = new FileInfo("PivotTableShowDataAs.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				void validateSheet() => TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 2, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 2, 3, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 2, 4, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 3, 2, "Chicago"),
+					new ExpectedCellValue(sheetName, 4, 2, "January"),
+					new ExpectedCellValue(sheetName, 4, 3, 0.209341437),
+					new ExpectedCellValue(sheetName, 4, 4, 2),
+					new ExpectedCellValue(sheetName, 5, 2, "March"),
+					new ExpectedCellValue(sheetName, 5, 3, 0.012583145),
+					new ExpectedCellValue(sheetName, 5, 4, 1),
+					new ExpectedCellValue(sheetName, 6, 2, "Nashville"),
+					new ExpectedCellValue(sheetName, 7, 2, "January"),
+					new ExpectedCellValue(sheetName, 7, 3, 0.209341437),
+					new ExpectedCellValue(sheetName, 7, 4, 2),
+					new ExpectedCellValue(sheetName, 8, 2, "February"),
+					new ExpectedCellValue(sheetName, 8, 3, 0.100201914),
+					new ExpectedCellValue(sheetName, 8, 4, 6),
+					new ExpectedCellValue(sheetName, 9, 2, "March"),
+					new ExpectedCellValue(sheetName, 9, 3, 0.209341437),
+					new ExpectedCellValue(sheetName, 9, 4, 2),
+					new ExpectedCellValue(sheetName, 10, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 11, 2, "January"),
+					new ExpectedCellValue(sheetName, 11, 3, 0.209341437),
+					new ExpectedCellValue(sheetName, 11, 4, 1),
+					new ExpectedCellValue(sheetName, 12, 2, "February"),
+					new ExpectedCellValue(sheetName, 12, 3, 0.049849194),
+					new ExpectedCellValue(sheetName, 12, 4, 1),
+					new ExpectedCellValue(sheetName, 13, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 13, 3, 1),
+					new ExpectedCellValue(sheetName, 13, 4, 15)
+				});
+
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
+					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
+					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalTop = true;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					package.SaveAs(@"C:\Users\ems\Downloads\OUT.xlsx");
+					this.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				validateSheet();
+				// Validate that top subtotals were written in.
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 3, 3, .2219),
+					new ExpectedCellValue(sheetName, 3, 4, 3),
+					new ExpectedCellValue(sheetName, 6, 3, .5189),
+					new ExpectedCellValue(sheetName, 6, 4, 10),
+					new ExpectedCellValue(sheetName, 10, 3, .2592),
+					new ExpectedCellValue(sheetName, 10, 4, 2),
+				});
+
+				// Test again with subtotals turned off.
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
+					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
+					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubTotalFunctions = eSubTotalFunctions.None;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					this.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				validateSheet();
+				// Validate that no subtotals were written in.
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 3, 3, null),
+					new ExpectedCellValue(sheetName, 3, 4, null),
+					new ExpectedCellValue(sheetName, 6, 3, null),
+					new ExpectedCellValue(sheetName, 6, 4, null),
+					new ExpectedCellValue(sheetName, 10, 3, null),
+					new ExpectedCellValue(sheetName, 10, 4, null),
+				});
+			}
+		}
+		#endregion
 		#endregion
 
 		#region UpdateData Field Values Tests
