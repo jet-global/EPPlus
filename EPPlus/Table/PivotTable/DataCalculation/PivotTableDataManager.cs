@@ -101,9 +101,9 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 				//Write out row and column grand grand totals.
 				if (this.PivotTable.ColumnGrandTotals)
-					this.WriteGrandTotalValues(columnGrandTotalBackingData, columnGrandGrandTotalsLists);
+					this.WriteGrandTotalValues(false, columnGrandTotalBackingData, columnGrandGrandTotalsLists);
 				if (this.PivotTable.RowGrandTotals)
-					this.WriteGrandTotalValues(rowGrandTotalBackingData, columnGrandGrandTotalsLists);
+					this.WriteGrandTotalValues(true, rowGrandTotalBackingData, columnGrandGrandTotalsLists);
 
 				// Write out body data.
 				this.WritePivotTableBodyData(backingBodyData, columnGrandTotalBackingData, rowGrandTotalBackingData, columnGrandGrandTotalsLists);
@@ -112,37 +112,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		#endregion
 
 		#region Private Methods
-		private void WriteGrandGrandTotals(PivotCellBackingData[] columnGrandGrandTotalsLists)
-		{
-			var styles = this.PivotTable.Workbook.Styles;
-			foreach (var backingData in columnGrandGrandTotalsLists)
-			{
-				if (backingData == null)
-					continue;
-				var cell = this.PivotTable.Worksheet.Cells[backingData.SheetRow, backingData.SheetColumn];
-				object value = backingData.Result;
-				var dataField = this.PivotTable.DataFields[backingData.DataFieldCollectionIndex];
-				if (dataField.ShowDataAs == ShowDataAs.NoCalculation) { /*noop*/ }
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
-					value = 1;
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfCol)
-					throw new NotImplementedException();
-				else if (dataField.ShowDataAs == ShowDataAs.Percent)
-					throw new NotImplementedException();
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfParentRow)
-					throw new NotImplementedException();
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfRow)
-					throw new NotImplementedException();
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
-					throw new NotImplementedException();
-				else
-					throw new InvalidOperationException($"Unexpected dataField ShowDataAs setting '{dataField.ShowDataAs}'");
-
-				this.WriteCellValue(value, cell, dataField, styles);
-			}
-		}
-
-		private void WritePivotTableBodyData(PivotCellBackingData[,] backingData,
+		private void WritePivotTableBodyData(PivotCellBackingData[,] backingDatas,
 			List<PivotCellBackingData> columnGrandTotalsValuesLists, List<PivotCellBackingData> rowGrandTotalsValuesLists,
 			PivotCellBackingData[] grandGrandTotalValues)
 		{
@@ -162,43 +132,44 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					var dataFieldCollectionIndex = this.PivotTable.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 					var dataField = this.PivotTable.DataFields[dataFieldCollectionIndex];
 					var cacheField = this.PivotTable.CacheDefinition.CacheFields[dataField.Index];
+					var cellBackingData = backingDatas[row, column];
+					var value = this.TotalsCalculator.CalculateCellTotal(dataField, cellBackingData, rowHeader.TotalType, columnHeader.TotalType);
 
-					var result = this.TotalsCalculator.CalculateCellTotal(dataField, backingData[row, column], rowHeader.TotalType, columnHeader.TotalType);
-
-					if (result == null) { /* noop */}
-					else if (dataField.ShowDataAs == ShowDataAs.NoCalculation) { /* noop */ }
-					else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
+					if (dataField.ShowDataAs == ShowDataAs.NoCalculation) { /* noop */ }
+					else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal
+						|| dataField.ShowDataAs == ShowDataAs.PercentOfCol 
+						|| dataField.ShowDataAs == ShowDataAs.PercentOfRow)
 					{
-						if (grandGrandTotalValues == null)
+						if (cellBackingData == null)
+							value = null;
+						else if (value == null)
+							value = 0;
+						else if (value != null)
 						{
-							// TODO: Switch on row/column grand totals...? Using column for now
-							result = (double)result / (double)columnGrandTotalsValuesLists[column].Result;
-						}
-						else
-						{
-							result = (double)result / (double)grandGrandTotalValues[dataFieldCollectionIndex].Result;
+							double denominator;
+							if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
+								denominator = (double)grandGrandTotalValues[dataFieldCollectionIndex].Result;
+							else if (dataField.ShowDataAs == ShowDataAs.PercentOfCol)
+								denominator = (double)rowGrandTotalsValuesLists.First(v => v.SheetColumn == dataColumn && v.DataFieldCollectionIndex == dataFieldCollectionIndex).Result;
+							else
+								denominator = (double)columnGrandTotalsValuesLists.First(v => v.SheetRow == dataRow && v.DataFieldCollectionIndex == dataFieldCollectionIndex).Result;
+							value = (double)value / denominator;
 						}
 					}
-					else if (dataField.ShowDataAs == ShowDataAs.PercentOfCol)
-						throw new NotImplementedException();
 					else if (dataField.ShowDataAs == ShowDataAs.Percent)
 						throw new NotImplementedException();
 					else if (dataField.ShowDataAs == ShowDataAs.PercentOfParentRow)
 						throw new NotImplementedException();
-					else if (dataField.ShowDataAs == ShowDataAs.PercentOfRow)
-						throw new NotImplementedException();
-					else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
-						throw new NotImplementedException();
 					else
 						throw new InvalidOperationException($"Unexpected dataField ShowDataAs setting '{dataField.ShowDataAs}'");
 
-					this.WriteCellValue(result, cell, dataField, this.PivotTable.Workbook.Styles);
+					this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
 				}
 				dataColumn++;
 			}
 		}
 
-		private void WriteGrandTotalValues(List<PivotCellBackingData> grandTotalsBackingDatas, PivotCellBackingData[] grandGrandTotalValues)
+		private void WriteGrandTotalValues(bool isRowTotal, List<PivotCellBackingData> grandTotalsBackingDatas, PivotCellBackingData[] columnGrandGrandTotalValues)
 		{
 			foreach (var grandTotalBackingData in grandTotalsBackingDatas)
 			{
@@ -209,32 +180,62 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 				object value = grandTotalBackingData.Result;
 
-				if (value == null) { /* noop */}
-				else if (dataField.ShowDataAs == ShowDataAs.NoCalculation) { /* noop */ }
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
+				if (dataField.ShowDataAs == ShowDataAs.NoCalculation) { /* noop */ }
+				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal 
+					|| dataField.ShowDataAs == ShowDataAs.PercentOfCol 
+					|| dataField.ShowDataAs == ShowDataAs.PercentOfRow)
 				{
-					if (grandGrandTotalValues.Length > grandTotalBackingData.DataFieldCollectionIndex)
+					if (columnGrandGrandTotalValues.Length > grandTotalBackingData.DataFieldCollectionIndex)
 					{
-						double grandGrandTotalValue = (double)grandGrandTotalValues[grandTotalBackingData.DataFieldCollectionIndex].Result;
-						value = (double)grandTotalBackingData.Result / grandGrandTotalValue;
+						if (value == null)
+							value = 0;
+						else if ((dataField.ShowDataAs == ShowDataAs.PercentOfCol && isRowTotal) || (dataField.ShowDataAs == ShowDataAs.PercentOfRow && !isRowTotal))
+							value = 1;
+						else
+						{
+							double grandGrandTotalValue = (double)columnGrandGrandTotalValues[grandTotalBackingData.DataFieldCollectionIndex].Result;
+							value = (double)grandTotalBackingData.Result / grandGrandTotalValue;
+						}
 					}
 					else
 						value = 1;
 				}
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfCol)
-					throw new NotImplementedException();
 				else if (dataField.ShowDataAs == ShowDataAs.Percent)
 					throw new NotImplementedException();
 				else if (dataField.ShowDataAs == ShowDataAs.PercentOfParentRow)
-					throw new NotImplementedException();
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfRow)
-					throw new NotImplementedException();
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
 					throw new NotImplementedException();
 				else
 					throw new InvalidOperationException($"Unexpected dataField ShowDataAs setting '{dataField.ShowDataAs}'");
 
 				this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
+			}
+		}
+
+		private void WriteGrandGrandTotals(PivotCellBackingData[] columnGrandGrandTotalsLists)
+		{
+			var styles = this.PivotTable.Workbook.Styles;
+			foreach (var backingData in columnGrandGrandTotalsLists)
+			{
+				if (backingData == null)
+					continue;
+				var cell = this.PivotTable.Worksheet.Cells[backingData.SheetRow, backingData.SheetColumn];
+				object value = backingData.Result;
+				var dataField = this.PivotTable.DataFields[backingData.DataFieldCollectionIndex];
+				if (dataField.ShowDataAs == ShowDataAs.NoCalculation) { /*noop*/ }
+				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
+					value = 1;
+				else if (dataField.ShowDataAs == ShowDataAs.PercentOfCol)
+					value = 1;
+				else if (dataField.ShowDataAs == ShowDataAs.PercentOfRow)
+					value = 1;
+				else if (dataField.ShowDataAs == ShowDataAs.Percent)
+					throw new NotImplementedException();
+				else if (dataField.ShowDataAs == ShowDataAs.PercentOfParentRow)
+					throw new NotImplementedException();
+				else
+					throw new InvalidOperationException($"Unexpected dataField ShowDataAs setting '{dataField.ShowDataAs}'");
+
+				this.WriteCellValue(value, cell, dataField, styles);
 			}
 		}
 
