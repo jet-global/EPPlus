@@ -156,12 +156,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 							value = (double)value / denominator;
 						}
 					}
-					else if (dataField.ShowDataAs == ShowDataAs.Percent)
-						throw new NotImplementedException();
-					else if (dataField.ShowDataAs == ShowDataAs.PercentOfParentRow)
-						throw new NotImplementedException();
 					else
-						throw new InvalidOperationException($"Unexpected dataField ShowDataAs setting '{dataField.ShowDataAs}'");
+					{
+						// TODO: Implement the rest of these settings. See user story 11453.
+						throw new InvalidOperationException($"Unsupported dataField ShowDataAs setting '{dataField.ShowDataAs}'");
+					}
 
 					this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
 				}
@@ -200,12 +199,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					else
 						value = 1;
 				}
-				else if (dataField.ShowDataAs == ShowDataAs.Percent)
-					throw new NotImplementedException();
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfParentRow)
-					throw new NotImplementedException();
 				else
-					throw new InvalidOperationException($"Unexpected dataField ShowDataAs setting '{dataField.ShowDataAs}'");
+				{
+					// TODO: Implement the rest of these settings. See user story 11453.
+					throw new InvalidOperationException($"Unsupported dataField ShowDataAs setting '{dataField.ShowDataAs}'");
+				}
 
 				this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
 			}
@@ -228,12 +226,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					value = 1;
 				else if (dataField.ShowDataAs == ShowDataAs.PercentOfRow)
 					value = 1;
-				else if (dataField.ShowDataAs == ShowDataAs.Percent)
-					throw new NotImplementedException();
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfParentRow)
-					throw new NotImplementedException();
 				else
-					throw new InvalidOperationException($"Unexpected dataField ShowDataAs setting '{dataField.ShowDataAs}'");
+				{
+					// TODO: Implement the rest of these settings. See user story 11453.
+					throw new InvalidOperationException($"Unsupported dataField ShowDataAs setting '{dataField.ShowDataAs}'");
+				}
 
 				this.WriteCellValue(value, cell, dataField, styles);
 			}
