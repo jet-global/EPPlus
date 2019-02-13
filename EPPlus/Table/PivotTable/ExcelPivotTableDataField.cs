@@ -101,9 +101,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (string.IsNullOrEmpty(value))
 				{
 					var pivotShowAsExtAttribute = base.TopNode.SelectSingleNode("d:extLst/d:ext/x14:dataField/@pivotShowAs", base.NameSpaceManager);
-					if (pivotShowAsExtAttribute?.Value == "percentOfParentRow")
-						return ShowDataAs.PercentOfParentRow;
-					return ShowDataAs.NoCalculation;
+					value = pivotShowAsExtAttribute?.Value;
+					if (string.IsNullOrEmpty(value))
+						return ShowDataAs.NoCalculation;
 				}
 				if (Enum.TryParse(value, true, out ShowDataAs result))
 					return result;
@@ -122,15 +122,18 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					string valueString = value.ToString();
 					string attributeValue = char.ToLowerInvariant(valueString[0]) + valueString.Substring(1);
-					if (value == ShowDataAs.PercentOfParentRow)
+					if (value == ShowDataAs.PercentOfParentRow || value == ShowDataAs.PercentOfParentCol 
+						|| value == ShowDataAs.PercentOfParent || value == ShowDataAs.PercentOfRunningTotal 
+						|| value == ShowDataAs.RankAscending || value == ShowDataAs.RankDescending)
 					{
-						// Unfortunately, the "percentOfParentRow" value is stored in extLst/ext/x14:dataField/@pivotShowAs.
+						// Unfortunately, these setting values are stored in extLst/ext/x14:dataField/@pivotShowAs.
 						var extDataFieldNode = base.TopNode.SelectSingleNode("d:extLst/d:ext/x14:dataField", base.NameSpaceManager);
 						if (extDataFieldNode == null)
 							extDataFieldNode = base.CreateComplexNode("d:extLst/d:ext/x14:dataField");
 						if (extDataFieldNode.Attributes["pivotShowAs"] == null)
 							extDataFieldNode.Attributes.Append(base.TopNode.OwnerDocument.CreateAttribute("pivotShowAs"));
 						extDataFieldNode.Attributes["pivotShowAs"].Value = attributeValue;
+						base.SetXmlNodeString("@showDataAs", null, true);
 					}
 					else
 					{
