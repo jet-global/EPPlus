@@ -37,7 +37,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using OfficeOpenXml.Extensions;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OfficeOpenXml.Internationalization;
 using OfficeOpenXml.Table.PivotTable.DataCalculation;
 using OfficeOpenXml.Utils;
@@ -237,7 +236,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets whether to show the drill down buttons.
+		/// Gets or sets whether to show the drill down buttons (expand/collapse buttons).
 		/// </summary>
 		public bool ShowDrill
 		{
@@ -349,14 +348,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string DataCaption
 		{
-			get
-			{
-				return base.GetXmlNodeString("@dataCaption");
-			}
-			set
-			{
-				base.SetXmlNodeString("@dataCaption", value);
-			}
+			get { return base.GetXmlNodeString("@dataCaption"); }
+			set { base.SetXmlNodeString("@dataCaption", value); }
 		}
 
 		/// <summary>
@@ -364,14 +357,24 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowHeaders
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showHeaders");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showHeaders", value);
-			}
+			get { return base.GetXmlNodeBool("@showHeaders", true); }
+			set { base.SetXmlNodeBool("@showHeaders", value, true); }
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether or not to hide the values row.
+		/// </summary>
+		public bool HideValuesRow
+		{
+			get { return base.GetXmlNodeBool("d:extLst/d:ext/x14:pivotTableDefinition/@hideValuesRow", false); }
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether fields should be shown ascending or in data source order.
+		/// </summary>
+		public bool FieldListSortAscending
+		{
+			get { return base.GetXmlNodeBool("fieldListSortAscending"); }
 		}
 
 		/// <summary>
@@ -379,10 +382,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int PageWrap
 		{
-			get
-			{
-				return base.GetXmlNodeInt("@pageWrap");
-			}
+			get { return base.GetXmlNodeIntNull("@pageWrap") ?? 0; }
 			set
 			{
 				if (value < 0)
@@ -404,6 +404,14 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				base.SetXmlNodeBool("@useAutoFormatting", value);
 			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether or not cell formatting should be preserved on update.
+		/// </summary>
+		public bool PreserveFormatting
+		{
+			get { return base.GetXmlNodeBool("@preserveFormatting", true); }
 		}
 
 		/// <summary>
@@ -473,12 +481,17 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get
 			{
-				return base.GetXmlNodeBool("@multipleFieldFilters");
+				return base.GetXmlNodeBool("@multipleFieldFilters", true);
 			}
 			set
 			{
 				base.SetXmlNodeBool("@multipleFieldFilters", value);
 			}
+		}
+
+		public bool CustomListSort
+		{
+			get { return base.GetXmlNodeBool("@customListSort", true); }
 		}
 
 		/// <summary>
@@ -599,6 +612,22 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				base.SetXmlNodeString(FirstDataColumnPath, value.ToString());
 			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether or not to merge and center cells with labels.
+		/// </summary>
+		public bool MergeAndCenterCellsWithLabels
+		{
+			get { return base.GetXmlNodeBool("@mergeItem", false); }
+		}
+
+		/// <summary>
+		/// Gets a value corresponding to the pivot table setting "Display fields in report area".
+		/// </summary>
+		public bool PageOverThenDown
+		{
+			get { return base.GetXmlNodeBool("@pageOverThenDown", false); }
 		}
 
 		/// <summary>
@@ -995,6 +1024,75 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 			return pageFieldIndices;
+		}
+
+		/// <summary>
+		/// Gets a list of the unsupported features that are enabled on this pivot table.
+		/// </summary>
+		/// <param name="unsupportedFeatures">The unsupported features enabled on this pivot table.</param>
+		/// <returns>True if unsupported features are found, otherwise false.</returns>
+		internal bool TryGetUnsupportedFeatures(out List<string> unsupportedFeatures)
+		{
+			unsupportedFeatures = new List<string>();
+			foreach (var dataField in this.DataFields)
+			{
+				if (dataField.ShowDataAs == ShowDataAs.Percent || dataField.ShowDataAs == ShowDataAs.PercentOfParentRow || dataField.ShowDataAs == ShowDataAs.PercentOfParentCol
+					|| dataField.ShowDataAs == ShowDataAs.PercentOfParent || dataField.ShowDataAs == ShowDataAs.Difference || dataField.ShowDataAs == ShowDataAs.PercentDiff
+					|| dataField.ShowDataAs == ShowDataAs.RunTotal || dataField.ShowDataAs == ShowDataAs.PercentOfRunningTotal || dataField.ShowDataAs == ShowDataAs.RankAscending
+					|| dataField.ShowDataAs == ShowDataAs.RankDescending || dataField.ShowDataAs == ShowDataAs.Index)
+				{
+					unsupportedFeatures.Add($"Data field '{dataField.Name}' show data as setting '{dataField.ShowDataAs}'");
+				}
+			}
+			foreach (var field in this.Fields)
+			{
+				if (!field.Compact)
+					unsupportedFeatures.Add($"Field '{field.Name}' compact disabled");
+				if (field.RepeatItemLabels)
+					unsupportedFeatures.Add($"Field '{field.Name}' repeat item labels enabled");
+				if (field.InsertBlankLine)
+					unsupportedFeatures.Add($"Field '{field.Name}' insert blank line enabled");
+				if (field.ShowAll)
+					unsupportedFeatures.Add($"Field '{field.Name}' show items with no data enabled");
+				if (field.InsertPageBreak)
+					unsupportedFeatures.Add($"Field '{field.Name}' insert page break after each item enabled");
+			}
+			var filters = base.TopNode.SelectSingleNode("d:filters", base.NameSpaceManager);
+			if (filters != null)
+				unsupportedFeatures.Add("Filters enabled");
+			if (this.MergeAndCenterCellsWithLabels)
+				unsupportedFeatures.Add("Merge and center cells with labels enabled");
+			if (this.PageOverThenDown)
+				unsupportedFeatures.Add("Display fields in report filter area over then down enabled");
+			if (this.PageWrap != 0)
+				unsupportedFeatures.Add("Report filter fields per [row|column] > 0");
+			if (!string.IsNullOrEmpty(this.ErrorCaption))
+				unsupportedFeatures.Add("Error caption enabled");
+			if (this.ShowError)
+				unsupportedFeatures.Add("Show error enabled");
+			if (!string.IsNullOrEmpty(this.MissingCaption))
+				unsupportedFeatures.Add("Empty cell caption enabled");
+			if (!this.UseAutoFormatting)
+				unsupportedFeatures.Add("Use auto formatting disabled");
+			if (!this.PreserveFormatting)
+				unsupportedFeatures.Add("Preserve formatting disabled");
+			if (this.MultipleFieldFilters)
+				unsupportedFeatures.Add("Multiple field filters enabled");
+			if (!this.CustomListSort)
+				unsupportedFeatures.Add("Use Custom Lists when sorting disabled");
+			if (!this.ShowDrill)
+				unsupportedFeatures.Add("Show expand/collapse buttons disabled");
+			if (!this.ShowDataTips)
+				unsupportedFeatures.Add("Show contextual tooltips disabled");
+			if (!this.ShowHeaders)
+				unsupportedFeatures.Add("Display field captions and filter dropdowns disabled");
+			if (this.GridDropZones)
+				unsupportedFeatures.Add("Grid drop zones enabled");
+			if (!this.HideValuesRow)
+				unsupportedFeatures.Add("Show values row enabled");
+			if (this.FieldListSortAscending)
+				unsupportedFeatures.Add("Field list sort ascending enabled");
+			return unsupportedFeatures.Any();
 		}
 		#endregion
 
