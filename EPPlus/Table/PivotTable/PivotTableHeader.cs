@@ -85,6 +85,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// when there are no row or column fields.
 		/// </summary>
 		public bool IsPlaceHolder { get; set; }
+
+		/// <summary>
+		/// Gets a value indicating whether or not this header contains a tabular form field.
+		/// </summary>
+		public bool IsTabularHeader { get; }
 		#endregion
 
 		#region Constructors
@@ -100,8 +105,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="isDataField">A value indicating if it is a data field node.</param>
 		/// <param name="totalType">The itemType value of the <see cref="RowColumnItem"/>.</param>
 		/// <param name="isAboveDataField">A value indicating if it is above a data field node.</param>
+		/// <param name="isTabularField">A value indicating if it is a pivot field with tabular form enabled.</param>
 		public PivotTableHeader(List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldCollectionIndex, bool isGrandTotal,
-			bool isRowHeader, bool isLeafNode, bool isDataField, string totalType = null, bool isAboveDataField = false)
+			bool isRowHeader, bool isLeafNode, bool isDataField, string totalType = null, bool isAboveDataField = false, bool isTabularField = false)
 		{
 			this.CacheRecordIndices = recordIndices;
 			this.PivotTableField = field;
@@ -112,6 +118,18 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.IsDataField = isDataField;
 			this.IsAboveDataField = isAboveDataField;
 			this.TotalType = totalType;
+			this.IsTabularHeader = isTabularField;
+		}
+
+		/// <summary>
+		/// Creates a new <see cref="PivotTableHeader"/> object with only a <see cref="PivotTableField"/>.
+		/// Used for tabular form and other non-compact form headers.
+		/// </summary>
+		/// <param name="field">The field that this header corresponds to.</param>
+		public PivotTableHeader(ExcelPivotTableField field)
+		{
+			this.PivotTableField = field;
+			this.IsTabularHeader = true;
 		}
 		#endregion
 	}
