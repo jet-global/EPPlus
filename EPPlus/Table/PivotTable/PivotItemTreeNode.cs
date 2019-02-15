@@ -177,6 +177,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			clone.PivotFieldIndex = this.PivotFieldIndex;
 			clone.PivotFieldItemIndex = this.PivotFieldItemIndex;
 			clone.SubtotalTop = this.SubtotalTop;
+			clone.IsTabularForm = this.IsTabularForm;
 
 			foreach (var child in this.Children)
 			{

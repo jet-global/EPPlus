@@ -105,8 +105,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="isDataField">A value indicating if it is a data field node.</param>
 		/// <param name="totalType">The itemType value of the <see cref="RowColumnItem"/>.</param>
 		/// <param name="isAboveDataField">A value indicating if it is above a data field node.</param>
+		/// <param name="isTabularField">A value indicating if it is a pivot field with tabular form enabled.</param>
 		public PivotTableHeader(List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldCollectionIndex, bool isGrandTotal,
-			bool isRowHeader, bool isLeafNode, bool isDataField, string totalType = null, bool isAboveDataField = false)
+			bool isRowHeader, bool isLeafNode, bool isDataField, string totalType = null, bool isAboveDataField = false, bool isTabularField = false)
 		{
 			this.CacheRecordIndices = recordIndices;
 			this.PivotTableField = field;
@@ -117,6 +118,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.IsDataField = isDataField;
 			this.IsAboveDataField = isAboveDataField;
 			this.TotalType = totalType;
+			this.IsTabularHeader = isTabularField;
 		}
 
 		/// <summary>
