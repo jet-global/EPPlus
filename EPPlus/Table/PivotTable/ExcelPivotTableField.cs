@@ -302,7 +302,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool Outline
 		{
 			get { return base.GetXmlNodeBool("@outline", true); }
-			set { base.SetXmlNodeBool("@outline", value); }
+			set { base.SetXmlNodeBool("@outline", value, true); }
 		}
 
 		/// <summary>
