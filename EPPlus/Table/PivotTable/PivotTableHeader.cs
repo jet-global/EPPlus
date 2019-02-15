@@ -87,7 +87,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool IsPlaceHolder { get; set; }
 
 		/// <summary>
-		/// Gets a value indicating that this is a header for a tabular form field.
+		/// Gets a value indicating whether or not this header contains a tabular form field.
 		/// </summary>
 		public bool IsTabularHeader { get; }
 		#endregion

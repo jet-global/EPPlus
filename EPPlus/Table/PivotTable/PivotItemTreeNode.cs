@@ -111,7 +111,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="pivotFieldIndex">The index of the pivot field referenced by the new child.</param>
 		/// <param name="pivotFieldItemIndex">The index of the pivot field item referenced by the new child.</param>
 		/// <param name="sharedItemValue">The shared item "v" value. (Only used for date groupings).</param>
-		/// <param name="isTabularForm">A value indicating if this node's pivot field is set as tabular form (outline form is false).</param>
+		/// <param name="isTabularForm">A value indicating if this node's pivot field is set as tabular form.</param>
 		public PivotItemTreeNode AddChild(int value, int pivotFieldIndex = -2, int pivotFieldItemIndex = -2, string sharedItemValue = null, bool isTabularForm = false)
 		{
 			var child = new PivotItemTreeNode(value)

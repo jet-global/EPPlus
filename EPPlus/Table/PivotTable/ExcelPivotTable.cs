@@ -1114,13 +1114,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Base case: If we're at a leaf node or a non-tabular form field node.
 			if (root.Value != -1 && (!root.HasChildren || !root.IsTabularForm))
 			{
-				// TODO: Extract into a method (shared with buildColumnItems)
-				for (; repeatedItemsCount < lastChildIndices.Count; repeatedItemsCount++)
-				{
-					if (indices[repeatedItemsCount].Item2 != lastChildIndices[repeatedItemsCount].Item2)
-						break;
-				}
-
+				repeatedItemsCount = this.GetRepeatedItemsCount(indices, lastChildIndices);
 				ExcelPivotTableField pivotField = null;
 				string subtotalType = null;
 				if (root.PivotFieldIndex != -2)
@@ -1147,7 +1141,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				var child = root.Children[i];
 				int pivotFieldItemIndex = child.PivotFieldIndex == -2 ? child.DataFieldIndex : child.PivotFieldItemIndex;
-				// If the current tree node's pivot field has tabular form enabled and it is not a leaf node and it's children are not datafields,
+				// If the current tree node's pivot field has tabular form enabled, is not a leaf node and it's children are not datafields,
 				// then create a tabular form header if it does not exist already.
 				if (root.IsTabularForm && root.HasChildren && !child.IsDataField)
 				{
@@ -1163,6 +1157,17 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			this.CreateColumnAndTabularSubtotalNodes(root, repeatedItemsCount, indices, true);
 			return lastChildIndices;
+		}
+
+		private int GetRepeatedItemsCount(List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices)
+		{
+			int repeatedItemsCount = 0;
+			for (; repeatedItemsCount < lastChildIndices.Count; repeatedItemsCount++)
+			{
+				if (indices[repeatedItemsCount].Item2 != lastChildIndices[repeatedItemsCount].Item2)
+					break;
+			}
+			return repeatedItemsCount;
 		}
 
 		private void CreateColumnAndTabularSubtotalNodes(PivotItemTreeNode node, int repeatedItemsCount, List<Tuple<int, int>> indices, bool tabularFieldEnabled = false)
@@ -1300,13 +1305,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Base case (leaf node).
 			if (!node.HasChildren)
 			{
-				// Find the number of matching parent pivot field indices (a.k.a. repeated items count a.k.a "r" attribute)
-				for (; repeatedItemsCount < lastChildIndices.Count; repeatedItemsCount++)
-				{
-					if (indices[repeatedItemsCount].Item2 != lastChildIndices[repeatedItemsCount].Item2)
-						break;
-				}
-
+				repeatedItemsCount = this.GetRepeatedItemsCount(indices, lastChildIndices);
 				var header = new PivotTableHeader(indices, null, node.DataFieldIndex, false, false, true, node.IsDataField);
 				this.ColumnHeaders.Add(header);
 				this.ColumnItems.AddColumnItem(indices.ToList(), repeatedItemsCount, node.DataFieldIndex);
@@ -1326,7 +1325,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 
 			this.CreateColumnAndTabularSubtotalNodes(node, repeatedItemsCount, indices);
-			
 			return lastChildIndices;
 		}
 
@@ -1732,7 +1730,6 @@ namespace OfficeOpenXml.Table.PivotTable
 						// Otherwise, the item is an inner item, so get the correct column to write to.
 						if (item.RepeatedItemsCount != 0)
 							currentColumn = this.GetInnerItemColumn(item, previousNonTotalItem, currentColumn, startColumn, ref firstColumnWrittenTo, lastColumnWrittenTo, i, j);
-
 						this.Worksheet.Cells[row, currentColumn].Value = headerValue;
 						if (pivotFieldIndex == -2)
 							dataFieldColumn = currentColumn;
@@ -1897,7 +1894,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
 			int column = this.Address.Start.Column + this.FirstDataCol;
-			// Update the column headers in the worksheet.
 			if (this.ColumnFields.Any())
 			{
 				for (int i = 0; i < this.ColumnItems.Count; i++)
