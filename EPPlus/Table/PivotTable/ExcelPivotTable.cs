@@ -1590,11 +1590,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			// Update the row and column header values in the worksheet.
 			bool tabularTable = this.Fields.Any(x => x.Outline == false);
-			if (!tabularTable)
-				this.UpdateRowColumnHeaders(stringResources);
-			else
-				this.UpdateRowColumnHeadersTabularForm(stringResources);
-
+			this.UpdateRowColumnHeaders(stringResources, tabularTable);
 			// Update the pivot table's address.
 			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
 			// If there are no data fields, then don't find the offset to obtain the first data column.
@@ -1675,24 +1671,38 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (singleDataFieldLabelCell != null)
 				singleDataFieldLabelCell.Value = singleDataFieldLabel;
 		}
-
-		private void UpdateRowColumnHeadersTabularForm(StringResources stringResources)
+		
+		private void UpdateRowColumnHeaders(StringResources stringResources, bool tabularTable)
 		{
+			// Clear out the pivot table in the worksheet.
 			this.ClearTable();
 
+			// Update the row headers in the worksheet.
+			if (!tabularTable)
+				this.WriteRowHeaders(stringResources);
+			else
+			{
+				int dataFieldColumn = this.WriteTabularRowHeaders(stringResources);
+				this.WriteTabularHeadersInColumns(dataFieldColumn);
+			}
+
+			// Update the column headers in the worksheet.
+			this.WriteColumnHeaders(stringResources);
+		}
+
+		private int WriteTabularRowHeaders(StringResources stringResources)
+		{
 			int dataFieldColumn = 0;
 			int row = this.Address.Start.Row + this.FirstDataRow;
 			int startColumn = this.Address.Start.Column;
 			int firstColumnWrittenTo = row;
 			int lastColumnWrittenTo = 0;
 			RowColumnItem previousNonTotalItem = null;
-
 			for (int i = 0; i < this.RowItems.Count; i++)
 			{
 				int currentColumn = startColumn;
 				var item = this.RowItems[i];
 				var header = this.RowHeaders[i];
-
 				for (int j = 0; j < item.Count; j++)
 				{
 					// Write subtotal headers.
@@ -1729,28 +1739,20 @@ namespace OfficeOpenXml.Table.PivotTable
 						lastColumnWrittenTo = currentColumn;
 						previousNonTotalItem = item;
 					}
-					
+
 					// If the row item contains pivot fields in tabular form, then stay on the same row and increment the column.
 					if (item.Count > 1)
 						currentColumn++;
 				}
 				row++;
 			}
-
-			// Write tabular form row headers.
-			this.WriteTabularHeaders(dataFieldColumn);
-
-			// Write column headers.
-			row = this.Address.Start.Row + this.FirstHeaderRow;
-			int headerColumn = this.Address.Start.Column + this.FirstDataCol;
-			this.WriteColumnHeaders(stringResources, row, headerColumn);
+			return dataFieldColumn;
 		}
 
 		private int GetInnerItemColumn(RowColumnItem currentItem, RowColumnItem previousNonTotalItem, int currentColumn, int startColumn, ref int firstColumnWrittenTo, int lastColumnWrittenTo, int i, int j)
 		{
 			var currentRowFieldIndex = currentItem.RepeatedItemsCount + j;
 			var isAboveDataField = this.RowFields.Skip(currentRowFieldIndex).Any(x => x.Index == -2);
-
 			// If we are at an inner node, then get the column based on whether or not we are the the first child.
 			if (previousNonTotalItem.RepeatedItemsCount == 0)
 			{
@@ -1805,11 +1807,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			return currentColumn;
 		}
 
-		private int GetTabularSubtotalHeaderColumn(RowColumnItem currentItem, RowColumnItem previousNonTotalItem, int startColumn, int currentColumn, int lastColumnWrittenTo, 
+		private int GetTabularSubtotalHeaderColumn(RowColumnItem item, RowColumnItem previousNonTotalItem, int startColumn, int currentColumn, int lastColumnWrittenTo,
 			int firstColumnWrittenTo, int i, int j)
 		{
 			int returnColumn = 0;
-			if (currentItem.RepeatedItemsCount == 0)
+			if (item.RepeatedItemsCount == 0)
 				returnColumn = currentColumn;
 			else
 			{
@@ -1832,27 +1834,27 @@ namespace OfficeOpenXml.Table.PivotTable
 						// Case 3: Otherwise, always print the header to the first column that was written to by the last non-default/non-leaf node.
 						// Note: When a subtotal's repeated item count is greater than the last non-default node, that means it shares values with the last non-default node.
 						// AKA, this subtotal node is for a child of the last non-default node.
-						if (this.RowHeaders[i - 1].IsLeafNode && previousRepeatedItemsCount < currentItem.RepeatedItemsCount)
-							returnColumn = startColumn + currentItem.RepeatedItemsCount - 1;
-						else if (previousRepeatedItemsCount < currentItem.RepeatedItemsCount)
+						if (this.RowHeaders[i - 1].IsLeafNode && previousRepeatedItemsCount < item.RepeatedItemsCount)
+							returnColumn = startColumn + item.RepeatedItemsCount - 1;
+						else if (previousRepeatedItemsCount < item.RepeatedItemsCount)
 							returnColumn = lastColumnWrittenTo;
 						else
 							returnColumn = firstColumnWrittenTo;
 					}
 					else
 					{
-						int currentRowFieldIndex = currentItem.RepeatedItemsCount + j;
+						int currentRowFieldIndex = item.RepeatedItemsCount + j;
 						var isAboveDataField = this.RowFields.Skip(currentRowFieldIndex).Any(x => x.Index == -2);
 						if (this.HasRowDataFields && !isAboveDataField)
-							returnColumn = startColumn + currentItem.RepeatedItemsCount - 1;
+							returnColumn = startColumn + item.RepeatedItemsCount - 1;
 						else
 						{
-							int previousFieldIndex = this.RowFields[currentItem.RepeatedItemsCount - 1].Index;
+							int previousFieldIndex = this.RowFields[item.RepeatedItemsCount - 1].Index;
 							var previousField = this.Fields[previousFieldIndex];
 							if (previousField.Outline)
-								returnColumn = startColumn + currentItem.RepeatedItemsCount - 1;
+								returnColumn = startColumn + item.RepeatedItemsCount - 1;
 							else
-								returnColumn = startColumn + currentItem.RepeatedItemsCount;
+								returnColumn = startColumn + item.RepeatedItemsCount;
 						}
 					}
 				}
@@ -1860,8 +1862,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					// If datafields are the first row field, then for every non-leaf field under it, calculate the column to print the total header to.
 					// Otherwise, always print it to the firstColumnWrittenTo value.
-					if (previousRepeatedItemsCount < currentItem.RepeatedItemsCount)
-						returnColumn = startColumn + currentItem.RepeatedItemsCount - 1;
+					if (previousRepeatedItemsCount < item.RepeatedItemsCount)
+						returnColumn = startColumn + item.RepeatedItemsCount - 1;
 					else
 						returnColumn = firstColumnWrittenTo;
 				}
@@ -1869,15 +1871,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			return returnColumn;
 		}
 
-		private void UpdateRowColumnHeaders(StringResources stringResources)
+		private void WriteRowHeaders(StringResources stringResources)
 		{
-			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
-			int headerColumn = this.Address.Start.Column + this.FirstDataCol;
 			int dataRow = this.Address.Start.Row + this.FirstDataRow;
-			// Clear out the pivot table in the worksheet.
-			this.ClearTable();
-			
-			// Update the row headers in the worksheet.
 			if (this.RowFields.Any())
 			{
 				for (int i = 0; i < this.RowItems.Count; i++)
@@ -1895,13 +1891,12 @@ namespace OfficeOpenXml.Table.PivotTable
 			// If there are no row headers and only one data field, print the name of the data field for the row.
 			else if (this.DataFields.Count == 1)
 				this.Worksheet.Cells[dataRow++, this.Address.Start.Column].Value = this.DataFields.First().Name;
-
-			// Update the column headers in the worksheet.
-			this.WriteColumnHeaders(stringResources, startRow, headerColumn);
 		}
 
-		public void WriteColumnHeaders(StringResources stringResources, int startRow, int column)
+		private void WriteColumnHeaders(StringResources stringResources)
 		{
+			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
+			int column = this.Address.Start.Column + this.FirstDataCol;
 			// Update the column headers in the worksheet.
 			if (this.ColumnFields.Any())
 			{
@@ -1932,7 +1927,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.Worksheet.Cells[this.Address.Start.Row, column].Value = this.DataFields.First().Name;
 		}
 
-		private void WriteTabularHeaders(int dataFieldColumn)
+		private void WriteTabularHeadersInColumns(int dataFieldColumn)
 		{
 			bool hasValuesLabel = false;
 			// Write "Values" string if necessary.
@@ -1966,7 +1961,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 		}
-
 
 		private PivotCellBackingData[,] WritePivotTableBodyData(TotalsFunctionHelper totalsCalculator)
 		{
