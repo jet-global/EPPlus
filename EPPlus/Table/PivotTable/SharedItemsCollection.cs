@@ -44,6 +44,15 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get { return base.GetXmlNodeString("@minDate") ?? string.Empty; }
 		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether any of these shared items are blank.
+		/// </summary>
+		public bool ContainsBlank
+		{
+			get { return base.GetXmlNodeBool("@containsBlank", false); }
+			set { base.SetXmlNodeBool("@containsBlank", value, false); }
+		}
 		#endregion
 
 		#region Constructors
@@ -69,6 +78,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			string stringValue = ConvertUtil.ConvertObjectToXmlAttributeString(value);
 			var item = new CacheItem(this.NameSpaceManager, base.TopNode, CacheItem.GetObjectType(value), stringValue);
+			if (item.Type == PivotCacheRecordType.m)
+				this.ContainsBlank = true;
 			item.AddSelf(base.TopNode);
 			base.AddItem(item);
 		}

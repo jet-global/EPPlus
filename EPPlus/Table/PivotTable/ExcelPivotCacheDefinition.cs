@@ -258,9 +258,13 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				if (this.Workbook != value.Worksheet.Workbook)
 					throw (new ArgumentException("Range must be in the same package as the pivottable"));
-				var sourceRange = this.SourceRange;
-				base.SetXmlNodeString(SourceWorksheetPath, value.Worksheet.Name);
-				base.SetXmlNodeString(SourceAddressPath, value.FirstAddress);
+				base.SetXmlNodeString(ExcelPivotCacheDefinition.SourceWorksheetPath, value.Worksheet.Name);
+				base.SetXmlNodeString(ExcelPivotCacheDefinition.SourceAddressPath, value.FirstAddress);
+
+				// Delete the worksheetSource "name" attribute if it exists.
+				if (base.GetXmlNodeString(ExcelPivotCacheDefinition.SourceNamePath) != null)
+					base.DeleteNode(ExcelPivotCacheDefinition.SourceNamePath);
+
 				mySourceRange = value;
 			}
 		}
