@@ -1108,7 +1108,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
-		private List<Tuple<int, int>> BuildRowItemsTabular(List<int> tabularFieldIndices, PivotItemTreeNode root, List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices)
+		private List<Tuple<int, int>> BuildTabularRowItems(List<int> tabularFieldIndices, PivotItemTreeNode root, List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices)
 		{
 			int repeatedItemsCount = 0;
 			// Base case: If we're at a leaf node or a non-tabular form field node.
@@ -1152,7 +1152,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 				var childIndices = indices.ToList();
 				childIndices.Add(new Tuple<int, int>(child.PivotFieldIndex, pivotFieldItemIndex));
-				lastChildIndices = this.BuildRowItemsTabular(tabularFieldIndices, child, childIndices, lastChildIndices);
+				lastChildIndices = this.BuildTabularRowItems(tabularFieldIndices, child, childIndices, lastChildIndices);
 			}
 
 			this.CreateColumnAndTabularSubtotalNodes(root, repeatedItemsCount, indices, true);
@@ -1518,7 +1518,7 @@ namespace OfficeOpenXml.Table.PivotTable
 							if (!this.Fields[i].Outline)
 								tabularFieldIndices.Add(i);
 						}
-						this.BuildRowItemsTabular(tabularFieldIndices, root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>());
+						this.BuildTabularRowItems(tabularFieldIndices, root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>());
 					}
 				}
 				else
