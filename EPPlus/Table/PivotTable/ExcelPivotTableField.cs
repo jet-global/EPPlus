@@ -336,10 +336,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				else
 					return v;
 			}
-			set
-			{
-				base.SetXmlNodeString("@name", value);
-			}
+			set { base.SetXmlNodeString("@name", value); }
 		}
 
 		/// <summary>
@@ -347,8 +344,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool Compact
 		{
-			get { return base.GetXmlNodeBool("@compact"); }
-			set { base.SetXmlNodeBool("@compact", value); }
+			get { return base.GetXmlNodeBool("@compact", true); }
+			set { base.SetXmlNodeBool("@compact", value, true); }
 		}
 
 		/// <summary>
@@ -372,11 +369,12 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		/// <summary>
 		/// Gets or sets whether to show all items for this field.
+		/// Corresponds to the "Show items with no data" layout setting.
 		/// </summary>
 		public bool ShowAll
 		{
-			get { return base.GetXmlNodeBool("@showAll"); }
-			set { base.SetXmlNodeBool("@showAll", value); }
+			get { return base.GetXmlNodeBool("@showAll", true); }
+			set { base.SetXmlNodeBool("@showAll", value, true); }
 		}
 
 		/// <summary>
@@ -598,11 +596,36 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets whether the field is a data field.
+		/// Gets whether the field is a data field.
 		/// </summary>
 		public bool IsDataField
 		{
 			get { return base.GetXmlNodeBool("@dataField", false); }
+		}
+
+		/// <summary>
+		/// Gets or sets whether the "Insert blank line after each item label" layout setting is enabled.
+		/// </summary>
+		public bool InsertBlankLine
+		{
+			get { return base.GetXmlNodeBool("@insertBlankRow", false); }
+			set { base.SetXmlNodeBool("@insertBlankRow", value, false); }
+		}
+
+		/// <summary>
+		/// Getse a value indicating
+		/// </summary>
+		public bool InsertPageBreak
+		{
+			get { return base.GetXmlNodeBool("@insertPageBreak", false); }
+		}
+
+		/// <summary>
+		/// Gets whether or not to repeat item labels in the pivot table for this field.
+		/// </summary>
+		public bool RepeatItemLabels
+		{
+			get { return base.GetXmlNodeBool("d:extLst/d:ext/x14:pivotField/@fillDownLabels"); }
 		}
 
 		/// <summary>

@@ -26,6 +26,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using EPPlusTest.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
 using OfficeOpenXml.Table.PivotTable;
@@ -196,6 +197,28 @@ namespace EPPlusTest.Table.PivotTable
 				var sourceAddress = sheet1.Cells["A1:C4"];
 				var pivotTable = new ExcelPivotTable(sheet1, sheet1.Cells[10, 10], sourceAddress, "pivotTable1", 1);
 				var cacheDefinition = new ExcelPivotCacheDefinition(TestUtility.CreateDefaultNSM(), pivotTable, sourceAddress, -1);
+			}
+		}
+		#endregion
+
+		#region SetSourceRangeAddress
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableBackedByExcelTable.xlsx")]
+		public void SetSourceRangeAddress()
+		{
+			var file = new FileInfo("PivotTableBackedByExcelTable.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				using (var package = new ExcelPackage(file))
+				{
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+					Assert.AreEqual("Table1", cacheDefinition.TopNode.SelectSingleNode("d:cacheSource/d:worksheetSource/@name", cacheDefinition.NameSpaceManager).Value);
+					Assert.AreEqual("Table1", cacheDefinition.GetSourceRangeAddress().Address);
+					cacheDefinition.SetSourceRangeAddress(package.Workbook.Worksheets.First(), "A1:G7");
+					Assert.AreEqual("A1:G7", cacheDefinition.GetSourceRangeAddress());
+					Assert.IsNull(cacheDefinition.TopNode.SelectSingleNode("d:cacheSource/d:worksheetSource/@name", cacheDefinition.NameSpaceManager));
+				}
 			}
 		}
 		#endregion
