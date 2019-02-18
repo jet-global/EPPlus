@@ -442,7 +442,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets a list of enableed pivot table features that are unsupported.
+		/// Gets a list of enabled pivot table features that are unsupported.
 		/// </summary>
 		/// <param name="unsupportedFeatures">A list of unsuppported features.</param>
 		/// <returns>True if unsupported features were present, otherwise false.</returns>
