@@ -276,6 +276,7 @@
     <Compile Include="Table\PivotTable\DiscreteGroupingPropertiesCollectionTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotCacheDefinitionTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotCacheRecordsTest.cs" />
+    <Compile Include="Table\PivotTable\ExcelPivotTableDataFieldTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldGroupTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableTest.cs" />

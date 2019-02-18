@@ -87,10 +87,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string Name
 		{
-			get
-			{
-				return base.GetXmlNodeString(NamePath);
-			}
+			get { return base.GetXmlNodeString(NamePath); }
 			set
 			{
 				if (this.Worksheet.Workbook.ExistsTableName(value))
@@ -132,10 +129,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				return myCacheDefinition;
 			}
-			private set
-			{
-				myCacheDefinition = value;
-			}
+			private set { myCacheDefinition = value; }
 		}
 
 		/// <summary>
@@ -143,10 +137,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public ExcelWorksheet Worksheet
 		{
-			get
-			{
-				return this.Workbook.Worksheets[this.Address.WorkSheet];
-			}
+			get { return this.Workbook.Worksheets[this.Address.WorkSheet]; }
 		}
 
 		/// <summary>
@@ -154,10 +145,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public ExcelAddress Address
 		{
-			get
-			{
-				return myAddress;
-			}
+			get { return myAddress; }
 			internal set
 			{
 				if (string.IsNullOrEmpty(value.WorkSheet))
@@ -172,13 +160,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool DataOnRows
 		{
 			get
-			{
-				return base.GetXmlNodeBool("@dataOnRows");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@dataOnRows", value);
-			}
+			{	return base.GetXmlNodeBool("@dataOnRows"); }
+			set { base.SetXmlNodeBool("@dataOnRows", value); }
 		}
 
 		/// <summary>
@@ -186,14 +169,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ApplyNumberFormats
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@applyNumberFormats");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@applyNumberFormats", value);
-			}
+			get { return base.GetXmlNodeBool("@applyNumberFormats"); }
+			set { base.SetXmlNodeBool("@applyNumberFormats", value); }
 		}
 
 		/// <summary>
@@ -201,14 +178,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ApplyBorderFormats
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@applyBorderFormats");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@applyBorderFormats", value);
-			}
+			get { return base.GetXmlNodeBool("@applyBorderFormats"); }
+			set { base.SetXmlNodeBool("@applyBorderFormats", value); }
 		}
 
 		/// <summary>
@@ -216,14 +187,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ApplyFontFormats
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@applyFontFormats");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@applyFontFormats", value);
-			}
+			get { return base.GetXmlNodeBool("@applyFontFormats"); }
+			set { base.SetXmlNodeBool("@applyFontFormats", value); }
 		}
 
 		/// <summary>
@@ -231,14 +196,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ApplyPatternFormats
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@applyPatternFormats");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@applyPatternFormats", value);
-			}
+			get { return base.GetXmlNodeBool("@applyPatternFormats"); }
+			set { base.SetXmlNodeBool("@applyPatternFormats", value); }
 		}
 
 		/// <summary>
@@ -246,14 +205,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ApplyWidthHeightFormats
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@applyWidthHeightFormats");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@applyWidthHeightFormats", value);
-			}
+			get { return base.GetXmlNodeBool("@applyWidthHeightFormats"); }
+			set { base.SetXmlNodeBool("@applyWidthHeightFormats", value); }
 		}
 
 		/// <summary>
@@ -261,14 +214,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowMemberPropertyTips
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showMemberPropertyTips");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showMemberPropertyTips", value);
-			}
+			get { return base.GetXmlNodeBool("@showMemberPropertyTips"); }
+			set { base.SetXmlNodeBool("@showMemberPropertyTips", value); }
 		}
 
 		/// <summary>
@@ -276,14 +223,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowCalcMember
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showCalcMbrs");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showCalcMbrs", value);
-			}
+			get { return base.GetXmlNodeBool("@showCalcMbrs"); }
+			set { base.SetXmlNodeBool("@showCalcMbrs", value); }
 		}
 
 		/// <summary>
@@ -291,14 +232,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool EnableDrill
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@enableDrill", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@enableDrill", value);
-			}
+			get { return base.GetXmlNodeBool("@enableDrill", true); }
+			set { base.SetXmlNodeBool("@enableDrill", value); }
 		}
 
 		/// <summary>
@@ -306,14 +241,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowDrill
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showDrill", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showDrill", value);
-			}
+			get { return base.GetXmlNodeBool("@showDrill", true); }
+			set { base.SetXmlNodeBool("@showDrill", value); }
 		}
 
 		/// <summary>
@@ -321,14 +250,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowDataTips
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showDataTips", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showDataTips", value, true);
-			}
+			get { return base.GetXmlNodeBool("@showDataTips", true); }
+			set { base.SetXmlNodeBool("@showDataTips", value, true); }
 		}
 
 		/// <summary>
@@ -336,14 +259,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool FieldPrintTitles
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@fieldPrintTitles");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@fieldPrintTitles", value);
-			}
+			get { return base.GetXmlNodeBool("@fieldPrintTitles"); }
+			set { base.SetXmlNodeBool("@fieldPrintTitles", value); }
 		}
 
 		/// <summary>
@@ -351,14 +268,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ItemPrintTitles
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@itemPrintTitles");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@itemPrintTitles", value);
-			}
+			get { return base.GetXmlNodeBool("@itemPrintTitles"); }
+			set { base.SetXmlNodeBool("@itemPrintTitles", value); }
 		}
 
 		/// <summary>
@@ -367,14 +278,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <remarks>A blank value in XML indicates true.</remarks>
 		public bool ColumnGrandTotals
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@colGrandTotals", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@colGrandTotals", value);
-			}
+			get { return base.GetXmlNodeBool("@colGrandTotals", true); }
+			set { base.SetXmlNodeBool("@colGrandTotals", value); }
 		}
 
 		/// <summary>
@@ -859,14 +764,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal int CacheID
 		{
-			get
-			{
-				return base.GetXmlNodeInt("@cacheId");
-			}
-			set
-			{
-				base.SetXmlNodeString("@cacheId", value.ToString());
-			}
+			get { return base.GetXmlNodeInt("@cacheId"); }
+			set { base.SetXmlNodeString("@cacheId", value.ToString()); }
 		}
 
 		/// <summary>
@@ -909,7 +808,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal bool HasColumnDataFields => this.ColumnFields.Any(c => c.Index == -2);
 
-		private ExcelWorkbook Workbook { get; set; }
+		internal ExcelWorkbook Workbook { get; private set; }
 		#endregion
 
 		#region Constructors
@@ -1600,36 +1499,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.Address = new ExcelAddress(this.Worksheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
 			if (this.DataFields.Any())
 			{
-				using (var totalsCalculator = new TotalsFunctionHelper())
-				{
-					// If the workbook has calculated fields, configure the calculation helper and cache fields appropriately.
-					var calculatedFields = this.CacheDefinition.CacheFields.Where(c => !string.IsNullOrEmpty(c.Formula));
-					if (calculatedFields.Any())
-						this.SetUpCalculatedFields(calculatedFields, totalsCalculator);
-
-					var backingTableData = this.WritePivotTableBodyData(totalsCalculator);
-					PivotCellBackingData[] grandTotalsValuesLists = null;
-					RowGrandTotalHelper rowGrandTotalHelper = null;
-					ColumnGrandTotalHelper columnGrandTotalHelper = null;
-					if (this.ColumnGrandTotals)
-					{
-						columnGrandTotalHelper = new ColumnGrandTotalHelper(this, backingTableData, totalsCalculator);
-						grandTotalsValuesLists = columnGrandTotalHelper.UpdateGrandTotals();
-					}
-					if (this.RowGrandTotals)
-					{
-						rowGrandTotalHelper = new RowGrandTotalHelper(this, backingTableData, totalsCalculator);
-						rowGrandTotalHelper.UpdateGrandTotals();
-					}
-					// Write grand-grand totals to worksheet (grand totals at bottom right corner of pivot table).
-					if (this.ColumnGrandTotals && this.RowGrandTotals && this.ColumnFields.Any())
-					{
-						if (this.HasRowDataFields)
-							rowGrandTotalHelper.UpdateGrandGrandTotals(grandTotalsValuesLists);
-						else
-							columnGrandTotalHelper.UpdateGrandGrandTotals(grandTotalsValuesLists);
-					}
-				}
+				var dataManager = new PivotTableDataManager(this);
+				dataManager.UpdateWorksheet();
 			}
 			else
 			{
@@ -1956,131 +1827,6 @@ namespace OfficeOpenXml.Table.PivotTable
 					}
 				}
 			}
-		}
-
-		private PivotCellBackingData[,] WritePivotTableBodyData(TotalsFunctionHelper totalsCalculator)
-		{
-			var backingData = new PivotCellBackingData[this.RowHeaders.Count(), this.ColumnHeaders.Count()];
-			int dataColumn = this.Address.Start.Column + this.FirstDataCol;
-			for (int column = 0; column < this.ColumnHeaders.Count; column++)
-			{
-				var columnHeader = this.ColumnHeaders[column];
-				int dataRow = this.Address.Start.Row + this.FirstDataRow - 1;
-				for (int row = 0; row < this.RowHeaders.Count; row++)
-				{
-					dataRow++;
-					var rowHeader = this.RowHeaders[row];
-					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
-						continue;
-					if (rowHeader.IsPlaceHolder)
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
-					else if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.ColumnFields.Count)
-						|| rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
-					{
-						// At a leaf node.
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
-					}
-					else if (this.HasRowDataFields)
-					{
-						if (rowHeader.PivotTableField != null && rowHeader.PivotTableField.DefaultSubtotal && !rowHeader.TotalType.IsEquivalentTo("none"))
-						{
-							if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField) 
-								|| !string.IsNullOrEmpty(rowHeader.TotalType))
-							{
-								backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
-							}
-						}
-					}
-					else if (rowHeader.PivotTableField.DefaultSubtotal && !rowHeader.TotalType.IsEquivalentTo("none")
-						&& (rowHeader.TotalType != null || rowHeader.PivotTableField.SubtotalTop))
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
-
-					var cell = this.Worksheet.Cells[dataRow, dataColumn];
-					var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
-					var dataField = this.DataFields[dataFieldCollectionIndex];
-					var cacheField = this.CacheDefinition.CacheFields[dataField.Index];
-					totalsCalculator.WriteCellTotal(cell, dataField, backingData[row, column], this.Workbook.Styles, rowHeader.TotalType, columnHeader.TotalType);
-				}
-				dataColumn++;
-			}
-			return backingData;
-		}
-
-		private void SetUpCalculatedFields(IEnumerable<CacheFieldNode> calculatedFields, TotalsFunctionHelper totalsCalculator)
-		{
-			// Add all of the cache field names to the calculation helper.
-			var cacheFieldNames = new HashSet<string>(this.CacheDefinition.CacheFields.Select(c => c.Name));
-			totalsCalculator.AddNames(cacheFieldNames);
-
-			// Resolve any calclulated fields that may be referencing each other to forumlas composed of regular ol' cache fields.
-			foreach (var calculatedField in calculatedFields)
-			{
-				var resolvedFormulaTokens = this.ResolveFormulaReferences(calculatedField.Formula, totalsCalculator, calculatedFields);
-				foreach (var token in resolvedFormulaTokens.Where(t => t.TokenType == TokenType.NameValue))
-				{
-					if (!calculatedField.ReferencedCacheFieldsToIndex.ContainsKey(token.Value))
-					{
-						var referencedFieldIndex = this.CacheDefinition.GetCacheFieldIndex(token.Value);
-						calculatedField.ReferencedCacheFieldsToIndex.Add(token.Value, referencedFieldIndex);
-					}
-				}
-				calculatedField.ResolvedFormula = string.Join(string.Empty, resolvedFormulaTokens.Select(t => t.Value));
-			}
-		}
-
-		private List<Token> ResolveFormulaReferences(string formula, TotalsFunctionHelper totalsCalculator, IEnumerable<CacheFieldNode> calculatedFields)
-		{
-			var resolvedFormulaTokens = new List<Token>();
-			var tokens = totalsCalculator.Tokenize(formula);
-			foreach (var token in tokens)
-			{
-				if (token.TokenType == TokenType.NameValue)
-				{
-					// If a token references another calculated field, resolve the chain of formulas.
-					var field = calculatedFields.FirstOrDefault(f => f.Name.IsEquivalentTo(token.Value));
-					if (field != null)
-					{
-						var resolvedReferences = this.ResolveFormulaReferences(field.Formula, totalsCalculator, calculatedFields);
-						resolvedFormulaTokens.AddRange(resolvedReferences);
-					}
-					else
-						resolvedFormulaTokens.Add(token);
-				}
-				else
-					resolvedFormulaTokens.Add(token);
-			}
-			return resolvedFormulaTokens;
-		}
-
-		private PivotCellBackingData GetBackingCellValues(PivotTableHeader rowHeader, PivotTableHeader columnHeader, TotalsFunctionHelper functionCalculator)
-		{
-			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
-			var dataField = this.DataFields[dataFieldCollectionIndex];
-			var cacheField = this.CacheDefinition.CacheFields[dataField.Index];
-			if (string.IsNullOrEmpty(cacheField.Formula))
-			{
-				var matchingValues = this.CacheDefinition.CacheRecords.FindMatchingValues(
-					rowHeader.CacheRecordIndices,
-					columnHeader.CacheRecordIndices,
-					this.GetPageFieldIndices(),
-					dataField.Index,
-					this);
-				return new PivotCellBackingData(matchingValues);
-			}
-
-			// If a formula is present, it is a calculated field which needs to be evaluated.
-			var fieldNameToValues = new Dictionary<string, List<object>>();
-			foreach (var cacheFieldName in cacheField.ReferencedCacheFieldsToIndex.Keys)
-			{
-				var values = this.CacheDefinition.CacheRecords.FindMatchingValues(
-					rowHeader.CacheRecordIndices,
-					columnHeader.CacheRecordIndices,
-					this.GetPageFieldIndices(),
-					cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
-					this);
-				fieldNameToValues.Add(cacheFieldName, values);
-			}
-			return new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
 		}
 
 		private string SetTotalCaptionCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, StringResources stringResources)
