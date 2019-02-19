@@ -393,17 +393,12 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		/// <summary>
 		/// Gets or sets whether the legacy auto formatting has been applied to the PivotTable view.
+		/// Corresponds to the "Autofit column widths on update" pivot table setting.
 		/// </summary>
 		public bool UseAutoFormatting
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@useAutoFormatting");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@useAutoFormatting", value);
-			}
+			get { return base.GetXmlNodeBool("@useAutoFormatting", false); }
+			set { base.SetXmlNodeBool("@useAutoFormatting", value, false); }
 		}
 
 		/// <summary>
@@ -989,14 +984,6 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// pivotSelections are causing corruptions when left. Deleting for meow.
 			this.Worksheet.View.RemovePivotSelections();
-
-			if (this.DataFields.Count == 0)
-			{
-				// Leaving a dataFields node with no data fields can corrupt a workbook.
-				var dataFieldsNode = base.TopNode.SelectSingleNode("d:dataFields", base.NameSpaceManager);
-				if (dataFieldsNode != null)
-					base.TopNode.RemoveChild(dataFieldsNode);
-			}
 		}
 
 		/// <summary>
@@ -1088,8 +1075,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				unsupportedFeatures.Add("Multiple field filters enabled");
 			if (!this.CustomListSort)
 				unsupportedFeatures.Add("Use Custom Lists when sorting disabled");
-			if (!this.ShowDrill)
-				unsupportedFeatures.Add("Show expand/collapse buttons disabled");
 			if (!this.ShowDataTips)
 				unsupportedFeatures.Add("Show contextual tooltips disabled");
 			if (!this.ShowHeaders)
@@ -1599,11 +1584,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				var dataManager = new PivotTableDataManager(this);
 				dataManager.UpdateWorksheet();
-			}
-			else
-			{
-				// If there are no data fields, then remove the xml node to prevent corrupting the workbook.
-				this.TopNode.RemoveChild(this.TopNode.SelectSingleNode("d:dataFields", this.NameSpaceManager));
 			}
 		}
 
