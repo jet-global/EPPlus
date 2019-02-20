@@ -413,8 +413,13 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			else
 				itemValue = record.Items[dataFieldIndex].Value;
-			double.TryParse(itemValue, out var recordData);
-			matchingValues.Add(recordData);
+			if (itemValue == null)
+				matchingValues.Add(itemValue);
+			else
+			{
+				double.TryParse(itemValue, out var recordData);
+				matchingValues.Add(recordData);
+			}
 		}
 		#endregion
 

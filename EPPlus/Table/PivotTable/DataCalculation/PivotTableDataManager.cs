@@ -135,7 +135,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					var cellBackingData = backingDatas[row, column];
 					var value = this.TotalsCalculator.CalculateCellTotal(dataField, cellBackingData, rowHeader.TotalType, columnHeader.TotalType);
 
-					if (dataField.ShowDataAs == ShowDataAs.NoCalculation) { /* noop */ }
+					if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
+					{
+						// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
+						value = this.GetCellNoCalculationValue(value, cellBackingData);
+					}
 					else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal
 						|| dataField.ShowDataAs == ShowDataAs.PercentOfCol 
 						|| dataField.ShowDataAs == ShowDataAs.PercentOfRow)
@@ -179,7 +183,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 				object value = grandTotalBackingData.Result;
 
-				if (dataField.ShowDataAs == ShowDataAs.NoCalculation) { /* noop */ }
+				if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
+				{
+					// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
+					value = this.GetCellNoCalculationValue(value, grandTotalBackingData);
+				}
 				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal 
 					|| dataField.ShowDataAs == ShowDataAs.PercentOfCol 
 					|| dataField.ShowDataAs == ShowDataAs.PercentOfRow)
@@ -219,7 +227,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				var cell = this.PivotTable.Worksheet.Cells[backingData.SheetRow, backingData.SheetColumn];
 				object value = backingData.Result;
 				var dataField = this.PivotTable.DataFields[backingData.DataFieldCollectionIndex];
-				if (dataField.ShowDataAs == ShowDataAs.NoCalculation) { /*noop*/ }
+				if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
+				{
+					// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
+					value = this.GetCellNoCalculationValue(value, backingData);
+				}
 				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
 					value = 1;
 				else if (dataField.ShowDataAs == ShowDataAs.PercentOfCol)
@@ -276,6 +288,14 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				dataColumn++;
 			}
 			return backingData;
+		}
+
+		private object GetCellNoCalculationValue(object value, PivotCellBackingData backingData)
+		{
+			// Non-null backing data indicates that this cell is eligible for a value.
+			if (backingData != null && value == null)
+				value = this.PivotTable.ShowMissing ? this.PivotTable.MissingCaption : "0";
+			return value;
 		}
 
 		private PivotCellBackingData GetBackingCellValues(PivotTableHeader rowHeader, PivotTableHeader columnHeader, TotalsFunctionHelper functionCalculator)

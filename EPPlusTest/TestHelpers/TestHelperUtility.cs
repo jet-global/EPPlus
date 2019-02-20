@@ -56,7 +56,7 @@ namespace EPPlusTest.TestHelpers
 			else if (value is ExcelErrorValue errorValue)
 			{
 				Assert.IsTrue(ExcelErrorValue.Values.TryGetErrorType(expectedCell.Value.ToString(), out eErrorType errorType), 
-					$"Expected {expectedCell.Value}, actual {value}");
+					$"Expected {expectedCell.Value}, actual {value} at [{expectedCell.Sheet},{expectedCell.Row},{expectedCell.Column}]");
 				Assert.AreEqual(errorType, errorValue.Type);
 			}
 			else

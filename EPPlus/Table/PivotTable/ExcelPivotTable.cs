@@ -287,14 +287,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <remarks>A blank value in XML indicates true.</remarks>
 		public bool RowGrandTotals
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@rowGrandTotals", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@rowGrandTotals", value);
-			}
+			get { return base.GetXmlNodeBool("@rowGrandTotals", true); }
+			set { base.SetXmlNodeBool("@rowGrandTotals", value); }
 		}
 
 		/// <summary>
@@ -302,14 +296,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool PrintDrill
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@printDrill");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@printDrill", value);
-			}
+			get { return base.GetXmlNodeBool("@printDrill"); }
+			set { base.SetXmlNodeBool("@printDrill", value); }
 		}
 
 		/// <summary>
@@ -317,14 +305,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowError
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showError");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showError", value);
-			}
+			get { return base.GetXmlNodeBool("@showError"); }
+			set { base.SetXmlNodeBool("@showError", value); }
 		}
 
 		/// <summary>
@@ -332,14 +314,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string ErrorCaption
 		{
-			get
-			{
-				return base.GetXmlNodeString("@errorCaption");
-			}
-			set
-			{
-				base.SetXmlNodeString("@errorCaption", value);
-			}
+			get { return base.GetXmlNodeString("@errorCaption"); }
+			set { base.SetXmlNodeString("@errorCaption", value); }
 		}
 
 		/// <summary>
@@ -414,14 +390,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool GridDropZones
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@gridDropZones");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@gridDropZones", value);
-			}
+			get { return base.GetXmlNodeBool("@gridDropZones"); }
+			set { base.SetXmlNodeBool("@gridDropZones", value); }
 		}
 
 		/// <summary>
@@ -429,14 +399,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int Indent
 		{
-			get
-			{
-				return base.GetXmlNodeInt("@indent");
-			}
-			set
-			{
-				base.SetXmlNodeString("@indent", value.ToString());
-			}
+			get { return base.GetXmlNodeInt("@indent"); }
+			set { base.SetXmlNodeString("@indent", value.ToString()); }
 		}
 
 		/// <summary>
@@ -444,14 +408,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool OutlineData
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@outlineData");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@outlineData", value);
-			}
+			get { return base.GetXmlNodeBool("@outlineData"); }
+			set { base.SetXmlNodeBool("@outlineData", value); }
 		}
 
 		/// <summary>
@@ -459,14 +417,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool Outline
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@outline");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@outline", value);
-			}
+			get { return base.GetXmlNodeBool("@outline"); }
+			set { base.SetXmlNodeBool("@outline", value); }
 		}
 
 		/// <summary>
@@ -474,14 +426,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool MultipleFieldFilters
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@multipleFieldFilters", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@multipleFieldFilters", value);
-			}
+			get { return base.GetXmlNodeBool("@multipleFieldFilters", true); }
+			set { base.SetXmlNodeBool("@multipleFieldFilters", value); }
 		}
 
 		public bool CustomListSort
@@ -494,14 +440,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool Compact
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@compact");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@compact", value);
-			}
+			get { return base.GetXmlNodeBool("@compact"); }
+			set { base.SetXmlNodeBool("@compact", value); }
 		}
 
 		/// <summary>
@@ -509,14 +449,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool CompactData
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@compactData");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@compactData", value);
-			}
+			get { return base.GetXmlNodeBool("@compactData"); }
+			set { base.SetXmlNodeBool("@compactData", value); }
 		}
 
 		/// <summary>
@@ -524,14 +458,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string GrandTotalCaption
 		{
-			get
-			{
-				return base.GetXmlNodeString("@grandTotalCaption");
-			}
-			set
-			{
-				base.SetXmlNodeString("@grandTotalCaption", value);
-			}
+			get { return base.GetXmlNodeString("@grandTotalCaption"); }
+			set { base.SetXmlNodeString("@grandTotalCaption", value); }
 		}
 
 		/// <summary>
@@ -539,29 +467,27 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string RowHeaderCaption
 		{
-			get
-			{
-				return base.GetXmlNodeString("@rowHeaderCaption");
-			}
-			set
-			{
-				base.SetXmlNodeString("@rowHeaderCaption", value);
-			}
+			get { return base.GetXmlNodeString("@rowHeaderCaption"); }
+			set { base.SetXmlNodeString("@rowHeaderCaption", value); }
+		}
+
+		/// <summary>
+		/// Gets or sets whether the "Layout and Format" pivot table setting "For empty values show:" is enabled.
+		/// </summary>
+		public bool ShowMissing
+		{
+			get { return base.GetXmlNodeBool("@showMissing", true); }
+			set { base.SetXmlNodeBool("@showMissing", value, true); }
 		}
 
 		/// <summary>
 		/// Gets or sets the string to be displayed in cells with no value.
+		/// Corresponds to the "Layout and Format" pivot table setting "For empty values show: [missingCaption]".
 		/// </summary>
 		public string MissingCaption
 		{
-			get
-			{
-				return base.GetXmlNodeString("@missingCaption");
-			}
-			set
-			{
-				base.SetXmlNodeString("@missingCaption", value);
-			}
+			get { return base.GetXmlNodeString("@missingCaption", null); }
+			set { base.SetXmlNodeString("@missingCaption", value); }
 		}
 
 		/// <summary>
@@ -569,14 +495,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int FirstHeaderRow
 		{
-			get
-			{
-				return base.GetXmlNodeInt(FirstHeaderRowPath);
-			}
-			set
-			{
-				base.SetXmlNodeString(FirstHeaderRowPath, value.ToString());
-			}
+			get { return base.GetXmlNodeInt(FirstHeaderRowPath); }
+			set { base.SetXmlNodeString(FirstHeaderRowPath, value.ToString()); }
 		}
 
 		/// <summary>
@@ -584,14 +504,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int FirstDataRow
 		{
-			get
-			{
-				return base.GetXmlNodeInt(FirstDataRowPath);
-			}
-			set
-			{
-				base.SetXmlNodeString(FirstDataRowPath, value.ToString());
-			}
+			get { return base.GetXmlNodeInt(FirstDataRowPath); }
+			set { base.SetXmlNodeString(FirstDataRowPath, value.ToString()); }
 		}
 
 		/// <summary>
@@ -599,14 +513,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int FirstDataCol
 		{
-			get
-			{
-				return base.GetXmlNodeInt(FirstDataColumnPath);
-			}
-			set
-			{
-				base.SetXmlNodeString(FirstDataColumnPath, value.ToString());
-			}
+			get { return base.GetXmlNodeInt(FirstDataColumnPath); }
+			set { base.SetXmlNodeString(FirstDataColumnPath, value.ToString()); }
 		}
 
 		/// <summary>
@@ -738,10 +646,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string StyleName
 		{
-			get
-			{
-				return base.GetXmlNodeString(StyleNamePath);
-			}
+			get { return base.GetXmlNodeString(StyleNamePath); }
 			set
 			{
 				if (value.StartsWith("PivotStyle"))
@@ -771,10 +676,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public TableStyles TableStyle
 		{
-			get
-			{
-				return myTableStyle;
-			}
+			get { return myTableStyle; }
 			set
 			{
 				myTableStyle = value;
@@ -1065,8 +967,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				unsupportedFeatures.Add("Error caption enabled");
 			if (this.ShowError)
 				unsupportedFeatures.Add("Show error enabled");
-			if (!string.IsNullOrEmpty(this.MissingCaption))
-				unsupportedFeatures.Add("Empty cell caption enabled");
 			if (!this.PreserveFormatting)
 				unsupportedFeatures.Add("Preserve formatting disabled");
 			if (this.MultipleFieldFilters)

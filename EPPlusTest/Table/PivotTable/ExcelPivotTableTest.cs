@@ -934,6 +934,149 @@ namespace EPPlusTest.Table.PivotTable
 			}
 		}
 
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithSourceDataMissingValues.xlsx")]
+		public void PivotTableRefreshWithShowBlankValuesAs()
+		{
+			var file = new FileInfo("PivotTableWithSourceDataMissingValues.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				object blankValue = 0;
+				string sheetName = "PivotTables";
+				void validateWorksheet() => TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 2, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 3, 2, "January"),
+					new ExpectedCellValue(sheetName, 4, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 2, "January Total"),
+					new ExpectedCellValue(sheetName, 6, 2, "February"),
+					new ExpectedCellValue(sheetName, 7, 2, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 8, 2, "Tent"),
+					new ExpectedCellValue(sheetName, 9, 2, "February Total"),
+					new ExpectedCellValue(sheetName, 10, 2, "March"),
+					new ExpectedCellValue(sheetName, 11, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 12, 2, "Headlamp"),
+					new ExpectedCellValue(sheetName, 13, 2, "March Total"),
+					new ExpectedCellValue(sheetName, 14, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 2, 3, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 3, 3, null),
+					new ExpectedCellValue(sheetName, 4, 3, 5),
+					new ExpectedCellValue(sheetName, 5, 3, 5),
+					new ExpectedCellValue(sheetName, 6, 3, null),
+					new ExpectedCellValue(sheetName, 7, 3, blankValue),
+					new ExpectedCellValue(sheetName, 8, 3, 6),
+					new ExpectedCellValue(sheetName, 9, 3, 6),
+					new ExpectedCellValue(sheetName, 10, 3, null),
+					new ExpectedCellValue(sheetName, 11, 3, blankValue),
+					new ExpectedCellValue(sheetName, 12, 3, blankValue),
+					new ExpectedCellValue(sheetName, 13, 3, blankValue),
+					new ExpectedCellValue(sheetName, 14, 3, 11),
+				});
+
+				// With ShowMissing set to false, blank values are shown as "0".
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables.First();
+					pivotTable.ShowMissing = false;
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					this.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				validateWorksheet();
+
+				// With ShowMissing set to true and the MissingCaption set to "BLAHBLAH", blank values are shown as "BLAHBLAH".
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables.First();
+					pivotTable.ShowMissing = true;
+					blankValue = pivotTable.MissingCaption = "BLAHBLAH";
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					this.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				validateWorksheet();
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithSourceDataMissingValues.xlsx")]
+		public void PivotTableRefreshAllValuesBlankWithShowBlankValuesAs()
+		{
+			var file = new FileInfo("PivotTableWithSourceDataMissingValues.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				object blankValue = 0;
+				string sheetName = "PivotTables";
+				void validateWorksheet() => TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 2, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 3, 2, "January"),
+					new ExpectedCellValue(sheetName, 4, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 2, "January Total"),
+					new ExpectedCellValue(sheetName, 6, 2, "February"),
+					new ExpectedCellValue(sheetName, 7, 2, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 8, 2, "Tent"),
+					new ExpectedCellValue(sheetName, 9, 2, "February Total"),
+					new ExpectedCellValue(sheetName, 10, 2, "March"),
+					new ExpectedCellValue(sheetName, 11, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 12, 2, "Headlamp"),
+					new ExpectedCellValue(sheetName, 13, 2, "March Total"),
+					new ExpectedCellValue(sheetName, 14, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 2, 3, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 3, 3, null),
+					new ExpectedCellValue(sheetName, 4, 3, blankValue),
+					new ExpectedCellValue(sheetName, 5, 3, blankValue),
+					new ExpectedCellValue(sheetName, 6, 3, null),
+					new ExpectedCellValue(sheetName, 7, 3, blankValue),
+					new ExpectedCellValue(sheetName, 8, 3, blankValue),
+					new ExpectedCellValue(sheetName, 9, 3, blankValue),
+					new ExpectedCellValue(sheetName, 10, 3, null),
+					new ExpectedCellValue(sheetName, 11, 3, blankValue),
+					new ExpectedCellValue(sheetName, 12, 3, blankValue),
+					new ExpectedCellValue(sheetName, 13, 3, blankValue),
+					new ExpectedCellValue(sheetName, 14, 3, blankValue),
+				});
+
+				// With ShowMissing set to false, blank values are shown as "0".
+				using (var package = new ExcelPackage(file))
+				{
+					package.Workbook.Worksheets["Sheet1"].Cells["E2:G8"].Value = null;  // Clear out all source data values.
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables.First();
+					pivotTable.ShowMissing = false;
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					this.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				validateWorksheet();
+
+				// With ShowMissing set to true and the MissingCaption set to "BLAHBLAH", blank values are shown as "BLAHBLAH".
+				using (var package = new ExcelPackage(file))
+				{
+					package.Workbook.Worksheets["Sheet1"].Cells["E2:G8"].Value = null;  // Clear out all source data values.
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables.First();
+					pivotTable.ShowMissing = true;
+					blankValue = pivotTable.MissingCaption = "BLAHBLAH";
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					this.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				validateWorksheet();
+			}
+		}
 		#region Calculated Fields Tests
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithCalculatedFields.xlsx")]

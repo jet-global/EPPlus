@@ -75,7 +75,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <returns>The result of the function.</returns>
 		public object Calculate(DataFieldFunctions dataFieldFunction, List<object> values)
 		{
-			if (values == null || values.Count == 0)
+			if (values == null || values.Count == 0 || values.All(v => v == null))
 				return null;
 			// Write the values into a temp worksheet.
 			int row = 1;
