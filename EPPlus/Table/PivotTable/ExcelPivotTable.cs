@@ -1067,8 +1067,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				unsupportedFeatures.Add("Show error enabled");
 			if (!string.IsNullOrEmpty(this.MissingCaption))
 				unsupportedFeatures.Add("Empty cell caption enabled");
-			if (!this.UseAutoFormatting)
-				unsupportedFeatures.Add("Use auto formatting disabled");
 			if (!this.PreserveFormatting)
 				unsupportedFeatures.Add("Preserve formatting disabled");
 			if (this.MultipleFieldFilters)
