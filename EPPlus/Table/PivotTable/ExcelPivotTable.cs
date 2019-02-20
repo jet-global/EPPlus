@@ -486,7 +486,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string MissingCaption
 		{
-			get { return base.GetXmlNodeString("@missingCaption"); }
+			get { return base.GetXmlNodeString("@missingCaption", null); }
 			set { base.SetXmlNodeString("@missingCaption", value); }
 		}
 
@@ -967,8 +967,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				unsupportedFeatures.Add("Error caption enabled");
 			if (this.ShowError)
 				unsupportedFeatures.Add("Show error enabled");
-			if (!string.IsNullOrEmpty(this.MissingCaption))
-				unsupportedFeatures.Add("Empty cell caption enabled");
 			if (!this.PreserveFormatting)
 				unsupportedFeatures.Add("Preserve formatting disabled");
 			if (this.MultipleFieldFilters)

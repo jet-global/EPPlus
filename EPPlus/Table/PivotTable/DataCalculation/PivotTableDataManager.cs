@@ -136,7 +136,10 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					var value = this.TotalsCalculator.CalculateCellTotal(dataField, cellBackingData, rowHeader.TotalType, columnHeader.TotalType);
 
 					if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
-						value = this.GetCellNoCalculationValue(value);
+					{
+						// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
+						value = this.GetCellNoCalculationValue(value, cellBackingData);
+					}
 					else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal
 						|| dataField.ShowDataAs == ShowDataAs.PercentOfCol 
 						|| dataField.ShowDataAs == ShowDataAs.PercentOfRow)
@@ -181,7 +184,10 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				object value = grandTotalBackingData.Result;
 
 				if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
-					value = this.GetCellNoCalculationValue(value);
+				{
+					// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
+					value = this.GetCellNoCalculationValue(value, grandTotalBackingData);
+				}
 				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal 
 					|| dataField.ShowDataAs == ShowDataAs.PercentOfCol 
 					|| dataField.ShowDataAs == ShowDataAs.PercentOfRow)
@@ -222,7 +228,10 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				object value = backingData.Result;
 				var dataField = this.PivotTable.DataFields[backingData.DataFieldCollectionIndex];
 				if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
-					value = this.GetCellNoCalculationValue(value);
+				{
+					// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
+					value = this.GetCellNoCalculationValue(value, backingData);
+				}
 				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
 					value = 1;
 				else if (dataField.ShowDataAs == ShowDataAs.PercentOfCol)
@@ -281,12 +290,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			return backingData;
 		}
 
-		private object GetCellNoCalculationValue(object value)
+		private object GetCellNoCalculationValue(object value, PivotCellBackingData backingData)
 		{
-			// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
-			// A value of 0 indicates that it was an empty value rather than a cell that should have no value.
-			if (value?.ToString() == "0" && this.PivotTable.ShowMissing)
-				value = this.PivotTable.MissingCaption;
+			// Non-null backing data indicates that this cell is eligible for a value.
+			if (backingData != null && value == null)
+				value = this.PivotTable.ShowMissing ? this.PivotTable.MissingCaption : "0";
 			return value;
 		}
 
