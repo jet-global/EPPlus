@@ -1597,12 +1597,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			int row = this.Address.Start.Row + this.FirstDataRow;
 			int previousColumn = this.Address.Start.Column;
-			bool previousHeaderTabularForm = true;
 			bool topNodeHeaderTabularForm = true;
 			var columnFieldNames = new List<string>();
-
 			var tabularFormPivotFields = this.Fields.Where(x => x.Outline == false);
-			bool hasTabularFormFields = this.Fields.Any(x => x.Outline == false);
 			if (this.RowFields.Any())
 			{
 				for (int i = 0; i < this.RowItems.Count; i++)
@@ -1616,7 +1613,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						string itemType = this.GetTotalCaptionCellValue(this.RowFields, item, header, stringResources);
 						if (!string.IsNullOrEmpty(itemType))
 						{
-							if (hasTabularFormFields && !header.TotalType.IsEquivalentTo("grand"))
+							if (tabularFormPivotFields.Count() > 0 && !header.TotalType.IsEquivalentTo("grand"))
 								column = this.GetTabularSubtotalHeaderColumn(header, item.RepeatedItemsCount, column, topNodeHeaderTabularForm);
 							this.Worksheet.Cells[row, column].Value = itemType;
 							previousColumn = column;
@@ -1627,7 +1624,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						var itemIndex = item.RepeatedItemsCount == 0 ? j : j + item.RepeatedItemsCount;
 						string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, itemIndex, j);
 						if (j == 0)
-							column = this.GetTabularFormHeaderColumn(header, item, tabularFormPivotFields, column, previousColumn, previousHeaderTabularForm, topNodeHeaderTabularForm, i);
+							column = this.GetTabularFormHeaderColumn(header, item, tabularFormPivotFields, column, previousColumn, topNodeHeaderTabularForm, i);
 						this.Worksheet.Cells[row, column].Value = sharedItemValue;
 
 						// Reset the local variables.
@@ -1638,7 +1635,6 @@ namespace OfficeOpenXml.Table.PivotTable
 							if (!columnFieldNames.Contains(pivotFieldName))
 								columnFieldNames.Add(pivotFieldName);
 						}
-						previousHeaderTabularForm = header.IsDataField || header.IsLeafNode ? previousHeaderTabularForm : header.IsCompactForm;
 						if (item.RepeatedItemsCount == 0 && !header.IsDataField)
 							topNodeHeaderTabularForm = header.IsTabularHeader;
 						else if (this.RowFields.First().Index == -2)
@@ -1690,7 +1686,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			return returnColumn;
 		}
 
-		private int GetTabularFormHeaderColumn(PivotTableHeader header, RowColumnItem item, IEnumerable<ExcelPivotTableField> tabularFormPivotFields, int column, int previousColumn, bool previousHeaderTabularForm, bool topNodeTabularForm, int i = 0)
+		private int GetTabularFormHeaderColumn(PivotTableHeader header, RowColumnItem item, IEnumerable<ExcelPivotTableField> tabularFormPivotFields, int column, int previousColumn, bool topNodeTabularForm, int i = 0)
 		{
 			int returnColumn = 0;
 			var parentList = header.CacheRecordIndices.GetRange(0, item.RepeatedItemsCount).ToList();
