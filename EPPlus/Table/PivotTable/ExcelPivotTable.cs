@@ -1592,17 +1592,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			bool tabularTable = this.Fields.Any(x => x.Outline == false);
 			this.UpdateRowColumnHeaders(stringResources, tabularTable);
 			// Update the pivot table's address.
-			// TODO: Put this in a method.
-			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
-			// If there are no data fields, then don't find the offset to obtain the first data column.
-			int endColumn = this.Address.Start.Column;
-			if (this.DataFields.Any())
-				endColumn += this.FirstDataCol + this.ColumnHeaders.Count - 1;
-			else if (tabularTable)
-				endColumn += this.TabularHeaders.Count;
-			else if (this.Fields.Any(x => x.Compact == false))
-				endColumn += this.RowFields.Count - 1;
-			this.Address = new ExcelAddress(this.Worksheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
+			this.Address = this.GetNewAddress(tabularTable);
 			if (this.DataFields.Any())
 			{
 				using (var totalsCalculator = new TotalsFunctionHelper())
@@ -1641,6 +1631,20 @@ namespace OfficeOpenXml.Table.PivotTable
 				// If there are no data fields, then remove the xml node to prevent corrupting the workbook.
 				this.TopNode.RemoveChild(this.TopNode.SelectSingleNode("d:dataFields", this.NameSpaceManager));
 			}
+		}
+
+		private ExcelAddress GetNewAddress(bool hasTabularFields)
+		{
+			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
+			// If there are no data fields, then don't find the offset to obtain the first data column.
+			int endColumn = this.Address.Start.Column;
+			if (this.DataFields.Any())
+				endColumn += this.FirstDataCol + this.ColumnHeaders.Count - 1;
+			else if (hasTabularFields)
+				endColumn += this.TabularHeaders.Count;
+			else if (this.Fields.Any(x => x.Compact == false))
+				endColumn += this.RowFields.Count - 1;
+			return new ExcelAddress(this.Worksheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
 		}
 
 		private void ClearTable()
@@ -1683,7 +1687,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Update the row headers in the worksheet.
 			if (!tabularTable)
 				this.WriteRowHeaders(stringResources);
-				//this.WriteNonCompactFormRowHeaders(stringResources);
 			else
 			{
 				int dataFieldColumn = this.WriteTabularRowHeaders(stringResources);
