@@ -45503,28 +45503,6 @@ namespace EPPlusTest.Table.PivotTable
 		#endregion
 		#endregion
 
-		[TestMethod]
-		public void dfaefdcvzsdf()
-		{
-			var file = new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\CompactForm.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets["Sheet1"];
-					var pivotTable = worksheet.PivotTables.First();
-					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
-					{
-						cacheDefinition.UpdateData();
-					}
-					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\CompactForm - output.xlsx"));
-					package.SaveAs(newFile.File);
-					Assert.Fail();
-				}
-			}
-		}
-
 		#region Helper Methods
 		private void CheckPivotTableAddress(ExcelAddress expectedAddress, ExcelAddress pivotTableAddress)
 		{

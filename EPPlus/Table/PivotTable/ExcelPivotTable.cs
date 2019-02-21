@@ -1881,7 +1881,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			bool previousHeaderCompactForm = true;
 			bool topNodeHeaderCompactForm = true;
 			var columnFieldNames = new List<string>();
-
+			var compactFormPivotFields = this.Fields.Where(x => x.Compact);
 			bool hasNonCompactFormFields = this.Fields.Any(x => x.Compact == false);
 			if (this.RowFields.Any())
 			{
@@ -1895,15 +1895,15 @@ namespace OfficeOpenXml.Table.PivotTable
 					if (!string.IsNullOrEmpty(itemType))
 					{
 						if (hasNonCompactFormFields && !header.TotalType.IsEquivalentTo("grand"))
-							column = this.GetCompactFormHeaderColumn(header, item, column, previousColumn, previousHeaderCompactForm, topNodeHeaderCompactForm);
+							column = this.GetCompactFormHeaderColumn(header, item, compactFormPivotFields, column, previousColumn, previousHeaderCompactForm, topNodeHeaderCompactForm);
 						this.Worksheet.Cells[row++, column].Value = itemType;
 						previousColumn = column;
 						continue;
 					}
 					// Get the header value to print to the cell.
 					string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, item.RepeatedItemsCount, 0);
-					int newColumn = this.GetCompactFormHeaderColumn(header, item, column, previousColumn, previousHeaderCompactForm, topNodeHeaderCompactForm, i);
-					 this.Worksheet.Cells[row++, newColumn].Value = sharedItemValue;
+					int newColumn = this.GetCompactFormHeaderColumn(header, item, compactFormPivotFields, column, previousColumn, previousHeaderCompactForm, topNodeHeaderCompactForm, i);
+					this.Worksheet.Cells[row++, newColumn].Value = sharedItemValue;
 					
 					// Reset the local variables.
 					if (newColumn > previousColumn)
@@ -1936,23 +1936,24 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private int GetCompactFormHeaderColumn(PivotTableHeader header, RowColumnItem item, int column, int previousColumn, bool previousHeaderCompactForm, bool topNodeCompactForm, int i = 0)
+		private int GetCompactFormHeaderColumn(PivotTableHeader header, RowColumnItem item, IEnumerable<ExcelPivotTableField>compactFormPivotFields, int column, int previousColumn, bool previousHeaderCompactForm, bool topNodeCompactForm, int i = 0)
 		{
 			int returnColumn = 0;
-			var nonCompactFormPivotFields = this.Fields.Where(x => x.Compact);
 			var parentList = header.CacheRecordIndices.GetRange(0, header.CacheRecordIndices.Count - 1).ToList();
-			if (item.RepeatedItemsCount == 0)
+			bool hasAllCompactFieldParents = parentList.All(x => x.Item1 == -2 || compactFormPivotFields.Any(j => j.Index == x.Item1));
+			if (item.RepeatedItemsCount == 0 || hasAllCompactFieldParents)
 				returnColumn = column;
 			else if (string.IsNullOrEmpty(header.TotalType) && previousHeaderCompactForm)
 				returnColumn = previousColumn;
 			else
 			{
+				int previousFieldIndex = header.CacheRecordIndices[header.CacheRecordIndices.Count - 2].Item1;
 				if (topNodeCompactForm)
 				{
 					// The top node is in compact form.
 					if (header.TotalType.IsEquivalentTo("default"))
 					{
-						int compactFormParentCount = parentList.Count(x => nonCompactFormPivotFields.Any(j => j.Index == x.Item1));
+						int compactFormParentCount = parentList.Count(x => compactFormPivotFields.Any(j => j.Index == x.Item1));
 						returnColumn = column + item.RepeatedItemsCount - compactFormParentCount;
 					}
 					else if (header.IsLeafNode)
@@ -1972,7 +1973,6 @@ namespace OfficeOpenXml.Table.PivotTable
 					{
 						// If a datafield header is our parent, then calculate the column so that it is the same column the datafield header is written to.
 						// Otherwise, it is just shifted to the left by one column.
-						int previousFieldIndex = header.CacheRecordIndices[header.CacheRecordIndices.Count - 2].Item1;
 						if (previousFieldIndex == -2)
 							returnColumn = column + item.RepeatedItemsCount - (header.CacheRecordIndices.Count - 1);
 						else
@@ -1982,19 +1982,17 @@ namespace OfficeOpenXml.Table.PivotTable
 				else
 				{
 					// The top node is not in compact form.
-					bool hasParentCompactForm = nonCompactFormPivotFields.Any(x => parentList.Any(j => j.Item1 == x.Index));
+					bool hasParentCompactForm = compactFormPivotFields.Any(x => parentList.Any(j => j.Item1 == x.Index));
 					bool hasDataFieldParent = parentList.Any(x => x.Item1 == -2);
-					// If the header has a parent header that is not in compact form, then all headers after it will be shifted to the left by one column.
+					// If the header has a parent header that is in compact form, then all headers after it will be shifted to the left by one column.
 					if (hasParentCompactForm || hasDataFieldParent)
 						returnColumn = column + item.RepeatedItemsCount - 1;
+					// If the parent header is a datafield, then write this header to the same column.
+					else if (previousFieldIndex == -2)
+						returnColumn = previousColumn;
+					// Otherwise, write it to the next column.
 					else
-					{
-						int previousFieldIndex = header.CacheRecordIndices[header.CacheRecordIndices.Count - 2].Item1;
-						if (previousFieldIndex == -2)
-							returnColumn = previousColumn;
-						else
-							returnColumn = column + item.RepeatedItemsCount;
-					}
+						returnColumn = column + item.RepeatedItemsCount;
 				}
 			}
 			return returnColumn;
