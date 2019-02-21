@@ -749,34 +749,24 @@ namespace OfficeOpenXml
 			}
 		}
 
-		internal string GetXmlNodeString(XmlNode node, string path)
+		internal string GetXmlNodeString(XmlNode node, string path, string blankValue = "")
 		{
 			if (node == null)
-			{
-				return "";
-			}
-
-			XmlNode nameNode = node.SelectSingleNode(path, NameSpaceManager);
-
-			if (nameNode != null)
-			{
-				if (nameNode.NodeType == XmlNodeType.Attribute)
-				{
-					return nameNode.Value != null ? nameNode.Value : "";
-				}
-				else
-				{
-					return nameNode.InnerText;
-				}
-			}
+				return blankValue;
+			XmlNode nameNode = node.SelectSingleNode(path, this.NameSpaceManager);
+			if (nameNode == null)
+				return blankValue;
 			else
 			{
-				return "";
+				if (nameNode.NodeType == XmlNodeType.Attribute)
+					return nameNode.Value ?? "";
+				else
+					return nameNode.InnerText;
 			}
 		}
-		internal string GetXmlNodeString(string path)
+		internal string GetXmlNodeString(string path, string blankValue = "")
 		{
-			return GetXmlNodeString(TopNode, path);
+			return GetXmlNodeString(this.TopNode, path, blankValue);
 		}
 		internal static Uri GetNewUri(Packaging.ZipPackage package, string sUri)
 		{

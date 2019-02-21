@@ -37,7 +37,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using OfficeOpenXml.Extensions;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OfficeOpenXml.Internationalization;
 using OfficeOpenXml.Table.PivotTable.DataCalculation;
 using OfficeOpenXml.Utils;
@@ -87,10 +86,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string Name
 		{
-			get
-			{
-				return base.GetXmlNodeString(NamePath);
-			}
+			get { return base.GetXmlNodeString(NamePath); }
 			set
 			{
 				if (this.Worksheet.Workbook.ExistsTableName(value))
@@ -132,10 +128,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				return myCacheDefinition;
 			}
-			private set
-			{
-				myCacheDefinition = value;
-			}
+			private set { myCacheDefinition = value; }
 		}
 
 		/// <summary>
@@ -143,10 +136,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public ExcelWorksheet Worksheet
 		{
-			get
-			{
-				return this.Workbook.Worksheets[this.Address.WorkSheet];
-			}
+			get { return this.Workbook.Worksheets[this.Address.WorkSheet]; }
 		}
 
 		/// <summary>
@@ -154,10 +144,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public ExcelAddress Address
 		{
-			get
-			{
-				return myAddress;
-			}
+			get { return myAddress; }
 			internal set
 			{
 				if (string.IsNullOrEmpty(value.WorkSheet))
@@ -172,13 +159,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool DataOnRows
 		{
 			get
-			{
-				return base.GetXmlNodeBool("@dataOnRows");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@dataOnRows", value);
-			}
+			{	return base.GetXmlNodeBool("@dataOnRows"); }
+			set { base.SetXmlNodeBool("@dataOnRows", value); }
 		}
 
 		/// <summary>
@@ -186,14 +168,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ApplyNumberFormats
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@applyNumberFormats");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@applyNumberFormats", value);
-			}
+			get { return base.GetXmlNodeBool("@applyNumberFormats"); }
+			set { base.SetXmlNodeBool("@applyNumberFormats", value); }
 		}
 
 		/// <summary>
@@ -201,14 +177,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ApplyBorderFormats
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@applyBorderFormats");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@applyBorderFormats", value);
-			}
+			get { return base.GetXmlNodeBool("@applyBorderFormats"); }
+			set { base.SetXmlNodeBool("@applyBorderFormats", value); }
 		}
 
 		/// <summary>
@@ -216,14 +186,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ApplyFontFormats
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@applyFontFormats");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@applyFontFormats", value);
-			}
+			get { return base.GetXmlNodeBool("@applyFontFormats"); }
+			set { base.SetXmlNodeBool("@applyFontFormats", value); }
 		}
 
 		/// <summary>
@@ -231,14 +195,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ApplyPatternFormats
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@applyPatternFormats");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@applyPatternFormats", value);
-			}
+			get { return base.GetXmlNodeBool("@applyPatternFormats"); }
+			set { base.SetXmlNodeBool("@applyPatternFormats", value); }
 		}
 
 		/// <summary>
@@ -246,14 +204,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ApplyWidthHeightFormats
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@applyWidthHeightFormats");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@applyWidthHeightFormats", value);
-			}
+			get { return base.GetXmlNodeBool("@applyWidthHeightFormats"); }
+			set { base.SetXmlNodeBool("@applyWidthHeightFormats", value); }
 		}
 
 		/// <summary>
@@ -261,14 +213,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowMemberPropertyTips
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showMemberPropertyTips");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showMemberPropertyTips", value);
-			}
+			get { return base.GetXmlNodeBool("@showMemberPropertyTips"); }
+			set { base.SetXmlNodeBool("@showMemberPropertyTips", value); }
 		}
 
 		/// <summary>
@@ -276,14 +222,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowCalcMember
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showCalcMbrs");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showCalcMbrs", value);
-			}
+			get { return base.GetXmlNodeBool("@showCalcMbrs"); }
+			set { base.SetXmlNodeBool("@showCalcMbrs", value); }
 		}
 
 		/// <summary>
@@ -291,29 +231,17 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool EnableDrill
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@enableDrill", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@enableDrill", value);
-			}
+			get { return base.GetXmlNodeBool("@enableDrill", true); }
+			set { base.SetXmlNodeBool("@enableDrill", value); }
 		}
 
 		/// <summary>
-		/// Gets or sets whether to show the drill down buttons.
+		/// Gets or sets whether to show the drill down buttons (expand/collapse buttons).
 		/// </summary>
 		public bool ShowDrill
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showDrill", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showDrill", value);
-			}
+			get { return base.GetXmlNodeBool("@showDrill", true); }
+			set { base.SetXmlNodeBool("@showDrill", value); }
 		}
 
 		/// <summary>
@@ -321,14 +249,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowDataTips
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showDataTips", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showDataTips", value, true);
-			}
+			get { return base.GetXmlNodeBool("@showDataTips", true); }
+			set { base.SetXmlNodeBool("@showDataTips", value, true); }
 		}
 
 		/// <summary>
@@ -336,14 +258,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool FieldPrintTitles
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@fieldPrintTitles");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@fieldPrintTitles", value);
-			}
+			get { return base.GetXmlNodeBool("@fieldPrintTitles"); }
+			set { base.SetXmlNodeBool("@fieldPrintTitles", value); }
 		}
 
 		/// <summary>
@@ -351,14 +267,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ItemPrintTitles
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@itemPrintTitles");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@itemPrintTitles", value);
-			}
+			get { return base.GetXmlNodeBool("@itemPrintTitles"); }
+			set { base.SetXmlNodeBool("@itemPrintTitles", value); }
 		}
 
 		/// <summary>
@@ -367,14 +277,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <remarks>A blank value in XML indicates true.</remarks>
 		public bool ColumnGrandTotals
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@colGrandTotals", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@colGrandTotals", value);
-			}
+			get { return base.GetXmlNodeBool("@colGrandTotals", true); }
+			set { base.SetXmlNodeBool("@colGrandTotals", value); }
 		}
 
 		/// <summary>
@@ -383,14 +287,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <remarks>A blank value in XML indicates true.</remarks>
 		public bool RowGrandTotals
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@rowGrandTotals", true);
-			}
-			set
-			{
-				base.SetXmlNodeBool("@rowGrandTotals", value);
-			}
+			get { return base.GetXmlNodeBool("@rowGrandTotals", true); }
+			set { base.SetXmlNodeBool("@rowGrandTotals", value); }
 		}
 
 		/// <summary>
@@ -398,14 +296,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool PrintDrill
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@printDrill");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@printDrill", value);
-			}
+			get { return base.GetXmlNodeBool("@printDrill"); }
+			set { base.SetXmlNodeBool("@printDrill", value); }
 		}
 
 		/// <summary>
@@ -413,14 +305,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowError
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showError");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showError", value);
-			}
+			get { return base.GetXmlNodeBool("@showError"); }
+			set { base.SetXmlNodeBool("@showError", value); }
 		}
 
 		/// <summary>
@@ -428,14 +314,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string ErrorCaption
 		{
-			get
-			{
-				return base.GetXmlNodeString("@errorCaption");
-			}
-			set
-			{
-				base.SetXmlNodeString("@errorCaption", value);
-			}
+			get { return base.GetXmlNodeString("@errorCaption"); }
+			set { base.SetXmlNodeString("@errorCaption", value); }
 		}
 
 		/// <summary>
@@ -444,14 +324,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string DataCaption
 		{
-			get
-			{
-				return base.GetXmlNodeString("@dataCaption");
-			}
-			set
-			{
-				base.SetXmlNodeString("@dataCaption", value);
-			}
+			get { return base.GetXmlNodeString("@dataCaption"); }
+			set { base.SetXmlNodeString("@dataCaption", value); }
 		}
 
 		/// <summary>
@@ -459,14 +333,24 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool ShowHeaders
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@showHeaders");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@showHeaders", value);
-			}
+			get { return base.GetXmlNodeBool("@showHeaders", true); }
+			set { base.SetXmlNodeBool("@showHeaders", value, true); }
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether or not to hide the values row.
+		/// </summary>
+		public bool HideValuesRow
+		{
+			get { return base.GetXmlNodeBool("d:extLst/d:ext/x14:pivotTableDefinition/@hideValuesRow", false); }
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether fields should be shown ascending or in data source order.
+		/// </summary>
+		public bool FieldListSortAscending
+		{
+			get { return base.GetXmlNodeBool("fieldListSortAscending"); }
 		}
 
 		/// <summary>
@@ -474,10 +358,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int PageWrap
 		{
-			get
-			{
-				return base.GetXmlNodeInt("@pageWrap");
-			}
+			get { return base.GetXmlNodeIntNull("@pageWrap") ?? 0; }
 			set
 			{
 				if (value < 0)
@@ -488,17 +369,20 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		/// <summary>
 		/// Gets or sets whether the legacy auto formatting has been applied to the PivotTable view.
+		/// Corresponds to the "Autofit column widths on update" pivot table setting.
 		/// </summary>
 		public bool UseAutoFormatting
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@useAutoFormatting");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@useAutoFormatting", value);
-			}
+			get { return base.GetXmlNodeBool("@useAutoFormatting", false); }
+			set { base.SetXmlNodeBool("@useAutoFormatting", value, false); }
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether or not cell formatting should be preserved on update.
+		/// </summary>
+		public bool PreserveFormatting
+		{
+			get { return base.GetXmlNodeBool("@preserveFormatting", true); }
 		}
 
 		/// <summary>
@@ -506,14 +390,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool GridDropZones
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@gridDropZones");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@gridDropZones", value);
-			}
+			get { return base.GetXmlNodeBool("@gridDropZones"); }
+			set { base.SetXmlNodeBool("@gridDropZones", value); }
 		}
 
 		/// <summary>
@@ -521,14 +399,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int Indent
 		{
-			get
-			{
-				return base.GetXmlNodeInt("@indent");
-			}
-			set
-			{
-				base.SetXmlNodeString("@indent", value.ToString());
-			}
+			get { return base.GetXmlNodeInt("@indent"); }
+			set { base.SetXmlNodeString("@indent", value.ToString()); }
 		}
 
 		/// <summary>
@@ -536,14 +408,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool OutlineData
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@outlineData");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@outlineData", value);
-			}
+			get { return base.GetXmlNodeBool("@outlineData"); }
+			set { base.SetXmlNodeBool("@outlineData", value); }
 		}
 
 		/// <summary>
@@ -551,14 +417,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool Outline
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@outline");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@outline", value);
-			}
+			get { return base.GetXmlNodeBool("@outline"); }
+			set { base.SetXmlNodeBool("@outline", value); }
 		}
 
 		/// <summary>
@@ -566,14 +426,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool MultipleFieldFilters
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@multipleFieldFilters");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@multipleFieldFilters", value);
-			}
+			get { return base.GetXmlNodeBool("@multipleFieldFilters", true); }
+			set { base.SetXmlNodeBool("@multipleFieldFilters", value); }
+		}
+
+		public bool CustomListSort
+		{
+			get { return base.GetXmlNodeBool("@customListSort", true); }
 		}
 
 		/// <summary>
@@ -581,14 +440,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool Compact
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@compact");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@compact", value);
-			}
+			get { return base.GetXmlNodeBool("@compact"); }
+			set { base.SetXmlNodeBool("@compact", value); }
 		}
 
 		/// <summary>
@@ -596,14 +449,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool CompactData
 		{
-			get
-			{
-				return base.GetXmlNodeBool("@compactData");
-			}
-			set
-			{
-				base.SetXmlNodeBool("@compactData", value);
-			}
+			get { return base.GetXmlNodeBool("@compactData"); }
+			set { base.SetXmlNodeBool("@compactData", value); }
 		}
 
 		/// <summary>
@@ -611,14 +458,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string GrandTotalCaption
 		{
-			get
-			{
-				return base.GetXmlNodeString("@grandTotalCaption");
-			}
-			set
-			{
-				base.SetXmlNodeString("@grandTotalCaption", value);
-			}
+			get { return base.GetXmlNodeString("@grandTotalCaption"); }
+			set { base.SetXmlNodeString("@grandTotalCaption", value); }
 		}
 
 		/// <summary>
@@ -626,29 +467,27 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string RowHeaderCaption
 		{
-			get
-			{
-				return base.GetXmlNodeString("@rowHeaderCaption");
-			}
-			set
-			{
-				base.SetXmlNodeString("@rowHeaderCaption", value);
-			}
+			get { return base.GetXmlNodeString("@rowHeaderCaption"); }
+			set { base.SetXmlNodeString("@rowHeaderCaption", value); }
+		}
+
+		/// <summary>
+		/// Gets or sets whether the "Layout and Format" pivot table setting "For empty values show:" is enabled.
+		/// </summary>
+		public bool ShowMissing
+		{
+			get { return base.GetXmlNodeBool("@showMissing", true); }
+			set { base.SetXmlNodeBool("@showMissing", value, true); }
 		}
 
 		/// <summary>
 		/// Gets or sets the string to be displayed in cells with no value.
+		/// Corresponds to the "Layout and Format" pivot table setting "For empty values show: [missingCaption]".
 		/// </summary>
 		public string MissingCaption
 		{
-			get
-			{
-				return base.GetXmlNodeString("@missingCaption");
-			}
-			set
-			{
-				base.SetXmlNodeString("@missingCaption", value);
-			}
+			get { return base.GetXmlNodeString("@missingCaption", null); }
+			set { base.SetXmlNodeString("@missingCaption", value); }
 		}
 
 		/// <summary>
@@ -656,14 +495,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int FirstHeaderRow
 		{
-			get
-			{
-				return base.GetXmlNodeInt(FirstHeaderRowPath);
-			}
-			set
-			{
-				base.SetXmlNodeString(FirstHeaderRowPath, value.ToString());
-			}
+			get { return base.GetXmlNodeInt(FirstHeaderRowPath); }
+			set { base.SetXmlNodeString(FirstHeaderRowPath, value.ToString()); }
 		}
 
 		/// <summary>
@@ -671,14 +504,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int FirstDataRow
 		{
-			get
-			{
-				return base.GetXmlNodeInt(FirstDataRowPath);
-			}
-			set
-			{
-				base.SetXmlNodeString(FirstDataRowPath, value.ToString());
-			}
+			get { return base.GetXmlNodeInt(FirstDataRowPath); }
+			set { base.SetXmlNodeString(FirstDataRowPath, value.ToString()); }
 		}
 
 		/// <summary>
@@ -686,14 +513,24 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public int FirstDataCol
 		{
-			get
-			{
-				return base.GetXmlNodeInt(FirstDataColumnPath);
-			}
-			set
-			{
-				base.SetXmlNodeString(FirstDataColumnPath, value.ToString());
-			}
+			get { return base.GetXmlNodeInt(FirstDataColumnPath); }
+			set { base.SetXmlNodeString(FirstDataColumnPath, value.ToString()); }
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether or not to merge and center cells with labels.
+		/// </summary>
+		public bool MergeAndCenterCellsWithLabels
+		{
+			get { return base.GetXmlNodeBool("@mergeItem", false); }
+		}
+
+		/// <summary>
+		/// Gets a value corresponding to the pivot table setting "Display fields in report area".
+		/// </summary>
+		public bool PageOverThenDown
+		{
+			get { return base.GetXmlNodeBool("@pageOverThenDown", false); }
 		}
 
 		/// <summary>
@@ -809,10 +646,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public string StyleName
 		{
-			get
-			{
-				return base.GetXmlNodeString(StyleNamePath);
-			}
+			get { return base.GetXmlNodeString(StyleNamePath); }
 			set
 			{
 				if (value.StartsWith("PivotStyle"))
@@ -842,10 +676,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public TableStyles TableStyle
 		{
-			get
-			{
-				return myTableStyle;
-			}
+			get { return myTableStyle; }
 			set
 			{
 				myTableStyle = value;
@@ -859,14 +690,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal int CacheID
 		{
-			get
-			{
-				return base.GetXmlNodeInt("@cacheId");
-			}
-			set
-			{
-				base.SetXmlNodeString("@cacheId", value.ToString());
-			}
+			get { return base.GetXmlNodeInt("@cacheId"); }
+			set { base.SetXmlNodeString("@cacheId", value.ToString()); }
 		}
 
 		/// <summary>
@@ -909,7 +734,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal bool HasColumnDataFields => this.ColumnFields.Any(c => c.Index == -2);
 
-		private ExcelWorkbook Workbook { get; set; }
+		internal ExcelWorkbook Workbook { get; private set; }
 		#endregion
 
 		#region Constructors
@@ -1061,14 +886,6 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// pivotSelections are causing corruptions when left. Deleting for meow.
 			this.Worksheet.View.RemovePivotSelections();
-
-			if (this.DataFields.Count == 0)
-			{
-				// Leaving a dataFields node with no data fields can corrupt a workbook.
-				var dataFieldsNode = base.TopNode.SelectSingleNode("d:dataFields", base.NameSpaceManager);
-				if (dataFieldsNode != null)
-					base.TopNode.RemoveChild(dataFieldsNode);
-			}
 		}
 
 		/// <summary>
@@ -1104,6 +921,69 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 			return pageFieldIndices;
+		}
+
+		/// <summary>
+		/// Gets a list of the unsupported features that are enabled on this pivot table.
+		/// </summary>
+		/// <param name="unsupportedFeatures">The unsupported features enabled on this pivot table.</param>
+		/// <returns>True if unsupported features are found, otherwise false.</returns>
+		internal bool TryGetUnsupportedFeatures(out List<string> unsupportedFeatures)
+		{
+			unsupportedFeatures = new List<string>();
+			foreach (var dataField in this.DataFields)
+			{
+				if (dataField.ShowDataAs == ShowDataAs.Percent || dataField.ShowDataAs == ShowDataAs.PercentOfParentRow || dataField.ShowDataAs == ShowDataAs.PercentOfParentCol
+					|| dataField.ShowDataAs == ShowDataAs.PercentOfParent || dataField.ShowDataAs == ShowDataAs.Difference || dataField.ShowDataAs == ShowDataAs.PercentDiff
+					|| dataField.ShowDataAs == ShowDataAs.RunTotal || dataField.ShowDataAs == ShowDataAs.PercentOfRunningTotal || dataField.ShowDataAs == ShowDataAs.RankAscending
+					|| dataField.ShowDataAs == ShowDataAs.RankDescending || dataField.ShowDataAs == ShowDataAs.Index)
+				{
+					unsupportedFeatures.Add($"Data field '{dataField.Name}' show data as setting '{dataField.ShowDataAs}'");
+				}
+			}
+			foreach (var field in this.Fields)
+			{
+				if (!field.Compact)
+					unsupportedFeatures.Add($"Field '{field.Name}' compact disabled");
+				if (field.RepeatItemLabels)
+					unsupportedFeatures.Add($"Field '{field.Name}' repeat item labels enabled");
+				if (field.InsertBlankLine)
+					unsupportedFeatures.Add($"Field '{field.Name}' insert blank line enabled");
+				if (field.ShowAll)
+					unsupportedFeatures.Add($"Field '{field.Name}' show items with no data enabled");
+				if (field.InsertPageBreak)
+					unsupportedFeatures.Add($"Field '{field.Name}' insert page break after each item enabled");
+			}
+			var filters = base.TopNode.SelectSingleNode("d:filters", base.NameSpaceManager);
+			if (filters != null)
+				unsupportedFeatures.Add("Filters enabled");
+			if (this.MergeAndCenterCellsWithLabels)
+				unsupportedFeatures.Add("Merge and center cells with labels enabled");
+			if (this.PageOverThenDown)
+				unsupportedFeatures.Add("Display fields in report filter area over then down enabled");
+			if (this.PageWrap != 0)
+				unsupportedFeatures.Add("Report filter fields per [row|column] > 0");
+			if (!string.IsNullOrEmpty(this.ErrorCaption))
+				unsupportedFeatures.Add("Error caption enabled");
+			if (this.ShowError)
+				unsupportedFeatures.Add("Show error enabled");
+			if (!this.PreserveFormatting)
+				unsupportedFeatures.Add("Preserve formatting disabled");
+			if (this.MultipleFieldFilters)
+				unsupportedFeatures.Add("Multiple field filters enabled");
+			if (!this.CustomListSort)
+				unsupportedFeatures.Add("Use Custom Lists when sorting disabled");
+			if (!this.ShowDataTips)
+				unsupportedFeatures.Add("Show contextual tooltips disabled");
+			if (!this.ShowHeaders)
+				unsupportedFeatures.Add("Display field captions and filter dropdowns disabled");
+			if (this.GridDropZones)
+				unsupportedFeatures.Add("Grid drop zones enabled");
+			if (!this.HideValuesRow)
+				unsupportedFeatures.Add("Show values row enabled");
+			if (this.FieldListSortAscending)
+				unsupportedFeatures.Add("Field list sort ascending enabled");
+			return unsupportedFeatures.Any();
 		}
 		#endregion
 
@@ -1595,41 +1475,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.Address = this.GetNewAddress(tabularTable);
 			if (this.DataFields.Any())
 			{
-				using (var totalsCalculator = new TotalsFunctionHelper())
-				{
-					// If the workbook has calculated fields, configure the calculation helper and cache fields appropriately.
-					var calculatedFields = this.CacheDefinition.CacheFields.Where(c => !string.IsNullOrEmpty(c.Formula));
-					if (calculatedFields.Any())
-						this.SetUpCalculatedFields(calculatedFields, totalsCalculator);
-
-					var backingTableData = this.WritePivotTableBodyData(totalsCalculator);
-					PivotCellBackingData[] grandTotalsValuesLists = null;
-					RowGrandTotalHelper rowGrandTotalHelper = null;
-					ColumnGrandTotalHelper columnGrandTotalHelper = null;
-					if (this.ColumnGrandTotals)
-					{
-						columnGrandTotalHelper = new ColumnGrandTotalHelper(this, backingTableData, totalsCalculator);
-						grandTotalsValuesLists = columnGrandTotalHelper.UpdateGrandTotals();
-					}
-					if (this.RowGrandTotals)
-					{
-						rowGrandTotalHelper = new RowGrandTotalHelper(this, backingTableData, totalsCalculator);
-						rowGrandTotalHelper.UpdateGrandTotals();
-					}
-					// Write grand-grand totals to worksheet (grand totals at bottom right corner of pivot table).
-					if (this.ColumnGrandTotals && this.RowGrandTotals && this.ColumnFields.Any())
-					{
-						if (this.HasRowDataFields)
-							rowGrandTotalHelper.UpdateGrandGrandTotals(grandTotalsValuesLists);
-						else
-							columnGrandTotalHelper.UpdateGrandGrandTotals(grandTotalsValuesLists);
-					}
-				}
-			}
-			else
-			{
-				// If there are no data fields, then remove the xml node to prevent corrupting the workbook.
-				this.TopNode.RemoveChild(this.TopNode.SelectSingleNode("d:dataFields", this.NameSpaceManager));
+				var dataManager = new PivotTableDataManager(this);
+				dataManager.UpdateWorksheet();
 			}
 		}
 
@@ -2067,131 +1914,6 @@ namespace OfficeOpenXml.Table.PivotTable
 					}
 				}
 			}
-		}
-
-		private PivotCellBackingData[,] WritePivotTableBodyData(TotalsFunctionHelper totalsCalculator)
-		{
-			var backingData = new PivotCellBackingData[this.RowHeaders.Count(), this.ColumnHeaders.Count()];
-			int dataColumn = this.Address.Start.Column + this.FirstDataCol;
-			for (int column = 0; column < this.ColumnHeaders.Count; column++)
-			{
-				var columnHeader = this.ColumnHeaders[column];
-				int dataRow = this.Address.Start.Row + this.FirstDataRow - 1;
-				for (int row = 0; row < this.RowHeaders.Count; row++)
-				{
-					dataRow++;
-					var rowHeader = this.RowHeaders[row];
-					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
-						continue;
-					if (rowHeader.IsPlaceHolder)
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
-					else if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.ColumnFields.Count)
-						|| rowHeader.CacheRecordIndices.Count == this.RowFields.Count)
-					{
-						// At a leaf node.
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
-					}
-					else if (this.HasRowDataFields)
-					{
-						if (rowHeader.PivotTableField != null && rowHeader.PivotTableField.DefaultSubtotal && !rowHeader.TotalType.IsEquivalentTo("none"))
-						{
-							if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField) 
-								|| !string.IsNullOrEmpty(rowHeader.TotalType))
-							{
-								backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
-							}
-						}
-					}
-					else if (rowHeader.PivotTableField.DefaultSubtotal && !rowHeader.TotalType.IsEquivalentTo("none")
-						&& (rowHeader.TotalType != null || rowHeader.PivotTableField.SubtotalTop))
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, totalsCalculator);
-
-					var cell = this.Worksheet.Cells[dataRow, dataColumn];
-					var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
-					var dataField = this.DataFields[dataFieldCollectionIndex];
-					var cacheField = this.CacheDefinition.CacheFields[dataField.Index];
-					totalsCalculator.WriteCellTotal(cell, dataField, backingData[row, column], this.Workbook.Styles, rowHeader.TotalType, columnHeader.TotalType);
-				}
-				dataColumn++;
-			}
-			return backingData;
-		}
-
-		private void SetUpCalculatedFields(IEnumerable<CacheFieldNode> calculatedFields, TotalsFunctionHelper totalsCalculator)
-		{
-			// Add all of the cache field names to the calculation helper.
-			var cacheFieldNames = new HashSet<string>(this.CacheDefinition.CacheFields.Select(c => c.Name));
-			totalsCalculator.AddNames(cacheFieldNames);
-
-			// Resolve any calclulated fields that may be referencing each other to forumlas composed of regular ol' cache fields.
-			foreach (var calculatedField in calculatedFields)
-			{
-				var resolvedFormulaTokens = this.ResolveFormulaReferences(calculatedField.Formula, totalsCalculator, calculatedFields);
-				foreach (var token in resolvedFormulaTokens.Where(t => t.TokenType == TokenType.NameValue))
-				{
-					if (!calculatedField.ReferencedCacheFieldsToIndex.ContainsKey(token.Value))
-					{
-						var referencedFieldIndex = this.CacheDefinition.GetCacheFieldIndex(token.Value);
-						calculatedField.ReferencedCacheFieldsToIndex.Add(token.Value, referencedFieldIndex);
-					}
-				}
-				calculatedField.ResolvedFormula = string.Join(string.Empty, resolvedFormulaTokens.Select(t => t.Value));
-			}
-		}
-
-		private List<Token> ResolveFormulaReferences(string formula, TotalsFunctionHelper totalsCalculator, IEnumerable<CacheFieldNode> calculatedFields)
-		{
-			var resolvedFormulaTokens = new List<Token>();
-			var tokens = totalsCalculator.Tokenize(formula);
-			foreach (var token in tokens)
-			{
-				if (token.TokenType == TokenType.NameValue)
-				{
-					// If a token references another calculated field, resolve the chain of formulas.
-					var field = calculatedFields.FirstOrDefault(f => f.Name.IsEquivalentTo(token.Value));
-					if (field != null)
-					{
-						var resolvedReferences = this.ResolveFormulaReferences(field.Formula, totalsCalculator, calculatedFields);
-						resolvedFormulaTokens.AddRange(resolvedReferences);
-					}
-					else
-						resolvedFormulaTokens.Add(token);
-				}
-				else
-					resolvedFormulaTokens.Add(token);
-			}
-			return resolvedFormulaTokens;
-		}
-
-		private PivotCellBackingData GetBackingCellValues(PivotTableHeader rowHeader, PivotTableHeader columnHeader, TotalsFunctionHelper functionCalculator)
-		{
-			var dataFieldCollectionIndex = this.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
-			var dataField = this.DataFields[dataFieldCollectionIndex];
-			var cacheField = this.CacheDefinition.CacheFields[dataField.Index];
-			if (string.IsNullOrEmpty(cacheField.Formula))
-			{
-				var matchingValues = this.CacheDefinition.CacheRecords.FindMatchingValues(
-					rowHeader.CacheRecordIndices,
-					columnHeader.CacheRecordIndices,
-					this.GetPageFieldIndices(),
-					dataField.Index,
-					this);
-				return new PivotCellBackingData(matchingValues);
-			}
-
-			// If a formula is present, it is a calculated field which needs to be evaluated.
-			var fieldNameToValues = new Dictionary<string, List<object>>();
-			foreach (var cacheFieldName in cacheField.ReferencedCacheFieldsToIndex.Keys)
-			{
-				var values = this.CacheDefinition.CacheRecords.FindMatchingValues(
-					rowHeader.CacheRecordIndices,
-					columnHeader.CacheRecordIndices,
-					this.GetPageFieldIndices(),
-					cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
-					this);
-				fieldNameToValues.Add(cacheFieldName, values);
-			}
-			return new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
 		}
 
 		private string GetTotalCaptionCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, StringResources stringResources)

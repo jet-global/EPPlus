@@ -1,4 +1,29 @@
-﻿using System;
+﻿/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2019 Michelle Lau and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+* For code change notes, see the source control history.
+*******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.Extensions;
@@ -50,7 +75,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <returns>The result of the function.</returns>
 		public object Calculate(DataFieldFunctions dataFieldFunction, List<object> values)
 		{
-			if (values == null || values.Count == 0)
+			if (values == null || values.Count == 0 || values.All(v => v == null))
 				return null;
 			// Write the values into a temp worksheet.
 			int row = 1;
@@ -152,22 +177,12 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			var result = this.TempWorksheet.Calculate(formula);
 			return result;
 		}
-
-		/// <summary>
-		/// Calculates and writes the value for a cell into a worksheet.
-		/// </summary>
-		/// <param name="cell">The cell to write a value into.</param>
-		/// <param name="dataField">The data field that the value is under.</param>
-		/// <param name="backingData">The data used to calculated the cell's value.</param>
-		/// <param name="styles">The style to apply to the cell.</param>
-		/// <param name="rowTotalType">The total type of the row header (optional).</param>
-		/// <param name="columnTotalType">The total type of the column header (optional).</param>
-		public void WriteCellTotal(ExcelRange cell, ExcelPivotTableDataField dataField, 
-			PivotCellBackingData backingData, ExcelStyles styles, string rowTotalType = null, string columnTotalType = null)
+		
+		public object CalculateCellTotal(ExcelPivotTableDataField dataField, PivotCellBackingData backingData,
+		string rowTotalType = null, string columnTotalType = null)
 		{
 			if (backingData == null)
-				return;
-
+				return null;
 			if (!string.IsNullOrEmpty(rowTotalType) && !rowTotalType.IsEquivalentTo("default"))
 			{
 				// Only calculate a value if the row and column functions match up, or if there is no column function specified.
@@ -175,23 +190,22 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				{
 					// Calculate the value with rowTotalType as the function.
 					var function = ExcelPivotTableField.SubtotalFunctionTypeToDataFieldFunctionEnum[rowTotalType];
-					cell.Value = this.Calculate(function, backingData.GetBackingValues());
+					return this.Calculate(function, backingData.GetBackingValues());
 				}
+				// No value for this cell.
+				return null;
 			}
 			else if (!string.IsNullOrEmpty(columnTotalType) && !columnTotalType.IsEquivalentTo("default"))
 			{
 				// We already know that the row subtotal function type is either empty or default because of the previous condition.
 				// Calculate the value with columnTotalType as the function.
 				var function = ExcelPivotTableField.SubtotalFunctionTypeToDataFieldFunctionEnum[columnTotalType];
-				cell.Value = this.Calculate(function, backingData.GetBackingValues());
+				return this.Calculate(function, backingData.GetBackingValues());
 			}
 			else if (string.IsNullOrEmpty(backingData.Formula))
-				cell.Value = this.Calculate(dataField.Function, backingData.GetBackingValues());
+				return this.Calculate(dataField.Function, backingData.GetBackingValues());
 			else
-				cell.Value = this.EvaluateCalculatedFieldFormula(backingData.GetCalculatedCellBackingValues(), backingData.Formula);
-			var style = styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
-			if (style != null)
-				cell.Style.Numberformat.Format = style.Format;
+				return this.EvaluateCalculatedFieldFormula(backingData.GetCalculatedCellBackingValues(), backingData.Formula);
 		}
 		#endregion
 

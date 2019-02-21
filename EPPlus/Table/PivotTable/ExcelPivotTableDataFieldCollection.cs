@@ -44,8 +44,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal ExcelPivotTableDataFieldCollection(XmlNamespaceManager namespaceManager, XmlNode node, ExcelPivotTable table) 
 			: base(namespaceManager, node, table)
 		{
-			if (node == null)
-				base.TopNode = base.PivotTable.CreateNode("d:dataFields");
 		}
 		#endregion
 
@@ -60,7 +58,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			var dataFieldsNode = field.TopNode.SelectSingleNode("../../d:dataFields", field.NameSpaceManager);
 			if (dataFieldsNode == null)
 			{
-				base.PivotTable.CreateNode("d:dataFields");
+				base.TopNode = base.PivotTable.CreateNode("d:dataFields");
 				dataFieldsNode = field.TopNode.SelectSingleNode("../../d:dataFields", field.NameSpaceManager);
 			}
 
@@ -112,6 +110,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		protected override List<ExcelPivotTableDataField> LoadItems()
 		{
 			var collection = new List<ExcelPivotTableDataField>();
+			if (base.TopNode == null)
+				return collection;
 			foreach (XmlElement dataElem in base.TopNode.SelectNodes("d:dataField", base.NameSpaceManager))
 			{
 				if (int.TryParse(dataElem.GetAttribute("fld"), out var fld) && fld >= 0)

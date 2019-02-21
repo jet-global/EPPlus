@@ -1,4 +1,29 @@
-﻿namespace OfficeOpenXml.Table.PivotTable.DataCalculation
+﻿/*******************************************************************************
+* You may amend and distribute as you like, but don't remove this header!
+*
+* EPPlus provides server-side generation of Excel 2007/2010 spreadsheets.
+* See http://www.codeplex.com/EPPlus for details.
+*
+* Copyright (C) 2011-2019 Michelle Lau and others as noted in the source history.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+* See the GNU Lesser General Public License for more details.
+*
+* The GNU Lesser General Public License can be viewed at http://www.opensource.org/licenses/lgpl-license.php
+* If you unfamiliar with this license or have questions about it, here is an http://www.gnu.org/licenses/gpl-faq.html
+*
+* All code and executables are provided "as is" with no warranty either express or implied. 
+* The author accepts no liability for any damage or loss of business that this product may cause.
+*
+* For code change notes, see the source control history.
+*******************************************************************************/
+namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 {
 	/// <summary>
 	/// Calculate row grand totals (grand totals at the bottom of a pivot table).
@@ -49,12 +74,12 @@
 		}
 
 		/// <summary>
-		/// Calculates and writes the grand total values to the worksheet.
+		/// Calculates the grand total values and updates the backing data.
 		/// </summary>
 		/// <param name="majorIndex">The current major axis index.</param>
 		/// <param name="grandTotalValueLists">The values used to calculate grand totals.</param>
 		/// <param name="totalType">The type of function that the subtotal should be calculated with.</param>
-		protected override void WriteGrandTotal(int majorIndex, PivotCellBackingData[] grandTotalValueLists, string totalType)
+		protected override void CalculateBackingDataTotal(int majorIndex, PivotCellBackingData[] grandTotalValueLists, string totalType)
 		{
 			var row = this.PivotTable.Address.End.Row;
 			if (this.PivotTable.HasRowDataFields)
@@ -64,11 +89,13 @@
 			{
 				if (grandTotalValueLists[i] != null)
 				{
-					var cell = this.PivotTable.Worksheet.Cells[row++, column];
 					var dataField = this.PivotTable.DataFields[i];
-					var cacheField = this.PivotTable.CacheDefinition.CacheFields[dataField.Index];
-					var styles = this.PivotTable.Worksheet.Workbook.Styles;
-					base.TotalsCalculator.WriteCellTotal(cell, dataField, grandTotalValueLists[i], styles, columnTotalType: totalType);
+					var result = base.TotalsCalculator.CalculateCellTotal(dataField, grandTotalValueLists[i], columnTotalType: totalType);
+					var backingData = grandTotalValueLists[i];
+					backingData.Result = result;
+					backingData.SheetRow = row++;
+					backingData.SheetColumn = column;
+					backingData.DataFieldCollectionIndex = i;
 				}
 			}
 		}
@@ -83,17 +110,19 @@
 		}
 
 		/// <summary>
-		/// Writes the grand total for the specified <paramref name="backingData"/> in the cell at the specified <paramref name="index"/>.
+		/// Updates the specified <paramref name="backingData"/> with the grand total result and corresponding cell location.
 		/// </summary>
-		/// <param name="index">The major index of the cell to write the total to.</param>
-		/// <param name="dataField">The data field to use the number format of.</param>
-		/// <param name="backingData">The data to use to calculate the total.</param>
-		protected override void WriteCellTotal(int index, ExcelPivotTableDataField dataField, PivotCellBackingData backingData)
+		/// <param name="index">The major index of the corresponding cell.</param>
+		/// <param name="dataFieldCollectionIndex">The index of the data field to use the formula of.</param>
+		/// <param name="backingData">The values to use to calculate the total.</param>
+		protected override void UpdateGrandGrandTotalBackingDataTotal(int index, int dataFieldCollectionIndex, PivotCellBackingData backingData)
 		{
-			var cell = this.PivotTable.Worksheet.Cells[index, this.PivotTable.Address.End.Column];
-			var cacheField = this.PivotTable.CacheDefinition.CacheFields[dataField.Index];
-			var styles = this.PivotTable.Worksheet.Workbook.Styles;
-			base.TotalsCalculator.WriteCellTotal(cell, dataField, backingData, styles);
+			var dataField = this.PivotTable.DataFields[dataFieldCollectionIndex];
+			var value = base.TotalsCalculator.CalculateCellTotal(dataField, backingData);
+			backingData.SheetRow = index;
+			backingData.SheetColumn = this.PivotTable.Address.End.Column;
+			backingData.DataFieldCollectionIndex = dataFieldCollectionIndex;
+			backingData.Result = value;
 		}
 		#endregion
 	}

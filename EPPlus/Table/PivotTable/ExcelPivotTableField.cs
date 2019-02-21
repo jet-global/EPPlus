@@ -86,49 +86,6 @@ namespace OfficeOpenXml.Table.PivotTable
 	}
 
 	/// <summary>
-	/// Defines the data formats for a field in the PivotTable.
-	/// </summary>
-	public enum eShowDataAs
-	{
-		/// <summary>
-		/// Indicates the field is shown as the "difference from" a value.
-		/// </summary>
-		Difference,
-		/// <summary>
-		/// Indicates the field is shown as the "index.
-		/// </summary>
-		Index,
-		/// <summary>
-		/// Indicates that the field is shown as its normal datatype.
-		/// </summary>
-		Normal,
-		/// <summary>
-		/// /Indicates the field is show as the "percentage of" a value.
-		/// </summary>
-		Percent,
-		/// <summary>
-		/// Indicates the field is shown as the "percentage difference from" a value.
-		/// </summary>
-		PercentDiff,
-		/// <summary>
-		/// Indicates the field is shown as the percentage of column.
-		/// </summary>
-		PercentOfCol,
-		/// <summary>
-		/// Indicates the field is shown as the percentage of row.
-		/// </summary>
-		PercentOfRow,
-		/// <summary>
-		/// Indicates the field is shown as percentage of total.
-		/// </summary>
-		PercentOfTotal,
-		/// <summary>
-		/// Indicates the field is shown as running total in the table.
-		/// </summary>
-		RunTotal,
-	}
-
-	/// <summary>
 	/// Built-in subtotal functions.
 	/// </summary>
 	[Flags]
@@ -172,6 +129,105 @@ namespace OfficeOpenXml.Table.PivotTable
 		None,
 		Ascending,
 		Descending
+	}
+
+	/// <summary>
+	/// Represents the pivot table field setting options for "Show Values As".
+	/// </summary>
+	public enum ShowDataAs
+	{
+		/// <summary>
+		/// Data is shown as it was calculated.
+		/// </summary>
+		NoCalculation,
+
+		/// <summary>
+		/// Data is shown as a percentage of the grand total.
+		/// Corresponds to "% of Grand Total" in Excel.
+		/// </summary>
+		PercentOfTotal,
+
+		/// <summary>
+		/// Data is shown as a percentage of the column total.
+		/// Corresponds to "% of Column Total" in Excel.
+		/// </summary>
+		PercentOfCol,
+
+		/// <summary>
+		/// Data is shown as a percentage of the row total.
+		/// Corresponds to "% of Row Total" in Excel.
+		/// </summary>
+		PercentOfRow,
+
+		/// <summary>
+		/// Data is shown as a percentage of a base field and item, specified by <see cref="ExcelPivotTableDataField.BaseField"/>
+		/// and <see cref="ExcelPivotTableDataField.BaseItem"/>.
+		/// Corresponds to "% of" in Excel.
+		/// </summary>
+		Percent,
+
+		/// <summary>
+		/// Data is shown as a percentage of the parent row total.
+		/// Corresponds to "% of Parent Row Total" in Excel.
+		/// </summary>
+		/// <remarks>Stored in datafield extLst.</remarks>
+		PercentOfParentRow,
+
+		/// <summary>
+		/// Data is shown as a percentage of the parent column total.
+		/// Corresponds to "% of Parent Column Total" in Excel.
+		/// </summary>
+		/// <remarks>Stored in datafield extLst.</remarks>
+		PercentOfParentCol,
+
+		/// <summary>
+		/// Data is shown as a percentage of the parent total.
+		/// Corresponds to the "% of Parent Total" in Excel.
+		/// </summary>
+		/// <remarks>Stored in datafield extLst.</remarks>
+		PercentOfParent,
+
+		/// <summary>
+		/// Data is shown as the difference between a base field and item, specified by <see cref="ExcelPivotTableDataField.BaseField"/>
+		/// and <see cref="ExcelPivotTableDataField.BaseItem"/>. Corresponds to the "Difference From" setting in Excel.
+		/// </summary>
+		Difference,
+
+		/// <summary>
+		/// Data is shown as the percent difference between a base field and item, specified by <see cref="ExcelPivotTableDataField.BaseField"/>
+		/// and <see cref="ExcelPivotTableDataField.BaseItem"/>. Corresponds to the "Difference From" setting in Excel.
+		/// </summary>
+		PercentDiff,
+
+		/// <summary>
+		/// Data is shown as the running total of a base field specified by <see cref="ExcelPivotTableDataField.BaseField"/>.
+		/// Corresponds to the "Running Total In" setting in Excel.
+		/// </summary>
+		RunTotal,
+
+		/// <summary>
+		/// Data is shown as the percent of a running total of a base field specified by <see cref="ExcelPivotTableDataField.BaseField"/>.
+		/// Corresponds to the "% Running Total In" setting in Excel.
+		/// </summary>
+		/// <remarks>Stored in datafield extLst.</remarks>
+		PercentOfRunningTotal,
+
+		/// <summary>
+		/// Corresponds to the "Rank Smallest to Largest" setting in Excel.
+		/// </summary>
+		/// <remarks>Stored in datafield extLst.</remarks>
+		RankAscending,
+
+		/// <summary>
+		/// Corresponds to the "Rank Largest to Smallest" setting in Excel.
+		/// </summary>
+		/// <remarks>Stored in datafield extLst.</remarks>
+		RankDescending,
+
+		/// <summary>
+		/// Corresponds to the "Index" setting in Excel.
+		/// </summary>
+		Index
 	}
 	#endregion
 
@@ -280,10 +336,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				else
 					return v;
 			}
-			set
-			{
-				base.SetXmlNodeString("@name", value);
-			}
+			set { base.SetXmlNodeString("@name", value); }
 		}
 
 		/// <summary>
@@ -316,22 +369,24 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		/// <summary>
 		/// Gets or sets whether to show all items for this field.
+		/// Corresponds to the "Show items with no data" layout setting.
 		/// </summary>
 		public bool ShowAll
 		{
-			get { return base.GetXmlNodeBool("@showAll"); }
-			set { base.SetXmlNodeBool("@showAll", value); }
+			get { return base.GetXmlNodeBool("@showAll", true); }
+			set { base.SetXmlNodeBool("@showAll", value, true); }
 		}
 
 		/// <summary>
 		/// Gets whether to show the default subtotal.
+		/// NOTE: To set this value, use <see cref="SubTotalFunctions"/>.
 		/// </summary>
-		/// <remarks>A blank value in XML indicates true. Setting this value to false will remove the subtotal nodes from 
-		/// the <see cref="ExcelPivotTableField"/>.</remarks>
+		/// <remarks>A blank value in XML indicates true. Setting this value to false needs to remove the subtotal nodes from 
+		/// the <see cref="ExcelPivotTableField"/>. Use <see cref="SubTotalFunctions"/> to do this.</remarks>
 		public bool DefaultSubtotal
 		{
 			get { return base.GetXmlNodeBool("@defaultSubtotal", true); }
-			private set { base.SetXmlNodeBool("@defaultSubtotal", value); }
+			// setting this value must be done from SubTotalFunctions.
 		}
 
 		/// <summary>
@@ -409,7 +464,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (value == eSubTotalFunctions.None)
 				{
 					// For no subtotals, set defaultSubtotal to off
-					this.DefaultSubtotal = false;
+					base.SetXmlNodeBool("@defaultSubtotal", false);
 				}
 				else
 				{
@@ -541,11 +596,36 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets whether the field is a data field.
+		/// Gets whether the field is a data field.
 		/// </summary>
 		public bool IsDataField
 		{
 			get { return base.GetXmlNodeBool("@dataField", false); }
+		}
+
+		/// <summary>
+		/// Gets or sets whether the "Insert blank line after each item label" layout setting is enabled.
+		/// </summary>
+		public bool InsertBlankLine
+		{
+			get { return base.GetXmlNodeBool("@insertBlankRow", false); }
+			set { base.SetXmlNodeBool("@insertBlankRow", value, false); }
+		}
+
+		/// <summary>
+		/// Getse a value indicating
+		/// </summary>
+		public bool InsertPageBreak
+		{
+			get { return base.GetXmlNodeBool("@insertPageBreak", false); }
+		}
+
+		/// <summary>
+		/// Gets whether or not to repeat item labels in the pivot table for this field.
+		/// </summary>
+		public bool RepeatItemLabels
+		{
+			get { return base.GetXmlNodeBool("d:extLst/d:ext/x14:pivotField/@fillDownLabels"); }
 		}
 
 		/// <summary>

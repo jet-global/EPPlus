@@ -131,6 +131,31 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Gets a value indicating whether to save pivot cache records.
+		/// </summary>
+		public bool SaveData
+		{
+			get { return base.GetXmlNodeBool("@saveData", true); }
+		}
+
+		/// <summary>
+		/// Gets a value indicating the number of items to retain per field.
+		/// </summary>
+		public int? MissingItemLimit
+		{
+			get { return base.GetXmlNodeIntNull("@missingItemsLimit"); }
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether or not the pivot table should refresh on load.
+		/// </summary>
+		public bool RefreshOnLoad
+		{
+			get { return base.GetXmlNodeBool("@refreshOnLoad"); }
+			set { base.SetXmlNodeBool("@refreshOnLoad", value); }
+		}
+
+		/// <summary>
 		/// Gets or sets the XML data representing the cache definition in the package.
 		/// </summary>
 		internal XmlDocument CacheDefinitionXml { get; private set; }
@@ -179,14 +204,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		internal string RecordRelationshipID
 		{
-			get
-			{
-				return base.GetXmlNodeString("@r:id");
-			}
-			set
-			{
-				base.SetXmlNodeString("@r:id", value);
-			}
+			get { return base.GetXmlNodeString("@r:id"); }
+			set { base.SetXmlNodeString("@r:id", value); }
 		}
 
 		/// <summary>
@@ -239,9 +258,13 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				if (this.Workbook != value.Worksheet.Workbook)
 					throw (new ArgumentException("Range must be in the same package as the pivottable"));
-				var sourceRange = this.SourceRange;
-				base.SetXmlNodeString(SourceWorksheetPath, value.Worksheet.Name);
-				base.SetXmlNodeString(SourceAddressPath, value.FirstAddress);
+				base.SetXmlNodeString(ExcelPivotCacheDefinition.SourceWorksheetPath, value.Worksheet.Name);
+				base.SetXmlNodeString(ExcelPivotCacheDefinition.SourceAddressPath, value.FirstAddress);
+
+				// Delete the worksheetSource "name" attribute if it exists.
+				if (base.GetXmlNodeString(ExcelPivotCacheDefinition.SourceNamePath) != null)
+					base.DeleteNode(ExcelPivotCacheDefinition.SourceNamePath);
+
 				mySourceRange = value;
 			}
 		}
@@ -416,6 +439,28 @@ namespace OfficeOpenXml.Table.PivotTable
 					return i;
 			}
 			return -1;
+		}
+
+		/// <summary>
+		/// Gets a list of enabled pivot table features that are unsupported.
+		/// </summary>
+		/// <param name="unsupportedFeatures">A list of unsuppported features.</param>
+		/// <returns>True if unsupported features were present, otherwise false.</returns>
+		public bool TryGetUnsupportedFeatures(out List<string> unsupportedFeatures)
+		{
+			unsupportedFeatures = new List<string>();
+			foreach (var pivotTable in this.GetRelatedPivotTables())
+			{
+				if (pivotTable.TryGetUnsupportedFeatures(out var pivotTableUnsupportedFeatures))
+					unsupportedFeatures.AddRange(pivotTableUnsupportedFeatures);
+			}
+			if (base.TopNode.SelectSingleNode("d:calculatedItems", base.NameSpaceManager) != null)
+				unsupportedFeatures.Add("Calculated items present");
+			if (!this.SaveData)
+				unsupportedFeatures.Add("Save source data with file disabled");
+			if (this.MissingItemLimit != null)
+				unsupportedFeatures.Add("Missing item limit set");
+			return unsupportedFeatures.Any();
 		}
 		#endregion
 
