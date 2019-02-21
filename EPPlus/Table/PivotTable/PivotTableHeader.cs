@@ -90,6 +90,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets a value indicating whether or not this header contains a tabular form field.
 		/// </summary>
 		public bool IsTabularHeader { get; }
+
+		/// <summary>
+		/// Gets a value indicating whether or not this header has compact form enabled.
+		/// </summary>
+		public bool IsCompactForm { get; }
 		#endregion
 
 		#region Constructors
@@ -119,6 +124,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.IsAboveDataField = isAboveDataField;
 			this.TotalType = totalType;
 			this.IsTabularHeader = isTabularField;
+			this.IsCompactForm = field == null ? false : field.Compact;
 		}
 
 		/// <summary>

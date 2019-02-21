@@ -291,8 +291,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool Compact
 		{
-			get { return base.GetXmlNodeBool("@compact"); }
-			set { base.SetXmlNodeBool("@compact", value); }
+			get { return base.GetXmlNodeBool("@compact", true); }
+			set { base.SetXmlNodeBool("@compact", value, true); }
 		}
 
 		/// <summary>

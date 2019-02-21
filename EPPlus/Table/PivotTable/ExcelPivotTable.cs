@@ -1228,12 +1228,14 @@ namespace OfficeOpenXml.Table.PivotTable
 
 				int pivotFieldItemIndex = 0;
 				bool isTabularFormat = false;
+				bool isDataField = true;
 				if (child.PivotFieldIndex != -2)
 				{
 					// Child is not a data field.
 					pivotField = this.Fields[child.PivotFieldIndex];
 					pivotFieldItemIndex = child.PivotFieldItemIndex;
 					isTabularFormat = pivotField.Outline == false;
+					isDataField = false;
 				}
 				else
 					pivotFieldItemIndex = child.DataFieldIndex;
@@ -1245,7 +1247,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				bool isAboveDataField = !childIndices.Any(x => x.Item1 == -2);
 				string subtotalType = this.GetRowFieldSubtotalType(pivotField);
 
-				this.RowHeaders.Add(new PivotTableHeader(childIndices, pivotField, child.DataFieldIndex, false, true, isLeafNode, false, subtotalType, isAboveDataField));
+				this.RowHeaders.Add(new PivotTableHeader(childIndices, pivotField, child.DataFieldIndex, false, true, isLeafNode, isDataField, subtotalType, isAboveDataField));
 				this.BuildRowItems(child, childIndices);
 				// Create subtotal nodes if default subtotal is enabled.
 				this.CreateRowSubtotalNodes(child, childIndices, pivotField, rowDepth, isAboveDataField);
@@ -1590,6 +1592,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			bool tabularTable = this.Fields.Any(x => x.Outline == false);
 			this.UpdateRowColumnHeaders(stringResources, tabularTable);
 			// Update the pivot table's address.
+			// TODO: Put this in a method.
 			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
 			// If there are no data fields, then don't find the offset to obtain the first data column.
 			int endColumn = this.Address.Start.Column;
@@ -1597,6 +1600,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				endColumn += this.FirstDataCol + this.ColumnHeaders.Count - 1;
 			else if (tabularTable)
 				endColumn += this.TabularHeaders.Count;
+			else if (this.Fields.Any(x => x.Compact == false))
+				endColumn += this.RowFields.Count - 1;
 			this.Address = new ExcelAddress(this.Worksheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
 			if (this.DataFields.Any())
 			{
@@ -1678,6 +1683,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Update the row headers in the worksheet.
 			if (!tabularTable)
 				this.WriteRowHeaders(stringResources);
+				//this.WriteNonCompactFormRowHeaders(stringResources);
 			else
 			{
 				int dataFieldColumn = this.WriteTabularRowHeaders(stringResources);
@@ -1694,7 +1700,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			int row = this.Address.Start.Row + this.FirstDataRow;
 			int startColumn = this.Address.Start.Column;
 			int firstColumnWrittenTo = row;
-			int lastColumnWrittenTo = 0;
+			int lastColumnWrittenTo = startColumn;
 			RowColumnItem previousNonTotalItem = null;
 			for (int i = 0; i < this.RowItems.Count; i++)
 			{
@@ -1704,7 +1710,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				for (int j = 0; j < item.Count; j++)
 				{
 					// Write subtotal headers.
-					var totalHeader = this.SetTotalCaptionCellValue(this.RowFields, item, header, stringResources);
+					var totalHeader = this.GetTotalCaptionCellValue(this.RowFields, item, header, stringResources);
 					if (!string.IsNullOrEmpty(totalHeader))
 					{
 						lastColumnWrittenTo = this.GetTabularSubtotalHeaderColumn(item, previousNonTotalItem, startColumn, currentColumn, lastColumnWrittenTo, firstColumnWrittenTo, i, j);
@@ -1870,24 +1876,128 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private void WriteRowHeaders(StringResources stringResources)
 		{
-			int dataRow = this.Address.Start.Row + this.FirstDataRow;
+			int row = this.Address.Start.Row + this.FirstDataRow;
+			int previousColumn = this.Address.Start.Column;
+			bool previousHeaderCompactForm = true;
+			bool topNodeHeaderCompactForm = true;
+			var columnFieldNames = new List<string>();
+
+			bool hasNonCompactFormFields = this.Fields.Any(x => x.Compact == false);
 			if (this.RowFields.Any())
 			{
 				for (int i = 0; i < this.RowItems.Count; i++)
 				{
-					string itemType = this.SetTotalCaptionCellValue(this.RowFields, this.RowItems[i], this.RowHeaders[i], stringResources);
+					int column = this.Address.Start.Column;
+					var item = this.RowItems[i];
+					var header = this.RowHeaders[i];
+					// Get the subtotal caption header if subtotals are enabled.
+					string itemType = this.GetTotalCaptionCellValue(this.RowFields, item, header, stringResources);
 					if (!string.IsNullOrEmpty(itemType))
 					{
-						this.Worksheet.Cells[dataRow++, this.Address.Start.Column].Value = itemType;
+						if (hasNonCompactFormFields && !header.TotalType.IsEquivalentTo("grand"))
+							column = this.GetCompactFormHeaderColumn(header, item, column, previousColumn, previousHeaderCompactForm, topNodeHeaderCompactForm);
+						this.Worksheet.Cells[row++, column].Value = itemType;
+						previousColumn = column;
 						continue;
 					}
-					var sharedItem = this.GetSharedItemValue(this.RowFields, this.RowItems[i], this.RowItems[i].RepeatedItemsCount, 0);
-					this.Worksheet.Cells[dataRow++, this.Address.Start.Column].Value = sharedItem;
+					// Get the header value to print to the cell.
+					string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, item.RepeatedItemsCount, 0);
+					int newColumn = this.GetCompactFormHeaderColumn(header, item, column, previousColumn, previousHeaderCompactForm, topNodeHeaderCompactForm, i);
+					 this.Worksheet.Cells[row++, newColumn].Value = sharedItemValue;
+					
+					// Reset the local variables.
+					if (newColumn > previousColumn)
+					{
+						if (this.HasRowDataFields && header.IsDataField && !columnFieldNames.Contains("Values"))
+							columnFieldNames.Add("Values");
+						else if (!header.IsDataField && !columnFieldNames.Contains(header.PivotTableField.Name))
+							columnFieldNames.Add(header.PivotTableField.Name);
+					}
+					previousHeaderCompactForm = header.IsDataField || header.IsLeafNode ? previousHeaderCompactForm : header.IsCompactForm;
+					if (item.RepeatedItemsCount == 0 && !header.IsDataField)
+						topNodeHeaderCompactForm = header.IsCompactForm;
+					previousColumn = newColumn;
 				}
 			}
 			// If there are no row headers and only one data field, print the name of the data field for the row.
 			else if (this.DataFields.Count == 1)
-				this.Worksheet.Cells[dataRow++, this.Address.Start.Column].Value = this.DataFields.First().Name;
+				this.Worksheet.Cells[row++, this.Address.Start.Column].Value = this.DataFields.First().Name;
+
+			this.WriteRowHeadersInColumn(columnFieldNames);
+		}
+
+		private void WriteRowHeadersInColumn(List<string> headers)
+		{
+			int row = this.Address.Start.Row + this.FirstDataRow - 1;
+			int column = this.Address.Start.Column + 1;
+			for (int i = 0; i < headers.Count; i++)
+			{
+				this.Worksheet.Cells[row, column++].Value = headers[i];
+			}
+		}
+
+		private int GetCompactFormHeaderColumn(PivotTableHeader header, RowColumnItem item, int column, int previousColumn, bool previousHeaderCompactForm, bool topNodeCompactForm, int i = 0)
+		{
+			int returnColumn = 0;
+			var nonCompactFormPivotFields = this.Fields.Where(x => x.Compact);
+			var parentList = header.CacheRecordIndices.GetRange(0, header.CacheRecordIndices.Count - 1).ToList();
+			if (item.RepeatedItemsCount == 0)
+				returnColumn = column;
+			else if (string.IsNullOrEmpty(header.TotalType) && previousHeaderCompactForm)
+				returnColumn = previousColumn;
+			else
+			{
+				if (topNodeCompactForm)
+				{
+					// The top node is in compact form.
+					if (header.TotalType.IsEquivalentTo("default"))
+					{
+						int compactFormParentCount = parentList.Count(x => nonCompactFormPivotFields.Any(j => j.Index == x.Item1));
+						returnColumn = column + item.RepeatedItemsCount - compactFormParentCount;
+					}
+					else if (header.IsLeafNode)
+					{
+						// If a datafield is the top node or if datafields are the leaf nodes, then all leaf nodes must be written in the same column.
+						// Otherwise, the header is a leaf node, it's parent is not in compact form and it's grandparents are all in compact form.
+						var previousItem = i > 0 ? this.RowItems[i - 1] : null;
+						var previousHeader = i > 0 ? this.RowHeaders[i - 1] : null;
+						if ((header.IsDataField && header.DataFieldCollectionIndex != 0) 
+							|| (previousItem != null && previousItem.RepeatedItemsCount == item.RepeatedItemsCount) 
+							|| (previousHeader != null && previousHeader.IsDataField))
+							returnColumn = previousColumn;
+						else
+							returnColumn = previousColumn + 1;
+					}
+					else
+					{
+						// If a datafield header is our parent, then calculate the column so that it is the same column the datafield header is written to.
+						// Otherwise, it is just shifted to the left by one column.
+						int previousFieldIndex = header.CacheRecordIndices[header.CacheRecordIndices.Count - 2].Item1;
+						if (previousFieldIndex == -2)
+							returnColumn = column + item.RepeatedItemsCount - (header.CacheRecordIndices.Count - 1);
+						else
+							returnColumn = column + item.RepeatedItemsCount - 1;
+					}
+				}
+				else
+				{
+					// The top node is not in compact form.
+					bool hasParentCompactForm = nonCompactFormPivotFields.Any(x => parentList.Any(j => j.Item1 == x.Index));
+					bool hasDataFieldParent = parentList.Any(x => x.Item1 == -2);
+					// If the header has a parent header that is not in compact form, then all headers after it will be shifted to the left by one column.
+					if (hasParentCompactForm || hasDataFieldParent)
+						returnColumn = column + item.RepeatedItemsCount - 1;
+					else
+					{
+						int previousFieldIndex = header.CacheRecordIndices[header.CacheRecordIndices.Count - 2].Item1;
+						if (previousFieldIndex == -2)
+							returnColumn = previousColumn;
+						else
+							returnColumn = column + item.RepeatedItemsCount;
+					}
+				}
+			}
+			return returnColumn;
 		}
 
 		private void WriteColumnHeaders(StringResources stringResources)
@@ -1899,7 +2009,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				for (int i = 0; i < this.ColumnItems.Count; i++)
 				{
 					int startHeaderRow = startRow;
-					string itemType = this.SetTotalCaptionCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], stringResources);
+					string itemType = this.GetTotalCaptionCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], stringResources);
 					if (!string.IsNullOrEmpty(itemType))
 					{
 						int totalCaptionRow = startHeaderRow + this.ColumnItems[i].RepeatedItemsCount;
@@ -2083,7 +2193,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			return new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
 		}
 
-		private string SetTotalCaptionCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, StringResources stringResources)
+		private string GetTotalCaptionCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, StringResources stringResources)
 		{
 			string totalHeader = string.Empty;
 			if (!string.IsNullOrEmpty(item.ItemType))
