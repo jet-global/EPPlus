@@ -396,10 +396,11 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		/// <summary>
 		/// Gets or sets the indentation increment for compact axis or can be used to set the Report Layout to Compact Form.
+		/// NOTE: For some reason, Excel stores this value as 1 less than it is set in the UI.
 		/// </summary>
 		public int Indent
 		{
-			get { return base.GetXmlNodeInt("@indent"); }
+			get { return base.GetXmlNodeInt("@indent", 1); }
 			set { base.SetXmlNodeString("@indent", value.ToString()); }
 		}
 
@@ -988,7 +989,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
-		private List<Tuple<int, int>> BuildTabularRowItems(List<int> tabularFieldIndices, PivotItemTreeNode root, List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices)
+		private List<Tuple<int, int>> BuildTabularRowItems(List<int> tabularFieldIndices, PivotItemTreeNode root, List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices, int indent)
 		{
 			int repeatedItemsCount = 0;
 			// Base case: If we're at a leaf node or a non-tabular form field node.
@@ -1007,7 +1008,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				bool isAboveDataField = !indices.Any(x => x.Item1 == -2);
 				bool hasTabularField = tabularFieldIndices.Any(x => indices.Any(y => y.Item1 == x));
 				bool isDataField = root.PivotFieldIndex == -2;
-				this.RowHeaders.Add(new PivotTableHeader(indices, pivotField, root.DataFieldIndex, false, true, isLeafNode, isDataField, subtotalType, isAboveDataField, hasTabularField));
+				indent = indent == -1 ? 0 : indent;
+				this.RowHeaders.Add(new PivotTableHeader(indices, pivotField, root.DataFieldIndex, false, true, 
+					isLeafNode, isDataField, subtotalType, isAboveDataField, hasTabularField, indent: indent));
 				this.RowItems.AddColumnItem(indices.ToList(), repeatedItemsCount, root.DataFieldIndex);
 				lastChildIndices = indices.ToList();
 
@@ -1016,12 +1019,12 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 
 			root.ExpandIfDataFieldNode(this.DataFields.Count);
-
+			indent = this.GetIndentationLevel(root, indent);
 			for (int i = 0; i < root.Children.Count; i++)
 			{
 				var child = root.Children[i];
 				int pivotFieldItemIndex = child.PivotFieldIndex == -2 ? child.DataFieldIndex : child.PivotFieldItemIndex;
-				// If the current tree node's pivot field has tabular form enabled, is not a leaf node and it's children are not datafields,
+				// If the current tree node's pivot field has tabular form enabled, is not a leaf node and its children are not datafields,
 				// then create a tabular form header if it does not exist already.
 				if (root.IsTabularForm && root.HasChildren && !child.IsDataField)
 				{
@@ -1032,7 +1035,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 				var childIndices = indices.ToList();
 				childIndices.Add(new Tuple<int, int>(child.PivotFieldIndex, pivotFieldItemIndex));
-				lastChildIndices = this.BuildTabularRowItems(tabularFieldIndices, child, childIndices, lastChildIndices);
+				lastChildIndices = this.BuildTabularRowItems(tabularFieldIndices, child, childIndices, lastChildIndices, indent);
 			}
 
 			this.CreateColumnAndTabularSubtotalNodes(root, repeatedItemsCount, indices, true);
@@ -1094,18 +1097,18 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private void BuildRowItems(PivotItemTreeNode root, List<Tuple<int, int>> indices)
+		private void BuildRowItems(PivotItemTreeNode root, List<Tuple<int, int>> indices, int indent)
 		{
 			if (!root.HasChildren)
 				return;
 
 			root.ExpandIfDataFieldNode(this.DataFields.Count);
 
+			var rowDepth = indices.Count;
+			indent = this.GetIndentationLevel(root, indent);
 			foreach (var child in root.Children)
 			{
-				var rowDepth = indices.Count;
 				ExcelPivotTableField pivotField = null;
-
 				int pivotFieldItemIndex = 0;
 				bool isTabularFormat = false;
 				if (child.PivotFieldIndex != -2)
@@ -1125,11 +1128,26 @@ namespace OfficeOpenXml.Table.PivotTable
 				bool isAboveDataField = !childIndices.Any(x => x.Item1 == -2);
 				string subtotalType = this.GetRowFieldSubtotalType(pivotField);
 
-				this.RowHeaders.Add(new PivotTableHeader(childIndices, pivotField, child.DataFieldIndex, false, true, isLeafNode, false, subtotalType, isAboveDataField));
-				this.BuildRowItems(child, childIndices);
+				this.RowHeaders.Add(new PivotTableHeader(childIndices, pivotField, child.DataFieldIndex, 
+					false, true, isLeafNode, false, subtotalType, isAboveDataField, indent: indent));
+				this.BuildRowItems(child, childIndices, indent);
 				// Create subtotal nodes if default subtotal is enabled.
 				this.CreateRowSubtotalNodes(child, childIndices, pivotField, rowDepth, isAboveDataField);
 			}
+		}
+
+		private int GetIndentationLevel(PivotItemTreeNode parent, int parentIndentation)
+		{
+			if (parent.PivotFieldIndex == -2)
+				return parentIndentation + 1;
+			else if (parent.Value == -1)  // Children of the root node are not indented.
+				return 0;
+			else if (parent.IsTabularForm)  // Children of tabular form nodes are not indented.
+				return 0;
+			var pivotField = this.Fields[parent.PivotFieldIndex];
+			if (!pivotField.Compact && !parent.IsTabularForm)  // Only compact fields are indented.
+				return 0;
+			return parentIndentation + 1;
 		}
 
 		private string GetRowFieldSubtotalType(ExcelPivotTableField pivotField)
@@ -1389,7 +1407,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					bool tabularForm = this.Fields.Any(x => x.Outline == false);
 					if (!tabularForm)
-						this.BuildRowItems(root, new List<Tuple<int, int>>());
+						this.BuildRowItems(root, new List<Tuple<int, int>>(), -1);
 					else
 					{
 						var tabularFieldIndices = new List<int>();
@@ -1398,7 +1416,7 @@ namespace OfficeOpenXml.Table.PivotTable
 							if (!this.Fields[i].Outline)
 								tabularFieldIndices.Add(i);
 						}
-						this.BuildTabularRowItems(tabularFieldIndices, root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>());
+						this.BuildTabularRowItems(tabularFieldIndices, root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>(), -1);
 					}
 				}
 				else
@@ -1555,7 +1573,9 @@ namespace OfficeOpenXml.Table.PivotTable
 					if (!string.IsNullOrEmpty(totalHeader))
 					{
 						lastColumnWrittenTo = this.GetTabularSubtotalHeaderColumn(item, previousNonTotalItem, startColumn, currentColumn, lastColumnWrittenTo, firstColumnWrittenTo, i, j);
-						this.Worksheet.Cells[row, lastColumnWrittenTo].Value = totalHeader;
+						var cell = this.Worksheet.Cells[row, lastColumnWrittenTo];
+						cell.Value = totalHeader;
+						cell.Style.Indent = this.GetIndent(header.Indent);
 						continue;
 					}
 
@@ -1569,7 +1589,9 @@ namespace OfficeOpenXml.Table.PivotTable
 					{
 						// If the item is a leaf node with pivot fields that have tabular form disabled, then print out the 
 						// header values at the last written in column.
-						this.Worksheet.Cells[row, lastColumnWrittenTo].Value = headerValue;
+						var cell = this.Worksheet.Cells[row, lastColumnWrittenTo];
+						cell.Value = headerValue;
+						cell.Style.Indent = this.GetIndent(header.Indent);
 					}
 					else
 					{
@@ -1577,7 +1599,9 @@ namespace OfficeOpenXml.Table.PivotTable
 						// Otherwise, the item is an inner item, so get the correct column to write to.
 						if (item.RepeatedItemsCount != 0)
 							currentColumn = this.GetInnerItemColumn(item, previousNonTotalItem, currentColumn, startColumn, ref firstColumnWrittenTo, lastColumnWrittenTo, i, j);
-						this.Worksheet.Cells[row, currentColumn].Value = headerValue;
+						var cell = this.Worksheet.Cells[row, currentColumn];
+						cell.Value = headerValue;
+						cell.Style.Indent = this.GetIndent(header.Indent);
 						if (pivotFieldIndex == -2)
 							dataFieldColumn = currentColumn;
 						lastColumnWrittenTo = currentColumn;
@@ -1722,20 +1746,25 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				for (int i = 0; i < this.RowItems.Count; i++)
 				{
-					string itemType = this.SetTotalCaptionCellValue(this.RowFields, this.RowItems[i], this.RowHeaders[i], stringResources);
+					var cell = this.Worksheet.Cells[dataRow++, this.Address.Start.Column];
+					var rowHeader = this.RowHeaders[i];
+					string itemType = this.SetTotalCaptionCellValue(this.RowFields, this.RowItems[i], rowHeader, stringResources);
 					if (!string.IsNullOrEmpty(itemType))
+						cell.Value = itemType;
+					else
 					{
-						this.Worksheet.Cells[dataRow++, this.Address.Start.Column].Value = itemType;
-						continue;
+						var sharedItem = this.GetSharedItemValue(this.RowFields, this.RowItems[i], this.RowItems[i].RepeatedItemsCount, 0);
+						cell.Value = sharedItem;
 					}
-					var sharedItem = this.GetSharedItemValue(this.RowFields, this.RowItems[i], this.RowItems[i].RepeatedItemsCount, 0);
-					this.Worksheet.Cells[dataRow++, this.Address.Start.Column].Value = sharedItem;
+					cell.Style.Indent = this.GetIndent(rowHeader.Indent);
 				}
 			}
 			// If there are no row headers and only one data field, print the name of the data field for the row.
 			else if (this.DataFields.Count == 1)
 				this.Worksheet.Cells[dataRow++, this.Address.Start.Column].Value = this.DataFields.First().Name;
 		}
+
+		private int GetIndent(int depth) => depth * (this.Indent + 1);
 
 		private void WriteColumnHeaders(StringResources stringResources)
 		{
