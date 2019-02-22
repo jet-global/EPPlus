@@ -491,6 +491,26 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Gets or sets the value that corresponds to the Excel pivot table 
+		/// display setting "Show items with no data on columns".
+		/// </summary>
+		public bool ShowEmptyColumn
+		{
+			get { return base.GetXmlNodeBool("@showEmptyCol", false); }
+			set { base.SetXmlNodeBool("@showEmptyCol", value, false); }
+		}
+
+		/// <summary>
+		/// Gets or sets the value that corresponds to the Excel pivot table 
+		/// display setting "Show items with no data on rows".
+		/// </summary>
+		public bool ShowEmptyRow
+		{
+			get { return base.GetXmlNodeBool("@showEmptyRow", false); }
+			set { base.SetXmlNodeBool("@showEmptyRow", value, false); }
+		}
+
+		/// <summary>
 		/// Gets or sets the first row of the PivotTable header relative to the top left cell in the ref value.
 		/// </summary>
 		public int FirstHeaderRow
@@ -983,6 +1003,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				unsupportedFeatures.Add("Show values row enabled");
 			if (this.FieldListSortAscending)
 				unsupportedFeatures.Add("Field list sort ascending enabled");
+			if (this.ShowEmptyColumn)
+				unsupportedFeatures.Add("Show items with no data on columns enabled");
+			if (this.ShowEmptyRow)
+				unsupportedFeatures.Add("Show items with no data on rows enabled");
 			return unsupportedFeatures.Any();
 		}
 		#endregion
