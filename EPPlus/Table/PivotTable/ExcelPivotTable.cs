@@ -1142,10 +1142,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				return parentIndentation + 1;
 			else if (parent.Value == -1)  // Children of the root node are not indented.
 				return 0;
-			else if (parent.IsTabularForm)  // Children of tabular form nodes are not indented.
-				return 0;
 			var pivotField = this.Fields[parent.PivotFieldIndex];
-			if (!pivotField.Compact && !parent.IsTabularForm)  // Only compact fields are indented.
+			if (!pivotField.Compact || parent.IsTabularForm)  // Only children of compact fields are indented.
 				return 0;
 			return parentIndentation + 1;
 		}
