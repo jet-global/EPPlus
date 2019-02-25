@@ -396,7 +396,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		/// <summary>
 		/// Gets or sets the indentation increment for compact axis or can be used to set the Report Layout to Compact Form.
-		/// NOTE: For some reason, Excel stores this value as 1 less than it is set in the UI.
+		/// NOTE: For some reason, Excel stores this value as 1 less than it is set in the UI. Also, 0 indent is stored as 127.
 		/// </summary>
 		public int Indent
 		{
@@ -1786,7 +1786,12 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.Worksheet.Cells[dataRow++, this.Address.Start.Column].Value = this.DataFields.First().Name;
 		}
 
-		private int GetIndent(int depth) => depth * (this.Indent + 1);
+		private int GetIndent(int depth)
+		{
+			// Excel stores a zero indent as 127, and other values are stored as 1 less than the UI shows.
+			var indent = this.Indent == 127 ? 0 : this.Indent + 1;
+			return depth * indent;
+		}
 
 		private void WriteColumnHeaders(StringResources stringResources)
 		{
