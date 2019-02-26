@@ -658,18 +658,14 @@ namespace OfficeOpenXml
 				return false;
 			}
 		}
-		internal int GetXmlNodeInt(string path)
+
+		internal int GetXmlNodeInt(string path, int blankValue = int.MinValue)
 		{
-			int i;
-			if (int.TryParse(GetXmlNodeString(path), out i))
-			{
+			if (int.TryParse(this.GetXmlNodeString(path), out var i))
 				return i;
-			}
-			else
-			{
-				return int.MinValue;
-			}
+			return blankValue;
 		}
+
 		internal int? GetXmlNodeIntNull(string path)
 		{
 			int i;

@@ -95,6 +95,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets a value indicating whether or not this header has compact form enabled.
 		/// </summary>
 		public bool IsCompactForm { get; }
+
+		/// <summary>
+		/// Gets the level of indentation of the items that correspond to this header.
+		/// </summary>
+		public int Indent { get; }
 		#endregion
 
 		#region Constructors
@@ -111,8 +116,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="totalType">The itemType value of the <see cref="RowColumnItem"/>.</param>
 		/// <param name="isAboveDataField">A value indicating if it is above a data field node.</param>
 		/// <param name="isTabularField">A value indicating if it is a pivot field with tabular form enabled.</param>
+		/// <param name="indent">The level of indentation for the items that correspond to this header.</param>
 		public PivotTableHeader(List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldCollectionIndex, bool isGrandTotal,
-			bool isRowHeader, bool isLeafNode, bool isDataField, string totalType = null, bool isAboveDataField = false, bool isTabularField = false)
+			bool isRowHeader, bool isLeafNode, bool isDataField, string totalType = null, bool isAboveDataField = false, bool isTabularField = false, int indent = 0)
 		{
 			this.CacheRecordIndices = recordIndices;
 			this.PivotTableField = field;
@@ -125,6 +131,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.TotalType = totalType;
 			this.IsTabularHeader = isTabularField;
 			this.IsCompactForm = field == null ? false : field.Compact;
+			this.Indent = indent;
 		}
 
 		/// <summary>
