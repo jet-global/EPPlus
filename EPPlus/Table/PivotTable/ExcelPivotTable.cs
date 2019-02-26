@@ -1606,29 +1606,28 @@ namespace OfficeOpenXml.Table.PivotTable
 							column = this.GetCompactFormHeaderColumn(header, item, compactFormPivotFields, column, previousColumn, previousHeaderCompactForm, topNodeHeaderCompactForm);
 						cell = this.Worksheet.Cells[row++, column];
 						cell.Value = itemType;
-						cell.Style.Indent = this.GetIndent(header.Indent);
-						previousColumn = column;
-						continue;
 					}
-					// Get the header value to print to the cell.
-					string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, item.RepeatedItemsCount, 0);
-					int newColumn = this.GetCompactFormHeaderColumn(header, item, compactFormPivotFields, column, previousColumn, previousHeaderCompactForm, topNodeHeaderCompactForm, i);
-					cell = this.Worksheet.Cells[row++, newColumn];
-					cell.Value = sharedItemValue;
-					cell.Style.Indent = this.GetIndent(header.Indent);
-
-					// Reset the local variables.
-					if (newColumn > previousColumn)
+					else
 					{
-						if (this.HasRowDataFields && header.IsDataField && !columnFieldNames.Contains("Values"))
-							columnFieldNames.Add("Values");
-						else if (!header.IsDataField && !columnFieldNames.Contains(header.PivotTableField.Name))
-							columnFieldNames.Add(header.PivotTableField.Name);
+						// Get the header value to print to the cell.
+						string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, item.RepeatedItemsCount, 0);
+						column = this.GetCompactFormHeaderColumn(header, item, compactFormPivotFields, column, previousColumn, previousHeaderCompactForm, topNodeHeaderCompactForm, i);
+						cell = this.Worksheet.Cells[row++, column];
+						cell.Value = sharedItemValue;
+						// Reset the local variables.
+						if (column > previousColumn)
+						{
+							if (this.HasRowDataFields && header.IsDataField && !columnFieldNames.Contains("Values"))
+								columnFieldNames.Add("Values");
+							else if (!header.IsDataField && !columnFieldNames.Contains(header.PivotTableField.Name))
+								columnFieldNames.Add(header.PivotTableField.Name);
+						}
+						previousHeaderCompactForm = header.IsDataField || header.IsLeafNode ? previousHeaderCompactForm : header.IsCompactForm;
+						if (item.RepeatedItemsCount == 0 && !header.IsDataField)
+							topNodeHeaderCompactForm = header.IsCompactForm;
 					}
-					previousHeaderCompactForm = header.IsDataField || header.IsLeafNode ? previousHeaderCompactForm : header.IsCompactForm;
-					if (item.RepeatedItemsCount == 0 && !header.IsDataField)
-						topNodeHeaderCompactForm = header.IsCompactForm;
-					previousColumn = newColumn;
+					cell.Style.Indent = this.GetIndent(header.Indent);
+					previousColumn = column;
 				}
 			}
 			// If there are no row headers and only one data field, print the name of the data field for the row.
@@ -1677,35 +1676,33 @@ namespace OfficeOpenXml.Table.PivotTable
 							}
 							cell = this.Worksheet.Cells[row, column];
 							cell.Value = itemType;
-							cell.Style.Indent = this.GetIndent(header.Indent);
-							previousColumn = column;
-							continue;
 						}
-
-						// Get the header value to print to the cell.
-						var itemIndex = item.RepeatedItemsCount == 0 ? j : j + item.RepeatedItemsCount;
-						string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, itemIndex, j);
-						if (j == 0)
+						else
 						{
-							column = hasNonCompactFormFields ? this.GetTabularHeaderColumn(header, item, tabularFormPivotFields, column, previousColumn, topNodeHeaderTabularForm, i, false)
-								: this.GetTabularHeaderColumn(header, item, tabularFormPivotFields, column, previousColumn, topNodeHeaderTabularForm, i);
+							// Get the header value to print to the cell.
+							var itemIndex = item.RepeatedItemsCount == 0 ? j : j + item.RepeatedItemsCount;
+							string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, itemIndex, j);
+							if (j == 0)
+							{
+								column = hasNonCompactFormFields ? this.GetTabularHeaderColumn(header, item, tabularFormPivotFields, column, previousColumn, topNodeHeaderTabularForm, i, false)
+									: this.GetTabularHeaderColumn(header, item, tabularFormPivotFields, column, previousColumn, topNodeHeaderTabularForm, i);
+							}
+							cell = this.Worksheet.Cells[row, column];
+							cell.Value = sharedItemValue;
+							// Reset the local variables.
+							if (column > previousColumn)
+							{
+								var rowFieldIndex = this.RowFields[item.RepeatedItemsCount + j].Index;
+								var pivotFieldName = rowFieldIndex == -2 ? "Values" : this.Fields[rowFieldIndex].Name;
+								if (!columnFieldNames.Contains(pivotFieldName))
+									columnFieldNames.Add(pivotFieldName);
+							}
+							if (item.RepeatedItemsCount == 0 && !header.IsDataField)
+								topNodeHeaderTabularForm = header.IsTabularHeader;
+							else if (this.RowFields.First().Index == -2)
+								topNodeHeaderTabularForm = false;
 						}
-						cell = this.Worksheet.Cells[row, column];
-						cell.Value = sharedItemValue;
 						cell.Style.Indent = this.GetIndent(header.Indent);
-
-						// Reset the local variables.
-						if (column > previousColumn)
-						{
-							var rowFieldIndex = this.RowFields[item.RepeatedItemsCount + j].Index;
-							var pivotFieldName = rowFieldIndex == -2 ? "Values" : this.Fields[rowFieldIndex].Name;
-							if (!columnFieldNames.Contains(pivotFieldName))
-								columnFieldNames.Add(pivotFieldName);
-						}
-						if (item.RepeatedItemsCount == 0 && !header.IsDataField)
-							topNodeHeaderTabularForm = header.IsTabularHeader;
-						else if (this.RowFields.First().Index == -2)
-							topNodeHeaderTabularForm = false;
 						previousColumn = column;
 						column++;
 					}
