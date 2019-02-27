@@ -1657,10 +1657,23 @@ namespace OfficeOpenXml.Table.PivotTable
 					if (hasNonCompactFormFields && item.RepeatedItemsCount > 0 && string.IsNullOrEmpty(header.TotalType))
 					{
 						var previousRowFieldIndex = this.RowFields[item.RepeatedItemsCount - 1].Index;
-						var previousPivotField = this.Fields[previousRowFieldIndex];
-						// If the parent pivot field of this header has compact form disabled and tabular form enabled, then get the correct column to write to.
-						if (!previousPivotField.Compact && previousPivotField.Outline)
+						// If datafields are leaf nodes.
+						if (header.IsDataField)
 							column += item.RepeatedItemsCount;
+						else if (previousRowFieldIndex != -2)
+						{
+							var previousPivotField = this.Fields[previousRowFieldIndex];
+							// If the parent pivot field of this header has compact form disabled and tabular form enabled, then get the correct column to write to.
+							if (!previousPivotField.Compact && previousPivotField.Outline)
+							{
+								if (this.RowFields.First().Index == -2)
+									column += item.RepeatedItemsCount - 1;
+								else
+									column += item.RepeatedItemsCount;
+							}
+						}
+						else if (previousRowFieldIndex == -2 && this.RowFields.First().Index != -2)
+							column += item.RepeatedItemsCount - 1;
 					}
 
 					for (int j = 0; j < item.Count; j++)
@@ -1733,7 +1746,11 @@ namespace OfficeOpenXml.Table.PivotTable
 					if (allCompactFormFields && (hasNonTabularParent || hasDataFieldParent))
 						returnColumn = column + repeatedItemsCount - 1;
 					else
+					{
 						returnColumn = column + repeatedItemsCount;
+						if (hasDataFieldParent)
+							returnColumn -= 1;
+					}
 				}
 				else
 				{
@@ -1745,8 +1762,12 @@ namespace OfficeOpenXml.Table.PivotTable
 							int nonTabularParentCount = parentIndices.Count(x => x.Item1 == -2 || nonTabularFields.Any(j => j.Index == x.Item1));
 							returnColumn = column + repeatedItemsCount - nonTabularParentCount;
 						}
-						else 
+						else
+						{
 							returnColumn = column + repeatedItemsCount;
+							if (hasDataFieldParent)
+								returnColumn -= 1;
+						}
 					}
 					else 
 						returnColumn = column + repeatedItemsCount - 1;
@@ -1767,8 +1788,37 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (topNodeTabularForm)
 				{
 					// The top node is in compact form.
-					if (header.IsDataField && item.Count == 1)
-						returnColumn = previousColumn;
+					if (header.IsDataField)
+					{
+						if (header.IsLeafNode)
+						{
+							// If datafields are leaf nodes, then either use the previous column if compact form is enabled for all fields or the given column.
+							if (item.Count == 1)
+								returnColumn = allCompactFormFields ? previousColumn : column;
+							else
+							{
+								// Otherwise, datafields are leaf nodes, but the parent field is in tabular form, so calculate the column to write to based on 
+								// how many parent fields are not in tabular form.
+								int nonTabularParentCount = parentList.Count(f => tabularFormPivotFields.All(x => x.Index != f.Item1));
+								returnColumn = allCompactFormFields ? column + item.RepeatedItemsCount - nonTabularParentCount : column;
+							}
+						}
+						else
+						{
+							bool hasAllTabularFieldParents = parentList.All(x => x.Item1 == -2 || tabularFormPivotFields.Any(j => j.Index == x.Item1));
+							if (hasAllTabularFieldParents)
+							{
+								var compactFormPivotFields = this.Fields.Where(x => x.Compact);
+								bool hasNonCompactFormParent = parentList.Any(f => compactFormPivotFields.Any(x => x.Index == f.Item1));
+								if (hasNonCompactFormParent)
+									returnColumn = allCompactFormFields ? column + item.RepeatedItemsCount : column;
+								else
+									returnColumn = column;
+							}
+							else 
+								returnColumn = allCompactFormFields ? previousColumn : column;
+						}
+					}
 					else
 					{
 						// If a datafield is the top node or if datafields are the leaf nodes, then all leaf nodes must be written in the same column.
@@ -1776,9 +1826,13 @@ namespace OfficeOpenXml.Table.PivotTable
 						int previousIndex = this.RowFields[item.RepeatedItemsCount - 1].Index;
 						bool nonTabularField = previousIndex != -2 ? this.Fields[previousIndex].Outline : false;
 						if (previousIndex == -2)
-							returnColumn = previousColumn;
-						else if (nonTabularField)
 							returnColumn = allCompactFormFields ? previousColumn : column;
+						else if (nonTabularField)
+						{
+							returnColumn = allCompactFormFields ? previousColumn : column;
+							if (parentList.Any(x => x.Item1 == -2) && !allCompactFormFields)
+								returnColumn -= 1;
+						}
 						else
 							returnColumn = column + item.RepeatedItemsCount;
 					}
@@ -1790,21 +1844,25 @@ namespace OfficeOpenXml.Table.PivotTable
 					bool hasAllTabularFieldParents = parentList.All(x => x.Item1 == -2 || tabularFormPivotFields.Any(j => j.Index == x.Item1));
 					int previousIndex = this.RowFields[item.RepeatedItemsCount - 1].Index;
 					if (header.IsDataField)
-						returnColumn = previousColumn;
+						returnColumn = allCompactFormFields ? previousColumn : column;
 					else if (previousIndex == -2 || (this.RowFields.First().Index == -2 && !hasTabularFormParent))
 					{
 						var nonTabularFields = this.Fields.Where(f => f.Outline);
 						int nonTabularParentCount = parentList.Count(x => x.Item1 == -2 || nonTabularFields.Any(j => j.Index == x.Item1));
-						returnColumn = column + item.RepeatedItemsCount - nonTabularParentCount;
+						returnColumn = allCompactFormFields ? column + item.RepeatedItemsCount - nonTabularParentCount : column;
 					}
 					else if (hasAllTabularFieldParents || !hasTabularFormParent)
 					{
 						// If a non-tabular form parent node has multiple children, then calculate the return column.
 						// Otherwise, this is the only child so use the previous column.
-						if (this.RowHeaders[i - 1].IsLeafNode)
+						if (this.RowHeaders[i - 1].IsLeafNode || !string.IsNullOrEmpty(this.RowHeaders[i - 1].TotalType))
 							returnColumn = column + item.RepeatedItemsCount - 1;
 						else
+						{
 							returnColumn = allCompactFormFields ? previousColumn : column;
+							if (parentList.Any(x => x.Item1 == -2) && !allCompactFormFields)
+								returnColumn -= 1;
+						}
 					}
 					else if (header.IsLeafNode && item.Count == 1)
 						returnColumn = allCompactFormFields ? previousColumn : column;
