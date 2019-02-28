@@ -92,6 +92,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool IsTabularHeader { get; }
 
 		/// <summary>
+		/// Gets a value indicating whether or not this header has compact form enabled.
+		/// </summary>
+		public bool IsCompactForm { get; }
+
+		/// <summary>
 		/// Gets the level of indentation of the items that correspond to this header.
 		/// </summary>
 		public int Indent { get; }
@@ -125,6 +130,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.IsAboveDataField = isAboveDataField;
 			this.TotalType = totalType;
 			this.IsTabularHeader = isTabularField;
+			this.IsCompactForm = field == null ? false : field.Compact;
 			this.Indent = indent;
 		}
 
