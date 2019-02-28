@@ -430,6 +430,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			set { base.SetXmlNodeBool("@multipleFieldFilters", value); }
 		}
 
+		/// <summary>
+		/// Gets the "Totals and Filters" pivot table setting value for "Use Custom Lists when sorting".
+		/// </summary>
 		public bool CustomListSort
 		{
 			get { return base.GetXmlNodeBool("@customListSort", true); }
@@ -846,44 +849,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal void RefreshFromCache(StringResources stringResources)
 		{
 			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.RefreshFromCache));
-			// Update pivotField items to match corresponding cacheField sharedItems.
-			foreach (var pivotField in this.Fields)
-			{
-				var fieldItems = pivotField.Items;
-				var cacheField = this.CacheDefinition.CacheFields[pivotField.Index];
-				if (!cacheField.HasSharedItems)
-					continue;
 
-				if (fieldItems.Count > 0)
-				{
-					// Only sort pivot field items if the pivot field is not part of a date grouping.
-					if (this.CacheDefinition.CacheFields[pivotField.Index].FieldGroup == null)
-					{
-						// Preserve the "@h" attribute for fields marked as hidden as well as the totals field items.
-						var totalsFieldItems = fieldItems.Where(i => !string.IsNullOrEmpty(i.T)).ToList();
-						var hiddenFieldItemsDictionary = fieldItems
-							.Where(i => string.IsNullOrEmpty(i.T))
-							.ToDictionary(i => i.X, i => i.Hidden);
-						fieldItems.Clear();
-						var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
-
-						// Sort the row/column headers.
-						var sortedList = this.SortField(pivotField.Sort, pivotField).ToList();
-
-						// Assign the correct index value to each item.
-						for (int i = 0; i < sortedList.Count(); i++)
-						{
-							var field = sortedList[i];
-							int index = sharedItemsList.FindIndex(x => x == field);
-							fieldItems.AddItem(index);
-							if (hiddenFieldItemsDictionary.ContainsKey(index))
-								fieldItems[i].Hidden = hiddenFieldItemsDictionary[index];
-						}
-						// Add back the totals field items.
-						fieldItems.AppendItems(totalsFieldItems);
-					}
-				}
-			}
+			// Update pivot fields and sort pivot field items.
+			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.UpdatePivotFields));
+			this.UpdatePivotFields();
 
 			this.RowHeaders.Clear();
 			this.ColumnHeaders.Clear();
@@ -1063,6 +1032,48 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			this.CreateColumnAndTabularSubtotalNodes(root, repeatedItemsCount, indices, true);
 			return lastChildIndices;
+		}
+
+		private void UpdatePivotFields()
+		{
+			// Update pivotField items to match corresponding cacheField sharedItems.
+			foreach (var pivotField in this.Fields)
+			{
+				var fieldItems = pivotField.Items;
+				var cacheField = this.CacheDefinition.CacheFields[pivotField.Index];
+				if (!cacheField.HasSharedItems)
+					continue;
+
+				if (fieldItems.Count > 0)
+				{
+					// Only sort pivot field items if the pivot field is not part of a date grouping.
+					if (this.CacheDefinition.CacheFields[pivotField.Index].FieldGroup == null)
+					{
+						// Preserve the "@h" attribute for fields marked as hidden as well as the totals field items.
+						var totalsFieldItems = fieldItems.Where(i => !string.IsNullOrEmpty(i.T)).ToList();
+						var hiddenFieldItemsDictionary = fieldItems
+							.Where(i => string.IsNullOrEmpty(i.T))
+							.ToDictionary(i => i.X, i => i.Hidden);
+						fieldItems.Clear();
+						var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
+
+						// Sort the row/column headers.
+						var sortedList = this.SortField(pivotField.Sort, pivotField).ToList();
+
+						// Assign the correct index value to each item.
+						for (int i = 0; i < sortedList.Count(); i++)
+						{
+							var field = sortedList[i];
+							int index = sharedItemsList.FindIndex(x => x == field);
+							fieldItems.AddItem(index);
+							if (hiddenFieldItemsDictionary.ContainsKey(index))
+								fieldItems[i].Hidden = hiddenFieldItemsDictionary[index];
+						}
+						// Add back the totals field items.
+						fieldItems.AppendItems(totalsFieldItems);
+					}
+				}
+			}
 		}
 
 		private int GetRepeatedItemsCount(List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices)
