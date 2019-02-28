@@ -44365,7 +44365,7 @@ namespace EPPlusTest.Table.PivotTable
 			}
 		}
 		#endregion
-
+		
 		#region Multiple Data Fields
 		// Two Row Fields Multiple Data Fields
 		[TestMethod]
@@ -61421,27 +61421,6 @@ namespace EPPlusTest.Table.PivotTable
 			}
 		}
 		#endregion
-
-		[TestMethod]
-		public void adfadsjfls()
-		{
-			var file = new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\CompactAndTabular.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "Sheet1";
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables.First();
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\CompactAndTabular - Output.xlsx"));
-					package.SaveAs(newFile.File);
-					Assert.Fail();
-				}
-			}
-		}
 		#endregion
 		#endregion
 		#endregion
