@@ -410,6 +410,168 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 				this.ValidateIndentation(newFile.File, pt1expected);
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
+		public void PivotTableRefreshIndentationCompactFormDisabled()
+		{
+			var file = new FileInfo("PivotTableCompactForm.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "FourRowFields";
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets[sheetName];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					package.SaveAs(newFile.File);
+				}
+				var pt1expected = new[]
+				{
+					// Pivot Table 5
+					new ExpectedCellValue(sheetName, 60, 1, 0),
+					new ExpectedCellValue(sheetName, 61, 1, 0),
+					new ExpectedCellValue(sheetName, 65, 1, 0),
+					new ExpectedCellValue(sheetName, 69, 1, 0),
+					new ExpectedCellValue(sheetName, 73, 1, 0),
+					new ExpectedCellValue(sheetName, 77, 1, 0),
+					new ExpectedCellValue(sheetName, 81, 1, 0),
+					new ExpectedCellValue(sheetName, 85, 1, 0),
+					new ExpectedCellValue(sheetName, 89, 1, 0),
+
+					new ExpectedCellValue(sheetName, 60, 2, 0),
+					new ExpectedCellValue(sheetName, 62, 2, 0),
+					new ExpectedCellValue(sheetName, 63, 2, 1),
+					new ExpectedCellValue(sheetName, 66, 2, 0),
+					new ExpectedCellValue(sheetName, 67, 2, 1),
+					new ExpectedCellValue(sheetName, 70, 2, 0),
+					new ExpectedCellValue(sheetName, 71, 2, 1),
+					new ExpectedCellValue(sheetName, 74, 2, 0),
+					new ExpectedCellValue(sheetName, 75, 2, 1),
+					new ExpectedCellValue(sheetName, 78, 2, 0),
+					new ExpectedCellValue(sheetName, 79, 2, 1),
+					new ExpectedCellValue(sheetName, 82, 2, 0),
+					new ExpectedCellValue(sheetName, 83, 2, 1),
+					new ExpectedCellValue(sheetName, 86, 2, 0),
+					new ExpectedCellValue(sheetName, 87, 2, 1),
+
+					new ExpectedCellValue(sheetName, 60, 3, 0),
+					new ExpectedCellValue(sheetName, 64, 3, 0),
+					new ExpectedCellValue(sheetName, 72, 3, 0),
+					new ExpectedCellValue(sheetName, 76, 3, 0),
+					new ExpectedCellValue(sheetName, 80, 3, 0),
+					new ExpectedCellValue(sheetName, 84, 3, 0),
+					new ExpectedCellValue(sheetName, 88, 3, 0),
+				};
+				var pt2expected = new[]
+				{
+					// Pivot Table 7
+					new ExpectedCellValue(sheetName, 60, 11, 0),
+					new ExpectedCellValue(sheetName, 61, 11, 0),
+					new ExpectedCellValue(sheetName, 65, 11, 0),
+					new ExpectedCellValue(sheetName, 69, 11, 0),
+					new ExpectedCellValue(sheetName, 73, 11, 0),
+					new ExpectedCellValue(sheetName, 77, 11, 0),
+					new ExpectedCellValue(sheetName, 81, 11, 0),
+					new ExpectedCellValue(sheetName, 85, 11, 0),
+					new ExpectedCellValue(sheetName, 89, 11, 0),
+
+					new ExpectedCellValue(sheetName, 60, 12, 0),
+					new ExpectedCellValue(sheetName, 62, 12, 0),
+					new ExpectedCellValue(sheetName, 63, 12, 1),
+					new ExpectedCellValue(sheetName, 64, 12, 2),
+					new ExpectedCellValue(sheetName, 66, 12, 0),
+					new ExpectedCellValue(sheetName, 67, 12, 1),
+					new ExpectedCellValue(sheetName, 68, 12, 2),
+					new ExpectedCellValue(sheetName, 70, 12, 0),
+					new ExpectedCellValue(sheetName, 71, 12, 1),
+					new ExpectedCellValue(sheetName, 72, 12, 2),
+					new ExpectedCellValue(sheetName, 74, 12, 0),
+					new ExpectedCellValue(sheetName, 75, 12, 1),
+					new ExpectedCellValue(sheetName, 76, 12, 2),
+					new ExpectedCellValue(sheetName, 78, 12, 0),
+					new ExpectedCellValue(sheetName, 79, 12, 1),
+					new ExpectedCellValue(sheetName, 80, 12, 2),
+					new ExpectedCellValue(sheetName, 82, 12, 0),
+					new ExpectedCellValue(sheetName, 83, 12, 1),
+					new ExpectedCellValue(sheetName, 84, 12, 2),
+					new ExpectedCellValue(sheetName, 86, 12, 0),
+					new ExpectedCellValue(sheetName, 87, 12, 1),
+					new ExpectedCellValue(sheetName, 88, 12, 2),
+				};
+				this.ValidateIndentation(newFile.File, pt1expected);
+				this.ValidateIndentation(newFile.File, pt2expected);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactAndTabularFormMultipleDataFields.xlsx")]
+		public void PivotTableRefreshIndentationCompactFormDisabledAndTabularFormEnabled()
+		{
+			var file = new FileInfo("PivotTableCompactAndTabularFormMultipleDataFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "ThreeRowFields";
+				using (var package = new ExcelPackage(file))
+				{
+					var sheet = package.Workbook.Worksheets[sheetName];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					package.SaveAs(newFile.File);
+				}
+				var pt1expected = new[]
+				{
+					// Pivot Table 7
+					new ExpectedCellValue(sheetName, 116, 3, 0),
+					new ExpectedCellValue(sheetName, 125, 3, 0),
+					new ExpectedCellValue(sheetName, 137, 3, 0),
+					new ExpectedCellValue(sheetName, 145, 3, 0),
+					new ExpectedCellValue(sheetName, 146, 3, 0),
+
+					new ExpectedCellValue(sheetName, 116, 4, 0),
+					new ExpectedCellValue(sheetName, 117, 4, 0),
+					new ExpectedCellValue(sheetName, 121, 4, 0),
+					new ExpectedCellValue(sheetName, 125, 4, 0),
+					new ExpectedCellValue(sheetName, 129, 4, 0),
+					new ExpectedCellValue(sheetName, 133, 4, 0),
+					new ExpectedCellValue(sheetName, 137, 4, 0),
+					new ExpectedCellValue(sheetName, 141, 4, 0),
+
+					new ExpectedCellValue(sheetName, 116, 5, 0),
+					new ExpectedCellValue(sheetName, 117, 5, 0),
+					new ExpectedCellValue(sheetName, 118, 5, 1),
+					new ExpectedCellValue(sheetName, 119, 5, 0),
+					new ExpectedCellValue(sheetName, 120, 5, 1),
+					new ExpectedCellValue(sheetName, 121, 5, 0),
+					new ExpectedCellValue(sheetName, 122, 5, 1),
+					new ExpectedCellValue(sheetName, 123, 5, 0),
+					new ExpectedCellValue(sheetName, 124, 5, 1),
+					new ExpectedCellValue(sheetName, 125, 5, 0),
+					new ExpectedCellValue(sheetName, 126, 5, 1),
+					new ExpectedCellValue(sheetName, 127, 5, 0),
+					new ExpectedCellValue(sheetName, 128, 5, 1),
+					new ExpectedCellValue(sheetName, 129, 5, 0),
+					new ExpectedCellValue(sheetName, 130, 5, 1),
+					new ExpectedCellValue(sheetName, 131, 5, 0),
+					new ExpectedCellValue(sheetName, 132, 5, 1),
+					new ExpectedCellValue(sheetName, 133, 5, 0),
+					new ExpectedCellValue(sheetName, 134, 5, 1),
+					new ExpectedCellValue(sheetName, 135, 5, 0),
+					new ExpectedCellValue(sheetName, 136, 5, 1),
+					new ExpectedCellValue(sheetName, 137, 5, 0),
+					new ExpectedCellValue(sheetName, 138, 5, 1),
+					new ExpectedCellValue(sheetName, 139, 5, 0),
+					new ExpectedCellValue(sheetName, 140, 5, 1),
+					new ExpectedCellValue(sheetName, 141, 5, 0),
+					new ExpectedCellValue(sheetName, 142, 5, 1),
+					new ExpectedCellValue(sheetName, 143, 5, 0),
+					new ExpectedCellValue(sheetName, 144, 5, 1),
+				};
+				this.ValidateIndentation(newFile.File, pt1expected);
+			}
+		}
 		#endregion
 
 		#region Helper Methods
