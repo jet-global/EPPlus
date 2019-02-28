@@ -196,6 +196,9 @@ namespace OfficeOpenXml
 			/// <returns>True if succesfully converted, otherwise false.</returns>
 			public static bool TryGetErrorType(string candidate, out eErrorType eErrorType)
 			{
+				eErrorType = eErrorType.Value;
+				if (candidate == null)
+					return false;
 				return _values.TryGetValue(candidate, out eErrorType);
 			}
 			#endregion

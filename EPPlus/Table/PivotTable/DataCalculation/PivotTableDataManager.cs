@@ -99,13 +99,13 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					this.WriteGrandGrandTotals(columnGrandGrandTotalsLists);
 				}
 
-				//Write out row and column grand grand totals.
+				// Write out row and column grand grand totals.
 				if (this.PivotTable.ColumnGrandTotals)
 					this.WriteGrandTotalValues(false, columnGrandTotalBackingData, columnGrandGrandTotalsLists);
 				if (this.PivotTable.RowGrandTotals)
 					this.WriteGrandTotalValues(true, rowGrandTotalBackingData, columnGrandGrandTotalsLists);
 
-				// Write out body data.
+				// Write out body data applying "Show Data As" and other settings as necessary.
 				this.WritePivotTableBodyData(backingBodyData, columnGrandTotalBackingData, rowGrandTotalBackingData, columnGrandGrandTotalsLists);
 			}
 		}
@@ -131,17 +131,16 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					var cell = this.PivotTable.Worksheet.Cells[dataRow, dataColumn];
 					var dataFieldCollectionIndex = this.PivotTable.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 					var dataField = this.PivotTable.DataFields[dataFieldCollectionIndex];
-					var cacheField = this.PivotTable.CacheDefinition.CacheFields[dataField.Index];
 					var cellBackingData = backingDatas[row, column];
-					var value = this.TotalsCalculator.CalculateCellTotal(dataField, cellBackingData, rowHeader.TotalType, columnHeader.TotalType);
-
+					var value = cellBackingData?.Result;
+					
 					if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
 					{
 						// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
 						value = this.GetCellNoCalculationValue(value, cellBackingData);
 					}
 					else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal
-						|| dataField.ShowDataAs == ShowDataAs.PercentOfCol 
+						|| dataField.ShowDataAs == ShowDataAs.PercentOfCol
 						|| dataField.ShowDataAs == ShowDataAs.PercentOfRow)
 					{
 						if (cellBackingData == null)
@@ -160,6 +159,55 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 							value = (double)value / denominator;
 						}
 					}
+					else if (dataField.ShowDataAs == ShowDataAs.Percent)
+					{
+						// TODO: Deal with "(next)" and "(previous)" options for this setting. See task #11840
+						// "(next)" is stored as "1048829" and "(previous)" is "1048828".
+						if (dataField.BaseItem == 1048829)
+							throw new InvalidOperationException(@"'(next)' is not supported for the 'Show Data as Percent of' setting.");
+						else if (dataField.BaseItem == 1048828)
+							throw new InvalidOperationException(@"'(previous)' is not supported for the 'Show Data as Percent of' setting.");
+
+						var baseFieldItemTuple = new Tuple<int, int>(dataField.BaseField, dataField.BaseItem);
+						if (cellBackingData == null) { /* noop */ }
+						else if (rowHeader.CacheRecordIndices.Any(t => t.Equals(baseFieldItemTuple)) || columnHeader.CacheRecordIndices.Any(t => t.Equals(baseFieldItemTuple)))
+						{
+							if (value != null)
+								value = 1;  // At a row/column that contains the comparison field item which makes this 100%.
+						}
+						else
+						{
+							// Try to find a value that matches either the current row or column header structure.
+							// If a value is found, the percentage can be calculated. Otherwise, the appropriate error is written out.
+							if (this.TryFindMatchingHeaderIndex(rowHeader, baseFieldItemTuple, this.PivotTable.RowHeaders, out int headerIndex))
+							{
+								var baseValue = backingDatas[headerIndex, column]?.Result;
+								value = this.GetShowDataAsPercentOfValue(baseValue, value);
+							}
+							else if (this.TryFindMatchingHeaderIndex(columnHeader, baseFieldItemTuple, this.PivotTable.ColumnHeaders, out headerIndex))
+							{
+								var baseValue = backingDatas[row, headerIndex]?.Result;
+								value = this.GetShowDataAsPercentOfValue(baseValue, value);
+							}
+							else
+							{
+								if (!this.PivotTable.RowFields.Any(f => f.Index == dataField.BaseField) 
+									&& !this.PivotTable.ColumnFields.Any(f => f.Index == dataField.BaseField))
+								{
+									// If the dataField.BaseField is not a row or column field, all values #N/A!
+									value = ExcelErrorValue.Create(eErrorType.NA);
+								}
+								else if (!rowHeader.CacheRecordIndices.Any(i => i.Item1 == dataField.BaseField) 
+									&& !columnHeader.CacheRecordIndices.Any(i => i.Item1 == dataField.BaseField))
+									{
+										// Subtotals only get a value if they are at the same depth or below the show data as field.
+										value = null;
+									}
+								else
+									value = ExcelErrorValue.Create(eErrorType.NA);
+							}
+						}
+					}
 					else
 					{
 						// TODO: Implement the rest of these settings. See user story 11453.
@@ -172,15 +220,55 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			}
 		}
 
+		private object GetShowDataAsPercentOfValue(object baseValue, object value)
+		{
+			if (baseValue == null && value == null)
+				return ExcelErrorValue.Create(eErrorType.Null);
+			else if (baseValue == null)
+				return null;
+			else if (value == null)
+				return ExcelErrorValue.Create(eErrorType.Null);
+			else
+				return (double)value / (double)baseValue;
+		}
+
+		private bool TryFindMatchingHeaderIndex(PivotTableHeader header, Tuple<int, int> baseFieldItem, List<PivotTableHeader> headers, out int headerIndex)
+		{
+			headerIndex = -1;
+			var index = header.CacheRecordIndices.FindIndex(i => i.Item1 == baseFieldItem.Item1);
+			if (index >= 0)
+			{
+				// The value that this will be compared against is in the cell that matches this cell's 
+				// row and colum indices other than the base field/item indices.
+				var indicesToMatch = header.CacheRecordIndices.ToList();
+				indicesToMatch[index] = baseFieldItem;
+				headerIndex = headers.FindIndex(h => this.AreEquivalent(h.CacheRecordIndices, indicesToMatch));
+				return headerIndex != -1;
+			}
+			return false;
+		}
+
+		private bool AreEquivalent(List<Tuple<int, int>> first, List<Tuple<int, int>> second)
+		{
+			if (first?.Count != second?.Count)
+				return false;
+			for (int j = 0; j < first.Count; j++)
+			{
+				if (!first[j].Equals(second[j]))
+					return false;
+			}
+			return true;
+		}
+
 		private void WriteGrandTotalValues(bool isRowTotal, List<PivotCellBackingData> grandTotalsBackingDatas, PivotCellBackingData[] columnGrandGrandTotalValues)
 		{
-			foreach (var grandTotalBackingData in grandTotalsBackingDatas)
+			for (int i = 0; i < grandTotalsBackingDatas.Count; i++)
 			{
+				var grandTotalBackingData = grandTotalsBackingDatas[i];
 				if (grandTotalBackingData == null)
 					continue;
 				var dataField = this.PivotTable.DataFields[grandTotalBackingData.DataFieldCollectionIndex];
 				var cell = this.PivotTable.Worksheet.Cells[grandTotalBackingData.SheetRow, grandTotalBackingData.SheetColumn];
-
 				object value = grandTotalBackingData.Result;
 
 				if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
@@ -206,6 +294,49 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					}
 					else
 						value = 1;
+				}
+				else if (dataField.ShowDataAs == ShowDataAs.Percent)
+				{
+					// TODO: Deal with "(next)" and "(previous)" options for this setting. See task #11840
+					// "(next)" is stored as "1048829" and "(previous)" is "1048828".
+					if (dataField.BaseItem == 1048829)
+						throw new InvalidOperationException(@"'(next)' is not supported for the 'Show Data as Percent of' setting.");
+					else if (dataField.BaseItem == 1048828)
+						throw new InvalidOperationException(@"'(previous)' is not supported for the 'Show Data as Percent of' setting.");
+
+					var baseFieldItemTuple = new Tuple<int, int>(dataField.BaseField, dataField.BaseItem);
+					var headers = isRowTotal ? this.PivotTable.ColumnHeaders : this.PivotTable.RowHeaders;
+					var header = headers[grandTotalBackingData.MajorAxisIndex];
+					if (header.CacheRecordIndices.Any(t => t.Equals(baseFieldItemTuple)))
+						value = 1;  // At a row/column that contains the comparison field item which makes this 100%.
+					else
+					{
+						// Try to find a value that matches either the current row or column header structure.
+						// If a value is found, the percentage can be calculated. Otherwise, the appropriate error is written out.
+						if (this.TryFindMatchingHeaderIndex(header, baseFieldItemTuple, headers, out int headerIndex))
+						{
+							// Get the correct index into grandTotalsBackingDatas which are a 1d array 
+							// representing [datafields.Count] number of rows/columns.
+							var denominatorHeader = grandTotalsBackingDatas
+								.Where(d => d.MajorAxisIndex == headerIndex)
+								.ElementAt(grandTotalBackingData.DataFieldCollectionIndex);
+							var baseValue = denominatorHeader?.Result;
+							value = this.GetShowDataAsPercentOfValue(baseValue, value);
+						}
+						else
+						{
+							if (!this.PivotTable.RowFields.Any(f => f.Index == dataField.BaseField)
+									&& !this.PivotTable.ColumnFields.Any(f => f.Index == dataField.BaseField))
+							{
+								// If the dataField.BaseField is not a row or column field, all values #N/A!
+								value = ExcelErrorValue.Create(eErrorType.NA);
+							}
+							else if (!header.CacheRecordIndices.Any(x => x.Item1 == dataField.BaseField))
+								value = null;
+							else
+								value = ExcelErrorValue.Create(eErrorType.NA);
+						}
+					}
 				}
 				else
 				{
@@ -238,6 +369,17 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					value = 1;
 				else if (dataField.ShowDataAs == ShowDataAs.PercentOfRow)
 					value = 1;
+				else if (dataField.ShowDataAs == ShowDataAs.Percent)
+				{
+					if (!this.PivotTable.RowFields.Any(f => f.Index == dataField.BaseField)
+						&& !this.PivotTable.ColumnFields.Any(f => f.Index == dataField.BaseField))
+					{
+						// If the dataField.BaseField is not a row or column field, all values #N/A!
+						value = ExcelErrorValue.Create(eErrorType.NA);
+					}
+					else
+						value = null;  // The "% Of" option doesn't write in values for grand grand totals.
+				}
 				else
 				{
 					// TODO: Implement the rest of these settings. See user story 11453.
@@ -303,6 +445,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			var dataFieldCollectionIndex = this.PivotTable.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 			var dataField = this.PivotTable.DataFields[dataFieldCollectionIndex];
 			var cacheField = this.PivotTable.CacheDefinition.CacheFields[dataField.Index];
+			PivotCellBackingData backingData = null;
 			if (string.IsNullOrEmpty(cacheField.Formula))
 			{
 				var matchingValues = this.PivotTable.CacheDefinition.CacheRecords.FindMatchingValues(
@@ -311,22 +454,28 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					this.PivotTable.GetPageFieldIndices(),
 					dataField.Index,
 					this.PivotTable);
-				return new PivotCellBackingData(matchingValues);
+				 backingData = new PivotCellBackingData(matchingValues);
 			}
-
-			// If a formula is present, it is a calculated field which needs to be evaluated.
-			var fieldNameToValues = new Dictionary<string, List<object>>();
-			foreach (var cacheFieldName in cacheField.ReferencedCacheFieldsToIndex.Keys)
+			else
 			{
-				var values = this.PivotTable.CacheDefinition.CacheRecords.FindMatchingValues(
-					rowHeader.CacheRecordIndices,
-					columnHeader.CacheRecordIndices,
-					this.PivotTable.GetPageFieldIndices(),
-					cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
-					this.PivotTable);
-				fieldNameToValues.Add(cacheFieldName, values);
+				// If a formula is present, it is a calculated field which needs to be evaluated.
+				var fieldNameToValues = new Dictionary<string, List<object>>();
+				foreach (var cacheFieldName in cacheField.ReferencedCacheFieldsToIndex.Keys)
+				{
+					var values = this.PivotTable.CacheDefinition.CacheRecords.FindMatchingValues(
+						rowHeader.CacheRecordIndices,
+						columnHeader.CacheRecordIndices,
+						this.PivotTable.GetPageFieldIndices(),
+						cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
+						this.PivotTable);
+					fieldNameToValues.Add(cacheFieldName, values);
+				}
+				backingData = new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
 			}
-			return new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
+			var value = this.TotalsCalculator.CalculateCellTotal(dataField, backingData, rowHeader.TotalType, columnHeader.TotalType);
+			if (backingData != null)
+				backingData.Result = value;
+			return backingData;
 		}
 
 		private void ConfigureCalculatedFields(IEnumerable<CacheFieldNode> calculatedFields, TotalsFunctionHelper totalsCalculator)

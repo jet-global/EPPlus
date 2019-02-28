@@ -378,7 +378,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or set whether to show the default subtotal.
+		/// Gets whether to show the default subtotal.
 		/// NOTE: To set this value, use <see cref="SubTotalFunctions"/>.
 		/// </summary>
 		/// <remarks>A blank value in XML indicates true. Setting this value to false needs to remove the subtotal nodes from 
@@ -386,8 +386,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool DefaultSubtotal
 		{
 			get { return base.GetXmlNodeBool("@defaultSubtotal", true); }
-			set { base.SetXmlNodeBool("@defaultSubtotal", value); }
-			// setting this value must be done from SubTotalFunctions.
+			// setting this value should only be done from SubTotalFunctions.
+			private set { base.SetXmlNodeBool("@defaultSubtotal", value); }
 		}
 
 		/// <summary>
@@ -465,7 +465,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (value == eSubTotalFunctions.None)
 				{
 					// For no subtotals, set defaultSubtotal to off
-					base.SetXmlNodeBool("@defaultSubtotal", false);
+					this.DefaultSubtotal = false;
 				}
 				else
 				{
@@ -484,6 +484,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						}
 					}
 					this.TopNode.InnerXml = string.Format("<items count=\"{0}\">{1}</items>", count, innerXml);
+					this.DefaultSubtotal = true; // Turn on defaultSubtotal when a subtotal function is set.
 				}
 			}
 		}

@@ -64,6 +64,12 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// </summary>
 		public int DataFieldCollectionIndex { get; set; } = -1;
 
+		/// <summary>
+		/// Gets or sets the index of this backing cell data in the pivot table.
+		/// Corresponds to the index of the major axis header for this cell.
+		/// </summary>
+		public int MajorAxisIndex { get; set; }
+
 		private Dictionary<string, List<object>> CalculatedCellBackingData { get; set; }
 
 		private List<object> BackingData { get; set; }

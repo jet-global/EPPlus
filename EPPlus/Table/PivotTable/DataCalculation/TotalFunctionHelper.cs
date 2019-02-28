@@ -177,7 +177,15 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			var result = this.TempWorksheet.Calculate(formula);
 			return result;
 		}
-		
+
+		/// <summary>
+		/// Calculates the total value of a cell.
+		/// </summary>
+		/// <param name="dataField">The datafield that the cell is calculated for.</param>
+		/// <param name="backingData">The data that backs the cell value.</param>
+		/// <param name="rowTotalType">The type of total function specified by the row used to calculate the cell.</param>
+		/// <param name="columnTotalType">The type of total function specified by the column used to calculate the cell.</param>
+		/// <returns>The calculated value.</returns>
 		public object CalculateCellTotal(ExcelPivotTableDataField dataField, PivotCellBackingData backingData,
 		string rowTotalType = null, string columnTotalType = null)
 		{
