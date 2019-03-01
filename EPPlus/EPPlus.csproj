@@ -772,11 +772,18 @@
     <Compile Include="Table\PivotTable\CacheFieldNode.cs" />
     <Compile Include="Table\PivotTable\CacheItem.cs" />
     <Compile Include="Table\PivotTable\CacheRecordNode.cs" />
+    <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\ShowDataAsCalculatorBase.cs" />
+    <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\NoCalculationCalcutor.cs" />
+    <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\PercentOfCalculator.cs" />
+    <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\PercentOfColCalculator.cs" />
+    <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\PercentOfRowCalculator.cs" />
+    <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\PercentOfTotalCalculator.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\PivotCellBackingData.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\PivotTableDataManager.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\RowGrandTotalHelper.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\GrandTotalHelperBase.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\ColumnGrandTotalHelper.cs" />
+    <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\ShowDataAsFactory.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\TotalFunctionHelper.cs" />
     <Compile Include="Table\PivotTable\DiscreteGroupingPropertiesCollection.cs" />
     <Compile Include="Table\PivotTable\ExcelPageField.cs" />
@@ -935,7 +942,6 @@
   <ItemGroup>
     <Compile Include="ConditionalFormatting\CF Implementation.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
