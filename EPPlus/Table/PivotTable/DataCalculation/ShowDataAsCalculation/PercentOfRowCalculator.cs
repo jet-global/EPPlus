@@ -78,7 +78,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			return 1;
 		}
 
-
 		/// <summary>
 		/// Calculates a grand grand total value for a pivot table cell.
 		/// </summary>

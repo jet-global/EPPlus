@@ -64,7 +64,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			PivotCellBackingData[] columnGrandGrandTotalValues, 
 			bool isRowTotal);
 
-
 		/// <summary>
 		/// Calculates a grand grand total value for a pivot table cell.
 		/// </summary>
