@@ -2,55 +2,75 @@
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 {
+	/// <summary>
+	/// Base class for calculating a <see cref="ShowDataAs"/> value in a pivot table.
+	/// </summary>
 	internal abstract class ShowDataAsCalculatorBase
 	{
 		#region Properties
+		/// <summary>
+		/// Gets the pivot table that this calculator is calculating against.
+		/// </summary>
 		protected ExcelPivotTable PivotTable { get; }
-		protected PivotCellBackingData[,] BackingDatas { get; }
-		protected PivotCellBackingData[] GrandGrandTotalValues { get; }
-		protected List<PivotCellBackingData> ColumnGrandTotalsValuesLists { get; }
-		protected List<PivotCellBackingData> RowGrandTotalsValuesLists { get; }
+		
+		/// <summary>
+		/// Gets the index of the data field that is being calculated.
+		/// </summary>
 		protected int DataFieldCollectionIndex { get; }
-		protected int DataRow { get; }
-		protected int DataColumn { get; }
-		protected int SheetRow { get; }
-		protected int SheetColumn { get; }
 		#endregion
 
 		#region Constructors
-		public ShowDataAsCalculatorBase(ExcelPivotTable pivotTable,
-			PivotCellBackingData[,] backingDatas, 
-			PivotCellBackingData[] grandGrandTotalValues,
-			List<PivotCellBackingData> rowGrandTotalsValuesLists, 
-			List<PivotCellBackingData> columnGrandTotalsValuesLists,
-			int dataFieldCollectionIndex, int dataRow, int dataColumn)
+		/// <summary>
+		/// Base calculator constructor.
+		/// </summary>
+		/// <param name="pivotTable">The pivot table to calculate against.</param>
+		/// <param name="dataFieldCollectionIndex">The index of the data field that the calculator is calculating.</param>
+		public ShowDataAsCalculatorBase(ExcelPivotTable pivotTable, int dataFieldCollectionIndex)
 		{
 			this.PivotTable = pivotTable;
-			this.BackingDatas = backingDatas;
-			this.GrandGrandTotalValues = grandGrandTotalValues;
-			this.RowGrandTotalsValuesLists = rowGrandTotalsValuesLists;
-			this.ColumnGrandTotalsValuesLists = columnGrandTotalsValuesLists;
 			this.DataFieldCollectionIndex = dataFieldCollectionIndex;
-			this.DataRow = dataRow;
-			this.DataColumn = dataColumn;
-			this.SheetRow = this.PivotTable.Address.Start.Row + this.PivotTable.FirstDataRow + this.DataRow;
-			this.SheetColumn = this.PivotTable.Address.Start.Column + this.PivotTable.FirstDataCol + this.DataColumn;
 		}
 		#endregion
 
 		#region Abstract Methods
-		public abstract object CalculateBodyValue();
+		/// <summary>
+		/// Calculates a body value in a pivot table cell.
+		/// </summary>
+		/// <param name="dataRow">The row in the backing body data.</param>
+		/// <param name="dataColumn">The column in the backing body data.</param>
+		/// <param name="backingDatas">The backing data for the pivot table body.</param>
+		/// <param name="grandGrandTotalValues">The backing data for the pivot table grand grand totals.</param>
+		/// <param name="rowGrandTotalsValuesLists">The backing data for the pivot table row grand totals.</param>
+		/// <param name="columnGrandTotalsValuesLists">The backing data for the pivot table column grand totals.</param>
+		/// <returns>An object value for the cell.</returns>
+		public abstract object CalculateBodyValue(
+			int dataRow, int dataColumn,
+			PivotCellBackingData[,] backingDatas,
+			PivotCellBackingData[] grandGrandTotalValues,
+			List<PivotCellBackingData> rowGrandTotalsValuesLists,
+			List<PivotCellBackingData> columnGrandTotalsValuesLists);
 
-		public abstract object CalculateGrandTotalValue(PivotCellBackingData grandTotalBackingData, PivotCellBackingData[] columnGrandGrandTotalValues, bool isRowTotal);
+		/// <summary>
+		/// Calculates the grand total value in a pivot table cell.
+		/// </summary>
+		/// <param name="index">The index into the backing data.</param>
+		/// <param name="grandTotalsBackingDatas">The backing data for grand totals.</param>
+		/// <param name="columnGrandGrandTotalValues">The backing data for the column grand grand totals.</param>
+		/// <param name="isRowTotal">A value indicating whether or not this calculation is for row totals.</param>
+		/// <returns>An object value for the cell.</returns>
+		public abstract object CalculateGrandTotalValue(
+			int index, 
+			List<PivotCellBackingData> grandTotalsBackingDatas, 
+			PivotCellBackingData[] columnGrandGrandTotalValues, 
+			bool isRowTotal);
 
+
+		/// <summary>
+		/// Calculates a grand grand total value for a pivot table cell.
+		/// </summary>
+		/// <param name="backingData">The backing data for the grand total cell to calculate.</param>
+		/// <returns>An object value for the cell.</returns>
 		public abstract object CalculateGrandGrandTotalValue(PivotCellBackingData backingData);
-		#endregion
-
-		#region Protected Methods
-		protected PivotCellBackingData GetBodyBackingData()
-		{
-			return this.BackingDatas[this.DataRow, this.DataColumn];
-		}
 		#endregion
 	}
 }

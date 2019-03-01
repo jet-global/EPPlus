@@ -130,18 +130,13 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					var dataFieldCollectionIndex = this.PivotTable.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 					var dataField = this.PivotTable.DataFields[dataFieldCollectionIndex];
 
-					var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(
-						dataField.ShowDataAs,
-						this.PivotTable,
-						dataFieldCollectionIndex, 
-						backingDatas,
-						grandGrandTotalValues,
+					var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(dataField.ShowDataAs, this.PivotTable, dataFieldCollectionIndex);
+					var value = showDataAsCalculator.CalculateBodyValue(
+						row, column, 
+						backingDatas, 
+						grandGrandTotalValues, 
 						rowGrandTotalsValuesLists,
-						columnGrandTotalsValuesLists,
-						row, column);
-
-					// TODO: Pass values into CalculateBodyValue instead of the constructor.
-					var value = showDataAsCalculator.CalculateBodyValue();
+						columnGrandTotalsValuesLists);
 
 					var cell = this.PivotTable.Worksheet.Cells[sheetRow, sheetColumn];
 					this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
@@ -160,13 +155,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					continue;
 				var dataField = this.PivotTable.DataFields[grandTotalBackingData.DataFieldCollectionIndex];
 
-				var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(
-					dataField.ShowDataAs,
-					this.PivotTable,
-					grandTotalBackingData.DataFieldCollectionIndex,
-					rowGrandTotalsValuesLists: grandTotalsBackingDatas);
-
-				var value = showDataAsCalculator.CalculateGrandTotalValue(grandTotalBackingData, columnGrandGrandTotalValues, isRowTotal);
+				var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(dataField.ShowDataAs, this.PivotTable, grandTotalBackingData.DataFieldCollectionIndex);
+				var value = showDataAsCalculator.CalculateGrandTotalValue(i, grandTotalsBackingDatas, columnGrandGrandTotalValues, isRowTotal);
 
 				var cell = this.PivotTable.Worksheet.Cells[grandTotalBackingData.SheetRow, grandTotalBackingData.SheetColumn];
 				this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
@@ -182,10 +172,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					continue;
 				var dataField = this.PivotTable.DataFields[backingData.DataFieldCollectionIndex];
 
-				var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(
-				dataField.ShowDataAs,
-				this.PivotTable,
-				backingData.DataFieldCollectionIndex);
+				var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(dataField.ShowDataAs, this.PivotTable, backingData.DataFieldCollectionIndex);
 
 				var value = showDataAsCalculator.CalculateGrandGrandTotalValue(backingData);
 

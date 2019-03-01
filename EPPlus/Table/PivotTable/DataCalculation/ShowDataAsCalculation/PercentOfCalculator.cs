@@ -4,28 +4,42 @@ using System.Linq;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 {
+	/// <summary>
+	/// Calculates the <see cref="ShowDataAs.Percent"/> value in a pivot table.
+	/// </summary>
 	internal class PercentOfCalculator : ShowDataAsCalculatorBase
 	{
 		#region Constructors
-		public PercentOfCalculator(ExcelPivotTable pivotTable,
-			int dataFieldCollectionIndex, 
-			PivotCellBackingData[,] backingDatas, 
-			PivotCellBackingData[] grandGrandTotalValues,
-			List<PivotCellBackingData> rowGrandTotalsValuesLists, 
-			List<PivotCellBackingData> columnGrandTotalsValuesLists,
-			int dataRow, int dataColumn) 
-			: base(pivotTable, backingDatas, grandGrandTotalValues, rowGrandTotalsValuesLists, 
-					columnGrandTotalsValuesLists, dataFieldCollectionIndex, dataRow, dataColumn)
-		{ }
+		/// <summary>
+		/// Constructs the calculator.
+		/// </summary>
+		/// <param name="pivotTable">The pivot table to calculate against.</param>
+		/// <param name="dataFieldCollectionIndex">The index of the data field that the calculator is calculating.</param>
+		public PercentOfCalculator(ExcelPivotTable pivotTable, int dataFieldCollectionIndex) : base(pivotTable, dataFieldCollectionIndex) { }
 		#endregion
 
 		#region ShowDataAsCalculatorBase Overrides
-		public override object CalculateBodyValue()
+		/// <summary>
+		/// Calculates a body value in a pivot table cell.
+		/// </summary>
+		/// <param name="dataRow">The row in the backing body data.</param>
+		/// <param name="dataColumn">The column in the backing body data.</param>
+		/// <param name="backingDatas">The backing data for the pivot table body.</param>
+		/// <param name="grandGrandTotalValues">The backing data for the pivot table grand grand totals.</param>
+		/// <param name="rowGrandTotalsValuesLists">The backing data for the pivot table row grand totals.</param>
+		/// <param name="columnGrandTotalsValuesLists">The backing data for the pivot table column grand totals.</param>
+		/// <returns>An object value for the cell.</returns>
+		public override object CalculateBodyValue(
+			int dataRow, int dataColumn,
+			PivotCellBackingData[,] backingDatas,
+			PivotCellBackingData[] grandGrandTotalValues,
+			List<PivotCellBackingData> rowGrandTotalsValuesLists,
+			List<PivotCellBackingData> columnGrandTotalsValuesLists)
 		{
-			var rowHeader = base.PivotTable.RowHeaders[base.DataRow];
-			var columnHeader = base.PivotTable.ColumnHeaders[base.DataColumn];
-			var cellBackingData = base.GetBodyBackingData();
-			var dataField = base.PivotTable.DataFields[this.DataFieldCollectionIndex];
+			var rowHeader = base.PivotTable.RowHeaders[dataRow];
+			var columnHeader = base.PivotTable.ColumnHeaders[dataColumn];
+			var cellBackingData = backingDatas[dataRow, dataColumn];
+			var dataField = base.PivotTable.DataFields[base.DataFieldCollectionIndex];
 			// TODO: Deal with "(next)" and "(previous)" options for this setting. See task #11840
 			// "(next)" is stored as "1048829" and "(previous)" is "1048828".
 			if (dataField.BaseItem == 1048829)
@@ -49,12 +63,12 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				// If a value is found, the percentage can be calculated. Otherwise, the appropriate error is written out.
 				if (this.TryFindMatchingHeaderIndex(rowHeader, baseFieldItemTuple, base.PivotTable.RowHeaders, out int headerIndex))
 				{
-					var baseValue = base.BackingDatas[headerIndex, base.DataColumn]?.Result;
+					var baseValue = backingDatas[headerIndex, dataColumn]?.Result;
 					return this.GetShowDataAsPercentOfValue(baseValue, cellBackingData?.Result);
 				}
 				else if (this.TryFindMatchingHeaderIndex(columnHeader, baseFieldItemTuple, base.PivotTable.ColumnHeaders, out headerIndex))
 				{
-					var baseValue = base.BackingDatas[base.DataRow, headerIndex]?.Result;
+					var baseValue = backingDatas[dataRow, headerIndex]?.Result;
 					return this.GetShowDataAsPercentOfValue(baseValue, cellBackingData?.Result);
 				}
 				else
@@ -77,7 +91,19 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			}
 		}
 
-		public override object CalculateGrandTotalValue(PivotCellBackingData grandTotalBackingData, PivotCellBackingData[] columnGrandGrandTotalValues, bool isRowTotal)
+		/// <summary>
+		/// Calculates the grand total value in a pivot table cell.
+		/// </summary>
+		/// <param name="index">The index into the backing data.</param>
+		/// <param name="grandTotalsBackingDatas">The backing data for grand totals.</param>
+		/// <param name="columnGrandGrandTotalValues">The backing data for the column grand grand totals.</param>
+		/// <param name="isRowTotal">A value indicating whether or not this calculation is for row totals.</param>
+		/// <returns>An object value for the cell.</returns>
+		public override object CalculateGrandTotalValue(
+			int index, 
+			List<PivotCellBackingData> grandTotalsBackingDatas, 
+			PivotCellBackingData[] columnGrandGrandTotalValues, 
+			bool isRowTotal)
 		{
 			var dataField = base.PivotTable.DataFields[base.DataFieldCollectionIndex];
 			// TODO: Deal with "(next)" and "(previous)" options for this setting. See task #11840
@@ -86,9 +112,9 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				throw new InvalidOperationException(@"'(next)' is not supported for the 'Show Data as Percent of' setting.");
 			else if (dataField.BaseItem == 1048828)
 				throw new InvalidOperationException(@"'(previous)' is not supported for the 'Show Data as Percent of' setting.");
-
+			var grandTotalBackingData = grandTotalsBackingDatas[index];
 			var baseFieldItemTuple = new Tuple<int, int>(dataField.BaseField, dataField.BaseItem);
-			var headers = isRowTotal ? this.PivotTable.ColumnHeaders : this.PivotTable.RowHeaders;
+			var headers = isRowTotal ? base.PivotTable.ColumnHeaders : base.PivotTable.RowHeaders;
 			var header = headers[grandTotalBackingData.MajorAxisIndex];
 			if (header.CacheRecordIndices.Any(t => t.Equals(baseFieldItemTuple)))
 				return 1;  // At a row/column that contains the comparison field item which makes this 100%.
@@ -100,7 +126,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				{
 					// Get the correct index into grand totals backing data which is a 1d array 
 					// representing [datafields.Count] number of rows/columns.
-					var denominatorHeader = base.RowGrandTotalsValuesLists
+					var denominatorHeader = grandTotalsBackingDatas
 						.Where(d => d.MajorAxisIndex == headerIndex)
 						.ElementAt(grandTotalBackingData.DataFieldCollectionIndex);
 					var baseValue = denominatorHeader?.Result;
@@ -119,16 +145,20 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			}
 		}
 
+		/// <summary>
+		/// Calculates a grand grand total value for a pivot table cell.
+		/// </summary>
+		/// <param name="backingData">The backing data for the grand total cell to calculate.</param>
+		/// <returns>An object value for the cell.</returns>
 		public override object CalculateGrandGrandTotalValue(PivotCellBackingData backingData)
 		{
 			var dataField = base.PivotTable.DataFields[base.DataFieldCollectionIndex];
-			if (!this.PivotTable.RowFields.Any(f => f.Index == dataField.BaseField)
-				&& !this.PivotTable.ColumnFields.Any(f => f.Index == dataField.BaseField))
+			if (!base.PivotTable.RowFields.Any(f => f.Index == dataField.BaseField)
+				&& !base.PivotTable.ColumnFields.Any(f => f.Index == dataField.BaseField))
 			{
 				// If the dataField.BaseField is not a row or column field, all values #N/A!
 				return ExcelErrorValue.Create(eErrorType.NA);
 			}
-
 			// The "% Of" option doesn't write in values for grand grand totals.
 			return null;
 		}
