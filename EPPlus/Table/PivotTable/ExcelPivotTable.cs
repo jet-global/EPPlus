@@ -922,13 +922,19 @@ namespace OfficeOpenXml.Table.PivotTable
 			unsupportedFeatures = new List<string>();
 			foreach (var dataField in this.DataFields)
 			{
-				if (dataField.ShowDataAs == ShowDataAs.Percent || dataField.ShowDataAs == ShowDataAs.PercentOfParentRow || dataField.ShowDataAs == ShowDataAs.PercentOfParentCol
+				if (dataField.ShowDataAs == ShowDataAs.PercentOfParentRow || dataField.ShowDataAs == ShowDataAs.PercentOfParentCol
 					|| dataField.ShowDataAs == ShowDataAs.PercentOfParent || dataField.ShowDataAs == ShowDataAs.Difference || dataField.ShowDataAs == ShowDataAs.PercentDiff
 					|| dataField.ShowDataAs == ShowDataAs.RunTotal || dataField.ShowDataAs == ShowDataAs.PercentOfRunningTotal || dataField.ShowDataAs == ShowDataAs.RankAscending
 					|| dataField.ShowDataAs == ShowDataAs.RankDescending || dataField.ShowDataAs == ShowDataAs.Index)
 				{
 					unsupportedFeatures.Add($"Data field '{dataField.Name}' show data as setting '{dataField.ShowDataAs}'");
 				}
+
+				// Disallow the '(next)' and '(previous)' options. 
+				if (dataField.BaseField == 1048829)
+					unsupportedFeatures.Add($"Data field '{dataField.Name}' '(next)' option selected");
+				else if (dataField.BaseField == 1048828)
+					unsupportedFeatures.Add($"Data field '{dataField.Name}' '(previous)' option selected");
 			}
 			foreach (var field in this.Fields)
 			{
