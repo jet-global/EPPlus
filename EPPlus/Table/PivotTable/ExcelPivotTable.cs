@@ -938,8 +938,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			foreach (var field in this.Fields)
 			{
-				if (!field.Compact)
-					unsupportedFeatures.Add($"Field '{field.Name}' compact disabled");
 				if (field.RepeatItemLabels)
 					unsupportedFeatures.Add($"Field '{field.Name}' repeat item labels enabled");
 				if (field.InsertBlankLine)
