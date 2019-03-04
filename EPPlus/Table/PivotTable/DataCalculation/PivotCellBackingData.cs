@@ -70,6 +70,12 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// </summary>
 		public int MajorAxisIndex { get; set; }
 
+		/// <summary>
+		/// Gets or sets a value indicating whether or not the value of this 
+		/// backing data should be shown. 
+		/// </summary>
+		public bool ShowValue { get; set; }
+
 		private Dictionary<string, List<object>> CalculatedCellBackingData { get; set; }
 
 		private List<object> BackingData { get; set; }
@@ -165,6 +171,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <returns>A copy of the current <see cref="PivotCellBackingData"/> object.</returns>
 		public PivotCellBackingData Clone()
 		{
+			PivotCellBackingData backingData = null;
 			if (this.IsCalculatedCell)
 			{
 				var valuesDictionary = new Dictionary<string, List<object>>();
@@ -172,9 +179,14 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				{
 					valuesDictionary.Add(keyValue.Key, new List<object>(keyValue.Value));
 				}
-				return new PivotCellBackingData(valuesDictionary, this.Formula);
+				backingData = new PivotCellBackingData(valuesDictionary, this.Formula);
 			}
-			return new PivotCellBackingData(new List<object>(this.BackingData));
+			else
+			{
+				backingData = new PivotCellBackingData(new List<object>(this.BackingData));
+			}
+			backingData.ShowValue = this.ShowValue;
+			return backingData;
 		}
 		#endregion
 	}

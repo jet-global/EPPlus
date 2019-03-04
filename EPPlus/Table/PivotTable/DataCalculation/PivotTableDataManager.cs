@@ -120,16 +120,16 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			for (int column = 0; column < this.PivotTable.ColumnHeaders.Count; column++)
 			{
 				var columnHeader = this.PivotTable.ColumnHeaders[column];
-				int sheetRow = this.PivotTable.Address.Start.Row + this.PivotTable.FirstDataRow;
+				int sheetRow = this.PivotTable.Address.Start.Row + this.PivotTable.FirstDataRow - 1;
 				for (int row = 0; row < this.PivotTable.RowHeaders.Count; row++)
 				{
+					sheetRow++;
 					var rowHeader = this.PivotTable.RowHeaders[row];
-					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
+					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal || !backingDatas[row, column].ShowValue)
 						continue;
 
 					var dataFieldCollectionIndex = this.PivotTable.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 					var dataField = this.PivotTable.DataFields[dataFieldCollectionIndex];
-
 					var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(dataField.ShowDataAs, this.PivotTable, dataFieldCollectionIndex);
 					var value = showDataAsCalculator.CalculateBodyValue(
 						row, column, 
@@ -140,7 +140,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 					var cell = this.PivotTable.Worksheet.Cells[sheetRow, sheetColumn];
 					this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
-					sheetRow++;
+					//sheetRow++;
 				}
 				sheetColumn++;
 			}
@@ -151,7 +151,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			for (int i = 0; i < grandTotalsBackingDatas.Count; i++)
 			{
 				var grandTotalBackingData = grandTotalsBackingDatas[i];
-				if (grandTotalBackingData == null)
+				if (grandTotalBackingData == null || !grandTotalBackingData.ShowValue)
 					continue;
 				var dataField = this.PivotTable.DataFields[grandTotalBackingData.DataFieldCollectionIndex];
 
@@ -173,7 +173,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				var dataField = this.PivotTable.DataFields[backingData.DataFieldCollectionIndex];
 
 				var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(dataField.ShowDataAs, this.PivotTable, backingData.DataFieldCollectionIndex);
-
 				var value = showDataAsCalculator.CalculateGrandGrandTotalValue(backingData);
 
 				var cell = this.PivotTable.Worksheet.Cells[backingData.SheetRow, backingData.SheetColumn];
@@ -195,13 +194,14 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					var rowHeader = this.PivotTable.RowHeaders[row];
 					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
 						continue;
+					backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, this.TotalsCalculator);
 					if (rowHeader.IsPlaceHolder)
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, this.TotalsCalculator);
+						backingData[row, column].ShowValue = true;
 					else if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.PivotTable.ColumnFields.Count)
 						|| rowHeader.CacheRecordIndices.Count == this.PivotTable.RowFields.Count)
 					{
 						// At a leaf node.
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, this.TotalsCalculator);
+						backingData[row, column].ShowValue = true;
 					}
 					else if (this.PivotTable.HasRowDataFields)
 					{
@@ -210,13 +210,15 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 							if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField)
 								|| !string.IsNullOrEmpty(rowHeader.TotalType))
 							{
-								backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, this.TotalsCalculator);
+								backingData[row, column].ShowValue = true;
 							}
 						}
 					}
 					else if (rowHeader.PivotTableField.DefaultSubtotal && !rowHeader.TotalType.IsEquivalentTo("none")
 						&& (rowHeader.TotalType != null || rowHeader.PivotTableField.SubtotalTop))
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, this.TotalsCalculator);
+					{
+						backingData[row, column].ShowValue = true;
+					}
 				}
 				dataColumn++;
 			}
