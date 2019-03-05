@@ -71,8 +71,12 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		private object GetCellNoCalculationValue(PivotCellBackingData cellBackingData)
 		{
 			// Non-null backing data indicates that this cell is eligible for a value.
-			if (cellBackingData != null && cellBackingData.Result == null)
-				return base.PivotTable.ShowMissing ? base.PivotTable.MissingCaption : "0";
+			if (cellBackingData != null && cellBackingData.Result == null && cellBackingData.ShowValue)
+			{
+				if (base.PivotTable.ShowMissing)
+					return base.PivotTable.MissingCaption;
+				return 0;
+			}
 			return cellBackingData?.Result;
 		}
 		#endregion

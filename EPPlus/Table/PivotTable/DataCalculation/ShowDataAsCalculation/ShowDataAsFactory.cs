@@ -29,10 +29,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 					return new PercentOfColCalculator(pivotTable, dataFieldCollectionIndex);
 				case ShowDataAs.Percent:
 					return new PercentOfCalculator(pivotTable, dataFieldCollectionIndex);
+				case ShowDataAs.PercentOfParentRow:
+					return new PercentOfParentRowCalculator(pivotTable, dataFieldCollectionIndex);
 				case ShowDataAs.PercentDiff:
 				case ShowDataAs.PercentOfParent:
 				case ShowDataAs.PercentOfParentCol:
-				case ShowDataAs.PercentOfParentRow:
 				case ShowDataAs.PercentOfRunningTotal:
 				case ShowDataAs.RankAscending:
 				case ShowDataAs.RankDescending:
