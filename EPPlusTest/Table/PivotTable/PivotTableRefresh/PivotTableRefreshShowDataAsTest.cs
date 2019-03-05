@@ -3018,20 +3018,6 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 				});
 			}
 		}
-
-		[TestMethod]
-		public void SDKfSFSdfsf()
-		{
-			using (var package = new ExcelPackage(new FileInfo(@"C:\Users\ems\Downloads\test.xlsx")))
-			{
-				foreach (var cacheDef in package.Workbook.PivotCacheDefinitions)
-				{
-					cacheDef.UpdateData();
-				}
-				package.SaveAs(@"C:\Users\ems\Downloads\OUT.xlsx");
-			}
-			Assert.Fail();
-		}
 		#endregion
 		#endregion
 
