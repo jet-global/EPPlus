@@ -140,7 +140,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 					var cell = this.PivotTable.Worksheet.Cells[sheetRow, sheetColumn];
 					this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
-					//sheetRow++;
 				}
 				sheetColumn++;
 			}
