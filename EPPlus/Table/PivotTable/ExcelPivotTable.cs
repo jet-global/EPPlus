@@ -37,8 +37,10 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using OfficeOpenXml.Extensions;
+using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.Internationalization;
 using OfficeOpenXml.Table.PivotTable.DataCalculation;
+using OfficeOpenXml.Table.PivotTable.Filters;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -64,6 +66,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		private ExcelPivotTableRowColumnFieldCollection myColumnFields;
 		private ExcelPivotTableDataFieldCollection myDataFields;
 		private ExcelPageFieldCollection myPageFields;
+		private ExcelPivotFieldFiltersCollection myFilters;
 		private ItemsCollection myRowItems;
 		private ItemsCollection myColumnItems;
 		private TableStyles myTableStyle = Table.TableStyles.Medium6;
@@ -636,6 +639,24 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Gets the pivot table label/value filters.
+		/// </summary>
+		public ExcelPivotFieldFiltersCollection Filters
+		{
+			get
+			{
+				if (myFilters == null)
+				{
+					var filtersNode = this.TopNode.SelectSingleNode("d:filters", this.NameSpaceManager);
+					if (filtersNode == null)
+						return null;
+					myFilters = new ExcelPivotFieldFiltersCollection(this.NameSpaceManager, filtersNode, this);
+				}
+				return myFilters;
+			}
+		}
+
+		/// <summary>
 		/// Gets the row items.
 		/// </summary>
 		public ItemsCollection RowItems
@@ -753,6 +774,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets a value indicating whether there is more than one data field in the column fields.
 		/// </summary>
 		internal bool HasColumnDataFields => this.ColumnFields.Any(c => c.Index == -2);
+
+		/// <summary>
+		/// Gets a value indicating whether label/value filters are applied to the pivot table.
+		/// </summary>
+		internal bool HasFilters => this.Filters != null;
 
 		internal ExcelWorkbook Workbook { get; private set; }
 		#endregion
@@ -976,7 +1002,20 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			var filters = base.TopNode.SelectSingleNode("d:filters", base.NameSpaceManager);
 			if (filters != null)
-				unsupportedFeatures.Add("Filters enabled");
+			{
+				foreach (var filter in this.Filters)
+				{
+					if (filter.LabelFilterType == LabelFilterType.CaptionBetween || filter.LabelFilterType == LabelFilterType.CaptionNotBetween)
+					{
+						var stringOne = new WildCardValueMatcher().ExcelWildcardToRegex(filter.StringValueOne);
+						var stringTwo = new WildCardValueMatcher().ExcelWildcardToRegex(filter.StringValueTwo);
+						bool stringOneHasWildcards = stringOne.Contains("*") || stringOne.Contains(".");
+						bool stringTwoHasWildcards = stringTwo.Contains("*") || stringTwo.Contains(".");
+						if (stringOneHasWildcards || stringTwoHasWildcards)
+							unsupportedFeatures.Add($"{this.Fields[filter.Field].Name} field has {filter.LabelFilterType} label filter with wildcards enabled.");
+					}
+				}
+			}
 			if (this.MergeAndCenterCellsWithLabels)
 				unsupportedFeatures.Add("Merge and center cells with labels enabled");
 			if (this.PageOverThenDown)
@@ -1259,6 +1298,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				var cacheRecord = this.CacheDefinition.CacheRecords[i];
 				var currentNode = rootNode;
 
+				bool createdFilterTreeNode = false;
 				for (int j = 0; j < rowColFields.Count; j++)
 				{
 					int rowColFieldIndex = rowColFields[j].Index;
@@ -1280,13 +1320,20 @@ namespace OfficeOpenXml.Table.PivotTable
 						int recordItemValue = int.Parse(cacheRecord.Items[rowColFieldIndex].Value);
 						var sharedItemValue = cacheFields[rowColFieldIndex].SharedItems[recordItemValue];
 
-						if (cacheFields[originalIndex].IsGroupField)
-							currentNode = this.CreateTreeNodeWithGrouping(sharedItemValue, originalIndex, currentNode, recordItemValue, groupBy, cacheFields, cacheRecordPageFieldIndices, cacheRecord);
-						else
-							currentNode = this.CreateTreeNode(false, currentNode, this.Fields[rowColFieldIndex], recordItemValue, rowColFieldIndex, cacheRecordPageFieldIndices, cacheRecord, sharedItemValue.Value);
+						// If filters are enabled, then only create a tree node if it satifies the filter criteria.
+						if (this.HasFilters)
+							createdFilterTreeNode = this.ShouldCreateTreeNodeWithFilter(cacheRecord, rowColFieldIndex);
+
+						if (this.HasFilters == false || (this.HasFilters && createdFilterTreeNode))
+						{
+							if (cacheFields[originalIndex].IsGroupField)
+								currentNode = this.CreateTreeNodeWithGrouping(sharedItemValue, originalIndex, currentNode, recordItemValue, groupBy, cacheFields, cacheRecordPageFieldIndices, cacheRecord);
+							else
+								currentNode = this.CreateTreeNode(false, currentNode, this.Fields[rowColFieldIndex], recordItemValue, rowColFieldIndex, cacheRecordPageFieldIndices, cacheRecord, sharedItemValue.Value);
+						}
 
 						// This cache record does not contain the page field indices, so continue to the next record.
-						if (currentNode == null)
+						if (currentNode == null || (this.HasFilters && !createdFilterTreeNode))
 							break;
 					}
 					if (!currentNode.CacheRecordIndices.Contains(i))
@@ -1294,6 +1341,22 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 			return rootNode;
+		}
+
+		private bool ShouldCreateTreeNodeWithFilter(CacheRecordNode record, int fieldIndex)
+		{
+			foreach (var filter in this.Filters)
+			{
+				int filterFieldIndex = filter.Field;
+				// Get the shared item string from the record index.
+				int recordItemValue = int.Parse(record.Items[filterFieldIndex].Value);
+				var sharedItemValue = this.myCacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordItemValue].Value;
+				bool sharedItemIsNumericType = this.myCacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordItemValue].Type == PivotCacheRecordType.n;
+				bool isMatch = filter.MatchesFilterCriteriaResult(sharedItemValue, sharedItemIsNumericType);
+				if (!isMatch)
+					return false;
+			}
+			return true;
 		}
 
 		private PivotItemTreeNode CreateTreeNodeWithGrouping(CacheItem sharedItemValue, int groupingIndex, PivotItemTreeNode currentNode, int recordItemValue, PivotFieldDateGrouping? groupBy,
@@ -1426,7 +1489,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				var pageFieldIndices = this.GetPageFieldIndices();
 				var root = this.BuildRowColTree(rowColFieldCollection, pageFieldIndices);
 				root.SortChildren(this);
-				if (isRowItems)
+				if (isRowItems && root.Children.Count > 0)
 				{
 					bool tabularForm = this.Fields.Any(x => x.Outline == false);
 					if (!tabularForm)
@@ -1442,7 +1505,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						this.BuildTabularRowItems(tabularFieldIndices, root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>(), -1);
 					}
 				}
-				else
+				else if (root.Children.Count > 0)
 					this.BuildColumnItems(root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>());
 
 				// Create grand total items if necessary.

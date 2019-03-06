@@ -37069,7 +37069,6 @@ namespace EPPlusTest.Table.PivotTable
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\Output.xlsx"));
 					this.CheckPivotTableAddress(new ExcelAddress("P10:T39"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);

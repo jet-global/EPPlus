@@ -280,9 +280,14 @@
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldGroupTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldTest.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableTest.cs" />
+    <Compile Include="Table\PivotTable\Filters\ExcelCustomFiltersCollectionTest.cs" />
+    <Compile Include="Table\PivotTable\Filters\ExcelFilterCriteriaCollectionTest.cs" />
+    <Compile Include="Table\PivotTable\Filters\ExcelFilterTest.cs" />
+    <Compile Include="Table\PivotTable\Filters\ExcelPivotTableAdvancedFilterTest.cs" />
     <Compile Include="Table\PivotTable\ItemsCollectionTest.cs" />
     <Compile Include="Table\PivotTable\PivotItemTreeNodeTest.cs" />
     <Compile Include="Table\PivotTable\PivotTableRefresh\PivotTableRefreshIndentationTest.cs" />
+    <Compile Include="Table\PivotTable\Filters\PivotTableFiltersTest.cs" />
     <Compile Include="Table\PivotTable\PivotTableTestBase.cs" />
     <Compile Include="Table\PivotTable\RowColumnItemTest.cs" />
     <Compile Include="Table\PivotTable\SharedItemsCollectionTest.cs" />
