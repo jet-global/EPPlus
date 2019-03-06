@@ -287,6 +287,7 @@
     <Compile Include="Table\PivotTable\ItemsCollectionTest.cs" />
     <Compile Include="Table\PivotTable\PivotItemTreeNodeTest.cs" />
     <Compile Include="Table\PivotTable\PivotTableRefresh\PivotTableRefreshIndentationTest.cs" />
+    <Compile Include="Table\PivotTable\PivotTableRefresh\PivotTableRefreshShowDataAsTest.cs" />
     <Compile Include="Table\PivotTable\Filters\PivotTableFiltersTest.cs" />
     <Compile Include="Table\PivotTable\PivotTableTestBase.cs" />
     <Compile Include="Table\PivotTable\RowColumnItemTest.cs" />

@@ -460,6 +460,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				unsupportedFeatures.Add("Save source data with file disabled");
 			if (this.MissingItemLimit != null)
 				unsupportedFeatures.Add("Missing item limit set");
+			if (this.CacheSource != eSourceType.Worksheet)
+				unsupportedFeatures.Add($"Unsupported pivot cache source type {this.CacheSource}");
 			return unsupportedFeatures.Any();
 		}
 		#endregion

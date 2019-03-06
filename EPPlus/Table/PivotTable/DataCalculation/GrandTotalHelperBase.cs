@@ -108,7 +108,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				if (dataFieldCollectionIndex != -1)
 				{
 					this.CalculateBackingDataTotal(majorIndex, grandTotalValueLists, majorHeader.TotalType);
-					grandTotalBackingData.AddRange(grandTotalValueLists.Where(t => t != null));
+					foreach (var grandTotalBackingCell in grandTotalValueLists.Where(t => t != null))
+					{
+						grandTotalBackingCell.MajorAxisIndex = majorIndex;
+						grandTotalBackingData.Add(grandTotalBackingCell);
+					}
 				}
 			}
 			return grandGrandTotalValueLists;

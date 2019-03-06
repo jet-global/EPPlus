@@ -229,6 +229,25 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		Index
 	}
+
+	/// <summary>
+	/// Represents field subtotal locations.
+	/// </summary>
+	public enum SubtotalLocation
+	{
+		/// <summary>
+		/// Indicates that subtotals are off.
+		/// </summary>
+		Off,
+		/// <summary>
+		/// Indicates that subtotals should be shown at the top of a group.
+		/// </summary>
+		Top,
+		/// <summary>
+		/// Indicates that subtotals should be shown at the bottom of a group.
+		/// </summary>
+		Bottom
+	}
 	#endregion
 
 	/// <summary>
@@ -359,7 +378,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets whether the custom text that is displayed for the subtotals label is shown.
+		/// Gets or sets the subtotal top field attribute.
+		/// NOTE: This property alone does not indicate that the "Show all subtotals at top of group"
+		/// setting is selected. For this setting, <see cref="ExcelPivotTableField.SubtotalLocation"/>.
 		/// </summary>
 		public bool SubtotalTop
 		{
@@ -378,7 +399,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or set whether to show the default subtotal.
+		/// Gets whether to show the default subtotal.
 		/// NOTE: To set this value, use <see cref="SubTotalFunctions"/>.
 		/// </summary>
 		/// <remarks>A blank value in XML indicates true. Setting this value to false needs to remove the subtotal nodes from 
@@ -386,8 +407,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool DefaultSubtotal
 		{
 			get { return base.GetXmlNodeBool("@defaultSubtotal", true); }
-			set { base.SetXmlNodeBool("@defaultSubtotal", value); }
-			// setting this value must be done from SubTotalFunctions.
+			// setting this value should only be done from SubTotalFunctions.
+			private set { base.SetXmlNodeBool("@defaultSubtotal", value); }
 		}
 
 		/// <summary>
@@ -465,7 +486,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (value == eSubTotalFunctions.None)
 				{
 					// For no subtotals, set defaultSubtotal to off
-					base.SetXmlNodeBool("@defaultSubtotal", false);
+					this.DefaultSubtotal = false;
 				}
 				else
 				{
@@ -484,6 +505,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						}
 					}
 					this.TopNode.InnerXml = string.Format("<items count=\"{0}\">{1}</items>", count, innerXml);
+					this.DefaultSubtotal = true; // Turn on defaultSubtotal when a subtotal function is set.
 				}
 			}
 		}
@@ -662,6 +684,39 @@ namespace OfficeOpenXml.Table.PivotTable
 					// Select all 'references' nodes that are descendants of the top node.
 					mySortingReferences = new AutoSortScopeReferencesCollection(this.NameSpaceManager, this.TopNode.SelectSingleNode(".//d:references", this.NameSpaceManager), myTable);
 				return mySortingReferences;
+			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating where subtotals should be located.
+		/// </summary>
+		public SubtotalLocation SubtotalLocation
+		{
+			get
+			{
+				if (this.SubtotalTop && this.DefaultSubtotal)
+					return SubtotalLocation.Top;
+				else if (!this.SubtotalTop && this.DefaultSubtotal)
+					return SubtotalLocation.Bottom;
+				return SubtotalLocation.Off;
+			}
+			set
+			{
+				if (value == SubtotalLocation.Top)
+				{
+					this.SubtotalTop = true;
+					this.DefaultSubtotal = true;
+				}
+				else if (value == SubtotalLocation.Bottom)
+				{
+					this.SubtotalTop = false;
+					this.DefaultSubtotal = true;
+				}
+				else
+				{
+					this.SubtotalTop = true;
+					this.DefaultSubtotal = false;
+				}
 			}
 		}
 

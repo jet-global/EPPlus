@@ -23,11 +23,11 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.Extensions;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 {
@@ -99,13 +99,13 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					this.WriteGrandGrandTotals(columnGrandGrandTotalsLists);
 				}
 
-				//Write out row and column grand grand totals.
+				// Write out row and column grand grand totals.
 				if (this.PivotTable.ColumnGrandTotals)
 					this.WriteGrandTotalValues(false, columnGrandTotalBackingData, columnGrandGrandTotalsLists);
 				if (this.PivotTable.RowGrandTotals)
 					this.WriteGrandTotalValues(true, rowGrandTotalBackingData, columnGrandGrandTotalsLists);
 
-				// Write out body data.
+				// Write out body data applying "Show Data As" and other settings as necessary.
 				this.WritePivotTableBodyData(backingBodyData, columnGrandTotalBackingData, rowGrandTotalBackingData, columnGrandGrandTotalsLists);
 			}
 		}
@@ -116,103 +116,48 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			List<PivotCellBackingData> columnGrandTotalsValuesLists, List<PivotCellBackingData> rowGrandTotalsValuesLists,
 			PivotCellBackingData[] grandGrandTotalValues)
 		{
-			int dataColumn = this.PivotTable.Address.Start.Column + this.PivotTable.FirstDataCol;
+			int sheetColumn = this.PivotTable.Address.Start.Column + this.PivotTable.FirstDataCol;
 			for (int column = 0; column < this.PivotTable.ColumnHeaders.Count; column++)
 			{
 				var columnHeader = this.PivotTable.ColumnHeaders[column];
-				int dataRow = this.PivotTable.Address.Start.Row + this.PivotTable.FirstDataRow - 1;
+				int sheetRow = this.PivotTable.Address.Start.Row + this.PivotTable.FirstDataRow - 1;
 				for (int row = 0; row < this.PivotTable.RowHeaders.Count; row++)
 				{
-					dataRow++;
+					sheetRow++;
 					var rowHeader = this.PivotTable.RowHeaders[row];
-					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
+					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal || !backingDatas[row, column].ShowValue)
 						continue;
 
-					var cell = this.PivotTable.Worksheet.Cells[dataRow, dataColumn];
 					var dataFieldCollectionIndex = this.PivotTable.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 					var dataField = this.PivotTable.DataFields[dataFieldCollectionIndex];
-					var cacheField = this.PivotTable.CacheDefinition.CacheFields[dataField.Index];
-					var cellBackingData = backingDatas[row, column];
-					var value = this.TotalsCalculator.CalculateCellTotal(dataField, cellBackingData, rowHeader.TotalType, columnHeader.TotalType);
+					var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(dataField.ShowDataAs, this.PivotTable, dataFieldCollectionIndex);
+					var value = showDataAsCalculator.CalculateBodyValue(
+						row, column, 
+						backingDatas, 
+						grandGrandTotalValues, 
+						rowGrandTotalsValuesLists,
+						columnGrandTotalsValuesLists);
 
-					if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
-					{
-						// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
-						value = this.GetCellNoCalculationValue(value, cellBackingData);
-					}
-					else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal
-						|| dataField.ShowDataAs == ShowDataAs.PercentOfCol 
-						|| dataField.ShowDataAs == ShowDataAs.PercentOfRow)
-					{
-						if (cellBackingData == null)
-							value = null;
-						else if (value == null)
-							value = 0;
-						else if (value != null)
-						{
-							double denominator;
-							if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
-								denominator = (double)grandGrandTotalValues[dataFieldCollectionIndex].Result;
-							else if (dataField.ShowDataAs == ShowDataAs.PercentOfCol)
-								denominator = (double)rowGrandTotalsValuesLists.First(v => v.SheetColumn == dataColumn && v.DataFieldCollectionIndex == dataFieldCollectionIndex).Result;
-							else
-								denominator = (double)columnGrandTotalsValuesLists.First(v => v.SheetRow == dataRow && v.DataFieldCollectionIndex == dataFieldCollectionIndex).Result;
-							value = (double)value / denominator;
-						}
-					}
-					else
-					{
-						// TODO: Implement the rest of these settings. See user story 11453.
-						throw new InvalidOperationException($"Unsupported dataField ShowDataAs setting '{dataField.ShowDataAs}'");
-					}
-
+					var cell = this.PivotTable.Worksheet.Cells[sheetRow, sheetColumn];
 					this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
 				}
-				dataColumn++;
+				sheetColumn++;
 			}
 		}
 
 		private void WriteGrandTotalValues(bool isRowTotal, List<PivotCellBackingData> grandTotalsBackingDatas, PivotCellBackingData[] columnGrandGrandTotalValues)
 		{
-			foreach (var grandTotalBackingData in grandTotalsBackingDatas)
+			for (int i = 0; i < grandTotalsBackingDatas.Count; i++)
 			{
-				if (grandTotalBackingData == null)
+				var grandTotalBackingData = grandTotalsBackingDatas[i];
+				if (grandTotalBackingData == null || !grandTotalBackingData.ShowValue)
 					continue;
 				var dataField = this.PivotTable.DataFields[grandTotalBackingData.DataFieldCollectionIndex];
+
+				var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(dataField.ShowDataAs, this.PivotTable, grandTotalBackingData.DataFieldCollectionIndex);
+				var value = showDataAsCalculator.CalculateGrandTotalValue(i, grandTotalsBackingDatas, columnGrandGrandTotalValues, isRowTotal);
+
 				var cell = this.PivotTable.Worksheet.Cells[grandTotalBackingData.SheetRow, grandTotalBackingData.SheetColumn];
-
-				object value = grandTotalBackingData.Result;
-
-				if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
-				{
-					// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
-					value = this.GetCellNoCalculationValue(value, grandTotalBackingData);
-				}
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal 
-					|| dataField.ShowDataAs == ShowDataAs.PercentOfCol 
-					|| dataField.ShowDataAs == ShowDataAs.PercentOfRow)
-				{
-					if (columnGrandGrandTotalValues.Length > grandTotalBackingData.DataFieldCollectionIndex)
-					{
-						if (value == null)
-							value = 0;
-						else if ((dataField.ShowDataAs == ShowDataAs.PercentOfCol && isRowTotal) || (dataField.ShowDataAs == ShowDataAs.PercentOfRow && !isRowTotal))
-							value = 1;
-						else
-						{
-							double grandGrandTotalValue = (double)columnGrandGrandTotalValues[grandTotalBackingData.DataFieldCollectionIndex].Result;
-							value = (double)grandTotalBackingData.Result / grandGrandTotalValue;
-						}
-					}
-					else
-						value = 1;
-				}
-				else
-				{
-					// TODO: Implement the rest of these settings. See user story 11453.
-					throw new InvalidOperationException($"Unsupported dataField ShowDataAs setting '{dataField.ShowDataAs}'");
-				}
-
 				this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
 			}
 		}
@@ -224,26 +169,12 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			{
 				if (backingData == null)
 					continue;
-				var cell = this.PivotTable.Worksheet.Cells[backingData.SheetRow, backingData.SheetColumn];
-				object value = backingData.Result;
 				var dataField = this.PivotTable.DataFields[backingData.DataFieldCollectionIndex];
-				if (dataField.ShowDataAs == ShowDataAs.NoCalculation)
-				{
-					// If no ShowDataAs value is selected, the "For empty cells show: [missingCaption]" setting can be applied.
-					value = this.GetCellNoCalculationValue(value, backingData);
-				}
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfTotal)
-					value = 1;
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfCol)
-					value = 1;
-				else if (dataField.ShowDataAs == ShowDataAs.PercentOfRow)
-					value = 1;
-				else
-				{
-					// TODO: Implement the rest of these settings. See user story 11453.
-					throw new InvalidOperationException($"Unsupported dataField ShowDataAs setting '{dataField.ShowDataAs}'");
-				}
 
+				var showDataAsCalculator = ShowDataAsFactory.GetShowDataAsCalculator(dataField.ShowDataAs, this.PivotTable, backingData.DataFieldCollectionIndex);
+				var value = showDataAsCalculator.CalculateGrandGrandTotalValue(backingData);
+
+				var cell = this.PivotTable.Worksheet.Cells[backingData.SheetRow, backingData.SheetColumn];
 				this.WriteCellValue(value, cell, dataField, styles);
 			}
 		}
@@ -262,13 +193,14 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					var rowHeader = this.PivotTable.RowHeaders[row];
 					if (rowHeader.IsGrandTotal || columnHeader.IsGrandTotal)
 						continue;
+					backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, this.TotalsCalculator);
 					if (rowHeader.IsPlaceHolder)
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, this.TotalsCalculator);
+						backingData[row, column].ShowValue = true;
 					else if ((rowHeader.CacheRecordIndices == null && columnHeader.CacheRecordIndices.Count == this.PivotTable.ColumnFields.Count)
 						|| rowHeader.CacheRecordIndices.Count == this.PivotTable.RowFields.Count)
 					{
 						// At a leaf node.
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, this.TotalsCalculator);
+						backingData[row, column].ShowValue = true;
 					}
 					else if (this.PivotTable.HasRowDataFields)
 					{
@@ -277,25 +209,19 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 							if ((rowHeader.PivotTableField != null && rowHeader.PivotTableField.SubtotalTop && !rowHeader.IsAboveDataField)
 								|| !string.IsNullOrEmpty(rowHeader.TotalType))
 							{
-								backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, this.TotalsCalculator);
+								backingData[row, column].ShowValue = true;
 							}
 						}
 					}
 					else if (rowHeader.PivotTableField.DefaultSubtotal && !rowHeader.TotalType.IsEquivalentTo("none")
 						&& (rowHeader.TotalType != null || rowHeader.PivotTableField.SubtotalTop))
-						backingData[row, column] = this.GetBackingCellValues(rowHeader, columnHeader, this.TotalsCalculator);
+					{
+						backingData[row, column].ShowValue = true;
+					}
 				}
 				dataColumn++;
 			}
 			return backingData;
-		}
-
-		private object GetCellNoCalculationValue(object value, PivotCellBackingData backingData)
-		{
-			// Non-null backing data indicates that this cell is eligible for a value.
-			if (backingData != null && value == null)
-				value = this.PivotTable.ShowMissing ? this.PivotTable.MissingCaption : "0";
-			return value;
 		}
 
 		private PivotCellBackingData GetBackingCellValues(PivotTableHeader rowHeader, PivotTableHeader columnHeader, TotalsFunctionHelper functionCalculator)
@@ -303,6 +229,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			var dataFieldCollectionIndex = this.PivotTable.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
 			var dataField = this.PivotTable.DataFields[dataFieldCollectionIndex];
 			var cacheField = this.PivotTable.CacheDefinition.CacheFields[dataField.Index];
+			PivotCellBackingData backingData = null;
 			if (string.IsNullOrEmpty(cacheField.Formula))
 			{
 				var matchingValues = this.PivotTable.CacheDefinition.CacheRecords.FindMatchingValues(
@@ -311,22 +238,28 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					this.PivotTable.GetPageFieldIndices(),
 					dataField.Index,
 					this.PivotTable);
-				return new PivotCellBackingData(matchingValues);
+				 backingData = new PivotCellBackingData(matchingValues);
 			}
-
-			// If a formula is present, it is a calculated field which needs to be evaluated.
-			var fieldNameToValues = new Dictionary<string, List<object>>();
-			foreach (var cacheFieldName in cacheField.ReferencedCacheFieldsToIndex.Keys)
+			else
 			{
-				var values = this.PivotTable.CacheDefinition.CacheRecords.FindMatchingValues(
-					rowHeader.CacheRecordIndices,
-					columnHeader.CacheRecordIndices,
-					this.PivotTable.GetPageFieldIndices(),
-					cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
-					this.PivotTable);
-				fieldNameToValues.Add(cacheFieldName, values);
+				// If a formula is present, it is a calculated field which needs to be evaluated.
+				var fieldNameToValues = new Dictionary<string, List<object>>();
+				foreach (var cacheFieldName in cacheField.ReferencedCacheFieldsToIndex.Keys)
+				{
+					var values = this.PivotTable.CacheDefinition.CacheRecords.FindMatchingValues(
+						rowHeader.CacheRecordIndices,
+						columnHeader.CacheRecordIndices,
+						this.PivotTable.GetPageFieldIndices(),
+						cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
+						this.PivotTable);
+					fieldNameToValues.Add(cacheFieldName, values);
+				}
+				backingData = new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
 			}
-			return new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
+			var value = this.TotalsCalculator.CalculateCellTotal(dataField, backingData, rowHeader.TotalType, columnHeader.TotalType);
+			if (backingData != null)
+				backingData.Result = value;
+			return backingData;
 		}
 
 		private void ConfigureCalculatedFields(IEnumerable<CacheFieldNode> calculatedFields, TotalsFunctionHelper totalsCalculator)

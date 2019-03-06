@@ -398,7 +398,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		private bool FindCacheRecordValueAndPageFieldTupleValueMatch(Dictionary<int, List<int>> pageFieldIndices, CacheRecordNode record)
 		{
 			// At least one of the page field's items must match to succeed.
-			bool allMatch = true;
 			foreach (var pageField in pageFieldIndices)
 			{
 				bool pageFieldMatch = false;
@@ -414,7 +413,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (pageFieldMatch == false)
 					return false;
 			}
-			return allMatch;
+			return true;
 		}
 
 		private void AddToList(CacheRecordNode record, int dataFieldIndex, List<object> matchingValues)

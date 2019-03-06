@@ -97,7 +97,7 @@ namespace EPPlusTest.Table.PivotTable
 					worksheet.Cells[5, 5].Value = "Green";
 					worksheet.Cells[6, 5].Value = "Purple";
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("I10:J17"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I10:J17"), pivotTable.Address);
 					Assert.AreEqual(4, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -148,7 +148,7 @@ namespace EPPlusTest.Table.PivotTable
 					worksheet.Cells[7, 6].Value = 28;
 					cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["C3:F7"]);
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("I10:J18"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I10:J18"), pivotTable.Address);
 					Assert.AreEqual(4, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(5, pivotTable.Fields[1].Items.Count);
@@ -197,7 +197,7 @@ namespace EPPlusTest.Table.PivotTable
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["C3:F5"]);
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("I10:J15"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I10:J15"), pivotTable.Address);
 					Assert.AreEqual(4, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -241,7 +241,7 @@ namespace EPPlusTest.Table.PivotTable
 					worksheet.Cells[4, 3].Value = "January";
 					worksheet.Cells[7, 3].Value = "January";
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B12:O23"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B12:O23"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -348,7 +348,7 @@ namespace EPPlusTest.Table.PivotTable
 					worksheet.Cells[9, 7].Value = 20;
 					cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["A1:G9"]);
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B12:U24"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B12:U24"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(9, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(5, pivotTable.Fields[1].Items.Count);
@@ -470,7 +470,7 @@ namespace EPPlusTest.Table.PivotTable
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["A1:G5"]);
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B12:M20"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B12:M20"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -553,7 +553,7 @@ namespace EPPlusTest.Table.PivotTable
 					worksheet.DeleteRow(6);
 					cacheDefinition.SetSourceRangeAddress(worksheet, worksheet.Cells["A1:G7"]);
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B11:P21"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B11:P21"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -652,7 +652,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D19"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D19"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -737,7 +737,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:A5"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:A5"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -773,7 +773,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("E1:E12"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E1:E12"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -819,7 +819,7 @@ namespace EPPlusTest.Table.PivotTable
 					worksheet.Cells[8, 3].Value = "December";
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C15:D19"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C15:D19"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -871,7 +871,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables.First();
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A13:F25"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A13:F25"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -982,7 +982,7 @@ namespace EPPlusTest.Table.PivotTable
 					pivotTable.ShowMissing = false;
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -997,7 +997,7 @@ namespace EPPlusTest.Table.PivotTable
 					blankValue = pivotTable.MissingCaption = "BLAHBLAH";
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -1054,7 +1054,7 @@ namespace EPPlusTest.Table.PivotTable
 					pivotTable.ShowMissing = false;
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -1070,13 +1070,148 @@ namespace EPPlusTest.Table.PivotTable
 					blankValue = pivotTable.MissingCaption = "BLAHBLAH";
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:C14"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
 				validateWorksheet();
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableRowDataFieldsMultipleColumnFields.xlsx")]
+		public void PivotTableRefreshWithColumnFieldsAndRowDataFieldsSubtotalsBottom()
+		{
+			var file = new FileInfo("PivotTableRowDataFieldsMultipleColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalLocation = SubtotalLocation.Bottom;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:K7"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 4, 2, null),
+					new ExpectedCellValue(sheetName, 4, 3, "January"),
+					new ExpectedCellValue(sheetName, 4, 4, "January Total"),
+					new ExpectedCellValue(sheetName, 4, 5, "February"),
+					new ExpectedCellValue(sheetName, 4, 6, null),
+					new ExpectedCellValue(sheetName, 4, 7, "February Total"),
+					new ExpectedCellValue(sheetName, 4, 8, "March"),
+					new ExpectedCellValue(sheetName, 4, 9, null),
+					new ExpectedCellValue(sheetName, 4, 10, "March Total"),
+					new ExpectedCellValue(sheetName, 4, 11, "Grand Total"),
+
+					new ExpectedCellValue(sheetName, 5, 2, "Values"),
+					new ExpectedCellValue(sheetName, 5, 3, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 4, null),
+					new ExpectedCellValue(sheetName, 5, 5, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 5, 6, "Tent"),
+					new ExpectedCellValue(sheetName, 5, 7, null),
+					new ExpectedCellValue(sheetName, 5, 8, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 9, "Headlamp"),
+					new ExpectedCellValue(sheetName, 5, 10, null),
+					new ExpectedCellValue(sheetName, 5, 11, null),
+
+					new ExpectedCellValue(sheetName, 6, 2, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 6, 3, 1247.25),
+					new ExpectedCellValue(sheetName, 6, 4, 1247.25),
+					new ExpectedCellValue(sheetName, 6, 5, 99),
+					new ExpectedCellValue(sheetName, 6, 6, 199),
+					new ExpectedCellValue(sheetName, 6, 7, 298),
+					new ExpectedCellValue(sheetName, 6, 8, 415.75),
+					new ExpectedCellValue(sheetName, 6, 9, 24.99),
+					new ExpectedCellValue(sheetName, 6, 10, 440.74),
+					new ExpectedCellValue(sheetName, 6, 11, 1985.99),
+
+					new ExpectedCellValue(sheetName, 7, 2, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 7, 3, 5),
+					new ExpectedCellValue(sheetName, 7, 4, 5),
+					new ExpectedCellValue(sheetName, 7, 5, 1),
+					new ExpectedCellValue(sheetName, 7, 6, 6),
+					new ExpectedCellValue(sheetName, 7, 7, 7),
+					new ExpectedCellValue(sheetName, 7, 8, 2),
+					new ExpectedCellValue(sheetName, 7, 9, 1),
+					new ExpectedCellValue(sheetName, 7, 10, 3),
+					new ExpectedCellValue(sheetName, 7, 11, 15)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableRowDataFieldsMultipleColumnFields.xlsx")]
+		public void PivotTableRefreshWithColumnFieldsAndRowDataFieldsSubtotalsOff()
+		{
+			var file = new FileInfo("PivotTableRowDataFieldsMultipleColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalLocation = SubtotalLocation.Off;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:H7"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 4, 2, null),
+					new ExpectedCellValue(sheetName, 4, 3, "January"),
+					new ExpectedCellValue(sheetName, 4, 4, "February"),
+					new ExpectedCellValue(sheetName, 4, 5, null),
+					new ExpectedCellValue(sheetName, 4, 6, "March"),
+					new ExpectedCellValue(sheetName, 4, 7, null),
+					new ExpectedCellValue(sheetName, 4, 8, "Grand Total"),
+
+					new ExpectedCellValue(sheetName, 5, 2, "Values"),
+					new ExpectedCellValue(sheetName, 5, 3, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 4, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 5, 5, "Tent"),
+					new ExpectedCellValue(sheetName, 5, 6, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 7, "Headlamp"),
+					new ExpectedCellValue(sheetName, 5, 8, null),
+
+					new ExpectedCellValue(sheetName, 6, 2, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 6, 3, 1247.25),
+					new ExpectedCellValue(sheetName, 6, 4, 99),
+					new ExpectedCellValue(sheetName, 6, 5, 199),
+					new ExpectedCellValue(sheetName, 6, 6, 415.75),
+					new ExpectedCellValue(sheetName, 6, 7, 24.99),
+					new ExpectedCellValue(sheetName, 6, 8, 1985.99),
+
+					new ExpectedCellValue(sheetName, 7, 2, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 7, 3, 5),
+					new ExpectedCellValue(sheetName, 7, 4, 1),
+					new ExpectedCellValue(sheetName, 7, 5, 6),
+					new ExpectedCellValue(sheetName, 7, 6, 2),
+					new ExpectedCellValue(sheetName, 7, 7, 1),
+					new ExpectedCellValue(sheetName, 7, 8, 15)
+				});
+			}
+		}
+
 		#region Calculated Fields Tests
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithCalculatedFields.xlsx")]
@@ -1095,7 +1230,7 @@ namespace EPPlusTest.Table.PivotTable
 					var formulaCacheField = cacheDefinition.CacheFields.First(c => !string.IsNullOrEmpty(c.Formula));
 					formulaCacheField.Formula = "'Wholesale Price'";
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -1164,7 +1299,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -1235,7 +1370,7 @@ namespace EPPlusTest.Table.PivotTable
 					var formulaCacheField = cacheDefinition.CacheFields.First(c => !string.IsNullOrEmpty(c.Formula));
 					formulaCacheField.Formula = "'Wholesale Price' * Item";
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -1304,7 +1439,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B18:D27"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B18:D27"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -1367,7 +1502,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G4:L14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G4:L14"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -1452,1003 +1587,6 @@ namespace EPPlusTest.Table.PivotTable
 			}
 		}
 		#endregion
-
-		#region ShowDataAs Tests
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
-		public void PivotTableRefreshShowDataAsRowFieldsColumnDataFields()
-		{
-			var file = new FileInfo("PivotTableShowDataAs.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "PivotTables";
-				void validateSheet() => TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 2, 2, "Row Labels"),
-					new ExpectedCellValue(sheetName, 2, 3, "Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 2, 4, "Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 3, 2, "Chicago"),
-					new ExpectedCellValue(sheetName, 4, 2, "January"),
-					new ExpectedCellValue(sheetName, 4, 3, 0.209341437),
-					new ExpectedCellValue(sheetName, 4, 4, 2),
-					new ExpectedCellValue(sheetName, 5, 2, "March"),
-					new ExpectedCellValue(sheetName, 5, 3, 0.012583145),
-					new ExpectedCellValue(sheetName, 5, 4, 1),
-					new ExpectedCellValue(sheetName, 6, 2, "Nashville"),
-					new ExpectedCellValue(sheetName, 7, 2, "January"),
-					new ExpectedCellValue(sheetName, 7, 3, 0.209341437),
-					new ExpectedCellValue(sheetName, 7, 4, 2),
-					new ExpectedCellValue(sheetName, 8, 2, "February"),
-					new ExpectedCellValue(sheetName, 8, 3, 0.100201914),
-					new ExpectedCellValue(sheetName, 8, 4, 6),
-					new ExpectedCellValue(sheetName, 9, 2, "March"),
-					new ExpectedCellValue(sheetName, 9, 3, 0.209341437),
-					new ExpectedCellValue(sheetName, 9, 4, 2),
-					new ExpectedCellValue(sheetName, 10, 2, "San Francisco"),
-					new ExpectedCellValue(sheetName, 11, 2, "January"),
-					new ExpectedCellValue(sheetName, 11, 3, 0.209341437),
-					new ExpectedCellValue(sheetName, 11, 4, 1),
-					new ExpectedCellValue(sheetName, 12, 2, "February"),
-					new ExpectedCellValue(sheetName, 12, 3, 0.049849194),
-					new ExpectedCellValue(sheetName, 12, 4, 1),
-					new ExpectedCellValue(sheetName, 13, 2, "Grand Total"),
-					new ExpectedCellValue(sheetName, 13, 3, 1),
-					new ExpectedCellValue(sheetName, 13, 4, 15)
-				});
-
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables["PivotTable1"];
-
-					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
-					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
-					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
-					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
-					foreach (var field in pivotTable.Fields)
-					{
-						field.SubtotalTop = true;
-					}
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
-					Assert.AreEqual(7, pivotTable.Fields.Count);
-					package.SaveAs(newFile.File);
-				}
-				validateSheet();
-				// Validate that top subtotals were written in.
-				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 3, 3, .2219),
-					new ExpectedCellValue(sheetName, 3, 4, 3),
-					new ExpectedCellValue(sheetName, 6, 3, .5189),
-					new ExpectedCellValue(sheetName, 6, 4, 10),
-					new ExpectedCellValue(sheetName, 10, 3, .2592),
-					new ExpectedCellValue(sheetName, 10, 4, 2),
-				});
-
-				// Test again with subtotals turned off.
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables["PivotTable1"];
-
-					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
-					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
-					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
-					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
-					foreach (var field in pivotTable.Fields)
-					{
-						field.SubTotalFunctions = eSubTotalFunctions.None;
-					}
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
-					Assert.AreEqual(7, pivotTable.Fields.Count);
-					package.SaveAs(newFile.File);
-				}
-				validateSheet();
-				// Validate that no subtotals were written in.
-				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 3, 3, null),
-					new ExpectedCellValue(sheetName, 3, 4, null),
-					new ExpectedCellValue(sheetName, 6, 3, null),
-					new ExpectedCellValue(sheetName, 6, 4, null),
-					new ExpectedCellValue(sheetName, 10, 3, null),
-					new ExpectedCellValue(sheetName, 10, 4, null),
-				});
-			}
-		}
-
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
-		public void PivotTableRefreshShowDataAsColumnFieldsRowDataFields()
-		{
-			var file = new FileInfo("PivotTableShowDataAs.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "PivotTables";
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables["PivotTable2"];
-
-					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
-					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
-					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
-					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
-					foreach (var field in pivotTable.Fields)
-					{
-						field.SubTotalFunctions = eSubTotalFunctions.Default;
-					}
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B18:K22"), pivotTable.Address);
-					Assert.AreEqual(7, pivotTable.Fields.Count);
-					package.SaveAs(newFile.File);
-				}
-				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 18, 2, null),
-					new ExpectedCellValue(sheetName, 18, 3, "Column Labels"),
-					new ExpectedCellValue(sheetName, 18, 4, null),
-					new ExpectedCellValue(sheetName, 19, 2, null),
-					new ExpectedCellValue(sheetName, 19, 3, "January"),
-					new ExpectedCellValue(sheetName, 19, 4, "January Total"),
-					new ExpectedCellValue(sheetName, 19, 5, "February"),
-					new ExpectedCellValue(sheetName, 19, 6, null),
-					new ExpectedCellValue(sheetName, 19, 7, "February Total"),
-					new ExpectedCellValue(sheetName, 19, 8, "March"),
-					new ExpectedCellValue(sheetName, 19, 9, null),
-					new ExpectedCellValue(sheetName, 19, 10, "March Total"),
-					new ExpectedCellValue(sheetName, 19, 11, "Grand Total"),
-					new ExpectedCellValue(sheetName, 20, 2, "Values"),
-					new ExpectedCellValue(sheetName, 20, 3, "Car Rack"),
-					new ExpectedCellValue(sheetName, 20, 4, null),
-					new ExpectedCellValue(sheetName, 20, 5, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 20, 6, "Tent"),
-					new ExpectedCellValue(sheetName, 20, 7, null),
-					new ExpectedCellValue(sheetName, 20, 8, "Car Rack"),
-					new ExpectedCellValue(sheetName, 20, 9, "Headlamp"),
-					new ExpectedCellValue(sheetName, 20, 10, null),
-					new ExpectedCellValue(sheetName, 20, 11, null),
-					new ExpectedCellValue(sheetName, 21, 2, "Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 21, 3, .6280),
-					new ExpectedCellValue(sheetName, 21, 4, .6280),
-					new ExpectedCellValue(sheetName, 21, 5, .0498),
-					new ExpectedCellValue(sheetName, 21, 6, .1002),
-					new ExpectedCellValue(sheetName, 21, 7, .1501),
-					new ExpectedCellValue(sheetName, 21, 8, .2093),
-					new ExpectedCellValue(sheetName, 21, 9, .0126),
-					new ExpectedCellValue(sheetName, 21, 10, .2219),
-					new ExpectedCellValue(sheetName, 21, 11, 1),
-					new ExpectedCellValue(sheetName, 22, 2, "Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 22, 3, 5),
-					new ExpectedCellValue(sheetName, 22, 4, 5),
-					new ExpectedCellValue(sheetName, 22, 5, 1),
-					new ExpectedCellValue(sheetName, 22, 6, 6),
-					new ExpectedCellValue(sheetName, 22, 7, 7),
-					new ExpectedCellValue(sheetName, 22, 8, 2),
-					new ExpectedCellValue(sheetName, 22, 9, 1),
-					new ExpectedCellValue(sheetName, 22, 10, 3),
-					new ExpectedCellValue(sheetName, 22, 11, 15)
-				});
-			}
-		}
-
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
-		public void PivotTableRefreshShowDataAsColumnFieldsRowDataFieldsSubtotalsOff()
-		{
-			var file = new FileInfo("PivotTableShowDataAs.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "PivotTables";
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables["PivotTable2"];
-
-					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
-					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
-					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
-					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
-					foreach (var field in pivotTable.Fields)
-					{
-						field.SubTotalFunctions = eSubTotalFunctions.None;
-					}
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B18:H22"), pivotTable.Address);
-					Assert.AreEqual(7, pivotTable.Fields.Count);
-					package.SaveAs(newFile.File);
-				}
-				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 18, 2, null),
-					new ExpectedCellValue(sheetName, 18, 3, "Column Labels"),
-					new ExpectedCellValue(sheetName, 18, 4, null),
-					new ExpectedCellValue(sheetName, 19, 2, null),
-					new ExpectedCellValue(sheetName, 19, 3, "January"),
-					new ExpectedCellValue(sheetName, 19, 4, "February"),
-					new ExpectedCellValue(sheetName, 19, 5, null),
-					new ExpectedCellValue(sheetName, 19, 6, "March"),
-					new ExpectedCellValue(sheetName, 19, 7, null),
-					new ExpectedCellValue(sheetName, 19, 8, "Grand Total"),
-					new ExpectedCellValue(sheetName, 20, 2, "Values"),
-					new ExpectedCellValue(sheetName, 20, 3, "Car Rack"),
-					new ExpectedCellValue(sheetName, 20, 4, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 20, 5, "Tent"),
-					new ExpectedCellValue(sheetName, 20, 6, "Car Rack"),
-					new ExpectedCellValue(sheetName, 20, 7, "Headlamp"),
-					new ExpectedCellValue(sheetName, 20, 8, null),
-					new ExpectedCellValue(sheetName, 21, 2, "Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 21, 3, .6280),
-					new ExpectedCellValue(sheetName, 21, 4, .0498),
-					new ExpectedCellValue(sheetName, 21, 5, .1002),
-					new ExpectedCellValue(sheetName, 21, 6, .2093),
-					new ExpectedCellValue(sheetName, 21, 7, .0126),
-					new ExpectedCellValue(sheetName, 21, 8, 1),
-					new ExpectedCellValue(sheetName, 22, 2, "Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 22, 3, 5),
-					new ExpectedCellValue(sheetName, 22, 4, 1),
-					new ExpectedCellValue(sheetName, 22, 5, 6),
-					new ExpectedCellValue(sheetName, 22, 6, 2),
-					new ExpectedCellValue(sheetName, 22, 7, 1),
-					new ExpectedCellValue(sheetName, 22, 8, 15)
-				});
-			}
-		}
-
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
-		public void PivotTableRefreshShowDataAsRowFieldsColumnFieldsAndColumnDataFieldsSubtotalsTop()
-		{
-			var file = new FileInfo("PivotTableShowDataAs.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "PivotTables";
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables["PivotTable3"];
-
-					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
-					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
-					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
-					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
-					foreach (var field in pivotTable.Fields)
-					{
-						field.SubtotalTop = true;
-						field.SubTotalFunctions =	eSubTotalFunctions.Default;
-					}
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B30:J41"), pivotTable.Address);
-					Assert.AreEqual(7, pivotTable.Fields.Count);
-					package.SaveAs(newFile.File);
-				}
-				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 31, 2, null),
-					new ExpectedCellValue(sheetName, 31, 3, "Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 31, 4, null),
-					new ExpectedCellValue(sheetName, 31, 5, null),
-					new ExpectedCellValue(sheetName, 31, 6, "Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 31, 7, null),
-					new ExpectedCellValue(sheetName, 31, 8, null),
-					new ExpectedCellValue(sheetName, 31, 9, "Total Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 31, 10, "Total Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 32, 2, "Row Labels"),
-					new ExpectedCellValue(sheetName, 32, 3, "Chicago"),
-					new ExpectedCellValue(sheetName, 32, 4, "Nashville"),
-					new ExpectedCellValue(sheetName, 32, 5, "San Francisco"),
-					new ExpectedCellValue(sheetName, 32, 6, "Chicago"),
-					new ExpectedCellValue(sheetName, 32, 7, "Nashville"),
-					new ExpectedCellValue(sheetName, 32, 8, "San Francisco"),
-					new ExpectedCellValue(sheetName, 32, 9, null),
-					new ExpectedCellValue(sheetName, 32, 10, null),
-					new ExpectedCellValue(sheetName, 33, 2, "January"),
-					new ExpectedCellValue(sheetName, 33, 3, .2093),
-					new ExpectedCellValue(sheetName, 33, 4, .2093),
-					new ExpectedCellValue(sheetName, 33, 5, .2093),
-					new ExpectedCellValue(sheetName, 33, 6, 2),
-					new ExpectedCellValue(sheetName, 33, 7, 2),
-					new ExpectedCellValue(sheetName, 33, 8, 1),
-					new ExpectedCellValue(sheetName, 33, 9, .628),
-					new ExpectedCellValue(sheetName, 33, 10, 5),
-					new ExpectedCellValue(sheetName, 34, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 34, 3, .2093),
-					new ExpectedCellValue(sheetName, 34, 4, .2093),
-					new ExpectedCellValue(sheetName, 34, 5, .2093),
-					new ExpectedCellValue(sheetName, 34, 6, 2),
-					new ExpectedCellValue(sheetName, 34, 7, 2),
-					new ExpectedCellValue(sheetName, 34, 8, 1),
-					new ExpectedCellValue(sheetName, 34, 9, .628),
-					new ExpectedCellValue(sheetName, 34, 10, 5),
-					new ExpectedCellValue(sheetName, 35, 2, "February"),
-					new ExpectedCellValue(sheetName, 35, 3, 0),
-					new ExpectedCellValue(sheetName, 35, 4, .1002),
-					new ExpectedCellValue(sheetName, 35, 5, .0498),
-					new ExpectedCellValue(sheetName, 35, 6, null),
-					new ExpectedCellValue(sheetName, 35, 7, 6),
-					new ExpectedCellValue(sheetName, 35, 8, 1),
-					new ExpectedCellValue(sheetName, 35, 9, .1501),
-					new ExpectedCellValue(sheetName, 35, 10, 7),
-					new ExpectedCellValue(sheetName, 36, 2, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 36, 3, 0),
-					new ExpectedCellValue(sheetName, 36, 4, 0),
-					new ExpectedCellValue(sheetName, 36, 5, .0498),
-					new ExpectedCellValue(sheetName, 36, 6, null),
-					new ExpectedCellValue(sheetName, 36, 7, null),
-					new ExpectedCellValue(sheetName, 36, 8, 1),
-					new ExpectedCellValue(sheetName, 36, 9, .0498),
-					new ExpectedCellValue(sheetName, 36, 10, 1),
-					new ExpectedCellValue(sheetName, 37, 2, "Tent"),
-					new ExpectedCellValue(sheetName, 37, 3, 0),
-					new ExpectedCellValue(sheetName, 37, 4, .1002),
-					new ExpectedCellValue(sheetName, 37, 5, 0),
-					new ExpectedCellValue(sheetName, 37, 6, null),
-					new ExpectedCellValue(sheetName, 37, 7, 6),
-					new ExpectedCellValue(sheetName, 37, 8, null),
-					new ExpectedCellValue(sheetName, 37, 9, .1002),
-					new ExpectedCellValue(sheetName, 37, 10, 6),
-					new ExpectedCellValue(sheetName, 38, 2, "March"),
-					new ExpectedCellValue(sheetName, 38, 3, .0126),
-					new ExpectedCellValue(sheetName, 38, 4, .2093),
-					new ExpectedCellValue(sheetName, 38, 5, 0),
-					new ExpectedCellValue(sheetName, 38, 6, 1),
-					new ExpectedCellValue(sheetName, 38, 7, 2),
-					new ExpectedCellValue(sheetName, 38, 8, null),
-					new ExpectedCellValue(sheetName, 38, 9, .2219),
-					new ExpectedCellValue(sheetName, 38, 10, 3),
-					new ExpectedCellValue(sheetName, 39, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 39, 3, 0),
-					new ExpectedCellValue(sheetName, 39, 4, .2093),
-					new ExpectedCellValue(sheetName, 39, 5, 0),
-					new ExpectedCellValue(sheetName, 39, 6, null),
-					new ExpectedCellValue(sheetName, 39, 7, 2),
-					new ExpectedCellValue(sheetName, 39, 8, null),
-					new ExpectedCellValue(sheetName, 39, 9, .2093),
-					new ExpectedCellValue(sheetName, 39, 10, 2),
-					new ExpectedCellValue(sheetName, 40, 2, "Headlamp"),
-					new ExpectedCellValue(sheetName, 40, 3, .0126),
-					new ExpectedCellValue(sheetName, 40, 4, 0),
-					new ExpectedCellValue(sheetName, 40, 5, 0),
-					new ExpectedCellValue(sheetName, 40, 6, 1),
-					new ExpectedCellValue(sheetName, 40, 7, null),
-					new ExpectedCellValue(sheetName, 40, 8, null),
-					new ExpectedCellValue(sheetName, 40, 9, .0126),
-					new ExpectedCellValue(sheetName, 40, 10, 1),
-					new ExpectedCellValue(sheetName, 41, 2, "Grand Total"),
-					new ExpectedCellValue(sheetName, 41, 3, .2219),
-					new ExpectedCellValue(sheetName, 41, 4, .5189),
-					new ExpectedCellValue(sheetName, 41, 5, .2592),
-					new ExpectedCellValue(sheetName, 41, 6, 3),
-					new ExpectedCellValue(sheetName, 41, 7, 10),
-					new ExpectedCellValue(sheetName, 41, 8, 2),
-					new ExpectedCellValue(sheetName, 41, 9, 1),
-					new ExpectedCellValue(sheetName, 41, 10, 15)
-				});
-			}
-		}
-
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
-		public void PivotTableRefreshShowDataAsRowFieldsColumnFieldsAndRowDataFields()
-		{
-			var file = new FileInfo("PivotTableShowDataAs.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "PivotTables";
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables["PivotTable4"];
-
-					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
-					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
-					wholesalePriceDataField.ShowDataAs = ShowDataAs.NoCalculation;
-					unitsSoldDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
-					foreach (var field in pivotTable.Fields)
-					{
-						field.SubTotalFunctions = eSubTotalFunctions.None;
-					}
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B46:F67"), pivotTable.Address);
-					Assert.AreEqual(7, pivotTable.Fields.Count);
-					package.SaveAs(newFile.File);
-				}
-				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 47, 2, "Row Labels"),
-					new ExpectedCellValue(sheetName, 47, 3, "Chicago"),
-					new ExpectedCellValue(sheetName, 47, 4, "Nashville"),
-					new ExpectedCellValue(sheetName, 47, 5, "San Francisco"),
-					new ExpectedCellValue(sheetName, 47, 6, "Grand Total"),
-					new ExpectedCellValue(sheetName, 48, 2, "Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 48, 3, null),
-					new ExpectedCellValue(sheetName, 48, 6, null),
-					new ExpectedCellValue(sheetName, 49, 2, "January"),
-					new ExpectedCellValue(sheetName, 49, 3, null),
-					new ExpectedCellValue(sheetName, 49, 6, null),
-					new ExpectedCellValue(sheetName, 50, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 50, 3, .1333),
-					new ExpectedCellValue(sheetName, 50, 4, .1333),
-					new ExpectedCellValue(sheetName, 50, 5, .0667),
-					new ExpectedCellValue(sheetName, 50, 6, .3333),
-					new ExpectedCellValue(sheetName, 51, 2, "February"),
-					new ExpectedCellValue(sheetName, 51, 4, null),
-					new ExpectedCellValue(sheetName, 51, 5, null),
-					new ExpectedCellValue(sheetName, 52, 2, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 52, 3, 0),
-					new ExpectedCellValue(sheetName, 52, 4, 0),
-					new ExpectedCellValue(sheetName, 52, 5, .0667),
-					new ExpectedCellValue(sheetName, 52, 6, .0667),
-					new ExpectedCellValue(sheetName, 53, 2, "Tent"),
-					new ExpectedCellValue(sheetName, 53, 3, 0),
-					new ExpectedCellValue(sheetName, 53, 4, .4),
-					new ExpectedCellValue(sheetName, 53, 5, 0),
-					new ExpectedCellValue(sheetName, 53, 6, .4),
-					new ExpectedCellValue(sheetName, 54, 2, "March"),
-					new ExpectedCellValue(sheetName, 54, 3, null),
-					new ExpectedCellValue(sheetName, 54, 6, null),
-					new ExpectedCellValue(sheetName, 55, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 55, 3, 0),
-					new ExpectedCellValue(sheetName, 55, 4, .1333),
-					new ExpectedCellValue(sheetName, 55, 5, 0),
-					new ExpectedCellValue(sheetName, 55, 6, .1333),
-					new ExpectedCellValue(sheetName, 56, 2, "Headlamp"),
-					new ExpectedCellValue(sheetName, 56, 3, .0667),
-					new ExpectedCellValue(sheetName, 56, 4, 0),
-					new ExpectedCellValue(sheetName, 56, 5, 0),
-					new ExpectedCellValue(sheetName, 56, 6, .0667),
-					new ExpectedCellValue(sheetName, 57, 2, "Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 57, 3, null),
-					new ExpectedCellValue(sheetName, 57, 6, null),
-					new ExpectedCellValue(sheetName, 58, 2, "January"),
-					new ExpectedCellValue(sheetName, 58, 3, null),
-					new ExpectedCellValue(sheetName, 58, 4, null),
-					new ExpectedCellValue(sheetName, 59, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 59, 3, 415.75),
-					new ExpectedCellValue(sheetName, 59, 4, 415.75),
-					new ExpectedCellValue(sheetName, 59, 5, 415.75),
-					new ExpectedCellValue(sheetName, 59, 6, 1247.25),
-					new ExpectedCellValue(sheetName, 60, 2, "February"),
-					new ExpectedCellValue(sheetName, 60, 3, null),
-					new ExpectedCellValue(sheetName, 60, 5, null),
-					new ExpectedCellValue(sheetName, 61, 2, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 61, 3, null),
-					new ExpectedCellValue(sheetName, 61, 4, null),
-					new ExpectedCellValue(sheetName, 61, 5, 99),
-					new ExpectedCellValue(sheetName, 61, 6, 99),
-					new ExpectedCellValue(sheetName, 62, 2, "Tent"),
-					new ExpectedCellValue(sheetName, 62, 3, null),
-					new ExpectedCellValue(sheetName, 62, 4, 199),
-					new ExpectedCellValue(sheetName, 62, 5, null),
-					new ExpectedCellValue(sheetName, 62, 6, 199),
-					new ExpectedCellValue(sheetName, 63, 2, "March"),
-					new ExpectedCellValue(sheetName, 63, 5, null),
-					new ExpectedCellValue(sheetName, 63, 6, null),
-					new ExpectedCellValue(sheetName, 64, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 64, 3, null),
-					new ExpectedCellValue(sheetName, 64, 4, 415.75),
-					new ExpectedCellValue(sheetName, 64, 5, null),
-					new ExpectedCellValue(sheetName, 64, 6, 415.75),
-					new ExpectedCellValue(sheetName, 65, 2, "Headlamp"),
-					new ExpectedCellValue(sheetName, 65, 3, 24.99),
-					new ExpectedCellValue(sheetName, 65, 4, null),
-					new ExpectedCellValue(sheetName, 65, 5, null),
-					new ExpectedCellValue(sheetName, 65, 6, 24.99),
-					new ExpectedCellValue(sheetName, 66, 2, "Total Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 66, 3, .2),
-					new ExpectedCellValue(sheetName, 66, 4, .6667),
-					new ExpectedCellValue(sheetName, 66, 5, .1333),
-					new ExpectedCellValue(sheetName, 66, 6, 1),
-					new ExpectedCellValue(sheetName, 67, 2, "Total Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 67, 3, 440.74),
-					new ExpectedCellValue(sheetName, 67, 4, 1030.5),
-					new ExpectedCellValue(sheetName, 67, 5, 514.75),
-					new ExpectedCellValue(sheetName, 67, 6, 1985.99)
-				});
-			}
-		}
-
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
-		public void PivotTableRefreshShowDataAsPercentOfColRowFieldsColumnFieldsAndRowDataFields()
-		{
-			var file = new FileInfo("PivotTableShowDataAs.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "PivotTables";
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables["PivotTable4"];
-
-					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
-					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
-					wholesalePriceDataField.ShowDataAs = ShowDataAs.NoCalculation;
-					unitsSoldDataField.ShowDataAs = ShowDataAs.PercentOfCol;
-					foreach (var field in pivotTable.Fields)
-					{
-						field.SubTotalFunctions = eSubTotalFunctions.None;
-					}
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B46:F67"), pivotTable.Address);
-					Assert.AreEqual(7, pivotTable.Fields.Count);
-					package.SaveAs(newFile.File);
-				}
-				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 47, 2, "Row Labels"),
-					new ExpectedCellValue(sheetName, 47, 3, "Chicago"),
-					new ExpectedCellValue(sheetName, 47, 4, "Nashville"),
-					new ExpectedCellValue(sheetName, 47, 5, "San Francisco"),
-					new ExpectedCellValue(sheetName, 47, 6, "Grand Total"),
-					new ExpectedCellValue(sheetName, 48, 2, "Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 48, 3, null),
-					new ExpectedCellValue(sheetName, 48, 6, null),
-					new ExpectedCellValue(sheetName, 49, 2, "January"),
-					new ExpectedCellValue(sheetName, 49, 3, null),
-					new ExpectedCellValue(sheetName, 49, 6, null),
-					new ExpectedCellValue(sheetName, 50, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 50, 3, .6667),
-					new ExpectedCellValue(sheetName, 50, 4, .2),
-					new ExpectedCellValue(sheetName, 50, 5, .5),
-					new ExpectedCellValue(sheetName, 50, 6, .3333),
-					new ExpectedCellValue(sheetName, 51, 2, "February"),
-					new ExpectedCellValue(sheetName, 51, 4, null),
-					new ExpectedCellValue(sheetName, 51, 5, null),
-					new ExpectedCellValue(sheetName, 52, 2, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 52, 3, 0),
-					new ExpectedCellValue(sheetName, 52, 4, 0),
-					new ExpectedCellValue(sheetName, 52, 5, .5),
-					new ExpectedCellValue(sheetName, 52, 6, .0667),
-					new ExpectedCellValue(sheetName, 53, 2, "Tent"),
-					new ExpectedCellValue(sheetName, 53, 3, 0),
-					new ExpectedCellValue(sheetName, 53, 4, .6),
-					new ExpectedCellValue(sheetName, 53, 5, 0),
-					new ExpectedCellValue(sheetName, 53, 6, .4),
-					new ExpectedCellValue(sheetName, 54, 2, "March"),
-					new ExpectedCellValue(sheetName, 54, 3, null),
-					new ExpectedCellValue(sheetName, 54, 6, null),
-					new ExpectedCellValue(sheetName, 55, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 55, 3, 0),
-					new ExpectedCellValue(sheetName, 55, 4, .2),
-					new ExpectedCellValue(sheetName, 55, 5, 0),
-					new ExpectedCellValue(sheetName, 55, 6, .1333),
-					new ExpectedCellValue(sheetName, 56, 2, "Headlamp"),
-					new ExpectedCellValue(sheetName, 56, 3, .3333),
-					new ExpectedCellValue(sheetName, 56, 4, 0),
-					new ExpectedCellValue(sheetName, 56, 5, 0),
-					new ExpectedCellValue(sheetName, 56, 6, .0667),
-					new ExpectedCellValue(sheetName, 57, 2, "Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 57, 3, null),
-					new ExpectedCellValue(sheetName, 57, 6, null),
-					new ExpectedCellValue(sheetName, 58, 2, "January"),
-					new ExpectedCellValue(sheetName, 58, 3, null),
-					new ExpectedCellValue(sheetName, 58, 4, null),
-					new ExpectedCellValue(sheetName, 59, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 59, 3, 415.75),
-					new ExpectedCellValue(sheetName, 59, 4, 415.75),
-					new ExpectedCellValue(sheetName, 59, 5, 415.75),
-					new ExpectedCellValue(sheetName, 59, 6, 1247.25),
-					new ExpectedCellValue(sheetName, 60, 2, "February"),
-					new ExpectedCellValue(sheetName, 60, 3, null),
-					new ExpectedCellValue(sheetName, 60, 5, null),
-					new ExpectedCellValue(sheetName, 61, 2, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 61, 3, null),
-					new ExpectedCellValue(sheetName, 61, 4, null),
-					new ExpectedCellValue(sheetName, 61, 5, 99),
-					new ExpectedCellValue(sheetName, 61, 6, 99),
-					new ExpectedCellValue(sheetName, 62, 2, "Tent"),
-					new ExpectedCellValue(sheetName, 62, 3, null),
-					new ExpectedCellValue(sheetName, 62, 4, 199),
-					new ExpectedCellValue(sheetName, 62, 5, null),
-					new ExpectedCellValue(sheetName, 62, 6, 199),
-					new ExpectedCellValue(sheetName, 63, 2, "March"),
-					new ExpectedCellValue(sheetName, 63, 5, null),
-					new ExpectedCellValue(sheetName, 63, 6, null),
-					new ExpectedCellValue(sheetName, 64, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 64, 3, null),
-					new ExpectedCellValue(sheetName, 64, 4, 415.75),
-					new ExpectedCellValue(sheetName, 64, 5, null),
-					new ExpectedCellValue(sheetName, 64, 6, 415.75),
-					new ExpectedCellValue(sheetName, 65, 2, "Headlamp"),
-					new ExpectedCellValue(sheetName, 65, 3, 24.99),
-					new ExpectedCellValue(sheetName, 65, 4, null),
-					new ExpectedCellValue(sheetName, 65, 5, null),
-					new ExpectedCellValue(sheetName, 65, 6, 24.99),
-					new ExpectedCellValue(sheetName, 66, 2, "Total Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 66, 3, 1),
-					new ExpectedCellValue(sheetName, 66, 4, 1),
-					new ExpectedCellValue(sheetName, 66, 5, 1),
-					new ExpectedCellValue(sheetName, 66, 6, 1),
-					new ExpectedCellValue(sheetName, 67, 2, "Total Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 67, 3, 440.74),
-					new ExpectedCellValue(sheetName, 67, 4, 1030.5),
-					new ExpectedCellValue(sheetName, 67, 5, 514.75),
-					new ExpectedCellValue(sheetName, 67, 6, 1985.99)
-				});
-			}
-		}
-
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
-		public void PivotTableRefreshShowDataAsPercentOfRowRowFieldsColumnFieldsAndRowDataFields()
-		{
-			var file = new FileInfo("PivotTableShowDataAs.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "PivotTables";
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables["PivotTable4"];
-
-					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
-					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
-					wholesalePriceDataField.ShowDataAs = ShowDataAs.NoCalculation;
-					unitsSoldDataField.ShowDataAs = ShowDataAs.PercentOfRow;
-					foreach (var field in pivotTable.Fields)
-					{
-						field.SubTotalFunctions = eSubTotalFunctions.None;
-					}
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B46:F67"), pivotTable.Address);
-					Assert.AreEqual(7, pivotTable.Fields.Count);
-					package.SaveAs(newFile.File);
-				}
-				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 47, 2, "Row Labels"),
-					new ExpectedCellValue(sheetName, 47, 3, "Chicago"),
-					new ExpectedCellValue(sheetName, 47, 4, "Nashville"),
-					new ExpectedCellValue(sheetName, 47, 5, "San Francisco"),
-					new ExpectedCellValue(sheetName, 47, 6, "Grand Total"),
-					new ExpectedCellValue(sheetName, 48, 2, "Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 48, 3, null),
-					new ExpectedCellValue(sheetName, 48, 6, null),
-					new ExpectedCellValue(sheetName, 49, 2, "January"),
-					new ExpectedCellValue(sheetName, 49, 3, null),
-					new ExpectedCellValue(sheetName, 49, 6, null),
-					new ExpectedCellValue(sheetName, 50, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 50, 3, .4),
-					new ExpectedCellValue(sheetName, 50, 4, .4),
-					new ExpectedCellValue(sheetName, 50, 5, .2),
-					new ExpectedCellValue(sheetName, 50, 6, 1),
-					new ExpectedCellValue(sheetName, 51, 2, "February"),
-					new ExpectedCellValue(sheetName, 51, 4, null),
-					new ExpectedCellValue(sheetName, 51, 5, null),
-					new ExpectedCellValue(sheetName, 52, 2, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 52, 3, 0),
-					new ExpectedCellValue(sheetName, 52, 4, 0),
-					new ExpectedCellValue(sheetName, 52, 5, 1),
-					new ExpectedCellValue(sheetName, 52, 6, 1),
-					new ExpectedCellValue(sheetName, 53, 2, "Tent"),
-					new ExpectedCellValue(sheetName, 53, 3, 0),
-					new ExpectedCellValue(sheetName, 53, 4, 1),
-					new ExpectedCellValue(sheetName, 53, 5, 0),
-					new ExpectedCellValue(sheetName, 53, 6, 1),
-					new ExpectedCellValue(sheetName, 54, 2, "March"),
-					new ExpectedCellValue(sheetName, 54, 3, null),
-					new ExpectedCellValue(sheetName, 54, 6, null),
-					new ExpectedCellValue(sheetName, 55, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 55, 3, 0),
-					new ExpectedCellValue(sheetName, 55, 4, 1),
-					new ExpectedCellValue(sheetName, 55, 5, 0),
-					new ExpectedCellValue(sheetName, 55, 6, 1),
-					new ExpectedCellValue(sheetName, 56, 2, "Headlamp"),
-					new ExpectedCellValue(sheetName, 56, 3, 1),
-					new ExpectedCellValue(sheetName, 56, 4, 0),
-					new ExpectedCellValue(sheetName, 56, 5, 0),
-					new ExpectedCellValue(sheetName, 56, 6, 1),
-					new ExpectedCellValue(sheetName, 57, 2, "Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 57, 3, null),
-					new ExpectedCellValue(sheetName, 57, 6, null),
-					new ExpectedCellValue(sheetName, 58, 2, "January"),
-					new ExpectedCellValue(sheetName, 58, 3, null),
-					new ExpectedCellValue(sheetName, 58, 4, null),
-					new ExpectedCellValue(sheetName, 59, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 59, 3, 415.75),
-					new ExpectedCellValue(sheetName, 59, 4, 415.75),
-					new ExpectedCellValue(sheetName, 59, 5, 415.75),
-					new ExpectedCellValue(sheetName, 59, 6, 1247.25),
-					new ExpectedCellValue(sheetName, 60, 2, "February"),
-					new ExpectedCellValue(sheetName, 60, 3, null),
-					new ExpectedCellValue(sheetName, 60, 5, null),
-					new ExpectedCellValue(sheetName, 61, 2, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 61, 3, null),
-					new ExpectedCellValue(sheetName, 61, 4, null),
-					new ExpectedCellValue(sheetName, 61, 5, 99),
-					new ExpectedCellValue(sheetName, 61, 6, 99),
-					new ExpectedCellValue(sheetName, 62, 2, "Tent"),
-					new ExpectedCellValue(sheetName, 62, 3, null),
-					new ExpectedCellValue(sheetName, 62, 4, 199),
-					new ExpectedCellValue(sheetName, 62, 5, null),
-					new ExpectedCellValue(sheetName, 62, 6, 199),
-					new ExpectedCellValue(sheetName, 63, 2, "March"),
-					new ExpectedCellValue(sheetName, 63, 5, null),
-					new ExpectedCellValue(sheetName, 63, 6, null),
-					new ExpectedCellValue(sheetName, 64, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 64, 3, null),
-					new ExpectedCellValue(sheetName, 64, 4, 415.75),
-					new ExpectedCellValue(sheetName, 64, 5, null),
-					new ExpectedCellValue(sheetName, 64, 6, 415.75),
-					new ExpectedCellValue(sheetName, 65, 2, "Headlamp"),
-					new ExpectedCellValue(sheetName, 65, 3, 24.99),
-					new ExpectedCellValue(sheetName, 65, 4, null),
-					new ExpectedCellValue(sheetName, 65, 5, null),
-					new ExpectedCellValue(sheetName, 65, 6, 24.99),
-					new ExpectedCellValue(sheetName, 66, 2, "Total Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 66, 3, .2),
-					new ExpectedCellValue(sheetName, 66, 4, .6667),
-					new ExpectedCellValue(sheetName, 66, 5, .1333),
-					new ExpectedCellValue(sheetName, 66, 6, 1),
-					new ExpectedCellValue(sheetName, 67, 2, "Total Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 67, 3, 440.74),
-					new ExpectedCellValue(sheetName, 67, 4, 1030.5),
-					new ExpectedCellValue(sheetName, 67, 5, 514.75),
-					new ExpectedCellValue(sheetName, 67, 6, 1985.99)
-				});
-			}
-		}
-
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
-		public void PivotTableRefreshShowDataAsPercentOfColRowFieldsColumnFieldsAndColumnDataFields()
-		{
-			var file = new FileInfo("PivotTableShowDataAs.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "PivotTables";
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables["PivotTable3"];
-
-					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
-					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
-					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfCol;
-					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
-					foreach (var field in pivotTable.Fields)
-					{
-						field.SubTotalFunctions = eSubTotalFunctions.None;
-					}
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B30:J41"), pivotTable.Address);
-					Assert.AreEqual(7, pivotTable.Fields.Count);
-					package.SaveAs(newFile.File);
-				}
-				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 31, 2, null),
-					new ExpectedCellValue(sheetName, 31, 3, "Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 31, 4, null),
-					new ExpectedCellValue(sheetName, 31, 5, null),
-					new ExpectedCellValue(sheetName, 31, 6, "Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 31, 7, null),
-					new ExpectedCellValue(sheetName, 31, 8, null),
-					new ExpectedCellValue(sheetName, 31, 9, "Total Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 31, 10, "Total Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 32, 2, "Row Labels"),
-					new ExpectedCellValue(sheetName, 32, 3, "Chicago"),
-					new ExpectedCellValue(sheetName, 32, 4, "Nashville"),
-					new ExpectedCellValue(sheetName, 32, 5, "San Francisco"),
-					new ExpectedCellValue(sheetName, 32, 6, "Chicago"),
-					new ExpectedCellValue(sheetName, 32, 7, "Nashville"),
-					new ExpectedCellValue(sheetName, 32, 8, "San Francisco"),
-					new ExpectedCellValue(sheetName, 32, 9, null),
-					new ExpectedCellValue(sheetName, 32, 10, null),
-					new ExpectedCellValue(sheetName, 33, 2, "January"),
-					new ExpectedCellValue(sheetName, 33, 3, null),
-					new ExpectedCellValue(sheetName, 33, 4, null),
-					new ExpectedCellValue(sheetName, 33, 5, null),
-					new ExpectedCellValue(sheetName, 33, 10, null),
-					new ExpectedCellValue(sheetName, 34, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 34, 3, .9433),
-					new ExpectedCellValue(sheetName, 34, 4, .4034),
-					new ExpectedCellValue(sheetName, 34, 5, .8077),
-					new ExpectedCellValue(sheetName, 34, 6, 2),
-					new ExpectedCellValue(sheetName, 34, 7, 2),
-					new ExpectedCellValue(sheetName, 34, 8, 1),
-					new ExpectedCellValue(sheetName, 34, 9, .628),
-					new ExpectedCellValue(sheetName, 34, 10, 5),
-					new ExpectedCellValue(sheetName, 35, 2, "February"),
-					new ExpectedCellValue(sheetName, 35, 3, null),
-					new ExpectedCellValue(sheetName, 35, 6, null),
-					new ExpectedCellValue(sheetName, 35, 10, null),
-					new ExpectedCellValue(sheetName, 36, 2, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 36, 3, 0),
-					new ExpectedCellValue(sheetName, 36, 4, 0),
-					new ExpectedCellValue(sheetName, 36, 5, .1923),
-					new ExpectedCellValue(sheetName, 36, 6, null),
-					new ExpectedCellValue(sheetName, 36, 7, null),
-					new ExpectedCellValue(sheetName, 36, 8, 1),
-					new ExpectedCellValue(sheetName, 36, 9, .0498),
-					new ExpectedCellValue(sheetName, 36, 10, 1),
-					new ExpectedCellValue(sheetName, 37, 2, "Tent"),
-					new ExpectedCellValue(sheetName, 37, 3, 0),
-					new ExpectedCellValue(sheetName, 37, 4, .1931),
-					new ExpectedCellValue(sheetName, 37, 5, 0),
-					new ExpectedCellValue(sheetName, 37, 6, null),
-					new ExpectedCellValue(sheetName, 37, 7, 6),
-					new ExpectedCellValue(sheetName, 37, 8, null),
-					new ExpectedCellValue(sheetName, 37, 9, .1002),
-					new ExpectedCellValue(sheetName, 37, 10, 6),
-					new ExpectedCellValue(sheetName, 38, 2, "March"),
-					new ExpectedCellValue(sheetName, 38, 3, null),
-					new ExpectedCellValue(sheetName, 38, 5, null),
-					new ExpectedCellValue(sheetName, 38, 7, null),
-					new ExpectedCellValue(sheetName, 38, 9, null),
-					new ExpectedCellValue(sheetName, 38, 10, null),
-					new ExpectedCellValue(sheetName, 39, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 39, 3, 0),
-					new ExpectedCellValue(sheetName, 39, 4, .4034),
-					new ExpectedCellValue(sheetName, 39, 5, 0),
-					new ExpectedCellValue(sheetName, 39, 6, null),
-					new ExpectedCellValue(sheetName, 39, 7, 2),
-					new ExpectedCellValue(sheetName, 39, 8, null),
-					new ExpectedCellValue(sheetName, 39, 9, .2093),
-					new ExpectedCellValue(sheetName, 39, 10, 2),
-					new ExpectedCellValue(sheetName, 40, 2, "Headlamp"),
-					new ExpectedCellValue(sheetName, 40, 3, .0567),
-					new ExpectedCellValue(sheetName, 40, 4, 0),
-					new ExpectedCellValue(sheetName, 40, 5, 0),
-					new ExpectedCellValue(sheetName, 40, 6, 1),
-					new ExpectedCellValue(sheetName, 40, 7, null),
-					new ExpectedCellValue(sheetName, 40, 8, null),
-					new ExpectedCellValue(sheetName, 40, 9, .0126),
-					new ExpectedCellValue(sheetName, 40, 10, 1),
-					new ExpectedCellValue(sheetName, 41, 2, "Grand Total"),
-					new ExpectedCellValue(sheetName, 41, 3, 1),
-					new ExpectedCellValue(sheetName, 41, 4, 1),
-					new ExpectedCellValue(sheetName, 41, 5, 1),
-					new ExpectedCellValue(sheetName, 41, 6, 3),
-					new ExpectedCellValue(sheetName, 41, 7, 10),
-					new ExpectedCellValue(sheetName, 41, 8, 2),
-					new ExpectedCellValue(sheetName, 41, 9, 1),
-					new ExpectedCellValue(sheetName, 41, 10, 15)
-				});
-			}
-		}
-
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
-		public void PivotTableRefreshShowDataAsPercentOfRowWithRowFieldsColumnFieldsAndColumnDataFields()
-		{
-			var file = new FileInfo("PivotTableShowDataAs.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "PivotTables";
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables["PivotTable3"];
-
-					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
-					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
-					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfRow;
-					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
-					foreach (var field in pivotTable.Fields)
-					{
-						field.SubTotalFunctions = eSubTotalFunctions.None;
-					}
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B30:J41"), pivotTable.Address);
-					Assert.AreEqual(7, pivotTable.Fields.Count);
-					package.SaveAs(newFile.File);
-				}
-				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
-				{
-					new ExpectedCellValue(sheetName, 31, 2, null),
-					new ExpectedCellValue(sheetName, 31, 3, "Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 31, 4, null),
-					new ExpectedCellValue(sheetName, 31, 5, null),
-					new ExpectedCellValue(sheetName, 31, 6, "Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 31, 7, null),
-					new ExpectedCellValue(sheetName, 31, 8, null),
-					new ExpectedCellValue(sheetName, 31, 9, "Total Sum of Wholesale Price"),
-					new ExpectedCellValue(sheetName, 31, 10, "Total Sum of Units Sold"),
-					new ExpectedCellValue(sheetName, 32, 2, "Row Labels"),
-					new ExpectedCellValue(sheetName, 32, 3, "Chicago"),
-					new ExpectedCellValue(sheetName, 32, 4, "Nashville"),
-					new ExpectedCellValue(sheetName, 32, 5, "San Francisco"),
-					new ExpectedCellValue(sheetName, 32, 6, "Chicago"),
-					new ExpectedCellValue(sheetName, 32, 7, "Nashville"),
-					new ExpectedCellValue(sheetName, 32, 8, "San Francisco"),
-					new ExpectedCellValue(sheetName, 32, 9, null),
-					new ExpectedCellValue(sheetName, 32, 10, null),
-					new ExpectedCellValue(sheetName, 33, 2, "January"),
-					new ExpectedCellValue(sheetName, 33, 3, null),
-					new ExpectedCellValue(sheetName, 33, 5, null),
-					new ExpectedCellValue(sheetName, 33, 9, null),
-					new ExpectedCellValue(sheetName, 33, 10, null),
-					new ExpectedCellValue(sheetName, 34, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 34, 3, .3333),
-					new ExpectedCellValue(sheetName, 34, 4, .3333),
-					new ExpectedCellValue(sheetName, 34, 5, .3333),
-					new ExpectedCellValue(sheetName, 34, 6, 2),
-					new ExpectedCellValue(sheetName, 34, 7, 2),
-					new ExpectedCellValue(sheetName, 34, 8, 1),
-					new ExpectedCellValue(sheetName, 34, 9, 1),
-					new ExpectedCellValue(sheetName, 34, 10, 5),
-					new ExpectedCellValue(sheetName, 35, 2, "February"),
-					new ExpectedCellValue(sheetName, 35, 3, null),
-					new ExpectedCellValue(sheetName, 35, 6, null),
-					new ExpectedCellValue(sheetName, 35, 10, null),
-					new ExpectedCellValue(sheetName, 36, 2, "Sleeping Bag"),
-					new ExpectedCellValue(sheetName, 36, 3, 0),
-					new ExpectedCellValue(sheetName, 36, 4, 0),
-					new ExpectedCellValue(sheetName, 36, 5, 1),
-					new ExpectedCellValue(sheetName, 36, 6, null),
-					new ExpectedCellValue(sheetName, 36, 7, null),
-					new ExpectedCellValue(sheetName, 36, 8, 1),
-					new ExpectedCellValue(sheetName, 36, 9, 1),
-					new ExpectedCellValue(sheetName, 36, 10, 1),
-					new ExpectedCellValue(sheetName, 37, 2, "Tent"),
-					new ExpectedCellValue(sheetName, 37, 3, 0),
-					new ExpectedCellValue(sheetName, 37, 4, 1),
-					new ExpectedCellValue(sheetName, 37, 5, 0),
-					new ExpectedCellValue(sheetName, 37, 6, null),
-					new ExpectedCellValue(sheetName, 37, 7, 6),
-					new ExpectedCellValue(sheetName, 37, 8, null),
-					new ExpectedCellValue(sheetName, 37, 9, 1),
-					new ExpectedCellValue(sheetName, 37, 10, 6),
-					new ExpectedCellValue(sheetName, 38, 2, "March"),
-					new ExpectedCellValue(sheetName, 38, 3, null),
-					new ExpectedCellValue(sheetName, 38, 5, null),
-					new ExpectedCellValue(sheetName, 38, 7, null),
-					new ExpectedCellValue(sheetName, 38, 9, null),
-					new ExpectedCellValue(sheetName, 38, 10, null),
-					new ExpectedCellValue(sheetName, 39, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 39, 3, 0),
-					new ExpectedCellValue(sheetName, 39, 4, 1),
-					new ExpectedCellValue(sheetName, 39, 5, 0),
-					new ExpectedCellValue(sheetName, 39, 6, null),
-					new ExpectedCellValue(sheetName, 39, 7, 2),
-					new ExpectedCellValue(sheetName, 39, 8, null),
-					new ExpectedCellValue(sheetName, 39, 9, 1),
-					new ExpectedCellValue(sheetName, 39, 10, 2),
-					new ExpectedCellValue(sheetName, 40, 2, "Headlamp"),
-					new ExpectedCellValue(sheetName, 40, 3, 1),
-					new ExpectedCellValue(sheetName, 40, 4, 0),
-					new ExpectedCellValue(sheetName, 40, 5, 0),
-					new ExpectedCellValue(sheetName, 40, 6, 1),
-					new ExpectedCellValue(sheetName, 40, 7, null),
-					new ExpectedCellValue(sheetName, 40, 8, null),
-					new ExpectedCellValue(sheetName, 40, 9, 1),
-					new ExpectedCellValue(sheetName, 40, 10, 1),
-					new ExpectedCellValue(sheetName, 41, 2, "Grand Total"),
-					new ExpectedCellValue(sheetName, 41, 3, .2219),
-					new ExpectedCellValue(sheetName, 41, 4, .5189),
-					new ExpectedCellValue(sheetName, 41, 5, .2592),
-					new ExpectedCellValue(sheetName, 41, 6, 3),
-					new ExpectedCellValue(sheetName, 41, 7, 10),
-					new ExpectedCellValue(sheetName, 41, 8, 2),
-					new ExpectedCellValue(sheetName, 41, 9, 1),
-					new ExpectedCellValue(sheetName, 41, 10, 15)
-				});
-			}
-		}
-		#endregion
 		#endregion
 
 		#region UpdateData Field Values Tests
@@ -2466,7 +1604,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:B5"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B5"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -2506,7 +1644,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F1:G10"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F1:G10"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -2544,7 +1682,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithNoColumnFields.xlsx")]
-		public void PivotTableRefreshDataFieldTwoRowFieldsWithFalseSubtotalTop()
+		public void PivotTableRefreshDataFieldTwoRowFieldsWithSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableWithNoColumnFields.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -2556,11 +1694,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F1:G13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F1:G13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -2617,7 +1755,7 @@ namespace EPPlusTest.Table.PivotTable
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F1:G10"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F1:G10"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
@@ -2664,7 +1802,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L1:M17"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L1:M17"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -2716,7 +1854,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithNoColumnFields.xlsx")]
-		public void PivotTableRefreshDataFieldThreeRowFieldsWithFalseSubtotalTop()
+		public void PivotTableRefreshDataFieldThreeRowFieldsWithSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableWithNoColumnFields.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -2728,11 +1866,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L1:M25"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L1:M25"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -2804,7 +1942,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:I13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:I13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
@@ -2879,7 +2017,7 @@ namespace EPPlusTest.Table.PivotTable
 					pivotTable.RowGrandTotals = false;
 					pivotTable.ColumnGrandTotals = false;
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:K7"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:K7"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -2942,7 +2080,7 @@ namespace EPPlusTest.Table.PivotTable
 					pivotTable.ColumnGrandTotals = false;
 					pivotTable.RowGrandTotals = true;
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:K8"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:K8"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -3016,7 +2154,7 @@ namespace EPPlusTest.Table.PivotTable
 					pivotTable.RowGrandTotals = false;
 					pivotTable.ColumnGrandTotals = true;
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:L7"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:L7"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -3082,7 +2220,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:C5"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:C5"), pivotTable.Address);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[2].Items.Count);
@@ -3129,7 +2267,7 @@ namespace EPPlusTest.Table.PivotTable
 					pivotTable.RowGrandTotals = false;
 					pivotTable.ColumnGrandTotals = true;
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:C4"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:C4"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -3172,7 +2310,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A10:W17"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A10:W17"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -3293,7 +2431,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:E13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:E13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -3372,7 +2510,7 @@ namespace EPPlusTest.Table.PivotTable
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:E25"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:E25"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
@@ -3453,7 +2591,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithMultipleRowDataFieldsTwoRowFieldOneColumnField.xlsx")]
-		public void PivotTableRefreshMultipleRowDataFieldsTwoRowsAndOneColumnSubtotalsOn()
+		public void PivotTableRefreshMultipleRowDataFieldsTwoRowsAndOneColumnSubtotalsBottom()
 		{
 			var file = new FileInfo("PivotTableWithMultipleRowDataFieldsTwoRowFieldOneColumnField.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -3465,11 +2603,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:E31"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:E31"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -3592,7 +2730,7 @@ namespace EPPlusTest.Table.PivotTable
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:E34"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:E34"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(7, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
@@ -3696,7 +2834,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:E52"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:E52"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -3864,7 +3002,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:B12"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B12"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -3919,7 +3057,7 @@ namespace EPPlusTest.Table.PivotTable
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F1:G26"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F1:G26"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
@@ -3992,7 +3130,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F1:G32"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F1:G32"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -4077,7 +3215,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("K1:L33"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("K1:L33"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -4163,7 +3301,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P1:Q54"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P1:Q54"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -4286,7 +3424,7 @@ namespace EPPlusTest.Table.PivotTable
 					pivotTable.PageFields[0].Item = 1;
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J9:M18"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J9:M18"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -4348,7 +3486,7 @@ namespace EPPlusTest.Table.PivotTable
 					pivotTable.PageFields[1].Item = 2;
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J9:L15"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J9:L15"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -4399,7 +3537,7 @@ namespace EPPlusTest.Table.PivotTable
 					pivotTable.Fields[2].Items[1].Hidden = true;
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J9:N18"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J9:N18"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -4469,7 +3607,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:I7"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:I7"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -4544,7 +3682,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A11:I17"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A11:I17"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -4618,7 +3756,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A21:W29"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A21:W29"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -4745,7 +3883,7 @@ namespace EPPlusTest.Table.PivotTable
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A21:Q29"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A21:Q29"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
@@ -4844,7 +3982,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A33:S40"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A33:S40"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -4963,7 +4101,7 @@ namespace EPPlusTest.Table.PivotTable
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A33:M40"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A33:M40"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
@@ -5052,7 +4190,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A44:AK56"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A44:AK56"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -5247,7 +4385,7 @@ namespace EPPlusTest.Table.PivotTable
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A44:Q56"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A44:Q56"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(7, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
@@ -5370,7 +4508,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A60:AK72"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A60:AK72"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -5566,7 +4704,7 @@ namespace EPPlusTest.Table.PivotTable
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A60:Q72"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A60:Q72"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(7, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
@@ -5786,11 +4924,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -5810,11 +4948,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -5831,7 +4969,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCustomRowFieldSubtotals.xlsx")]
-		public void PivotTableRefreshCustomSubtotalsMultipleRowFieldsSingleDataFieldSubtotalsTopOff()
+		public void PivotTableRefreshCustomSubtotalsMultipleRowFieldsSingleDataFieldSubtotalsBottom()
 		{
 			var file = new FileInfo("PivotTableCustomRowFieldSubtotals.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -5844,11 +4982,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -5929,11 +5067,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F2:G23"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F2:G23"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -6066,28 +5204,28 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("I2:J30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I2:J30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
 				validateWorksheet();
 
-				// Run again with subtotalTop = true, results should be the same.
+				// Run again with subtotal top, results should be the same.
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("I2:J30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I2:J30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -6173,28 +5311,28 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L2:M30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L2:M30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
 				validateWorksheet();
 
-				// Run again with subtotalTop = true, results should be the same.
+				// Run again with subtotal top, results should be the same.
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L2:M30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L2:M30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -6294,28 +5432,28 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("O2:P37"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("O2:P37"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
 				validateWorksheet();
 
-				// Run again with subtotalTop = true, results should be the same.
+				// Run again with subtotal top, results should be the same.
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("O2:P37"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("O2:P37"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -6338,11 +5476,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F3:U7"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F3:U7"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -6442,11 +5580,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F10:Q13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F10:Q13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -6518,11 +5656,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F16:Q42"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F16:Q42"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -6822,11 +5960,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F16:Q38"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F16:Q38"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7095,11 +6233,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:C10"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:C10"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7142,11 +6280,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B15:C23"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B15:C23"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7189,11 +6327,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F2:F13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F2:F13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7231,11 +6369,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D10"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D10"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7287,11 +6425,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G2:I10"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G2:I10"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7343,11 +6481,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B13:C28"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B13:C28"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7404,11 +6542,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F13:G28"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F13:G28"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7465,11 +6603,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B32:C43"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B32:C43"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7518,11 +6656,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F32:G43"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F32:G43"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7571,11 +6709,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B47:B65"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B47:B65"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7620,11 +6758,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:E10"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:E10"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7685,11 +6823,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H2:K10"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H2:K10"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7750,11 +6888,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B15:D30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B15:D30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7827,11 +6965,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G15:I30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G15:I30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7904,11 +7042,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B35:D50"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B35:D50"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -7981,11 +7119,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G35:I50"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G35:I50"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8058,11 +7196,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B55:C77"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B55:C77"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8133,11 +7271,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F55:G77"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F55:G77"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8208,11 +7346,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B82:B111"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B82:B111"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8267,11 +7405,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("E82:F104"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E82:F104"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8342,11 +7480,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("I82:J104"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I82:J104"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8417,11 +7555,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B117:C139"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B117:C139"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8492,11 +7630,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F117:G139"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F117:G139"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8567,11 +7705,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B144:D159"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B144:D159"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8644,11 +7782,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G144:I159"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G144:I159"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8724,7 +7862,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:C13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:C13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8773,7 +7911,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("E2:F13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E2:F13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8822,7 +7960,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B18:B32"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B18:B32"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8862,7 +8000,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("E18:F29"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E18:F29"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8911,7 +8049,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("I18:J29"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I18:J29"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -8961,7 +8099,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B3:D21"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:D21"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9043,7 +8181,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F3:H21"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F3:H21"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9125,7 +8263,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B26:D44"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B26:D44"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9207,7 +8345,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F26:H44"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F26:H44"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9289,7 +8427,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B49:C67"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B49:C67"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9352,7 +8490,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F49:G74"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F49:G74"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9429,7 +8567,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B78:C96"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B78:C96"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9492,7 +8630,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F78:G103"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F78:G103"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9569,7 +8707,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B107:C125"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B107:C125"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9632,7 +8770,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F107:G128"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F107:G128"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9701,7 +8839,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B133:C151"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B133:C151"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9764,7 +8902,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F133:G154"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F133:G154"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9833,7 +8971,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B159:B187"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B159:B187"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9887,7 +9025,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F159:F187"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F159:F187"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -9942,7 +9080,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:E31"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:E31"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -10087,7 +9225,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H2:K31"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H2:K31"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -10232,7 +9370,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B36:E65"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B36:E65"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -10377,7 +9515,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H36:K65"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H36:K65"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -10522,7 +9660,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B71:D100"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B71:D100"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -10637,7 +9775,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H71:J107"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H71:J107"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -10773,7 +9911,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B110:D139"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B110:D139"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -10888,7 +10026,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H110:J146"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H110:J146"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -11024,7 +10162,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B149:D178"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B149:D178"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -11139,7 +10277,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H149:J185"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H149:J185"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -11275,7 +10413,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B189:D218"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B189:D218"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -11390,7 +10528,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H189:J225"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H189:J225"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -11526,7 +10664,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B231:C260"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B231:C260"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -11611,7 +10749,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H231:I274"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H231:I274"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -11724,7 +10862,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B278:C307"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B278:C307"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -11809,7 +10947,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable16"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H278:I321"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H278:I321"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -11922,7 +11060,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable17"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B326:B355"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B326:B355"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -11977,7 +11115,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable18"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H326:H376"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H326:H376"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -12053,7 +11191,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable19"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B380:C409"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B380:C409"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -12138,7 +11276,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable20"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H380:I423"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H380:I423"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -12251,7 +11389,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable21"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B427:C456"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B427:C456"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -12336,7 +11474,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable22"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H427:I470"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H427:I470"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -12449,7 +11587,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable23"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B481:C510"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B481:C510"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -12534,7 +11672,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable24"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H481:I524"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H481:I524"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -12647,7 +11785,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable25"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B527:C556"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B527:C556"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -12732,7 +11870,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable26"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H527:I570"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H527:I570"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -12845,7 +11983,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable27"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B573:D602"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B573:D602"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -12960,7 +12098,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable28"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H573:J609"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H573:J609"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -13096,7 +12234,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable29"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B614:D643"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B614:D643"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -13211,7 +12349,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable30"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H614:J650"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H614:J650"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -13349,7 +12487,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:C13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:C13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -13410,7 +12548,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F2:L14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F2:L14"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -13526,7 +12664,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A19:N32"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A19:N32"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -13747,7 +12885,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:D20"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:D20"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -13848,7 +12986,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G2:Q21"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G2:Q21"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -14093,7 +13231,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A27:C45"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A27:C45"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -14175,7 +13313,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G27:P46"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G27:P46"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -14400,7 +13538,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A50:C68"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A50:C68"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -14482,7 +13620,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G50:P69"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G50:P69"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -14707,7 +13845,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G2:N32"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G2:N32"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -14980,7 +14118,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A37:D66"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A37:D66"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -15125,7 +14263,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G37:M67"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G37:M67"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -15367,7 +14505,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A71:D100"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A71:D100"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -15512,7 +14650,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G71:M101"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G71:M101"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -15756,7 +14894,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:D10"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D10"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -15808,7 +14946,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G2:L11"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G2:L11"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -15893,7 +15031,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:E24"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:E24"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -16010,7 +15148,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H2:J30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H2:J30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -16122,7 +15260,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("M2:O26"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("M2:O26"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -16222,7 +15360,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:F38"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:F38"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -16432,7 +15570,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("I2:L52"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I2:L52"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -16661,7 +15799,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("O2:R44"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("O2:R44"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -16858,7 +15996,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("U2:X40"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("U2:X40"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -17039,7 +16177,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B59:D109"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B59:D109"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -17217,7 +16355,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G59:I116"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G59:I116"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -17416,7 +16554,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L59:N101"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L59:N101"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -17570,7 +16708,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P59:R97"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P59:R97"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -17712,7 +16850,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B120:D166"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B120:D166"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -17878,7 +17016,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G120:I173"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G120:I173"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -18065,7 +17203,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("K120:M165"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("K120:M165"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -18228,7 +17366,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("O120:Q158"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("O120:Q158"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -18370,7 +17508,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B178:D224"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B178:D224"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -18536,7 +17674,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G178:H238"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G178:H238"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -18683,7 +17821,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J178:K223"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J178:K223"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -18800,7 +17938,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable16"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("M178:N216"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("M178:N216"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -18903,7 +18041,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable17"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B242:E285"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B242:E285"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -19104,7 +18242,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable18"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G242:J292"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G242:J292"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -19333,7 +18471,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable19"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L242:O284"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L242:O284"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -19530,7 +18668,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable20"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q242:T280"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q242:T280"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -19711,7 +18849,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable21"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B297:E340"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B297:E340"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -19912,7 +19050,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable22"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G297:I354"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G297:I354"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -20111,7 +19249,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable23"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L297:N339"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L297:N339"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -20265,7 +19403,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable24"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P297:R335"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P297:R335"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -20407,7 +19545,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable25"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B360:E399"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B360:E399"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -20592,7 +19730,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable26"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G360:I413"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G360:I413"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -20779,7 +19917,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable27"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L360:N405"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L360:N405"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -20942,7 +20080,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable28"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P360:R398"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P360:R398"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -21084,7 +20222,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("B2:G60"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:G60"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -21467,7 +20605,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:C13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:C13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -21515,7 +20653,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormTwoRowFieldsFirstFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormTwoRowFieldsFirstFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -21528,11 +20666,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:C16"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:C16"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -21602,7 +20740,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F2:H13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F2:H13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -21650,7 +20788,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormTwoRowFieldsBothFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormTwoRowFieldsBothFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -21663,11 +20801,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F2:H16"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F2:H16"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -21737,7 +20875,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("K2:L13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("K2:L13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -21773,7 +20911,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormTwoRowFieldsLastFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormTwoRowFieldsLastFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -21786,11 +20924,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("K2:L16"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("K2:L16"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -21846,7 +20984,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:D20"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:D20"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -21934,7 +21072,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsAllFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsAllFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -21947,11 +21085,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:D30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:D30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -22092,7 +21230,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F2:I20"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F2:I20"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -22180,7 +21318,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsFirstAndSecondFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsFirstAndSecondFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -22193,11 +21331,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F2:I30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F2:I30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -22338,7 +21476,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("K2:M20"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("K2:M20"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -22407,7 +21545,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsFirstAndThirdFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsFirstAndThirdFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -22420,11 +21558,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("K2:M30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("K2:M30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -22536,7 +21674,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("O2:Q20"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("O2:Q20"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -22605,7 +21743,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsFirstFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsFirstFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -22618,11 +21756,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("O2:Q30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("O2:Q30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -22734,7 +21872,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A51:B69"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A51:B69"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -22784,7 +21922,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsLastFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsLastFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -22797,11 +21935,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A51:B79"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A51:B79"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -22884,7 +22022,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("D51:F69"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("D51:F69"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -22953,7 +22091,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsSecondFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsSecondFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -22966,11 +22104,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("D51:F79"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("D51:F79"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -23082,7 +22220,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H51:J69"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H51:J69"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -23151,7 +22289,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsSecondAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsSecondAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -23164,11 +22302,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H51:J79"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H51:J79"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -23281,7 +22419,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:E31"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:E31"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -23443,7 +22581,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsAllFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsAllFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -23456,11 +22594,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:E52"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:E52"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -23740,7 +22878,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G2:K31"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G2:K31"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -23902,7 +23040,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstThreeFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstThreeFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -23915,11 +23053,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G2:K52"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G2:K52"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -24199,7 +23337,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("M2:P31"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("M2:P31"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -24331,7 +23469,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstSecondAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstSecondAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -24344,11 +23482,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("M2:P52"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("M2:P52"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -24577,7 +23715,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("R2:U31"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("R2:U31"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -24709,7 +23847,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstAndSecondFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstAndSecondFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -24722,11 +23860,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("R2:U52"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("R2:U52"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -24955,7 +24093,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A60:D89"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A60:D89"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -25087,7 +24225,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstThirdAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstThirdAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -25100,11 +24238,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A60:D110"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A60:D110"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -25333,7 +24471,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F60:I89"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F60:I89"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -25465,7 +24603,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstAndThirdFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstAndThirdFieldsCompactFormFalseSubtotal()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -25478,11 +24616,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F60:I110"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F60:I110"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -25711,7 +24849,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("K60:M89"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("K60:M89"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -25813,7 +24951,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -25826,11 +24964,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("K60:M110"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("K60:M110"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -26008,7 +25146,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("O60:Q89"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("O60:Q89"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -26110,7 +25248,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -26123,11 +25261,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("O60:Q110"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("O60:Q110"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -26305,7 +25443,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A115:B144"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A115:B144"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -26377,7 +25515,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsLastFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsLastFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -26390,11 +25528,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A115:B165"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A115:B165"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -26521,7 +25659,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("D115:F144"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("D115:F144"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -26623,7 +25761,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsThirdFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsThirdFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -26636,11 +25774,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("D115:F165"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("D115:F165"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -26818,7 +25956,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H115:J144"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H115:J144"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -26920,7 +26058,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsThirdAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsThirdAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -26933,11 +26071,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H115:J165"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H115:J165"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -27115,7 +26253,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L115:N144"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L115:N144"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -27217,7 +26355,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsSecondFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsSecondFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -27230,11 +26368,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L115:N165"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L115:N165"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -27412,7 +26550,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P115:R144"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P115:R144"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -27514,7 +26652,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsSecondAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsSecondAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -27527,11 +26665,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P115:R165"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P115:R165"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -27709,7 +26847,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A180:D209"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A180:D209"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -27841,7 +26979,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsSecondAndThirdFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsSecondAndThirdFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -27854,11 +26992,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A180:D230"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A180:D230"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -28087,7 +27225,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F180:I209"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F180:I209"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -28219,7 +27357,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsSecondThirdAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsSecondThirdAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -28232,11 +27370,11 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F180:I230"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F180:I230"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -28466,7 +27604,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:C13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:C13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -28527,7 +27665,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("E2:F12"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E2:F12"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -28575,7 +27713,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:D34"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:D34"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -28732,7 +27870,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F2:H34"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F2:H34"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -28856,7 +27994,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A41:C72"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A41:C72"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -28977,7 +28115,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F41:H72"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F41:H72"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -29098,7 +28236,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A77:C109"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A77:C109"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -29222,7 +28360,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F77:G108"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F77:G108"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -29311,7 +28449,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A114:C138"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A114:C138"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -29411,7 +28549,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F114:H138"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F114:H138"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -29511,7 +28649,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J114:K138"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J114:K138"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -29587,7 +28725,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A2:E55"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A2:E55"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -29882,7 +29020,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G2:J55"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G2:J55"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -30123,7 +29261,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L2:O55"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L2:O55"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -30364,7 +29502,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q2:S55"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q2:S55"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -30551,7 +29689,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A62:D115"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A62:D115"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -30792,7 +29930,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G62:I115"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G62:I115"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -30979,7 +30117,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L62:N115"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L62:N115"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -31166,7 +30304,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A120:D180"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A120:D180"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -31435,7 +30573,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G120:J180"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G120:J180"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -31704,7 +30842,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L120:N180"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L120:N180"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -31912,7 +31050,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q120:S180"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q120:S180"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -32120,7 +31258,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A186:C246"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A186:C246"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -32328,7 +31466,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G186:I246"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G186:I246"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -32536,7 +31674,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L186:M246"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L186:M246"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -32683,7 +31821,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A253:D298"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A253:D298"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -32892,7 +32030,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable16"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G253:J298"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G253:J298"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -33101,7 +32239,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable17"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L253:N298"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L253:N298"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -33264,7 +32402,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable18"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q253:S298"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q253:S298"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -33427,7 +32565,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable19"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A304:C349"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A304:C349"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -33590,7 +32728,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable20"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G304:I349"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G304:I349"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -33753,7 +32891,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable21"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L304:M349"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L304:M349"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -33870,7 +33008,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable22"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A356:D394"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A356:D394"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -34051,7 +33189,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable23"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("G356:J394"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G356:J394"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -34232,7 +33370,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable24"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("L356:N394"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("L356:N394"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -34374,7 +33512,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable25"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q356:S394"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q356:S394"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -34516,7 +33654,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable26"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("V356:W394"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("V356:W394"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -34623,7 +33761,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A5:C16"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A5:C16"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -34684,12 +33822,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A5:C16"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A5:C16"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -34750,12 +33888,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A5:C19"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A5:C19"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -34825,7 +33963,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F5:H13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F5:H13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -34877,12 +34015,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F5:H16"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F5:H16"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -34943,12 +34081,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("F5:H16"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("F5:H16"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -35010,7 +34148,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H6:K24"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H6:K24"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -35111,12 +34249,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H6:K24"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H6:K24"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -35217,12 +34355,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H6:K34"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H6:K34"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -35363,7 +34501,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N6:Q17"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N6:Q17"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -35436,12 +34574,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N6:Q24"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N6:Q24"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -35542,12 +34680,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N6:Q27"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N6:Q27"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -35660,7 +34798,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("T6:W17"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("T6:W17"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -35733,12 +34871,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("T6:W24"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("T6:W24"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -35839,12 +34977,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("T6:W27"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("T6:W27"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -35957,7 +35095,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H40:K55"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H40:K55"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -36046,12 +35184,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H40:K58"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H40:K58"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -36152,12 +35290,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H40:K65"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H40:K65"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -36286,7 +35424,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N40:Q55"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N40:Q55"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -36375,12 +35513,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N40:Q58"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N40:Q58"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -36481,12 +35619,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N40:Q65"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N40:Q65"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -36615,7 +35753,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("T40:W48"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("T40:W48"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -36676,12 +35814,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("T40:W58"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("T40:W58"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -36782,12 +35920,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("T40:W58"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("T40:W58"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -36889,7 +36027,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P10:T39"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P10:T39"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -37064,12 +36202,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P10:T39"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P10:T39"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -37244,12 +36382,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P10:T60"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P10:T60"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -37529,7 +36667,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W10:AA32"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W10:AA32"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -37669,12 +36807,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W10:AA39"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W10:AA39"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -37849,12 +36987,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W10:AA53"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W10:AA53"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -38099,7 +37237,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD10:AH32"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD10:AH32"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -38239,12 +37377,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD10:AH39"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD10:AH39"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -38419,12 +37557,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD10:AH53"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD10:AH53"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -38669,7 +37807,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P70:T92"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P70:T92"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -38809,12 +37947,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P70:T99"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P70:T99"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -38989,12 +38127,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P70:T113"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P70:T113"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -39239,7 +38377,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W70:AA92"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W70:AA92"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -39379,12 +38517,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W70:AA99"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W70:AA99"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -39559,12 +38697,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W70:AA113"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W70:AA113"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -39809,7 +38947,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD70:AH85"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD70:AH85"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -39914,12 +39052,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD70:AH99"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD70:AH99"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -40094,12 +39232,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD70:AH106"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD70:AH106"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -40309,7 +39447,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P120:T135"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P120:T135"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -40414,12 +39552,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P120:T149"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P120:T149"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -40594,12 +39732,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P120:T156"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P120:T156"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -40809,7 +39947,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W120:AA142"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W120:AA142"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -40949,12 +40087,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W120:AA149"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W120:AA149"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -41129,12 +40267,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W120:AA163"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W120:AA163"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -41379,7 +40517,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD120:AH142"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD120:AH142"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -41519,12 +40657,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD120:AH149"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD120:AH149"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -41699,12 +40837,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD120:AH163"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD120:AH163"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -41949,7 +41087,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P170:T185"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P170:T185"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -42054,12 +41192,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P170:T199"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P170:T199"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -42234,12 +41372,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P170:T206"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P170:T206"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -42449,7 +41587,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W170:AA185"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W170:AA185"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -42554,12 +41692,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W170:AA199"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W170:AA199"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -42734,12 +41872,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W170:AA206"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W170:AA206"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -42949,7 +42087,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD170:AH185"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD170:AH185"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -43054,12 +42192,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD170:AH199"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD170:AH199"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -43234,12 +42372,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("AD170:AH206"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("AD170:AH206"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -43449,7 +42587,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P215:T230"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P215:T230"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -43554,12 +42692,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P215:T244"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P215:T244"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -43734,12 +42872,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("P215:T251"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("P215:T251"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -43949,7 +43087,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W215:AA223"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W215:AA223"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -44019,12 +43157,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W215:AA244"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W215:AA244"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -44199,12 +43337,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("W215:AA244"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("W215:AA244"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -44382,7 +43520,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H7:K30"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H7:K30"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -44503,12 +43641,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H7:K36"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H7:K36"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -44653,12 +43791,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H7:K36"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H7:K36"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -44803,7 +43941,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N7:Q26"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N7:Q26"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -44908,12 +44046,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N7:Q32"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N7:Q32"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -45042,12 +44180,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N7:Q32"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N7:Q32"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -45176,7 +44314,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H41:J63"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H41:J63"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -45270,12 +44408,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H41:J69"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H41:J69"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -45387,12 +44525,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H41:J69"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H41:J69"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -45504,7 +44642,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N41:P66"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N41:P66"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -45607,12 +44745,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N41:P72"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N41:P72"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -45733,12 +44871,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N41:P72"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N41:P72"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -45859,7 +44997,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H76:J94"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H76:J94"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -45941,12 +45079,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H76:J100"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H76:J100"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -46046,12 +45184,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("H76:J100"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("H76:J100"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -46151,7 +45289,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N76:P100"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N76:P100"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -46251,12 +45389,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N76:P100"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N76:P100"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -46356,12 +45494,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("N76:P106"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("N76:P106"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -46480,7 +45618,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C10:G33"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C10:G33"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -46625,12 +45763,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C10:G53"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C10:G53"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -46875,12 +46013,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C10:G53"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C10:G53"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -47125,7 +46263,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J10:N33"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J10:N33"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -47270,12 +46408,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J10:N53"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J10:N53"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -47520,12 +46658,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J10:N53"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J10:N53"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -47770,7 +46908,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q10:U40"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q10:U40"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -47950,12 +47088,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q10:U60"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q10:U60"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -48235,12 +47373,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q10:U60"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q10:U60"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -48520,7 +47658,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C65:G84"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C65:G84"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -48645,12 +47783,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C65:G104"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C65:G104"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -48875,12 +48013,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C65:G104"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C65:G104"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -49105,7 +48243,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J65:N91"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J65:N91"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -49265,12 +48403,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J65:N111"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J65:N111"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -49530,12 +48668,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J65:N111"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J65:N111"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -49795,7 +48933,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q65:U91"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q65:U91"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -49955,12 +49093,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q65:U111"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q65:U111"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -50220,12 +49358,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q65:U111"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q65:U111"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -50485,7 +49623,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C116:F146"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C116:F146"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -50634,12 +49772,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C116:F166"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C116:F166"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -50868,12 +50006,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C116:F166"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C116:F166"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -51102,7 +50240,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J116:M153"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J116:M153"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -51279,12 +50417,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J116:M173"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J116:M173"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -51541,12 +50679,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J116:M173"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J116:M173"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -51803,7 +50941,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q116:T153"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q116:T153"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -51980,12 +51118,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q116:T173"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q116:T173"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -52242,12 +51380,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q116:T173"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q116:T173"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -52504,7 +51642,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C179:F212"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C179:F212"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -52665,12 +51803,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C179:F232"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C179:F232"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -52911,12 +52049,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C179:F232"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C179:F232"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -53157,7 +52295,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J179:M212"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J179:M212"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -53318,12 +52456,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J179:M232"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J179:M232"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -53564,12 +52702,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J179:M232"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J179:M232"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -53810,7 +52948,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q179:T219"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q179:T219"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -53999,12 +53137,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q179:T239"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q179:T239"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -54273,12 +53411,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q179:T239"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q179:T239"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -54547,7 +53685,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C244:F266"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C244:F266"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -54664,12 +53802,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C244:F286"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C244:F286"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -54866,12 +54004,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C244:F286"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C244:F286"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -55068,7 +54206,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J244:M280"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J244:M280"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -55241,12 +54379,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J244:M286"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J244:M286"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -55443,12 +54581,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J244:M300"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J244:M300"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -55701,7 +54839,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q244:T280"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q244:T280"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -55874,12 +55012,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q244:T286"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q244:T286"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -56076,12 +55214,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q244:T300"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q244:T300"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -56334,7 +55472,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable16"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C305:F330"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C305:F330"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -56463,12 +55601,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable16"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C305:F350"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C305:F350"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -56677,12 +55815,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable16"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C305:F350"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C305:F350"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -56891,7 +56029,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable17"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J305:M330"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J305:M330"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -57020,12 +56158,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable17"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J305:M350"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J305:M350"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -57234,12 +56372,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable17"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J305:M350"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J305:M350"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -57448,7 +56586,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable18"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q305:T344"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q305:T344"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -57633,12 +56771,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable18"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q305:T350"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q305:T350"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -57847,12 +56985,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable18"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q305:T364"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q305:T364"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -58117,7 +57255,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable19"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C370:F388"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C370:F388"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -58218,12 +57356,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable19"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C370:F408"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C370:F408"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -58404,12 +57542,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable19"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C370:F408"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C370:F408"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -58590,7 +57728,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable20"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J370:M402"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J370:M402"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -58747,12 +57885,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable20"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J370:M408"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J370:M408"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -58933,12 +58071,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable20"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J370:M422"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J370:M422"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -59175,7 +58313,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable21"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q370:T402"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q370:T402"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -59332,12 +58470,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable21"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q370:T408"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q370:T408"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -59518,12 +58656,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable21"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q370:T422"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q370:T422"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -59760,7 +58898,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable22"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C430:F454"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C430:F454"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -59885,12 +59023,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable22"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C430:F468"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C430:F468"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -60071,12 +59209,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable22"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("C430:F474"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C430:F474"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -60281,7 +59419,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable23"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J430:M454"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J430:M454"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -60406,12 +59544,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable23"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J430:M468"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J430:M468"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -60592,12 +59730,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable23"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("J430:M474"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("J430:M474"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -60802,7 +59940,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable24"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q430:T468"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q430:T468"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -60983,12 +60121,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable24"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = true;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q430:T468"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q430:T468"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -61169,12 +60307,12 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable24"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.DefaultSubtotal = true;
-						field.SubtotalTop = false;
+						field.SubTotalFunctions = eSubTotalFunctions.Default;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("Q430:T488"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q430:T488"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
@@ -61439,7 +60577,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:C12"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:C12"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -61506,7 +60644,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A16:W23"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A16:W23"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -61630,7 +60768,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A27:I40"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A27:I40"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -61741,7 +60879,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:C5"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:C5"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -61787,7 +60925,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A9:C19"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A9:C19"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -61851,7 +60989,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A23:C34"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A23:C34"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -61918,7 +61056,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A38:C49"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A38:C49"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -61985,7 +61123,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:K14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:K14"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -62098,7 +61236,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A18:S25"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A18:S25"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -62212,7 +61350,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A29:AH44"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A29:AH44"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -62444,7 +61582,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A1:E13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:E13"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -62519,7 +61657,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A17:E29"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A17:E29"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -62594,7 +61732,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A33:J46"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A33:J46"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -62752,7 +61890,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
-					this.CheckPivotTableAddress(new ExcelAddress("A50:J84"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A50:J84"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -63126,7 +62264,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:B10"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B10"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63179,13 +62317,13 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:B13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B13"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63246,7 +62384,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("E1:F10"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E1:F10"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63301,7 +62439,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("E1:F13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E1:F13"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63362,7 +62500,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("I1:J14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I1:J14"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63425,7 +62563,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("I1:J20"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I1:J20"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63500,7 +62638,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("M1:N11"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("M1:N11"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63557,7 +62695,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("M1:N14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("M1:N14"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63620,7 +62758,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("Q1:R15"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q1:R15"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63685,7 +62823,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("Q1:R21"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q1:R21"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63762,7 +62900,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("U1:V12"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("U1:V12"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63821,7 +62959,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("U1:V15"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("U1:V15"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63887,7 +63025,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:B17"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B17"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -63956,7 +63094,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:B25"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B25"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64041,7 +63179,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("E1:F17"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E1:F17"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64110,7 +63248,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("E1:F25"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E1:F25"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64195,7 +63333,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("I1:J19"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I1:J19"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64268,7 +63406,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("I1:J29"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I1:J29"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64361,7 +63499,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("M1:N18"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("M1:N18"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64432,7 +63570,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("M1:N27"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("M1:N27"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64521,7 +63659,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("Q1:R22"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q1:R22"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64600,7 +63738,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("Q1:R35"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("Q1:R35"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64705,7 +63843,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("U1:V21"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("U1:V21"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64782,7 +63920,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("U1:V33"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("U1:V33"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -64884,7 +64022,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:B19"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B19"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -64957,7 +64095,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("E1:F21"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E1:F21"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -65034,7 +64172,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("I1:J29"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I1:J29"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -65127,7 +64265,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:F22"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:F22"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -65288,7 +64426,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A26:K44"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A26:K44"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -65519,7 +64657,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A48:W67"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A48:W67"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -65989,7 +65127,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A71:L120"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A71:L120"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -66611,7 +65749,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:AE22"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:AE22"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -67295,7 +66433,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:S78"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:S78"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -68877,7 +68015,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A12:B14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A12:B14"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -68916,7 +68054,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A12:B14"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A12:B14"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -68955,7 +68093,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:B45"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B45"), pivotTable.Address);
 					Assert.AreEqual(13, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
@@ -69084,7 +68222,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:R151"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:R151"), pivotTable.Address);
 					Assert.AreEqual(13, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -71824,7 +70962,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A1:B8"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B8"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -71875,7 +71013,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("E1:H13"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E1:H13"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -71958,7 +71096,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A18:G36"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A18:G36"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -72118,7 +71256,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A41:L67"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A41:L67"), pivotTable.Address);
 					Assert.AreEqual(9, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -72463,7 +71601,7 @@ namespace EPPlusTest.Table.PivotTable
 					{
 						cacheDefinition.UpdateData();
 					}
-					this.CheckPivotTableAddress(new ExcelAddress("A14:Y53"), pivotTable.Address);
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A14:Y53"), pivotTable.Address);
 					Assert.AreEqual(13, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
@@ -73461,7 +72599,7 @@ namespace EPPlusTest.Table.PivotTable
 		#endregion
 
 		#region Helper Methods
-		private void CheckPivotTableAddress(ExcelAddress expectedAddress, ExcelAddress pivotTableAddress)
+		internal static void CheckPivotTableAddress(ExcelAddress expectedAddress, ExcelAddress pivotTableAddress)
 		{
 			Assert.AreEqual(expectedAddress.Start.Row, pivotTableAddress.Start.Row);
 			Assert.AreEqual(expectedAddress.Start.Column, pivotTableAddress.Start.Column);

@@ -433,6 +433,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			set { base.SetXmlNodeBool("@multipleFieldFilters", value); }
 		}
 
+		/// <summary>
+		/// Gets the "Totals and Filters" pivot table setting value for "Use Custom Lists when sorting".
+		/// </summary>
 		public bool CustomListSort
 		{
 			get { return base.GetXmlNodeBool("@customListSort", true); }
@@ -872,44 +875,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal void RefreshFromCache(StringResources stringResources)
 		{
 			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.RefreshFromCache));
-			// Update pivotField items to match corresponding cacheField sharedItems.
-			foreach (var pivotField in this.Fields)
-			{
-				var fieldItems = pivotField.Items;
-				var cacheField = this.CacheDefinition.CacheFields[pivotField.Index];
-				if (!cacheField.HasSharedItems)
-					continue;
 
-				if (fieldItems.Count > 0)
-				{
-					// Only sort pivot field items if the pivot field is not part of a date grouping.
-					if (this.CacheDefinition.CacheFields[pivotField.Index].FieldGroup == null)
-					{
-						// Preserve the "@h" attribute for fields marked as hidden as well as the totals field items.
-						var totalsFieldItems = fieldItems.Where(i => !string.IsNullOrEmpty(i.T)).ToList();
-						var hiddenFieldItemsDictionary = fieldItems
-							.Where(i => string.IsNullOrEmpty(i.T))
-							.ToDictionary(i => i.X, i => i.Hidden);
-						fieldItems.Clear();
-						var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
-
-						// Sort the row/column headers.
-						var sortedList = this.SortField(pivotField.Sort, pivotField).ToList();
-
-						// Assign the correct index value to each item.
-						for (int i = 0; i < sortedList.Count(); i++)
-						{
-							var field = sortedList[i];
-							int index = sharedItemsList.FindIndex(x => x == field);
-							fieldItems.AddItem(index);
-							if (hiddenFieldItemsDictionary.ContainsKey(index))
-								fieldItems[i].Hidden = hiddenFieldItemsDictionary[index];
-						}
-						// Add back the totals field items.
-						fieldItems.AppendItems(totalsFieldItems);
-					}
-				}
-			}
+			// Update pivot fields and sort pivot field items.
+			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.UpdatePivotFields));
+			this.UpdatePivotFields();
 
 			this.RowHeaders.Clear();
 			this.ColumnHeaders.Clear();
@@ -979,18 +948,22 @@ namespace OfficeOpenXml.Table.PivotTable
 			unsupportedFeatures = new List<string>();
 			foreach (var dataField in this.DataFields)
 			{
-				if (dataField.ShowDataAs == ShowDataAs.Percent || dataField.ShowDataAs == ShowDataAs.PercentOfParentRow || dataField.ShowDataAs == ShowDataAs.PercentOfParentCol
+				if (dataField.ShowDataAs == ShowDataAs.PercentOfParentCol
 					|| dataField.ShowDataAs == ShowDataAs.PercentOfParent || dataField.ShowDataAs == ShowDataAs.Difference || dataField.ShowDataAs == ShowDataAs.PercentDiff
 					|| dataField.ShowDataAs == ShowDataAs.RunTotal || dataField.ShowDataAs == ShowDataAs.PercentOfRunningTotal || dataField.ShowDataAs == ShowDataAs.RankAscending
 					|| dataField.ShowDataAs == ShowDataAs.RankDescending || dataField.ShowDataAs == ShowDataAs.Index)
 				{
 					unsupportedFeatures.Add($"Data field '{dataField.Name}' show data as setting '{dataField.ShowDataAs}'");
 				}
+
+				// Disallow the '(next)' and '(previous)' options. 
+				if (dataField.BaseField == 1048829)
+					unsupportedFeatures.Add($"Data field '{dataField.Name}' '(next)' option selected");
+				else if (dataField.BaseField == 1048828)
+					unsupportedFeatures.Add($"Data field '{dataField.Name}' '(previous)' option selected");
 			}
 			foreach (var field in this.Fields)
 			{
-				if (!field.Compact)
-					unsupportedFeatures.Add($"Field '{field.Name}' compact disabled");
 				if (field.RepeatItemLabels)
 					unsupportedFeatures.Add($"Field '{field.Name}' repeat item labels enabled");
 				if (field.InsertBlankLine)
@@ -999,6 +972,8 @@ namespace OfficeOpenXml.Table.PivotTable
 					unsupportedFeatures.Add($"Field '{field.Name}' show items with no data enabled");
 				if (field.InsertPageBreak)
 					unsupportedFeatures.Add($"Field '{field.Name}' insert page break after each item enabled");
+				if (field.IncludeNewItemsInFilter)
+					unsupportedFeatures.Add($"Field '{field.Name}' include new items in filter enabled");
 			}
 			var filters = base.TopNode.SelectSingleNode("d:filters", base.NameSpaceManager);
 			if (filters != null)
@@ -1104,6 +1079,48 @@ namespace OfficeOpenXml.Table.PivotTable
 			return lastChildIndices;
 		}
 
+		private void UpdatePivotFields()
+		{
+			// Update pivotField items to match corresponding cacheField sharedItems.
+			foreach (var pivotField in this.Fields)
+			{
+				var fieldItems = pivotField.Items;
+				var cacheField = this.CacheDefinition.CacheFields[pivotField.Index];
+				if (!cacheField.HasSharedItems)
+					continue;
+
+				if (fieldItems.Count > 0)
+				{
+					// Only sort pivot field items if the pivot field is not part of a date grouping.
+					if (this.CacheDefinition.CacheFields[pivotField.Index].FieldGroup == null)
+					{
+						// Preserve the "@h" attribute for fields marked as hidden as well as the totals field items.
+						var totalsFieldItems = fieldItems.Where(i => !string.IsNullOrEmpty(i.T)).ToList();
+						var hiddenFieldItemsDictionary = fieldItems
+							.Where(i => string.IsNullOrEmpty(i.T))
+							.ToDictionary(i => i.X, i => i.Hidden);
+						fieldItems.Clear();
+						var sharedItemsList = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems.ToList();
+
+						// Sort the row/column headers.
+						var sortedList = this.SortField(pivotField.Sort, pivotField).ToList();
+
+						// Assign the correct index value to each item.
+						for (int i = 0; i < sortedList.Count(); i++)
+						{
+							var field = sortedList[i];
+							int index = sharedItemsList.FindIndex(x => x == field);
+							fieldItems.AddItem(index);
+							if (hiddenFieldItemsDictionary.ContainsKey(index))
+								fieldItems[i].Hidden = hiddenFieldItemsDictionary[index];
+						}
+						// Add back the totals field items.
+						fieldItems.AppendItems(totalsFieldItems);
+					}
+				}
+			}
+		}
+
 		private int GetRepeatedItemsCount(List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices)
 		{
 			int repeatedItemsCount = 0;
@@ -1119,9 +1136,16 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			var fieldCollection = tabularFieldEnabled ? this.RowFields : this.ColumnFields;
 
-			// Create subtotal nodes if default subtotal is enabled and we are not at the root node.
+			// Create subtotal nodes if subtotals are enabled and we are not at the root node.
 			// Also, if node has a grandchild or the leaf node is not data field create a subtotal node.
-			var defaultSubtotal = node.PivotFieldIndex == -2 ? false : this.Fields[node.PivotFieldIndex].DefaultSubtotal;
+			bool defaultSubtotal;
+			if (node.PivotFieldIndex == -2)
+				defaultSubtotal = false;
+			else if (this.Fields[node.PivotFieldIndex].SubtotalLocation != SubtotalLocation.Off)
+				defaultSubtotal = true;
+			else
+				defaultSubtotal = false;
+
 			if (defaultSubtotal && node.Value != -1 &&
 				(node.Children.FirstOrDefault()?.HasChildren == true || fieldCollection.Last().Index != -2))
 			{
