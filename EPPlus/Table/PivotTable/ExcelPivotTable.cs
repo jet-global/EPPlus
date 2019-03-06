@@ -1095,9 +1095,16 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			var fieldCollection = tabularFieldEnabled ? this.RowFields : this.ColumnFields;
 
-			// Create subtotal nodes if default subtotal is enabled and we are not at the root node.
+			// Create subtotal nodes if subtotals are enabled and we are not at the root node.
 			// Also, if node has a grandchild or the leaf node is not data field create a subtotal node.
-			var defaultSubtotal = node.PivotFieldIndex == -2 ? false : this.Fields[node.PivotFieldIndex].DefaultSubtotal;
+			bool defaultSubtotal;
+			if (node.PivotFieldIndex == -2)
+				defaultSubtotal = false;
+			else if (this.Fields[node.PivotFieldIndex].SubtotalLocation != SubtotalLocation.Off)
+				defaultSubtotal = true;
+			else
+				defaultSubtotal = false;
+
 			if (defaultSubtotal && node.Value != -1 &&
 				(node.Children.FirstOrDefault()?.HasChildren == true || fieldCollection.Last().Index != -2))
 			{
