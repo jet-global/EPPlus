@@ -2861,7 +2861,6 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B46:F73"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
-					package.SaveAs(@"C:\Users\ems\Downloads\OUT.xlsx");
 				}
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
 				{

@@ -299,6 +299,21 @@ namespace OfficeOpenXml.Table.PivotTable
 					var sharedItems = this.CacheDefinition.CacheFields[tuple.Item1].SharedItems;
 					int recordValue = int.Parse(record.Items[tuple.Item1].Value);
 					int pivotFieldValue = pivotTable.Fields[tuple.Item1].Items[tuple.Item2].X;
+
+					if (pivotTable.HasFilters)
+					{
+						foreach (var filter in pivotTable.Filters)
+						{
+							int filterFieldIndex = filter.Field;
+							int recordReferenceIndex = int.Parse(record.Items[filterFieldIndex].Value);
+							string recordReferenceString = this.CacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordReferenceIndex].Value;
+							bool isNumeric = this.CacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordReferenceIndex].Type == PivotCacheRecordType.n;
+							bool isMatch = filter.MatchesFilterCriteriaResult(recordReferenceString, isNumeric);
+							if (!isMatch)
+								return false;
+						}
+					}
+
 					if (!sharedItems[recordValue].Value.IsEquivalentTo(sharedItems[pivotFieldValue].Value))
 						return false;
 				}
