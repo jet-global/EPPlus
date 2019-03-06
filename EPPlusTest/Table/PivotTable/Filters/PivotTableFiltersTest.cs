@@ -6874,26 +6874,6 @@ namespace EPPlusTest.Table.PivotTable.Filters
 		#endregion
 		#endregion
 
-		[TestMethod]
-		public void dafdag()
-		{
-			var file = new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\LabelFilters.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var newFile = new TempTestFile())
-			{
-				string sheetName = "Sheet1";
-				using (var package = new ExcelPackage(file))
-				{
-					var worksheet = package.Workbook.Worksheets[sheetName];
-					var pivotTable = worksheet.PivotTables.First();
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
-					package.SaveAs(newFile.File);
-					Assert.Fail();
-				}
-			}
-		}
-
 		#region Helper Methods
 		private void CheckPivotTableAddress(ExcelAddress expectedAddress, ExcelAddress pivotTableAddress)
 		{
