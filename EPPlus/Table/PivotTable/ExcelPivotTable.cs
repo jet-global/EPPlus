@@ -922,7 +922,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			unsupportedFeatures = new List<string>();
 			foreach (var dataField in this.DataFields)
 			{
-				if (dataField.ShowDataAs == ShowDataAs.PercentOfParentRow || dataField.ShowDataAs == ShowDataAs.PercentOfParentCol
+				if (dataField.ShowDataAs == ShowDataAs.PercentOfParentCol
 					|| dataField.ShowDataAs == ShowDataAs.PercentOfParent || dataField.ShowDataAs == ShowDataAs.Difference || dataField.ShowDataAs == ShowDataAs.PercentDiff
 					|| dataField.ShowDataAs == ShowDataAs.RunTotal || dataField.ShowDataAs == ShowDataAs.PercentOfRunningTotal || dataField.ShowDataAs == ShowDataAs.RankAscending
 					|| dataField.ShowDataAs == ShowDataAs.RankDescending || dataField.ShowDataAs == ShowDataAs.Index)
@@ -946,6 +946,8 @@ namespace OfficeOpenXml.Table.PivotTable
 					unsupportedFeatures.Add($"Field '{field.Name}' show items with no data enabled");
 				if (field.InsertPageBreak)
 					unsupportedFeatures.Add($"Field '{field.Name}' insert page break after each item enabled");
+				if (field.IncludeNewItemsInFilter)
+					unsupportedFeatures.Add($"Field '{field.Name}' include new items in filter enabled");
 			}
 			var filters = base.TopNode.SelectSingleNode("d:filters", base.NameSpaceManager);
 			if (filters != null)
@@ -1095,9 +1097,16 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			var fieldCollection = tabularFieldEnabled ? this.RowFields : this.ColumnFields;
 
-			// Create subtotal nodes if default subtotal is enabled and we are not at the root node.
+			// Create subtotal nodes if subtotals are enabled and we are not at the root node.
 			// Also, if node has a grandchild or the leaf node is not data field create a subtotal node.
-			var defaultSubtotal = node.PivotFieldIndex == -2 ? false : this.Fields[node.PivotFieldIndex].DefaultSubtotal;
+			bool defaultSubtotal;
+			if (node.PivotFieldIndex == -2)
+				defaultSubtotal = false;
+			else if (this.Fields[node.PivotFieldIndex].SubtotalLocation != SubtotalLocation.Off)
+				defaultSubtotal = true;
+			else
+				defaultSubtotal = false;
+
 			if (defaultSubtotal && node.Value != -1 &&
 				(node.Children.FirstOrDefault()?.HasChildren == true || fieldCollection.Last().Index != -2))
 			{

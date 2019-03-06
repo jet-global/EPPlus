@@ -1077,6 +1077,141 @@ namespace EPPlusTest.Table.PivotTable
 				validateWorksheet();
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableRowDataFieldsMultipleColumnFields.xlsx")]
+		public void PivotTableRefreshWithColumnFieldsAndRowDataFieldsSubtotalsBottom()
+		{
+			var file = new FileInfo("PivotTableRowDataFieldsMultipleColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalLocation = SubtotalLocation.Bottom;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:K7"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 4, 2, null),
+					new ExpectedCellValue(sheetName, 4, 3, "January"),
+					new ExpectedCellValue(sheetName, 4, 4, "January Total"),
+					new ExpectedCellValue(sheetName, 4, 5, "February"),
+					new ExpectedCellValue(sheetName, 4, 6, null),
+					new ExpectedCellValue(sheetName, 4, 7, "February Total"),
+					new ExpectedCellValue(sheetName, 4, 8, "March"),
+					new ExpectedCellValue(sheetName, 4, 9, null),
+					new ExpectedCellValue(sheetName, 4, 10, "March Total"),
+					new ExpectedCellValue(sheetName, 4, 11, "Grand Total"),
+
+					new ExpectedCellValue(sheetName, 5, 2, "Values"),
+					new ExpectedCellValue(sheetName, 5, 3, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 4, null),
+					new ExpectedCellValue(sheetName, 5, 5, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 5, 6, "Tent"),
+					new ExpectedCellValue(sheetName, 5, 7, null),
+					new ExpectedCellValue(sheetName, 5, 8, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 9, "Headlamp"),
+					new ExpectedCellValue(sheetName, 5, 10, null),
+					new ExpectedCellValue(sheetName, 5, 11, null),
+
+					new ExpectedCellValue(sheetName, 6, 2, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 6, 3, 1247.25),
+					new ExpectedCellValue(sheetName, 6, 4, 1247.25),
+					new ExpectedCellValue(sheetName, 6, 5, 99),
+					new ExpectedCellValue(sheetName, 6, 6, 199),
+					new ExpectedCellValue(sheetName, 6, 7, 298),
+					new ExpectedCellValue(sheetName, 6, 8, 415.75),
+					new ExpectedCellValue(sheetName, 6, 9, 24.99),
+					new ExpectedCellValue(sheetName, 6, 10, 440.74),
+					new ExpectedCellValue(sheetName, 6, 11, 1985.99),
+
+					new ExpectedCellValue(sheetName, 7, 2, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 7, 3, 5),
+					new ExpectedCellValue(sheetName, 7, 4, 5),
+					new ExpectedCellValue(sheetName, 7, 5, 1),
+					new ExpectedCellValue(sheetName, 7, 6, 6),
+					new ExpectedCellValue(sheetName, 7, 7, 7),
+					new ExpectedCellValue(sheetName, 7, 8, 2),
+					new ExpectedCellValue(sheetName, 7, 9, 1),
+					new ExpectedCellValue(sheetName, 7, 10, 3),
+					new ExpectedCellValue(sheetName, 7, 11, 15)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableRowDataFieldsMultipleColumnFields.xlsx")]
+		public void PivotTableRefreshWithColumnFieldsAndRowDataFieldsSubtotalsOff()
+		{
+			var file = new FileInfo("PivotTableRowDataFieldsMultipleColumnFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalLocation = SubtotalLocation.Off;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:H7"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 4, 2, null),
+					new ExpectedCellValue(sheetName, 4, 3, "January"),
+					new ExpectedCellValue(sheetName, 4, 4, "February"),
+					new ExpectedCellValue(sheetName, 4, 5, null),
+					new ExpectedCellValue(sheetName, 4, 6, "March"),
+					new ExpectedCellValue(sheetName, 4, 7, null),
+					new ExpectedCellValue(sheetName, 4, 8, "Grand Total"),
+
+					new ExpectedCellValue(sheetName, 5, 2, "Values"),
+					new ExpectedCellValue(sheetName, 5, 3, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 4, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 5, 5, "Tent"),
+					new ExpectedCellValue(sheetName, 5, 6, "Car Rack"),
+					new ExpectedCellValue(sheetName, 5, 7, "Headlamp"),
+					new ExpectedCellValue(sheetName, 5, 8, null),
+
+					new ExpectedCellValue(sheetName, 6, 2, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 6, 3, 1247.25),
+					new ExpectedCellValue(sheetName, 6, 4, 99),
+					new ExpectedCellValue(sheetName, 6, 5, 199),
+					new ExpectedCellValue(sheetName, 6, 6, 415.75),
+					new ExpectedCellValue(sheetName, 6, 7, 24.99),
+					new ExpectedCellValue(sheetName, 6, 8, 1985.99),
+
+					new ExpectedCellValue(sheetName, 7, 2, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 7, 3, 5),
+					new ExpectedCellValue(sheetName, 7, 4, 1),
+					new ExpectedCellValue(sheetName, 7, 5, 6),
+					new ExpectedCellValue(sheetName, 7, 6, 2),
+					new ExpectedCellValue(sheetName, 7, 7, 1),
+					new ExpectedCellValue(sheetName, 7, 8, 15)
+				});
+			}
+		}
+
 		#region Calculated Fields Tests
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithCalculatedFields.xlsx")]
@@ -1452,8 +1587,6 @@ namespace EPPlusTest.Table.PivotTable
 			}
 		}
 		#endregion
-
-		
 		#endregion
 
 		#region UpdateData Field Values Tests
@@ -1549,7 +1682,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithNoColumnFields.xlsx")]
-		public void PivotTableRefreshDataFieldTwoRowFieldsWithFalseSubtotalTop()
+		public void PivotTableRefreshDataFieldTwoRowFieldsWithSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableWithNoColumnFields.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -1561,7 +1694,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -1721,7 +1854,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithNoColumnFields.xlsx")]
-		public void PivotTableRefreshDataFieldThreeRowFieldsWithFalseSubtotalTop()
+		public void PivotTableRefreshDataFieldThreeRowFieldsWithSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableWithNoColumnFields.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -1733,7 +1866,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -2458,7 +2591,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithMultipleRowDataFieldsTwoRowFieldOneColumnField.xlsx")]
-		public void PivotTableRefreshMultipleRowDataFieldsTwoRowsAndOneColumnSubtotalsOn()
+		public void PivotTableRefreshMultipleRowDataFieldsTwoRowsAndOneColumnSubtotalsBottom()
 		{
 			var file = new FileInfo("PivotTableWithMultipleRowDataFieldsTwoRowFieldOneColumnField.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -2470,7 +2603,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -4791,7 +4924,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -4815,7 +4948,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -4836,7 +4969,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCustomRowFieldSubtotals.xlsx")]
-		public void PivotTableRefreshCustomSubtotalsMultipleRowFieldsSingleDataFieldSubtotalsTopOff()
+		public void PivotTableRefreshCustomSubtotalsMultipleRowFieldsSingleDataFieldSubtotalsBottom()
 		{
 			var file = new FileInfo("PivotTableCustomRowFieldSubtotals.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -4849,7 +4982,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -4934,7 +5067,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -5071,7 +5204,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -5081,14 +5214,14 @@ namespace EPPlusTest.Table.PivotTable
 				}
 				validateWorksheet();
 
-				// Run again with subtotalTop = true, results should be the same.
+				// Run again with subtotal top, results should be the same.
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -5178,7 +5311,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -5188,14 +5321,14 @@ namespace EPPlusTest.Table.PivotTable
 				}
 				validateWorksheet();
 
-				// Run again with subtotalTop = true, results should be the same.
+				// Run again with subtotal top, results should be the same.
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -5299,7 +5432,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -5309,14 +5442,14 @@ namespace EPPlusTest.Table.PivotTable
 				}
 				validateWorksheet();
 
-				// Run again with subtotalTop = true, results should be the same.
+				// Run again with subtotal top, results should be the same.
 				using (var package = new ExcelPackage(file))
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -5343,7 +5476,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -5447,7 +5580,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -5523,7 +5656,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -5827,7 +5960,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6100,7 +6233,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6147,7 +6280,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6194,7 +6327,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6236,7 +6369,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6292,7 +6425,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6348,7 +6481,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6409,7 +6542,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6470,7 +6603,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6523,7 +6656,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6576,7 +6709,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6625,7 +6758,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6690,7 +6823,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6755,7 +6888,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6832,7 +6965,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6909,7 +7042,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -6986,7 +7119,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -7063,7 +7196,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -7138,7 +7271,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -7213,7 +7346,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -7272,7 +7405,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -7347,7 +7480,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -7422,7 +7555,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -7497,7 +7630,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -7572,7 +7705,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -7649,7 +7782,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Off;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -20520,7 +20653,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormTwoRowFieldsFirstFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormTwoRowFieldsFirstFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -20533,7 +20666,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -20655,7 +20788,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormTwoRowFieldsBothFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormTwoRowFieldsBothFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -20668,7 +20801,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -20778,7 +20911,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormTwoRowFieldsLastFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormTwoRowFieldsLastFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -20791,7 +20924,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -20939,7 +21072,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsAllFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsAllFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -20952,7 +21085,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -21185,7 +21318,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsFirstAndSecondFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsFirstAndSecondFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -21198,7 +21331,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -21412,7 +21545,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsFirstAndThirdFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsFirstAndThirdFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -21425,7 +21558,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -21610,7 +21743,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsFirstFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsFirstFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -21623,7 +21756,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -21789,7 +21922,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsLastFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsLastFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -21802,7 +21935,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -21958,7 +22091,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsSecondFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsSecondFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -21971,7 +22104,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -22156,7 +22289,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormThreeRowFieldsSecondAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormThreeRowFieldsSecondAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -22169,7 +22302,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -22448,7 +22581,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsAllFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsAllFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -22461,7 +22594,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -22907,7 +23040,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstThreeFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstThreeFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -22920,7 +23053,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -23336,7 +23469,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstSecondAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstSecondAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -23349,7 +23482,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -23714,7 +23847,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstAndSecondFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstAndSecondFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -23727,7 +23860,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable4"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -24092,7 +24225,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstThirdAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstThirdAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -24105,7 +24238,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable5"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -24470,7 +24603,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstAndThirdFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstAndThirdFieldsCompactFormFalseSubtotal()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -24483,7 +24616,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable6"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -24818,7 +24951,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -24831,7 +24964,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable7"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -25115,7 +25248,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsFirstFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsFirstFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -25128,7 +25261,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable8"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -25382,7 +25515,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsLastFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsLastFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -25395,7 +25528,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable9"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -25628,7 +25761,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsThirdFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsThirdFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -25641,7 +25774,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable10"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -25925,7 +26058,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsThirdAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsThirdAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -25938,7 +26071,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable11"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -26222,7 +26355,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsSecondFieldCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsSecondFieldCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -26235,7 +26368,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable12"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -26519,7 +26652,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsSecondAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsSecondAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -26532,7 +26665,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable13"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -26846,7 +26979,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsSecondAndThirdFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsSecondAndThirdFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -26859,7 +26992,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable14"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -27224,7 +27357,7 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCompactForm.xlsx")]
-		public void PivotTableCompactFormFourRowFieldsSecondThirdAndLastFieldsCompactFormFalseSubtotalTopFalse()
+		public void PivotTableCompactFormFourRowFieldsSecondThirdAndLastFieldsCompactFormFalseSubtotalBottom()
 		{
 			var file = new FileInfo("PivotTableCompactForm.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -27237,7 +27370,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable15"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -33689,8 +33822,8 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
+						field.SubtotalLocation = SubtotalLocation.Top;
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -33756,7 +33889,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -33883,7 +34016,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -33949,7 +34082,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -34117,7 +34250,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -34223,7 +34356,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -34442,7 +34575,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -34548,7 +34681,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -34739,7 +34872,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -34845,7 +34978,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -35052,7 +35185,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -35158,7 +35291,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -35381,7 +35514,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -35487,7 +35620,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -35682,7 +35815,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -35788,7 +35921,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -36070,7 +36203,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -36250,7 +36383,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -36675,7 +36808,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -36855,7 +36988,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -37245,7 +37378,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -37425,7 +37558,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -37815,7 +37948,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -37995,7 +38128,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -38385,7 +38518,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -38565,7 +38698,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -38920,7 +39053,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -39100,7 +39233,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -39420,7 +39553,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -39600,7 +39733,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -39955,7 +40088,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -40135,7 +40268,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -40525,7 +40658,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -40705,7 +40838,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -41060,7 +41193,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -41240,7 +41373,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -41560,7 +41693,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -41740,7 +41873,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -42060,7 +42193,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -42240,7 +42373,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -42560,7 +42693,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -42740,7 +42873,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -43025,7 +43158,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -43205,7 +43338,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -43509,7 +43642,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -43659,7 +43792,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -43914,7 +44047,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -44048,7 +44181,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -44276,7 +44409,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -44393,7 +44526,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -44613,7 +44746,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -44739,7 +44872,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -44947,7 +45080,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -45052,7 +45185,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -45257,7 +45390,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -45362,7 +45495,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -45631,7 +45764,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -45881,7 +46014,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -46276,7 +46409,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -46526,7 +46659,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -46956,7 +47089,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -47241,7 +47374,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -47651,7 +47784,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -47881,7 +48014,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -48271,7 +48404,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -48536,7 +48669,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -48961,7 +49094,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -49226,7 +49359,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -49640,7 +49773,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -49874,7 +50007,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -50285,7 +50418,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -50547,7 +50680,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -50986,7 +51119,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -51248,7 +51381,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -51671,7 +51804,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -51917,7 +52050,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -52324,7 +52457,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -52570,7 +52703,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -53005,7 +53138,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -53279,7 +53412,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -53670,7 +53803,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -53872,7 +54005,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -54247,7 +54380,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -54449,7 +54582,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -54880,7 +55013,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -55082,7 +55215,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -55469,7 +55602,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -55683,7 +55816,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -56026,7 +56159,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -56240,7 +56373,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -56639,7 +56772,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -56853,7 +56986,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -57224,7 +57357,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -57410,7 +57543,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -57753,7 +57886,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -57939,7 +58072,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -58338,7 +58471,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -58524,7 +58657,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -58891,7 +59024,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -59077,7 +59210,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -59412,7 +59545,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -59598,7 +59731,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -59989,7 +60122,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = true;
+						field.SubtotalLocation = SubtotalLocation.Top;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -60175,7 +60308,7 @@ namespace EPPlusTest.Table.PivotTable
 					foreach (var field in pivotTable.Fields)
 					{
 						field.SubTotalFunctions = eSubTotalFunctions.Default;
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
@@ -62184,7 +62317,7 @@ namespace EPPlusTest.Table.PivotTable
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var field in pivotTable.Fields)
 					{
-						field.SubtotalTop = false;
+						field.SubtotalLocation = SubtotalLocation.Bottom;
 					}
 					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
 					{
