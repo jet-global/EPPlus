@@ -229,6 +229,25 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		Index
 	}
+
+	/// <summary>
+	/// Represents field subtotal locations.
+	/// </summary>
+	public enum SubtotalLocation
+	{
+		/// <summary>
+		/// Indicates that subtotals are off.
+		/// </summary>
+		Off,
+		/// <summary>
+		/// Indicates that subtotals should be shown at the top of a group.
+		/// </summary>
+		Top,
+		/// <summary>
+		/// Indicates that subtotals should be shown at the bottom of a group.
+		/// </summary>
+		Bottom
+	}
 	#endregion
 
 	/// <summary>
@@ -359,7 +378,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets whether the custom text that is displayed for the subtotals label is shown.
+		/// Gets or sets the subtotal top field attribute.
+		/// NOTE: This property alone does not indicate that the "Show all subtotals at top of group"
+		/// setting is selected. For this setting, <see cref="ExcelPivotTableField.SubtotalLocation"/>.
 		/// </summary>
 		public bool SubtotalTop
 		{
@@ -663,6 +684,39 @@ namespace OfficeOpenXml.Table.PivotTable
 					// Select all 'references' nodes that are descendants of the top node.
 					mySortingReferences = new AutoSortScopeReferencesCollection(this.NameSpaceManager, this.TopNode.SelectSingleNode(".//d:references", this.NameSpaceManager), myTable);
 				return mySortingReferences;
+			}
+		}
+
+		/// <summary>
+		/// Gets a value indicating where subtotals should be located.
+		/// </summary>
+		public SubtotalLocation SubtotalLocation
+		{
+			get
+			{
+				if (this.SubtotalTop && this.DefaultSubtotal)
+					return SubtotalLocation.Top;
+				else if (!this.SubtotalTop && this.DefaultSubtotal)
+					return SubtotalLocation.Bottom;
+				return SubtotalLocation.Off;
+			}
+			set
+			{
+				if (value == SubtotalLocation.Top)
+				{
+					this.SubtotalTop = true;
+					this.DefaultSubtotal = true;
+				}
+				else if (value == SubtotalLocation.Bottom)
+				{
+					this.SubtotalTop = false;
+					this.DefaultSubtotal = true;
+				}
+				else
+				{
+					this.SubtotalTop = true;
+					this.DefaultSubtotal = false;
+				}
 			}
 		}
 
