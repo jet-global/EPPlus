@@ -3018,6 +3018,347 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
+		public void PivotTableRefreshShowDataAsPercentOfParentRowWithColumnFieldsAndRowDataFieldsSubtotalsOff()
+		{
+			var file = new FileInfo("PivotTableShowDataAs.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
+					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
+					// Show 'Wholesale Price' data as the percentage of its parent row.
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfParentRow;
+					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalTop = true;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B18:K22"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 19, 2, null),
+					new ExpectedCellValue(sheetName, 19, 3, "January"),
+					new ExpectedCellValue(sheetName, 19, 4, "January Total"),
+					new ExpectedCellValue(sheetName, 19, 5, "February"),
+					new ExpectedCellValue(sheetName, 19, 6, null),
+					new ExpectedCellValue(sheetName, 19, 7, "February Total"),
+					new ExpectedCellValue(sheetName, 19, 8, "March"),
+					new ExpectedCellValue(sheetName, 19, 9, null),
+					new ExpectedCellValue(sheetName, 19, 10, "March Total"),
+					new ExpectedCellValue(sheetName, 19, 11, "Grand Total"),
+
+					new ExpectedCellValue(sheetName, 20, 2, "Values"),
+					new ExpectedCellValue(sheetName, 20, 3, "Car Rack"),
+					new ExpectedCellValue(sheetName, 20, 4, null),
+					new ExpectedCellValue(sheetName, 20, 5, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 20, 6, "Tent"),
+					new ExpectedCellValue(sheetName, 20, 7, null),
+					new ExpectedCellValue(sheetName, 20, 8, "Car Rack"),
+					new ExpectedCellValue(sheetName, 20, 9, "Headlamp"),
+					new ExpectedCellValue(sheetName, 20, 10, null),
+					new ExpectedCellValue(sheetName, 20, 11, null),
+
+					new ExpectedCellValue(sheetName, 21, 2, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 21, 3, null),
+					new ExpectedCellValue(sheetName, 21, 4, null),
+					new ExpectedCellValue(sheetName, 21, 5, null),
+					new ExpectedCellValue(sheetName, 21, 6, null),
+					new ExpectedCellValue(sheetName, 21, 7, null),
+					new ExpectedCellValue(sheetName, 21, 8, null),
+					new ExpectedCellValue(sheetName, 21, 9, null),
+					new ExpectedCellValue(sheetName, 21, 10, null),
+					new ExpectedCellValue(sheetName, 21, 11, null),
+
+					new ExpectedCellValue(sheetName, 22, 2, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 22, 3, 5),
+					new ExpectedCellValue(sheetName, 22, 4, 5),
+					new ExpectedCellValue(sheetName, 22, 5, 1),
+					new ExpectedCellValue(sheetName, 22, 6, 6),
+					new ExpectedCellValue(sheetName, 22, 7, 7),
+					new ExpectedCellValue(sheetName, 22, 8, 2),
+					new ExpectedCellValue(sheetName, 22, 9, 1),
+					new ExpectedCellValue(sheetName, 22, 10, 3),
+					new ExpectedCellValue(sheetName, 22, 11, 15)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
+		public void PivotTableRefreshShowDataAsPercentOfParentRowWithColumnFieldsAndRowDataFieldsSubtotalsOn()
+		{
+			var file = new FileInfo("PivotTableShowDataAs.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
+					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
+					// Show 'Wholesale Price' data as the percentage of its parent row.
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfParentRow;
+					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalTop = false;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					package.SaveAs(@"C:\Users\ems\Downloads\OUT.xlsx");
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B18:H22"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 19, 2, null),
+					new ExpectedCellValue(sheetName, 19, 3, "January"),
+					new ExpectedCellValue(sheetName, 19, 4, "February"),
+					new ExpectedCellValue(sheetName, 19, 5, null),
+					new ExpectedCellValue(sheetName, 19, 6, "March"),
+					new ExpectedCellValue(sheetName, 19, 7, null),
+					new ExpectedCellValue(sheetName, 19, 8, "Grand Total"),
+
+					new ExpectedCellValue(sheetName, 20, 2, "Values"),
+					new ExpectedCellValue(sheetName, 20, 3, "Car Rack"),
+					new ExpectedCellValue(sheetName, 20, 4, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 20, 5, "Tent"),
+					new ExpectedCellValue(sheetName, 20, 6, "Car Rack"),
+					new ExpectedCellValue(sheetName, 20, 7, "Headlamp"),
+					new ExpectedCellValue(sheetName, 20, 8, null),
+
+					new ExpectedCellValue(sheetName, 21, 2, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 21, 3, null),
+					new ExpectedCellValue(sheetName, 21, 4, null),
+					new ExpectedCellValue(sheetName, 21, 5, null),
+					new ExpectedCellValue(sheetName, 21, 6, null),
+					new ExpectedCellValue(sheetName, 21, 7, null),
+					new ExpectedCellValue(sheetName, 21, 8, null),
+
+					new ExpectedCellValue(sheetName, 22, 2, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 22, 3, 5),
+					new ExpectedCellValue(sheetName, 22, 4, 1),
+					new ExpectedCellValue(sheetName, 22, 5, 6),
+					new ExpectedCellValue(sheetName, 22, 6, 2),
+					new ExpectedCellValue(sheetName, 22, 7, 1),
+					new ExpectedCellValue(sheetName, 22, 8, 15)
+				});
+			}
+		}
+		#endregion
+
+		#region PercentOfParentColumn Tests
+		/*
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
+		public void PivotTableRefreshShowDataAsColumnFieldsRowFieldsAndColumnDataFieldsPercentOfParentRowDataFieldSubtotalTopOnOff()
+		{
+			var file = new FileInfo("PivotTableShowDataAs.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				void validateWorksheet() => TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 33, 2, "January"),
+
+					new ExpectedCellValue(sheetName, 34, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 34, 3, 1),
+					new ExpectedCellValue(sheetName, 34, 4, 1),
+					new ExpectedCellValue(sheetName, 34, 5, 1),
+					new ExpectedCellValue(sheetName, 34, 6, 2),
+					new ExpectedCellValue(sheetName, 34, 7, 2),
+					new ExpectedCellValue(sheetName, 34, 8, 1),
+					new ExpectedCellValue(sheetName, 34, 9, 1),
+					new ExpectedCellValue(sheetName, 34, 10, 5),
+
+					new ExpectedCellValue(sheetName, 35, 2, "February"),
+
+					new ExpectedCellValue(sheetName, 36, 2, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 36, 3, null),
+					new ExpectedCellValue(sheetName, 36, 4, 0),
+					new ExpectedCellValue(sheetName, 36, 5, 1),
+					new ExpectedCellValue(sheetName, 36, 6, null),
+					new ExpectedCellValue(sheetName, 36, 7, null),
+					new ExpectedCellValue(sheetName, 36, 8, 1),
+					new ExpectedCellValue(sheetName, 36, 9, .3322),
+					new ExpectedCellValue(sheetName, 36, 10, 1),
+
+					new ExpectedCellValue(sheetName, 37, 2, "Tent"),
+					new ExpectedCellValue(sheetName, 37, 3, null),
+					new ExpectedCellValue(sheetName, 37, 4, 1),
+					new ExpectedCellValue(sheetName, 37, 5, 0),
+					new ExpectedCellValue(sheetName, 37, 6, null),
+					new ExpectedCellValue(sheetName, 37, 7, 6),
+					new ExpectedCellValue(sheetName, 37, 8, null),
+					new ExpectedCellValue(sheetName, 37, 9, .6678),
+					new ExpectedCellValue(sheetName, 37, 10, 6),
+
+					new ExpectedCellValue(sheetName, 38, 2, "March"),
+
+					new ExpectedCellValue(sheetName, 39, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 39, 3, 0),
+					new ExpectedCellValue(sheetName, 39, 4, 1),
+					new ExpectedCellValue(sheetName, 39, 5, null),
+					new ExpectedCellValue(sheetName, 39, 6, null),
+					new ExpectedCellValue(sheetName, 39, 7, 2),
+					new ExpectedCellValue(sheetName, 39, 8, null),
+					new ExpectedCellValue(sheetName, 39, 9, .9433),
+					new ExpectedCellValue(sheetName, 39, 10, 2),
+
+					new ExpectedCellValue(sheetName, 40, 2, "Headlamp"),
+					new ExpectedCellValue(sheetName, 40, 3, 1),
+					new ExpectedCellValue(sheetName, 40, 4, 0),
+					new ExpectedCellValue(sheetName, 40, 5, null),
+					new ExpectedCellValue(sheetName, 40, 6, 1),
+					new ExpectedCellValue(sheetName, 40, 7, null),
+					new ExpectedCellValue(sheetName, 40, 8, null),
+					new ExpectedCellValue(sheetName, 40, 9, .0567),
+					new ExpectedCellValue(sheetName, 40, 10, 1),
+
+					new ExpectedCellValue(sheetName, 41, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 41, 3, 1),
+					new ExpectedCellValue(sheetName, 41, 4, 1),
+					new ExpectedCellValue(sheetName, 41, 5, 1),
+					new ExpectedCellValue(sheetName, 41, 6, 3),
+					new ExpectedCellValue(sheetName, 41, 7, 10),
+					new ExpectedCellValue(sheetName, 41, 8, 2),
+					new ExpectedCellValue(sheetName, 41, 9, 1),
+					new ExpectedCellValue(sheetName, 41, 10, 15),
+				});
+
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable3"];
+
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
+					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
+					// Show 'Wholesale Price' data as the percentage of its parent row.
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfParentRow;
+					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalTop = true;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B30:J41"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				validateWorksheet();
+				// Validate subtotal top is on.
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					// January
+					new ExpectedCellValue(sheetName, 33, 3, .9433),
+					new ExpectedCellValue(sheetName, 33, 4, .4034),
+					new ExpectedCellValue(sheetName, 33, 5, .8077),
+					new ExpectedCellValue(sheetName, 33, 6, 2),
+					new ExpectedCellValue(sheetName, 33, 7, 2),
+					new ExpectedCellValue(sheetName, 33, 8, 1),
+					new ExpectedCellValue(sheetName, 33, 9, .6280),
+					new ExpectedCellValue(sheetName, 33, 10, 5),
+
+					// February
+					new ExpectedCellValue(sheetName, 35, 3, 0),
+					new ExpectedCellValue(sheetName, 35, 4, .1931),
+					new ExpectedCellValue(sheetName, 35, 5, .1923),
+					new ExpectedCellValue(sheetName, 35, 6, null),
+					new ExpectedCellValue(sheetName, 35, 7, 6),
+					new ExpectedCellValue(sheetName, 35, 8, 1),
+					new ExpectedCellValue(sheetName, 35, 9, .1501),
+					new ExpectedCellValue(sheetName, 35, 10, 7),
+
+					// March
+					new ExpectedCellValue(sheetName, 38, 3, .0567),
+					new ExpectedCellValue(sheetName, 38, 4, .4034),
+					new ExpectedCellValue(sheetName, 38, 5, 0),
+					new ExpectedCellValue(sheetName, 38, 6, 1),
+					new ExpectedCellValue(sheetName, 38, 7, 2),
+					new ExpectedCellValue(sheetName, 38, 8, null),
+					new ExpectedCellValue(sheetName, 38, 9, .2219),
+					new ExpectedCellValue(sheetName, 38, 10, 3),
+				});
+
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable3"];
+
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
+					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
+					// Show 'Wholesale Price' data as the percentage of its parent row.
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfParentRow;
+					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubTotalFunctions = eSubTotalFunctions.None;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B30:J41"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				validateWorksheet();
+				// Validate subtotal top is off.
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					// January
+					new ExpectedCellValue(sheetName, 33, 3, null),
+					new ExpectedCellValue(sheetName, 33, 4, null),
+					new ExpectedCellValue(sheetName, 33, 5, null),
+					new ExpectedCellValue(sheetName, 33, 6, null),
+					new ExpectedCellValue(sheetName, 33, 7, null),
+					new ExpectedCellValue(sheetName, 33, 8, null),
+					new ExpectedCellValue(sheetName, 33, 9, null),
+					new ExpectedCellValue(sheetName, 33, 10, null),
+
+					// February
+					new ExpectedCellValue(sheetName, 35, 3, null),
+					new ExpectedCellValue(sheetName, 35, 4, null),
+					new ExpectedCellValue(sheetName, 35, 5, null),
+					new ExpectedCellValue(sheetName, 35, 6, null),
+					new ExpectedCellValue(sheetName, 35, 7, null),
+					new ExpectedCellValue(sheetName, 35, 8, null),
+					new ExpectedCellValue(sheetName, 35, 9, null),
+					new ExpectedCellValue(sheetName, 35, 10, null),
+
+					// March
+					new ExpectedCellValue(sheetName, 38, 3, null),
+					new ExpectedCellValue(sheetName, 38, 4, null),
+					new ExpectedCellValue(sheetName, 38, 5, null),
+					new ExpectedCellValue(sheetName, 38, 6, null),
+					new ExpectedCellValue(sheetName, 38, 7, null),
+					new ExpectedCellValue(sheetName, 38, 8, null),
+					new ExpectedCellValue(sheetName, 38, 9, null),
+					new ExpectedCellValue(sheetName, 38, 10, null),
+				});
+			}
+		}
+		*/
 		#endregion
 		#endregion
 
