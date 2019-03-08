@@ -980,15 +980,22 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				foreach (var filter in this.Filters)
 				{
-					if (filter.LabelFilterType == LabelFilterType.CaptionBetween || filter.LabelFilterType == LabelFilterType.CaptionNotBetween)
+					if (filter.FieldFilterType == FieldFilter.Label)
 					{
-						var stringOne = new WildCardValueMatcher().ExcelWildcardToRegex(filter.StringValueOne);
-						var stringTwo = new WildCardValueMatcher().ExcelWildcardToRegex(filter.StringValueTwo);
-						bool stringOneHasWildcards = stringOne.Contains("*") || stringOne.Contains(".");
-						bool stringTwoHasWildcards = stringTwo.Contains("*") || stringTwo.Contains(".");
-						if (stringOneHasWildcards || stringTwoHasWildcards)
-							unsupportedFeatures.Add($"{this.Fields[filter.Field].Name} field has {filter.LabelFilterType} label filter with wildcards enabled.");
+						if (filter.LabelFilterType == LabelFilterType.CaptionBetween || filter.LabelFilterType == LabelFilterType.CaptionNotBetween)
+						{
+							var stringOne = new WildCardValueMatcher().ExcelWildcardToRegex(filter.StringValueOne);
+							var stringTwo = new WildCardValueMatcher().ExcelWildcardToRegex(filter.StringValueTwo);
+							bool stringOneHasWildcards = stringOne.Contains("*") || stringOne.Contains(".");
+							bool stringTwoHasWildcards = stringTwo.Contains("*") || stringTwo.Contains(".");
+							if (stringOneHasWildcards || stringTwoHasWildcards)
+								unsupportedFeatures.Add($"'{this.Fields[filter.Field].Name}' field has {filter.LabelFilterType} label filter with wildcards enabled.");
+						}
 					}
+					else if (filter.FieldFilterType == FieldFilter.Value)
+						unsupportedFeatures.Add($"'{this.Fields[filter.Field].Name}' field has value filters enabled.");
+					else if (filter.FieldFilterType == FieldFilter.Report)
+						unsupportedFeatures.Add($"'{this.Fields[filter.Field].Name}' field has report filters enabled.");
 				}
 			}
 			if (this.MergeAndCenterCellsWithLabels)

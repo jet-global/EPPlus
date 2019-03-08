@@ -154,10 +154,7 @@ namespace OfficeOpenXml.Table.PivotTable.Filters
 		{
 			get
 			{
-				if (this.FieldFilterType == FieldFilter.Label)
-					return (LabelFilterType)Enum.Parse(typeof(LabelFilterType), this.PivotFilterType, true);
-				else
-					throw new InvalidOperationException("Invalid filter type.");
+				return (LabelFilterType)Enum.Parse(typeof(LabelFilterType), this.PivotFilterType, true);
 			}
 		}
 
@@ -230,8 +227,6 @@ namespace OfficeOpenXml.Table.PivotTable.Filters
 				else
 					match = this.SatisfiesInequalityLabelFilter(input, filterValue, match, hasWildcard, isNumericType);
 			}
-			else
-				throw new NotImplementedException($"{this.FieldFilterType} is not supported."); // TODO: Handle Value Filters (Task #11843).
 			return match;
 		}
 		#endregion
