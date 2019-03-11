@@ -126,24 +126,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		#endregion
 
 		#region Private Methods
-		private bool TryFindBodyParent(int startIndex, out int index)
-		{
-			index = 0;
-			var header = base.PivotTable.ColumnHeaders[startIndex];
-			// Walk down the headers until we find a parent.
-			for (int i = startIndex + 1; i < base.PivotTable.ColumnHeaders.Count; i++)
-			{
-				var previousHeader = base.PivotTable.ColumnHeaders[i];
-				if (previousHeader.CacheRecordIndices?.Count < header.CacheRecordIndices.Count && previousHeader.IsDataField == false)
-				{
-					index = i;
-					return true;
-				}
-			}
-			index = -1;
-			return false;
-		}
-
 		private bool TryFindParent(int startIndex, out int index)
 		{
 			index = 0;
