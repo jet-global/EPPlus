@@ -106,7 +106,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					this.WriteGrandTotalValues(true, rowGrandTotalBackingData, columnGrandGrandTotalsLists);
 
 				// Write out body data applying "Show Data As" and other settings as necessary.
-				this.WritePivotTableBodyData(backingBodyData, columnGrandTotalBackingData, rowGrandTotalBackingData, columnGrandGrandTotalsLists);
+				this.WritePivotTableBodyData(backingBodyData, columnGrandTotalBackingData, 
+					rowGrandTotalBackingData, columnGrandGrandTotalsLists, totalsCalculator);
 			}
 		}
 		#endregion
@@ -114,7 +115,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		#region Private Methods
 		private void WritePivotTableBodyData(PivotCellBackingData[,] backingDatas,
 			List<PivotCellBackingData> columnGrandTotalsValuesLists, List<PivotCellBackingData> rowGrandTotalsValuesLists,
-			PivotCellBackingData[] grandGrandTotalValues)
+			PivotCellBackingData[] grandGrandTotalValues, TotalsFunctionHelper totalsCalculator)
 		{
 			int sheetColumn = this.PivotTable.Address.Start.Column + this.PivotTable.FirstDataCol;
 			for (int column = 0; column < this.PivotTable.ColumnHeaders.Count; column++)
@@ -136,7 +137,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 						backingDatas, 
 						grandGrandTotalValues, 
 						rowGrandTotalsValuesLists,
-						columnGrandTotalsValuesLists);
+						columnGrandTotalsValuesLists,
+						totalsCalculator);
 
 					var cell = this.PivotTable.Worksheet.Cells[sheetRow, sheetColumn];
 					this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);

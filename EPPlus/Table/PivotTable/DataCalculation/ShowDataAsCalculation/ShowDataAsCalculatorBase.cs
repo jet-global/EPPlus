@@ -42,13 +42,15 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <param name="grandGrandTotalValues">The backing data for the pivot table grand grand totals.</param>
 		/// <param name="rowGrandTotalsValuesLists">The backing data for the pivot table row grand totals.</param>
 		/// <param name="columnGrandTotalsValuesLists">The backing data for the pivot table column grand totals.</param>
+		/// <param name="totalsCalculator">A <see cref="TotalsFunctionHelper"/> to calculate values with.</param>
 		/// <returns>An object value for the cell.</returns>
 		public abstract object CalculateBodyValue(
 			int dataRow, int dataColumn,
 			PivotCellBackingData[,] backingDatas,
 			PivotCellBackingData[] grandGrandTotalValues,
 			List<PivotCellBackingData> rowGrandTotalsValuesLists,
-			List<PivotCellBackingData> columnGrandTotalsValuesLists);
+			List<PivotCellBackingData> columnGrandTotalsValuesLists,
+			TotalsFunctionHelper totalsCalculator);
 
 		/// <summary>
 		/// Calculates the grand total value in a pivot table cell.
