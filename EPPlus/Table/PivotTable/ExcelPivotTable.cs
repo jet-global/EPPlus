@@ -922,8 +922,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			unsupportedFeatures = new List<string>();
 			foreach (var dataField in this.DataFields)
 			{
-				if (dataField.ShowDataAs == ShowDataAs.PercentOfParentCol
-					|| dataField.ShowDataAs == ShowDataAs.PercentOfParent || dataField.ShowDataAs == ShowDataAs.Difference || dataField.ShowDataAs == ShowDataAs.PercentDiff
+				if (dataField.ShowDataAs == ShowDataAs.PercentOfParent || dataField.ShowDataAs == ShowDataAs.Difference || dataField.ShowDataAs == ShowDataAs.PercentDiff
 					|| dataField.ShowDataAs == ShowDataAs.RunTotal || dataField.ShowDataAs == ShowDataAs.PercentOfRunningTotal || dataField.ShowDataAs == ShowDataAs.RankAscending
 					|| dataField.ShowDataAs == ShowDataAs.RankDescending || dataField.ShowDataAs == ShowDataAs.Index)
 				{
