@@ -213,6 +213,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Gets or sets whether to show member property information.
 		/// </summary>
+		/// <remarks>This only applies to pivot tables with an OLAP data source.</remarks>
 		public bool ShowMemberPropertyTips
 		{
 			get { return base.GetXmlNodeBool("@showMemberPropertyTips"); }
@@ -514,6 +515,39 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get { return base.GetXmlNodeBool("@showEmptyRow", false); }
 			set { base.SetXmlNodeBool("@showEmptyRow", value, false); }
+		}
+
+		/// <summary>
+		/// Gets or sets the value that corresponds to the Excel pivot table
+		/// display setting "Enable cell editing in the values area".
+		/// </summary>
+		/// <remarks>This only applies to pivot tables with an OLAP data source.</remarks>
+		public bool EnableEdit
+		{
+			get { return base.GetXmlNodeBool("//x14:pivotTableDefinition/@enableEdit", false); }
+			set { base.SetXmlNodeBool("//x14:pivotTableDefinition/@enableEdit", value, false); }
+		}
+
+		/// <summary>
+		/// Gets or sets the value that corresponds to the Excel pivot table
+		/// totals and filters settings "Include filtered items in totals".
+		/// </summary>
+		/// <remarks>This only applies to pivot tables with an OLAP data source.</remarks>
+		public bool VisualTotals
+		{
+			get { return base.GetXmlNodeBool("@visualTotals", true); }
+			set { base.SetXmlNodeBool("@visualTotals", value, true); }
+		}
+
+		/// <summary>
+		/// Gets or sets the value that correspons to the Excel pivot table
+		/// totals and filters settings "Mark totals with *".
+		/// </summary>
+		/// <remarks>This only applies to pivot tables with an OLAP data source.</remarks>
+		public bool AsterisksTotals
+		{
+			get { return base.GetXmlNodeBool("@asteriskTotals", false); }
+			set { base.SetXmlNodeBool("@asteriskTotals", value, false); }
 		}
 
 		/// <summary>
@@ -1028,6 +1062,14 @@ namespace OfficeOpenXml.Table.PivotTable
 				unsupportedFeatures.Add("Show items with no data on columns enabled");
 			if (this.ShowEmptyRow)
 				unsupportedFeatures.Add("Show items with no data on rows enabled");
+			if (this.ShowMemberPropertyTips)
+				unsupportedFeatures.Add("Show peroperties in tooltips enabled");
+			if (this.EnableEdit)
+				unsupportedFeatures.Add("Enable cell editing in the values area enabled");
+			if (!this.VisualTotals)
+				unsupportedFeatures.Add("Include filtered items in totals enabled");
+			if (this.AsterisksTotals)
+				unsupportedFeatures.Add("Mark totals with * disabled");
 			return unsupportedFeatures.Any();
 		}
 		#endregion
