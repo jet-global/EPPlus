@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 {
 	/// <summary>
-	/// Calculates the <see cref="ShowDataAs.PercentOfParentRow"/> value in a pivot table.
+	/// Calculates the <see cref="ShowDataAs.PercentOfCol"/> value in a pivot table.
 	/// </summary>
-	internal class PercentOfParentRowCalculator : ShowDataAsCalculatorBase
+	internal class PercentOfParentColumnCalculator : ShowDataAsCalculatorBase
 	{
 		#region Constructors
 		/// <summary>
@@ -14,7 +15,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// </summary>
 		/// <param name="pivotTable">The pivot table to calculate against.</param>
 		/// <param name="dataFieldCollectionIndex">The index of the data field that the calculator is calculating.</param>
-		public PercentOfParentRowCalculator(ExcelPivotTable pivotTable, int dataFieldCollectionIndex) : base(pivotTable, dataFieldCollectionIndex) { }
+		public PercentOfParentColumnCalculator(ExcelPivotTable pivotTable, int dataFieldCollectionIndex) : base(pivotTable, dataFieldCollectionIndex) { }
 		#endregion
 
 		#region ShowDataAsCalculatorBase Overrides
@@ -41,29 +42,45 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			var columnHeader = base.PivotTable.ColumnHeaders[dataColumn];
 			var cellBackingData = backingDatas[dataRow, dataColumn];
 
-			object baseValue = null;
-			if (this.TryFindParent(dataRow, out int parentIndex))
-				baseValue = backingDatas[parentIndex, dataColumn]?.Result;
-			else if (rowHeader.IsDataField)
-				return null;  // Data field root nodes don't get values.
+			if (columnHeader.IsDataField)
+				return null;
 			else
 			{
-				// At a root node, go to the grand total for the base value.
-				baseValue = rowGrandTotalsValuesLists
-					.Where(d => d.MajorAxisIndex == dataColumn)
-					.ElementAt(rowHeader.DataFieldCollectionIndex)
-					?.Result;
-			}
+				// Because columns don't always have a cell where a subtotal would go, we need to calculate
+				// subtotals from scratch here.
+				PivotCellBackingData subtotalBackingData = null;
+				if (cellBackingData.IsCalculatedCell)
+					subtotalBackingData = new PivotCellBackingData(new Dictionary<string, List<object>>(), cellBackingData.Formula);
+				else
+					subtotalBackingData = new PivotCellBackingData(new List<object>());
 
-			if (cellBackingData?.Result == null)
-			{
-				// If both are null, write null.
-				if (baseValue == null)
-					return null;
-				// If the parent has a value, write out 0.
-				return 0;
+				// Find all of the cells with the same parent and merge their backing datas.
+				for (int i = 0; i < base.PivotTable.ColumnHeaders.Count; i++)
+				{
+					var possibleSibling = this.PivotTable.ColumnHeaders[i];
+					bool isSibling = this.IsSibling(columnHeader.CacheRecordIndices, possibleSibling.CacheRecordIndices);
+					if (isSibling)
+					{
+						var backingData = backingDatas[dataRow, i];
+						if (backingData != null)
+							subtotalBackingData.Merge(backingData);
+					}
+				}
+
+				object baseValue = null;
+				var dataField = this.PivotTable.DataFields[base.DataFieldCollectionIndex];
+				baseValue = totalsCalculator.CalculateCellTotal(dataField, subtotalBackingData, rowHeader.TotalType, columnHeader.TotalType);
+
+				if (cellBackingData?.Result == null)
+				{
+					// If both are null, write null.
+					if (baseValue == null)
+						return null;
+					// If the parent has a value, write out 0.
+					return 0;
+				}
+				return (double)cellBackingData.Result / (double)baseValue;
 			}
-			return (double)cellBackingData.Result / (double)baseValue;
 		}
 
 		/// <summary>
@@ -80,7 +97,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			PivotCellBackingData[] columnGrandGrandTotalValues,
 			bool isRowTotal)
 		{
-			if (isRowTotal)
+			if (!isRowTotal)
 				return 1;
 			object baseValue = null;
 			var grandTotalBackingData = grandTotalsBackingDatas[index];
@@ -90,7 +107,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 					.First(v => v.MajorAxisIndex == parentIndex && v.DataFieldCollectionIndex == grandTotalBackingData.DataFieldCollectionIndex)
 					.Result;
 			}
-			else if (this.PivotTable.RowHeaders[grandTotalBackingData.MajorAxisIndex].IsDataField)
+			else if (this.PivotTable.ColumnHeaders[grandTotalBackingData.MajorAxisIndex].IsDataField)
 				return null;  // Data field root nodes don't get values.
 			else
 			{
@@ -112,12 +129,12 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		private bool TryFindParent(int startIndex, out int index)
 		{
 			index = 0;
-			var header = base.PivotTable.RowHeaders[startIndex];
+			var header = base.PivotTable.ColumnHeaders[startIndex];
 			// Walk backwards up the headers until we find a parent.
 			for (int i = startIndex - 1; i >= 0; i--)
 			{
-				var previousRowHeader = base.PivotTable.RowHeaders[i];
-				if (previousRowHeader.CacheRecordIndices.Count < header.CacheRecordIndices.Count && previousRowHeader.IsDataField == false)
+				var previousHeader = base.PivotTable.ColumnHeaders[i];
+				if (previousHeader.CacheRecordIndices.Count < header.CacheRecordIndices.Count && previousHeader.IsDataField == false)
 				{
 					index = i;
 					return true;
@@ -125,6 +142,18 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			}
 			index = -1;
 			return false;
+		}
+
+		private bool IsSibling(List<Tuple<int, int>> indices, List<Tuple<int, int>> possibleSiblingIndices)
+		{
+			if (indices == null || possibleSiblingIndices == null || indices.Count != possibleSiblingIndices.Count)
+				return false;
+			for (int i = 0; i < indices.Count - 1; i++)
+			{
+				if (indices[i] != possibleSiblingIndices[i])
+					return false;
+			}
+			return true;
 		}
 		#endregion
 	}
