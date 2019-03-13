@@ -61,6 +61,15 @@ namespace EPPlusTest.Internationalization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to (blank).
+        /// </summary>
+        internal static string BlankValueHeaderCaption {
+            get {
+                return ResourceManager.GetString("BlankValueHeaderCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Grand Total Sum.
         /// </summary>
         internal static string GrandTotalCaption {

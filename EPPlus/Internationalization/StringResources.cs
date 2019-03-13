@@ -23,12 +23,18 @@ namespace OfficeOpenXml.Internationalization
 		/// </summary>
 		[StringResource("The {0} will be replaced with a field name. Place accordingly in your translations.")]
 		public string TotalCaptionWithPrecedingValue => this.GetValue("{0} Total");
-		
+
 		/// <summary>
 		/// Gets the string for a grand total header.
 		/// </summary>
 		[StringResource]
 		public string GrandTotalCaption => this.GetValue("Grand Total");
+
+		/// <summary>
+		/// Gets the string for a blank value header
+		/// </summary>
+		[StringResource]
+		public string BlankValueHeaderCaption => this.GetValue("(blank)");
 
 		private ResourceManager ResourceManager { get; set; }
 		#endregion

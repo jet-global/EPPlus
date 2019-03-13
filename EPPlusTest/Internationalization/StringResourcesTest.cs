@@ -54,7 +54,7 @@ namespace EPPlusTest.Internationalization
 			stringResources.LoadResourceManager(TestInternationalizationResourcesMissingValue.ResourceManager);
 			var result = stringResources.ValidateLoadedResourceManager(out string error);
 			Assert.IsFalse(result);
-			var expectedError = $"The following string resources were missing:{Environment.NewLine}{nameof(stringResources.TotalCaptionWithPrecedingValue)}";
+			var expectedError = $"The following string resources were missing:{Environment.NewLine}{nameof(stringResources.TotalCaptionWithPrecedingValue)}, {nameof(stringResources.BlankValueHeaderCaption)}";
 			Assert.AreEqual(expectedError, error);
 		}
 		#endregion
