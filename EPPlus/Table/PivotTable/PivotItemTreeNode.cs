@@ -241,11 +241,17 @@ namespace OfficeOpenXml.Table.PivotTable
 				else
 					pivotField = pivotTable.Fields[child.PivotFieldIndex];
 
+				var copyList = this.Children.ToList();
+				var blankItemNode = copyList.ToList().Where(x => x.SharedItemValue.IsEquivalentTo("(blank)"));
+				// Remove "(blank)" node from list to make sorting easier.
+				if (blankItemNode.Count() > 0)
+					copyList.RemoveAll(x => x.SharedItemValue.IsEquivalentTo("(blank)"));
+
 				// Sort the children, so that they are in alphabetical/chronological order.
-				var orderNodes = this.Children.OrderBy(x => x.PivotFieldItemIndex).ToList();
+				var orderNodes = copyList.OrderBy(x => x.PivotFieldItemIndex).ToList();
 				if (!this.Children.SequenceEqual(orderNodes))
 				{
-					var newChildList = this.Children.ToList();
+					var newChildList = copyList.ToList();
 					this.Children.Clear();
 					for (int i = 0; i < orderNodes.Count(); i++)
 					{
@@ -257,6 +263,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				// Sort items with references to datafields.
 				if (pivotField.AutoSortScopeReferences.Count != 0)
 					this.SortWithDataFields(pivotTable, pivotField, this);
+
+				// Add "(blank)" node to the end of the sorted list if needed.
+				if (blankItemNode.Count() > 0)
+					this.Children.Add(blankItemNode.First());
 
 				// Recursively sort the children of the current node.
 				child.SortChildren(pivotTable);

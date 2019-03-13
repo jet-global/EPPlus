@@ -1487,6 +1487,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			Dictionary<int, List<int>> cacheRecordPageFieldIndices, CacheRecordNode cacheRecord, string searchValue, CacheFieldNode cacheField = null)
 		{
 			// If an identical child already exists, continue. Otherwise, create a new child.
+			searchValue = searchValue ?? "(blank)";
 			if (currentNode.HasChild(searchValue))
 				return currentNode.GetChildNode(searchValue);
 			else
@@ -1507,33 +1508,44 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private IOrderedEnumerable<CacheItem> SortField(eSortType sortOrder, ExcelPivotTableField pivotField)
+		private List<CacheItem> SortField(eSortType sortOrder, ExcelPivotTableField pivotField)
 		{
 			var fieldItems = pivotField.Items;
 			var sharedItems = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems;
-			var isNumericValues = sharedItems.All(x => double.TryParse(x.Value, out _));
+			bool hasMissingValueType = sharedItems.Any(x => x.Type == PivotCacheRecordType.m);
+			var copyList = sharedItems.ToList();
+			if (hasMissingValueType)
+				copyList.RemoveAll(i => i.Type == PivotCacheRecordType.m);
 
 			IOrderedEnumerable<CacheItem> sortedList = null;
 			if (sortOrder == eSortType.Descending && pivotField.AutoSortScopeReferences.Count == 0)
 			{
-				if (isNumericValues)
-					sortedList = sharedItems.OrderByDescending(x => double.Parse(x.Value));
+				if (copyList.All(t => t.Type == PivotCacheRecordType.n))
+					sortedList = copyList.OrderByDescending(x => double.Parse(x.Value));
+				else if (copyList.All(t => t.Type == PivotCacheRecordType.d) || (pivotField.Name.IsEquivalentTo("Month") && copyList.All(t => t.Type == PivotCacheRecordType.s)))
+					sortedList = copyList.ToList().OrderByDescending(m => DateTime.ParseExact(m.Value, "MMMM", Thread.CurrentThread.CurrentCulture));
 				else
-					sortedList = sharedItems.ToList().OrderByDescending(x => x.Value);
-				if (pivotField.Name.IsEquivalentTo("Month"))
-					sortedList = sharedItems.ToList().OrderByDescending(m => DateTime.ParseExact(m.Value, "MMMMM", Thread.CurrentThread.CurrentCulture));
+					sortedList = copyList.OrderByDescending(x => x.Value);
 			}
 			else
 			{
-				if (isNumericValues)
-					sortedList = sharedItems.OrderBy(x => double.Parse(x.Value));
+				if (copyList.All(t => t.Type == PivotCacheRecordType.n))
+					sortedList = copyList.OrderBy(x => double.Parse(x.Value));
+				else if (copyList.All(t => t.Type == PivotCacheRecordType.d) || (pivotField.Name.IsEquivalentTo("Month") && copyList.All(t => t.Type == PivotCacheRecordType.s)))
+					sortedList = copyList.ToList().OrderBy(m => DateTime.ParseExact(m.Value, "MMMM", Thread.CurrentThread.CurrentCulture));
 				else
-					sortedList = sharedItems.ToList().OrderBy(x => x.Value);
-				if (pivotField.Name.IsEquivalentTo("Month"))
-					sortedList = sharedItems.ToList().OrderBy(m => DateTime.ParseExact(m.Value, "MMMMM", Thread.CurrentThread.CurrentCulture));
+					sortedList = copyList.OrderBy(x => x.Value);
 			}
 
-			return sortedList;
+			var returnList = sortedList.ToList();
+			if (hasMissingValueType)
+			{
+				// Add "(blank)" value header to the end of the sorted list.
+				int index = sharedItems.ToList().FindIndex(i => i.Type == PivotCacheRecordType.m);
+				returnList.Add(sharedItems[index]);
+			}
+
+			return returnList;
 		}
 
 		private void RemovePivotFieldItemMAttribute()
@@ -2055,6 +2067,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private string GetSharedItemValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, int repeatedItemsCount, int xMemberIndex)
 		{
+			var sharedItemValue = string.Empty;
 			var pivotFieldIndex = field[repeatedItemsCount].Index;
 			// A field that has an 'x' attribute equal to -2 is a special row/column field that indicates the
 			// pivot table has more than one data field. Excel uses this to display the headings for the data 
@@ -2066,9 +2079,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			var cacheItemIndex = pivotField.Items[item[xMemberIndex]].X;
 			// If the pivot field is a part of a grouping, use the groupItems collection. Otherwise, use the sharedItems collection.
 			if (this.CacheDefinition.CacheFields[pivotFieldIndex].IsGroupField)
-				return this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup.GroupItems[cacheItemIndex].Value;
+				sharedItemValue = this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup.GroupItems[cacheItemIndex].Value;
 			else
-				return this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value;
+				sharedItemValue = this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value;
+			sharedItemValue = sharedItemValue ?? "(blank)";
+			return sharedItemValue;
 		}
 
 		private void InitSchemaNodeOrder()
