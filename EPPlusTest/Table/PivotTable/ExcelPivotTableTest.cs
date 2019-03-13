@@ -1213,10 +1213,10 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTablesWithBlankValues.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithBlankValues.xlsx")]
 		public void PivotTableRefreshWithBlankValueInRowAndColumnHeaders()
 		{
-			var file = new FileInfo("PivotTablesWithBlankValues.xlsx");
+			var file = new FileInfo("PivotTableWithBlankValues.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var newFile = new TempTestFile())
 			{
@@ -1282,10 +1282,10 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTablesWithBlankValues.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithBlankValues.xlsx")]
 		public void PivotTableRefreshWithBlankValueInRowAndColumnHeaderTwoRowFieldsAndOneColumnField()
 		{
-			var file = new FileInfo("PivotTablesWithBlankValues.xlsx");
+			var file = new FileInfo("PivotTableWithBlankValues.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var newFile = new TempTestFile())
 			{
@@ -1393,10 +1393,10 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTablesWithBlankValues.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithBlankValues.xlsx")]
 		public void PivotTableRefreshWithBlankValueInRowAndColumnHeadersWithMissingValuesInDataTable()
 		{
-			var file = new FileInfo("PivotTablesWithBlankValues.xlsx");
+			var file = new FileInfo("PivotTableWithBlankValues.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var newFile = new TempTestFile())
 			{
@@ -1474,10 +1474,10 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTablesWithBlankValues.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithBlankValues.xlsx")]
 		public void PivotTableRefreshWithBlankValueInRowAndColumnHeadersWithMissingValuesInDataTable2()
 		{
-			var file = new FileInfo("PivotTablesWithBlankValues.xlsx");
+			var file = new FileInfo("PivotTableWithBlankValues.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var newFile = new TempTestFile())
 			{
@@ -1765,10 +1765,10 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTablesWithBlankValues.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithBlankValues.xlsx")]
 		public void PivotTableRefreshWithBlankValueInRowAndColumnHeadersWithMissingValuesInDataTableTabularAndNonCompactForm()
 		{
-			var file = new FileInfo("PivotTablesWithBlankValues.xlsx");
+			var file = new FileInfo("PivotTableWithBlankValues.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var newFile = new TempTestFile())
 			{
@@ -1967,10 +1967,10 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTablesWithBlankValues.xlsx")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithBlankValues.xlsx")]
 		public void PivotTableRefreshWithBlankValueInRowAndColumnHeadersWithMissingValuesInDataTableTabularAndNonCompactForm2()
 		{
-			var file = new FileInfo("PivotTablesWithBlankValues.xlsx");
+			var file = new FileInfo("PivotTableWithBlankValues.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var newFile = new TempTestFile())
 			{
