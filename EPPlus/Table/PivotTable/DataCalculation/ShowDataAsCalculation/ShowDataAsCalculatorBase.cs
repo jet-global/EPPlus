@@ -12,11 +12,13 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// Gets the pivot table that this calculator is calculating against.
 		/// </summary>
 		protected ExcelPivotTable PivotTable { get; }
-		
+
 		/// <summary>
 		/// Gets the index of the data field that is being calculated.
 		/// </summary>
 		protected int DataFieldCollectionIndex { get; }
+
+		protected TotalsFunctionHelper TotalsCalculator { get; }
 		#endregion
 
 		#region Constructors
@@ -25,10 +27,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// </summary>
 		/// <param name="pivotTable">The pivot table to calculate against.</param>
 		/// <param name="dataFieldCollectionIndex">The index of the data field that the calculator is calculating.</param>
-		public ShowDataAsCalculatorBase(ExcelPivotTable pivotTable, int dataFieldCollectionIndex)
+		public ShowDataAsCalculatorBase(ExcelPivotTable pivotTable, int dataFieldCollectionIndex, TotalsFunctionHelper totalsCalculator)
 		{
 			this.PivotTable = pivotTable;
 			this.DataFieldCollectionIndex = dataFieldCollectionIndex;
+			this.TotalsCalculator = totalsCalculator;
 		}
 		#endregion
 
@@ -42,15 +45,13 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <param name="grandGrandTotalValues">The backing data for the pivot table grand grand totals.</param>
 		/// <param name="rowGrandTotalsValuesLists">The backing data for the pivot table row grand totals.</param>
 		/// <param name="columnGrandTotalsValuesLists">The backing data for the pivot table column grand totals.</param>
-		/// <param name="totalsCalculator">A <see cref="TotalsFunctionHelper"/> to calculate values with.</param>
 		/// <returns>An object value for the cell.</returns>
 		public abstract object CalculateBodyValue(
 			int dataRow, int dataColumn,
 			PivotCellBackingData[,] backingDatas,
 			PivotCellBackingData[] grandGrandTotalValues,
 			List<PivotCellBackingData> rowGrandTotalsValuesLists,
-			List<PivotCellBackingData> columnGrandTotalsValuesLists,
-			TotalsFunctionHelper totalsCalculator);
+			List<PivotCellBackingData> columnGrandTotalsValuesLists);
 
 		/// <summary>
 		/// Calculates the grand total value in a pivot table cell.

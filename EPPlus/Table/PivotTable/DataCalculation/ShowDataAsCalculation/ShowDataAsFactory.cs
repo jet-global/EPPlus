@@ -15,26 +15,27 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <param name="pivotTable">The pivot table that the calculator is calculating against.</param>
 		/// <param name="dataFieldCollectionIndex">The index of the data field that the calculator is calculating.</param>
 		/// <returns>The appropriate calculator class for the ShowDataAs value.</returns>
-		public static ShowDataAsCalculatorBase GetShowDataAsCalculator(ShowDataAs showDataAs, ExcelPivotTable pivotTable, int dataFieldCollectionIndex)
+		public static ShowDataAsCalculatorBase GetShowDataAsCalculator(ShowDataAs showDataAs, ExcelPivotTable pivotTable, int dataFieldCollectionIndex, TotalsFunctionHelper totalsCalculator)
 		{
 			switch (showDataAs)
 			{
 				case ShowDataAs.NoCalculation:
-					return new NoCalculationCalcutor(pivotTable, dataFieldCollectionIndex);
+					return new NoCalculationCalcutor(pivotTable, dataFieldCollectionIndex, totalsCalculator);
 				case ShowDataAs.PercentOfTotal:
-					return new PercentOfTotalCalculator(pivotTable, dataFieldCollectionIndex);
+					return new PercentOfTotalCalculator(pivotTable, dataFieldCollectionIndex, totalsCalculator);
 				case ShowDataAs.PercentOfRow:
-					return new PercentOfRowCalculator(pivotTable, dataFieldCollectionIndex);
+					return new PercentOfRowCalculator(pivotTable, dataFieldCollectionIndex, totalsCalculator);
 				case ShowDataAs.PercentOfCol:
-					return new PercentOfColCalculator(pivotTable, dataFieldCollectionIndex);
+					return new PercentOfColCalculator(pivotTable, dataFieldCollectionIndex, totalsCalculator);
 				case ShowDataAs.Percent:
-					return new PercentOfCalculator(pivotTable, dataFieldCollectionIndex);
+					return new PercentOfCalculator(pivotTable, dataFieldCollectionIndex, totalsCalculator);
 				case ShowDataAs.PercentOfParentRow:
-					return new PercentOfParentRowCalculator(pivotTable, dataFieldCollectionIndex);
+					return new PercentOfParentRowCalculator(pivotTable, dataFieldCollectionIndex, totalsCalculator);
 				case ShowDataAs.PercentOfParentCol:
-					return new PercentOfParentColumnCalculator(pivotTable, dataFieldCollectionIndex);
-				case ShowDataAs.PercentDiff:
+					return new PercentOfParentColumnCalculator(pivotTable, dataFieldCollectionIndex, totalsCalculator);
 				case ShowDataAs.PercentOfParent:
+					return new PercentOfParentCalculator(pivotTable, dataFieldCollectionIndex, totalsCalculator);
+				case ShowDataAs.PercentDiff:
 				case ShowDataAs.PercentOfRunningTotal:
 				case ShowDataAs.RankAscending:
 				case ShowDataAs.RankDescending:
