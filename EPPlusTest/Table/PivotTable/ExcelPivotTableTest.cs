@@ -2497,6 +2497,229 @@ namespace EPPlusTest.Table.PivotTable
 			}
 		}
 
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithBooleanValues.xlsx")]
+		public void PivotTableRefreshContainingBooleanValuesInRows()
+		{
+			var file = new FileInfo("PivotTableWithBooleanValues.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:C20"), pivotTable.Address);
+					Assert.AreEqual(11, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 3, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 4, 2, "FALSE"),
+					new ExpectedCellValue(sheetName, 5, 2, "Amsterdam"),
+					new ExpectedCellValue(sheetName, 6, 2, "Hamburg"),
+					new ExpectedCellValue(sheetName, 7, 2, "Hamburg 36"),
+					new ExpectedCellValue(sheetName, 8, 2, "London"),
+					new ExpectedCellValue(sheetName, 9, 2, "Thunder Bay"),
+					new ExpectedCellValue(sheetName, 10, 2, "TRUE"),
+					new ExpectedCellValue(sheetName, 11, 2, "AArhus C"),
+					new ExpectedCellValue(sheetName, 12, 2, "Antwerpen"),
+					new ExpectedCellValue(sheetName, 13, 2, "Bojkovice"),
+					new ExpectedCellValue(sheetName, 14, 2, "Düsseldorf"),
+					new ExpectedCellValue(sheetName, 15, 2, "K¢benhavn ¥"),
+					new ExpectedCellValue(sheetName, 16, 2, "Kopavogur"),
+					new ExpectedCellValue(sheetName, 17, 2, "Maidstone"),
+					new ExpectedCellValue(sheetName, 18, 2, "Maribor"),
+					new ExpectedCellValue(sheetName, 19, 2, "Valencia"),
+					new ExpectedCellValue(sheetName, 20, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 3, 3, "Sum of Profit (LCY)"),
+					new ExpectedCellValue(sheetName, 4, 3, 95.41),
+					new ExpectedCellValue(sheetName, 5, 3, 0),
+					new ExpectedCellValue(sheetName, 6, 3, 0),
+					new ExpectedCellValue(sheetName, 7, 3, 95.41),
+					new ExpectedCellValue(sheetName, 8, 3, 0),
+					new ExpectedCellValue(sheetName, 9, 3, 0),
+					new ExpectedCellValue(sheetName, 10, 3, 1665.44),
+					new ExpectedCellValue(sheetName, 11, 3, 0),
+					new ExpectedCellValue(sheetName, 12, 3, 1119.44),
+					new ExpectedCellValue(sheetName, 13, 3, 546d),
+					new ExpectedCellValue(sheetName, 14, 3, 0),
+					new ExpectedCellValue(sheetName, 15, 3, 0),
+					new ExpectedCellValue(sheetName, 16, 3, 0),
+					new ExpectedCellValue(sheetName, 17, 3, 0),
+					new ExpectedCellValue(sheetName, 18, 3, 0),
+					new ExpectedCellValue(sheetName, 19, 3, 0),
+					new ExpectedCellValue(sheetName, 20, 3, 1760.85)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithBooleanValues.xlsx")]
+		public void PivotTableRefreshContainingBooleanValuesInColumns()
+		{
+			var file = new FileInfo("PivotTableWithBooleanValues.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B25:E42"), pivotTable.Address);
+					Assert.AreEqual(11, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 25, 2, "Sum of Net Change"),
+					new ExpectedCellValue(sheetName, 26, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 27, 2, "Afrifield Corporation"),
+					new ExpectedCellValue(sheetName, 28, 2, "Antarcticopy"),
+					new ExpectedCellValue(sheetName, 29, 2, "Autohaus Mielberg KG"),
+					new ExpectedCellValue(sheetName, 30, 2, "Beef House"),
+					new ExpectedCellValue(sheetName, 31, 2, "Bilabankinn"),
+					new ExpectedCellValue(sheetName, 32, 2, "Blanemark Hifi Shop"),
+					new ExpectedCellValue(sheetName, 33, 2, "BYT-KOMPLET s.r.o."),
+					new ExpectedCellValue(sheetName, 34, 2, "Candoxy Canada Inc."),
+					new ExpectedCellValue(sheetName, 35, 2, "Candoxy Kontor A/S"),
+					new ExpectedCellValue(sheetName, 36, 2, "Candoxy Nederland BV"),
+					new ExpectedCellValue(sheetName, 37, 2, "Carl Anthony"),
+					new ExpectedCellValue(sheetName, 38, 2, "Centromerkur d.o.o."),
+					new ExpectedCellValue(sheetName, 39, 2, "Corporación Beta"),
+					new ExpectedCellValue(sheetName, 40, 2, "Cronus Cardoxy Procurement"),
+					new ExpectedCellValue(sheetName, 41, 2, "Cronus Cardoxy Sales"),
+					new ExpectedCellValue(sheetName, 42, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 25, 3, "Column Labels"),
+					new ExpectedCellValue(sheetName, 26, 3, "FALSE"),
+					new ExpectedCellValue(sheetName, 27, 3, null),
+					new ExpectedCellValue(sheetName, 28, 3, null),
+					new ExpectedCellValue(sheetName, 29, 3, 8794.86),
+					new ExpectedCellValue(sheetName, 30, 3, null),
+					new ExpectedCellValue(sheetName, 31, 3, null),
+					new ExpectedCellValue(sheetName, 32, 3, 0),
+					new ExpectedCellValue(sheetName, 33, 3, null),
+					new ExpectedCellValue(sheetName, 34, 3, 0),
+					new ExpectedCellValue(sheetName, 35, 3, null),
+					new ExpectedCellValue(sheetName, 36, 3, 0),
+					new ExpectedCellValue(sheetName, 37, 3, null),
+					new ExpectedCellValue(sheetName, 38, 3, null),
+					new ExpectedCellValue(sheetName, 39, 3, null),
+					new ExpectedCellValue(sheetName, 40, 3, 0),
+					new ExpectedCellValue(sheetName, 41, 3, null),
+					new ExpectedCellValue(sheetName, 42, 3, 8794.86),
+					new ExpectedCellValue(sheetName, 25, 4, null),
+					new ExpectedCellValue(sheetName, 26, 4, "TRUE"),
+					new ExpectedCellValue(sheetName, 27, 4, 0),
+					new ExpectedCellValue(sheetName, 28, 4, 3218.14),
+					new ExpectedCellValue(sheetName, 29, 4, null),
+					new ExpectedCellValue(sheetName, 30, 4, 14178.1),
+					new ExpectedCellValue(sheetName, 31, 4, 0),
+					new ExpectedCellValue(sheetName, 32, 4, null),
+					new ExpectedCellValue(sheetName, 33, 4, 58518.63),
+					new ExpectedCellValue(sheetName, 34, 4, null),
+					new ExpectedCellValue(sheetName, 35, 4, 0),
+					new ExpectedCellValue(sheetName, 36, 4, null),
+					new ExpectedCellValue(sheetName, 37, 4, 0),
+					new ExpectedCellValue(sheetName, 38, 4, 0),
+					new ExpectedCellValue(sheetName, 39, 4, 0),
+					new ExpectedCellValue(sheetName, 40, 4, null),
+					new ExpectedCellValue(sheetName, 41, 4, 0),
+					new ExpectedCellValue(sheetName, 42, 4, 75914.87),
+					new ExpectedCellValue(sheetName, 25, 5, null),
+					new ExpectedCellValue(sheetName, 26, 5, "Grand Total"),
+					new ExpectedCellValue(sheetName, 27, 5, 0),
+					new ExpectedCellValue(sheetName, 28, 5, 3218.14),
+					new ExpectedCellValue(sheetName, 29, 5, 8794.86),
+					new ExpectedCellValue(sheetName, 30, 5, 14178.1),
+					new ExpectedCellValue(sheetName, 31, 5, 0),
+					new ExpectedCellValue(sheetName, 32, 5, 0),
+					new ExpectedCellValue(sheetName, 33, 5, 58518.63),
+					new ExpectedCellValue(sheetName, 34, 5, 0),
+					new ExpectedCellValue(sheetName, 35, 5, 0),
+					new ExpectedCellValue(sheetName, 36, 5, 0),
+					new ExpectedCellValue(sheetName, 37, 5, 0),
+					new ExpectedCellValue(sheetName, 38, 5, 0),
+					new ExpectedCellValue(sheetName, 39, 5, 0),
+					new ExpectedCellValue(sheetName, 40, 5, 0),
+					new ExpectedCellValue(sheetName, 41, 5, 0),
+					new ExpectedCellValue(sheetName, 42, 5, 84709.73)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithBooleanValuesWithGrouping.xlsx")]
+		public void PivotTableRefreshContainingBooleanValuesWithGroupings()
+		{
+			var file = new FileInfo("PivotTableWithBooleanValuesWithGrouping.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet1";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B25:C44"), pivotTable.Address);
+					Assert.AreEqual(12, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 25, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 26, 2, "Group1"),
+					new ExpectedCellValue(sheetName, 27, 2, "FALSE"),
+					new ExpectedCellValue(sheetName, 28, 2, "Autohaus Mielberg KG"),
+					new ExpectedCellValue(sheetName, 29, 2, "Blanemark Hifi Shop"),
+					new ExpectedCellValue(sheetName, 30, 2, "Candoxy Canada Inc."),
+					new ExpectedCellValue(sheetName, 31, 2, "Candoxy Nederland BV"),
+					new ExpectedCellValue(sheetName, 32, 2, "Cronus Cardoxy Procurement"),
+					new ExpectedCellValue(sheetName, 33, 2, "TRUE"),
+					new ExpectedCellValue(sheetName, 34, 2, "Afrifield Corporation"),
+					new ExpectedCellValue(sheetName, 35, 2, "Antarcticopy"),
+					new ExpectedCellValue(sheetName, 36, 2, "Beef House"),
+					new ExpectedCellValue(sheetName, 37, 2, "Bilabankinn"),
+					new ExpectedCellValue(sheetName, 38, 2, "BYT-KOMPLET s.r.o."),
+					new ExpectedCellValue(sheetName, 39, 2, "Candoxy Kontor A/S"),
+					new ExpectedCellValue(sheetName, 40, 2, "Carl Anthony"),
+					new ExpectedCellValue(sheetName, 41, 2, "Centromerkur d.o.o."),
+					new ExpectedCellValue(sheetName, 42, 2, "Corporación Beta"),
+					new ExpectedCellValue(sheetName, 43, 2, "Cronus Cardoxy Sales"),
+					new ExpectedCellValue(sheetName, 44, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 25, 3, "Sum of Net Change"),
+					new ExpectedCellValue(sheetName, 26, 3, 84709.73),
+					new ExpectedCellValue(sheetName, 27, 3, 8794.86),
+					new ExpectedCellValue(sheetName, 28, 3, 8794.86),
+					new ExpectedCellValue(sheetName, 29, 3, 0),
+					new ExpectedCellValue(sheetName, 30, 3, 0),
+					new ExpectedCellValue(sheetName, 31, 3, 0),
+					new ExpectedCellValue(sheetName, 32, 3, 0),
+					new ExpectedCellValue(sheetName, 33, 3, 75914.87),
+					new ExpectedCellValue(sheetName, 34, 3, 0),
+					new ExpectedCellValue(sheetName, 35, 3, 3218.14),
+					new ExpectedCellValue(sheetName, 36, 3, 14178.1),
+					new ExpectedCellValue(sheetName, 37, 3, 0),
+					new ExpectedCellValue(sheetName, 38, 3, 58518.63),
+					new ExpectedCellValue(sheetName, 39, 3, 0),
+					new ExpectedCellValue(sheetName, 40, 3, 0),
+					new ExpectedCellValue(sheetName, 41, 3, 0),
+					new ExpectedCellValue(sheetName, 42, 3, 0),
+					new ExpectedCellValue(sheetName, 43, 3, 0),
+					new ExpectedCellValue(sheetName, 44, 3, 84709.73)
+				});
+			}
+		}
+
 		#region Calculated Fields Tests
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithCalculatedFields.xlsx")]

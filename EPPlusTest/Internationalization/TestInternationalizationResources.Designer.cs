@@ -79,6 +79,24 @@ namespace EPPlusTest.Internationalization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to FALSE.
+        /// </summary>
+        internal static string PivotTableFalseCaption {
+            get {
+                return ResourceManager.GetString("PivotTableFalseCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TRUE.
+        /// </summary>
+        internal static string PivotTableTrueCaption {
+            get {
+                return ResourceManager.GetString("PivotTableTrueCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ABC.
         /// </summary>
         internal static string String1 {
