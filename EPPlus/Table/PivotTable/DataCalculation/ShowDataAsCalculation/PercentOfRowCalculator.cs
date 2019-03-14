@@ -14,7 +14,9 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// </summary>
 		/// <param name="pivotTable">The pivot table to calculate against.</param>
 		/// <param name="dataFieldCollectionIndex">The index of the data field that the calculator is calculating.</param>
-		public PercentOfRowCalculator(ExcelPivotTable pivotTable, int dataFieldCollectionIndex) : base(pivotTable, dataFieldCollectionIndex) { }
+		/// <param name="totalsCalculator">A <see cref="TotalsFunctionHelper"/> to calculate values with.</param>
+		public PercentOfRowCalculator(ExcelPivotTable pivotTable, int dataFieldCollectionIndex, TotalsFunctionHelper totalsCalculator) 
+			: base(pivotTable, dataFieldCollectionIndex, totalsCalculator) { }
 		#endregion
 
 		#region ShowDataAsCalculatorBase Overrides
@@ -27,15 +29,13 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <param name="grandGrandTotalValues">The backing data for the pivot table grand grand totals.</param>
 		/// <param name="rowGrandTotalsValuesLists">The backing data for the pivot table row grand totals.</param>
 		/// <param name="columnGrandTotalsValuesLists">The backing data for the pivot table column grand totals.</param>
-		/// <param name="totalsCalculator">A <see cref="TotalsFunctionHelper"/> to calculate values with.</param>
 		/// <returns>An object value for the cell.</returns>
 		public override object CalculateBodyValue(
 			int dataRow, int dataColumn, 
 			PivotCellBackingData[,] backingDatas, 
 			PivotCellBackingData[] grandGrandTotalValues, 
 			List<PivotCellBackingData> rowGrandTotalsValuesLists,
-			List<PivotCellBackingData> columnGrandTotalsValuesLists,
-			TotalsFunctionHelper totalsCalculator)
+			List<PivotCellBackingData> columnGrandTotalsValuesLists)
 		{
 			var cellBackingData = backingDatas[dataRow, dataColumn];
 			if (cellBackingData == null)
