@@ -2065,7 +2065,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			return totalHeader;
 		}
 
-		private string GetSharedItemValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, int repeatedItemsCount, int xMemberIndex, StringResources stringResources)
+		private string GetSharedItemValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem rowColItem, int repeatedItemsCount, int xMemberIndex, StringResources stringResources)
 		{
 			var sharedItemValue = string.Empty;
 			var pivotFieldIndex = field[repeatedItemsCount].Index;
@@ -2074,14 +2074,15 @@ namespace OfficeOpenXml.Table.PivotTable
 			// values and how to group them in relation to other rows/columns. 
 			// If a special field alrady exists in that collection, then another one will not be generated.
 			if (pivotFieldIndex == -2)
-				return this.DataFields[item.DataFieldIndex].Name;
+				return this.DataFields[rowColItem.DataFieldIndex].Name;
 			var pivotField = this.Fields[pivotFieldIndex];
-			var cacheItemIndex = pivotField.Items[item[xMemberIndex]].X;
-			// If the pivot field is a part of a grouping, use the groupItems collection. Otherwise, use the sharedItems collection.
-			if (this.CacheDefinition.CacheFields[pivotFieldIndex].IsGroupField)
-				sharedItemValue = this.CacheDefinition.CacheFields[pivotFieldIndex].FieldGroup.GroupItems[cacheItemIndex].Value;
+			var cacheItemIndex = pivotField.Items[rowColItem[xMemberIndex]].X;
+			var cacheField = this.CacheDefinition.CacheFields[pivotFieldIndex];
+			var item = cacheField.IsGroupField ? cacheField.FieldGroup.GroupItems[cacheItemIndex] : cacheField.SharedItems[cacheItemIndex];
+			if (item.Type == PivotCacheRecordType.b)
+				sharedItemValue = item.Value.IsEquivalentTo("1") ? "TRUE" : "FALSE";
 			else
-				sharedItemValue = this.CacheDefinition.CacheFields[pivotFieldIndex].SharedItems[cacheItemIndex].Value;
+				sharedItemValue = item.Value;
 			sharedItemValue = sharedItemValue ?? stringResources.BlankValueHeaderCaption;
 			return sharedItemValue;
 		}
