@@ -2080,7 +2080,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			var cacheField = this.CacheDefinition.CacheFields[pivotFieldIndex];
 			var item = cacheField.IsGroupField ? cacheField.FieldGroup.GroupItems[cacheItemIndex] : cacheField.SharedItems[cacheItemIndex];
 			if (item.Type == PivotCacheRecordType.b)
-				sharedItemValue = item.Value.IsEquivalentTo("1") ? "TRUE" : "FALSE";
+				sharedItemValue = item.Value.IsEquivalentTo("1") ? stringResources.PivotTableTrueCaption : stringResources.PivotTableFalseCaption;
 			else
 				sharedItemValue = item.Value;
 			sharedItemValue = sharedItemValue ?? stringResources.BlankValueHeaderCaption;

@@ -31,10 +31,22 @@ namespace OfficeOpenXml.Internationalization
 		public string GrandTotalCaption => this.GetValue("Grand Total");
 
 		/// <summary>
-		/// Gets the string for a blank value header
+		/// Gets the string for a blank value header.
 		/// </summary>
 		[StringResource]
 		public string BlankValueHeaderCaption => this.GetValue("(blank)");
+
+		/// <summary>
+		/// Gets the string for a true boolean type.
+		/// </summary>
+		[StringResource]
+		public string PivotTableTrueCaption => this.GetValue("TRUE");
+
+		/// <summary>
+		/// Gets the string for a false boolean type.
+		/// </summary>
+		[StringResource]
+		public string PivotTableFalseCaption => this.GetValue("FALSE");
 
 		private ResourceManager ResourceManager { get; set; }
 		#endregion
