@@ -7,7 +7,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 	/// <summary>
 	/// Calculates the <see cref="ShowDataAs.PercentOfParent"/> value in a pivot table.
 	/// </summary>
-	internal class PercentOfParentCalculator : ShowDataAsCalculatorBase
+	internal class PercentOfParentCalculator : PercentOfParentCalculatorBase
 	{
 		#region Constructors
 		/// <summary>
@@ -52,8 +52,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 
 			// Find the index of the parent in the row header's cacheRecordIndices.
 			var parentIndicesIndex = rowHeader.CacheRecordIndices.FindIndex(t => t.Item1 == dataField.BaseField);
-			List<Tuple<int, int>> parentRowHeaderIndices, parentColumnHeaderIndices;
-			string rowTotalType, columnTotalType;
 			if (parentIndicesIndex == -1)
 			{
 				// Find the index of the parent in the column header's cacheRecordIndices.
@@ -61,50 +59,15 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				// The current cell is above the parent field so it does not get a value.
 				if (parentIndicesIndex == -1)
 					return null;
-
-				parentRowHeaderIndices = rowHeader.CacheRecordIndices;
-				parentColumnHeaderIndices = columnHeader.CacheRecordIndices.Take(parentIndicesIndex + 1).ToList();
-
-				var parentColumnHeader = this.FindHeader(base.PivotTable.ColumnHeaders, parentColumnHeaderIndices, out _);
-				// If the parent is a datafield no value is written out.
-				if (base.PivotTable.DataFields.Any(d => d.Field == parentColumnHeader.PivotTableField))
-					return null;
-
-				rowTotalType = rowHeader.TotalType;
-				columnTotalType = parentColumnHeader.TotalType;
+				var parentColumnHeaderIndices = columnHeader.CacheRecordIndices.Take(parentIndicesIndex + 1).ToList();
+				return base.CalculateBodyValue(false, dataRow, dataColumn, parentColumnHeaderIndices, backingDatas);
 			}
 			else
 			{
-				parentRowHeaderIndices = rowHeader.CacheRecordIndices.Take(parentIndicesIndex + 1).ToList();
-				parentColumnHeaderIndices = columnHeader.CacheRecordIndices;
-				var parentRowHeader = this.FindHeader(base.PivotTable.RowHeaders, parentRowHeaderIndices, out _);
-
-				// If the parent is a datafield no value is written out.
-				if (base.PivotTable.DataFields.Any(d => d.Field == parentRowHeader.PivotTableField))
-					return null;
-
-				rowTotalType = parentRowHeader.TotalType;
-				columnTotalType = columnHeader.TotalType;
+				// Find the index of the parent in the row header's cacheRecordIndices.
+				var parentRowHeaderIndices = rowHeader.CacheRecordIndices.Take(parentIndicesIndex + 1).ToList();
+				return base.CalculateBodyValue(true, dataRow, dataColumn, parentRowHeaderIndices, backingDatas);
 			}
-
-			var parentBackingData = PivotTableDataManager.GetBackingCellValues(
-				base.PivotTable,
-				base.DataFieldCollectionIndex,
-				parentRowHeaderIndices,
-				parentColumnHeaderIndices,
-				rowTotalType,
-				columnTotalType,
-				base.TotalsCalculator);
-
-			if (cellBackingData?.Result == null)
-			{
-				// If both are null, write null.
-				if (parentBackingData.Result == null)
-					return null;
-				// If the parent has a value, write out 0.
-				return 0;
-			}
-			return (double)cellBackingData.Result / (double)parentBackingData.Result;
 		}
 
 		/// <summary>
@@ -146,39 +109,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			if (currentHeader.CacheRecordIndices?.Last()?.Item1 == dataField.BaseField)
 				return 1;
 
-			// Find all of the grandTotalsBackingDatas with the specified parent
-			var siblingHeaderIndices = this.FindSiblings(headers, currentHeader.CacheRecordIndices);
-			var siblingBackingDatas = grandTotalsBackingDatas
-				.Where(d => siblingHeaderIndices.Contains(d.MajorAxisIndex) && d.DataFieldCollectionIndex == base.DataFieldCollectionIndex)
-				.ToList();
-
-			// Create a new PivotCellBackingData and merge all of the sibling grandTotalsBackingDatas into it.
-			PivotCellBackingData parentBackingData = null;
-			if (cellBackingData.IsCalculatedCell)
-				parentBackingData = new PivotCellBackingData(new Dictionary<string, List<object>>(), cellBackingData.Formula);
-			else
-				parentBackingData = new PivotCellBackingData(new List<object>());
-			siblingBackingDatas.ForEach(d => parentBackingData.Merge(d));
-
-			// Calculate the backing data
-			object baseValue = null;
-			if (isRowTotal)
-				baseValue = base.TotalsCalculator.CalculateCellTotal(dataField, parentBackingData, columnTotalType: currentHeader.TotalType);
-			else
-				baseValue = base.TotalsCalculator.CalculateCellTotal(dataField, parentBackingData, rowTotalType: currentHeader.TotalType);
-
-			if (cellBackingData?.Result == null)
-			{
-				// If both are null, write null.
-				if (baseValue == null)
-					return null;
-				// If the parent has a value, write out 0.
-				return 0;
-			}
-			else if (baseValue == null)
-				return 1;
-			var result = (double)cellBackingData.Result / (double)baseValue;
-			return result;
+			return base.CalculateGrandTotalValue(headers, grandTotalsBackingDatas, columnGrandGrandTotalValues, cellBackingData, dataField, isRowTotal);
 		}
 
 		/// <summary>
@@ -222,17 +153,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 					return false;
 			}
 			return true;
-		}
-
-		private PivotTableHeader FindHeader(List<PivotTableHeader> headers, List<Tuple<int, int>> indices, out int index)
-		{
-			for (index = 0; index < headers.Count; index++)
-			{
-				var header = headers[index];
-				if (this.IndexMatch(header.CacheRecordIndices, indices))
-					return header;
-			}
-			throw new InvalidOperationException("No header was found matching the specified indices.");
 		}
 
 		private bool IndexMatch(List<Tuple<int, int>> parentIndices, List<Tuple<int, int>> containsIndices)

@@ -772,6 +772,7 @@
     <Compile Include="Table\PivotTable\CacheFieldNode.cs" />
     <Compile Include="Table\PivotTable\CacheItem.cs" />
     <Compile Include="Table\PivotTable\CacheRecordNode.cs" />
+    <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\PercentOfParentCalculatorBase.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\PercentOfParentColumnCalculator.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\PercentOfParentCalculator.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\ShowDataAsCalculation\PercentOfParentRowCalculator.cs" />

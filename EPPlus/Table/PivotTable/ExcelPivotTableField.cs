@@ -714,8 +714,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				else
 				{
-					this.SubtotalTop = true;
-					this.DefaultSubtotal = false;
+					this.SubtotalTop = false;
+					this.SubTotalFunctions = eSubTotalFunctions.None;
 				}
 			}
 		}
