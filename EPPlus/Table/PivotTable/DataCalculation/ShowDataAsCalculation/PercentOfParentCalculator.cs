@@ -109,39 +109,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			if (currentHeader.CacheRecordIndices?.Last()?.Item1 == dataField.BaseField)
 				return 1;
 
-			// Find all of the grandTotalsBackingDatas with the specified parent
-			var siblingHeaderIndices = this.FindSiblings(headers, currentHeader.CacheRecordIndices);
-			var siblingBackingDatas = grandTotalsBackingDatas
-				.Where(d => siblingHeaderIndices.Contains(d.MajorAxisIndex) && d.DataFieldCollectionIndex == base.DataFieldCollectionIndex)
-				.ToList();
-
-			// Create a new PivotCellBackingData and merge all of the sibling grandTotalsBackingDatas into it.
-			PivotCellBackingData parentBackingData = null;
-			if (cellBackingData.IsCalculatedCell)
-				parentBackingData = new PivotCellBackingData(new Dictionary<string, List<object>>(), cellBackingData.Formula);
-			else
-				parentBackingData = new PivotCellBackingData(new List<object>());
-			siblingBackingDatas.ForEach(d => parentBackingData.Merge(d));
-
-			// Calculate the backing data
-			object baseValue = null;
-			if (isRowTotal)
-				baseValue = base.TotalsCalculator.CalculateCellTotal(dataField, parentBackingData, columnTotalType: currentHeader.TotalType);
-			else
-				baseValue = base.TotalsCalculator.CalculateCellTotal(dataField, parentBackingData, rowTotalType: currentHeader.TotalType);
-
-			if (cellBackingData?.Result == null)
-			{
-				// If both are null, write null.
-				if (baseValue == null)
-					return null;
-				// If the parent has a value, write out 0.
-				return 0;
-			}
-			else if (baseValue == null)
-				return 1;
-			var result = (double)cellBackingData.Result / (double)baseValue;
-			return result;
+			return base.CalculateGrandTotalValue(headers, grandTotalsBackingDatas, columnGrandGrandTotalValues, cellBackingData, dataField, isRowTotal);
 		}
 
 		/// <summary>

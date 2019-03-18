@@ -71,22 +71,9 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		{
 			if (!isRowTotal)
 				return 1;
-			object baseValue = null;
-			var grandTotalBackingData = grandTotalsBackingDatas[index];
-			if (this.TryFindParent(grandTotalBackingData.MajorAxisIndex, out int parentIndex))
-			{
-				baseValue = grandTotalsBackingDatas
-					.First(v => v.MajorAxisIndex == parentIndex && v.DataFieldCollectionIndex == grandTotalBackingData.DataFieldCollectionIndex)
-					.Result;
-			}
-			else if (this.PivotTable.ColumnHeaders[grandTotalBackingData.MajorAxisIndex].IsDataField)
-				return null;  // Data field root nodes don't get values.
-			else
-			{
-				// If a value was not found, the grand total value is the base value.
-				baseValue = (double)columnGrandGrandTotalValues[grandTotalBackingData.DataFieldCollectionIndex].Result;
-			}
-			return (double)grandTotalBackingData.Result / (double)baseValue;
+			var dataField = base.PivotTable.DataFields[base.DataFieldCollectionIndex];
+			var cellBackingData = grandTotalsBackingDatas[index];
+			return base.CalculateGrandTotalValue(base.PivotTable.ColumnHeaders, grandTotalsBackingDatas, columnGrandGrandTotalValues, cellBackingData, dataField, isRowTotal);
 		}
 
 		/// <summary>
