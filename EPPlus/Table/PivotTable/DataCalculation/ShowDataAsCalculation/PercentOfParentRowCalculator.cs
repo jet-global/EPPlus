@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
@@ -6,7 +7,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 	/// <summary>
 	/// Calculates the <see cref="ShowDataAs.PercentOfParentRow"/> value in a pivot table.
 	/// </summary>
-	internal class PercentOfParentRowCalculator : ShowDataAsCalculatorBase
+	internal class PercentOfParentRowCalculator : PercentOfParentCalculatorBase
 	{
 		#region Constructors
 		/// <summary>
@@ -40,30 +41,12 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			var rowHeader = base.PivotTable.RowHeaders[dataRow];
 			var columnHeader = base.PivotTable.ColumnHeaders[dataColumn];
 			var cellBackingData = backingDatas[dataRow, dataColumn];
-
-			object baseValue = null;
-			if (this.TryFindParent(dataRow, out int parentIndex))
-				baseValue = backingDatas[parentIndex, dataColumn]?.Result;
+			var parentHeaderIndices = new List<Tuple<int, int>>();
+			if (rowHeader.CacheRecordIndices.Count > 1)
+				parentHeaderIndices = rowHeader.CacheRecordIndices.Take(rowHeader.CacheRecordIndices.Count - 1).ToList();
 			else if (rowHeader.IsDataField)
 				return null;  // Data field root nodes don't get values.
-			else
-			{
-				// At a root node, go to the grand total for the base value.
-				baseValue = rowGrandTotalsValuesLists
-					.Where(d => d.MajorAxisIndex == dataColumn)
-					.ElementAt(rowHeader.DataFieldCollectionIndex)
-					?.Result;
-			}
-
-			if (cellBackingData?.Result == null)
-			{
-				// If both are null, write null.
-				if (baseValue == null)
-					return null;
-				// If the parent has a value, write out 0.
-				return 0;
-			}
-			return (double)cellBackingData.Result / (double)baseValue;
+			return base.CalculateBodyValue(true, dataRow, dataColumn, parentHeaderIndices, backingDatas);
 		}
 
 		/// <summary>

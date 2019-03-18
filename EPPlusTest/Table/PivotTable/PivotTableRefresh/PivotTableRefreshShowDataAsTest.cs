@@ -3187,6 +3187,96 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableTabularShowDataAs.xlsx")]
+		public void PivotTableRefreshShowDataAsPercentOfParentRowWithColumnFieldsAndRowDataFieldsTabularForm()
+		{
+			var file = new FileInfo("PivotTableTabularShowDataAs.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
+					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
+					// Show 'Wholesale Price' data as the percentage of its parent row.
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfParentRow;
+					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
+
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:E13"), pivotTable.Address);
+					package.SaveAs(newFile.File);
+				}
+
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 2, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 2, 3, "Month"),
+					new ExpectedCellValue(sheetName, 2, 4, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 2, 5, "Sum of Units Sold"),
+
+					new ExpectedCellValue(sheetName, 3, 2, "Chicago"),
+					new ExpectedCellValue(sheetName, 3, 3, "January"),
+					new ExpectedCellValue(sheetName, 3, 4, .9433),
+					new ExpectedCellValue(sheetName, 3, 5, 2),
+
+					new ExpectedCellValue(sheetName, 4, 2, null),
+					new ExpectedCellValue(sheetName, 4, 3, "March"),
+					new ExpectedCellValue(sheetName, 4, 4, .0567),
+					new ExpectedCellValue(sheetName, 4, 5, 1),
+
+					new ExpectedCellValue(sheetName, 5, 2, "Chicago Total"),
+					new ExpectedCellValue(sheetName, 5, 3, null),
+					new ExpectedCellValue(sheetName, 5, 4, .2219),
+					new ExpectedCellValue(sheetName, 5, 5, 3),
+
+					new ExpectedCellValue(sheetName, 6, 2, "Nashville"),
+					new ExpectedCellValue(sheetName, 6, 3, "January"),
+					new ExpectedCellValue(sheetName, 6, 4, .4034),
+					new ExpectedCellValue(sheetName, 6, 5, 2),
+
+					new ExpectedCellValue(sheetName, 7, 2, null),
+					new ExpectedCellValue(sheetName, 7, 3, "February"),
+					new ExpectedCellValue(sheetName, 7, 4, .1931),
+					new ExpectedCellValue(sheetName, 7, 5, 6),
+
+					new ExpectedCellValue(sheetName, 8, 2, null),
+					new ExpectedCellValue(sheetName, 8, 3, "March"),
+					new ExpectedCellValue(sheetName, 8, 4, .4034),
+					new ExpectedCellValue(sheetName, 8, 5, 2),
+
+					new ExpectedCellValue(sheetName, 9, 2, "Nashville Total"),
+					new ExpectedCellValue(sheetName, 9, 3, null),
+					new ExpectedCellValue(sheetName, 9, 4, .5189),
+					new ExpectedCellValue(sheetName, 9, 5, 10),
+
+					new ExpectedCellValue(sheetName, 10, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 10, 3, "January"),
+					new ExpectedCellValue(sheetName, 10, 4, .8077),
+					new ExpectedCellValue(sheetName, 10, 5, 1),
+
+					new ExpectedCellValue(sheetName, 11, 2, null),
+					new ExpectedCellValue(sheetName, 11, 3, "February"),
+					new ExpectedCellValue(sheetName, 11, 4, .1923),
+					new ExpectedCellValue(sheetName, 11, 5, 1),
+
+					new ExpectedCellValue(sheetName, 12, 2, "San Francisco Total"),
+					new ExpectedCellValue(sheetName, 12, 3, null),
+					new ExpectedCellValue(sheetName, 12, 4, .2592),
+					new ExpectedCellValue(sheetName, 12, 5, 2),
+
+					new ExpectedCellValue(sheetName, 13, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 13, 3, null),
+					new ExpectedCellValue(sheetName, 13, 4, 1),
+					new ExpectedCellValue(sheetName, 13, 5, 15),
+				});
+			}
+		}
 		#endregion
 
 		#region PercentOfParentColumn Tests
