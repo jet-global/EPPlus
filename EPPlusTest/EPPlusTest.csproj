@@ -284,6 +284,11 @@
     <Compile Include="Table\PivotTable\Filters\ExcelFilterCriteriaCollectionTest.cs" />
     <Compile Include="Table\PivotTable\Filters\ExcelFilterTest.cs" />
     <Compile Include="Table\PivotTable\Filters\ExcelPivotTableAdvancedFilterTest.cs" />
+    <Compile Include="Table\PivotTable\Formats\ExcelFormatReferencesCollectionTest.cs" />
+    <Compile Include="Table\PivotTable\Formats\ExcelFormatReferenceTest.cs" />
+    <Compile Include="Table\PivotTable\Formats\ExcelFormatsCollectionTest.cs" />
+    <Compile Include="Table\PivotTable\Formats\ExcelFormatTest.cs" />
+    <Compile Include="Table\PivotTable\Formats\PivotTableFormattingTest.cs" />
     <Compile Include="Table\PivotTable\ItemsCollectionTest.cs" />
     <Compile Include="Table\PivotTable\PivotItemTreeNodeTest.cs" />
     <Compile Include="Table\PivotTable\PivotTableRefresh\PivotTableRefreshIndentationTest.cs" />

@@ -17,8 +17,8 @@ namespace OfficeOpenXml.Style.Dxf
 			if (topNode != null)
 			{
 				_helper = new XmlHelperInstance(nameSpaceManager, topNode);
-				NumberFormat.NumFmtID = _helper.GetXmlNodeInt("d:numFmt/@numFmtId");
 				NumberFormat.Format = _helper.GetXmlNodeString("d:numFmt/@formatCode");
+				NumberFormat.NumFmtID = _helper.GetXmlNodeInt("d:numFmt/@numFmtId");
 				if (NumberFormat.NumFmtID < 164 && string.IsNullOrEmpty(NumberFormat.Format))
 				{
 					NumberFormat.Format = ExcelNumberFormat.GetFromBuildInFromID(NumberFormat.NumFmtID);
