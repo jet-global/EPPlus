@@ -2122,12 +2122,15 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					int formatId = format.FormatId;
 					var formatting = this.Workbook.Styles.Dxfs[formatId];
-					foreach (var reference in format.References)
+					if (format.References != null)
 					{
-						foreach (var item in reference.SharedItems)
+						foreach (var reference in format.References)
 						{
-							if (int.Parse(item.Value) == xMemberIndex && reference.FieldIndex == fieldIndex && reference.Selected)
-								return this.GetTranslatedDate(formatting.NumberFormat.NumFmtID, dateTime);
+							foreach (var item in reference.SharedItems)
+							{
+								if (int.Parse(item.Value) == xMemberIndex && reference.FieldIndex == fieldIndex && reference.Selected)
+									return this.GetTranslatedDate(formatting.NumberFormat.NumFmtID, dateTime);
+							}
 						}
 					}
 				}
