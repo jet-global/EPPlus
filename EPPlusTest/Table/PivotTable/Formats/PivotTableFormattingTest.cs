@@ -2211,6 +2211,79 @@ namespace EPPlusTest.Table.PivotTable.Formats
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDateFormats.xlsx")]
+		public void PivotTableRefreshDateFormatedDifferentRegions()
+		{
+			var file = new FileInfo("PivotTableDateFormats.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
+					{
+						cacheDefinition.UpdateData();
+					}
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B23"), pivotTable.Address);
+					Assert.AreEqual(10, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 1, 1, "Row Labels"),
+					new ExpectedCellValue(sheetName, 2, 1, "Pebrero 1, 2012"),
+					new ExpectedCellValue(sheetName, 3, 1, "4.02.12"),
+					new ExpectedCellValue(sheetName, 4, 1, "19 févr. 2012"),
+					new ExpectedCellValue(sheetName, 5, 1, "2012ꈎ 2ꆪ 20ꑍ"),
+					new ExpectedCellValue(sheetName, 6, 1, "26. 2. 12"),
+					new ExpectedCellValue(sheetName, 7, 1, "2/28/2012"),
+					new ExpectedCellValue(sheetName, 8, 1, "5/14/2012"),
+					new ExpectedCellValue(sheetName, 9, 1, "5/19/2012"),
+					new ExpectedCellValue(sheetName, 10, 1, "5/21/2012"),
+					new ExpectedCellValue(sheetName, 11, 1, "5/23/2012"),
+					new ExpectedCellValue(sheetName, 12, 1, "5/26/2012"),
+					new ExpectedCellValue(sheetName, 13, 1, "4 ʻAukake 2012"),
+					new ExpectedCellValue(sheetName, 14, 1, "8/6/2012"),
+					new ExpectedCellValue(sheetName, 15, 1, "16/08/2012"),
+					new ExpectedCellValue(sheetName, 16, 1, "8/17/2012"),
+					new ExpectedCellValue(sheetName, 17, 1, "8/26/2012"),
+					new ExpectedCellValue(sheetName, 18, 1, "9/3/2012"),
+					new ExpectedCellValue(sheetName, 19, 1, "9/9/2012"),
+					new ExpectedCellValue(sheetName, 20, 1, "Alxames 13 Septàmbar 2012"),
+					new ExpectedCellValue(sheetName, 21, 1, "9/24/2012"),
+					new ExpectedCellValue(sheetName, 22, 1, "9/25/2012"),
+					new ExpectedCellValue(sheetName, 23, 1, "Grand Total"),
+					new ExpectedCellValue(sheetName, 1, 2, "Sum of Profit (LCY)"),
+					new ExpectedCellValue(sheetName, 2, 2, 1638.1),
+					new ExpectedCellValue(sheetName, 3, 2, 0),
+					new ExpectedCellValue(sheetName, 4, 2, 0),
+					new ExpectedCellValue(sheetName, 5, 2, 0),
+					new ExpectedCellValue(sheetName, 6, 2, 95.41),
+					new ExpectedCellValue(sheetName, 7, 2, 0),
+					new ExpectedCellValue(sheetName, 8, 2, 0),
+					new ExpectedCellValue(sheetName, 9, 2, 0),
+					new ExpectedCellValue(sheetName, 10, 2, 0),
+					new ExpectedCellValue(sheetName, 11, 2, 0),
+					new ExpectedCellValue(sheetName, 12, 2, 0),
+					new ExpectedCellValue(sheetName, 13, 2, 1119.44),
+					new ExpectedCellValue(sheetName, 14, 2, 546d),
+					new ExpectedCellValue(sheetName, 15, 2, 334.27),
+					new ExpectedCellValue(sheetName, 16, 2, 0),
+					new ExpectedCellValue(sheetName, 17, 2, 0),
+					new ExpectedCellValue(sheetName, 18, 2, 0),
+					new ExpectedCellValue(sheetName, 19, 2, 0),
+					new ExpectedCellValue(sheetName, 20, 2, 0),
+					new ExpectedCellValue(sheetName, 21, 2, 0),
+					new ExpectedCellValue(sheetName, 22, 2, 847.2),
+					new ExpectedCellValue(sheetName, 23, 2, 4580.42)
+				});
+			}
+		}
+
+		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDateFormatsTabularForm.xlsx")]
 		public void PivotTableRefreshRowFieldsDateFormatedInDDMMMFormatTabularForm()
 		{
