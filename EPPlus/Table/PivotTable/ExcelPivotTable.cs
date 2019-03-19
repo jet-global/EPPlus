@@ -1693,10 +1693,12 @@ namespace OfficeOpenXml.Table.PivotTable
 			int endColumn = this.Address.Start.Column;
 			if (this.DataFields.Any())
 				endColumn += this.FirstDataCol + this.ColumnHeaders.Count - 1;
-			else if (hasTabularFields)
-				endColumn += this.TabularHeaders.Count;
-			else if (this.Fields.Any(x => x.Compact == false))
-				endColumn += this.RowFields.Count - 1;
+			else
+			{
+				int tabularCount = this.TabularHeaders.Count;
+				int nonCompactCount = this.Fields.Count(x => x.Compact == false);
+				endColumn += tabularCount + nonCompactCount;
+			}
 			return new ExcelAddress(this.Worksheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
 		}
 
@@ -1756,11 +1758,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			var columnFieldNames = new List<string>();
 			var compactFormPivotFields = this.Fields.Where(x => x.Compact);
 			bool hasNonCompactFormFields = this.Fields.Any(x => x.Compact == false);
-
-			var hasDateTimeType = this.CacheDefinition.CacheFields.Any(l => l.SharedItems.All(p => p.Type == PivotCacheRecordType.d));
-			int dateTimeTypeIndex = hasDateTimeType ? this.CacheDefinition.CacheFields.ToList().FindIndex(x => x.SharedItems.Count > 0 && x.SharedItems.All(p => p.Type == PivotCacheRecordType.d)) : 0;
-			int dateItemCount = 0;
-
 			if (this.RowFields.Any())
 			{
 				for (int i = 0; i < this.RowItems.Count; i++)
@@ -1781,12 +1778,10 @@ namespace OfficeOpenXml.Table.PivotTable
 					else
 					{
 						// Get the header value to print to the cell.
-						string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, item.RepeatedItemsCount, 0, stringResources, dateItemCount);
+						string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, item.RepeatedItemsCount, 0, stringResources);
 						column = this.GetCompactFormHeaderColumn(header, item, compactFormPivotFields, column, previousColumn, previousHeaderCompactForm, topNodeHeaderCompactForm, i);
 						cell = this.Worksheet.Cells[row++, column];
 						cell.Value = sharedItemValue;
-						if (this.RowFields[item.RepeatedItemsCount].Index == dateTimeTypeIndex)
-							dateItemCount++;
 						// Reset the local variables.
 						if (column > previousColumn)
 						{
@@ -1841,7 +1836,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						{
 							// Get the header value to print to the cell.
 							var itemIndex = item.RepeatedItemsCount == 0 ? j : j + item.RepeatedItemsCount;
-							string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, itemIndex, j, stringResources, i);
+							string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, itemIndex, j, stringResources);
 							if (j == 0)
 								column = this.GetTabularHeaderColumn(header, item.RepeatedItemsCount, column, topNodeHeaderTabularForm, hasAllCompactFormFields, nonTabularFields);
 							cell = this.Worksheet.Cells[row, column];
@@ -2014,10 +2009,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
 			int column = this.Address.Start.Column + this.FirstDataCol;
-
-			var hasDateTimeType = this.CacheDefinition.CacheFields.Any(l => l.SharedItems.All(p => p.Type == PivotCacheRecordType.d));
-			int dateTimeTypeIndex = hasDateTimeType ? this.CacheDefinition.CacheFields.ToList().FindIndex(x => x.SharedItems.Count > 0 && x.SharedItems.All(p => p.Type == PivotCacheRecordType.d)) : 0;
-			int dateItemCount = 0;
 			if (this.ColumnFields.Any())
 			{
 				for (int i = 0; i < this.ColumnItems.Count; i++)
@@ -2034,13 +2025,11 @@ namespace OfficeOpenXml.Table.PivotTable
 					for (int j = 0; j < this.ColumnItems[i].Count; j++)
 					{
 						var columnFieldIndex = this.ColumnItems[i].RepeatedItemsCount == 0 ? j : j + this.ColumnItems[i].RepeatedItemsCount;
-						var sharedItem = this.GetSharedItemValue(this.ColumnFields, this.ColumnItems[i], columnFieldIndex, j, stringResources, dateItemCount);
+						var sharedItem = this.GetSharedItemValue(this.ColumnFields, this.ColumnItems[i], columnFieldIndex, j, stringResources);
 						var cellRow = this.ColumnItems[i].RepeatedItemsCount == 0 ? startHeaderRow : startHeaderRow + this.ColumnItems[i].RepeatedItemsCount;
 						this.Worksheet.Cells[cellRow, column].Value = sharedItem;
 						startHeaderRow++;
 					}
-					if (this.ColumnFields[this.ColumnItems[i].RepeatedItemsCount].Index == dateTimeTypeIndex)
-						dateItemCount++;
 					column++;
 				}
 			}
@@ -2098,7 +2087,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			return totalHeader;
 		}
 
-		private string GetSharedItemValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem rowColItem, int repeatedItemsCount, int xMemberIndex, StringResources stringResources, int i = 0)
+		private string GetSharedItemValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem rowColItem, int repeatedItemsCount, int xMemberIndex, StringResources stringResources)
 		{
 			var sharedItemValue = string.Empty;
 			var pivotFieldIndex = field[repeatedItemsCount].Index;
@@ -2115,38 +2104,30 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (item.Type == PivotCacheRecordType.b)
 				sharedItemValue = item.Value.IsEquivalentTo("1") ? stringResources.PivotTableTrueCaption : stringResources.PivotTableFalseCaption;
 			else if (item.Type == PivotCacheRecordType.d)
-				sharedItemValue = this.GetDateFormat(pivotFieldIndex, item.Value, cacheField.NumFormatId, i);
+				sharedItemValue = this.GetDateFormat(pivotFieldIndex, item.Value.Split('-'), cacheField.NumFormatId, rowColItem[xMemberIndex], string.IsNullOrEmpty(rowColItem.ItemType));
 			else
 				sharedItemValue = item.Value;
 			sharedItemValue = sharedItemValue ?? stringResources.BlankValueHeaderCaption;
 			return sharedItemValue;
 		}
 
-		private string GetDateFormat(int fieldIndex, string sharedItemValue, int numFormatId, int v)
+		private string GetDateFormat(int fieldIndex, string[] sharedItemValue, int numFormatId, int xMemberIndex, bool nonTotalHeader)
 		{
-			string date = sharedItemValue;
-			var itemSplit = sharedItemValue.Split('-');
-			var dateTime = new DateTime(int.Parse(itemSplit[0]), int.Parse(itemSplit[1]), int.Parse(itemSplit[2].Substring(0, 2)), int.Parse(itemSplit[2].Substring(3, 2)), 
-				int.Parse(itemSplit[2].Substring(6, 2)), int.Parse(itemSplit[2].Substring(9, 2)));
-			date = this.GetTranslatedDate(numFormatId, dateTime);
-			if (this.Formats != null)
+			var dateTime = new DateTime(int.Parse(sharedItemValue[0]), int.Parse(sharedItemValue[1]), int.Parse(sharedItemValue[2].Substring(0, 2)), 
+				int.Parse(sharedItemValue[2].Substring(3, 2)), int.Parse(sharedItemValue[2].Substring(6, 2)), int.Parse(sharedItemValue[2].Substring(9, 2)));
+			string date = this.GetTranslatedDate(numFormatId, dateTime);
+			if (this.Formats != null && nonTotalHeader)
 			{
-				foreach (var f in this.Formats)
+				foreach (var format in this.Formats)
 				{
-					int formatId = f.FormatId;
+					int formatId = format.FormatId;
 					var formatting = this.Workbook.Styles.Dxfs[formatId];
-					if (f.References.Count > 0)
+					foreach (var reference in format.References)
 					{
-						foreach (var reference in f.References)
+						foreach (var item in reference.SharedItems)
 						{
-							if (reference.ItemIndexCount > 0)
-							{ 
-								foreach (var item in reference.SharedItems)
-								{
-									if (int.Parse(item.Value) == v && reference.FieldIndex == fieldIndex && reference.Selected)
-										return this.GetTranslatedDate(formatting.NumberFormat.NumFmtID, dateTime);
-								}
-							}
+							if (int.Parse(item.Value) == xMemberIndex && reference.FieldIndex == fieldIndex && reference.Selected)
+								return this.GetTranslatedDate(formatting.NumberFormat.NumFmtID, dateTime);
 						}
 					}
 				}

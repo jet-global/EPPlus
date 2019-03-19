@@ -2209,28 +2209,435 @@ namespace EPPlusTest.Table.PivotTable.Formats
 				});
 			}
 		}
-		#endregion
 
 		[TestMethod]
-		public void dasgdgad()
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDateFormatsTabularForm.xlsx")]
+		public void PivotTableRefreshRowFieldsDateFormatedInDDMMMFormatTabularForm()
 		{
-			var file = new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\Dates.xlsx");
+			var file = new FileInfo("PivotTableDateFormatsTabularForm.xlsx");
 			Assert.IsTrue(file.Exists);
 			using (var newFile = new TempTestFile())
 			{
+				string sheetName = "PivotTables";
 				using (var package = new ExcelPackage(file))
 				{
-					var worksheet = package.Workbook.Worksheets.First();
-					var pivotTable = worksheet.PivotTables.First();
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
 					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
 					{
 						cacheDefinition.UpdateData();
 					}
-					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\Dates-output.xlsx"));
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A1:B16"), pivotTable.Address);
+					Assert.AreEqual(10, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
-					Assert.Fail();
 				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 1, 1, "Row Labels"),
+					new ExpectedCellValue(sheetName, 2, 1, "2/4/2012"),
+					new ExpectedCellValue(sheetName, 3, 1, "2/4/2012 Total"),
+					new ExpectedCellValue(sheetName, 4, 1, "28-Feb"),
+					new ExpectedCellValue(sheetName, 5, 1, "2/28/2012 Total"),
+					new ExpectedCellValue(sheetName, 6, 1, "5/26/2012"),
+					new ExpectedCellValue(sheetName, 7, 1, "5/26/2012 Total"),
+					new ExpectedCellValue(sheetName, 8, 1, "8/4/2012"),
+					new ExpectedCellValue(sheetName, 9, 1, "8/4/2012 Total"),
+					new ExpectedCellValue(sheetName, 10, 1, "26-Aug"),
+					new ExpectedCellValue(sheetName, 11, 1, "8/26/2012 Total"),
+					new ExpectedCellValue(sheetName, 12, 1, "9/3/2012"),
+					new ExpectedCellValue(sheetName, 13, 1, "9/3/2012 Total"),
+					new ExpectedCellValue(sheetName, 14, 1, "9/13/2012"),
+					new ExpectedCellValue(sheetName, 15, 1, "9/13/2012 Total"),
+					new ExpectedCellValue(sheetName, 16, 1, "Grand Total"),
+					new ExpectedCellValue(sheetName, 1, 2, "City"),
+					new ExpectedCellValue(sheetName, 2, 2, "TEMARA"),
+					new ExpectedCellValue(sheetName, 3, 2, null),
+					new ExpectedCellValue(sheetName, 4, 2, "Amsterdam"),
+					new ExpectedCellValue(sheetName, 5, 2, null),
+					new ExpectedCellValue(sheetName, 6, 2, "Durban"),
+					new ExpectedCellValue(sheetName, 7, 2, null),
+					new ExpectedCellValue(sheetName, 8, 2, "Antwerpen"),
+					new ExpectedCellValue(sheetName, 9, 2, null),
+					new ExpectedCellValue(sheetName, 10, 2, "Elkhorn"),
+					new ExpectedCellValue(sheetName, 11, 2, null),
+					new ExpectedCellValue(sheetName, 12, 2, "Valencia"),
+					new ExpectedCellValue(sheetName, 13, 2, null),
+					new ExpectedCellValue(sheetName, 14, 2, "Thunder Bay"),
+					new ExpectedCellValue(sheetName, 15, 2, null),
+					new ExpectedCellValue(sheetName, 16, 2, null)
+				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDateFormatsTabularForm.xlsx")]
+		public void PivotTableRefreshRowFieldsDateFormatedInAllUnitedStatesFormatTabularForm()
+		{
+			var file = new FileInfo("PivotTableDateFormatsTabularForm.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
+					{
+						cacheDefinition.UpdateData();
+					}
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E1:F16"), pivotTable.Address);
+					Assert.AreEqual(10, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 1, 5, "Row Labels"),
+					new ExpectedCellValue(sheetName, 2, 5, "Saturday, February 4, 2012"),
+					new ExpectedCellValue(sheetName, 3, 5, "2/4/2012 Total"),
+					new ExpectedCellValue(sheetName, 4, 5, "28-Feb"),
+					new ExpectedCellValue(sheetName, 5, 5, "2/28/2012 Total"),
+					new ExpectedCellValue(sheetName, 6, 5, "5/26/12 0:00"),
+					new ExpectedCellValue(sheetName, 7, 5, "5/26/2012 Total"),
+					new ExpectedCellValue(sheetName, 8, 5, "8/4/2012"),
+					new ExpectedCellValue(sheetName, 9, 5, "8/4/2012 Total"),
+					new ExpectedCellValue(sheetName, 10, 5, "26-Aug"),
+					new ExpectedCellValue(sheetName, 11, 5, "8/26/2012 Total"),
+					new ExpectedCellValue(sheetName, 12, 5, "September-12"),
+					new ExpectedCellValue(sheetName, 13, 5, "9/3/2012 Total"),
+					new ExpectedCellValue(sheetName, 14, 5, "S"),
+					new ExpectedCellValue(sheetName, 15, 5, "9/13/2012 Total"),
+					new ExpectedCellValue(sheetName, 16, 5, "Grand Total"),
+					new ExpectedCellValue(sheetName, 1, 6, "City"),
+					new ExpectedCellValue(sheetName, 2, 6, "TEMARA"),
+					new ExpectedCellValue(sheetName, 3, 6, null),
+					new ExpectedCellValue(sheetName, 4, 6, "Amsterdam"),
+					new ExpectedCellValue(sheetName, 5, 6, null),
+					new ExpectedCellValue(sheetName, 6, 6, "Durban"),
+					new ExpectedCellValue(sheetName, 7, 6, null),
+					new ExpectedCellValue(sheetName, 8, 6, "Antwerpen"),
+					new ExpectedCellValue(sheetName, 9, 6, null),
+					new ExpectedCellValue(sheetName, 10, 6, "Elkhorn"),
+					new ExpectedCellValue(sheetName, 11, 6, null),
+					new ExpectedCellValue(sheetName, 12, 6, "Valencia"),
+					new ExpectedCellValue(sheetName, 13, 6, null),
+					new ExpectedCellValue(sheetName, 14, 6, "Thunder Bay"),
+					new ExpectedCellValue(sheetName, 15, 6, null),
+					new ExpectedCellValue(sheetName, 16, 6, null)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDateFormatsTabularForm.xlsx")]
+		public void PivotTableRefreshRowFieldsDateFormatedInAllUnitedStatesFormatTabularFormAndNonCompactForm()
+		{
+			var file = new FileInfo("PivotTableDateFormatsTabularForm.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable3"];
+					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
+					{
+						cacheDefinition.UpdateData();
+					}
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A21:C43"), pivotTable.Address);
+					Assert.AreEqual(10, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 21, 1, "Row Labels"),
+					new ExpectedCellValue(sheetName, 22, 1, "2/4/2012"),
+					new ExpectedCellValue(sheetName, 23, 1, null),
+					new ExpectedCellValue(sheetName, 24, 1, null),
+					new ExpectedCellValue(sheetName, 25, 1, "28-Feb-2012"),
+					new ExpectedCellValue(sheetName, 26, 1, null),
+					new ExpectedCellValue(sheetName, 27, 1, null),
+					new ExpectedCellValue(sheetName, 28, 1, "May-12"),
+					new ExpectedCellValue(sheetName, 29, 1, null),
+					new ExpectedCellValue(sheetName, 30, 1, null),
+					new ExpectedCellValue(sheetName, 31, 1, "Saturday, August 4, 2012"),
+					new ExpectedCellValue(sheetName, 32, 1, null),
+					new ExpectedCellValue(sheetName, 33, 1, null),
+					new ExpectedCellValue(sheetName, 34, 1, "26-Aug-12"),
+					new ExpectedCellValue(sheetName, 35, 1, null),
+					new ExpectedCellValue(sheetName, 36, 1, null),
+					new ExpectedCellValue(sheetName, 37, 1, "9/3/12 0:00"),
+					new ExpectedCellValue(sheetName, 38, 1, null),
+					new ExpectedCellValue(sheetName, 39, 1, null),
+					new ExpectedCellValue(sheetName, 40, 1, "2012-09-13"),
+					new ExpectedCellValue(sheetName, 41, 1, null),
+					new ExpectedCellValue(sheetName, 42, 1, null),
+					new ExpectedCellValue(sheetName, 43, 1, "Grand Total"),
+					new ExpectedCellValue(sheetName, 21, 2, "City"),
+					new ExpectedCellValue(sheetName, 22, 2, null),
+					new ExpectedCellValue(sheetName, 23, 2, "TEMARA"),
+					new ExpectedCellValue(sheetName, 24, 2, "TEMARA Total"),
+					new ExpectedCellValue(sheetName, 25, 2, null),
+					new ExpectedCellValue(sheetName, 26, 2, "Amsterdam"),
+					new ExpectedCellValue(sheetName, 27, 2, "Amsterdam Total"),
+					new ExpectedCellValue(sheetName, 28, 2, null),
+					new ExpectedCellValue(sheetName, 29, 2, "Durban"),
+					new ExpectedCellValue(sheetName, 30, 2, "Durban Total"),
+					new ExpectedCellValue(sheetName, 31, 2, null),
+					new ExpectedCellValue(sheetName, 32, 2, "Antwerpen"),
+					new ExpectedCellValue(sheetName, 33, 2, "Antwerpen Total"),
+					new ExpectedCellValue(sheetName, 34, 2, null),
+					new ExpectedCellValue(sheetName, 35, 2, "Elkhorn"),
+					new ExpectedCellValue(sheetName, 36, 2, "Elkhorn Total"),
+					new ExpectedCellValue(sheetName, 37, 2, null),
+					new ExpectedCellValue(sheetName, 38, 2, "Valencia"),
+					new ExpectedCellValue(sheetName, 39, 2, "Valencia Total"),
+					new ExpectedCellValue(sheetName, 40, 2, null),
+					new ExpectedCellValue(sheetName, 41, 2, "Thunder Bay"),
+					new ExpectedCellValue(sheetName, 42, 2, "Thunder Bay Total"),
+					new ExpectedCellValue(sheetName, 43, 2, null),
+					new ExpectedCellValue(sheetName, 21, 3, "Name"),
+					new ExpectedCellValue(sheetName, 22, 3, null),
+					new ExpectedCellValue(sheetName, 23, 3, "ElectroMAROC"),
+					new ExpectedCellValue(sheetName, 24, 3, null),
+					new ExpectedCellValue(sheetName, 25, 3, null),
+					new ExpectedCellValue(sheetName, 26, 3, "Candoxy Nederland BV"),
+					new ExpectedCellValue(sheetName, 27, 3, null),
+					new ExpectedCellValue(sheetName, 28, 3, null),
+					new ExpectedCellValue(sheetName, 29, 3, "Durbandit Fruit Exporters"),
+					new ExpectedCellValue(sheetName, 30, 3, null),
+					new ExpectedCellValue(sheetName, 31, 3, null),
+					new ExpectedCellValue(sheetName, 32, 3, "Antarcticopy"),
+					new ExpectedCellValue(sheetName, 33, 3, null),
+					new ExpectedCellValue(sheetName, 34, 3, null),
+					new ExpectedCellValue(sheetName, 35, 3, "Elkhorn Airport"),
+					new ExpectedCellValue(sheetName, 36, 3, null),
+					new ExpectedCellValue(sheetName, 37, 3, null),
+					new ExpectedCellValue(sheetName, 38, 3, "Corporación Beta"),
+					new ExpectedCellValue(sheetName, 39, 3, null),
+					new ExpectedCellValue(sheetName, 40, 3, null),
+					new ExpectedCellValue(sheetName, 41, 3, "Candoxy Canada Inc."),
+					new ExpectedCellValue(sheetName, 42, 3, null),
+					new ExpectedCellValue(sheetName, 43, 3, null)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDateFormatsTabularForm.xlsx")]
+		public void PivotTableRefreshRowFieldsDateFormatedInAllUnitedStatesFormatNonCompactForm()
+		{
+			var file = new FileInfo("PivotTableDateFormatsTabularForm.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable4"];
+					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
+					{
+						cacheDefinition.UpdateData();
+					}
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A50:C72"), pivotTable.Address);
+					Assert.AreEqual(10, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 50, 1, "Row Labels"),
+					new ExpectedCellValue(sheetName, 51, 1, "Saturday, February 4, 2012"),
+					new ExpectedCellValue(sheetName, 52, 1, null),
+					new ExpectedCellValue(sheetName, 53, 1, null),
+					new ExpectedCellValue(sheetName, 54, 1, "2012-02-28"),
+					new ExpectedCellValue(sheetName, 55, 1, null),
+					new ExpectedCellValue(sheetName, 56, 1, null),
+					new ExpectedCellValue(sheetName, 57, 1, "26-May"),
+					new ExpectedCellValue(sheetName, 58, 1, null),
+					new ExpectedCellValue(sheetName, 59, 1, null),
+					new ExpectedCellValue(sheetName, 60, 1, "August 4, 2012"),
+					new ExpectedCellValue(sheetName, 61, 1, null),
+					new ExpectedCellValue(sheetName, 62, 1, null),
+					new ExpectedCellValue(sheetName, 63, 1, "8/26/12 0:00"),
+					new ExpectedCellValue(sheetName, 64, 1, null),
+					new ExpectedCellValue(sheetName, 65, 1, null),
+					new ExpectedCellValue(sheetName, 66, 1, "Sep-12"),
+					new ExpectedCellValue(sheetName, 67, 1, null),
+					new ExpectedCellValue(sheetName, 68, 1, null),
+					new ExpectedCellValue(sheetName, 69, 1, "13-Sep-2012"),
+					new ExpectedCellValue(sheetName, 70, 1, null),
+					new ExpectedCellValue(sheetName, 71, 1, null),
+					new ExpectedCellValue(sheetName, 72, 1, "Grand Total"),
+					new ExpectedCellValue(sheetName, 50, 2, "City"),
+					new ExpectedCellValue(sheetName, 51, 2, null),
+					new ExpectedCellValue(sheetName, 52, 2, "TEMARA"),
+					new ExpectedCellValue(sheetName, 53, 2, null),
+					new ExpectedCellValue(sheetName, 54, 2, null),
+					new ExpectedCellValue(sheetName, 55, 2, "Amsterdam"),
+					new ExpectedCellValue(sheetName, 56, 2, null),
+					new ExpectedCellValue(sheetName, 57, 2, null),
+					new ExpectedCellValue(sheetName, 58, 2, "Durban"),
+					new ExpectedCellValue(sheetName, 59, 2, null),
+					new ExpectedCellValue(sheetName, 60, 2, null),
+					new ExpectedCellValue(sheetName, 61, 2, "Antwerpen"),
+					new ExpectedCellValue(sheetName, 62, 2, null),
+					new ExpectedCellValue(sheetName, 63, 2, null),
+					new ExpectedCellValue(sheetName, 64, 2, "Elkhorn"),
+					new ExpectedCellValue(sheetName, 65, 2, null),
+					new ExpectedCellValue(sheetName, 66, 2, null),
+					new ExpectedCellValue(sheetName, 67, 2, "Valencia"),
+					new ExpectedCellValue(sheetName, 68, 2, null),
+					new ExpectedCellValue(sheetName, 69, 2, null),
+					new ExpectedCellValue(sheetName, 70, 2, "Thunder Bay"),
+					new ExpectedCellValue(sheetName, 71, 2, null),
+					new ExpectedCellValue(sheetName, 72, 2, null),
+					new ExpectedCellValue(sheetName, 50, 3, "Name"),
+					new ExpectedCellValue(sheetName, 51, 3, null),
+					new ExpectedCellValue(sheetName, 52, 3, null),
+					new ExpectedCellValue(sheetName, 53, 3, "ElectroMAROC"),
+					new ExpectedCellValue(sheetName, 54, 3, null),
+					new ExpectedCellValue(sheetName, 55, 3, null),
+					new ExpectedCellValue(sheetName, 56, 3, "Candoxy Nederland BV"),
+					new ExpectedCellValue(sheetName, 57, 3, null),
+					new ExpectedCellValue(sheetName, 58, 3, null),
+					new ExpectedCellValue(sheetName, 59, 3, "Durbandit Fruit Exporters"),
+					new ExpectedCellValue(sheetName, 60, 3, null),
+					new ExpectedCellValue(sheetName, 61, 3, null),
+					new ExpectedCellValue(sheetName, 62, 3, "Antarcticopy"),
+					new ExpectedCellValue(sheetName, 63, 3, null),
+					new ExpectedCellValue(sheetName, 64, 3, null),
+					new ExpectedCellValue(sheetName, 65, 3, "Elkhorn Airport"),
+					new ExpectedCellValue(sheetName, 66, 3, null),
+					new ExpectedCellValue(sheetName, 67, 3, null),
+					new ExpectedCellValue(sheetName, 68, 3, "Corporación Beta"),
+					new ExpectedCellValue(sheetName, 69, 3, null),
+					new ExpectedCellValue(sheetName, 70, 3, null),
+					new ExpectedCellValue(sheetName, 71, 3, "Candoxy Canada Inc."),
+					new ExpectedCellValue(sheetName, 72, 3, null)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDateFormatsTabularForm.xlsx")]
+		public void PivotTableRefreshRowFieldsDateFormatedInAllUnitedStatesFormatNonCompactForm2()
+		{
+			var file = new FileInfo("PivotTableDateFormatsTabularForm.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable5"];
+					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
+					{
+						cacheDefinition.UpdateData();
+					}
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("E50:H72"), pivotTable.Address);
+					Assert.AreEqual(10, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 50, 5, "Row Labels"),
+					new ExpectedCellValue(sheetName, 51, 5, "Saturday, February 4, 2012"),
+					new ExpectedCellValue(sheetName, 52, 5, null),
+					new ExpectedCellValue(sheetName, 53, 5, null),
+					new ExpectedCellValue(sheetName, 54, 5, "2012-02-28"),
+					new ExpectedCellValue(sheetName, 55, 5, null),
+					new ExpectedCellValue(sheetName, 56, 5, null),
+					new ExpectedCellValue(sheetName, 57, 5, "26-May"),
+					new ExpectedCellValue(sheetName, 58, 5, null),
+					new ExpectedCellValue(sheetName, 59, 5, null),
+					new ExpectedCellValue(sheetName, 60, 5, "August 4, 2012"),
+					new ExpectedCellValue(sheetName, 61, 5, null),
+					new ExpectedCellValue(sheetName, 62, 5, null),
+					new ExpectedCellValue(sheetName, 63, 5, "8/26/12 0:00"),
+					new ExpectedCellValue(sheetName, 64, 5, null),
+					new ExpectedCellValue(sheetName, 65, 5, null),
+					new ExpectedCellValue(sheetName, 66, 5, "Sep-12"),
+					new ExpectedCellValue(sheetName, 67, 5, null),
+					new ExpectedCellValue(sheetName, 68, 5, null),
+					new ExpectedCellValue(sheetName, 69, 5, "13-Sep-2012"),
+					new ExpectedCellValue(sheetName, 70, 5, null),
+					new ExpectedCellValue(sheetName, 71, 5, null),
+					new ExpectedCellValue(sheetName, 72, 5, "Grand Total"),
+					new ExpectedCellValue(sheetName, 50, 6, "City"),
+					new ExpectedCellValue(sheetName, 51, 6, null),
+					new ExpectedCellValue(sheetName, 52, 6, "TEMARA"),
+					new ExpectedCellValue(sheetName, 53, 6, null),
+					new ExpectedCellValue(sheetName, 54, 6, null),
+					new ExpectedCellValue(sheetName, 55, 6, "Amsterdam"),
+					new ExpectedCellValue(sheetName, 56, 6, null),
+					new ExpectedCellValue(sheetName, 57, 6, null),
+					new ExpectedCellValue(sheetName, 58, 6, "Durban"),
+					new ExpectedCellValue(sheetName, 59, 6, null),
+					new ExpectedCellValue(sheetName, 60, 6, null),
+					new ExpectedCellValue(sheetName, 61, 6, "Antwerpen"),
+					new ExpectedCellValue(sheetName, 62, 6, null),
+					new ExpectedCellValue(sheetName, 63, 6, null),
+					new ExpectedCellValue(sheetName, 64, 6, "Elkhorn"),
+					new ExpectedCellValue(sheetName, 65, 6, null),
+					new ExpectedCellValue(sheetName, 66, 6, null),
+					new ExpectedCellValue(sheetName, 67, 6, "Valencia"),
+					new ExpectedCellValue(sheetName, 68, 6, null),
+					new ExpectedCellValue(sheetName, 69, 6, null),
+					new ExpectedCellValue(sheetName, 70, 6, "Thunder Bay"),
+					new ExpectedCellValue(sheetName, 71, 6, null),
+					new ExpectedCellValue(sheetName, 72, 6, null),
+					new ExpectedCellValue(sheetName, 50, 7, "Name"),
+					new ExpectedCellValue(sheetName, 51, 7, null),
+					new ExpectedCellValue(sheetName, 52, 7, null),
+					new ExpectedCellValue(sheetName, 53, 7, "ElectroMAROC"),
+					new ExpectedCellValue(sheetName, 54, 7, null),
+					new ExpectedCellValue(sheetName, 55, 7, null),
+					new ExpectedCellValue(sheetName, 56, 7, "Candoxy Nederland BV"),
+					new ExpectedCellValue(sheetName, 57, 7, null),
+					new ExpectedCellValue(sheetName, 58, 7, null),
+					new ExpectedCellValue(sheetName, 59, 7, "Durbandit Fruit Exporters"),
+					new ExpectedCellValue(sheetName, 60, 7, null),
+					new ExpectedCellValue(sheetName, 61, 7, null),
+					new ExpectedCellValue(sheetName, 62, 7, "Antarcticopy"),
+					new ExpectedCellValue(sheetName, 63, 7, null),
+					new ExpectedCellValue(sheetName, 64, 7, null),
+					new ExpectedCellValue(sheetName, 65, 7, "Elkhorn Airport"),
+					new ExpectedCellValue(sheetName, 66, 7, null),
+					new ExpectedCellValue(sheetName, 67, 7, null),
+					new ExpectedCellValue(sheetName, 68, 7, "Corporación Beta"),
+					new ExpectedCellValue(sheetName, 69, 7, null),
+					new ExpectedCellValue(sheetName, 70, 7, null),
+					new ExpectedCellValue(sheetName, 71, 7, "Candoxy Canada Inc."),
+					new ExpectedCellValue(sheetName, 72, 7, null),
+					new ExpectedCellValue(sheetName, 50, 8, "Sum of Profit (LCY)"),
+					new ExpectedCellValue(sheetName, 51, 8, 0),
+					new ExpectedCellValue(sheetName, 52, 8, 0),
+					new ExpectedCellValue(sheetName, 53, 8, 0),
+					new ExpectedCellValue(sheetName, 54, 8, 0),
+					new ExpectedCellValue(sheetName, 55, 8, 0),
+					new ExpectedCellValue(sheetName, 56, 8, 0),
+					new ExpectedCellValue(sheetName, 57, 8, 0),
+					new ExpectedCellValue(sheetName, 58, 8, 0),
+					new ExpectedCellValue(sheetName, 59, 8, 0),
+					new ExpectedCellValue(sheetName, 60, 8, 1119.44),
+					new ExpectedCellValue(sheetName, 61, 8, 1119.44),
+					new ExpectedCellValue(sheetName, 62, 8, 1119.44),
+					new ExpectedCellValue(sheetName, 63, 8, 0),
+					new ExpectedCellValue(sheetName, 64, 8, 0),
+					new ExpectedCellValue(sheetName, 65, 8, 0),
+					new ExpectedCellValue(sheetName, 66, 8, 0),
+					new ExpectedCellValue(sheetName, 67, 8, 0),
+					new ExpectedCellValue(sheetName, 68, 8, 0),
+					new ExpectedCellValue(sheetName, 69, 8, 0),
+					new ExpectedCellValue(sheetName, 70, 8, 0),
+					new ExpectedCellValue(sheetName, 71, 8, 0),
+					new ExpectedCellValue(sheetName, 72, 8, 1119.44)
+				});
+			}
+		}
+		#endregion
 	}
 }
