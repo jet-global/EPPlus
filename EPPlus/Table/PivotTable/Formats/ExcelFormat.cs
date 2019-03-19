@@ -36,7 +36,7 @@ namespace OfficeOpenXml.Table.PivotTable.Formats
 	{
 		#region Properties
 		/// <summary>
-		/// Gets the index into the Formats collection in Styles.xml.
+		/// Gets the index into the formats collection in Styles.xml.
 		/// </summary>
 		public int FormatId
 		{

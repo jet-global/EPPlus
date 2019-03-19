@@ -38,8 +38,8 @@ namespace OfficeOpenXml.Table.PivotTable.Formats
 		/// <summary>
 		/// Creates a new instance of an <see cref="ExcelFormatsCollection"/>.
 		/// </summary>
-		/// <param name="namespaceManager"></param>
-		/// <param name="node"></param>
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="node">The xml top node.</param>
 		public ExcelFormatsCollection(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node) { }
 		#endregion
 
