@@ -39,8 +39,10 @@ using System.Xml;
 using OfficeOpenXml.Extensions;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.Internationalization;
+using OfficeOpenXml.Style.XmlAccess;
 using OfficeOpenXml.Table.PivotTable.DataCalculation;
 using OfficeOpenXml.Table.PivotTable.Filters;
+using OfficeOpenXml.Table.PivotTable.Formats;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -67,6 +69,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		private ExcelPivotTableDataFieldCollection myDataFields;
 		private ExcelPageFieldCollection myPageFields;
 		private ExcelPivotFieldFiltersCollection myFilters;
+		private ExcelFormatsCollection myFormats;
 		private ItemsCollection myRowItems;
 		private ItemsCollection myColumnItems;
 		private TableStyles myTableStyle = Table.TableStyles.Medium6;
@@ -716,6 +719,24 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (myColumnItems == null)
 					myColumnItems = new ItemsCollection(this.NameSpaceManager, this.TopNode.SelectSingleNode("d:colItems", this.NameSpaceManager));
 				return myColumnItems;
+			}
+		}
+
+		/// <summary>
+		/// Gets the collection of format filters.
+		/// </summary>
+		public ExcelFormatsCollection Formats
+		{
+			get
+			{
+				if (myFormats == null)
+				{
+					var formatsNode = this.TopNode.SelectSingleNode("d:formats", this.NameSpaceManager);
+					if (formatsNode == null)
+						return null;
+					myFormats = new ExcelFormatsCollection(this.NameSpaceManager, formatsNode);
+				}
+				return myFormats;
 			}
 		}
 
@@ -1512,29 +1533,28 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			var fieldItems = pivotField.Items;
 			var sharedItems = this.CacheDefinition.CacheFields[pivotField.Index].SharedItems;
+			bool sortDescending = sortOrder == eSortType.Descending && pivotField.AutoSortScopeReferences.Count == 0;
 			bool hasMissingValueType = sharedItems.Any(x => x.Type == PivotCacheRecordType.m);
 			var copyList = sharedItems.ToList();
 			if (hasMissingValueType)
 				copyList.RemoveAll(i => i.Type == PivotCacheRecordType.m);
 
 			IOrderedEnumerable<CacheItem> sortedList = null;
-			if (sortOrder == eSortType.Descending && pivotField.AutoSortScopeReferences.Count == 0)
-			{
-				if (copyList.All(t => t.Type == PivotCacheRecordType.n))
-					sortedList = copyList.OrderByDescending(x => double.Parse(x.Value));
-				else if (copyList.All(t => t.Type == PivotCacheRecordType.d) || (pivotField.Name.IsEquivalentTo("Month") && copyList.All(t => t.Type == PivotCacheRecordType.s)))
-					sortedList = copyList.ToList().OrderByDescending(m => DateTime.ParseExact(m.Value, "MMMM", Thread.CurrentThread.CurrentCulture));
-				else
-					sortedList = copyList.OrderByDescending(x => x.Value);
-			}
+			if (copyList.All(t => t.Type == PivotCacheRecordType.n))
+				sortedList = sortDescending ? copyList.OrderByDescending(x => double.Parse(x.Value)) : copyList.OrderBy(x => double.Parse(x.Value));
 			else
 			{
-				if (copyList.All(t => t.Type == PivotCacheRecordType.n))
-					sortedList = copyList.OrderBy(x => double.Parse(x.Value));
-				else if (copyList.All(t => t.Type == PivotCacheRecordType.d) || (pivotField.Name.IsEquivalentTo("Month") && copyList.All(t => t.Type == PivotCacheRecordType.s)))
-					sortedList = copyList.ToList().OrderBy(m => DateTime.ParseExact(m.Value, "MMMM", Thread.CurrentThread.CurrentCulture));
-				else
-					sortedList = copyList.OrderBy(x => x.Value);
+				bool isDateTime = true;
+				foreach (var item in copyList)
+				{
+					isDateTime = DateTime.TryParseExact(item.Value, "MMMM", Thread.CurrentThread.CurrentCulture, System.Globalization.DateTimeStyles.None, out var result);
+					if (!isDateTime)
+						break;
+					sortedList = sortDescending ? copyList.ToList().OrderByDescending(m => DateTime.ParseExact(m.Value, "MMMM", Thread.CurrentThread.CurrentCulture))
+						: copyList.ToList().OrderBy(m => DateTime.ParseExact(m.Value, "MMMM", Thread.CurrentThread.CurrentCulture));
+				}
+				if (!isDateTime)
+					sortedList = sortDescending ? copyList.OrderByDescending(x => x.Value) : copyList.OrderBy(x => x.Value);
 			}
 
 			var returnList = sortedList.ToList();
@@ -1673,10 +1693,12 @@ namespace OfficeOpenXml.Table.PivotTable
 			int endColumn = this.Address.Start.Column;
 			if (this.DataFields.Any())
 				endColumn += this.FirstDataCol + this.ColumnHeaders.Count - 1;
-			else if (hasTabularFields)
-				endColumn += this.TabularHeaders.Count;
-			else if (this.Fields.Any(x => x.Compact == false))
-				endColumn += this.RowFields.Count - 1;
+			else
+			{
+				int tabularCount = this.TabularHeaders.Count;
+				int nonCompactCount = this.Fields.Count(x => x.Compact == false);
+				endColumn += tabularCount + nonCompactCount;
+			}
 			return new ExcelAddress(this.Worksheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
 		}
 
@@ -2081,10 +2103,58 @@ namespace OfficeOpenXml.Table.PivotTable
 			var item = cacheField.IsGroupField ? cacheField.FieldGroup.GroupItems[cacheItemIndex] : cacheField.SharedItems[cacheItemIndex];
 			if (item.Type == PivotCacheRecordType.b)
 				sharedItemValue = item.Value.IsEquivalentTo("1") ? stringResources.PivotTableTrueCaption : stringResources.PivotTableFalseCaption;
+			else if (item.Type == PivotCacheRecordType.d)
+				sharedItemValue = this.GetDateFormat(pivotFieldIndex, item.Value.Split('-'), cacheField.NumFormatId, rowColItem[xMemberIndex], string.IsNullOrEmpty(rowColItem.ItemType));
 			else
 				sharedItemValue = item.Value;
 			sharedItemValue = sharedItemValue ?? stringResources.BlankValueHeaderCaption;
 			return sharedItemValue;
+		}
+
+		private string GetDateFormat(int fieldIndex, string[] sharedItemValue, int numFormatId, int xMemberIndex, bool nonTotalHeader)
+		{
+			var dateTime = new DateTime(int.Parse(sharedItemValue[0]), int.Parse(sharedItemValue[1]), int.Parse(sharedItemValue[2].Substring(0, 2)), 
+				int.Parse(sharedItemValue[2].Substring(3, 2)), int.Parse(sharedItemValue[2].Substring(6, 2)), int.Parse(sharedItemValue[2].Substring(9, 2)));
+			string date = this.GetTranslatedDate(numFormatId, dateTime);
+			if (this.Formats != null && nonTotalHeader)
+			{
+				foreach (var format in this.Formats)
+				{
+					int formatId = format.FormatId;
+					var formatting = this.Workbook.Styles.Dxfs[formatId];
+					if (format.References != null)
+					{
+						foreach (var reference in format.References)
+						{
+							foreach (var item in reference.SharedItems)
+							{
+								if (int.Parse(item.Value) == xMemberIndex && reference.FieldIndex == fieldIndex && reference.Selected)
+									return this.GetTranslatedDate(formatting.NumberFormat.NumFmtID, dateTime);
+							}
+						}
+					}
+				}
+			}
+			return date;
+		}
+
+		private string GetTranslatedDate(int nfId, DateTime date)
+		{
+			var styles = this.Worksheet.Workbook.Styles;
+			var nfID = nfId;
+			ExcelNumberFormatXml.ExcelFormatTranslator nf = null;
+			for (int i = 0; i < styles.NumberFormats.Count; i++)
+			{
+				if (nfID == styles.NumberFormats[i].NumFmtId)
+				{
+					nf = styles.NumberFormats[i].FormatTranslator;
+					break;
+				}
+			}
+			string format, textFormat;
+			format = nf.NetFormat;
+			textFormat = nf.NetTextFormat;
+			return ExcelRangeBase.FormatValue(date, nf, format, textFormat);
 		}
 
 		private void InitSchemaNodeOrder()

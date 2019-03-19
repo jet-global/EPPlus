@@ -804,6 +804,10 @@
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldItemCollection.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableFieldNumericGroup.cs" />
     <Compile Include="Table\PivotTable\ExcelPivotTableRowColumnFieldCollection.cs" />
+    <Compile Include="Table\PivotTable\Formats\ExcelFormat.cs" />
+    <Compile Include="Table\PivotTable\Formats\ExcelFormatReference.cs" />
+    <Compile Include="Table\PivotTable\Formats\ExcelFormatReferencesCollection.cs" />
+    <Compile Include="Table\PivotTable\Formats\ExcelFormatsCollection.cs" />
     <Compile Include="Table\PivotTable\ItemsCollection.cs" />
     <Compile Include="Table\PivotTable\PivotItemTreeNode.cs" />
     <Compile Include="Table\PivotTable\PivotTableHeader.cs" />

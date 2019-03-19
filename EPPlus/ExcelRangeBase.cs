@@ -1149,7 +1149,22 @@ namespace OfficeOpenXml
 			else if (v is DateTime)
 			{
 				if (nf.DataType == ExcelNumberFormatXml.eFormatType.DateTime)
+				{
+					var date = string.Empty;
+					if (format.Contains("MMMMM"))
+					{
+						// The month name only has the first letter of the name.
+						date = ((DateTime)v).ToString(format, nf.Culture);
+						var newDate = date.Split('-');
+						var returnDate = newDate[0].Substring(0, 1);
+						for (int i = 1; i < newDate.Length; i++)
+						{
+							returnDate += "-" + newDate[i];
+						}
+						return returnDate;
+					}
 					return ((DateTime)v).ToString(format, nf.Culture);
+				}
 				else
 				{
 					double d = ((DateTime)v).ToOADate();
