@@ -31,32 +31,18 @@
 using System;
 using System.Text;
 using System.Xml;
+
 namespace OfficeOpenXml.Packaging
 {
 	public abstract class ZipPackageRelationshipBase
 	{
+		#region Class Variables
 		protected ZipPackageRelationshipCollection _rels = new ZipPackageRelationshipCollection();
-		protected internal
-		int maxRId = 1;
-		internal void DeleteRelationship(string id)
-		{
-			_rels.Remove(id);
-			UpdateMaxRId(id, ref maxRId);
-		}
-		protected void UpdateMaxRId(string id, ref int maxRId)
-		{
-			if (id.StartsWith("rId"))
-			{
-				int num;
-				if (int.TryParse(id.Substring(3), out num))
-				{
-					if (num == maxRId - 1)
-					{
-						maxRId--;
-					}
-				}
-			}
-		}
+
+		protected internal int maxRId = 1;
+		#endregion
+
+		#region Internal Methods
 		internal virtual ZipPackageRelationship CreateRelationship(Uri targetUri, TargetMode targetMode, string relationshipType)
 		{
 			var rel = new ZipPackageRelationship();
@@ -67,22 +53,27 @@ namespace OfficeOpenXml.Packaging
 			_rels.Add(rel);
 			return rel;
 		}
+
 		internal bool RelationshipExists(string id)
 		{
 			return _rels.ContainsKey(id);
 		}
+
 		internal ZipPackageRelationshipCollection GetRelationshipsByType(string schema)
 		{
 			return _rels.GetRelationshipsByType(schema);
 		}
+
 		internal ZipPackageRelationshipCollection GetRelationships()
 		{
 			return _rels;
 		}
+
 		internal ZipPackageRelationship GetRelationship(string id)
 		{
 			return _rels[id];
 		}
+
 		internal void ReadRelation(string xml, string source)
 		{
 			var doc = new XmlDocument();
@@ -121,5 +112,29 @@ namespace OfficeOpenXml.Packaging
 				_rels.Add(rel);
 			}
 		}
+
+		internal void DeleteRelationship(string id)
+		{
+			_rels.Remove(id);
+			UpdateMaxRId(id, ref maxRId);
+		}
+		#endregion
+
+		#region Protected Methods
+		protected void UpdateMaxRId(string id, ref int maxRId)
+		{
+			if (id.StartsWith("rId"))
+			{
+				int num;
+				if (int.TryParse(id.Substring(3), out num))
+				{
+					if (num == maxRId - 1)
+					{
+						maxRId--;
+					}
+				}
+			}
+		}
+		#endregion
 	}
 }

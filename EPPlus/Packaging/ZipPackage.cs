@@ -38,50 +38,46 @@ using System.Xml;
 using Ionic.Zip;
 using OfficeOpenXml.Packaging.Ionic.Zip;
 using OfficeOpenXml.Utils;
+
 namespace OfficeOpenXml.Packaging
 {
-	/// <summary>
-	/// Specifies whether the target is inside or outside the System.IO.Packaging.Package.
-	/// </summary>
-	public enum TargetMode
-	{
-		/// <summary>
-		/// The relationship references a part that is inside the package.
-		/// </summary>
-		Internal = 0,
-		/// <summary>
-		/// The relationship references a resource that is external to the package.
-		/// </summary>
-		External = 1,
-	}
 	/// <summary>
 	/// Represent an OOXML Zip package.
 	/// </summary>
 	public class ZipPackage : ZipPackageRelationshipBase
 	{
-		internal class ContentType
+		#region Class Variables
+		internal Dictionary<string, ContentType> _contentTypes = new Dictionary<string, ContentType>(StringComparer.InvariantCultureIgnoreCase);
+
+		private Dictionary<string, ZipPackagePart> Parts = new Dictionary<string, ZipPackagePart>(StringComparer.InvariantCultureIgnoreCase);
+		private CompressionLevel _compression = CompressionLevel.Default;
+		#endregion
+
+		#region Properties
+		public CompressionLevel Compression
 		{
-			internal string Name;
-			internal bool IsExtension;
-			internal string Match;
-			public ContentType(string name, bool isExtension, string match)
+			get
 			{
-				Name = name;
-				IsExtension = isExtension;
-				Match = match;
+				return _compression;
+			}
+			set
+			{
+				foreach (var part in Parts.Values)
+				{
+					if (part.CompressionLevel == _compression)
+					{
+						part.CompressionLevel = value;
+					}
+				}
+				_compression = value;
 			}
 		}
-		Dictionary<string, ZipPackagePart> Parts = new Dictionary<string, ZipPackagePart>(StringComparer.InvariantCultureIgnoreCase);
-		internal Dictionary<string, ContentType> _contentTypes = new Dictionary<string, ContentType>(StringComparer.InvariantCultureIgnoreCase);
+		#endregion
+
+		#region Constructors
 		internal ZipPackage()
 		{
 			AddNew();
-		}
-
-		private void AddNew()
-		{
-			_contentTypes.Add("xml", new ContentType(ExcelPackage.schemaXmlExtension, true, "xml"));
-			_contentTypes.Add("rels", new ContentType(ExcelPackage.schemaRelsExtension, true, "rels"));
 		}
 
 		internal ZipPackage(Stream stream)
@@ -164,32 +160,14 @@ namespace OfficeOpenXml.Packaging
 				}
 			}
 		}
+		#endregion
 
-		private void AddContentTypes(string xml)
-		{
-			var doc = new XmlDocument();
-			XmlHelper.LoadXmlSafe(doc, xml, Encoding.UTF8);
-
-			foreach (XmlElement c in doc.DocumentElement.ChildNodes)
-			{
-				ContentType ct;
-				if (string.IsNullOrEmpty(c.GetAttribute("Extension")))
-				{
-					ct = new ContentType(c.GetAttribute("ContentType"), false, c.GetAttribute("PartName"));
-				}
-				else
-				{
-					ct = new ContentType(c.GetAttribute("ContentType"), true, c.GetAttribute("Extension"));
-				}
-				_contentTypes.Add(GetUriKey(ct.Match), ct);
-			}
-		}
-
-		#region Methods
+		#region Internal Methods
 		internal ZipPackagePart CreatePart(Uri partUri, string contentType)
 		{
 			return CreatePart(partUri, contentType, CompressionLevel.Default);
 		}
+
 		internal ZipPackagePart CreatePart(Uri partUri, string contentType, CompressionLevel compressionLevel)
 		{
 			if (PartExists(partUri))
@@ -208,6 +186,7 @@ namespace OfficeOpenXml.Packaging
 		/// <param name="partUri">The URI of the part to get.</param>
 		/// <returns>The part with the specified <paramref name="partUri"/>.</returns>
 		/// <exception cref="InvalidOperationException">Thrown when a part with the specified <paramref name="partUri"/> does not exist.</exception>
+
 		internal ZipPackagePart GetPart(Uri partUri)
 		{
 			if (this.TryGetPart(partUri, out ZipPackagePart part))
@@ -220,12 +199,14 @@ namespace OfficeOpenXml.Packaging
 		/// <param name="partUri">The URI of the part to get.</param>
 		/// <param name="part">The part with the specified <paramref name="partUri"/> if it exists; otherwise, null.</param>
 		/// <returns>true if a part with the specified <paramref name="partUri"/> exists; otherwise, false.</returns>
+
 		internal bool TryGetPart(Uri partUri, out ZipPackagePart part)
 		{
 			var partExists = this.PartExists(partUri);
 			part = partExists ? Parts.Single(x => x.Key.Equals(GetUriKey(partUri.OriginalString), StringComparison.InvariantCultureIgnoreCase)).Value : null;
 			return partExists;
 		}
+
 		internal string GetUriKey(string uri)
 		{
 			string ret = uri;
@@ -235,12 +216,12 @@ namespace OfficeOpenXml.Packaging
 			}
 			return ret;
 		}
+
 		internal bool PartExists(Uri partUri)
 		{
 			var uriKey = GetUriKey(partUri.OriginalString.ToLower(CultureInfo.InvariantCulture));
 			return Parts.Keys.Any(x => x.Equals(uriKey, StringComparison.InvariantCultureIgnoreCase));
 		}
-		#endregion
 
 		internal void DeletePart(Uri Uri)
 		{
@@ -270,6 +251,7 @@ namespace OfficeOpenXml.Packaging
 			Parts.Remove(GetUriKey(Uri.OriginalString));
 
 		}
+
 		internal void Save(Stream stream)
 		{
 			var enc = Encoding.UTF8;
@@ -305,6 +287,44 @@ namespace OfficeOpenXml.Packaging
 			//return ms;
 		}
 
+		internal void Flush()
+		{
+
+		}
+
+		internal void Close()
+		{
+
+		}
+		#endregion
+
+		#region Private Methods
+		private void AddNew()
+		{
+			_contentTypes.Add("xml", new ContentType(ExcelPackage.schemaXmlExtension, true, "xml"));
+			_contentTypes.Add("rels", new ContentType(ExcelPackage.schemaRelsExtension, true, "rels"));
+		}
+
+		private void AddContentTypes(string xml)
+		{
+			var doc = new XmlDocument();
+			XmlHelper.LoadXmlSafe(doc, xml, Encoding.UTF8);
+
+			foreach (XmlElement c in doc.DocumentElement.ChildNodes)
+			{
+				ContentType ct;
+				if (string.IsNullOrEmpty(c.GetAttribute("Extension")))
+				{
+					ct = new ContentType(c.GetAttribute("ContentType"), false, c.GetAttribute("PartName"));
+				}
+				else
+				{
+					ct = new ContentType(c.GetAttribute("ContentType"), true, c.GetAttribute("Extension"));
+				}
+				_contentTypes.Add(GetUriKey(ct.Match), ct);
+			}
+		}
+
 		private string GetContentTypeXml()
 		{
 			StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">");
@@ -322,32 +342,38 @@ namespace OfficeOpenXml.Packaging
 			xml.Append("</Types>");
 			return xml.ToString();
 		}
-		internal void Flush()
-		{
+		#endregion
 
-		}
-		internal void Close()
+		#region Nested Classes
+		internal class ContentType
 		{
-
-		}
-		CompressionLevel _compression = CompressionLevel.Default;
-		public CompressionLevel Compression
-		{
-			get
+			internal string Name;
+			internal bool IsExtension;
+			internal string Match;
+			public ContentType(string name, bool isExtension, string match)
 			{
-				return _compression;
-			}
-			set
-			{
-				foreach (var part in Parts.Values)
-				{
-					if (part.CompressionLevel == _compression)
-					{
-						part.CompressionLevel = value;
-					}
-				}
-				_compression = value;
+				Name = name;
+				IsExtension = isExtension;
+				Match = match;
 			}
 		}
+		#endregion
 	}
+
+	#region Enums
+	/// <summary>
+	/// Specifies whether the target is inside or outside the System.IO.Packaging.Package.
+	/// </summary>
+	public enum TargetMode
+	{
+		/// <summary>
+		/// The relationship references a part that is inside the package.
+		/// </summary>
+		Internal = 0,
+		/// <summary>
+		/// The relationship references a resource that is external to the package.
+		/// </summary>
+		External = 1,
+	}
+	#endregion
 }

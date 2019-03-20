@@ -34,6 +34,7 @@ namespace OfficeOpenXml.Packaging
 {
 	public class ZipPackageRelationship
 	{
+		#region Properties
 		public Uri TargetUri { get; internal set; }
 
 		public Uri SourceUri { get; internal set; }
@@ -43,5 +44,6 @@ namespace OfficeOpenXml.Packaging
 		public TargetMode TargetMode { get; internal set; }
 
 		public string Id { get; internal set; }
+		#endregion
 	}
 }

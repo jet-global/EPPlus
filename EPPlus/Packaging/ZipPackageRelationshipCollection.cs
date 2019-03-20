@@ -38,29 +38,19 @@ namespace OfficeOpenXml.Packaging
 {
 	public class ZipPackageRelationshipCollection : IEnumerable<ZipPackageRelationship>
 	{
+		#region Class Variables
 		internal protected Dictionary<string, ZipPackageRelationship> _rels = new Dictionary<string, ZipPackageRelationship>(StringComparer.InvariantCultureIgnoreCase);
-		internal void Add(ZipPackageRelationship item)
+		#endregion
+
+		#region Properties
+		public int Count
 		{
-			_rels.Add(item.Id, item);
-		}
-		public IEnumerator<ZipPackageRelationship> GetEnumerator()
-		{
-			return _rels.Values.GetEnumerator();
+			get
+			{
+				return _rels.Count;
+			}
 		}
 
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-		{
-			return _rels.Values.GetEnumerator();
-		}
-
-		internal void Remove(string id)
-		{
-			_rels.Remove(id);
-		}
-		internal bool ContainsKey(string id)
-		{
-			return _rels.ContainsKey(id);
-		}
 		internal ZipPackageRelationship this[string id]
 		{
 			get
@@ -68,6 +58,24 @@ namespace OfficeOpenXml.Packaging
 				return _rels[id];
 			}
 		}
+		#endregion
+
+		#region Internal Methods
+		internal void Add(ZipPackageRelationship item)
+		{
+			_rels.Add(item.Id, item);
+		}
+
+		internal void Remove(string id)
+		{
+			_rels.Remove(id);
+		}
+
+		internal bool ContainsKey(string id)
+		{
+			return _rels.ContainsKey(id);
+		}
+
 		internal ZipPackageRelationshipCollection GetRelationshipsByType(string relationshipType)
 		{
 			var ret = new ZipPackageRelationshipCollection();
@@ -94,13 +102,18 @@ namespace OfficeOpenXml.Packaging
 			byte[] b = Encoding.UTF8.GetBytes(xml.ToString());
 			os.Write(b, 0, b.Length);
 		}
+		#endregion
 
-		public int Count
+		#region IEnumerable Members
+		public IEnumerator<ZipPackageRelationship> GetEnumerator()
 		{
-			get
-			{
-				return _rels.Count;
-			}
+			return _rels.Values.GetEnumerator();
 		}
+
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return _rels.Values.GetEnumerator();
+		}
+		#endregion
 	}
 }

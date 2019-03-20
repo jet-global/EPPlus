@@ -36,68 +36,17 @@ namespace OfficeOpenXml.Packaging
 {
 	internal class ZipPackagePart : ZipPackageRelationshipBase, IDisposable
 	{
+		#region Delegates
 		internal delegate void SaveHandlerDelegate(ZipOutputStream stream, CompressionLevel compressionLevel, string fileName);
+		#endregion
 
-		internal ZipPackagePart(ZipPackage package, ZipEntry entry)
-		{
-			Package = package;
-			Entry = entry;
-			SaveHandler = null;
-			Uri = new Uri(package.GetUriKey(entry.FileName), UriKind.Relative);
-		}
-		internal ZipPackagePart(ZipPackage package, Uri partUri, string contentType, CompressionLevel compressionLevel)
-		{
-			Package = package;
-			//Entry = new ZipEntry();
-			//Entry.FileName = partUri.OriginalString.Replace('/','\\');
-			Uri = partUri;
-			ContentType = contentType;
-			CompressionLevel = compressionLevel;
-		}
-		internal ZipPackage Package { get; set; }
-		internal ZipEntry Entry { get; set; }
+		#region Class Variables
 		internal CompressionLevel CompressionLevel;
-		MemoryStream _stream = null;
-		internal MemoryStream Stream
-		{
-			get
-			{
-				return _stream;
-			}
-			set
-			{
-				_stream = value;
-			}
-		}
-		internal override ZipPackageRelationship CreateRelationship(Uri targetUri, TargetMode targetMode, string relationshipType)
-		{
 
-			var rel = base.CreateRelationship(targetUri, targetMode, relationshipType);
-			rel.SourceUri = Uri;
-			return rel;
-		}
-		internal MemoryStream GetStream()
-		{
-			return GetStream(FileMode.OpenOrCreate, FileAccess.ReadWrite);
-		}
-		internal MemoryStream GetStream(FileMode fileMode)
-		{
-			return GetStream(FileMode.Create, FileAccess.ReadWrite);
-		}
-		internal MemoryStream GetStream(FileMode fileMode, FileAccess fileAccess)
-		{
-			if (_stream == null || fileMode == FileMode.CreateNew || fileMode == FileMode.Create)
-			{
-				_stream = new MemoryStream();
-			}
-			else
-			{
-				_stream.Seek(0, SeekOrigin.Begin);
-			}
-			return _stream;
-		}
+		private string _contentType = "";
+		#endregion
 
-		string _contentType = "";
+		#region Properties
 		public string ContentType
 		{
 			get
@@ -117,18 +66,75 @@ namespace OfficeOpenXml.Packaging
 				_contentType = value;
 			}
 		}
+
 		public Uri Uri { get; private set; }
+
+		internal ZipPackage Package { get; set; }
+
+		internal ZipEntry Entry { get; set; }
+
+		internal MemoryStream Stream { get; set; }
+
+		internal SaveHandlerDelegate SaveHandler { get; set; }
+		#endregion
+
+		#region Constructors
+		internal ZipPackagePart(ZipPackage package, ZipEntry entry)
+		{
+			Package = package;
+			Entry = entry;
+			SaveHandler = null;
+			Uri = new Uri(package.GetUriKey(entry.FileName), UriKind.Relative);
+		}
+
+		internal ZipPackagePart(ZipPackage package, Uri partUri, string contentType, CompressionLevel compressionLevel)
+		{
+			Package = package;
+			//Entry = new ZipEntry();
+			//Entry.FileName = partUri.OriginalString.Replace('/','\\');
+			Uri = partUri;
+			ContentType = contentType;
+			CompressionLevel = compressionLevel;
+		}
+		#endregion
+
+		#region Public Methods
 		public Stream GetZipStream()
 		{
 			MemoryStream ms = new MemoryStream();
 			ZipOutputStream os = new ZipOutputStream(ms);
 			return os;
 		}
-		internal SaveHandlerDelegate SaveHandler
+		#endregion
+
+		#region Internal Methods
+		internal override ZipPackageRelationship CreateRelationship(Uri targetUri, TargetMode targetMode, string relationshipType)
 		{
-			get;
-			set;
+
+			var rel = base.CreateRelationship(targetUri, targetMode, relationshipType);
+			rel.SourceUri = Uri;
+			return rel;
 		}
+
+		internal MemoryStream GetStream()
+		{
+			return GetStream(FileMode.OpenOrCreate, FileAccess.ReadWrite);
+		}
+
+		internal MemoryStream GetStream(FileMode fileMode)
+		{
+			return GetStream(FileMode.Create, FileAccess.ReadWrite);
+		}
+
+		internal MemoryStream GetStream(FileMode fileMode, FileAccess fileAccess)
+		{
+			if (this.Stream == null || fileMode == FileMode.CreateNew || fileMode == FileMode.Create)
+				this.Stream = new MemoryStream();
+			else
+				this.Stream.Seek(0, SeekOrigin.Begin);
+			return this.Stream;
+		}
+
 		internal void WriteZip(ZipOutputStream os)
 		{
 			byte[] b;
@@ -156,12 +162,14 @@ namespace OfficeOpenXml.Packaging
 			}
 			b = null;
 		}
+		#endregion
 
-
+		#region IDisposable Members
 		public void Dispose()
 		{
-			_stream.Close();
-			_stream.Dispose();
+			this.Stream.Close();
+			this.Stream.Dispose();
 		}
+		#endregion
 	}
 }
