@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml.Extensions;
+using OfficeOpenXml.Table.PivotTable.DataCalculation;
 
 namespace OfficeOpenXml.Table.PivotTable
 {
@@ -279,26 +280,24 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			int autoScopeIndex = int.Parse(pivotField.AutoSortScopeReferences[0].Value);
 			var referenceDataFieldIndex = pivotTable.DataFields[autoScopeIndex].Index;
-
-			// TODO: Implement sorting for calculated fields. Logged in VSTS bug #10277.
-			// Skip sorting if this is a calculated field.
-			if (!string.IsNullOrEmpty(pivotTable.CacheDefinition.CacheFields[referenceDataFieldIndex].Formula))
-				return;
-
 			var orderedList = new List<Tuple<int, double>>();
+
 			// Get the total value for every child at the given data field index.
-			foreach (var c in root.Children.ToList())
+			foreach (var child in root.Children.ToList())
 			{
-				double sortingTotal = pivotTable.CacheDefinition.CacheRecords.CalculateSortingValues(c, referenceDataFieldIndex);
-				orderedList.Add(new Tuple<int, double>(c.Value, sortingTotal));
+				double sortingTotal = 0;
+				var cacheField = pivotTable.CacheDefinition.CacheFields[referenceDataFieldIndex];
+				if (!string.IsNullOrEmpty(cacheField.Formula))
+					sortingTotal = this.GetCalculatedFieldTotal(child, pivotTable, cacheField);
+				else
+					sortingTotal = pivotTable.CacheDefinition.CacheRecords.CalculateSortingValues(child, referenceDataFieldIndex);
+				orderedList.Add(new Tuple<int, double>(child.Value, sortingTotal));
 			}
 
+			bool sortDescending = pivotField.Sort == eSortType.Descending;
 			// Sort the list of total values accordingly.
-			if (pivotField.Sort == eSortType.Ascending)
-				orderedList = orderedList.OrderBy(i => i.Item2).ToList();
-			else if (pivotField.Sort == eSortType.Descending)
-				orderedList = orderedList.OrderByDescending(i => i.Item2).ToList();
-
+			orderedList = sortDescending ? orderedList.OrderByDescending(i => i.Item2).ToList() : orderedList.OrderBy(i => i.Item2).ToList();
+			
 			// If there are duplicated sortingTotal values, sort it based on the value of the first tuple.
 			var duplicates = orderedList.GroupBy(x => x.Item2).Where(g => g.Count() > 1).Select(k => k.Key);
 			if (duplicates.Count() > 0)
@@ -307,10 +306,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					var duplicatedList = orderedList.FindAll(j => j.Item2 == duplicates.ElementAt(i));
 					int startingIndex = orderedList.FindIndex(y => y == duplicatedList.ElementAt(0));
-					if (pivotField.Sort == eSortType.Ascending)
-						duplicatedList = duplicatedList.OrderBy(w => w.Item1).ToList();
-					else
-						duplicatedList = duplicatedList.OrderByDescending(w => w.Item1).ToList();
+					duplicatedList = sortDescending ? duplicatedList.OrderByDescending(w => w.Item1).ToList() : duplicatedList.OrderBy(w => w.Item1).ToList();
 					orderedList.RemoveRange(startingIndex, duplicatedList.Count());
 					orderedList.InsertRange(startingIndex, duplicatedList);
 				}
@@ -324,6 +320,21 @@ namespace OfficeOpenXml.Table.PivotTable
 				int index = newChildList.FindIndex(x => x.Value == orderedList.ElementAt(i).Item1);
 				root.Children.Add(newChildList[index]);
 			}
+		}
+
+		private double GetCalculatedFieldTotal(PivotItemTreeNode node, ExcelPivotTable pivotTable, CacheFieldNode cacheField)
+		{
+			var totalsFunction = new TotalsFunctionHelper();
+			var calculatedFields = pivotTable.CacheDefinition.CacheFields.Where(f => !string.IsNullOrEmpty(f.Formula));
+			PivotTableDataManager.ConfigureCalculatedFields(calculatedFields, totalsFunction, pivotTable);
+			var fieldNameToValues = new Dictionary<string, List<object>>();
+			foreach (var cacheFieldName in cacheField.ReferencedCacheFieldsToIndex.Keys)
+			{
+				var values = pivotTable.CacheDefinition.CacheRecords.GetChildDataFieldValues(node.CacheRecordIndices, cacheField.ReferencedCacheFieldsToIndex[cacheFieldName]);
+				fieldNameToValues.Add(cacheFieldName, values);
+			}
+			var total = totalsFunction.EvaluateCalculatedFieldFormula(fieldNameToValues, cacheField.ResolvedFormula);
+			return double.Parse(total.ToString());
 		}
 		#endregion
 	}
