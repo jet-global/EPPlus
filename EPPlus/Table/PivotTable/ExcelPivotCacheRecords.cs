@@ -230,6 +230,24 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Get a list of data field values at the given record indices to use for sorting calculated fields.
+		/// </summary>
+		/// <param name="indices">A list of record indices.</param>
+		/// <param name="dataFieldIndex">The index of the referenced data field.</param>
+		/// <returns>A list of data field values.</returns>
+		public List<object> GetChildDataFieldValues(List<int> indices, int dataFieldIndex)
+		{
+			var values = new List<object>();
+			for (int i = 0; i < indices.Count; i++)
+			{
+				var record = this.Records[indices[i]];
+				double.TryParse(record.Items[dataFieldIndex].Value, out var recordValue);
+				values.Add(recordValue);
+			}
+			return values;
+		}
+
+		/// <summary>
 		/// Calculate the values for each cell in the pivot table by de-referencing the tuple using the cache definition if a pivot table is given.
 		/// Otherwise, calculate the values for each cell in the pivot table for GetPivotData.
 		/// </summary>

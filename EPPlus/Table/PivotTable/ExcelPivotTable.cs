@@ -2126,10 +2126,18 @@ namespace OfficeOpenXml.Table.PivotTable
 					{
 						foreach (var reference in format.References)
 						{
-							foreach (var item in reference.SharedItems)
+							if (reference.ItemIndexCount == 0)
 							{
-								if (int.Parse(item.Value) == xMemberIndex && reference.FieldIndex == fieldIndex && reference.Selected)
+								if (reference.FieldIndex == fieldIndex)
 									return this.GetTranslatedDate(formatting.NumberFormat.NumFmtID, dateTime);
+							}
+							else
+							{
+								foreach (var item in reference.SharedItems)
+								{
+									if (int.Parse(item.Value) == xMemberIndex && reference.FieldIndex == fieldIndex && reference.Selected)
+										return this.GetTranslatedDate(formatting.NumberFormat.NumFmtID, dateTime);
+								}
 							}
 						}
 					}

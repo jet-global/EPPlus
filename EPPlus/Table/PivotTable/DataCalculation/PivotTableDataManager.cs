@@ -66,7 +66,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				// If the workbook has calculated fields, configure the calculation helper and cache fields appropriately.
 				var calculatedFields = this.PivotTable.CacheDefinition.CacheFields.Where(c => !string.IsNullOrEmpty(c.Formula));
 				if (calculatedFields.Any())
-					this.ConfigureCalculatedFields(calculatedFields, totalsCalculator);
+					PivotTableDataManager.ConfigureCalculatedFields(calculatedFields, totalsCalculator, this.PivotTable);
 
 				// Generate backing body data.
 				var backingBodyData = this.GetPivotTableBodyBackingData();
@@ -163,10 +163,38 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				}
 				backingData = new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
 			}
-			var value = functionCalculator.CalculateCellTotal(dataField, backingData, rowHeaderTotalType, columnHeaderTotalType);//rowHeader.TotalType, columnHeader.TotalType);
+			var value = functionCalculator.CalculateCellTotal(dataField, backingData, rowHeaderTotalType, columnHeaderTotalType);
 			if (backingData != null)
 				backingData.Result = value;
 			return backingData;
+		}
+
+		/// <summary>
+		/// Resolve the name references and other formulas contained in a formula.
+		/// </summary>
+		/// <param name="calculatedFields">The list of calculated fields in the pivot table.</param>
+		/// <param name="totalsCalculator">The function helper calculator.</param>
+		/// <param name="pivotTable">The pivot table the fields are on.</param>
+		public static void ConfigureCalculatedFields(IEnumerable<CacheFieldNode> calculatedFields, TotalsFunctionHelper totalsCalculator, ExcelPivotTable pivotTable)
+		{
+			// Add all of the cache field names to the calculation helper.
+			var cacheFieldNames = new HashSet<string>(pivotTable.CacheDefinition.CacheFields.Select(c => c.Name));
+			totalsCalculator.AddNames(cacheFieldNames);
+
+			// Resolve any calclulated fields that may be referencing each other to forumlas composed of regular ol' cache fields.
+			foreach (var calculatedField in calculatedFields)
+			{
+				var resolvedFormulaTokens = PivotTableDataManager.ResolveFormulaReferences(calculatedField.Formula, totalsCalculator, calculatedFields);
+				foreach (var token in resolvedFormulaTokens.Where(t => t.TokenType == TokenType.NameValue))
+				{
+					if (!calculatedField.ReferencedCacheFieldsToIndex.ContainsKey(token.Value))
+					{
+						var referencedFieldIndex = pivotTable.CacheDefinition.GetCacheFieldIndex(token.Value);
+						calculatedField.ReferencedCacheFieldsToIndex.Add(token.Value, referencedFieldIndex);
+					}
+				}
+				calculatedField.ResolvedFormula = string.Join(string.Empty, resolvedFormulaTokens.Select(t => t.Value));
+			}
 		}
 		#endregion
 
@@ -293,29 +321,17 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			return backingData;
 		}
 
-		private void ConfigureCalculatedFields(IEnumerable<CacheFieldNode> calculatedFields, TotalsFunctionHelper totalsCalculator)
+		private void WriteCellValue(object value, ExcelRange cell, ExcelPivotTableDataField dataField, ExcelStyles styles)
 		{
-			// Add all of the cache field names to the calculation helper.
-			var cacheFieldNames = new HashSet<string>(this.PivotTable.CacheDefinition.CacheFields.Select(c => c.Name));
-			totalsCalculator.AddNames(cacheFieldNames);
-
-			// Resolve any calclulated fields that may be referencing each other to forumlas composed of regular ol' cache fields.
-			foreach (var calculatedField in calculatedFields)
-			{
-				var resolvedFormulaTokens = this.ResolveFormulaReferences(calculatedField.Formula, totalsCalculator, calculatedFields);
-				foreach (var token in resolvedFormulaTokens.Where(t => t.TokenType == TokenType.NameValue))
-				{
-					if (!calculatedField.ReferencedCacheFieldsToIndex.ContainsKey(token.Value))
-					{
-						var referencedFieldIndex = this.PivotTable.CacheDefinition.GetCacheFieldIndex(token.Value);
-						calculatedField.ReferencedCacheFieldsToIndex.Add(token.Value, referencedFieldIndex);
-					}
-				}
-				calculatedField.ResolvedFormula = string.Join(string.Empty, resolvedFormulaTokens.Select(t => t.Value));
-			}
+			cell.Value = value;
+			var style = styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
+			if (style != null)
+				cell.Style.Numberformat.Format = style.Format;
 		}
+		#endregion
 
-		private List<Token> ResolveFormulaReferences(string formula, TotalsFunctionHelper totalsCalculator, IEnumerable<CacheFieldNode> calculatedFields)
+		#region Private Static Methods
+		private static List<Token> ResolveFormulaReferences(string formula, TotalsFunctionHelper totalsCalculator, IEnumerable<CacheFieldNode> calculatedFields)
 		{
 			var resolvedFormulaTokens = new List<Token>();
 			var tokens = totalsCalculator.Tokenize(formula);
@@ -327,7 +343,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					var field = calculatedFields.FirstOrDefault(f => f.Name.IsEquivalentTo(token.Value));
 					if (field != null)
 					{
-						var resolvedReferences = this.ResolveFormulaReferences(field.Formula, totalsCalculator, calculatedFields);
+						var resolvedReferences = PivotTableDataManager.ResolveFormulaReferences(field.Formula, totalsCalculator, calculatedFields);
 						resolvedFormulaTokens.AddRange(resolvedReferences);
 					}
 					else
@@ -337,14 +353,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					resolvedFormulaTokens.Add(token);
 			}
 			return resolvedFormulaTokens;
-		}
-
-		private void WriteCellValue(object value, ExcelRange cell, ExcelPivotTableDataField dataField, ExcelStyles styles)
-		{
-			cell.Value = value;
-			var style = styles.NumberFormats.FirstOrDefault(n => n.NumFmtId == dataField.NumFmtId);
-			if (style != null)
-				cell.Style.Numberformat.Format = style.Format;
 		}
 		#endregion
 	}
