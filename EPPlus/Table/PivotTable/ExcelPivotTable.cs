@@ -1001,33 +1001,35 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal bool TryGetUnsupportedFeatures(out List<string> unsupportedFeatures)
 		{
 			unsupportedFeatures = new List<string>();
+			void addUnsupportedFeature(List<string> unsupportedList, string message) => unsupportedList.Add($"[{this.Address.FullAddress}] {message}");
+
 			foreach (var dataField in this.DataFields)
 			{
 				if (dataField.ShowDataAs == ShowDataAs.Difference || dataField.ShowDataAs == ShowDataAs.PercentDiff
 					|| dataField.ShowDataAs == ShowDataAs.RunTotal || dataField.ShowDataAs == ShowDataAs.PercentOfRunningTotal || dataField.ShowDataAs == ShowDataAs.RankAscending
 					|| dataField.ShowDataAs == ShowDataAs.RankDescending || dataField.ShowDataAs == ShowDataAs.Index)
 				{
-					unsupportedFeatures.Add($"Data field '{dataField.Name}' show data as setting '{dataField.ShowDataAs}'");
+					addUnsupportedFeature(unsupportedFeatures, $"Data field '{dataField.Name}' show data as setting '{dataField.ShowDataAs}'");
 				}
 
 				// Disallow the '(next)' and '(previous)' options. 
 				if (dataField.BaseField == 1048829)
-					unsupportedFeatures.Add($"Data field '{dataField.Name}' '(next)' option selected");
+					addUnsupportedFeature(unsupportedFeatures, $"Data field '{dataField.Name}' '(next)' option selected");
 				else if (dataField.BaseField == 1048828)
-					unsupportedFeatures.Add($"Data field '{dataField.Name}' '(previous)' option selected");
+					addUnsupportedFeature(unsupportedFeatures, $"Data field '{dataField.Name}' '(previous)' option selected");
 			}
 			foreach (var field in this.Fields)
 			{
 				if (field.RepeatItemLabels)
-					unsupportedFeatures.Add($"Field '{field.Name}' repeat item labels enabled");
+					addUnsupportedFeature(unsupportedFeatures, $"Field '{field.Name}' repeat item labels enabled");
 				if (field.InsertBlankLine)
-					unsupportedFeatures.Add($"Field '{field.Name}' insert blank line enabled");
+					addUnsupportedFeature(unsupportedFeatures, $"Field '{field.Name}' insert blank line enabled");
 				if (field.ShowAll)
-					unsupportedFeatures.Add($"Field '{field.Name}' show items with no data enabled");
+					addUnsupportedFeature(unsupportedFeatures, $"Field '{field.Name}' show items with no data enabled");
 				if (field.InsertPageBreak)
-					unsupportedFeatures.Add($"Field '{field.Name}' insert page break after each item enabled");
+					addUnsupportedFeature(unsupportedFeatures, $"Field '{field.Name}' insert page break after each item enabled");
 				if (field.IncludeNewItemsInFilter)
-					unsupportedFeatures.Add($"Field '{field.Name}' include new items in filter enabled");
+					addUnsupportedFeature(unsupportedFeatures, $"Field '{field.Name}' include new items in filter enabled");
 			}
 			var filters = base.TopNode.SelectSingleNode("d:filters", base.NameSpaceManager);
 			if (filters != null)
@@ -1043,53 +1045,53 @@ namespace OfficeOpenXml.Table.PivotTable
 							bool stringOneHasWildcards = stringOne.Contains("*") || stringOne.Contains(".");
 							bool stringTwoHasWildcards = stringTwo.Contains("*") || stringTwo.Contains(".");
 							if (stringOneHasWildcards || stringTwoHasWildcards)
-								unsupportedFeatures.Add($"'{this.Fields[filter.Field].Name}' field has {filter.LabelFilterType} label filter with wildcards enabled.");
+								addUnsupportedFeature(unsupportedFeatures, $"'{this.Fields[filter.Field].Name}' field has {filter.LabelFilterType} label filter with wildcards enabled.");
 						}
 					}
 					else if (filter.FieldFilterType == FieldFilter.Value)
-						unsupportedFeatures.Add($"'{this.Fields[filter.Field].Name}' field has value filters enabled.");
+						addUnsupportedFeature(unsupportedFeatures, $"'{this.Fields[filter.Field].Name}' field has value filters enabled.");
 					else if (filter.FieldFilterType == FieldFilter.Report)
-						unsupportedFeatures.Add($"'{this.Fields[filter.Field].Name}' field has report filters enabled.");
+						addUnsupportedFeature(unsupportedFeatures, $"'{this.Fields[filter.Field].Name}' field has report filters enabled.");
 				}
 			}
 			if (this.MergeAndCenterCellsWithLabels)
-				unsupportedFeatures.Add("Merge and center cells with labels enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Merge and center cells with labels enabled");
 			if (this.PageOverThenDown)
-				unsupportedFeatures.Add("Display fields in report filter area over then down enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Display fields in report filter area over then down enabled");
 			if (this.PageWrap != 0)
-				unsupportedFeatures.Add("Report filter fields per [row|column] > 0");
+				addUnsupportedFeature(unsupportedFeatures, "Report filter fields per [row|column] > 0");
 			if (!string.IsNullOrEmpty(this.ErrorCaption))
-				unsupportedFeatures.Add("Error caption enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Error caption enabled");
 			if (this.ShowError)
-				unsupportedFeatures.Add("Show error enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Show error enabled");
 			if (!this.PreserveFormatting)
-				unsupportedFeatures.Add("Preserve formatting disabled");
+				addUnsupportedFeature(unsupportedFeatures, "Preserve formatting disabled");
 			if (this.MultipleFieldFilters)
-				unsupportedFeatures.Add("Multiple field filters enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Multiple field filters enabled");
 			if (!this.CustomListSort)
-				unsupportedFeatures.Add("Use Custom Lists when sorting disabled");
+				addUnsupportedFeature(unsupportedFeatures, "Use Custom Lists when sorting disabled");
 			if (!this.ShowDataTips)
-				unsupportedFeatures.Add("Show contextual tooltips disabled");
+				addUnsupportedFeature(unsupportedFeatures, "Show contextual tooltips disabled");
 			if (!this.ShowHeaders)
-				unsupportedFeatures.Add("Display field captions and filter dropdowns disabled");
+				addUnsupportedFeature(unsupportedFeatures, "Display field captions and filter dropdowns disabled");
 			if (this.GridDropZones)
-				unsupportedFeatures.Add("Grid drop zones enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Grid drop zones enabled");
 			if (!this.HideValuesRow)
-				unsupportedFeatures.Add("Show values row enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Show values row enabled");
 			if (this.FieldListSortAscending)
-				unsupportedFeatures.Add("Field list sort ascending enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Field list sort ascending enabled");
 			if (this.ShowEmptyColumn)
-				unsupportedFeatures.Add("Show items with no data on columns enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Show items with no data on columns enabled");
 			if (this.ShowEmptyRow)
-				unsupportedFeatures.Add("Show items with no data on rows enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Show items with no data on rows enabled");
 			if (this.ShowMemberPropertyTips)
-				unsupportedFeatures.Add("Show peroperties in tooltips enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Show peroperties in tooltips enabled");
 			if (this.EnableEdit)
-				unsupportedFeatures.Add("Enable cell editing in the values area enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Enable cell editing in the values area enabled");
 			if (!this.VisualTotals)
-				unsupportedFeatures.Add("Include filtered items in totals enabled");
+				addUnsupportedFeature(unsupportedFeatures, "Include filtered items in totals enabled");
 			if (this.AsterisksTotals)
-				unsupportedFeatures.Add("Mark totals with * disabled");
+				addUnsupportedFeature(unsupportedFeatures, "Mark totals with * disabled");
 			return unsupportedFeatures.Any();
 		}
 		#endregion
@@ -1695,9 +1697,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				endColumn += this.FirstDataCol + this.ColumnHeaders.Count - 1;
 			else
 			{
-				int tabularCount = this.TabularHeaders.Count;
-				int nonCompactCount = this.Fields.Count(x => x.Compact == false);
-				endColumn += tabularCount + nonCompactCount;
+				endColumn += this.RowFields.Count(f => !f.Compact || !f.Outline);
+				var lastRowField = this.RowFields.LastOrDefault();
+				if (lastRowField != null && lastRowField.Outline == false)
+					endColumn--;
 			}
 			return new ExcelAddress(this.Worksheet.Name, this.Address.Start.Row, this.Address.Start.Column, endRow, endColumn);
 		}

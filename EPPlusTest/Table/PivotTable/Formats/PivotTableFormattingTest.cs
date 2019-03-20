@@ -2711,6 +2711,75 @@ namespace EPPlusTest.Table.PivotTable.Formats
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithDateField.xlsx")]
+		public void PivotTableRefreshWithSortingDateDoesNotThrowException()
+		{
+			var file = new FileInfo("PivotTableWithDateField.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "pivot table";
+				using (var package = new ExcelPackage(file))
+				{
+					var pivotTable = package.Workbook.Worksheets[sheetName].PivotTables.Single();
+					package.Workbook.PivotCacheDefinitions.First().UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C10:F22"), pivotTable.Address);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 11, 3, "Beef House"),
+					new ExpectedCellValue(sheetName, 11, 4, "49525252"),
+					new ExpectedCellValue(sheetName, 11, 5, 0),
+					new ExpectedCellValue(sheetName, 11, 6, "2/4/2018"),
+
+					new ExpectedCellValue(sheetName, 12, 3, "Beef House Total"),
+					new ExpectedCellValue(sheetName, 12, 4, null),
+					new ExpectedCellValue(sheetName, 12, 6, null),
+
+					new ExpectedCellValue(sheetName, 13, 3, "John Haddock Insurance Co."),
+					new ExpectedCellValue(sheetName, 13, 5, 0),
+					new ExpectedCellValue(sheetName, 13, 6, "1/5/2018"),
+
+					new ExpectedCellValue(sheetName, 14, 3, null),
+					new ExpectedCellValue(sheetName, 14, 5, null),
+					new ExpectedCellValue(sheetName, 14, 6, "1/8/2018"),
+
+					new ExpectedCellValue(sheetName, 15, 3, null),
+					new ExpectedCellValue(sheetName, 15, 4, null),
+					new ExpectedCellValue(sheetName, 15, 6, "1/31/2018"),
+
+					new ExpectedCellValue(sheetName, 16, 3, "John Haddock Insurance Co. Total"),
+					new ExpectedCellValue(sheetName, 16, 4, null),
+					new ExpectedCellValue(sheetName, 16, 6, null),
+
+					new ExpectedCellValue(sheetName, 17, 3, "Selangorian Ltd."),
+					new ExpectedCellValue(sheetName, 17, 4, "20000"),
+					new ExpectedCellValue(sheetName, 17, 5, 0),
+					new ExpectedCellValue(sheetName, 17, 6, "1/11/2018"),
+
+					new ExpectedCellValue(sheetName, 18, 3, null),
+					new ExpectedCellValue(sheetName, 18, 4, null),
+					new ExpectedCellValue(sheetName, 18, 6, "1/31/2018"),
+
+					new ExpectedCellValue(sheetName, 19, 3, "Selangorian Ltd. Total"),
+					new ExpectedCellValue(sheetName, 19, 4, null),
+					new ExpectedCellValue(sheetName, 19, 6, null),
+
+					new ExpectedCellValue(sheetName, 20, 3, "The Cannon Group PLC"),
+					new ExpectedCellValue(sheetName, 20, 4, "10000"),
+					new ExpectedCellValue(sheetName, 20, 5, 0),
+					new ExpectedCellValue(sheetName, 20, 6, "1/31/2018"),
+
+					new ExpectedCellValue(sheetName, 21, 3, "The Cannon Group PLC Total"),
+					new ExpectedCellValue(sheetName, 21, 4, null),
+					new ExpectedCellValue(sheetName, 21, 5, null),
+					new ExpectedCellValue(sheetName, 21, 6, null)
+				});
+			}
+		}
 		#endregion
 	}
 }
