@@ -280,18 +280,18 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			int autoScopeIndex = int.Parse(pivotField.AutoSortScopeReferences[0].Value);
 			var referenceDataFieldIndex = pivotTable.DataFields[autoScopeIndex].Index;
-			var orderedList = new List<Tuple<int, double>>();
+			var orderedList = new List<Tuple<int, double?>>();
 
 			// Get the total value for every child at the given data field index.
 			foreach (var child in root.Children.ToList())
 			{
-				double sortingTotal = 0;
+				double? sortingTotal = 0;
 				var cacheField = pivotTable.CacheDefinition.CacheFields[referenceDataFieldIndex];
 				if (!string.IsNullOrEmpty(cacheField.Formula))
 					sortingTotal = this.GetCalculatedFieldTotal(child, pivotTable, cacheField);
 				else
 					sortingTotal = pivotTable.CacheDefinition.CacheRecords.CalculateSortingValues(child, referenceDataFieldIndex);
-				orderedList.Add(new Tuple<int, double>(child.Value, sortingTotal));
+				orderedList.Add(new Tuple<int, double?>(child.Value, sortingTotal));
 			}
 
 			bool sortDescending = pivotField.Sort == eSortType.Descending;
@@ -322,7 +322,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
-		private double GetCalculatedFieldTotal(PivotItemTreeNode node, ExcelPivotTable pivotTable, CacheFieldNode cacheField)
+		private double? GetCalculatedFieldTotal(PivotItemTreeNode node, ExcelPivotTable pivotTable, CacheFieldNode cacheField)
 		{
 			var totalsFunction = new TotalsFunctionHelper();
 			var calculatedFields = pivotTable.CacheDefinition.CacheFields.Where(f => !string.IsNullOrEmpty(f.Formula));
@@ -334,7 +334,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				fieldNameToValues.Add(cacheFieldName, values);
 			}
 			var total = totalsFunction.EvaluateCalculatedFieldFormula(fieldNameToValues, cacheField.ResolvedFormula);
-			return double.Parse(total.ToString());
+			if (double.TryParse(total.ToString(), out var result))
+				return result;
+			return null;
 		}
 		#endregion
 	}

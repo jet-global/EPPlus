@@ -2734,21 +2734,11 @@ namespace EPPlusTest.Table.PivotTable
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					var formulaCacheField = cacheDefinition.CacheFields.First(c => !string.IsNullOrEmpty(c.Formula));
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+					var formulaCacheField = cacheDefinition.CacheFields.First(c => c.Name == "CalculatedField");
 					formulaCacheField.Formula = "'Wholesale Price'";
 					cacheDefinition.UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
-					Assert.AreEqual(9, pivotTable.Fields.Count);
-					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[4].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[7].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[8].Items.Count);
 					package.SaveAs(newFile.File);
 				}
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
@@ -2805,19 +2795,8 @@ namespace EPPlusTest.Table.PivotTable
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
+					package.Workbook.PivotCacheDefinitions.First().UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
-					Assert.AreEqual(9, pivotTable.Fields.Count);
-					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[4].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[7].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[8].Items.Count);
 					package.SaveAs(newFile.File);
 				}
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
@@ -2874,21 +2853,11 @@ namespace EPPlusTest.Table.PivotTable
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable1"];
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					var formulaCacheField = cacheDefinition.CacheFields.First(c => !string.IsNullOrEmpty(c.Formula));
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+					var formulaCacheField = cacheDefinition.CacheFields.First(c => c.Name == "CalculatedField");
 					formulaCacheField.Formula = "'Wholesale Price' * Item";
 					cacheDefinition.UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:D13"), pivotTable.Address);
-					Assert.AreEqual(9, pivotTable.Fields.Count);
-					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[4].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[7].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[8].Items.Count);
 					package.SaveAs(newFile.File);
 				}
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
@@ -2945,20 +2914,10 @@ namespace EPPlusTest.Table.PivotTable
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable2"];
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
+					package.Workbook.PivotCacheDefinitions.First().UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B18:D27"), pivotTable.Address);
-					Assert.AreEqual(9, pivotTable.Fields.Count);
-					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[7].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[8].Items.Count);
 					package.SaveAs(newFile.File);
+					package.SaveAs(@"C:\Users\ems\Downloads\OUT.xlsx");
 				}
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
 				{
@@ -3008,19 +2967,8 @@ namespace EPPlusTest.Table.PivotTable
 				{
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
-					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
-					cacheDefinition.UpdateData();
+					package.Workbook.PivotCacheDefinitions.First().UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("G4:L14"), pivotTable.Address);
-					Assert.AreEqual(9, pivotTable.Fields.Count);
-					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[5].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[7].Items.Count);
-					Assert.AreEqual(0, pivotTable.Fields[8].Items.Count);
 					package.SaveAs(newFile.File);
 				}
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
@@ -3091,6 +3039,106 @@ namespace EPPlusTest.Table.PivotTable
 					new ExpectedCellValue(sheetName, 14, 10, 3326d),
 					new ExpectedCellValue(sheetName, 14, 11, 3326d),
 					new ExpectedCellValue(sheetName, 14, 12, 7483.5),
+				});
+			}
+		}
+
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithCalculatedFields.xlsx")]
+		public void PivotTableRefreshColumnRowAndPageFieldsWithCalculatedFieldsNamedSimilarly()
+		{
+			var file = new FileInfo("PivotTableWithCalculatedFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet2";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable4"];
+					package.Workbook.PivotCacheDefinitions.First().UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B31:C42"), pivotTable.Address);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 31, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 32, 2, "January"),
+					new ExpectedCellValue(sheetName, 33, 2, "Chicago"),
+					new ExpectedCellValue(sheetName, 34, 2, "Nashville"),
+					new ExpectedCellValue(sheetName, 35, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 36, 2, "February"),
+					new ExpectedCellValue(sheetName, 37, 2, "Nashville"),
+					new ExpectedCellValue(sheetName, 38, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 39, 2, "March"),
+					new ExpectedCellValue(sheetName, 40, 2, "Chicago"),
+					new ExpectedCellValue(sheetName, 41, 2, "Nashville"),
+					new ExpectedCellValue(sheetName, 42, 2, "Grand Total"),
+
+					new ExpectedCellValue(sheetName, 31, 3, "Sum of CalculatedField3"),
+					new ExpectedCellValue(sheetName, 32, 3, .93),
+					new ExpectedCellValue(sheetName, 33, 3, 1.1),
+					new ExpectedCellValue(sheetName, 34, 3, .85),
+					new ExpectedCellValue(sheetName, 35, 3, .83),
+					new ExpectedCellValue(sheetName, 36, 3, .81),
+					new ExpectedCellValue(sheetName, 37, 3, .8),
+					new ExpectedCellValue(sheetName, 38, 3, .99),
+					new ExpectedCellValue(sheetName, 39, 3, 1.04),
+					new ExpectedCellValue(sheetName, 40, 3, 1.25),
+					new ExpectedCellValue(sheetName, 41, 3, 1.04),
+					new ExpectedCellValue(sheetName, 42, 3, .91)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithCalculatedFields.xlsx")]
+		public void PivotTableRefreshColumnRowAndPageFieldsWithCalculatedFieldWithError()
+		{
+			var file = new FileInfo("PivotTableWithCalculatedFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet2";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable4"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+					var cacheField = cacheDefinition.CacheFields.First(c => c.Name == "CalculatedField3");
+					cacheField.Formula = "=1/0";
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B31:C42"), pivotTable.Address);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 31, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 32, 2, "January"),
+					new ExpectedCellValue(sheetName, 33, 2, "Chicago"),
+					new ExpectedCellValue(sheetName, 34, 2, "Nashville"),
+					new ExpectedCellValue(sheetName, 35, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 36, 2, "February"),
+					new ExpectedCellValue(sheetName, 37, 2, "Nashville"),
+					new ExpectedCellValue(sheetName, 38, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 39, 2, "March"),
+					new ExpectedCellValue(sheetName, 40, 2, "Chicago"),
+					new ExpectedCellValue(sheetName, 41, 2, "Nashville"),
+					new ExpectedCellValue(sheetName, 42, 2, "Grand Total"),
+
+					new ExpectedCellValue(sheetName, 31, 3, "Sum of CalculatedField3"),
+					new ExpectedCellValue(sheetName, 32, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 33, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 34, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 35, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 36, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 37, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 38, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 39, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 40, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 41, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 42, 3, ExcelErrorValue.Create(eErrorType.Div0))
 				});
 			}
 		}
