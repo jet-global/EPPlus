@@ -2917,8 +2917,8 @@ namespace EPPlusTest.Table.PivotTable
 					package.Workbook.PivotCacheDefinitions.First().UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B18:D27"), pivotTable.Address);
 					package.SaveAs(newFile.File);
-					package.SaveAs(@"C:\Users\ems\Downloads\OUT.xlsx");
 				}
+
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
 				{
 					new ExpectedCellValue(sheetName, 18, 3, "Sum of CalculatedField"),
@@ -2941,12 +2941,12 @@ namespace EPPlusTest.Table.PivotTable
 					new ExpectedCellValue(sheetName, 24, 2, "March"),
 					new ExpectedCellValue(sheetName, 24, 3, 1322.22),
 					new ExpectedCellValue(sheetName, 24, 4, 3),
-					new ExpectedCellValue(sheetName, 25, 2, "Headlamp"),
-					new ExpectedCellValue(sheetName, 25, 3, 24.99),
-					new ExpectedCellValue(sheetName, 25, 4, 1),
-					new ExpectedCellValue(sheetName, 26, 2, "Car Rack"),
-					new ExpectedCellValue(sheetName, 26, 3, 831.5),
-					new ExpectedCellValue(sheetName, 26, 4, 2),
+					new ExpectedCellValue(sheetName, 25, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 25, 3, 831.5),
+					new ExpectedCellValue(sheetName, 25, 4, 2),
+					new ExpectedCellValue(sheetName, 26, 2, "Headlamp"),
+					new ExpectedCellValue(sheetName, 26, 3, 24.99),
+					new ExpectedCellValue(sheetName, 26, 4, 1),
 					new ExpectedCellValue(sheetName, 27, 2, "Grand Total"),
 					new ExpectedCellValue(sheetName, 27, 3, 29789.85),
 					new ExpectedCellValue(sheetName, 27, 4, 15),
