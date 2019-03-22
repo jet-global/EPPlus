@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using OfficeOpenXml.Extensions;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 
@@ -255,14 +256,23 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			string sanitizedFormula = formula;
 			if (this.SanitizedFormulas.ContainsKey(formula))
 				return this.SanitizedFormulas[formula];
-			foreach (var fieldName in this.FieldNamesToSanitizedFieldNames.Keys)
+
+			var tokens = this.Package.Workbook.FormulaParser.Lexer.Tokenize(formula, this.TempWorksheet.Name);
+			var stringBuilder = new StringBuilder();
+			foreach (var token in tokens)
 			{
-				var quotedValue = $"'{fieldName}'";
-				if (sanitizedFormula.Contains(quotedValue))
-					sanitizedFormula = sanitizedFormula.Replace(quotedValue, this.FieldNamesToSanitizedFieldNames[fieldName]);
-				else if (sanitizedFormula.Contains(fieldName))
-					sanitizedFormula = sanitizedFormula.Replace(fieldName, this.FieldNamesToSanitizedFieldNames[fieldName]);
+				if (this.FieldNamesToSanitizedFieldNames.ContainsKey(token.Value))
+					stringBuilder.Append(this.FieldNamesToSanitizedFieldNames[token.Value]);
+				else
+				{
+					var unQuotedValue = token.Value.Trim('\'');
+					if (this.FieldNamesToSanitizedFieldNames.ContainsKey(unQuotedValue))
+						stringBuilder.Append(this.FieldNamesToSanitizedFieldNames[unQuotedValue]);
+					else
+						stringBuilder.Append(token.Value);
+				}
 			}
+			sanitizedFormula = stringBuilder.ToString();
 			this.SanitizedFormulas.Add(formula, sanitizedFormula);
 			return sanitizedFormula;
 		}
