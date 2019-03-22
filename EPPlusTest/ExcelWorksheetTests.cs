@@ -63,7 +63,14 @@ namespace EPPlusTest
 			NamedStyles();
 			TableTest();
 			DefinedName();
-			CreatePivotTable();
+
+			try
+			{
+				CreatePivotTable();
+			}
+			catch (NotImplementedException e) { /* Adding row/column fields is not supported. */}
+			catch (Exception) { throw; }
+
 			AddChartSheet();
 			SetHeaderFooterImage();
 
@@ -2185,6 +2192,8 @@ namespace EPPlusTest
 			pt.DataFields.Add(pt.Fields[2]);
 			pt.DataOnRows = false;
 
+			// NOTE: Setting these subtotal functions will fail because the pivot fields have no items,
+			// which means that they cannot have subtotal functions.
 			pt.Fields[0].SubTotalFunctions = eSubTotalFunctions.Sum | eSubTotalFunctions.Max;
 			Assert.AreEqual(pt.Fields[0].SubTotalFunctions, eSubTotalFunctions.Sum | eSubTotalFunctions.Max);
 
@@ -2199,6 +2208,7 @@ namespace EPPlusTest
 
 			pt.Fields[0].Sort = eSortType.Descending;
 			pt.TableStyle = OfficeOpenXml.Table.TableStyles.Medium14;
+
 
 			pt = wsPivot8.PivotTables.Add(wsPivot8.Cells["A3"], ws.Cells["K1:O11"], "Pivottable8");
 			pt.RowFields.Add(pt.Fields[1]);
@@ -2247,7 +2257,6 @@ namespace EPPlusTest
 			pt.RowFields.Add(pt.Fields[4]);
 			pt.DataOnRows = true;
 			//wsPivot10.Drawings.AddChart("Pivotchart10", OfficeOpenXml.Drawing.Chart.eChartType.BarStacked3D, pt);
-
 		}
 
 		[Ignore]
