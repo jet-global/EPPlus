@@ -180,7 +180,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					{
 						if (UriHelper.GetUriEndTargetName(cacheRecordsRel.SourceUri).IsEquivalentTo(cacheDefinitionName))
 						{
-							var partUri = new Uri($"xl/pivotCache/{cacheRecordsRel.TargetUri}", UriKind.Relative);
+							var partUri = new Uri($"xl/pivotCache/{UriHelper.GetUriEndTargetName(cacheRecordsRel.TargetUri)}", UriKind.Relative);
 							var possiblePart = this.Workbook.Package.GetXmlFromUri(partUri);
 							myCacheRecords = new ExcelPivotCacheRecords(base.NameSpaceManager, this.Workbook.Package, possiblePart, partUri, this);
 						}
@@ -339,8 +339,8 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// CacheRecord. Create an empty one.
 			this.CacheRecords = new ExcelPivotCacheRecords(ns, pck, ref tableId, this);
-
-			this.RecordRelationship = this.Part.CreateRelationship(UriHelper.ResolvePartUri(this.CacheDefinitionUri, this.CacheRecords.Uri), Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheRecords");
+			var uri = UriHelper.ResolvePartUri(this.CacheDefinitionUri, this.CacheRecords.Uri);
+			this.RecordRelationship = this.Part.CreateRelationship(uri, Packaging.TargetMode.Internal, ExcelPackage.schemaRelationships + "/pivotCacheRecords");
 			this.RecordRelationshipID = this.RecordRelationship.Id;
 
 			this.CacheDefinitionXml.Save(this.Part.GetStream());

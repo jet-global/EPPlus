@@ -764,15 +764,15 @@ namespace EPPlusTest
 			}
 		}
 		[TestMethod]
-		/**** Pivottable issue ****/
+		[ExpectedException(typeof(NotImplementedException))]
 		public void Issue()
 		{
-			// TODO (Task #8178): Fix grouping/test.
 			DirectoryInfo outputDir = new DirectoryInfo(@"c:\ExcelPivotTest");
 			FileInfo MyFile = new FileInfo(@"c:\temp\bug\pivottable.xlsx");
 			LoadData(MyFile);
 			BuildPivotTable1(MyFile);
 			BuildPivotTable2(MyFile);
+			MyFile.Delete();
 		}
 
 		private void LoadData(FileInfo MyFile)
@@ -882,7 +882,6 @@ namespace EPPlusTest
 				ep.Dispose();
 
 			}
-
 		}
 
 		private void BuildPivotTable2(FileInfo MyFile)
@@ -900,11 +899,6 @@ namespace EPPlusTest
 				pivotTable1.ColumnGrandTotals = true;
 				var rowField = pivotTable1.RowFields.Add(pivotTable1.Fields["INVOICE_DATE"]);
 
-
-				rowField.AddDateGrouping(eDateGroupBy.Years);
-				var yearField = pivotTable1.Fields.GetDateGroupField(eDateGroupBy.Years);
-				yearField.Name = "Year";
-
 				var rowField2 = pivotTable1.RowFields.Add(pivotTable1.Fields["AUDIT_LINE_STATUS"]);
 
 				var TotalSpend = pivotTable1.DataFields.Add(pivotTable1.Fields["TOTAL_INVOICE_PRICE"]);
@@ -919,9 +913,7 @@ namespace EPPlusTest
 				pivotTable1.DataOnRows = false;
 				ep.Save();
 				ep.Dispose();
-
 			}
-
 		}
 
 		[TestMethod, Ignore]

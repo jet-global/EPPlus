@@ -90,9 +90,14 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <returns>The new field.</returns>
 		public ExcelPivotTableField Add(ExcelPivotTableField field)
 		{
-			this.SetFlag(field, true);
-			base.AddItem(field);
-			return field;
+			throw new NotImplementedException();
+			// NOTE: Commented out because this class should really be based off of a type that
+			// reflects the XML accurately rather than directly dereferencing to the pivot table field.
+			// If this change is made, the following code should be useful.
+
+			//this.SetFlag(field, true);
+			//base.AddItem(field);
+			//return field;
 		}
 
 		/// <summary>
@@ -101,10 +106,15 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="field">The field that is being removed.</param>
 		public void Remove(ExcelPivotTableField field)
 		{
-			if (!base.ContainsItem(field))
-				throw new ArgumentException("Field not in collection");
-			this.SetFlag(field, false);
-			base.RemoveItem(field);
+			throw new NotImplementedException();
+			// NOTE: Commented out because this class should really be based off of a type that
+			// reflects the XML accurately rather than directly dereferencing to the pivot table field.
+			// If this change is made, the following code should be useful.
+
+			//if (!base.ContainsItem(field))
+			//	throw new ArgumentException("Field not in collection");
+			//this.SetFlag(field, false);
+			//base.RemoveItem(field);
 		}
 
 		/// <summary>
