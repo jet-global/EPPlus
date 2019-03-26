@@ -135,10 +135,23 @@ namespace OfficeOpenXml.Table.PivotTable
 			for (int i = 0; i < this.SharedItems.Count; i++)
 			{
 				var item = this.SharedItems[i];
-				// Empty strings are sometimes put in as string values by Excel
-				// so we will let empty types match with empty string shared items.
-				if ((type == PivotCacheRecordType.m || type == item.Type) && stringValue.IsEquivalentTo(item.Value))
-					return i;
+				if (type == PivotCacheRecordType.n && !string.IsNullOrEmpty(item.Value))
+				{
+					// Since stringValue is a rounded value, we must round the value in the shared
+					// items list to make sure the same value with less accuracy is not added. Otherwise,
+					// this can corrupt a workbook.
+					double doublValue = (double)Convert.ChangeType(stringValue, typeof(double));
+					double itemValue = (double)Convert.ChangeType(item.Value, typeof(double));
+					if (Math.Round(doublValue, 2) == Math.Round(itemValue, 2))
+						return i;
+				}
+				else
+				{
+					// Empty strings are sometimes put in as string values by Excel
+					// so we will let empty types match with empty string shared items.
+					if ((type == PivotCacheRecordType.m || type == item.Type) && stringValue.IsEquivalentTo(item.Value))
+						return i;
+				}
 			}
 			return -1;
 		}

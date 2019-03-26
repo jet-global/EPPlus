@@ -450,7 +450,6 @@ namespace OfficeOpenXml.Utils
 				return stringValue;
 			else if (ConvertUtil.IsNumeric(value, true))
 			{
-				var stringNumericValue = value.ToString();
 				if (value is double || value is decimal)
 				{
 					double doublValue = (double)Convert.ChangeType(value, typeof(double));
