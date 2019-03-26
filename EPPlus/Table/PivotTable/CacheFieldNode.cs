@@ -137,12 +137,20 @@ namespace OfficeOpenXml.Table.PivotTable
 				var item = this.SharedItems[i];
 				if (type == PivotCacheRecordType.n && !string.IsNullOrEmpty(item.Value))
 				{
-					// Since stringValue is a rounded value, we must round the value in the shared
-					// items list to make sure the same value with less accuracy is not added. Otherwise,
-					// this can corrupt a workbook.
-					double doublValue = (double)Convert.ChangeType(stringValue, typeof(double));
-					double itemValue = (double)Convert.ChangeType(item.Value, typeof(double));
-					if (Math.Round(doublValue, 2) == Math.Round(itemValue, 2))
+					// Round the target value and item value to check if it already exists in the shared item's list.
+					// Values must be rounded because if the value precisions are different, the target value will be 
+					// added to the shared item's list when it shouldn't be and this will corrupt the workbook.
+					double doubleTargetValue = (double)Convert.ChangeType(value, typeof(double));
+					double roundedTargetValue = Math.Round(doubleTargetValue);
+					double doubleItemValue = (double)Convert.ChangeType(item.Value, typeof(double));
+					double roundedItemValue = Math.Round(doubleItemValue);
+
+					if (Math.Abs(roundedTargetValue - doubleTargetValue) < Double.Epsilon)
+						doubleTargetValue = roundedTargetValue;
+					if (Math.Abs(roundedItemValue - doubleItemValue) < Double.Epsilon)
+						doubleItemValue = roundedItemValue;
+
+					if (doubleTargetValue == doubleItemValue)
 						return i;
 				}
 				else
