@@ -449,18 +449,7 @@ namespace OfficeOpenXml.Utils
 			if (value is string stringValue)
 				return stringValue;
 			else if (ConvertUtil.IsNumeric(value, true))
-			{
-				var stringNumericValue = value.ToString();
-				if (value is double || value is decimal)
-				{
-					double doublValue = (double)Convert.ChangeType(value, typeof(double));
-					// Numbers left at full precision can cause corruptions in Excel.
-					double rounded = Math.Round(doublValue);
-					if (Math.Abs(rounded - doublValue) < Double.Epsilon)
-						return rounded.ToString();
-				}
 				return value.ToString();
-			}
 			else if (value is bool boolVal)
 				return boolVal ? "1" : "0";
 			else if (value is ExcelErrorValue errorValue)

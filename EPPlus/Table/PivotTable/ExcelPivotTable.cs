@@ -459,7 +459,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public bool CompactData
 		{
-			get { return base.GetXmlNodeBool("@compactData"); }
+			get { return base.GetXmlNodeBool("@compactData", true); }
 			set { base.SetXmlNodeBool("@compactData", value); }
 		}
 
@@ -1944,7 +1944,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			int returnColumn = 0;
 			var parentList = header.CacheRecordIndices.GetRange(0, header.CacheRecordIndices.Count - 1).ToList();
 			bool hasAllCompactFieldParents = parentList.All(x => x.Item1 == -2 || compactFormPivotFields.Any(j => j.Index == x.Item1));
-			if (item.RepeatedItemsCount == 0 || hasAllCompactFieldParents)
+			if (!this.CompactData)
+				returnColumn = item.RepeatedItemsCount == 0 ? column : column + item.RepeatedItemsCount;
+			else if (item.RepeatedItemsCount == 0 || hasAllCompactFieldParents)
 				returnColumn = column;
 			else if (string.IsNullOrEmpty(header.TotalType) && previousHeaderCompactForm)
 				returnColumn = previousColumn;
@@ -2012,6 +2014,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
 			int column = this.Address.Start.Column + this.FirstDataCol;
+			var columnFieldNames = new List<string>();
 			if (this.ColumnFields.Any())
 			{
 				for (int i = 0; i < this.ColumnItems.Count; i++)
@@ -2032,6 +2035,18 @@ namespace OfficeOpenXml.Table.PivotTable
 						var cellRow = this.ColumnItems[i].RepeatedItemsCount == 0 ? startHeaderRow : startHeaderRow + this.ColumnItems[i].RepeatedItemsCount;
 						this.Worksheet.Cells[cellRow, column].Value = sharedItem;
 						startHeaderRow++;
+
+						if (!this.CompactData && i == 0)
+						{
+							var pivotFieldIndex = this.ColumnFields[columnFieldIndex].Index;
+							if (pivotFieldIndex == -2)
+								columnFieldNames.Add("Values");
+							else
+							{
+								var pivotField = this.Fields[pivotFieldIndex];
+								columnFieldNames.Add(pivotField.Name);
+							}
+						}
 					}
 					column++;
 				}
@@ -2039,6 +2054,19 @@ namespace OfficeOpenXml.Table.PivotTable
 			// If there are no column headers and only one data field, print the name of the data field for the column.
 			else if (this.DataFields.Count == 1)
 				this.Worksheet.Cells[this.Address.Start.Row, column].Value = this.DataFields.First().Name;
+			// If outline or tabular form is enabled, then write the header values to the correct cell.
+			if (columnFieldNames.Any())
+				this.WriteColumnHeadersInColumn(columnFieldNames);
+		}
+
+		private void WriteColumnHeadersInColumn(List<string> headers)
+		{
+			int row = this.Address.Start.Row;
+			int column = this.Address.Start.Column + this.FirstDataCol;
+			for (int i = 0; i < headers.Count; i++)
+			{
+				this.Worksheet.Cells[row, column++].Value = headers[i];
+			}
 		}
 
 		private string GetTotalCaptionCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, StringResources stringResources)

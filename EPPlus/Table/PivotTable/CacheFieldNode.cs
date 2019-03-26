@@ -135,10 +135,31 @@ namespace OfficeOpenXml.Table.PivotTable
 			for (int i = 0; i < this.SharedItems.Count; i++)
 			{
 				var item = this.SharedItems[i];
-				// Empty strings are sometimes put in as string values by Excel
-				// so we will let empty types match with empty string shared items.
-				if ((type == PivotCacheRecordType.m || type == item.Type) && stringValue.IsEquivalentTo(item.Value))
-					return i;
+				if (type == PivotCacheRecordType.n && !string.IsNullOrEmpty(item.Value))
+				{
+					// Round the target value and item value to check if it already exists in the shared item's list.
+					// Values must be rounded because if the value precisions are different, the target value will be 
+					// added to the shared item's list when it shouldn't be and this will corrupt the workbook.
+					double doubleTargetValue = (double)Convert.ChangeType(value, typeof(double));
+					double roundedTargetValue = Math.Round(doubleTargetValue);
+					double doubleItemValue = (double)Convert.ChangeType(item.Value, typeof(double));
+					double roundedItemValue = Math.Round(doubleItemValue);
+
+					if (Math.Abs(roundedTargetValue - doubleTargetValue) < Double.Epsilon)
+						doubleTargetValue = roundedTargetValue;
+					if (Math.Abs(roundedItemValue - doubleItemValue) < Double.Epsilon)
+						doubleItemValue = roundedItemValue;
+
+					if (doubleTargetValue == doubleItemValue)
+						return i;
+				}
+				else
+				{
+					// Empty strings are sometimes put in as string values by Excel
+					// so we will let empty types match with empty string shared items.
+					if ((type == PivotCacheRecordType.m || type == item.Type) && stringValue.IsEquivalentTo(item.Value))
+						return i;
+				}
 			}
 			return -1;
 		}
