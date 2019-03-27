@@ -25,7 +25,7 @@ namespace EPPlusTest.Table.PivotTable.DataCalculation
 			var totalFunctionHelper = new TotalsFunctionHelper();
 			var values = new List<object>() { 5, 2, 1, 6, 10, 22, 7 };
 			var result = totalFunctionHelper.Calculate(OfficeOpenXml.Table.PivotTable.DataFieldFunctions.Count, values);
-			Assert.AreEqual(7, (double)result);
+			Assert.AreEqual(7, result);
 		}
 
 		[TestMethod]

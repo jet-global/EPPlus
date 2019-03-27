@@ -345,20 +345,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				// Find record indices for date groupings fields.
 				var recordIndices = this.DateGroupingRecordValueTupleMatch(cacheField, tuple.Item2);
-				// Get the index of the current record in the collection.
-				// If the index is in the list, the record value and tuple matches.
-				if (tuple.Item1 < record.Items.Count)
-				{
-					var itemValue = record.Items[tuple.Item1].Value;
-					if (recordIndices.All(i => i != int.Parse(itemValue)))
-						return false;
-				}
-				else
-				{
-					int recordIndex = this.Records.IndexOf(record);
-					if (!recordIndices.Contains(recordIndex))
-						return false;
-				}
+				// If the record value is in the list, then the record value and tuple are a match.
+				int index = tuple.Item1 < record.Items.Count ? tuple.Item1 : cacheField.FieldGroup.BaseField;
+				var itemValue = record.Items[index].Value;
+				if (recordIndices.All(i => i != int.Parse(itemValue)))
+					return false;
 			}
 			else
 			{
