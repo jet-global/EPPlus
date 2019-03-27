@@ -71,10 +71,10 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				columnTotalType,
 				base.TotalsCalculator);
 
-			if (cellBackingData?.Result == null)
+			if (cellBackingData?.Result == null || ((double)cellBackingData.Result == 0))
 			{
 				// If both are null, write null.
-				if (parentBackingData.Result == null)
+				if (parentBackingData.Result == null || ((double)parentBackingData.Result == 0))
 					return null;
 				// If the parent has a value, write out 0.
 				return 0;

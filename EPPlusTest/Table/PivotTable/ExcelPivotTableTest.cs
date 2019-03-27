@@ -45822,8 +45822,52 @@ namespace EPPlusTest.Table.PivotTable
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTablePercentOfParentRowBlankValues.xlsx")]
+		public void PivotTablePercentOfParentRowBlankValues()
+		{
+			var file = new FileInfo("PivotTablePercentOfParentRowBlankValues.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet1";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 5, 3, 0),
+					new ExpectedCellValue(sheetName, 5, 4, 0),
+					new ExpectedCellValue(sheetName, 5, 5, 0),
+					new ExpectedCellValue(sheetName, 6, 3, 0),
+					new ExpectedCellValue(sheetName, 6, 4, null),
+					new ExpectedCellValue(sheetName, 6, 5, 0),
+					new ExpectedCellValue(sheetName, 7, 3, 0),
+					new ExpectedCellValue(sheetName, 7, 4, null),
+					new ExpectedCellValue(sheetName, 7, 5, 0),
+					new ExpectedCellValue(sheetName, 8, 3, 1),
+					new ExpectedCellValue(sheetName, 8, 4, null),
+					new ExpectedCellValue(sheetName, 8, 5, 1),
+					new ExpectedCellValue(sheetName, 9, 3, 0),
+					new ExpectedCellValue(sheetName, 9, 4, null),
+					new ExpectedCellValue(sheetName, 9, 5, 0),
+					new ExpectedCellValue(sheetName, 10, 3, 0),
+					new ExpectedCellValue(sheetName, 10, 4, null),
+					new ExpectedCellValue(sheetName, 10, 5, 0),
+					new ExpectedCellValue(sheetName, 11, 3, 0),
+					new ExpectedCellValue(sheetName, 11, 4, null),
+					new ExpectedCellValue(sheetName, 11, 5, 0),
+				});
+			}
+		}
 		#endregion
-		
+
 		#region Multiple Data Fields
 		// Two Row Fields Multiple Data Fields
 		[TestMethod]
