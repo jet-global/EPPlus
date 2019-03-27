@@ -1101,7 +1101,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			int repeatedItemsCount = 0;
 			// Base case: If we're at a leaf node or a non-tabular form field node.
-			if (root.Value != -1 && (!root.HasChildren || !root.IsTabularForm))
+			if (root.Value != -1 && (!root.HasChildren || (!root.IsTabularForm && this.CompactData)))
 			{
 				repeatedItemsCount = this.GetRepeatedItemsCount(indices, lastChildIndices);
 				ExcelPivotTableField pivotField = null;
@@ -1895,6 +1895,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			var parentList = header.CacheRecordIndices.GetRange(0, repeatedItemsCount).ToList();
 			if (repeatedItemsCount == 0)
 				returnColumn = column;
+			else if (!this.CompactData)
+				returnColumn = column + repeatedItemsCount;
 			else
 			{
 				bool hasDataFieldParent = parentList.Any(i => i.Item1 == -2);

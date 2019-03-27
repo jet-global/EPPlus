@@ -71,15 +71,15 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				columnTotalType,
 				base.TotalsCalculator);
 
-			if (cellBackingData?.Result == null || ((double)cellBackingData.Result == 0))
+			if (cellBackingData?.Result == null || Convert.ToDouble(cellBackingData.Result) == 0)
 			{
 				// If both are null, write null.
-				if (parentBackingData.Result == null || ((double)parentBackingData.Result == 0))
+				if (parentBackingData.Result == null || Convert.ToDouble(parentBackingData.Result) == 0)
 					return null;
 				// If the parent has a value, write out 0.
 				return 0;
 			}
-			return (double)cellBackingData.Result / (double)parentBackingData.Result;
+			return Convert.ToDouble(cellBackingData.Result) / Convert.ToDouble(parentBackingData.Result);
 		}
 
 		/// <summary>
@@ -136,7 +136,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			}
 			else if (baseValue == null)
 				return 1;
-			var result = (double)cellBackingData.Result / (double)baseValue;
+			var result = Convert.ToDouble(cellBackingData.Result) / Convert.ToDouble(baseValue);
 			return result;
 		}
 		#endregion
