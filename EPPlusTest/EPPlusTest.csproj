@@ -266,6 +266,7 @@
     <Compile Include="Table\PivotTable\CacheRecordNodeTest.cs" />
     <Compile Include="Table\PivotTable\DataCalculation\TotalFunctionHelperTest.cs" />
     <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionAverageTypeTest.cs" />
+    <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionCountTypeNullSourceData.cs" />
     <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionCountTypeTest.cs" />
     <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionMaxTypeTest.cs" />
     <Compile Include="Table\PivotTable\DataFieldFunctionTypes\DataFieldFunctionMinTypeTest.cs" />
