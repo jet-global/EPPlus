@@ -53,6 +53,16 @@ namespace OfficeOpenXml.Table.PivotTable
 			get { return base.GetXmlNodeBool("@containsBlank", false); }
 			set { base.SetXmlNodeBool("@containsBlank", value, false); }
 		}
+
+		public bool ContainsString
+		{
+			get { return base.GetXmlNodeBool("@containsString", true); }
+		}
+
+		public bool ContainsNumber
+		{
+			get { return base.GetXmlNodeBool("@containsNumber", false); }
+		}
 		#endregion
 
 		#region Constructors

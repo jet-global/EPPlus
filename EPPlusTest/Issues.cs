@@ -46,6 +46,19 @@ namespace EPPlusTest
 			}
 		}
 
+
+		[TestMethod]
+		public void TextColorBug()
+		{
+			//using (var package = new ExcelPackage(new FileInfo(@"C:\Users\sec\Downloads\original repro.xlsx")))
+			using (var package = new ExcelPackage(new FileInfo(@"C:\Users\sec\Downloads\compact_form_3rows.xlsx")))
+			{
+				package.Workbook.PivotCacheDefinitions.Single().UpdateData();
+				package.SaveAs(@"C:\Users\sec\Downloads\compact_form_3rows OUTPUT.xlsx");
+				//package.SaveAs(@"C:\Users\sec\Downloads\original repro OUTPUT.xlsx");
+			}
+		}
+
 		[TestMethod, Ignore]
 		public void Issue15052()
 		{

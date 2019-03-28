@@ -445,8 +445,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			else
 				itemValue = record.Items[dataFieldIndex].Value;
-			if (itemValue == null)
-				matchingValues.Add(itemValue);
+			if (string.IsNullOrWhiteSpace(itemValue))
+				matchingValues.Add(null);
 			else
 			{
 				double.TryParse(itemValue, out var recordData);

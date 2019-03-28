@@ -31,6 +31,7 @@
  *******************************************************************************/
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Xml;
 using OfficeOpenXml.Style.XmlAccess;
 using OfficeOpenXml.Utils;
@@ -192,7 +193,14 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (s == string.Empty)
 					return DataFieldFunctions.None;
 				else
-					return (DataFieldFunctions)Enum.Parse(typeof(DataFieldFunctions), s, true);
+				{
+					
+					var function = (DataFieldFunctions)Enum.Parse(typeof(DataFieldFunctions), s, true);
+					var sharedItems = this.Field.CacheField.SharedItems;
+					if (function == DataFieldFunctions.Count && sharedItems.ContainsNumber && !sharedItems.ContainsString)
+						return DataFieldFunctions.CountNums;
+					return function;
+				}
 			}
 			set
 			{

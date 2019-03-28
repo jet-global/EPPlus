@@ -651,6 +651,13 @@ namespace OfficeOpenXml.Table.PivotTable
 			get { return base.GetXmlNodeBool("d:extLst/d:ext/x14:pivotField/@fillDownLabels"); }
 		}
 
+		public CacheFieldNode CacheField
+		{
+			get
+			{
+				return myTable.CacheDefinition.CacheFields[this.Index];
+			}
+		}
 		/// <summary>
 		/// Gets the grouping settings. 
 		/// Null if the field has no grouping otherwise ExcelPivotTableFieldNumericGroup or ExcelPivotTableFieldNumericGroup.
