@@ -44,11 +44,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				return 0;
 			else
 			{
-			var sheetColumn = this.PivotTable.Address.Start.Column + this.PivotTable.FirstDataCol + dataColumn;
+				var sheetColumn = this.PivotTable.Address.Start.Column + this.PivotTable.FirstDataCol + dataColumn;
 				double denominator = (double)rowGrandTotalsValuesLists
 					.First(v => v.SheetColumn == sheetColumn && v.DataFieldCollectionIndex == base.DataFieldCollectionIndex)
 					.Result;
-				return (double)cellBackingData.Result / denominator;
+					return base.CalculatePercentage(cellBackingData.Result, denominator);
 			}
 		}
 
@@ -74,7 +74,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				else if (!isRowTotal)
 				{
 					double grandGrandTotalValue = (double)columnGrandGrandTotalValues[grandTotalBackingData.DataFieldCollectionIndex].Result;
-					return (double)grandTotalBackingData.Result / grandGrandTotalValue;
+					return base.CalculatePercentage(grandTotalBackingData.Result, grandGrandTotalValue);
 				}
 			}
 			return 1;

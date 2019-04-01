@@ -518,6 +518,106 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
+		public void PivotTableRefreshShowDataAsRowFieldsColumnFieldsAndRowDataFieldsGrandTotalsOff()
+		{
+			var file = new FileInfo("PivotTableShowDataAs.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable4"];
+					pivotTable.RowGrandTotals = false;
+					pivotTable.ColumnGrandTotals = false;
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
+					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.NoCalculation;
+					unitsSoldDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubTotalFunctions = eSubTotalFunctions.None;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B46:E65"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+					package.SaveAs(@"C:\Users\ems\Downloads\OUTest.xlsx");
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 47, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 47, 3, "Chicago"),
+					new ExpectedCellValue(sheetName, 47, 4, "Nashville"),
+					new ExpectedCellValue(sheetName, 47, 5, "San Francisco"),
+					new ExpectedCellValue(sheetName, 48, 2, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 48, 3, null),
+					new ExpectedCellValue(sheetName, 49, 2, "January"),
+					new ExpectedCellValue(sheetName, 49, 3, null),
+					new ExpectedCellValue(sheetName, 50, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 50, 3, .1333),
+					new ExpectedCellValue(sheetName, 50, 4, .1333),
+					new ExpectedCellValue(sheetName, 50, 5, .0667),
+					new ExpectedCellValue(sheetName, 51, 2, "February"),
+					new ExpectedCellValue(sheetName, 51, 4, null),
+					new ExpectedCellValue(sheetName, 51, 5, null),
+					new ExpectedCellValue(sheetName, 52, 2, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 52, 3, 0),
+					new ExpectedCellValue(sheetName, 52, 4, 0),
+					new ExpectedCellValue(sheetName, 52, 5, .0667),
+					new ExpectedCellValue(sheetName, 53, 2, "Tent"),
+					new ExpectedCellValue(sheetName, 53, 3, 0),
+					new ExpectedCellValue(sheetName, 53, 4, .4),
+					new ExpectedCellValue(sheetName, 53, 5, 0),
+					new ExpectedCellValue(sheetName, 54, 2, "March"),
+					new ExpectedCellValue(sheetName, 54, 3, null),
+					new ExpectedCellValue(sheetName, 55, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 55, 3, 0),
+					new ExpectedCellValue(sheetName, 55, 4, .1333),
+					new ExpectedCellValue(sheetName, 55, 5, 0),
+					new ExpectedCellValue(sheetName, 56, 2, "Headlamp"),
+					new ExpectedCellValue(sheetName, 56, 3, .0667),
+					new ExpectedCellValue(sheetName, 56, 4, 0),
+					new ExpectedCellValue(sheetName, 56, 5, 0),
+					new ExpectedCellValue(sheetName, 57, 2, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 57, 3, null),
+					new ExpectedCellValue(sheetName, 57, 6, null),
+					new ExpectedCellValue(sheetName, 58, 2, "January"),
+					new ExpectedCellValue(sheetName, 58, 3, null),
+					new ExpectedCellValue(sheetName, 58, 4, null),
+					new ExpectedCellValue(sheetName, 59, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 59, 3, 415.75),
+					new ExpectedCellValue(sheetName, 59, 4, 415.75),
+					new ExpectedCellValue(sheetName, 59, 5, 415.75),
+					new ExpectedCellValue(sheetName, 60, 2, "February"),
+					new ExpectedCellValue(sheetName, 60, 3, null),
+					new ExpectedCellValue(sheetName, 60, 5, null),
+					new ExpectedCellValue(sheetName, 61, 2, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 61, 3, null),
+					new ExpectedCellValue(sheetName, 61, 4, null),
+					new ExpectedCellValue(sheetName, 61, 5, 99),
+					new ExpectedCellValue(sheetName, 62, 2, "Tent"),
+					new ExpectedCellValue(sheetName, 62, 3, null),
+					new ExpectedCellValue(sheetName, 62, 4, 199),
+					new ExpectedCellValue(sheetName, 62, 5, null),
+					new ExpectedCellValue(sheetName, 63, 2, "March"),
+					new ExpectedCellValue(sheetName, 63, 5, null),
+					new ExpectedCellValue(sheetName, 64, 2, "Car Rack"),
+					new ExpectedCellValue(sheetName, 64, 3, null),
+					new ExpectedCellValue(sheetName, 64, 4, 415.75),
+					new ExpectedCellValue(sheetName, 64, 5, null),
+					new ExpectedCellValue(sheetName, 65, 2, "Headlamp"),
+					new ExpectedCellValue(sheetName, 65, 3, 24.99),
+					new ExpectedCellValue(sheetName, 65, 4, null),
+					new ExpectedCellValue(sheetName, 65, 5, null)
+				});
+			}
+		}
 		#endregion
 
 		#region PercentOfCol Tests

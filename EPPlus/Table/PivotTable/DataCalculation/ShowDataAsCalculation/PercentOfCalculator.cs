@@ -176,7 +176,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			else if (value == null)
 				return ExcelErrorValue.Create(eErrorType.Null);
 			else
-				return (double)value / (double)baseValue;
+				return base.CalculatePercentage(value, baseValue);
 		}
 
 		private bool TryFindMatchingHeaderIndex(PivotTableHeader header, Tuple<int, int> baseFieldItem, List<PivotTableHeader> headers, out int headerIndex)

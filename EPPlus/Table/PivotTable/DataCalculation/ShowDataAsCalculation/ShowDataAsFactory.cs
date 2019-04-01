@@ -14,6 +14,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <param name="showDataAs">The <see cref="ShowDataAs"/> type to get a calculator class for.</param>
 		/// <param name="pivotTable">The pivot table that the calculator is calculating against.</param>
 		/// <param name="dataFieldCollectionIndex">The index of the data field that the calculator is calculating.</param>
+		/// <param name="totalsCalculator">The <see cref="TotalsFunctionHelper"/> to calculate totals.</param>
 		/// <returns>The appropriate calculator class for the ShowDataAs value.</returns>
 		public static ShowDataAsCalculatorBase GetShowDataAsCalculator(ShowDataAs showDataAs, ExcelPivotTable pivotTable, int dataFieldCollectionIndex, TotalsFunctionHelper totalsCalculator)
 		{
