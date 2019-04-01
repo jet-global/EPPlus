@@ -48,7 +48,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				double denominator = (double)rowGrandTotalsValuesLists
 					.First(v => v.SheetColumn == sheetColumn && v.DataFieldCollectionIndex == base.DataFieldCollectionIndex)
 					.Result;
-					return base.CalculatePercentage(cellBackingData.Result, denominator);
+				return base.CalculatePercentage(cellBackingData.Result, denominator);
 			}
 		}
 
