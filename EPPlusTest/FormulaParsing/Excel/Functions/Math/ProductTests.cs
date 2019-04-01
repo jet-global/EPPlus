@@ -83,6 +83,36 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 		}
 
 		[TestMethod]
+		public void ProductWithLeadingZeros()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = 0;
+				worksheet.Cells["B2"].Value = 2;
+				worksheet.Cells["B3"].Value = 3;
+				worksheet.Cells["A1"].Formula = "=product(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(0, (double)worksheet.Cells["A1"].Value);
+			}
+		}
+
+		[TestMethod]
+		public void ProductWithBooleans()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+				worksheet.Cells["B1"].Value = true;
+				worksheet.Cells["B2"].Value = false;
+				worksheet.Cells["B3"].Value = 3;
+				worksheet.Cells["A1"].Formula = "=product(B1:B3)";
+				worksheet.Calculate();
+				Assert.AreEqual(3d, (double)worksheet.Cells["A1"].Value);
+			}
+		}
+
+		[TestMethod]
 		public void ProductWithZeroReturnsCorrectValue()
 		{
 			var function = new Product();

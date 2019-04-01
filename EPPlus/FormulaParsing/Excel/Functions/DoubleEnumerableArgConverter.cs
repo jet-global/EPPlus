@@ -31,7 +31,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 {
 	public class DoubleEnumerableArgConverter : CollectionFlattener<double>
 	{
-		public virtual IEnumerable<double> ConvertArgs(bool ignoreHidden, bool ignoreErrors, IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		public virtual IEnumerable<double> ConvertArgs(bool ignoreHidden, bool ignoreErrors, bool ignoreBools, IEnumerable<FunctionArgument> arguments, ParsingContext context)
 		{
 			return base.FuncArgsToFlatEnumerable(arguments, (arg, argList) =>
 			{
@@ -41,6 +41,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 					{
 						if (!ignoreErrors && cell.IsExcelError) throw new ExcelErrorValueException(ExcelErrorValue.Parse(cell.Value.ToString()));
 						if (!CellStateHelper.ShouldIgnore(ignoreHidden, cell, context) && ConvertUtil.IsNumeric(cell.Value))
+						if (!ignoreBools || !(cell.Value is bool))
 						{
 							argList.Add(cell.ValueDouble);
 						}
@@ -50,6 +51,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 				{
 					if (!ignoreErrors && arg.ValueIsExcelError) throw new ExcelErrorValueException(arg.ValueAsExcelErrorValue);
 					if (ConvertUtil.IsNumeric(arg.Value) && !CellStateHelper.ShouldIgnore(ignoreHidden, arg, context))
+					if (!ignoreBools || !(arg.Value is bool))
 					{
 						argList.Add(ConvertUtil.GetValueDouble(arg.Value));
 					}

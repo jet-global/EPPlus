@@ -132,18 +132,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Math
 			{
 				return argAsDouble;
 			}
-			var valueList = ArgsToDoubleEnumerable(false, false, argList, context);
-			var result = 0d;
+			var valueList = ArgsToDoubleEnumerable(false, false, argList, context, true);
+			if (!valueList.Any())
+				return 0;
+			var result = 1d;
 			foreach (var value in valueList)
 			{
-				if (result == 0d && value != 0d)
-				{
-					result = value;
-				}
-				else
-				{
-					result *= value;
-				}
+				result *= value;
 			}
 			return result;
 		}
