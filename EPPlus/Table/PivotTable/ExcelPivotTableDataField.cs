@@ -193,14 +193,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (s == string.Empty)
 					return DataFieldFunctions.None;
 				else
-				{
-					
-					var function = (DataFieldFunctions)Enum.Parse(typeof(DataFieldFunctions), s, true);
-					var sharedItems = this.Field.CacheField.SharedItems;
-					if (function == DataFieldFunctions.Count && sharedItems.ContainsNumber && !sharedItems.ContainsString)
-						return DataFieldFunctions.CountNums;
-					return function;
-				}
+					return (DataFieldFunctions)Enum.Parse(typeof(DataFieldFunctions), s, true);
 			}
 			set
 			{

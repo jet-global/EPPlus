@@ -142,6 +142,8 @@ namespace OfficeOpenXml.Table.PivotTable
 					// added to the shared item's list when it shouldn't be and this will corrupt the workbook.
 					double doubleTargetValue = (double)Convert.ChangeType(value, typeof(double));
 					double roundedTargetValue = Math.Round(doubleTargetValue);
+					if (string.IsNullOrWhiteSpace(item.Value))
+						continue;
 					double doubleItemValue = (double)Convert.ChangeType(item.Value, typeof(double));
 					double roundedItemValue = Math.Round(doubleItemValue);
 
