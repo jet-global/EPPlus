@@ -77,6 +77,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 					return base.CalculatePercentage(grandTotalBackingData.Result, grandGrandTotalValue);
 				}
 			}
+			if ((double)grandTotalBackingData.Result == 0d)
+				return ExcelErrorValue.Create(eErrorType.Div0);
 			return 1;
 		}
 

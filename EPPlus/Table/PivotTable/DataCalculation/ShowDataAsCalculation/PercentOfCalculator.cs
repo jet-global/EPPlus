@@ -55,7 +55,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			else if (rowHeader.CacheRecordIndices.Any(t => t.Equals(baseFieldItemTuple)) || columnHeader.CacheRecordIndices.Any(t => t.Equals(baseFieldItemTuple)))
 			{
 				if (cellBackingData?.Result != null)
+				{
+					if ((double)cellBackingData.Result == 0)
+						return ExcelErrorValue.Create(eErrorType.Div0);
 					return 1;  // At a row/column that contains the comparison field item which makes this 100%.
+				}
 				else
 					return cellBackingData?.Result;
 			}
