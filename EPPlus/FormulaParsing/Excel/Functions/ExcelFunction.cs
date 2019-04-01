@@ -345,12 +345,13 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 		/// </summary>
 		/// <param name="ignoreHiddenCells">If a cell is hidden and this value is true the value of that cell will be ignored</param>
 		/// <param name="ignoreErrors">If a cell contains an error, that error will be ignored if this method is set to true</param>
-		/// <param name="arguments"></param>
-		/// <param name="context"></param>
+		/// <param name="arguments">The <see cref="FunctionArgument"/>s.</param>
+		/// <param name="context">The <see cref="ParsingContext"/>.</param>
+		/// <param name="ignoreBools">If a cell has a boolean value, it will be ignored if this value is true.</param>
 		/// <returns></returns>
-		protected virtual IEnumerable<double> ArgsToDoubleEnumerable(bool ignoreHiddenCells, bool ignoreErrors, IEnumerable<FunctionArgument> arguments, ParsingContext context)
+		protected virtual IEnumerable<double> ArgsToDoubleEnumerable(bool ignoreHiddenCells, bool ignoreErrors, IEnumerable<FunctionArgument> arguments, ParsingContext context, bool ignoreBools = false)
 		{
-			return _argumentCollectionUtil.ArgsToDoubleEnumerable(ignoreHiddenCells, ignoreErrors, arguments, context);
+			return _argumentCollectionUtil.ArgsToDoubleEnumerable(ignoreHiddenCells, ignoreErrors, ignoreBools, arguments, context);
 		}
 
 		/// <summary>
