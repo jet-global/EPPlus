@@ -55,7 +55,13 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				if (this.Type == PivotCacheRecordType.m)
 					value = null;
-				base.SetXmlNodeString("@v", value, true);
+				if (this.Type == PivotCacheRecordType.n)
+				{
+					string formattedNumberValue = double.Parse(value).ToString("0.##############");
+					base.SetXmlNodeString("@v", formattedNumberValue, true);
+				}
+				else
+					base.SetXmlNodeString("@v", value, true);
 			}
 		}
 		#endregion

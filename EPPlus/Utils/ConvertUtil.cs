@@ -449,7 +449,11 @@ namespace OfficeOpenXml.Utils
 			if (value is string stringValue)
 				return stringValue;
 			else if (ConvertUtil.IsNumeric(value, true))
+			{
+				if (Convert.ToDouble(value) == 0)
+					return "0";
 				return value.ToString();
+			}
 			else if (value is bool boolVal)
 				return boolVal ? "1" : "0";
 			else if (value is ExcelErrorValue errorValue)
