@@ -2038,7 +2038,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						this.Worksheet.Cells[cellRow, column].Value = sharedItem;
 						startHeaderRow++;
 
-						if (!this.CompactData && i == 0)
+						if (!this.CompactData && i == 0 && this.ColumnFields.Count > 1)
 						{
 							var pivotFieldIndex = this.ColumnFields[columnFieldIndex].Index;
 							if (pivotFieldIndex == -2)
