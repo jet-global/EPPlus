@@ -44,7 +44,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			else
 			{
 				double denominator = (double)grandGrandTotalValues[base.DataFieldCollectionIndex].Result;
-				return (double)cellBackingData.Result / denominator;
+				return base.CalculatePercentage(cellBackingData.Result, denominator);
 			}
 		}
 
@@ -70,7 +70,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				else
 				{
 					double grandGrandTotalValue = (double)columnGrandGrandTotalValues[grandTotalBackingData.DataFieldCollectionIndex].Result;
-					return (double)grandTotalBackingData.Result / grandGrandTotalValue;
+					return base.CalculatePercentage(grandTotalBackingData.Result, grandGrandTotalValue);
 				}
 			}
 			return 1;

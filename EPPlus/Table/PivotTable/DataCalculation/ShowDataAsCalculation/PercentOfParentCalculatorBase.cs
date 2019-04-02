@@ -79,65 +79,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				// If the parent has a value, write out 0.
 				return 0;
 			}
-			return Convert.ToDouble(cellBackingData.Result) / Convert.ToDouble(parentBackingData.Result);
-		}
-
-		/// <summary>
-		/// Calculates a grand total value for a cell.
-		/// </summary>
-		/// <param name="headers">The headers for the grand totals.</param>
-		/// <param name="grandTotalsBackingDatas">The backing data objects for the grand totals.</param>
-		/// <param name="columnGrandGrandTotalValues">The grand grand total backing data objects.</param>
-		/// <param name="cellBackingData">The backing data for the current grand total cell.</param>
-		/// <param name="dataField">The data field that the grand total will be calculated for.</param>
-		/// <param name="isRowTotal">A value indicating if this is a row grand total.</param>
-		/// <returns>An object value for a cell.</returns>
-		protected object CalculateGrandTotalValue(List<PivotTableHeader> headers, List<PivotCellBackingData> grandTotalsBackingDatas,
-			PivotCellBackingData[] columnGrandGrandTotalValues, PivotCellBackingData cellBackingData, ExcelPivotTableDataField dataField, bool isRowTotal)
-		{
-			var currentHeader = headers[cellBackingData.MajorAxisIndex];
-			List<Tuple<int, int>> parentRowHeaderIndices, parentColumnHeaderIndices;
-			string rowTotalType = string.Empty, columnTotalType = string.Empty;
-			
-			// Data fields do not get a value.
-			if (currentHeader.CacheRecordIndices.Count == 1 && currentHeader.CacheRecordIndices.First().Item1 == -2)
-				return null;
-
-			// Find the parent indices in order to calculate the parent total value.
-			var headerIndices = currentHeader.CacheRecordIndices.Take(currentHeader.CacheRecordIndices.Count - 1).ToList();
-			if (isRowTotal)
-			{
-				parentColumnHeaderIndices = new List<Tuple<int, int>>();
-				parentRowHeaderIndices = headerIndices;
-			}
-			else
-			{
-				parentRowHeaderIndices = new List<Tuple<int, int>>();
-				parentColumnHeaderIndices = headerIndices;
-			}
-
-			var parentBackingData = PivotTableDataManager.GetBackingCellValues(
-				base.PivotTable,
-				base.DataFieldCollectionIndex,
-				parentRowHeaderIndices,
-				parentColumnHeaderIndices,
-				rowTotalType,
-				columnTotalType,
-				base.TotalsCalculator);
-			var baseValue = parentBackingData.Result;
-
-			if (cellBackingData?.Result == null)
-			{
-				// If both are null, write null.
-				if (baseValue == null)
-					return null;
-				// If the parent has a value, write out 0.
-				return 0;
-			}
-			else if (baseValue == null)
-				return 1;
-			var result = Convert.ToDouble(cellBackingData.Result) / Convert.ToDouble(baseValue);
-			return result;
+			return base.CalculatePercentage(Convert.ToDouble(cellBackingData.Result), Convert.ToDouble(parentBackingData.Result));
 		}
 		#endregion
 

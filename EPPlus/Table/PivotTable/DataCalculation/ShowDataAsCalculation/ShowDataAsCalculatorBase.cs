@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 {
@@ -73,6 +75,75 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <param name="backingData">The backing data for the grand total cell to calculate.</param>
 		/// <returns>An object value for the cell.</returns>
 		public abstract object CalculateGrandGrandTotalValue(PivotCellBackingData backingData);
+		#endregion
+
+		#region Protected Methods
+		/// <summary>
+		/// Calculates a grand total value for a cell.
+		/// </summary>
+		/// <param name="headers">The headers for the grand totals.</param>
+		/// <param name="cellBackingData">The backing data for the current grand total cell.</param>
+		/// <param name="isRowTotal">A value indicating if this is a row grand total.</param>
+		/// <returns>An object value for a cell.</returns>
+		protected object CalculateGrandTotalValue(List<PivotTableHeader> headers, PivotCellBackingData cellBackingData, bool isRowTotal)
+		{
+			var currentHeader = headers[cellBackingData.MajorAxisIndex];
+			List<Tuple<int, int>> parentRowHeaderIndices, parentColumnHeaderIndices;
+			string rowTotalType = string.Empty, columnTotalType = string.Empty;
+
+			// Data fields do not get a value.
+			if (currentHeader.CacheRecordIndices.Count == 1 && currentHeader.CacheRecordIndices.First().Item1 == -2)
+				return null;
+
+			// Find the parent indices in order to calculate the parent total value.
+			var headerIndices = currentHeader.CacheRecordIndices.Take(currentHeader.CacheRecordIndices.Count - 1).ToList();
+			if (isRowTotal)
+			{
+				parentColumnHeaderIndices = new List<Tuple<int, int>>();
+				parentRowHeaderIndices = headerIndices;
+			}
+			else
+			{
+				parentRowHeaderIndices = new List<Tuple<int, int>>();
+				parentColumnHeaderIndices = headerIndices;
+			}
+
+			var parentBackingData = PivotTableDataManager.GetBackingCellValues(
+				this.PivotTable,
+				this.DataFieldCollectionIndex,
+				parentRowHeaderIndices,
+				parentColumnHeaderIndices,
+				rowTotalType,
+				columnTotalType,
+				this.TotalsCalculator);
+			var baseValue = parentBackingData.Result;
+
+			if (cellBackingData?.Result == null)
+			{
+				// If both are null, write null.
+				if (baseValue == null)
+					return null;
+				// If the parent has a value, write out 0.
+				return 0;
+			}
+			else if (baseValue == null)
+				return 1;
+			return this.CalculatePercentage(Convert.ToDouble(cellBackingData.Result), Convert.ToDouble(baseValue));
+		}
+
+		/// <summary>
+		/// Calculates the percentage between two values.
+		/// </summary>
+		/// <param name="numerator">The numerator of the percentage.</param>
+		/// <param name="denominator">The denominator of the percentage.</param>
+		/// <returns>The percentage between two values.</returns>
+		protected object CalculatePercentage(object numerator, object denominator)
+		{
+			var denomiatorDouble = (double)denominator;
+			if (denomiatorDouble == 0d)
+				return ExcelErrorValue.Create(eErrorType.Div0);
+			return (double)numerator / denomiatorDouble;
+		}
 		#endregion
 	}
 }

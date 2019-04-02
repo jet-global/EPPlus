@@ -57,7 +57,7 @@ namespace EPPlusTest.TestHelpers
 			{
 				Assert.IsTrue(ExcelErrorValue.Values.TryGetErrorType(expectedCell.Value?.ToString(), out eErrorType errorType), 
 					$"Expected {expectedCell.Value ?? "null"}, actual {value} at [{expectedCell.Sheet},{expectedCell.Row},{expectedCell.Column}]");
-				Assert.AreEqual(errorType, errorValue.Type);
+				Assert.AreEqual(errorType, errorValue.Type, $"Expected {errorType}, actual {errorValue.Type} at [{expectedCell.Sheet},{expectedCell.Row},{expectedCell.Column}]");
 			}
 			else
 				Assert.AreEqual(expectedCell.Value, value, $"Cells at address [{expectedCell.Sheet},{expectedCell.Row},{expectedCell.Column}] do not match.");
