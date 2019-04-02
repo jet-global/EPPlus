@@ -109,7 +109,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			if (currentHeader.CacheRecordIndices?.Last()?.Item1 == dataField.BaseField)
 				return 1;
 
-			return base.CalculateGrandTotalValue(headers, grandTotalsBackingDatas, columnGrandGrandTotalValues, cellBackingData, dataField, isRowTotal);
+			return base.CalculateGrandTotalValue(headers, cellBackingData, isRowTotal);
 		}
 
 		/// <summary>

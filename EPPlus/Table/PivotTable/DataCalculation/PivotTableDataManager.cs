@@ -73,29 +73,19 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 				// Generate row and column grand totals backing data.
 				PivotCellBackingData[] columnGrandGrandTotalsLists = null;
-				List<PivotCellBackingData> rowGrandTotalBackingData = null, columnGrandTotalBackingData = null;
-				RowGrandTotalHelper rowGrandTotalHelper = null;
-				ColumnGrandTotalHelper columnGrandTotalHelper = null;
-				// Calculate grand totals, but don't write out the values yet.
-				if (this.PivotTable.ColumnGrandTotals)
-				{
-					columnGrandTotalHelper = new ColumnGrandTotalHelper(this.PivotTable, backingBodyData, totalsCalculator);
-					columnGrandGrandTotalsLists = columnGrandTotalHelper.UpdateGrandTotals(out columnGrandTotalBackingData);
-				}
-				if (this.PivotTable.RowGrandTotals)
-				{
-					rowGrandTotalHelper = new RowGrandTotalHelper(this.PivotTable, backingBodyData, totalsCalculator);
-					rowGrandTotalHelper.UpdateGrandTotals(out rowGrandTotalBackingData);
-				}
+				// Calculate grand (and grand-grand) totals, but don't write out the values yet.
+				var columnGrandTotalHelper = new ColumnGrandTotalHelper(this.PivotTable, backingBodyData, totalsCalculator);
+				columnGrandGrandTotalsLists = columnGrandTotalHelper.UpdateGrandTotals(out var columnGrandTotalBackingData);
+				var rowGrandTotalHelper = new RowGrandTotalHelper(this.PivotTable, backingBodyData, totalsCalculator);
+				rowGrandTotalHelper.UpdateGrandTotals(out var rowGrandTotalBackingData);
+				if (this.PivotTable.HasRowDataFields)
+					rowGrandTotalHelper.CalculateGrandGrandTotals(columnGrandGrandTotalsLists);
+				else
+					columnGrandTotalHelper.CalculateGrandGrandTotals(columnGrandGrandTotalsLists);
 
 				// Generate row and column grand grand totals backing data
 				if (this.PivotTable.ColumnGrandTotals && this.PivotTable.RowGrandTotals && this.PivotTable.ColumnFields.Any())
 				{
-					if (this.PivotTable.HasRowDataFields)
-						rowGrandTotalHelper.CalculateGrandGrandTotals(columnGrandGrandTotalsLists);
-					else
-						columnGrandTotalHelper.CalculateGrandGrandTotals(columnGrandGrandTotalsLists);
-
 					// Write grand-grand totals to worksheet (grand totals at bottom right corner of pivot table).
 					this.WriteGrandGrandTotals(columnGrandGrandTotalsLists);
 				}

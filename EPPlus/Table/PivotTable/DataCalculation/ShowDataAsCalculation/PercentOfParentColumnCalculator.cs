@@ -73,7 +73,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				return 1;
 			var dataField = base.PivotTable.DataFields[base.DataFieldCollectionIndex];
 			var cellBackingData = grandTotalsBackingDatas[index];
-			return base.CalculateGrandTotalValue(base.PivotTable.ColumnHeaders, grandTotalsBackingDatas, columnGrandGrandTotalValues, cellBackingData, dataField, isRowTotal);
+			return base.CalculateGrandTotalValue(base.PivotTable.ColumnHeaders, cellBackingData, isRowTotal);
 		}
 
 		/// <summary>
