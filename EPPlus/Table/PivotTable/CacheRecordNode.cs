@@ -227,7 +227,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			return true;
 		}
-
 		#endregion
 
 		#region Private Methods
