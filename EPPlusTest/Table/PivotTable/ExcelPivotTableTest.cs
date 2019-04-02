@@ -22725,6 +22725,154 @@ namespace EPPlusTest.Table.PivotTable
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableTabularSettingsMultipleDataFields.xlsx")]
+		public void PivotTableRefreshWithUniversalTabularFieldSettingsEnabledMultipleDataFieldsTwoRowFieldsOneColumnFieldsFirstDataField()
+		{
+			var file = new FileInfo("PivotTableTabularSettingsMultipleDataFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable4"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A58:E66"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 58, 1, "Location"),
+					new ExpectedCellValue(sheetName, 59, 1, "Chicago"),
+					new ExpectedCellValue(sheetName, 60, 1, null),
+					new ExpectedCellValue(sheetName, 61, 1, "Nashville"),
+					new ExpectedCellValue(sheetName, 62, 1, null),
+					new ExpectedCellValue(sheetName, 63, 1, null),
+					new ExpectedCellValue(sheetName, 64, 1, "San Francisco"),
+					new ExpectedCellValue(sheetName, 65, 1, null),
+					new ExpectedCellValue(sheetName, 66, 1, "Grand Total"),
+					new ExpectedCellValue(sheetName, 58, 2, "Month"),
+					new ExpectedCellValue(sheetName, 59, 2, "January"),
+					new ExpectedCellValue(sheetName, 60, 2, "March"),
+					new ExpectedCellValue(sheetName, 61, 2, "January"),
+					new ExpectedCellValue(sheetName, 62, 2, "February"),
+					new ExpectedCellValue(sheetName, 63, 2, "March"),
+					new ExpectedCellValue(sheetName, 64, 2, "January"),
+					new ExpectedCellValue(sheetName, 65, 2, "February"),
+					new ExpectedCellValue(sheetName, 66, 2, null),
+					new ExpectedCellValue(sheetName, 58, 3, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 59, 3, 415.75),
+					new ExpectedCellValue(sheetName, 60, 3, 24.99),
+					new ExpectedCellValue(sheetName, 61, 3, 415.75),
+					new ExpectedCellValue(sheetName, 62, 3, 199d),
+					new ExpectedCellValue(sheetName, 63, 3, 415.75),
+					new ExpectedCellValue(sheetName, 64, 3, 415.75),
+					new ExpectedCellValue(sheetName, 65, 3, 99d),
+					new ExpectedCellValue(sheetName, 66, 3, 1985.99),
+					new ExpectedCellValue(sheetName, 58, 4, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 59, 4, 2d),
+					new ExpectedCellValue(sheetName, 60, 4, 1d),
+					new ExpectedCellValue(sheetName, 61, 4, 2d),
+					new ExpectedCellValue(sheetName, 62, 4, 6d),
+					new ExpectedCellValue(sheetName, 63, 4, 2d),
+					new ExpectedCellValue(sheetName, 64, 4, 1d),
+					new ExpectedCellValue(sheetName, 65, 4, 1d),
+					new ExpectedCellValue(sheetName, 66, 4, 15d),
+					new ExpectedCellValue(sheetName, 58, 5, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 59, 5, 831.5),
+					new ExpectedCellValue(sheetName, 60, 5, 24.99),
+					new ExpectedCellValue(sheetName, 61, 5, 831.5),
+					new ExpectedCellValue(sheetName, 62, 5, 1194d),
+					new ExpectedCellValue(sheetName, 63, 5, 831.5),
+					new ExpectedCellValue(sheetName, 64, 5, 415.75),
+					new ExpectedCellValue(sheetName, 65, 5, 99d),
+					new ExpectedCellValue(sheetName, 66, 5, 4228.24)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableTabularSettingsMultipleDataFields.xlsx")]
+		public void PivotTableRefreshWithUniversalTabularFieldSettingsEnabledMultipleDataFieldsTwoRowFieldsOneColumnFieldsFirstDataFieldPercentOfRow()
+		{
+			var file = new FileInfo("PivotTableTabularSettingsMultipleDataFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable4"];
+
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Wholesale Price");
+					var unitsSoldDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Units Sold");
+					var totalDataField = pivotTable.DataFields.First(f => f.Name == "Sum of Total");
+					// Show 'Wholesale Price' and 'Total' data as the percentage of its parent row.
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfRow;
+					unitsSoldDataField.ShowDataAs = ShowDataAs.NoCalculation;
+					totalDataField.ShowDataAs = ShowDataAs.PercentOfRow;
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A58:E66"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 58, 1, "Location"),
+					new ExpectedCellValue(sheetName, 59, 1, "Chicago"),
+					new ExpectedCellValue(sheetName, 60, 1, null),
+					new ExpectedCellValue(sheetName, 61, 1, "Nashville"),
+					new ExpectedCellValue(sheetName, 62, 1, null),
+					new ExpectedCellValue(sheetName, 63, 1, null),
+					new ExpectedCellValue(sheetName, 64, 1, "San Francisco"),
+					new ExpectedCellValue(sheetName, 65, 1, null),
+					new ExpectedCellValue(sheetName, 66, 1, "Grand Total"),
+					new ExpectedCellValue(sheetName, 58, 2, "Month"),
+					new ExpectedCellValue(sheetName, 59, 2, "January"),
+					new ExpectedCellValue(sheetName, 60, 2, "March"),
+					new ExpectedCellValue(sheetName, 61, 2, "January"),
+					new ExpectedCellValue(sheetName, 62, 2, "February"),
+					new ExpectedCellValue(sheetName, 63, 2, "March"),
+					new ExpectedCellValue(sheetName, 64, 2, "January"),
+					new ExpectedCellValue(sheetName, 65, 2, "February"),
+					new ExpectedCellValue(sheetName, 66, 2, null),
+					new ExpectedCellValue(sheetName, 58, 3, "Sum of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 59, 3, 1d),
+					new ExpectedCellValue(sheetName, 60, 3, 1d),
+					new ExpectedCellValue(sheetName, 61, 3, 1d),
+					new ExpectedCellValue(sheetName, 62, 3, 1d),
+					new ExpectedCellValue(sheetName, 63, 3, 1d),
+					new ExpectedCellValue(sheetName, 64, 3, 1d),
+					new ExpectedCellValue(sheetName, 65, 3, 1d),
+					new ExpectedCellValue(sheetName, 66, 3, 1d),
+					new ExpectedCellValue(sheetName, 58, 4, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 59, 4, 2d),
+					new ExpectedCellValue(sheetName, 60, 4, 1d),
+					new ExpectedCellValue(sheetName, 61, 4, 2d),
+					new ExpectedCellValue(sheetName, 62, 4, 6d),
+					new ExpectedCellValue(sheetName, 63, 4, 2d),
+					new ExpectedCellValue(sheetName, 64, 4, 1d),
+					new ExpectedCellValue(sheetName, 65, 4, 1d),
+					new ExpectedCellValue(sheetName, 66, 4, 15d),
+					new ExpectedCellValue(sheetName, 58, 5, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 59, 5, 1d),
+					new ExpectedCellValue(sheetName, 60, 5, 1d),
+					new ExpectedCellValue(sheetName, 61, 5, 1d),
+					new ExpectedCellValue(sheetName, 62, 5, 1d),
+					new ExpectedCellValue(sheetName, 63, 5, 1d),
+					new ExpectedCellValue(sheetName, 64, 5, 1d),
+					new ExpectedCellValue(sheetName, 65, 5, 1d),
+					new ExpectedCellValue(sheetName, 66, 5, 1d)
+				});
+			}
+		}
 		#endregion
 
 		#region Tabular Pivot Tables
