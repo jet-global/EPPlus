@@ -552,6 +552,10 @@ namespace EPPlusTest.Utils
 			Assert.AreEqual("832", ConvertUtil.ConvertObjectToXmlAttributeString(832.0000000000001));
 			Assert.AreEqual("832.000000000001", ConvertUtil.ConvertObjectToXmlAttributeString(832.000000000001));
 
+			// Trailing zeros are truncated to avoid causing problems with Excel.
+			Assert.AreEqual("0", ConvertUtil.ConvertObjectToXmlAttributeString(0.0000000000000000000000000d));
+			Assert.AreEqual("0", ConvertUtil.ConvertObjectToXmlAttributeString(0.00000000000000000000m));
+
 			Assert.AreEqual("jet", ConvertUtil.ConvertObjectToXmlAttributeString("jet"));
 			Assert.AreEqual("0", ConvertUtil.ConvertObjectToXmlAttributeString(false));
 			Assert.AreEqual("#NAME?", ConvertUtil.ConvertObjectToXmlAttributeString(ExcelErrorValue.Create(eErrorType.Name)));

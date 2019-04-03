@@ -36,6 +36,11 @@ namespace OfficeOpenXml.Table.PivotTable
 	/// </summary>
 	public class CacheFieldNode : XmlHelper
 	{
+		#region Constants
+		// Excel stores numbers to 10^-15 precision. Storing 10^-14 to avoid any chance of corruption.
+		private const double Epsilon = 0.00000000000001;
+		#endregion
+
 		#region Properties
 		/// <summary>
 		/// Gets or sets the name for this <see cref="CacheFieldNode"/>.
@@ -137,22 +142,11 @@ namespace OfficeOpenXml.Table.PivotTable
 				var item = this.SharedItems[i];
 				if (type == PivotCacheRecordType.n && !string.IsNullOrEmpty(item.Value))
 				{
-					// Round the target value and item value to check if it already exists in the shared item's list.
-					// Values must be rounded because if the value precisions are different, the target value will be 
-					// added to the shared item's list when it shouldn't be and this will corrupt the workbook.
-					double doubleTargetValue = (double)Convert.ChangeType(value, typeof(double));
-					double roundedTargetValue = Math.Round(doubleTargetValue);
-					if (string.IsNullOrWhiteSpace(item.Value))
-						continue;
-					double doubleItemValue = (double)Convert.ChangeType(item.Value, typeof(double));
-					double roundedItemValue = Math.Round(doubleItemValue);
-
-					if (Math.Abs(roundedTargetValue - doubleTargetValue) < Double.Epsilon)
-						doubleTargetValue = roundedTargetValue;
-					if (Math.Abs(roundedItemValue - doubleItemValue) < Double.Epsilon)
-						doubleItemValue = roundedItemValue;
-
-					if (doubleTargetValue == doubleItemValue)
+					// Compare the value with the existing shared item value with precision as duplicate values
+					// cause corrupt workbooks.
+					var doubleItemValue = double.Parse(item.Value);
+					var doubleTargetValue = Convert.ToDouble(value);
+					if (Math.Abs(doubleItemValue - doubleTargetValue) < CacheFieldNode.Epsilon)
 						return i;
 				}
 				else
