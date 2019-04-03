@@ -139,10 +139,10 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <returns>The percentage between two values.</returns>
 		protected object CalculatePercentage(object numerator, object denominator)
 		{
-			var denomiatorDouble = (double)denominator;
+			var denomiatorDouble = Convert.ToDouble(denominator);
 			if (denomiatorDouble == 0d)
 				return ExcelErrorValue.Create(eErrorType.Div0);
-			return (double)numerator / denomiatorDouble;
+			return Convert.ToDouble(numerator) / denomiatorDouble;
 		}
 		#endregion
 	}

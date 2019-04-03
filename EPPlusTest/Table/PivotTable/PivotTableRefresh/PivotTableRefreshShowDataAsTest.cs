@@ -122,6 +122,48 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
+		public void PivotTableRefreshShowDataAsPercentOfGrandTotalRowFieldNoColumnFields()
+		{
+			var file = new FileInfo("PivotTableShowDataAs.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable7"];
+
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Count of Wholesale Price");
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalLocation = SubtotalLocation.Top;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B93:C97"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 93, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 93, 3, "Count of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 94, 2, "Chicago"),
+					new ExpectedCellValue(sheetName, 94, 3, .2857),
+					new ExpectedCellValue(sheetName, 95, 2, "Nashville"),
+					new ExpectedCellValue(sheetName, 95, 3, .4286),
+					new ExpectedCellValue(sheetName, 96, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 96, 3, 0.2857),
+					new ExpectedCellValue(sheetName, 97, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 97, 3, 1),
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
 		public void PivotTableRefreshShowDataAsColumnFieldsRowDataFields()
 		{
 			var file = new FileInfo("PivotTableShowDataAs.xlsx");

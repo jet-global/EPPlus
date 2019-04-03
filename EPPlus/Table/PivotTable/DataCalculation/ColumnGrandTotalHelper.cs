@@ -68,7 +68,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				return dataFieldCollectionIndex;
 			var minorHeader = this.MinorHeaderCollection[minorIndex];
 			dataFieldCollectionIndex = this.PivotTable.HasRowDataFields ? majorHeader.DataFieldCollectionIndex : minorHeader.DataFieldCollectionIndex;
-			if (minorHeader.IsLeafNode)
+			if (minorHeader.IsLeafNode || this.MinorHeaderCollection.Count == 1)
 			{
 				base.AddGrandTotalsBackingData(majorIndex, minorIndex, dataFieldCollectionIndex, grandTotalValueList);
 				// Only add row header leaf node values for grand-grand totals.

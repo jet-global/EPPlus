@@ -56,7 +56,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			{
 				if (cellBackingData?.Result != null)
 				{
-					if ((double)cellBackingData.Result == 0)
+					if (Convert.ToDouble(cellBackingData.Result) == 0)
 						return ExcelErrorValue.Create(eErrorType.Div0);
 					return 1;  // At a row/column that contains the comparison field item which makes this 100%.
 				}
