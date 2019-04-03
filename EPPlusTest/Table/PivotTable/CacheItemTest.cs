@@ -176,7 +176,7 @@ namespace EPPlusTest.Table.PivotTable
 			type = CacheItem.GetObjectType(null);
 			Assert.AreEqual(PivotCacheRecordType.m, type);
 			type = CacheItem.GetObjectType(string.Empty);
-			Assert.AreEqual(PivotCacheRecordType.m, type);
+			Assert.AreEqual(PivotCacheRecordType.s, type);
 			type = CacheItem.GetObjectType("string");
 			Assert.AreEqual(PivotCacheRecordType.s, type);
 			type = CacheItem.GetObjectType(83);

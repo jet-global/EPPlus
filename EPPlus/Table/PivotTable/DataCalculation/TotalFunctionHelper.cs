@@ -77,8 +77,10 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		public object Calculate(DataFieldFunctions dataFieldFunction, List<object> values)
 		{
 			string function = this.GetCorrespondingExcelFunction(dataFieldFunction);
-			if (values == null || values.Count == 0 || (values.All(v => v == null) && !function.IsEquivalentTo("COUNTA")))
+			if (values == null || values.Count == 0 || values.All(v => v == null))
 				return null;
+			if (function.IsEquivalentTo("PRODUCT") && values.All(v => v == null || string.IsNullOrWhiteSpace(v.ToString())))
+				return 0;
 			// Write the values into a temp worksheet.
 			int row = 1;
 			for (int i = 0; i < values.Count; i++)
@@ -87,15 +89,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				this.TempWorksheet.Cells[row, TotalsFunctionHelper.DataColumn].Value = values[i];
 			}
 			var resultCell = this.TempWorksheet.Cells[row + 1, TotalsFunctionHelper.DataColumn];
-			// Using the COUNTA formula to calculate this will always return the count of non-null values in the values list.
-			// However, the COUNTA function should return the number of records, even if the value is null.
-			if (function.IsEquivalentTo("COUNTA"))
-				resultCell.Value = values.Count; 
-			else
-			{
-				resultCell.Formula = $"={function}(A1:A{row})";
-				resultCell.Calculate();
-			}
+			resultCell.Formula = $"={function}(A1:A{row})";
+			resultCell.Calculate();
 			return resultCell.Value;
 		}
 

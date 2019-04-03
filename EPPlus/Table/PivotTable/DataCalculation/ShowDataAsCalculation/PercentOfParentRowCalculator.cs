@@ -63,11 +63,15 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			PivotCellBackingData[] columnGrandGrandTotalValues,
 			bool isRowTotal)
 		{
-			if (isRowTotal)
-				return 1;
-
 			var dataField = base.PivotTable.DataFields[base.DataFieldCollectionIndex];
 			var cellBackingData = grandTotalsBackingDatas[index];
+			if (isRowTotal)
+			{
+				if ((double)cellBackingData.Result == 0)
+					return null;
+				else
+					return 1;
+			}
 			return base.CalculateGrandTotalValue(base.PivotTable.RowHeaders, cellBackingData, isRowTotal);
 		}
 
@@ -76,26 +80,12 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// </summary>
 		/// <param name="backingData">The backing data for the grand total cell to calculate.</param>
 		/// <returns>An object value for the cell.</returns>
-		public override object CalculateGrandGrandTotalValue(PivotCellBackingData backingData) => 1;
-		#endregion
-
-		#region Private Methods
-		private bool TryFindParent(int startIndex, out int index)
+		public override object CalculateGrandGrandTotalValue(PivotCellBackingData backingData)
 		{
-			index = 0;
-			var header = base.PivotTable.RowHeaders[startIndex];
-			// Walk backwards up the headers until we find a parent.
-			for (int i = startIndex - 1; i >= 0; i--)
-			{
-				var previousRowHeader = base.PivotTable.RowHeaders[i];
-				if (previousRowHeader.CacheRecordIndices.Count < header.CacheRecordIndices.Count && previousRowHeader.IsDataField == false)
-				{
-					index = i;
-					return true;
-				}
-			}
-			index = -1;
-			return false;
+			if ((double)backingData.Result == 0)
+				return null;
+			else
+				return 1;
 		}
 		#endregion
 	}

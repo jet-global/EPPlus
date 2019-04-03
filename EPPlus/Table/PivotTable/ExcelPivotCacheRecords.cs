@@ -437,7 +437,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		private void AddToList(CacheRecordNode record, int dataFieldIndex, List<object> matchingValues)
 		{
 			string itemValue = null;
-			if (record.Items[dataFieldIndex].Type == PivotCacheRecordType.x)
+			PivotCacheRecordType type = record.Items[dataFieldIndex].Type;
+			if (type == PivotCacheRecordType.x)
 			{
 				int sharedItemIndex = int.Parse(record.Items[dataFieldIndex].Value);
 				var cacheField = this.CacheDefinition.CacheFields[dataFieldIndex];
@@ -445,7 +446,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			else
 				itemValue = record.Items[dataFieldIndex].Value;
-			if (itemValue == null)
+			if (type == PivotCacheRecordType.m)
+				matchingValues.Add(null);
+			else if (string.IsNullOrWhiteSpace(itemValue))
 				matchingValues.Add(itemValue);
 			else
 			{

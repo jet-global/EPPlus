@@ -141,7 +141,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				return PivotCacheRecordType.d;
 			else if (value is ExcelErrorValue)
 				return PivotCacheRecordType.e;
-			else if (value == null || (value is string stringValue && string.IsNullOrEmpty(stringValue)))
+			else if (value == null)
 				return PivotCacheRecordType.m;
 			else if (ConvertUtil.IsNumeric(value, true))
 				return PivotCacheRecordType.n;
