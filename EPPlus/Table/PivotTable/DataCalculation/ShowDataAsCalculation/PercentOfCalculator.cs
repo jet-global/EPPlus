@@ -133,8 +133,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 					// Get the correct index into grand totals backing data which is a 1d array 
 					// representing [datafields.Count] number of rows/columns.
 					var denominatorHeader = grandTotalsBackingDatas
-						.Where(d => d.MajorAxisIndex == headerIndex)
-						.ElementAt(grandTotalBackingData.DataFieldCollectionIndex);
+						.FirstOrDefault(d => d.MajorAxisIndex == headerIndex && d.DataFieldCollectionIndex == grandTotalBackingData.DataFieldCollectionIndex);
 					var baseValue = denominatorHeader?.Result;
 					return this.GetShowDataAsPercentOfValue(baseValue, grandTotalBackingData?.Result);
 				}
