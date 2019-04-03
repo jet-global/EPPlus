@@ -71,11 +71,9 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				// Generate backing body data.
 				var backingBodyData = this.GetPivotTableBodyBackingData();
 
-				// Generate row and column grand totals backing data.
-				PivotCellBackingData[] columnGrandGrandTotalsLists = null;
 				// Calculate grand (and grand-grand) totals, but don't write out the values yet.
 				var columnGrandTotalHelper = new ColumnGrandTotalHelper(this.PivotTable, backingBodyData, totalsCalculator);
-				columnGrandGrandTotalsLists = columnGrandTotalHelper.UpdateGrandTotals(out var columnGrandTotalBackingData);
+				var columnGrandGrandTotalsLists = columnGrandTotalHelper.UpdateGrandTotals(out var columnGrandTotalBackingData);
 				var rowGrandTotalHelper = new RowGrandTotalHelper(this.PivotTable, backingBodyData, totalsCalculator);
 				rowGrandTotalHelper.UpdateGrandTotals(out var rowGrandTotalBackingData);
 				if (this.PivotTable.HasRowDataFields)

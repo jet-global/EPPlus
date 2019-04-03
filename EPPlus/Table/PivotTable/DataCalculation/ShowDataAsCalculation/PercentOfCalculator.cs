@@ -56,7 +56,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			{
 				if (cellBackingData?.Result != null)
 				{
-					if ((double)cellBackingData.Result == 0)
+					if (Convert.ToDouble(cellBackingData.Result) == 0)
 						return ExcelErrorValue.Create(eErrorType.Div0);
 					return 1;  // At a row/column that contains the comparison field item which makes this 100%.
 				}
@@ -133,8 +133,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 					// Get the correct index into grand totals backing data which is a 1d array 
 					// representing [datafields.Count] number of rows/columns.
 					var denominatorHeader = grandTotalsBackingDatas
-						.Where(d => d.MajorAxisIndex == headerIndex)
-						.ElementAt(grandTotalBackingData.DataFieldCollectionIndex);
+						.FirstOrDefault(d => d.MajorAxisIndex == headerIndex && d.DataFieldCollectionIndex == grandTotalBackingData.DataFieldCollectionIndex);
 					var baseValue = denominatorHeader?.Result;
 					return this.GetShowDataAsPercentOfValue(baseValue, grandTotalBackingData?.Result);
 				}

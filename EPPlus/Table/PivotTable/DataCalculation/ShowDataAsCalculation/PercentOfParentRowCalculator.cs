@@ -67,7 +67,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			var cellBackingData = grandTotalsBackingDatas[index];
 			if (isRowTotal)
 			{
-				if ((double)cellBackingData.Result == 0)
+				if (Convert.ToDouble(cellBackingData.Result) == 0)
 					return null;
 				else
 					return 1;
@@ -82,7 +82,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <returns>An object value for the cell.</returns>
 		public override object CalculateGrandGrandTotalValue(PivotCellBackingData backingData)
 		{
-			if ((double)backingData.Result == 0)
+			if (Convert.ToDouble(backingData.Result) == 0)
 				return null;
 			else
 				return 1;

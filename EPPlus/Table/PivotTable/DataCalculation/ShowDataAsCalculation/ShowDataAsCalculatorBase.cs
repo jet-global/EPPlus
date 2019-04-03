@@ -144,10 +144,10 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <returns>The percentage between two values.</returns>
 		protected object CalculatePercentage(object numerator, object denominator, bool isGrandTotal = false)
 		{
-			var denomiatorDouble = (double)denominator;
+			var denomiatorDouble = Convert.ToDouble(denominator);
 			if (denomiatorDouble == 0d)
 				return isGrandTotal ? null : ExcelErrorValue.Create(eErrorType.Div0); // If this is a grand total value, print null instead of an error value.
-			return (double)numerator / denomiatorDouble;
+			return Convert.ToDouble(numerator) / denomiatorDouble;
 		}
 		#endregion
 	}

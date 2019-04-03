@@ -122,6 +122,48 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
+		public void PivotTableRefreshShowDataAsPercentOfGrandTotalRowFieldNoColumnFields()
+		{
+			var file = new FileInfo("PivotTableShowDataAs.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable7"];
+
+					var wholesalePriceDataField = pivotTable.DataFields.First(f => f.Name == "Count of Wholesale Price");
+					wholesalePriceDataField.ShowDataAs = ShowDataAs.PercentOfTotal;
+					foreach (var field in pivotTable.Fields)
+					{
+						field.SubtotalLocation = SubtotalLocation.Top;
+					}
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B93:C97"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 93, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 93, 3, "Count of Wholesale Price"),
+					new ExpectedCellValue(sheetName, 94, 2, "Chicago"),
+					new ExpectedCellValue(sheetName, 94, 3, .2857),
+					new ExpectedCellValue(sheetName, 95, 2, "Nashville"),
+					new ExpectedCellValue(sheetName, 95, 3, .4286),
+					new ExpectedCellValue(sheetName, 96, 2, "San Francisco"),
+					new ExpectedCellValue(sheetName, 96, 3, 0.2857),
+					new ExpectedCellValue(sheetName, 97, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 97, 3, 1),
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
 		public void PivotTableRefreshShowDataAsColumnFieldsRowDataFields()
 		{
 			var file = new FileInfo("PivotTableShowDataAs.xlsx");
@@ -2664,6 +2706,125 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 					new ExpectedCellValue(sheetName, 41, 8, 2),
 					new ExpectedCellValue(sheetName, 41, 9, null),
 					new ExpectedCellValue(sheetName, 41, 10, 15)
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\ShowDataAsComplex.xlsx")]
+		public void PivotTableRefreshShowDataAsPercentOfTabularFormColumnDataFields()
+		{
+			var file = new FileInfo("ShowDataAsComplex.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet1";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:H17"), pivotTable.Address);
+					Assert.AreEqual(14, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 3, 3, "Column Labels"),
+					new ExpectedCellValue(sheetName, 4, 3, "Count of Net Change"),
+					new ExpectedCellValue(sheetName, 4, 5, "Sum of Balance at End Date"),
+					new ExpectedCellValue(sheetName, 4, 7, "Total Count of Net Change"),
+					new ExpectedCellValue(sheetName, 4, 8, "Total Sum of Balance at End Date"),
+					new ExpectedCellValue(sheetName, 5, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 5, 3, "FALSE"),
+					new ExpectedCellValue(sheetName, 5, 4, "TRUE"),
+					new ExpectedCellValue(sheetName, 5, 5, "FALSE"),
+					new ExpectedCellValue(sheetName, 5, 6, "TRUE"),
+					new ExpectedCellValue(sheetName, 6, 2, "Begin-Total"),
+					new ExpectedCellValue(sheetName, 6, 3, 1),
+					new ExpectedCellValue(sheetName, 6, 4, 0),
+					new ExpectedCellValue(sheetName, 6, 5, null),
+					new ExpectedCellValue(sheetName, 6, 6, null),
+					new ExpectedCellValue(sheetName, 6, 7, 1),
+					new ExpectedCellValue(sheetName, 6, 8, null),
+					new ExpectedCellValue(sheetName, 7, 2, "Accounts Receivable"),
+					new ExpectedCellValue(sheetName, 7, 3, 1),
+					new ExpectedCellValue(sheetName, 7, 4, 0),
+					new ExpectedCellValue(sheetName, 7, 5, null),
+					new ExpectedCellValue(sheetName, 7, 6, null),
+					new ExpectedCellValue(sheetName, 7, 7, 1),
+					new ExpectedCellValue(sheetName, 7, 8, null),
+					new ExpectedCellValue(sheetName, 8, 2, "ASSETS"),
+					new ExpectedCellValue(sheetName, 8, 3, 1),
+					new ExpectedCellValue(sheetName, 8, 4, 0),
+					new ExpectedCellValue(sheetName, 8, 5, null),
+					new ExpectedCellValue(sheetName, 8, 6, null),
+					new ExpectedCellValue(sheetName, 8, 7, 1),
+					new ExpectedCellValue(sheetName, 8, 8, null),
+					new ExpectedCellValue(sheetName, 9, 2, "End-Total"),
+					new ExpectedCellValue(sheetName, 9, 3, 0.333333333333333),
+					new ExpectedCellValue(sheetName, 9, 4, 0.666666666666667),
+					new ExpectedCellValue(sheetName, 9, 5, 2.12307706591973),
+					new ExpectedCellValue(sheetName, 9, 6, 1),
+					new ExpectedCellValue(sheetName, 9, 7, 1),
+					new ExpectedCellValue(sheetName, 9, 8, null),
+					new ExpectedCellValue(sheetName, 10, 2, "Accounts Receivable, Total"),
+					new ExpectedCellValue(sheetName, 10, 3, 0),
+					new ExpectedCellValue(sheetName, 10, 4, 1),
+					new ExpectedCellValue(sheetName, 10, 5, ExcelErrorValue.Create(eErrorType.Null)),
+					new ExpectedCellValue(sheetName, 10, 6, 1),
+					new ExpectedCellValue(sheetName, 10, 7, 1),
+					new ExpectedCellValue(sheetName, 10, 8, null),
+					new ExpectedCellValue(sheetName, 11, 2, "Liquid Assets, Total"),
+					new ExpectedCellValue(sheetName, 11, 3, 1),
+					new ExpectedCellValue(sheetName, 11, 4, 0),
+					new ExpectedCellValue(sheetName, 11, 5, null),
+					new ExpectedCellValue(sheetName, 11, 6, null),
+					new ExpectedCellValue(sheetName, 11, 7, 1),
+					new ExpectedCellValue(sheetName, 11, 8, null),
+					new ExpectedCellValue(sheetName, 12, 2, "Securities, Total"),
+					new ExpectedCellValue(sheetName, 12, 3, 0),
+					new ExpectedCellValue(sheetName, 12, 4, 1),
+					new ExpectedCellValue(sheetName, 12, 5, ExcelErrorValue.Create(eErrorType.Null)),
+					new ExpectedCellValue(sheetName, 12, 6, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 12, 7, 1),
+					new ExpectedCellValue(sheetName, 12, 8, null),
+					new ExpectedCellValue(sheetName, 13, 2, "Posting"),
+					new ExpectedCellValue(sheetName, 13, 3, 0.666666666666667),
+					new ExpectedCellValue(sheetName, 13, 4, 0.333333333333333),
+					new ExpectedCellValue(sheetName, 13, 5, 4.74378108319677),
+					new ExpectedCellValue(sheetName, 13, 6, 1),
+					new ExpectedCellValue(sheetName, 13, 7, 1),
+					new ExpectedCellValue(sheetName, 13, 8, null),
+					new ExpectedCellValue(sheetName, 14, 2, "Cash"),
+					new ExpectedCellValue(sheetName, 14, 3, 1),
+					new ExpectedCellValue(sheetName, 14, 4, 0),
+					new ExpectedCellValue(sheetName, 14, 5, null),
+					new ExpectedCellValue(sheetName, 14, 6, null),
+					new ExpectedCellValue(sheetName, 14, 7, 1),
+					new ExpectedCellValue(sheetName, 14, 8, null),
+					new ExpectedCellValue(sheetName, 15, 2, "Customers, EU"),
+					new ExpectedCellValue(sheetName, 15, 3, 1),
+					new ExpectedCellValue(sheetName, 15, 4, 0),
+					new ExpectedCellValue(sheetName, 15, 5, null),
+					new ExpectedCellValue(sheetName, 15, 6, null),
+					new ExpectedCellValue(sheetName, 15, 7, 1),
+					new ExpectedCellValue(sheetName, 15, 8, null),
+					new ExpectedCellValue(sheetName, 16, 2, "Customers, North America"),
+					new ExpectedCellValue(sheetName, 16, 3, 0),
+					new ExpectedCellValue(sheetName, 16, 4, 1),
+					new ExpectedCellValue(sheetName, 16, 5, ExcelErrorValue.Create(eErrorType.Null)),
+					new ExpectedCellValue(sheetName, 16, 6, 1),
+					new ExpectedCellValue(sheetName, 16, 7, 1),
+					new ExpectedCellValue(sheetName, 16, 8, null),
+					new ExpectedCellValue(sheetName, 17, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 17, 3, 0.625),
+					new ExpectedCellValue(sheetName, 17, 4, 0.375),
+					new ExpectedCellValue(sheetName, 17, 5, 3.04613915570146),
+					new ExpectedCellValue(sheetName, 17, 6, 1),
+					new ExpectedCellValue(sheetName, 17, 7, 1),
+					new ExpectedCellValue(sheetName, 17, 8, null),
 				});
 			}
 		}
