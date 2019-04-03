@@ -140,11 +140,11 @@ namespace OfficeOpenXml.Table.PivotTable
 			for (int i = 0; i < this.SharedItems.Count; i++)
 			{
 				var item = this.SharedItems[i];
-				if (type == PivotCacheRecordType.n && !string.IsNullOrEmpty(item.Value))
+				if (type == PivotCacheRecordType.n && !string.IsNullOrWhiteSpace(item.Value))
 				{
 					// Compare the value with the existing shared item value with precision as duplicate values
 					// cause corrupt workbooks.
-					var doubleItemValue = double.Parse(item.Value);
+					double doubleItemValue = double.Parse(item.Value);
 					var doubleTargetValue = Convert.ToDouble(value);
 					if (Math.Abs(doubleItemValue - doubleTargetValue) < CacheFieldNode.Epsilon)
 						return i;
