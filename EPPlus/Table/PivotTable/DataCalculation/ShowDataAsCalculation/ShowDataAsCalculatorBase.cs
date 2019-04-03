@@ -106,6 +106,10 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			{
 				parentRowHeaderIndices = new List<Tuple<int, int>>();
 				parentColumnHeaderIndices = headerIndices;
+
+				// Use the datafield tuple if it exists (for parent row calculator), otherwise, use the tuple list passed in.
+				if (currentHeader.CacheRecordIndices.Any(i => i.Item1 == -2) && currentHeader.CacheRecordIndices.First().Item1 != -2)
+					parentColumnHeaderIndices = currentHeader.CacheRecordIndices.Where(i => i.Item1 == -2).ToList();
 			}
 
 			var parentBackingData = PivotTableDataManager.GetBackingCellValues(
@@ -128,7 +132,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			}
 			else if (baseValue == null)
 				return 1;
-			return this.CalculatePercentage(Convert.ToDouble(cellBackingData.Result), Convert.ToDouble(baseValue));
+			return this.CalculatePercentage(Convert.ToDouble(cellBackingData.Result), Convert.ToDouble(baseValue), true);
 		}
 
 		/// <summary>
@@ -136,12 +140,13 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// </summary>
 		/// <param name="numerator">The numerator of the percentage.</param>
 		/// <param name="denominator">The denominator of the percentage.</param>
+		/// <param name="isGrandTotal">A flag indicating if this is a grand total value (optional).</param>
 		/// <returns>The percentage between two values.</returns>
-		protected object CalculatePercentage(object numerator, object denominator)
+		protected object CalculatePercentage(object numerator, object denominator, bool isGrandTotal = false)
 		{
 			var denomiatorDouble = (double)denominator;
 			if (denomiatorDouble == 0d)
-				return ExcelErrorValue.Create(eErrorType.Div0);
+				return isGrandTotal ? null : ExcelErrorValue.Create(eErrorType.Div0); // If this is a grand total value, print null instead of an error value.
 			return (double)numerator / denomiatorDouble;
 		}
 		#endregion

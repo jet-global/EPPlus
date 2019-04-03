@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using static OfficeOpenXml.ExcelErrorValue;
 
 namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 {
@@ -48,6 +49,10 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 
 				rowTotalType = parentRowHeader.TotalType;
 				columnTotalType = columnHeader.TotalType;
+
+				// Use the datafield tuple if it exists (for parent row calculator), otherwise, use the tuple list passed in.
+				if (rowHeader.CacheRecordIndices.Any(i => i.Item1 == -2) && rowHeader.CacheRecordIndices.First().Item1 != -2)
+					parentRowHeaderIndices = rowHeader.CacheRecordIndices.Where(i => i.Item1 == -2).ToList();
 			}
 			else
 			{
@@ -71,7 +76,13 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				columnTotalType,
 				base.TotalsCalculator);
 
-			if (cellBackingData?.Result == null || Convert.ToDouble(cellBackingData.Result) == 0)
+			// Don't calculate the percentage if the cell contains an error value.
+			if (cellBackingData?.Result != null && Values.TryGetErrorType(cellBackingData?.Result.ToString(), out _)
+				|| parentBackingData.Result != null && Values.TryGetErrorType(parentBackingData.Result.ToString(), out _))
+				return null;
+
+			if (cellBackingData?.Result == null || Convert.ToDouble(cellBackingData.Result) == 0 ||
+				parentBackingData.Result == null || Convert.ToDouble(parentBackingData.Result) == 0)
 			{
 				// If both are null, write null.
 				if (parentBackingData.Result == null || Convert.ToDouble(parentBackingData.Result) == 0)
@@ -106,31 +117,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			}
 			return true;
 		}
-
-		private List<int> FindSiblings(List<PivotTableHeader> headers, List<Tuple<int, int>> childIndices)
-		{
-			var siblingHeaderIndices = new List<int>();
-			for (int i = 0; i < headers.Count; i++)
-			{
-				if (this.IsSibling(headers[i], childIndices))
-					siblingHeaderIndices.Add(i);
-			}
-			return siblingHeaderIndices;
-		}
-
-		private bool IsSibling(PivotTableHeader header, List<Tuple<int, int>> childIndices)
-		{
-			var possibleSiblingIndices = header.CacheRecordIndices;
-			if (childIndices == null || possibleSiblingIndices == null || childIndices.Count <= 1 || childIndices.Count != possibleSiblingIndices.Count)
-				return false;
-			for (int i = 0; i < childIndices.Count - 1; i++)
-			{
-				if (childIndices[i] != possibleSiblingIndices[i])
-					return false;
-			}
-			return true;
-		}
-
 		#endregion
 	}
 }
