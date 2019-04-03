@@ -31,7 +31,6 @@
  *******************************************************************************/
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Xml;
 using OfficeOpenXml.Style.XmlAccess;
 using OfficeOpenXml.Utils;
