@@ -181,7 +181,16 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 						calculatedField.ReferencedCacheFieldsToIndex.Add(token.Value, referencedFieldIndex);
 					}
 				}
-				calculatedField.ResolvedFormula = string.Join(string.Empty, resolvedFormulaTokens.Select(t => t.Value));
+				// Reconstruct the formula and wrap all field names in single ticks.
+				string resolvedFormula = string.Empty;
+				foreach (var token in resolvedFormulaTokens)
+				{
+					string tokenValue = token.Value;
+					if (token.TokenType == TokenType.NameValue)
+						tokenValue = $"'{tokenValue}'";
+					resolvedFormula += tokenValue;
+				}
+				calculatedField.ResolvedFormula = resolvedFormula;
 			}
 		}
 		#endregion
