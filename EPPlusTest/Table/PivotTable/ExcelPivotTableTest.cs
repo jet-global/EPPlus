@@ -75227,6 +75227,296 @@ namespace EPPlusTest.Table.PivotTable
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDateGroupingSameDate.xlsx")]
+		public void PivotTableRefreshDateGroupingSameDateInRowFields()
+		{
+			var file = new FileInfo("PivotTableDateGroupingSameDate.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet1";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
+					{
+						cacheDefinition.UpdateData();
+					}
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A21:J34"), pivotTable.Address);
+					Assert.AreEqual(30, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 21, 1, "Shipping Advice"),
+					new ExpectedCellValue(sheetName, 22, 1, "Complete"),
+					new ExpectedCellValue(sheetName, 23, 1, null),
+					new ExpectedCellValue(sheetName, 24, 1, null),
+					new ExpectedCellValue(sheetName, 25, 1, "Partial"),
+					new ExpectedCellValue(sheetName, 26, 1, null),
+					new ExpectedCellValue(sheetName, 27, 1, null),
+					new ExpectedCellValue(sheetName, 28, 1, null),
+					new ExpectedCellValue(sheetName, 29, 1, null),
+					new ExpectedCellValue(sheetName, 30, 1, null),
+					new ExpectedCellValue(sheetName, 31, 1, null),
+					new ExpectedCellValue(sheetName, 32, 1, null),
+					new ExpectedCellValue(sheetName, 33, 1, null),
+					new ExpectedCellValue(sheetName, 34, 1, null),
+					new ExpectedCellValue(sheetName, 21, 2, "No."),
+					new ExpectedCellValue(sheetName, 22, 2, "SH000003"),
+					new ExpectedCellValue(sheetName, 23, 2, null),
+					new ExpectedCellValue(sheetName, 24, 2, null),
+					new ExpectedCellValue(sheetName, 25, 2, "SH000001"),
+					new ExpectedCellValue(sheetName, 26, 2, null),
+					new ExpectedCellValue(sheetName, 27, 2, null),
+					new ExpectedCellValue(sheetName, 28, 2, "SH000002"),
+					new ExpectedCellValue(sheetName, 29, 2, null),
+					new ExpectedCellValue(sheetName, 30, 2, null),
+					new ExpectedCellValue(sheetName, 31, 2, null),
+					new ExpectedCellValue(sheetName, 32, 2, "SH000004"),
+					new ExpectedCellValue(sheetName, 33, 2, null),
+					new ExpectedCellValue(sheetName, 34, 2, null),
+					new ExpectedCellValue(sheetName, 21, 3, "Item No."),
+					new ExpectedCellValue(sheetName, 22, 3, "LS-120"),
+					new ExpectedCellValue(sheetName, 23, 3, "LS-75"),
+					new ExpectedCellValue(sheetName, 24, 3, "LS-MAN-10"),
+					new ExpectedCellValue(sheetName, 25, 3, "1906-S"),
+					new ExpectedCellValue(sheetName, 26, 3, "1908-S"),
+					new ExpectedCellValue(sheetName, 27, 3, 80100),
+					new ExpectedCellValue(sheetName, 28, 3, "1964-S"),
+					new ExpectedCellValue(sheetName, 29, 3, "1968-S"),
+					new ExpectedCellValue(sheetName, 30, 3, "1996-S"),
+					new ExpectedCellValue(sheetName, 31, 3, 80100),
+					new ExpectedCellValue(sheetName, 32, 3, "LS-10PC"),
+					new ExpectedCellValue(sheetName, 33, 3, null),
+					new ExpectedCellValue(sheetName, 34, 3, "LS-120"),
+					new ExpectedCellValue(sheetName, 21, 4, "Destination Type"),
+					new ExpectedCellValue(sheetName, 22, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 23, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 24, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 25, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 26, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 27, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 28, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 29, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 30, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 31, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 32, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 33, 4, null),
+					new ExpectedCellValue(sheetName, 34, 4, "Customer"),
+					new ExpectedCellValue(sheetName, 21, 5, "Description"),
+					new ExpectedCellValue(sheetName, 22, 5, "Loudspeaker, Black, 120W"),
+					new ExpectedCellValue(sheetName, 23, 5, "Loudspeaker, Cherry, 75W"),
+					new ExpectedCellValue(sheetName, 24, 5, "Manual for Loudspeakers"),
+					new ExpectedCellValue(sheetName, 25, 5, "ATHENS Mobile Pedestal"),
+					new ExpectedCellValue(sheetName, 26, 5, "LONDON Swivel Chair, blue"),
+					new ExpectedCellValue(sheetName, 27, 5, "Printing Paper"),
+					new ExpectedCellValue(sheetName, 28, 5, "TOKYO Gastestuhl, Blau"),
+					new ExpectedCellValue(sheetName, 29, 5, "MEXICO Swivel Chair, black"),
+					new ExpectedCellValue(sheetName, 30, 5, "ATLANTA Whiteboard, base"),
+					new ExpectedCellValue(sheetName, 31, 5, "Printing Paper"),
+					new ExpectedCellValue(sheetName, 32, 5, "Loudspeakers, White for PC"),
+					new ExpectedCellValue(sheetName, 33, 5, null),
+					new ExpectedCellValue(sheetName, 34, 5, "Loudspeaker, Black, 120W"),
+					new ExpectedCellValue(sheetName, 21, 6, "Status"),
+					new ExpectedCellValue(sheetName, 22, 6, "Completely Picked"),
+					new ExpectedCellValue(sheetName, 23, 6, "Completely Picked"),
+					new ExpectedCellValue(sheetName, 24, 6, "Completely Picked"),
+					new ExpectedCellValue(sheetName, 25, 6, " "),
+					new ExpectedCellValue(sheetName, 26, 6, " "),
+					new ExpectedCellValue(sheetName, 27, 6, " "),
+					new ExpectedCellValue(sheetName, 28, 6, " "),
+					new ExpectedCellValue(sheetName, 29, 6, " "),
+					new ExpectedCellValue(sheetName, 30, 6, " "),
+					new ExpectedCellValue(sheetName, 31, 6, " "),
+					new ExpectedCellValue(sheetName, 32, 6, "Partially Picked"),
+					new ExpectedCellValue(sheetName, 33, 6, "Completely Picked"),
+					new ExpectedCellValue(sheetName, 34, 6, "Partially Picked"),
+					new ExpectedCellValue(sheetName, 21, 7, "Shipment Date"),
+					new ExpectedCellValue(sheetName, 22, 7, 2013),
+					new ExpectedCellValue(sheetName, 23, 7, 2013),
+					new ExpectedCellValue(sheetName, 24, 7, 2013),
+					new ExpectedCellValue(sheetName, 25, 7, 2013),
+					new ExpectedCellValue(sheetName, 26, 7, 2013),
+					new ExpectedCellValue(sheetName, 27, 7, 2013),
+					new ExpectedCellValue(sheetName, 28, 7, 2013),
+					new ExpectedCellValue(sheetName, 29, 7, 2013),
+					new ExpectedCellValue(sheetName, 30, 7, 2013),
+					new ExpectedCellValue(sheetName, 31, 7, 2013),
+					new ExpectedCellValue(sheetName, 32, 7, 2013),
+					new ExpectedCellValue(sheetName, 33, 7, 2013),
+					new ExpectedCellValue(sheetName, 34, 7, 2013),
+					new ExpectedCellValue(sheetName, 21, 8, " Qty. to Ship"),
+					new ExpectedCellValue(sheetName, 22, 8, 6d),
+					new ExpectedCellValue(sheetName, 23, 8, 10d),
+					new ExpectedCellValue(sheetName, 24, 8, 4d),
+					new ExpectedCellValue(sheetName, 25, 8, 0),
+					new ExpectedCellValue(sheetName, 26, 8, 0),
+					new ExpectedCellValue(sheetName, 27, 8, 0),
+					new ExpectedCellValue(sheetName, 28, 8, 0),
+					new ExpectedCellValue(sheetName, 29, 8, 0),
+					new ExpectedCellValue(sheetName, 30, 8, 0),
+					new ExpectedCellValue(sheetName, 31, 8, 0),
+					new ExpectedCellValue(sheetName, 32, 8, 18d),
+					new ExpectedCellValue(sheetName, 33, 8, 20d),
+					new ExpectedCellValue(sheetName, 34, 8, 6d),
+					new ExpectedCellValue(sheetName, 21, 9, " Qty. Shipped"),
+					new ExpectedCellValue(sheetName, 22, 9, 0),
+					new ExpectedCellValue(sheetName, 23, 9, 0),
+					new ExpectedCellValue(sheetName, 24, 9, 0),
+					new ExpectedCellValue(sheetName, 25, 9, 0),
+					new ExpectedCellValue(sheetName, 26, 9, 0),
+					new ExpectedCellValue(sheetName, 27, 9, 0),
+					new ExpectedCellValue(sheetName, 28, 9, 0),
+					new ExpectedCellValue(sheetName, 29, 9, 0),
+					new ExpectedCellValue(sheetName, 30, 9, 0),
+					new ExpectedCellValue(sheetName, 31, 9, 0),
+					new ExpectedCellValue(sheetName, 32, 9, 0),
+					new ExpectedCellValue(sheetName, 33, 9, 0),
+					new ExpectedCellValue(sheetName, 34, 9, 0),
+					new ExpectedCellValue(sheetName, 21, 10, " Item Weight (lbs.)"),
+					new ExpectedCellValue(sheetName, 22, 10, 396d),
+					new ExpectedCellValue(sheetName, 23, 10, 160),
+					new ExpectedCellValue(sheetName, 24, 10, 4.8),
+					new ExpectedCellValue(sheetName, 25, 10, 0),
+					new ExpectedCellValue(sheetName, 26, 10, 0),
+					new ExpectedCellValue(sheetName, 27, 10, 0),
+					new ExpectedCellValue(sheetName, 28, 10, 0),
+					new ExpectedCellValue(sheetName, 29, 10, 0),
+					new ExpectedCellValue(sheetName, 30, 10, 0),
+					new ExpectedCellValue(sheetName, 31, 10, 0),
+					new ExpectedCellValue(sheetName, 32, 10, 120),
+					new ExpectedCellValue(sheetName, 33, 10, 80),
+					new ExpectedCellValue(sheetName, 34, 10, 528),
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableDateGroupingSameDate.xlsx")]
+		public void PivotTableRefreshDateGroupingSameDateInColumnFields()
+		{
+			var file = new FileInfo("PivotTableDateGroupingSameDate.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet1";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
+					{
+						cacheDefinition.UpdateData();
+					}
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A38:D61"), pivotTable.Address);
+					Assert.AreEqual(30, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 38, 1, null),
+					new ExpectedCellValue(sheetName, 39, 1, "Values"),
+					new ExpectedCellValue(sheetName, 40, 1, "Sum of Qty. Shipped"),
+					new ExpectedCellValue(sheetName, 41, 1, null),
+					new ExpectedCellValue(sheetName, 42, 1, null),
+					new ExpectedCellValue(sheetName, 43, 1, null),
+					new ExpectedCellValue(sheetName, 44, 1, null),
+					new ExpectedCellValue(sheetName, 45, 1, null),
+					new ExpectedCellValue(sheetName, 46, 1, null),
+					new ExpectedCellValue(sheetName, 47, 1, null),
+					new ExpectedCellValue(sheetName, 48, 1, null),
+					new ExpectedCellValue(sheetName, 49, 1, null),
+					new ExpectedCellValue(sheetName, 50, 1, "Sum of Qty. to Ship"),
+					new ExpectedCellValue(sheetName, 51, 1, null),
+					new ExpectedCellValue(sheetName, 52, 1, null),
+					new ExpectedCellValue(sheetName, 53, 1, null),
+					new ExpectedCellValue(sheetName, 54, 1, null),
+					new ExpectedCellValue(sheetName, 55, 1, null),
+					new ExpectedCellValue(sheetName, 56, 1, null),
+					new ExpectedCellValue(sheetName, 57, 1, null),
+					new ExpectedCellValue(sheetName, 58, 1, null),
+					new ExpectedCellValue(sheetName, 59, 1, null),
+					new ExpectedCellValue(sheetName, 60, 1, "Total Sum of Qty. Shipped"),
+					new ExpectedCellValue(sheetName, 61, 1, "Total Sum of Qty. to Ship"),
+					new ExpectedCellValue(sheetName, 38, 2, null),
+					new ExpectedCellValue(sheetName, 39, 2, "Description"),
+					new ExpectedCellValue(sheetName, 40, 2, "ATHENS Mobile Pedestal"),
+					new ExpectedCellValue(sheetName, 41, 2, "ATLANTA Whiteboard, base"),
+					new ExpectedCellValue(sheetName, 42, 2, "LONDON Swivel Chair, blue"),
+					new ExpectedCellValue(sheetName, 43, 2, "Loudspeaker, Black, 120W"),
+					new ExpectedCellValue(sheetName, 44, 2, "Loudspeaker, Cherry, 75W"),
+					new ExpectedCellValue(sheetName, 45, 2, "Loudspeakers, White for PC"),
+					new ExpectedCellValue(sheetName, 46, 2, "Manual for Loudspeakers"),
+					new ExpectedCellValue(sheetName, 47, 2, "MEXICO Swivel Chair, black"),
+					new ExpectedCellValue(sheetName, 48, 2, "Printing Paper"),
+					new ExpectedCellValue(sheetName, 49, 2, "TOKYO Gastestuhl, Blau"),
+					new ExpectedCellValue(sheetName, 50, 2, "ATHENS Mobile Pedestal"),
+					new ExpectedCellValue(sheetName, 51, 2, "ATLANTA Whiteboard, base"),
+					new ExpectedCellValue(sheetName, 52, 2, "LONDON Swivel Chair, blue"),
+					new ExpectedCellValue(sheetName, 53, 2, "Loudspeaker, Black, 120W"),
+					new ExpectedCellValue(sheetName, 54, 2, "Loudspeaker, Cherry, 75W"),
+					new ExpectedCellValue(sheetName, 55, 2, "Loudspeakers, White for PC"),
+					new ExpectedCellValue(sheetName, 56, 2, "Manual for Loudspeakers"),
+					new ExpectedCellValue(sheetName, 57, 2, "MEXICO Swivel Chair, black"),
+					new ExpectedCellValue(sheetName, 58, 2, "Printing Paper"),
+					new ExpectedCellValue(sheetName, 59, 2, "TOKYO Gastestuhl, Blau"),
+					new ExpectedCellValue(sheetName, 60, 2, null),
+					new ExpectedCellValue(sheetName, 61, 2, null),
+					new ExpectedCellValue(sheetName, 38, 3, "Shipment Date"),
+					new ExpectedCellValue(sheetName, 39, 3, 2013),
+					new ExpectedCellValue(sheetName, 40, 3, 0),
+					new ExpectedCellValue(sheetName, 41, 3, 0),
+					new ExpectedCellValue(sheetName, 42, 3, 0),
+					new ExpectedCellValue(sheetName, 43, 3, 0),
+					new ExpectedCellValue(sheetName, 44, 3, 0),
+					new ExpectedCellValue(sheetName, 45, 3, 0),
+					new ExpectedCellValue(sheetName, 46, 3, 0),
+					new ExpectedCellValue(sheetName, 47, 3, 0),
+					new ExpectedCellValue(sheetName, 48, 3, 0),
+					new ExpectedCellValue(sheetName, 49, 3, 0),
+					new ExpectedCellValue(sheetName, 50, 3, 0),
+					new ExpectedCellValue(sheetName, 51, 3, 0),
+					new ExpectedCellValue(sheetName, 52, 3, 0),
+					new ExpectedCellValue(sheetName, 53, 3, 12d),
+					new ExpectedCellValue(sheetName, 54, 3, 10d),
+					new ExpectedCellValue(sheetName, 55, 3, 38d),
+					new ExpectedCellValue(sheetName, 56, 3, 4d),
+					new ExpectedCellValue(sheetName, 57, 3, 0),
+					new ExpectedCellValue(sheetName, 58, 3, 0),
+					new ExpectedCellValue(sheetName, 59, 3, 0),
+					new ExpectedCellValue(sheetName, 60, 3, 0),
+					new ExpectedCellValue(sheetName, 61, 3, 64d),
+					new ExpectedCellValue(sheetName, 38, 4, null),
+					new ExpectedCellValue(sheetName, 39, 4, "Grand Total"),
+					new ExpectedCellValue(sheetName, 40, 4, 0),
+					new ExpectedCellValue(sheetName, 41, 4, 0),
+					new ExpectedCellValue(sheetName, 42, 4, 0),
+					new ExpectedCellValue(sheetName, 43, 4, 0),
+					new ExpectedCellValue(sheetName, 44, 4, 0),
+					new ExpectedCellValue(sheetName, 45, 4, 0),
+					new ExpectedCellValue(sheetName, 46, 4, 0),
+					new ExpectedCellValue(sheetName, 47, 4, 0),
+					new ExpectedCellValue(sheetName, 48, 4, 0),
+					new ExpectedCellValue(sheetName, 49, 4, 0),
+					new ExpectedCellValue(sheetName, 50, 4, 0),
+					new ExpectedCellValue(sheetName, 51, 4, 0),
+					new ExpectedCellValue(sheetName, 52, 4, 0),
+					new ExpectedCellValue(sheetName, 53, 4, 12d),
+					new ExpectedCellValue(sheetName, 54, 4, 10d),
+					new ExpectedCellValue(sheetName, 55, 4, 38d),
+					new ExpectedCellValue(sheetName, 56, 4, 4d),
+					new ExpectedCellValue(sheetName, 57, 4, 0),
+					new ExpectedCellValue(sheetName, 58, 4, 0),
+					new ExpectedCellValue(sheetName, 59, 4, 0),
+					new ExpectedCellValue(sheetName, 60, 4, 0),
+					new ExpectedCellValue(sheetName, 61, 4, 64d),
+				});
+			}
+		}
 		#endregion
 
 		#region Custom Grouping Tests

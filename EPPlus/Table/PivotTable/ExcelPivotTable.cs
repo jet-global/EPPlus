@@ -1462,7 +1462,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (sharedItemValue.Type == PivotCacheRecordType.d)
 			{
 				// Handles field date groupings.
-				var searchValue = this.GetItemValueByGroupingType(sharedItemValue.Value, groupBy);
+				var date = DateTime.Parse(sharedItemValue.Value);
+				var searchValue = this.GetItemValueByGroupingType(date, groupBy);
 				currentNode = this.CreateTreeNode(true, currentNode, pivotField, recordItemValue, groupingIndex, cacheRecordPageFieldIndices, cacheRecord, searchValue, stringResources, cacheFields[groupingIndex]);
 			}
 			else if (cacheFields[groupingIndex].FieldGroup.DiscreteGroupingProperties != null)
@@ -1476,12 +1477,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			return currentNode;
 		}
 
-		private string GetItemValueByGroupingType(string sharedItemValue, PivotFieldDateGrouping? groupBy)
+		private string GetItemValueByGroupingType(DateTime dateTime, PivotFieldDateGrouping? groupBy)
 		{
-			var dateSplit = sharedItemValue.Split('-');
-			var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
 			string sharedItemGroupingValue = string.Empty;
-
 			if (groupBy == PivotFieldDateGrouping.Years)
 				sharedItemGroupingValue = dateTime.Year.ToString();
 			else if (groupBy == PivotFieldDateGrouping.Months)
@@ -1502,7 +1500,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				int quarter = (dateTime.Month - 1) / 3 + 1;
 				sharedItemGroupingValue = "Qtr" + quarter;
 			}
-
 			return sharedItemGroupingValue;
 		}
 
@@ -2137,17 +2134,20 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (item.Type == PivotCacheRecordType.b)
 				sharedItemValue = item.Value.IsEquivalentTo("1") ? stringResources.PivotTableTrueCaption : stringResources.PivotTableFalseCaption;
 			else if (item.Type == PivotCacheRecordType.d)
-				sharedItemValue = this.GetDateFormat(pivotFieldIndex, item.Value.Split('-'), cacheField.NumFormatId, rowColItem[xMemberIndex], string.IsNullOrEmpty(rowColItem.ItemType));
+				sharedItemValue = this.GetDateFormat(pivotFieldIndex, item.Value, cacheField.NumFormatId, rowColItem[xMemberIndex], string.IsNullOrEmpty(rowColItem.ItemType));
 			else
+			{
 				sharedItemValue = item.Value;
+				if (sharedItemValue != null && sharedItemValue[0] == '<' && DateTime.TryParse(sharedItemValue.Substring(1), out var date))
+					sharedItemValue = this.GetItemValueByGroupingType(date, cacheField.FieldGroup.GroupBy);
+			}
 			sharedItemValue = sharedItemValue ?? stringResources.BlankValueHeaderCaption;
 			return sharedItemValue;
 		}
 
-		private string GetDateFormat(int fieldIndex, string[] sharedItemValue, int numFormatId, int xMemberIndex, bool nonTotalHeader)
+		private string GetDateFormat(int fieldIndex, string sharedItemValue, int numFormatId, int xMemberIndex, bool nonTotalHeader)
 		{
-			var dateTime = new DateTime(int.Parse(sharedItemValue[0]), int.Parse(sharedItemValue[1]), int.Parse(sharedItemValue[2].Substring(0, 2)), 
-				int.Parse(sharedItemValue[2].Substring(3, 2)), int.Parse(sharedItemValue[2].Substring(6, 2)), int.Parse(sharedItemValue[2].Substring(9, 2)));
+			var dateTime = DateTime.Parse(sharedItemValue);
 			string date = this.GetTranslatedDate(numFormatId, dateTime);
 			if (this.Formats != null && nonTotalHeader)
 			{

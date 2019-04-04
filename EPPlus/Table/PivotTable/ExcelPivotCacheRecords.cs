@@ -383,8 +383,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			for (int i = 0; i < sharedItems.Count; i++)
 			{
-				var dateSplit = sharedItems[i].Value.Split('-');
-				var dateTime = new DateTime(int.Parse(dateSplit[0]), int.Parse(dateSplit[1]), int.Parse(dateSplit[2].Substring(0, 2)));
+				var dateTime = DateTime.Parse(sharedItems[i].Value);
 				var groupByValue = string.Empty;
 
 				// Get the sharedItem's groupBy value, unless the groupBy value is months.
