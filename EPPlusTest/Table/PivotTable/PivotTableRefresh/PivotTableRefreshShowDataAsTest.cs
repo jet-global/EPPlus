@@ -1151,6 +1151,73 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\ShowDataAsComplex.xlsx")]
+		public void PivotTableRefreshShowDataAsPercentOfRowTotalWithErrorValues()
+		{
+			var file = new FileInfo("ShowDataAsComplex.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet1";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B21:E31"), pivotTable.Address);
+					Assert.AreEqual(14, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 21, 2, "Sum of Net Change"),
+					new ExpectedCellValue(sheetName, 21, 3, "Column Labels"),
+					new ExpectedCellValue(sheetName, 22, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 22, 3, "FALSE"),
+					new ExpectedCellValue(sheetName, 22, 4, "TRUE"),
+					new ExpectedCellValue(sheetName, 22, 5, "Grand Total"),
+					new ExpectedCellValue(sheetName, 23, 2, "Accounts Receivable"),
+					new ExpectedCellValue(sheetName, 23, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 23, 4, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 23, 5, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 24, 2, "Accounts Receivable, Total"),
+					new ExpectedCellValue(sheetName, 24, 3, 0),
+					new ExpectedCellValue(sheetName, 24, 4, 1),
+					new ExpectedCellValue(sheetName, 24, 5, 1),
+					new ExpectedCellValue(sheetName, 25, 2, "ASSETS"),
+					new ExpectedCellValue(sheetName, 25, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 25, 4, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 25, 5, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 26, 2, "Cash"),
+					new ExpectedCellValue(sheetName, 26, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 26, 4, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 26, 5, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 27, 2, "Customers, EU"),
+					new ExpectedCellValue(sheetName, 27, 3, 1),
+					new ExpectedCellValue(sheetName, 27, 4, 0),
+					new ExpectedCellValue(sheetName, 27, 5, 1),
+					new ExpectedCellValue(sheetName, 28, 2, "Customers, North America"),
+					new ExpectedCellValue(sheetName, 28, 3, 0),
+					new ExpectedCellValue(sheetName, 28, 4, 1),
+					new ExpectedCellValue(sheetName, 28, 5, 1),
+					new ExpectedCellValue(sheetName, 29, 2, "Liquid Assets, Total"),
+					new ExpectedCellValue(sheetName, 29, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 29, 4, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 29, 5, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 30, 2, "Securities, Total"),
+					new ExpectedCellValue(sheetName, 30, 3, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 30, 4, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 30, 5, ExcelErrorValue.Create(eErrorType.Div0)),
+					new ExpectedCellValue(sheetName, 31, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 31, 3, 0.0770052210411582),
+					new ExpectedCellValue(sheetName, 31, 4, 0.922994778958842),
+					new ExpectedCellValue(sheetName, 31, 5, 1),
+				});
+			}
+		}
 		#endregion
 
 		#region PercentOf Tests
