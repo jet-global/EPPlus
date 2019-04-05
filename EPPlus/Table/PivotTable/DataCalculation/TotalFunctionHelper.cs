@@ -166,14 +166,25 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			if (string.IsNullOrEmpty(formula))
 				return null;
 			// Create a named range that calculates each field referenced by the formula.
+			var stringValues = new List<string>();
 			foreach (var nameToValues in namesToValues)
 			{
 				var excelName = nameToValues.Key;
 				if (this.FieldNamesToSanitizedFieldNames.ContainsKey(excelName))
 					excelName = this.FieldNamesToSanitizedFieldNames[excelName];
-				// Update the formula of the named range with the name of the field 
-				// to be the sum of the field values.
-				this.TempWorksheet.Names[excelName].NameFormula = $"SUM({string.Join(",", nameToValues.Value)})";
+
+				// Convert DateTime values to OADates in order for calculations to proceed correctly.
+				stringValues.Clear();
+				foreach (var value in nameToValues.Value)
+				{
+					if (value is DateTime dateValue)
+						stringValues.Add(dateValue.ToOADate().ToString());
+					else
+						stringValues.Add(value.ToString());
+				}
+
+				// Update the formula of the named range to be the sum of the field values.
+				this.TempWorksheet.Names[excelName].NameFormula = $"SUM({string.Join(",", stringValues)})";
 			}
 			formula = this.SanitizeFormula(formula);
 			// Evaluate the formula. The fields that are referenced in it

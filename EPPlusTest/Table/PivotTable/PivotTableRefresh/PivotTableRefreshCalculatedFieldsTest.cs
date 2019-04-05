@@ -523,6 +523,143 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableCalculatedFieldError.xlsx")]
+		public void PivotTableRefreshCalculatedFieldWithPercentage()
+		{
+			var file = new FileInfo("PivotTableCalculatedFieldError.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet2";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+					cacheDefinition.CacheFields.First(c => c.Name == "Profit %").Formula = "'Profit (LCY)' * 3%";
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("C3:F19"), pivotTable.Address);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 3, 3, "Row Labels"),
+					new ExpectedCellValue(sheetName, 3, 4, "Sales"),
+					new ExpectedCellValue(sheetName, 3, 5, "Profit"),
+					new ExpectedCellValue(sheetName, 3, 6, "Sum of Profit %"),
+					new ExpectedCellValue(sheetName, 4, 3, "Antarcticopy"),
+					new ExpectedCellValue(sheetName, 4, 4, 3980.84),
+					new ExpectedCellValue(sheetName, 4, 5, 1119.44),
+					new ExpectedCellValue(sheetName, 4, 6, 33.5832),
+					new ExpectedCellValue(sheetName, 5, 3, "Autohaus Mielberg KG"),
+					new ExpectedCellValue(sheetName, 5, 4, 433.61),
+					new ExpectedCellValue(sheetName, 5, 5, 95.41),
+					new ExpectedCellValue(sheetName, 5, 6, 2.8623),
+					new ExpectedCellValue(sheetName, 6, 3, "BYT-KOMPLET s.r.o."),
+					new ExpectedCellValue(sheetName, 6, 4, 2471.3),
+					new ExpectedCellValue(sheetName, 6, 5, 546),
+					new ExpectedCellValue(sheetName, 6, 6, 16.38),
+					new ExpectedCellValue(sheetName, 7, 3, "Deerfield Graphics Company"),
+					new ExpectedCellValue(sheetName, 7, 4, 1638.1),
+					new ExpectedCellValue(sheetName, 7, 5, 1638.1),
+					new ExpectedCellValue(sheetName, 7, 6, 49.143),
+					new ExpectedCellValue(sheetName, 8, 3, "Designstudio Gmunden"),
+					new ExpectedCellValue(sheetName, 8, 4, 3849.7),
+					new ExpectedCellValue(sheetName, 8, 5, 847.2),
+					new ExpectedCellValue(sheetName, 8, 6, 25.416),
+					new ExpectedCellValue(sheetName, 9, 3, "Englunds Kontorsmöbler AB"),
+					new ExpectedCellValue(sheetName, 9, 4, 1038.27),
+					new ExpectedCellValue(sheetName, 9, 5, 334.27),
+					new ExpectedCellValue(sheetName, 9, 6, 10.0281),
+					new ExpectedCellValue(sheetName, 10, 3, "Gagn & Gaman"),
+					new ExpectedCellValue(sheetName, 10, 4, 1352.07),
+					new ExpectedCellValue(sheetName, 10, 5, 259.97),
+					new ExpectedCellValue(sheetName, 10, 6, 7.7991),
+					new ExpectedCellValue(sheetName, 11, 3, "Guildford Water Department"),
+					new ExpectedCellValue(sheetName, 11, 4, 822),
+					new ExpectedCellValue(sheetName, 11, 5, 822),
+					new ExpectedCellValue(sheetName, 11, 6, 24.66),
+					new ExpectedCellValue(sheetName, 12, 3, "Heimilisprydi"),
+					new ExpectedCellValue(sheetName, 12, 4, 3119.57),
+					new ExpectedCellValue(sheetName, 12, 5, 521.17),
+					new ExpectedCellValue(sheetName, 12, 6, 15.6351),
+					new ExpectedCellValue(sheetName, 13, 3, "John Haddock Insurance Co."),
+					new ExpectedCellValue(sheetName, 13, 4, 9444.3),
+					new ExpectedCellValue(sheetName, 13, 5, 4444.8),
+					new ExpectedCellValue(sheetName, 13, 6, 133.344),
+					new ExpectedCellValue(sheetName, 14, 3, "Klubben"),
+					new ExpectedCellValue(sheetName, 14, 4, 18142),
+					new ExpectedCellValue(sheetName, 14, 5, 6349.7),
+					new ExpectedCellValue(sheetName, 14, 6, 190.491),
+					new ExpectedCellValue(sheetName, 15, 3, "Progressive Home Furnishings"),
+					new ExpectedCellValue(sheetName, 15, 4, 2461),
+					new ExpectedCellValue(sheetName, 15, 5, 621.6),
+					new ExpectedCellValue(sheetName, 15, 6, 18.648),
+					new ExpectedCellValue(sheetName, 16, 3, "Selangorian Ltd."),
+					new ExpectedCellValue(sheetName, 16, 4, 10007.97),
+					new ExpectedCellValue(sheetName, 16, 5, 3804.07),
+					new ExpectedCellValue(sheetName, 16, 6, 114.1221),
+					new ExpectedCellValue(sheetName, 17, 3, "The Cannon Group PLC"),
+					new ExpectedCellValue(sheetName, 17, 4, 26324.08),
+					new ExpectedCellValue(sheetName, 17, 5, 8148.48),
+					new ExpectedCellValue(sheetName, 17, 6, 244.4544),
+					new ExpectedCellValue(sheetName, 18, 3, "Total"),
+					new ExpectedCellValue(sheetName, 18, 4, 85084.81),
+					new ExpectedCellValue(sheetName, 18, 5, 29552.21),
+					new ExpectedCellValue(sheetName, 18, 6, 886.5663),
+					new ExpectedCellValue(sheetName, 19, 3, "Grand Total"),
+					new ExpectedCellValue(sheetName, 19, 4, 170169.62),
+					new ExpectedCellValue(sheetName, 19, 5, 59104.42),
+					new ExpectedCellValue(sheetName, 19, 6, 1773.1326),
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\ShowDataAsComplex.xlsx")]
+		public void PivotTableRefreshCalculatedFieldDateComparison()
+		{
+			var file = new FileInfo("ShowDataAsComplex.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet1";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable3"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B37:C46"), pivotTable.Address);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 37, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 37, 3, "Sum of DateCalculatedField"),
+					new ExpectedCellValue(sheetName, 38, 2, "Accounts Receivable"),
+					new ExpectedCellValue(sheetName, 38, 3, 7),
+					new ExpectedCellValue(sheetName, 39, 2, "Accounts Receivable, Total"),
+					new ExpectedCellValue(sheetName, 39, 3, 7),
+					new ExpectedCellValue(sheetName, 40, 2, "ASSETS"),
+					new ExpectedCellValue(sheetName, 40, 3, 7),
+					new ExpectedCellValue(sheetName, 41, 2, "Cash"),
+					new ExpectedCellValue(sheetName, 41, 3, 7),
+					new ExpectedCellValue(sheetName, 42, 2, "Customers, EU"),
+					new ExpectedCellValue(sheetName, 42, 3, 7),
+					new ExpectedCellValue(sheetName, 43, 2, "Customers, North America"),
+					new ExpectedCellValue(sheetName, 43, 3, 7),
+					new ExpectedCellValue(sheetName, 44, 2, "Liquid Assets, Total"),
+					new ExpectedCellValue(sheetName, 44, 3, 7),
+					new ExpectedCellValue(sheetName, 45, 2, "Securities, Total"),
+					new ExpectedCellValue(sheetName, 45, 3, 7),
+					new ExpectedCellValue(sheetName, 46, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 46, 3, 7),
+				});
+			}
+		}
 		#endregion
 	}
 }

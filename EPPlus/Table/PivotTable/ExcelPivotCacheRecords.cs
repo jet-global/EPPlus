@@ -449,6 +449,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				matchingValues.Add(null);
 			else if (string.IsNullOrWhiteSpace(itemValue))
 				matchingValues.Add(itemValue);
+			else if (type == PivotCacheRecordType.d)
+				matchingValues.Add(DateTime.Parse(itemValue));
 			else
 			{
 				double.TryParse(itemValue, out var recordData);

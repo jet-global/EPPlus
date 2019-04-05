@@ -1168,7 +1168,7 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B21:E31"), pivotTable.Address);
-					Assert.AreEqual(14, pivotTable.Fields.Count);
+					Assert.AreEqual(15, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
@@ -2793,7 +2793,7 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:H17"), pivotTable.Address);
-					Assert.AreEqual(14, pivotTable.Fields.Count);
+					Assert.AreEqual(15, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
