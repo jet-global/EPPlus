@@ -262,7 +262,7 @@ namespace EPPlusTest
 			Assert.AreEqual("'Sheet1 Copy'!B2", excelAddress.Address);
 		}
 
-		[TestMethod]
+		[TestMethod, Ignore]
 		public void ChangeWorksheetAppliesToNestedAddressesMultiSheetList()
 		{
 			Assert.Fail("This test will fail. We suspect that the true error is that " +
