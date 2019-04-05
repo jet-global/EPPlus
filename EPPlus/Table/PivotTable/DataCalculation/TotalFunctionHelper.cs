@@ -166,7 +166,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			if (string.IsNullOrEmpty(formula))
 				return null;
 			// Create a named range that calculates each field referenced by the formula.
-			var stringValues = new List<string>();
 			foreach (var nameToValues in namesToValues)
 			{
 				var excelName = nameToValues.Key;
@@ -174,7 +173,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					excelName = this.FieldNamesToSanitizedFieldNames[excelName];
 
 				// Convert DateTime values to OADates in order for calculations to proceed correctly.
-				stringValues.Clear();
+				var stringValues = new List<string>();
 				foreach (var value in nameToValues.Value)
 				{
 					if (value is DateTime dateValue)
