@@ -441,7 +441,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				int sharedItemIndex = int.Parse(record.Items[dataFieldIndex].Value);
 				var cacheField = this.CacheDefinition.CacheFields[dataFieldIndex];
-				itemValue = cacheField.SharedItems[sharedItemIndex].Value;
+				var sharedItem = cacheField.SharedItems[sharedItemIndex];
+				type = sharedItem.Type;
+				itemValue = sharedItem.Value;
 			}
 			else
 				itemValue = record.Items[dataFieldIndex].Value;
