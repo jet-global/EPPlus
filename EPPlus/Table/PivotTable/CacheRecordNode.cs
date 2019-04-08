@@ -129,7 +129,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(row));
 			if (cacheDefinition == null)
 				throw new ArgumentNullException(nameof(cacheDefinition));
-			if (row.Count() != cacheDefinition.CacheFields.Count)
+			var nonCalculatedFieldsCount = cacheDefinition.CacheFields.Count(c => string.IsNullOrEmpty(c.Formula));
+			if (row.Count() != nonCalculatedFieldsCount)
 				throw new InvalidOperationException("An attempt was made to create a CacheRecord node with an invalid number of fields.");
 			this.NameSpaceManager = namespaceManager;
 			var recordNode = parentNode.OwnerDocument.CreateElement("d:r");
