@@ -591,44 +591,34 @@ namespace OfficeOpenXml
 				nameNode.InnerText = value;
 			}
 		}
+
 		internal void SetXmlNodeBool(string path, bool value)
 		{
-			SetXmlNodeString(TopNode, path, value ? "1" : "0", false, false);
+			this.SetXmlNodeString(this.TopNode, path, value ? "1" : "0", false, false);
 		}
+
 		internal void SetXmlNodeBool(string path, bool value, bool removeIf)
 		{
 			if (value == removeIf)
 			{
-				var node = TopNode.SelectSingleNode(path, NameSpaceManager);
+				var node = this.TopNode.SelectSingleNode(path, NameSpaceManager);
 				if (node != null)
 				{
-					if (node is XmlAttribute)
-					{
-						var elem = (node as XmlAttribute).OwnerElement;
-						elem.ParentNode.RemoveChild(elem);
-					}
+					if (node is XmlAttribute attributeElement)
+						attributeElement.OwnerElement.Attributes.Remove(attributeElement);
 					else
-					{
-						TopNode.RemoveChild(node);
-					}
+						this.TopNode.RemoveChild(node);
 				}
 			}
 			else
-			{
-				SetXmlNodeString(TopNode, path, value ? "1" : "0", false, false);
-			}
+				this.SetXmlNodeString(this.TopNode, path, value ? "1" : "0", false, false);
 		}
+
 		internal bool ExistNode(string path)
 		{
-			if (TopNode == null || TopNode.SelectSingleNode(path, NameSpaceManager) == null)
-			{
-				return false;
-			}
-			else
-			{
-				return true;
-			}
+			return this.TopNode != null && this.TopNode.SelectSingleNode(path, this.NameSpaceManager) != null;
 		}
+
 		internal bool? GetXmlNodeBoolNullable(string path)
 		{
 			var value = GetXmlNodeString(path);

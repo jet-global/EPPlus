@@ -96,6 +96,16 @@ namespace OfficeOpenXml.Table.PivotTable
 			get { return base.GetXmlNodeBool("@h", false); }
 			set { base.SetXmlNodeBool("@h", value, false); }
 		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether a pivot field item is expanded or not.
+		/// NOTE: the default value of 'true' indicates that the item is expanded.
+		/// </summary>
+		internal bool HideDetails
+		{
+			get { return base.GetXmlNodeBool("@sd", true); }
+			set { base.SetXmlNodeBool("@sd", value, true); }
+		}
 		#endregion
 
 		#region Constructors
