@@ -95,5 +95,14 @@ namespace EPPlusTest.Internationalization {
                 return ResourceManager.GetString("TotalCaptionWithFollowingValue", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Values.
+        /// </summary>
+        internal static string ValuesCaption {
+            get {
+                return ResourceManager.GetString("ValuesCaption", resourceCulture);
+            }
+        }
     }
 }
