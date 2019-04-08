@@ -454,6 +454,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (pivotTable.TryGetUnsupportedFeatures(out var pivotTableUnsupportedFeatures))
 					unsupportedFeatures.AddRange(pivotTableUnsupportedFeatures);
 			}
+			if (this.Workbook.SlicerCaches.Any())
+				unsupportedFeatures.Add("Slicer present");
 			if (base.TopNode.SelectSingleNode("d:calculatedItems", base.NameSpaceManager) != null)
 				unsupportedFeatures.Add("Calculated items present");
 			if (!this.SaveData)
