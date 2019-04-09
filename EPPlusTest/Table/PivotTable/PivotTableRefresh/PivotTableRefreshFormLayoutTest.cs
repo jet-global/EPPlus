@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using EPPlusTest.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OfficeOpenXml;
