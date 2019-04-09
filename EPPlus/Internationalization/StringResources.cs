@@ -48,6 +48,12 @@ namespace OfficeOpenXml.Internationalization
 		[StringResource]
 		public string PivotTableFalseCaption => this.GetValue("FALSE");
 
+		/// <summary>
+		/// Gets the string for a false boolean type.
+		/// </summary>
+		[StringResource]
+		public string ValuesCaption => this.GetValue("Values");
+
 		private ResourceManager ResourceManager { get; set; }
 		#endregion
 

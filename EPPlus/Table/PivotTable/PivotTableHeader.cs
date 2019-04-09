@@ -56,11 +56,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool IsGrandTotal { get; }
 
 		/// <summary>
-		/// Gets the flag indicating if this is a row label.
-		/// </summary>
-		public bool IsRowHeader { get; }
-
-		/// <summary>
 		/// Gets the value if there is a <see cref="RowColumnItem"/> with a non-null itemType, typically 'default'.
 		/// </summary>
 		public string TotalType { get; }
@@ -87,16 +82,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool IsPlaceHolder { get; set; }
 
 		/// <summary>
-		/// Gets a value indicating whether or not this header contains a tabular form field.
-		/// </summary>
-		public bool IsTabularHeader { get; }
-
-		/// <summary>
-		/// Gets a value indicating whether or not this header has compact form enabled.
-		/// </summary>
-		public bool IsCompactForm { get; }
-
-		/// <summary>
 		/// Gets the level of indentation of the items that correspond to this header.
 		/// </summary>
 		public int Indent { get; }
@@ -110,39 +95,23 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="field">The pivot table field.</param>
 		/// <param name="dataFieldCollectionIndex">The index of the data field in the collection.</param>
 		/// <param name="isGrandTotal">A value indicating if it is a grand total.</param>
-		/// <param name="isRowHeader">A value indicating if it is a row header.</param>
 		/// <param name="isLeafNode">A value indicating if it is a leaf node.</param>
 		/// <param name="isDataField">A value indicating if it is a data field node.</param>
 		/// <param name="totalType">The itemType value of the <see cref="RowColumnItem"/>.</param>
 		/// <param name="isAboveDataField">A value indicating if it is above a data field node.</param>
-		/// <param name="isTabularField">A value indicating if it is a pivot field with tabular form enabled.</param>
 		/// <param name="indent">The level of indentation for the items that correspond to this header.</param>
 		public PivotTableHeader(List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldCollectionIndex, bool isGrandTotal,
-			bool isRowHeader, bool isLeafNode, bool isDataField, string totalType = null, bool isAboveDataField = false, bool isTabularField = false, int indent = 0)
+			bool isLeafNode, bool isDataField, string totalType = null, bool isAboveDataField = false, int indent = 0)
 		{
 			this.CacheRecordIndices = recordIndices;
 			this.PivotTableField = field;
 			this.DataFieldCollectionIndex = dataFieldCollectionIndex;
 			this.IsGrandTotal = isGrandTotal;
-			this.IsRowHeader = isRowHeader;
 			this.IsLeafNode = isLeafNode;
 			this.IsDataField = isDataField;
 			this.IsAboveDataField = isAboveDataField;
 			this.TotalType = totalType;
-			this.IsTabularHeader = isTabularField;
-			this.IsCompactForm = field == null ? false : field.Compact;
 			this.Indent = indent;
-		}
-
-		/// <summary>
-		/// Creates a new <see cref="PivotTableHeader"/> object with only a <see cref="PivotTableField"/>.
-		/// Used for tabular form and other non-compact form headers.
-		/// </summary>
-		/// <param name="field">The field that this header corresponds to.</param>
-		public PivotTableHeader(ExcelPivotTableField field)
-		{
-			this.PivotTableField = field;
-			this.IsTabularHeader = true;
 		}
 		#endregion
 	}

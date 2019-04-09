@@ -138,4 +138,7 @@
   <data name="TotalCaptionWithPrecedingValue" xml:space="preserve">
     <value>{0} Default Total</value>
   </data>
+  <data name="ValuesCaption" xml:space="preserve">
+    <value>Values</value>
+  </data>
 </root>

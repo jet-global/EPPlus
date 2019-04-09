@@ -129,4 +129,7 @@
   <data name="TotalCaptionWithFollowingValue" xml:space="preserve">
     <value>Different Total {0}</value>
   </data>
+  <data name="ValuesCaption" xml:space="preserve">
+    <value>Values</value>
+  </data>
 </root>
