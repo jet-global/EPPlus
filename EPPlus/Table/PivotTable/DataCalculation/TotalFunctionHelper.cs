@@ -129,7 +129,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 		/// <summary>
 		/// Adds the set of names to the temp worksheet to prepare for evaluating a calculated field.
-		/// Names with illegal characters are mapped to new names.
+		/// Names are mapped to GUIDs that reference locations on a temporary worksheet.
 		/// </summary>
 		/// <param name="fieldNames">The set of field names to add.</param>
 		public void AddNames(HashSet<string> fieldNames)
@@ -139,17 +139,17 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			var row = 1;
 			foreach (var fieldName in fieldNames)
 			{
-				// Map field names with characters that are not valid for a named range to a GUID.
-				var sanitizedName = fieldName;
-				if (sanitizedName.IndexOfAny(ExcelNamedRange.IllegalCharacters) != -1)
+				// Sanitize all field names by mapping them to GUIDs that reference a location on a temp worksheet.
+				if (!this.FieldNamesToSanitizedFieldNames.ContainsKey(fieldName))
 				{
-					sanitizedName = Guid.NewGuid().ToString("N");
+					var sanitizedName = Guid.NewGuid().ToString("N");
 					this.FieldNamesToSanitizedFieldNames.Add(fieldName, sanitizedName);
 					this.SanitizedFieldNamesToFieldNames.Add(sanitizedName, fieldName);
+
+					var cell = this.TempWorksheet.Cells[row, TotalsFunctionHelper.NameValueColumn];
+					if (!this.TempWorksheet.Names.ContainsKey(sanitizedName))
+						this.TempWorksheet.Names.Add(sanitizedName, cell.FullAddressAbsolute);
 				}
-				var cell = this.TempWorksheet.Cells[row, TotalsFunctionHelper.NameValueColumn];
-				if (!this.TempWorksheet.Names.ContainsKey(sanitizedName))
-					this.TempWorksheet.Names.Add(sanitizedName, cell.FullAddressAbsolute);
 				row++;
 			}
 		}
@@ -171,9 +171,19 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 				var excelName = nameToValues.Key;
 				if (this.FieldNamesToSanitizedFieldNames.ContainsKey(excelName))
 					excelName = this.FieldNamesToSanitizedFieldNames[excelName];
-				// Update the formula of the named range with the name of the field 
-				// to be the sum of the field values.
-				this.TempWorksheet.Names[excelName].NameFormula = $"SUM({string.Join(",", nameToValues.Value)})";
+
+				// Convert DateTime values to OADates in order for calculations to proceed correctly.
+				var stringValues = new List<string>();
+				foreach (var value in nameToValues.Value)
+				{
+					if (value is DateTime dateValue)
+						stringValues.Add(dateValue.ToOADate().ToString());
+					else
+						stringValues.Add(value.ToString());
+				}
+
+				// Update the formula of the named range to be the sum of the field values.
+				this.TempWorksheet.Names[excelName].NameFormula = $"SUM({string.Join(",", stringValues)})";
 			}
 			formula = this.SanitizeFormula(formula);
 			// Evaluate the formula. The fields that are referenced in it

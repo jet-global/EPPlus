@@ -292,6 +292,7 @@
     <Compile Include="Table\PivotTable\Formats\PivotTableFormattingTest.cs" />
     <Compile Include="Table\PivotTable\ItemsCollectionTest.cs" />
     <Compile Include="Table\PivotTable\PivotItemTreeNodeTest.cs" />
+    <Compile Include="Table\PivotTable\PivotTableRefresh\PivotTableRefreshCalculatedFieldsTest.cs" />
     <Compile Include="Table\PivotTable\PivotTableRefresh\PivotTableRefreshFormLayoutTest.cs" />
     <Compile Include="Table\PivotTable\PivotTableRefresh\PivotTableRefreshIndentationTest.cs" />
     <Compile Include="Table\PivotTable\PivotTableRefresh\PivotTableRefreshShowDataAsTest.cs" />

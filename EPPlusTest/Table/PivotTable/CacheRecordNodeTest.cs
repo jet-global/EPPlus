@@ -87,6 +87,33 @@ namespace EPPlusTest.Table.PivotTable
 		}
 
 		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithCalculatedFields.xlsx")]
+		public void CacheRecordNodeConstructFromRowDataWithCalculatedField()
+		{
+			var file = new FileInfo("PivotTableWithCalculatedFields.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				XmlDocument document = new XmlDocument();
+				document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""0""><r></r></pivotCacheRecords>");
+				var ns = TestUtility.CreateDefaultNSM();
+				var node = document.SelectSingleNode("//d:r", ns);
+				var row = new List<object> { 20100076, "Chicago", "March", "Tent", 3.5, 2, 7, 10 };
+				var cacheRecordNode = new CacheRecordNode(ns, node, row, cacheDefinition);
+				Assert.AreEqual(8, cacheRecordNode.Items.Count);
+				Assert.AreEqual("20100076", cacheRecordNode.Items[0].Value);
+				Assert.AreEqual("1", cacheRecordNode.Items[1].Value);
+				Assert.AreEqual("2", cacheRecordNode.Items[2].Value);
+				Assert.AreEqual("3", cacheRecordNode.Items[3].Value);
+				Assert.AreEqual("3.5", cacheRecordNode.Items[4].Value);
+				Assert.AreEqual("1", cacheRecordNode.Items[5].Value);
+				Assert.AreEqual("7", cacheRecordNode.Items[6].Value);
+				Assert.AreEqual("10", cacheRecordNode.Items[7].Value);
+			}
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void CacheFieldNodeTestNullNode()
 		{
@@ -144,7 +171,7 @@ namespace EPPlusTest.Table.PivotTable
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
 		[ExpectedException(typeof(InvalidOperationException))]
-		public void ConstructCacheRecordNodeWithIncorrectNumberOfFields()
+		public void ConstructCacheRecordNodeWithTooFewRows()
 		{
 			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -156,6 +183,26 @@ namespace EPPlusTest.Table.PivotTable
 				var node = document.SelectSingleNode("//d:r", ns);
 				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
 				var row = new List<object> { 5, "e", false };
+				var record = cacheDefinition.CacheRecords[0];
+				new CacheRecordNode(ns, node, row, cacheDefinition);
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void ConstructCacheRecordNodeWithTooManyRows()
+		{
+			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var package = new ExcelPackage(file))
+			{
+				XmlDocument document = new XmlDocument();
+				document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""0""><r></r></pivotCacheRecords>");
+				var ns = TestUtility.CreateDefaultNSM();
+				var node = document.SelectSingleNode("//d:r", ns);
+				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
+				var row = new List<object> { 5, "e", false, "sdfsdf", "werwer" };
 				var record = cacheDefinition.CacheRecords[0];
 				new CacheRecordNode(ns, node, row, cacheDefinition);
 			}

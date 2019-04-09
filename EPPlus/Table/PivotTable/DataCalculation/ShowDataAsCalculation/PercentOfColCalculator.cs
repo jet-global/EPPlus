@@ -41,8 +41,6 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			var cellBackingData = backingDatas[dataRow, dataColumn];
 			if (cellBackingData == null)
 				return null;
-			else if (cellBackingData.Result == null)
-				return 0;
 			else
 			{
 				var sheetColumn = this.PivotTable.Address.Start.Column + this.PivotTable.FirstDataCol + dataColumn;
@@ -78,9 +76,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 					return base.CalculatePercentage(grandTotalBackingData.Result, grandGrandTotalValue);
 				}
 			}
-			if (Convert.ToDouble(grandTotalBackingData.Result) == 0d)
-				return ExcelErrorValue.Create(eErrorType.Div0);
-			return 1;
+			return base.CalculatePercentage(grandTotalBackingData.Result, grandTotalBackingData.Result);
 		}
 
 		/// <summary>

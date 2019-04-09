@@ -597,7 +597,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets the fields in the table .
+		/// Gets the fields in the table.
 		/// </summary>
 		public ExcelPivotTableFieldCollection Fields
 		{
@@ -951,6 +951,9 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// pivotSelections are causing corruptions when left. Deleting for meow.
 			this.Worksheet.View.RemovePivotSelections();
+
+			// Refreshing a pivot table expands all values, so update the field items to make the icons match.
+			this.ExpandAllFieldItems();
 		}
 
 		/// <summary>
@@ -1934,6 +1937,21 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 			return date;
+		}
+
+		private void ExpandAllFieldItems()
+		{
+			// Set all items to be expanded.
+			foreach (var pivotField in this.Fields)
+			{
+				if (pivotField.Items.Count == 0)
+					continue;
+				foreach (var item in pivotField.Items)
+				{
+					if (item.HideDetails == false)
+						item.HideDetails = true;
+				}
+			}
 		}
 
 		private string GetTranslatedDate(int nfId, DateTime date)

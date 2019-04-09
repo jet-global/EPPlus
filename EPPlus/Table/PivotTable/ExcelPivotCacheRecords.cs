@@ -441,7 +441,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				int sharedItemIndex = int.Parse(record.Items[dataFieldIndex].Value);
 				var cacheField = this.CacheDefinition.CacheFields[dataFieldIndex];
-				itemValue = cacheField.SharedItems[sharedItemIndex].Value;
+				var sharedItem = cacheField.SharedItems[sharedItemIndex];
+				type = sharedItem.Type;
+				itemValue = sharedItem.Value;
 			}
 			else
 				itemValue = record.Items[dataFieldIndex].Value;
@@ -449,6 +451,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				matchingValues.Add(null);
 			else if (string.IsNullOrWhiteSpace(itemValue))
 				matchingValues.Add(itemValue);
+			else if (type == PivotCacheRecordType.d)
+				matchingValues.Add(DateTime.Parse(itemValue));
 			else
 			{
 				double.TryParse(itemValue, out var recordData);
