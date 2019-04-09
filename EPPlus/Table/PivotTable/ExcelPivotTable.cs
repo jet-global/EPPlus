@@ -1227,10 +1227,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			int repeatedItemsCount = 0;
 			if (root.Value != -1)
 			{
-				bool createNode = pivotField != null 
-					&& ((this.CompactData && pivotField.Compact && this.OutlineData && pivotField.Outline)
-					|| (this.CompactData && this.OutlineData && pivotField.Outline)
-					|| (!this.Compact && this.OutlineData));
+				bool createNode = pivotField != null && (pivotField.Outline && (pivotField.Compact || this.OutlineData || !this.CompactData));
 				if (!root.HasChildren || (root.PivotFieldIndex == -2 && (this.CompactData || this.OutlineData)) || createNode)
 				{
 					repeatedItemsCount = this.GetRepeatedItemsCount(indices, lastChildIndices);
@@ -1689,7 +1686,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						string totalValue = this.GetTotalCaptionCellValue(this.RowFields, item, header, stringResources);
 						if (!string.IsNullOrEmpty(totalValue))
 						{
-							column = this.GetColumn(item, this.Address.Start.Column, header, item.Count == 1, j);
+							column = this.GetRowHeaderColumn(item, this.Address.Start.Column, header.CacheRecordIndices, j);
 							cell = this.Worksheet.Cells[row, column];
 							cell.Value = totalValue;
 							cell.Style.Indent = this.GetIndent(header.Indent);
@@ -1698,7 +1695,8 @@ namespace OfficeOpenXml.Table.PivotTable
 						{
 							var itemIndex = item.RepeatedItemsCount == 0 ? j : j + item.RepeatedItemsCount;
 							string sharedItemValue = this.GetSharedItemValue(this.RowFields, item, itemIndex, j, stringResources);
-							column = j == 0 ? this.GetColumn(item, this.Address.Start.Column, header, item.Count == 1, j) : column + 1;
+							column = j == 0 ? this.GetRowHeaderColumn(item, this.Address.Start.Column, header.CacheRecordIndices, j) : column + 1;
+							row = this.GetRowHeaderRow(item.RepeatedItemsCount, row, j);
 							cell = this.Worksheet.Cells[row, column];
 							cell.Value = sharedItemValue;
 							cell.Style.Indent = this.GetIndent(header.Indent);
@@ -1722,20 +1720,34 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.WriteHeadersForOutlineAndTabularForm(columnFieldNames, true);
 		}
 
-		private int GetColumn(RowColumnItem item, int startColumn, PivotTableHeader header, bool singleXMemberProperties, int j)
+		private int GetRowHeaderRow(int repeatedItemsCount, int row, int j)
 		{
+			if (j == 0)
+				return row;
+			int parentRowFieldIndex = this.RowFields[repeatedItemsCount + j - 1].Index;
+			if (parentRowFieldIndex != -2)
+			{
+				var parentPivotField = this.Fields[parentRowFieldIndex];
+				if (!parentPivotField.Compact && parentPivotField.Outline)
+					return row + 1;
+			}
+			return row;
+		}
+
+		private int GetRowHeaderColumn(RowColumnItem item, int column, List<Tuple<int, int>> cacheRecordIndices, int j)
+		{
+			bool singleXMemberProperties = item.Count == 0;
 			if (item.RepeatedItemsCount == 0)
-				return singleXMemberProperties ? startColumn : startColumn + j;
+				return singleXMemberProperties ? column : column + j;
 			else
 			{
-				int count = singleXMemberProperties ? header.CacheRecordIndices.Count - 1 : item.RepeatedItemsCount;
-				int column = startColumn;
+				int count = singleXMemberProperties && cacheRecordIndices != null ? cacheRecordIndices.Count - 1 : item.RepeatedItemsCount;
 				for (int i = 0; i < count; i++)
 				{
 					int index = this.RowFields[i].Index;
 					if (index == -2)
 					{
-						if ((!this.CompactData && this.OutlineData) || (!this.CompactData && !this.OutlineData))
+						if (!this.CompactData)
 							column += 1;
 					}
 					else if (!this.Fields[index].Compact || !this.Fields[index].Outline)
@@ -1767,6 +1779,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			int startRow = this.Address.Start.Row + this.FirstHeaderRow;
 			int column = this.Address.Start.Column + this.FirstDataCol;
 			var columnFieldNames = new List<string>();
+			bool hasCompactField = this.RowFields.Where(i => i.Index != -2).Any(x => this.Fields[x.Index].Compact);
 			if (this.ColumnFields.Any())
 			{
 				for (int i = 0; i < this.ColumnItems.Count; i++)
@@ -1788,7 +1801,7 @@ namespace OfficeOpenXml.Table.PivotTable
 						this.Worksheet.Cells[cellRow, column].Value = sharedItem;
 						startHeaderRow++;
 
-						if (!this.CompactData && i == 0 && this.ColumnFields.Count > 1)
+						if (!hasCompactField && !this.CompactData && i == 0 && this.ColumnFields.Count > 1)
 						{
 							var pivotFieldIndex = this.ColumnFields[columnFieldIndex].Index;
 							if (pivotFieldIndex == -2)
