@@ -125,7 +125,7 @@ namespace OfficeOpenXml.Style
 				case 18:
 					return "h:mm AM/PM";
 				case 19:
-					return "m/d/yyyy";
+					return "h:mm:ss AM/PM";
 				case 20:
 					return "h:mm";
 				case 21:
@@ -189,7 +189,7 @@ namespace OfficeOpenXml.Style
 					return 17;
 				case "h:mm AM/PM":
 					return 18;
-				case "m/d/yyyy":
+				case "h:mm:ss AM/PM":
 					return 19;
 				case "h:mm":
 					return 20;
