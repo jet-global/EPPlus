@@ -198,7 +198,6 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 					var worksheet = package.Workbook.Worksheets[sheetName];
 					var pivotTable = worksheet.PivotTables["PivotTable3"];
 					package.Workbook.PivotCacheDefinitions.ForEach(c => c.UpdateData());
-					package.SaveAs(new FileInfo(@"C:\Users\mcl\Downloads\PivotTables\Output.xlsx"));
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("A52:K64"), pivotTable.Address);
 					package.SaveAs(newFile.File);
 				}
