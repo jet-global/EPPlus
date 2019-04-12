@@ -697,6 +697,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Gets a boolean that determines whether any row items exist in this pivot table.
+		/// </summary>
+		public bool HasRowItems => this.TopNode.SelectSingleNode("d:rowItems", this.NameSpaceManager) != null;
+
+		/// <summary>
 		/// Gets the row items.
 		/// </summary>
 		public ItemsCollection RowItems
@@ -708,6 +713,11 @@ namespace OfficeOpenXml.Table.PivotTable
 				return myRowItems;
 			}
 		}
+
+		/// <summary>
+		/// Gets a boolean that determines whether any column items exist in this pivot table.
+		/// </summary>
+		public bool HasColumnItems => this.TopNode.SelectSingleNode("d:colItems", this.NameSpaceManager) != null;
 
 		/// <summary>
 		/// Gets the column items.
@@ -934,16 +944,25 @@ namespace OfficeOpenXml.Table.PivotTable
 			this.ColumnHeaders.Clear();
 
 			// Update the rowItems.
-			this.Workbook.FormulaParser.Logger?.LogFunction($"{nameof(this.UpdateRowColumnItems)}: Rows");
-			this.UpdateRowColumnItems(this.RowFields, this.RowItems, true, stringResources);
+			if (this.HasRowItems)
+			{
+				this.Workbook.FormulaParser.Logger?.LogFunction($"{nameof(this.UpdateRowColumnItems)}: Rows");
+				this.UpdateRowColumnItems(this.RowFields, this.RowItems, true, stringResources);
+			}
 
 			// Update the colItems.
-			this.Workbook.FormulaParser.Logger?.LogFunction($"{nameof(this.UpdateRowColumnItems)}: Columns");
-			this.UpdateRowColumnItems(this.ColumnFields, this.ColumnItems, false, stringResources);
+			if (this.HasColumnItems)
+			{
+				this.Workbook.FormulaParser.Logger?.LogFunction($"{nameof(this.UpdateRowColumnItems)}: Columns");
+				this.UpdateRowColumnItems(this.ColumnFields, this.ColumnItems, false, stringResources);
+			}
 
 			// Update the pivot table data.
-			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.UpdateWorksheet));
-			this.UpdateWorksheet(stringResources);
+			if (this.HasRowItems || this.HasColumnItems)
+			{
+				this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.UpdateWorksheet));
+				this.UpdateWorksheet(stringResources);
+			}
 
 			// Remove the 'm' (missing) xml attribute from each pivot field item, if it exists, to prevent 
 			// corrupting the workbook, since Excel automatically adds them.
