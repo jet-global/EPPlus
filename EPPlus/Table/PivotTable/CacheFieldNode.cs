@@ -109,6 +109,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Note: A base cacheField can have a fieldGroup, but the base field index is set to the default value.
 		/// </summary>
 		public bool IsGroupField => this.FieldGroup != null && this.FieldGroup.BaseField > -1;
+
+		/// <summary>
+		/// Gets a flag indicating whether or not this cache field is a date grouping field.
+		/// </summary>
+		public bool IsDateGrouping => this.FieldGroup != null && this.FieldGroup.GroupBy != PivotFieldDateGrouping.None;
 		#endregion
 
 		#region Constructors
