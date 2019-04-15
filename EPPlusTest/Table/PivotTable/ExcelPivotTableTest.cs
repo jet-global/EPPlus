@@ -23,6 +23,7 @@
 *
 * For code change notes, see the source control history.
 *******************************************************************************/
+using System;
 using System.IO;
 using System.Linq;
 using EPPlusTest.TestHelpers;
@@ -101,7 +102,7 @@ namespace EPPlusTest.Table.PivotTable
 					Assert.AreEqual(4, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(6, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(7, pivotTable.RowItems.Count);
 					package.SaveAs(newFile.File);
@@ -200,7 +201,7 @@ namespace EPPlusTest.Table.PivotTable
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("I10:J15"), pivotTable.Address);
 					Assert.AreEqual(4, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
 					Assert.AreEqual(3, pivotTable.Fields[2].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(5, pivotTable.RowItems.Count);
@@ -245,7 +246,7 @@ namespace EPPlusTest.Table.PivotTable
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(3, pivotTable.Fields[2].Items.Count);
 					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
@@ -472,10 +473,10 @@ namespace EPPlusTest.Table.PivotTable
 					cacheDefinition.UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B12:M20"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
-					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
+					Assert.AreEqual(5, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(3, pivotTable.Fields[1].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
@@ -555,10 +556,10 @@ namespace EPPlusTest.Table.PivotTable
 					cacheDefinition.UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B11:P21"), pivotTable.Address);
 					Assert.AreEqual(7, pivotTable.Fields.Count);
-					Assert.AreEqual(8, pivotTable.Fields[0].Items.Count);
+					Assert.AreEqual(7, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
@@ -656,8 +657,8 @@ namespace EPPlusTest.Table.PivotTable
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(4, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[3].Items.Count);
+					Assert.AreEqual(3, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[6].Items.Count);
@@ -823,7 +824,7 @@ namespace EPPlusTest.Table.PivotTable
 					Assert.AreEqual(7, pivotTable.Fields.Count);
 					Assert.AreEqual(0, pivotTable.Fields[0].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[1].Items.Count);
-					Assert.AreEqual(5, pivotTable.Fields[2].Items.Count);
+					Assert.AreEqual(4, pivotTable.Fields[2].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[3].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[4].Items.Count);
 					Assert.AreEqual(0, pivotTable.Fields[5].Items.Count);
@@ -75091,6 +75092,51 @@ namespace EPPlusTest.Table.PivotTable
 					new ExpectedCellValue(sheetName, 59, 4, 0),
 					new ExpectedCellValue(sheetName, 60, 4, 0),
 					new ExpectedCellValue(sheetName, 61, 4, 64d),
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableGroupingsDateChanges.xlsx")]
+		public void PivotTableRefreshDateGroupingBackingDateValueChanges()
+		{
+			var file = new FileInfo("PivotTableGroupingsDateChanges.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					package.Workbook.Worksheets["Data"].Cells[3, 4].Value = DateTime.Parse("12/31/2012").ToOADate();
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					foreach (var cacheDefinition in package.Workbook.PivotCacheDefinitions)
+					{
+						cacheDefinition.UpdateData();
+					}
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:E8"), pivotTable.Address);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 3, 3, "START"),
+					new ExpectedCellValue(sheetName, 3, 4, "START Total"),
+					new ExpectedCellValue(sheetName, 3, 5, "Grand Total"),
+					new ExpectedCellValue(sheetName, 4, 3, "Qtr4"),
+					new ExpectedCellValue(sheetName, 4, 4, null),
+					new ExpectedCellValue(sheetName, 5, 3, 2012),
+					new ExpectedCellValue(sheetName, 6, 2, "18100"),
+					new ExpectedCellValue(sheetName, 6, 3, 2041938.71),
+					new ExpectedCellValue(sheetName, 6, 4, 2041938.71),
+					new ExpectedCellValue(sheetName, 6, 5, 2041938.71),
+					new ExpectedCellValue(sheetName, 7, 2, "Opening Entry"),
+					new ExpectedCellValue(sheetName, 7, 3, 2041938.71),
+					new ExpectedCellValue(sheetName, 7, 4, 2041938.71),
+					new ExpectedCellValue(sheetName, 7, 5, 2041938.71),
+					new ExpectedCellValue(sheetName, 8, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 8, 3, 2041938.71),
+					new ExpectedCellValue(sheetName, 8, 4, 2041938.71),
+					new ExpectedCellValue(sheetName, 8, 5, 2041938.71)
 				});
 			}
 		}

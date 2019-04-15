@@ -118,6 +118,7 @@
     <Compile Include="ExcelPackageTest.cs" />
     <Compile Include="ExcelWorksheetTests.cs" />
     <Compile Include="Extensions\ExtensionsTest.cs" />
+    <Compile Include="Extensions\IEnumerableExtensionsTest.cs" />
     <Compile Include="ExternalReferenceCollectionTest.cs" />
     <Compile Include="FormulaParsing\DataProviderTestBase.cs" />
     <Compile Include="FormulaParsing\EpplusExcelDataProviderTest.cs" />

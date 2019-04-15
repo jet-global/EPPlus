@@ -182,10 +182,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				var type = CacheItem.GetObjectType(value);
 				var currentItem = myItems[col];
 				var cacheField = cacheDefinition.CacheFields[col];
-				if (cacheField.HasSharedItems)
+				if (cacheField.HasSharedItems || cacheField.ClearedSharedItems)
 				{
 					// If shared items contains value, update this.Value to index
-					// otherwise, create and add new sharedItem, update this.Value to new index
+					// otherwise, create and add new sharedItem, update this.Value to new index.
 					currentItem.Value = this.GetCacheFieldSharedItemIndexString(cacheField, type, value);
 				}
 				else

@@ -90,16 +90,6 @@ namespace EPPlusTest.Table.PivotTable
 		{
 			new CacheItem(TestUtility.CreateDefaultNSM(), null, PivotCacheRecordType.x, "1");
 		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ArgumentException))]
-		public void CacheItemIncorrectParentNode()
-		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(@"<pivotCacheRecords><r><n v=""20100076""/><x v=""0""/><b v=""0""/></r></pivotCacheRecords>");
-			var parentNode = document.SelectSingleNode("//pivotCacheRecords");
-			new CacheItem(TestUtility.CreateDefaultNSM(), parentNode, PivotCacheRecordType.n, "493");
-		}
 		#endregion
 
 		#region ReplaceNode Tests

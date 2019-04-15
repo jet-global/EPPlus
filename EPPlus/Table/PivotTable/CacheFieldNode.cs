@@ -100,6 +100,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Gets or sets a value indicating whether the shared items were cleared out during a refresh.
+		/// </summary>
+		public bool ClearedSharedItems { get; set; }
+
+		/// <summary>
 		/// Gets a value indicating whether or not this node is a group field.
 		/// Note: A base cacheField can have a fieldGroup, but the base field index is set to the default value.
 		/// </summary>
