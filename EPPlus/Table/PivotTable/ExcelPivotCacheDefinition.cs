@@ -1070,8 +1070,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				else
 				{
-					// TODO: If there are no shared items but the field contains numeric values, the @minValue and @maxValue
-					// attributes should be set. Enumerate the cache records and set as necessary.
+					// NOTE: If there are no shared items but the field contains numeric values, the @minValue and @maxValue
+					// attributes should be set here. 
+					// Because we do not currently use them and incorrect values do not cause corruptions, it is being left for a later date.
 				}
 			}
 		}
