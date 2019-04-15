@@ -197,7 +197,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					var cacheField = this.CacheDefinition.CacheFields[cacheFieldIndex];
 					var cell = sourceDataRange.Worksheet.Cells[row, column];
 					// If the cell value is a DateTime, convert it to an date.
-					if (cacheField.HasSharedItems && !string.IsNullOrEmpty(cacheField.SharedItems.MinDate) && cell.Value is double)
+					if (cacheField.SharedItems.ContainsDate == true && cell.Value is double)
 						rowCells.Add(DateTime.FromOADate((double)cell.Value));
 					else
 						rowCells.Add(cell.Value);

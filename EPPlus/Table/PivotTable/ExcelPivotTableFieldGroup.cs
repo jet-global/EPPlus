@@ -88,7 +88,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			get { return base.GetXmlNodeInt("@base"); }
 		}
-		
+
 		/// <summary>
 		/// Get the collection of group items.
 		/// </summary>
@@ -104,10 +104,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		public DiscreteGroupingPropertiesCollection DiscreteGroupingProperties { get; }
 
-		private string RangeGroupingProperties
-		{
-			get { return base.GetXmlNodeString("d:rangePr/@groupBy"); }
-		}
+		/// <summary>
+		/// Gets the Range Properties child element.
+		/// </summary>
+		public RangePr RangePr { get; }
 		#endregion
 
 		#region Constructors
@@ -129,10 +129,13 @@ namespace OfficeOpenXml.Table.PivotTable
 			var discretePrNode = topNode.SelectSingleNode("d:discretePr", this.NameSpaceManager);
 			if (discretePrNode != null)
 				this.DiscreteGroupingProperties = new DiscreteGroupingPropertiesCollection(this.NameSpaceManager, discretePrNode);
-			if (string.IsNullOrEmpty(this.RangeGroupingProperties))
+			var rangePrNode = topNode.SelectSingleNode("d:rangePr", this.NameSpaceManager);
+			if (rangePrNode != null)
+				this.RangePr = new RangePr(this.NameSpaceManager, rangePrNode);
+			if (string.IsNullOrEmpty(this.RangePr?.GroupBy))
 				this.GroupBy = PivotFieldDateGrouping.None;
 			else
-				this.GroupBy = (PivotFieldDateGrouping)Enum.Parse(typeof(PivotFieldDateGrouping), this.RangeGroupingProperties, true);
+				this.GroupBy = (PivotFieldDateGrouping)Enum.Parse(typeof(PivotFieldDateGrouping), this.RangePr.GroupBy, true);
 		}
 		#endregion
 	}

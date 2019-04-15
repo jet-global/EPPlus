@@ -129,9 +129,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(row));
 			if (cacheDefinition == null)
 				throw new ArgumentNullException(nameof(cacheDefinition));
-			var nonCalculatedFieldsCount = cacheDefinition.CacheFields.Count(c => string.IsNullOrEmpty(c.Formula));
-			if (row.Count() != nonCalculatedFieldsCount)
-				throw new InvalidOperationException("An attempt was made to create a CacheRecord node with an invalid number of fields.");
+			//var nonCalculatedFieldsCount = cacheDefinition.CacheFields.Count(c => string.IsNullOrEmpty(c.Formula));
+			//if (row.Count() != nonCalculatedFieldsCount)
+			//	throw new InvalidOperationException("An attempt was made to create a CacheRecord node with an invalid number of fields.");
 			this.NameSpaceManager = namespaceManager;
 			var recordNode = parentNode.OwnerDocument.CreateElement("d:r");
 			int col = 0;
@@ -182,10 +182,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				var type = CacheItem.GetObjectType(value);
 				var currentItem = myItems[col];
 				var cacheField = cacheDefinition.CacheFields[col];
-				if (cacheField.HasSharedItems)
+				if (cacheField.HasSharedItems || cacheField.ClearedSharedItems)
 				{
 					// If shared items contains value, update this.Value to index
-					// otherwise, create and add new sharedItem, update this.Value to new index
+					// otherwise, create and add new sharedItem, update this.Value to new index.
 					currentItem.Value = this.GetCacheFieldSharedItemIndexString(cacheField, type, value);
 				}
 				else

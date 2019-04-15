@@ -246,10 +246,10 @@ namespace EPPlusTest.Table.PivotTable
 				this.AssertCacheRecord(cacheRecords, 1, 0, PivotCacheRecordType.n, "2");
 				this.AssertCacheRecord(cacheRecords, 2, 0, PivotCacheRecordType.n, "3");
 				this.AssertCacheRecord(cacheRecords, 0, 1, PivotCacheRecordType.x, "0");
-				this.AssertCacheRecord(cacheRecords, 1, 1, PivotCacheRecordType.x, "3");
+				this.AssertCacheRecord(cacheRecords, 1, 1, PivotCacheRecordType.x, "1");
 				this.AssertCacheRecord(cacheRecords, 2, 1, PivotCacheRecordType.x, "2");
 				this.AssertCacheRecord(cacheRecords, 0, 2, PivotCacheRecordType.x, "0");
-				this.AssertCacheRecord(cacheRecords, 1, 2, PivotCacheRecordType.x, "2");
+				this.AssertCacheRecord(cacheRecords, 1, 2, PivotCacheRecordType.x, "1");
 				this.AssertCacheRecord(cacheRecords, 2, 2, PivotCacheRecordType.x, "0");
 				this.AssertCacheRecord(cacheRecords, 0, 3, PivotCacheRecordType.n, "100");
 				this.AssertCacheRecord(cacheRecords, 1, 3, PivotCacheRecordType.n, "90000");
