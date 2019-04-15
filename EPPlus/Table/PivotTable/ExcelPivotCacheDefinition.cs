@@ -1043,15 +1043,12 @@ namespace OfficeOpenXml.Table.PivotTable
 					{
 						cacheField.SharedItems.ContainsDate = hasDate;
 						cacheField.SharedItems.MinDate = minDate;
-						if (maxDate == null && minDate != null)
-						{
-							// If the min date value is a date with no time component and there is only one shared item,
-							// Excel sets the max date to the next day. Otherwise, max date is set to min date.
-							if (minDate.Value.TimeOfDay.TotalMilliseconds == 0)
-								maxDate = minDate.Value.AddDays(1);
-							else
-								maxDate = minDate;
-						}
+						if (maxDate == null)
+							maxDate = minDate;
+
+						// If the max date value is a date with no time component (midnight), Excel sets the max date to the next day.
+						if (maxDate != null && maxDate.Value.TimeOfDay.TotalMilliseconds == 0)
+							maxDate = maxDate.Value.AddDays(1);
 						cacheField.SharedItems.MaxDate = maxDate;
 					}
 
