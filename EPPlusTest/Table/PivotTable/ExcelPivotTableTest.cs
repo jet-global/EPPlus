@@ -77948,6 +77948,46 @@ namespace EPPlusTest.Table.PivotTable
 		#endregion
 		#endregion
 
+		#region Empty Tests
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableEmptyStructure.xlsx")]
+		public void PivotTableEmptyPivotTableStructure()
+		{
+			var file = new FileInfo("PivotTableEmptyStructure.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet8";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables.Single();
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 3, 1, null),
+					new ExpectedCellValue(sheetName, 3, 2, null),
+					new ExpectedCellValue(sheetName, 3, 3, null),
+					new ExpectedCellValue(sheetName, 4, 1, null),
+					new ExpectedCellValue(sheetName, 4, 2, null),
+					new ExpectedCellValue(sheetName, 4, 3, null),
+					new ExpectedCellValue(sheetName, 5, 1, null),
+					new ExpectedCellValue(sheetName, 5, 2, null),
+					new ExpectedCellValue(sheetName, 5, 3, null),
+					new ExpectedCellValue(sheetName, 19, 1, null),
+					new ExpectedCellValue(sheetName, 19, 2, null),
+					new ExpectedCellValue(sheetName, 19, 3, null),
+					new ExpectedCellValue(sheetName, 20, 1, null),
+					new ExpectedCellValue(sheetName, 20, 2, null),
+					new ExpectedCellValue(sheetName, 20, 3, null),
+				});
+			}
+		}
+		#endregion
+
 		#region Helper Methods
 		internal static void CheckPivotTableAddress(ExcelAddress expectedAddress, ExcelAddress pivotTableAddress)
 		{

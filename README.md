@@ -1,3 +1,6 @@
+ [![Build Status](https://jetreports.visualstudio.com/Jet/_apis/build/status/EPPlus/EPPlus-CI?branchName=master)](https://jetreports.visualstudio.com/Jet/_build/latest?definitionId=16&branchName=master)
+ 
+ 
  This is the Jet Reports fork of EPPlus ( https://epplus.codeplex.com/ , (C) 2011-2017 Jan Källman and others as noted in the source code.)
 
 ### How this fork differs from the mainline:
