@@ -41,7 +41,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets or sets the type of group by that this grouping represents.
+		/// Gets the type of group by that this grouping represents.
 		/// </summary>
 		public string GroupBy
 		{
