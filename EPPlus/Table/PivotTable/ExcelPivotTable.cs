@@ -1303,7 +1303,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				if (subtotalTypes.Count == 1)
 				{
 					var type = subtotalTypes.First();
-					if (!type.IsEquivalentTo("default"))
+					if (!type.IsEquivalentTo("default") && this.RowFields.Last().Index != pivotField.Index)
 						return type;
 				}
 				else if (subtotalTypes.Count > 1)
@@ -1559,9 +1559,15 @@ namespace OfficeOpenXml.Table.PivotTable
 				var root = this.BuildRowColTree(rowColFieldCollection, pageFieldIndices, stringResources);
 				root.SortChildren(this);
 				if (isRowItems && root.Children.Count > 0)
+				{
 					this.BuildRowItems(root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>(), -1);
+					this.CreateLeafFieldCustomFieldSettingsNode(true);
+				}
 				else if (root.Children.Count > 0)
+				{
 					this.BuildColumnItems(root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>());
+					this.CreateLeafFieldCustomFieldSettingsNode(false);
+				}
 
 				// Create grand total items if necessary.
 				bool grandTotals = isRowItems ? this.RowGrandTotals : this.ColumnGrandTotals;
@@ -1582,8 +1588,42 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
+		private void CreateLeafFieldCustomFieldSettingsNode(bool isRowField)
+		{
+			ExcelPivotTableRowColumnFieldCollection collection = isRowField ? this.RowFields : this.ColumnFields;
+			if (collection.Last().Index == -2)
+				return;
+			var lastPivotField = isRowField ? this.Fields[collection.Last().Index] : this.Fields[collection.Last().Index];
+			var lastItemSubtotalValue = lastPivotField.Items.Last().T;
+			if (collection.Count > 1 && lastPivotField.DefaultSubtotal && !lastItemSubtotalValue.IsEquivalentTo("default") && !string.IsNullOrEmpty(lastItemSubtotalValue))
+			{
+				var functionNames = lastPivotField.GetEnabledSubtotalTypes();
+				int itemsCount = lastPivotField.Items.Count(i => string.IsNullOrEmpty(i.T));
+				for (int i = 0; i < itemsCount; i++)
+				{
+					foreach (var function in functionNames)
+					{
+						List<Tuple<int, int>> indices = new List<Tuple<int, int>>(); ;
+						if (i == 0 && function == functionNames.First())
+						{
+							for (int k = 0; k < collection.Count - 1; k++)
+							{
+								// Excel stores 1048832 for the member properties ('x' value) for the row/column item.
+								indices.Add(new Tuple<int, int>(lastPivotField.Index, 1048832));
+							}
+							indices.Add(new Tuple<int, int>(lastPivotField.Index, i));
+						}
+						else
+							indices.Add(new Tuple<int, int>(lastPivotField.Index, i));
+						var hasDataFields = collection.Any(r => r.Index == -2);
+						this.CreateTotalNodes(function, isRowField, indices, lastPivotField, collection.Count - 1, true, hasDataFields, 0, true);
+					}
+				}
+			}
+		}
+
 		private void CreateTotalNodes(string totalType, bool isRowItem, List<Tuple<int, int>> indices, ExcelPivotTableField pivotField,
-			int repeatedItemsCount, bool multipleSubtotalDataFields, bool hasDataFields, int dataFieldIndex = 0)
+			int repeatedItemsCount, bool multipleSubtotalDataFields, bool hasDataFields, int dataFieldIndex = 0, bool customField = false)
 		{
 			var itemsCollection = isRowItem ? this.RowItems : this.ColumnItems;
 			var headerCollection = isRowItem ? this.RowHeaders : this.ColumnHeaders;
@@ -1617,7 +1657,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				for (int i = 0; i < index; i++)
 				{
 					var header = new PivotTableHeader(indices, pivotField, i, grandTotal, false, false, totalType, aboveDataField);
-					itemsCollection.AddSumNode(totalType, repeatedItemsCount, xMember, i);
+					var list = customField ? indices : null;
+					itemsCollection.AddSumNode(totalType, repeatedItemsCount, xMember, i, list);
 					headerCollection.Add(header);
 				}
 			}
@@ -1712,7 +1753,9 @@ namespace OfficeOpenXml.Table.PivotTable
 					ExcelRange cell = null;
 					for (int j = 0; j < item.Count; j++)
 					{
-						string totalValue = this.GetTotalCaptionCellValue(this.RowFields, item, header, stringResources);
+						if (item[j] == 1048832)
+							continue;
+						string totalValue = this.GetTotalCaptionCellValue(this.RowFields, item, header, stringResources, j);
 						if (!string.IsNullOrEmpty(totalValue))
 						{
 							column = this.GetRowHeaderColumn(item, this.Address.Start.Column, header.CacheRecordIndices, j);
@@ -1813,32 +1856,36 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				for (int i = 0; i < this.ColumnItems.Count; i++)
 				{
+					var item = this.ColumnItems[i];
 					int startHeaderRow = startRow;
-					string itemType = this.GetTotalCaptionCellValue(this.ColumnFields, this.ColumnItems[i], this.ColumnHeaders[i], stringResources);
-					if (!string.IsNullOrEmpty(itemType))
+					for (int j = 0; j < item.Count; j++)
 					{
-						int totalCaptionRow = startHeaderRow + this.ColumnItems[i].RepeatedItemsCount;
-						this.Worksheet.Cells[totalCaptionRow, column++].Value = itemType;
-						continue;
-					}
-
-					for (int j = 0; j < this.ColumnItems[i].Count; j++)
-					{
-						var columnFieldIndex = this.ColumnItems[i].RepeatedItemsCount == 0 ? j : j + this.ColumnItems[i].RepeatedItemsCount;
-						var sharedItem = this.GetSharedItemValue(this.ColumnFields, this.ColumnItems[i], columnFieldIndex, j, stringResources);
-						var cellRow = this.ColumnItems[i].RepeatedItemsCount == 0 ? startHeaderRow : startHeaderRow + this.ColumnItems[i].RepeatedItemsCount;
-						this.Worksheet.Cells[cellRow, column].Value = sharedItem;
-						startHeaderRow++;
-
-						if (!hasCompactField && !this.CompactData && i == 0 && this.ColumnFields.Count > 1)
+						if (item[j] == 1048832)
+							continue;
+						string itemType = this.GetTotalCaptionCellValue(this.ColumnFields, item, this.ColumnHeaders[i], stringResources, j);
+						if (!string.IsNullOrEmpty(itemType))
 						{
-							var pivotFieldIndex = this.ColumnFields[columnFieldIndex].Index;
-							if (pivotFieldIndex == -2)
-								columnFieldNames.Add(stringResources.ValuesCaption);
-							else
+							int totalCaptionRow = startHeaderRow + item.RepeatedItemsCount;
+							this.Worksheet.Cells[totalCaptionRow, column].Value = itemType;
+						}
+						else
+						{
+							var columnFieldIndex = item.RepeatedItemsCount == 0 ? j : j + item.RepeatedItemsCount;
+							var sharedItem = this.GetSharedItemValue(this.ColumnFields, item, columnFieldIndex, j, stringResources);
+							var cellRow = item.RepeatedItemsCount == 0 ? startHeaderRow : startHeaderRow + item.RepeatedItemsCount;
+							this.Worksheet.Cells[cellRow, column].Value = sharedItem;
+							startHeaderRow++;
+
+							if (!hasCompactField && !this.CompactData && i == 0 && this.ColumnFields.Count > 1)
 							{
-								var pivotField = this.Fields[pivotFieldIndex];
-								columnFieldNames.Add(pivotField.Name);
+								var pivotFieldIndex = this.ColumnFields[columnFieldIndex].Index;
+								if (pivotFieldIndex == -2)
+									columnFieldNames.Add(stringResources.ValuesCaption);
+								else
+								{
+									var pivotField = this.Fields[pivotFieldIndex];
+									columnFieldNames.Add(pivotField.Name);
+								}
 							}
 						}
 					}
@@ -1854,7 +1901,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.WriteHeadersForOutlineAndTabularForm(columnFieldNames, false);
 		}
 
-		private string GetTotalCaptionCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, StringResources stringResources)
+		private string GetTotalCaptionCellValue(ExcelPivotTableRowColumnFieldCollection field, RowColumnItem item, PivotTableHeader header, StringResources stringResources, int j = 0)
 		{
 			string totalHeader = string.Empty;
 			if (!string.IsNullOrEmpty(item.ItemType))
@@ -1872,7 +1919,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				else
 				{
-					var itemName = this.GetSharedItemValue(field, item, item.RepeatedItemsCount, 0, stringResources);
+					var itemName = this.GetSharedItemValue(field, item, item.RepeatedItemsCount, j, stringResources);
 					if (this.DataFields.Count > 1 && header.IsAboveDataField && 
 						((this.HasRowDataFields && field == this.RowFields) || (this.HasColumnDataFields && field == this.ColumnFields)))
 					{
