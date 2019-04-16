@@ -61,7 +61,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					base.SetXmlNodeString("@v", formattedNumberValue, true);
 				}
 				else
-					base.SetXmlNodeString("@v", value, true);
+					base.SetXmlNodeString("@v", value, false);
 			}
 		}
 		#endregion
@@ -92,12 +92,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				throw new ArgumentNullException(nameof(parentNode));
 			base.TopNode = parentNode.OwnerDocument.CreateElement(type.ToString(), parentNode.NamespaceURI);
 			this.Type = type;
-			if (!string.IsNullOrEmpty(value))
-			{
-				var attr = parentNode.OwnerDocument.CreateAttribute("v");
-				base.TopNode.Attributes.Append(attr);
-				this.Value = value;
-			}
+			var attr = parentNode.OwnerDocument.CreateAttribute("v");
+			base.TopNode.Attributes.Append(attr);
+			this.Value = value;
 		}
 		#endregion
 
