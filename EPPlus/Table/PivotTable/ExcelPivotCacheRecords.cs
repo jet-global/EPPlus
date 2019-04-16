@@ -325,8 +325,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			foreach (var tuple in list)
 			{
-				// Ignore data field tuples or group pivot field tuples.
-				if (tuple.Item1 == -2)
+				// Ignore data field tuples, group pivot field tuples and custom field subtotal settings.
+				if (tuple.Item1 == -2 || tuple.Item2 == 1048832)
 					continue;
 
 				var cacheField = this.CacheDefinition.CacheFields[tuple.Item1];

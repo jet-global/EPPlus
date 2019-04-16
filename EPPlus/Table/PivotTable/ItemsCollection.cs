@@ -81,9 +81,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="repeatedItemsCount">The 'r' attribute value.</param>
 		/// <param name="xAttribute">The 'x' attribute value.</param>
 		/// <param name="dataFieldIndex">The 'i' attribute value which points to a data field.</param>
-		public void AddSumNode(string totalType, int repeatedItemsCount = 0, int xAttribute = 0, int dataFieldIndex = 0)
+		/// <param name="indices">The list of xMember properties used for custom field setting subtotal nodes.</param>
+		public void AddSumNode(string totalType, int repeatedItemsCount = 0, int xAttribute = 0, int dataFieldIndex = 0, List<Tuple<int, int>> indices = null)
 		{
-			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, repeatedItemsCount, xAttribute, totalType, dataFieldIndex));
+			base.AddItem(new RowColumnItem(this.NameSpaceManager, base.TopNode, repeatedItemsCount, xAttribute, totalType, dataFieldIndex, indices));
 		}
 
 		/// <summary>

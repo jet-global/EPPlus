@@ -137,8 +137,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="memberIndex">The value of the 'x' child node.</param>
 		/// <param name="itemType">The value of the 't' attribute.</param>
 		/// <param name="dataFieldIndex">The 'i' attribute value which points to a data field.</param>
+		/// <param name="indices">The list of xMember properties used for custom field setting subtotal nodes.</param>
 		public RowColumnItem(XmlNamespaceManager namespaceManager, XmlNode parentNode, int repeatedItemsCount, int memberIndex, 
-			string itemType = null, int dataFieldIndex = 0) : base(namespaceManager, null)
+			string itemType = null, int dataFieldIndex = 0, List<Tuple<int, int>> indices = null) : base(namespaceManager, null)
 		{
 			if (parentNode == null)
 				throw new ArgumentNullException(nameof(parentNode));
@@ -147,7 +148,18 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.RepeatedItemsCount = repeatedItemsCount;
 			this.DataFieldIndex = dataFieldIndex;
 			var xNode = parentNode.OwnerDocument.CreateElement("x", base.TopNode.NamespaceURI);
-			if (memberIndex > 0)
+			if (indices != null)
+			{
+				for (int i = 0; i < indices.Count; i++)
+				{
+					xNode = parentNode.OwnerDocument.CreateElement("x", base.TopNode.NamespaceURI);
+					var attr = parentNode.OwnerDocument.CreateAttribute("v");
+					xNode.Attributes.Append(attr);
+					xNode.Attributes["v"].Value = indices[i].Item2.ToString();
+					base.TopNode.AppendChild(xNode);
+				}
+			}
+			else if (memberIndex > 0)
 			{
 				var attr = parentNode.OwnerDocument.CreateAttribute("v");
 				xNode.Attributes.Append(attr);
