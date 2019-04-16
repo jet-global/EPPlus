@@ -124,7 +124,7 @@ namespace EPPlusTest.Table.PivotTable
 			Assert.AreEqual(PivotCacheRecordType.m, cacheItem.Type);
 			Assert.AreEqual(1, parentNode.ChildNodes.Count);
 			Assert.AreEqual("m", parentNode.FirstChild.Name);
-			Assert.IsNull(parentNode.FirstChild.Attributes["v"]);
+			Assert.AreEqual(string.Empty, parentNode.FirstChild.Attributes["v"].Value);
 		}
 
 		[TestMethod]
