@@ -988,7 +988,7 @@ namespace OfficeOpenXml
 					AddressType? resultType = null;
 					foreach (var rangePart in rangeParts)
 					{
-						AddressType rangePartType = ExcelAddress.GetAddressType(rangePart);
+						AddressType rangePartType = ExcelAddress.GetAddressType(rangePart, true);
 						// Allow the first half of a range to determine its type unless the second half is invalid.
 						if (resultType == null)
 							resultType = rangePartType;
@@ -997,7 +997,7 @@ namespace OfficeOpenXml
 					}
 					return resultType.Value;
 				}
-				return ExcelAddress.GetAddressType(address);
+				return ExcelAddress.GetAddressType(address, false);
 			}
 		}
 
@@ -1031,7 +1031,7 @@ namespace OfficeOpenXml
 			}
 		}
 		
-		private static AddressType GetAddressType(string address)
+		private static AddressType GetAddressType(string address, bool allowHalfAddress)
 		{
 			if (ExcelAddress.SplitAddress(address, out string workbook, out string worksheet, out bool isWorksheetQuoted, out string internalAddress))
 			{
@@ -1042,7 +1042,7 @@ namespace OfficeOpenXml
 					internalAddress = internalAddress.Substring(0, internalAddress.IndexOf(','));
 				if (string.IsNullOrEmpty(internalAddress) || internalAddress.Contains(ExcelErrorValue.Values.Ref))
 					return AddressType.Invalid;
-				if (ExcelAddress.IsAddress(internalAddress))
+				if (ExcelAddress.IsAddress(internalAddress, allowHalfAddress))
 				{
 					// The worksheet will have the '!' stripped off if it is an invalid reference.
 					if (!isWorksheetQuoted && worksheet == "#REF")
@@ -1057,10 +1057,12 @@ namespace OfficeOpenXml
 				return AddressType.Invalid;
 		}
 
-		private static bool IsAddress(string intAddress)
+		private static bool IsAddress(string internalAddress, bool allowHalfAddress)
 		{
-			if (string.IsNullOrEmpty(intAddress)) return false;
-			var cells = intAddress.Split(':');
+			if (string.IsNullOrEmpty(internalAddress))
+				return false;
+			// TODO: Delete this split, it should be redundant
+			var cells = internalAddress.Split(':');
 			int fromRow, toRow, fromCol, toCol;
 
 			if (!GetRowCol(cells[0], out fromRow, out fromCol, false))
@@ -1076,6 +1078,8 @@ namespace OfficeOpenXml
 			}
 			else
 			{
+				if (!allowHalfAddress && (fromRow < 1 || fromCol < 1))
+					return false;
 				toRow = fromRow;
 				toCol = fromCol;
 			}

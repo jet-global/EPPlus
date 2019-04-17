@@ -94,61 +94,37 @@ namespace OfficeOpenXml.FormulaParsing.LexicalAnalysis
 		/// <returns>The created token.</returns>
 		public Token Create(IEnumerable<Token> tokens, string token, string worksheet)
 		{
-			Token tokenSeparator = null;
-			if (_tokenSeparatorProvider.Tokens.TryGetValue(token, out tokenSeparator))
-			{
+			if (_tokenSeparatorProvider.Tokens.TryGetValue(token, out var tokenSeparator))
 				return tokenSeparator;
-			}
 			var tokenList = (IList<Token>)tokens;
 			if (tokens.Any() && tokens.Last().TokenType == TokenType.String)
-			{
 				return new Token(token, TokenType.StringContent);
-			}
 			if (!string.IsNullOrEmpty(token))
-			{
 				token = token.Trim();
-			}
 			if (Regex.IsMatch(token, RegexConstants.Decimal))
-			{
 				return new Token(token, TokenType.Decimal);
-			}
 			if (Regex.IsMatch(token, RegexConstants.Integer))
-			{
 				return new Token(token, TokenType.Integer);
-			}
 			if (Regex.IsMatch(token, RegexConstants.Boolean, RegexOptions.IgnoreCase))
-			{
 				return new Token(token, TokenType.Boolean);
-			}
 			if (Regex.IsMatch(token, RegexConstants.StructuredReference, RegexOptions.IgnoreCase | RegexOptions.Multiline))
-			{
 				return new Token(token, TokenType.StructuredReference);
-			}
 			if (_nameValueProvider != null && _nameValueProvider.IsNamedValue(token, worksheet))
-			{
 				return new Token(token, TokenType.NameValue);
-			}
 			if (_functionNameProvider.IsFunctionName(token))
-			{
 				return new Token(token, TokenType.Function);
-			}
 			if (tokenList.Count > 0 && tokenList[tokenList.Count - 1].TokenType == TokenType.OpeningEnumerable)
-			{
 				return new Token(token, TokenType.Enumerable);
-			}
+
 			var addressType = ExcelAddress.IsValid(token);
 			if (addressType == ExcelAddress.AddressType.InternalAddress)
-			{
 				return new Token(token, TokenType.ExcelAddress);
-			}
 			if (addressType == ExcelAddress.AddressType.ExternalAddress)
-			{
 				return new Token(token, TokenType.InvalidReference);
-			}
+			else if (addressType == ExcelAddress.AddressType.ExternalName)
+				return new Token(token, TokenType.InvalidReference);
 			if (addressType == ExcelAddress.AddressType.Invalid)
-			{
 				return new Token(token, TokenType.InvalidReference);
-			}
 			return new Token(token, TokenType.Unrecognized);
 		}
 
