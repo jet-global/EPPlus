@@ -1061,41 +1061,12 @@ namespace OfficeOpenXml
 		{
 			if (string.IsNullOrEmpty(internalAddress))
 				return false;
-			// TODO: Delete this split, it should be redundant
-			var cells = internalAddress.Split(':');
-			int fromRow, toRow, fromCol, toCol;
+			if (!GetRowCol(internalAddress, out var fromRow, out var fromCol, false))
+				return false;
+			if (!allowHalfAddress && (fromRow < 1 || fromCol < 1))
+				return false;
 
-			if (!GetRowCol(cells[0], out fromRow, out fromCol, false))
-			{
-				return false;
-			}
-			if (cells.Length > 1)
-			{
-				if (!GetRowCol(cells[1], out toRow, out toCol, false))
-				{
-					return false;
-				}
-			}
-			else
-			{
-				if (!allowHalfAddress && (fromRow < 1 || fromCol < 1))
-					return false;
-				toRow = fromRow;
-				toCol = fromCol;
-			}
-			if (fromRow <= toRow &&
-				fromCol <= toCol &&
-				fromCol > -1 &&
-				toCol <= ExcelPackage.MaxColumns &&
-				fromRow > -1 &&
-				toRow <= ExcelPackage.MaxRows)
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return fromCol > -1 && fromRow > -1 && fromCol <= ExcelPackage.MaxColumns && fromRow <= ExcelPackage.MaxRows;
 		}
 
 		private static bool SplitAddress(string Address, out string wb, out string ws, out bool isWorksheetQuoted, out string internalAddress)

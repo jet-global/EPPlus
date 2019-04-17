@@ -4,6 +4,8 @@
   <MSTest>
     <DeleteDeploymentDirectoryAfterTestRunIsComplete>false</DeleteDeploymentDirectoryAfterTestRunIsComplete>
   </MSTest>
-
+  <RunConfiguration>    
+    <ResultsDirectory>%temp%\TestResults</ResultsDirectory>    
+  </RunConfiguration>
 
 </RunSettings>
