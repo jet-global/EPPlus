@@ -1063,6 +1063,9 @@ namespace OfficeOpenXml
 				return false;
 			if (!GetRowCol(internalAddress, out var fromRow, out var fromCol, false))
 				return false;
+			// Addresses such as "C:C" are split on ":" and passed to this method, but only in certain cases.
+			// The "allowHalfAddress" parameter allows values such as "C" to be parsed as addresses, which
+			// was previously causing some named ranges to be parsed as a cell reference.
 			if (!allowHalfAddress && (fromRow < 1 || fromCol < 1))
 				return false;
 
