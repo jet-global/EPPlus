@@ -1873,6 +1873,12 @@ namespace EPPlusTest
 			Assert.AreEqual(AddressType.ExternalAddress, ExcelAddress.IsValid("[1]Sheet1!C5:D6"));
 			Assert.AreEqual(AddressType.ExternalAddress, ExcelAddress.IsValid("'[1]Sheet1'!C5:'[1]Sheet1'D6"));
 		}
+
+		[TestMethod]
+		public void IsValidLettersThatLookLikeTheBeginningOfAnAddress()
+		{
+			Assert.AreEqual(AddressType.InternalName, ExcelAddress.IsValid("ABC"));
+		}
 		#endregion
 
 		#region ContainsCoordinate Tests
