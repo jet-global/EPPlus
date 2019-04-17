@@ -84,6 +84,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <param name="headers">The headers for the grand totals.</param>
 		/// <param name="cellBackingData">The backing data for the current grand total cell.</param>
 		/// <param name="isRowTotal">A value indicating if this is a row grand total.</param>
+		/// <param name="isParentColumnTotal">Bool indicating if % of Parent Total is used.</param>
 		/// <returns>An object value for a cell.</returns>
 		protected object CalculateGrandTotalValue(List<PivotTableHeader> headers, PivotCellBackingData cellBackingData, bool isRowTotal, bool isParentColumnTotal = false)
 		{
@@ -97,19 +98,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 
 			// Find the parent indices in order to calculate the parent total value.
 			var headerIndices = currentHeader.CacheRecordIndices.Take(currentHeader.CacheRecordIndices.Count - 1).ToList();
-
-			if (isParentColumnTotal)
-			{
-				parentRowHeaderIndices = new List<Tuple<int, int>>();
-				parentColumnHeaderIndices = new List<Tuple<int, int>>();
-			}
-			else
-			{
-				parentRowHeaderIndices = new List<Tuple<int, int>>();
-				parentColumnHeaderIndices = headerIndices;
-			}
-
-
+			parentRowHeaderIndices = new List<Tuple<int, int>>();
+			parentColumnHeaderIndices = isParentColumnTotal ? new List<Tuple<int, int>>() : headerIndices;
 			if (!isRowTotal)
 			{
 				// Use the datafield tuple if it exists (for parent row calculator), otherwise, use the tuple list passed in.
