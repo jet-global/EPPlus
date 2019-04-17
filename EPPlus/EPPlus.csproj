@@ -238,6 +238,7 @@
     <Compile Include="Drawing\Sparkline\SparklineEnums.cs" />
     <Compile Include="Drawing\Vml\ExcelVmlDrawingCommentHelper.cs" />
     <Compile Include="ExcelChartsheet.cs" />
+    <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="ExternalReferenceCollection.cs" />
     <Compile Include="FontSize.cs" />
@@ -811,6 +812,7 @@
     <Compile Include="Table\PivotTable\ItemsCollection.cs" />
     <Compile Include="Table\PivotTable\PivotItemTreeNode.cs" />
     <Compile Include="Table\PivotTable\PivotTableHeader.cs" />
+    <Compile Include="Table\PivotTable\RangePr.cs" />
     <Compile Include="Table\PivotTable\RowColumnItem.cs" />
     <Compile Include="Table\PivotTable\SharedItemsCollection.cs" />
     <Compile Include="Table\PivotTable\AutoSortScopeReference.cs" />

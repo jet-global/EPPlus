@@ -197,7 +197,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					var cacheField = this.CacheDefinition.CacheFields[cacheFieldIndex];
 					var cell = sourceDataRange.Worksheet.Cells[row, column];
 					// If the cell value is a DateTime, convert it to an date.
-					if (cacheField.HasSharedItems && !string.IsNullOrEmpty(cacheField.SharedItems.MinDate) && cell.Value is double)
+					if (cacheField.SharedItems.ContainsDate == true && cell.Value is double)
 						rowCells.Add(DateTime.FromOADate((double)cell.Value));
 					else
 						rowCells.Add(cell.Value);
@@ -260,6 +260,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, 
 			Dictionary<int, List<int>> filterIndices, int dataFieldIndex, ExcelPivotTable pivotTable = null)
 		{
+			// Convert tuple values if the tuple is a group field.
+			rowTuples = this.ConvertGroupingTuples(rowTuples, pivotTable);
+			columnTuples = this.ConvertGroupingTuples(columnTuples, pivotTable);
+
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
@@ -288,6 +292,26 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
+		private List<Tuple<int, int>> ConvertGroupingTuples(List<Tuple<int, int>> tupleList, ExcelPivotTable pivotTable)
+		{
+			if (tupleList == null || pivotTable == null)
+				return tupleList;
+
+			var convertedList = new List<Tuple<int, int>>();
+			foreach (var tuple in tupleList)
+			{
+				CacheFieldNode cacheField = tuple.Item1 == -2 ? null : pivotTable.CacheDefinition.CacheFields[tuple.Item1];
+				if (cacheField != null && cacheField.IsDateGrouping)
+				{
+					int pivotFieldItemValue = pivotTable.Fields[tuple.Item1].Items[tuple.Item2].X;
+					convertedList.Add(new Tuple<int, int>(tuple.Item1, pivotFieldItemValue));
+				}
+				else
+					convertedList.Add(tuple);
+			}
+			return convertedList;
+		}
+
 		private bool FindCacheRecordIndexAndTupleIndexMatch(IEnumerable<Tuple<int, int>> indexTupleList, CacheRecordNode record, Dictionary<int, List<int>> pageFieldIndices = null)
 		{
 			var indexTupleMatch = indexTupleList.All(i => i.Item1 == -2 || int.Parse(record.Items[i.Item1].Value) == i.Item2);
@@ -301,8 +325,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			foreach (var tuple in list)
 			{
-				// Ignore data field tuples or group pivot field tuples.
-				if (tuple.Item1 == -2)
+				// Ignore data field tuples, group pivot field tuples and custom field subtotal settings.
+				if (tuple.Item1 == -2 || tuple.Item2 == 1048832)
 					continue;
 
 				var cacheField = this.CacheDefinition.CacheFields[tuple.Item1];
@@ -341,7 +365,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private bool FindGroupingRecordValueAndTupleMatch(CacheFieldNode cacheField, CacheRecordNode record, Tuple<int, int> tuple, ExcelPivotTable pivotTable)
 		{
-			if (cacheField.FieldGroup.GroupBy != PivotFieldDateGrouping.None)
+			if (cacheField.IsDateGrouping)
 			{
 				// Find record indices for date groupings fields.
 				var recordIndices = this.DateGroupingRecordValueTupleMatch(cacheField, tuple.Item2);

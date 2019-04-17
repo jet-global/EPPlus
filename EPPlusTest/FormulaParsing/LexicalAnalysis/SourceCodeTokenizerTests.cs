@@ -421,6 +421,26 @@ namespace EPPlusTest.FormulaParsing.LexicalAnalysis
 			Assert.AreEqual(TokenType.StructuredReference, tokens.ElementAt(1).TokenType);
 		}
 
+		[TestMethod]
+		public void TokenizeHandlesNamedRange()
+		{
+			var formula = "CONTENT_TYPE";
+			var tokens = _tokenizer.Tokenize(formula);
+			Assert.AreEqual(1, tokens.Count());
+			Assert.AreEqual("CONTENT_TYPE", tokens.ElementAt(0).Value);
+			Assert.AreEqual(TokenType.NameValue, tokens.ElementAt(0).TokenType);
+		}
+
+		[TestMethod]
+		public void TokenizeHandlesNamedRangeThatKindOfLooksLikeAnAddress()
+		{
+			var formula = "ABC";
+			var tokens = _tokenizer.Tokenize(formula);
+			Assert.AreEqual(1, tokens.Count());
+			Assert.AreEqual("ABC", tokens.ElementAt(0).Value);
+			Assert.AreEqual(TokenType.NameValue, tokens.ElementAt(0).TokenType);
+		}
+
 		#region Error Type Tests
 		[TestMethod]
 		public void TokenizeHandlesNotApplicableError()

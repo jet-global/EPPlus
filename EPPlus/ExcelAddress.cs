@@ -988,7 +988,7 @@ namespace OfficeOpenXml
 					AddressType? resultType = null;
 					foreach (var rangePart in rangeParts)
 					{
-						AddressType rangePartType = ExcelAddress.GetAddressType(rangePart);
+						AddressType rangePartType = ExcelAddress.GetAddressType(rangePart, true);
 						// Allow the first half of a range to determine its type unless the second half is invalid.
 						if (resultType == null)
 							resultType = rangePartType;
@@ -997,7 +997,7 @@ namespace OfficeOpenXml
 					}
 					return resultType.Value;
 				}
-				return ExcelAddress.GetAddressType(address);
+				return ExcelAddress.GetAddressType(address, false);
 			}
 		}
 
@@ -1031,7 +1031,7 @@ namespace OfficeOpenXml
 			}
 		}
 		
-		private static AddressType GetAddressType(string address)
+		private static AddressType GetAddressType(string address, bool allowHalfAddress)
 		{
 			if (ExcelAddress.SplitAddress(address, out string workbook, out string worksheet, out bool isWorksheetQuoted, out string internalAddress))
 			{
@@ -1042,7 +1042,7 @@ namespace OfficeOpenXml
 					internalAddress = internalAddress.Substring(0, internalAddress.IndexOf(','));
 				if (string.IsNullOrEmpty(internalAddress) || internalAddress.Contains(ExcelErrorValue.Values.Ref))
 					return AddressType.Invalid;
-				if (ExcelAddress.IsAddress(internalAddress))
+				if (ExcelAddress.IsAddress(internalAddress, allowHalfAddress))
 				{
 					// The worksheet will have the '!' stripped off if it is an invalid reference.
 					if (!isWorksheetQuoted && worksheet == "#REF")
@@ -1057,41 +1057,19 @@ namespace OfficeOpenXml
 				return AddressType.Invalid;
 		}
 
-		private static bool IsAddress(string intAddress)
+		private static bool IsAddress(string internalAddress, bool allowHalfAddress)
 		{
-			if (string.IsNullOrEmpty(intAddress)) return false;
-			var cells = intAddress.Split(':');
-			int fromRow, toRow, fromCol, toCol;
+			if (string.IsNullOrEmpty(internalAddress))
+				return false;
+			if (!GetRowCol(internalAddress, out var fromRow, out var fromCol, false))
+				return false;
+			// Addresses such as "C:C" are split on ":" and passed to this method, but only in certain cases.
+			// The "allowHalfAddress" parameter allows values such as "C" to be parsed as addresses, which
+			// was previously causing some named ranges to be parsed as a cell reference.
+			if (!allowHalfAddress && (fromRow < 1 || fromCol < 1))
+				return false;
 
-			if (!GetRowCol(cells[0], out fromRow, out fromCol, false))
-			{
-				return false;
-			}
-			if (cells.Length > 1)
-			{
-				if (!GetRowCol(cells[1], out toRow, out toCol, false))
-				{
-					return false;
-				}
-			}
-			else
-			{
-				toRow = fromRow;
-				toCol = fromCol;
-			}
-			if (fromRow <= toRow &&
-				fromCol <= toCol &&
-				fromCol > -1 &&
-				toCol <= ExcelPackage.MaxColumns &&
-				fromRow > -1 &&
-				toRow <= ExcelPackage.MaxRows)
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return fromCol > -1 && fromRow > -1 && fromCol <= ExcelPackage.MaxColumns && fromRow <= ExcelPackage.MaxRows;
 		}
 
 		private static bool SplitAddress(string Address, out string wb, out string ws, out bool isWorksheetQuoted, out string internalAddress)

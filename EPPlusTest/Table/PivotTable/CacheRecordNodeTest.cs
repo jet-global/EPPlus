@@ -170,46 +170,6 @@ namespace EPPlusTest.Table.PivotTable
 
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
-		[ExpectedException(typeof(InvalidOperationException))]
-		public void ConstructCacheRecordNodeWithTooFewRows()
-		{
-			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var package = new ExcelPackage(file))
-			{
-				XmlDocument document = new XmlDocument();
-				document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""0""><r></r></pivotCacheRecords>");
-				var ns = TestUtility.CreateDefaultNSM();
-				var node = document.SelectSingleNode("//d:r", ns);
-				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
-				var row = new List<object> { 5, "e", false };
-				var record = cacheDefinition.CacheRecords[0];
-				new CacheRecordNode(ns, node, row, cacheDefinition);
-			}
-		}
-
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
-		[ExpectedException(typeof(InvalidOperationException))]
-		public void ConstructCacheRecordNodeWithTooManyRows()
-		{
-			var file = new FileInfo("PivotTableDataSourceTypeWorksheet.xlsx");
-			Assert.IsTrue(file.Exists);
-			using (var package = new ExcelPackage(file))
-			{
-				XmlDocument document = new XmlDocument();
-				document.LoadXml(@"<pivotCacheRecords xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" count=""0""><r></r></pivotCacheRecords>");
-				var ns = TestUtility.CreateDefaultNSM();
-				var node = document.SelectSingleNode("//d:r", ns);
-				var cacheDefinition = package.Workbook.PivotCacheDefinitions.First();
-				var row = new List<object> { 5, "e", false, "sdfsdf", "werwer" };
-				var record = cacheDefinition.CacheRecords[0];
-				new CacheRecordNode(ns, node, row, cacheDefinition);
-			}
-		}
-
-		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTableDataSourceTypeWorksheet.xlsx")]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructCacheRecordNodeWithNullParentNode()
 		{
