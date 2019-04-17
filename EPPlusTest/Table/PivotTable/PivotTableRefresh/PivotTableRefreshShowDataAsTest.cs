@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using EPPlusTest.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -6084,6 +6085,125 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 					new ExpectedCellValue(sheetName, 13, 3, 1),
 					new ExpectedCellValue(sheetName, 13, 4, 15)
 				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableShowDataAs.xlsx")]
+		public void PivotTableRefreshShowDataAsPercentOfParentColumnTotal()
+		{
+			var file = new FileInfo("PivotTableShowDataAs.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "PivotTables";
+				using (var package = new ExcelPackage(file))
+				{
+					var dataSheet = package.Workbook.Worksheets[sheetName];
+					dataSheet.Cells["B100:L106"].Value = 0;
+
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable8"];
+
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B100:L106"), pivotTable.Address);
+					Assert.AreEqual(7, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 100, 3, "Column Labels"),
+					new ExpectedCellValue(sheetName, 101, 3, "Sum of Total"),
+					new ExpectedCellValue(sheetName, 101, 7, "Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 101, 11, "Total Sum of Total"),
+					new ExpectedCellValue(sheetName, 101, 12, "Total Sum of Units Sold"),
+					new ExpectedCellValue(sheetName, 102, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 102, 3, "Car Rack"),
+					new ExpectedCellValue(sheetName, 102, 4, "Headlamp"),
+					new ExpectedCellValue(sheetName, 102, 5, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 102, 6, "Tent"),
+					new ExpectedCellValue(sheetName, 102, 7, "Car Rack"),
+					new ExpectedCellValue(sheetName, 102, 8, "Headlamp"),
+					new ExpectedCellValue(sheetName, 102, 9, "Sleeping Bag"),
+					new ExpectedCellValue(sheetName, 102, 10, "Tent"),
+					new ExpectedCellValue(sheetName, 103, 2, "January"),
+					new ExpectedCellValue(sheetName, 103, 3, 1),
+					new ExpectedCellValue(sheetName, 103, 4, 0),
+					new ExpectedCellValue(sheetName, 103, 5, 0),
+					new ExpectedCellValue(sheetName, 103, 6, 0),
+					new ExpectedCellValue(sheetName, 103, 7, 5),
+					new ExpectedCellValue(sheetName, 103, 8, null),
+					new ExpectedCellValue(sheetName, 103, 9, null),
+					new ExpectedCellValue(sheetName, 103, 10, null),
+					new ExpectedCellValue(sheetName, 103, 11, 1),
+					new ExpectedCellValue(sheetName, 103, 12, 5),
+					new ExpectedCellValue(sheetName, 104, 2, "February"),
+					new ExpectedCellValue(sheetName, 104, 3, 0),
+					new ExpectedCellValue(sheetName, 104, 4, 0),
+					new ExpectedCellValue(sheetName, 104, 5, 0.0765661252900232),
+					new ExpectedCellValue(sheetName, 104, 6, 0.923433874709977),
+					new ExpectedCellValue(sheetName, 104, 7, null),
+					new ExpectedCellValue(sheetName, 104, 8, null),
+					new ExpectedCellValue(sheetName, 104, 9, 1),
+					new ExpectedCellValue(sheetName, 104, 10, 6),
+					new ExpectedCellValue(sheetName, 104, 11, 1),
+					new ExpectedCellValue(sheetName, 104, 12, 7),
+					new ExpectedCellValue(sheetName, 105, 2, "March"),
+					new ExpectedCellValue(sheetName, 105, 3, 0.970822776681572),
+					new ExpectedCellValue(sheetName, 105, 4, 0.0291772233184275),
+					new ExpectedCellValue(sheetName, 105, 5, 0),
+					new ExpectedCellValue(sheetName, 105, 6, 0),
+					new ExpectedCellValue(sheetName, 105, 7, 2),
+					new ExpectedCellValue(sheetName, 105, 8, 1),
+					new ExpectedCellValue(sheetName, 105, 9, null),
+					new ExpectedCellValue(sheetName, 105, 10, null),
+					new ExpectedCellValue(sheetName, 105, 11, 1),
+					new ExpectedCellValue(sheetName, 105, 12, 3),
+					new ExpectedCellValue(sheetName, 106, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 106, 3, 0.688288744252928),
+					new ExpectedCellValue(sheetName, 106, 4, 0.00591026053393374),
+					new ExpectedCellValue(sheetName, 106, 5, 0.0234139973133029),
+					new ExpectedCellValue(sheetName, 106, 6, 0.282386997899835),
+					new ExpectedCellValue(sheetName, 106, 7, 7),
+					new ExpectedCellValue(sheetName, 106, 8, 1),
+					new ExpectedCellValue(sheetName, 106, 9, 1),
+					new ExpectedCellValue(sheetName, 106, 10, 6),
+					new ExpectedCellValue(sheetName, 106, 11, 1),
+					new ExpectedCellValue(sheetName, 106, 12, 15),
+				});
+			}
+		}
+
+		[TestMethod]
+		public void AutoGenerateExpectedResults()
+		{
+			string sheetName = "PivotTables";
+			string range = "B100:L106";
+			var sourceFilePath = @"C:\repos\EPPlus\EPPlusTest\Workbooks\PivotTables\PivotTableShowDataAs.xlsx";
+			var outputFilePath = @"C:\Users\rwf\Downloads\expected.cs";
+
+			using (var package = new ExcelPackage(new FileInfo(sourceFilePath)))
+			{
+				var cells = package.Workbook.Worksheets[sheetName].Cells[range];
+				string text = $"TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]{Environment.NewLine}{{{Environment.NewLine}";
+				foreach (var cell in cells)
+				{
+					string value = null;
+					if (cell.Value is string)
+						value = $"\"{cell.Value}\"";
+					else if (cell.Value is ExcelErrorValue errorValue)
+						value = $"ExcelErrorValue.Create(eErrorType.{errorValue.Type})";
+					else if (cell.Value == null)
+						value = "null";
+					else
+						value = cell.Value.ToString();
+
+					text += $"	new ExpectedCellValue(sheetName, {cell._fromRow}, {cell._fromCol}, {value}),{Environment.NewLine}";
+				}
+				text += "});";
+				File.WriteAllText(outputFilePath, text);
 			}
 		}
 		#endregion

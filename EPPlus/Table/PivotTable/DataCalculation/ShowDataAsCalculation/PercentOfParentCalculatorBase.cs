@@ -28,7 +28,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 		/// <param name="parentHeaderIndices">The cache record indices of the parent header.</param>
 		/// <param name="backingDatas">The backing body data for the pivot table.</param>
 		/// <returns>An object value for a cell.</returns>
-		protected object CalculateBodyValue(bool isParentRow, int dataRow, int dataColumn, List<Tuple<int, int>> parentHeaderIndices, PivotCellBackingData[,] backingDatas)
+		protected object CalculateBodyValue(bool isParentRow, int dataRow, int dataColumn, List<Tuple<int, int>> parentHeaderIndices, PivotCellBackingData[,] backingDatas, bool isParentColumnTotal = false)
 		{
 			var rowHeader = base.PivotTable.RowHeaders[dataRow];
 			var columnHeader = base.PivotTable.ColumnHeaders[dataColumn];
@@ -65,6 +65,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 
 				rowTotalType = rowHeader.TotalType;
 				columnTotalType = parentColumnHeader.TotalType;
+				if (isParentColumnTotal)
+					parentColumnHeaderIndices = null;
 			}
 
 			var parentBackingData = PivotTableDataManager.GetBackingCellValues(
