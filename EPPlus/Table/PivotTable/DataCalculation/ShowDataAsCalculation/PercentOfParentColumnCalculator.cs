@@ -41,18 +41,14 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			var rowHeader = base.PivotTable.RowHeaders[dataRow];
 			var columnHeader = base.PivotTable.ColumnHeaders[dataColumn];
 			var cellBackingData = backingDatas[dataRow, dataColumn];
+			var parentHeaderIndices = new List<Tuple<int, int>>();
+			if (columnHeader.CacheRecordIndices.Count > 1)
+				parentHeaderIndices = columnHeader.CacheRecordIndices.Take(columnHeader.CacheRecordIndices.Count - 1).ToList();
+			else if (columnHeader.IsDataField)
+				return null;  // Data field root nodes don't get values.
 
-			if (columnHeader.IsDataField)
-				return null;
-			else
-			{
-				var parentHeaderIndices = new List<Tuple<int, int>>();
-				if (columnHeader.CacheRecordIndices.Count > 1)
-					parentHeaderIndices = columnHeader.CacheRecordIndices.Take(columnHeader.CacheRecordIndices.Count - 1).ToList();
-				else if (columnHeader.IsDataField)
-					return null;  // Data field root nodes don't get values.
-				return base.CalculateBodyValue(false, dataRow, dataColumn, parentHeaderIndices, backingDatas);
-			}
+			var columnFields = base.PivotTable.ColumnFields.Where(v => v.Index != -2);
+			return base.CalculateBodyValue(false, dataRow, dataColumn, parentHeaderIndices, backingDatas, columnFields.Count() == 1);
 		}
 
 		/// <summary>
@@ -69,11 +65,16 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 			PivotCellBackingData[] columnGrandGrandTotalValues,
 			bool isRowTotal)
 		{
-			if (!isRowTotal)
-				return 1;
 			var dataField = base.PivotTable.DataFields[base.DataFieldCollectionIndex];
 			var cellBackingData = grandTotalsBackingDatas[index];
-			return base.CalculateGrandTotalValue(base.PivotTable.ColumnHeaders, cellBackingData, isRowTotal);
+			if (!isRowTotal)
+			{
+				if (Convert.ToDouble(cellBackingData.Result) == 0)
+					return null;
+				else
+					return 1;
+			}			
+			return base.CalculateGrandTotalValue(base.PivotTable.ColumnHeaders, cellBackingData, isRowTotal, true);
 		}
 
 		/// <summary>
