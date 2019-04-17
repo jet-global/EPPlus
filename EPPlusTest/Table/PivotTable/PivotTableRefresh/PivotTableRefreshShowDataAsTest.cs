@@ -6332,37 +6332,6 @@ namespace EPPlusTest.Table.PivotTable.PivotTableRefresh
 				});
 			}				
 		}
-
-		[TestMethod]
-		public void AutoGenerateExpectedResults()
-		{
-			string sheetName = "PivotTables";
-			string range = "B110:L123";
-			var sourceFilePath = @"C:\repos\EPPlus\EPPlusTest\Workbooks\PivotTables\PivotTableShowDataAs.xlsx";
-			var outputFilePath = @"C:\Users\rwf\Downloads\expected.cs";
-
-			using (var package = new ExcelPackage(new FileInfo(sourceFilePath)))
-			{
-				var cells = package.Workbook.Worksheets[sheetName].Cells[range];
-				string text = $"TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]{Environment.NewLine}{{{Environment.NewLine}";
-				foreach (var cell in cells)
-				{
-					string value = null;
-					if (cell.Value is string)
-						value = $"\"{cell.Value}\"";
-					else if (cell.Value is ExcelErrorValue errorValue)
-						value = $"ExcelErrorValue.Create(eErrorType.{errorValue.Type})";
-					else if (cell.Value == null)
-						value = "null";
-					else
-						value = cell.Value.ToString();
-
-					text += $"	new ExpectedCellValue(sheetName, {cell._fromRow}, {cell._fromCol}, {value}),{Environment.NewLine}";
-				}
-				text += "});";
-				File.WriteAllText(outputFilePath, text);
-			}
-		}
 		#endregion
 		#endregion
 
