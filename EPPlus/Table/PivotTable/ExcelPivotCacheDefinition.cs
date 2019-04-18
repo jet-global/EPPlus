@@ -1002,6 +1002,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					bool hasDate = false, hasString = false, hasBlank = false, hasNumbers = false, hasInteger = false, 
 						hasNonIntegerNumber = false, hasBool = false, hasError = false, hasLongText = false;
+
 					DateTime? minDate = null, maxDate = null;
 					foreach (var sharedItem in cacheField.SharedItems)
 					{
@@ -1060,13 +1061,29 @@ namespace OfficeOpenXml.Table.PivotTable
 							cacheField.SharedItems.ContainsInteger = true;  // Indicates strictly integer values.
 					}
 
+					// These four fields are only validated if there are shared items.
 					// Indicates this field contains more than one data type.
 					cacheField.SharedItems.ContainsMixedTypes = this.ContainsMixedDataTypes(hasDate, hasString, hasNumbers, hasBool, hasError);
 					cacheField.SharedItems.ContainsBlank = hasBlank;
-					cacheField.SharedItems.ContainsNumbers = hasNumbers;
+					cacheField.SharedItems.ContainsSemiMixedTypes = hasString || hasBool;  // Excel appears to think bools are strings.
 					cacheField.SharedItems.LongText = hasLongText;
-					cacheField.SharedItems.ContainsSemiMixedTypes = hasString;
-					cacheField.SharedItems.ContainsString = hasString;
+
+					// "...not validated unless there is more than one item in sharedItems or the one and only item is not a blank item.
+					//  If the first item is a blank item the data type the field cannot be verified."
+					if (cacheField.SharedItems.Count > 0 && cacheField.SharedItems.First().Type != PivotCacheRecordType.m)
+					{
+						cacheField.SharedItems.ContainsNumbers = hasNumbers;
+						cacheField.SharedItems.ContainsString = hasString || hasBool;  // Excel appears to think bools are strings.
+						// ContainsDate and ContainsInteger are set above.
+					}
+					else
+					{
+						// Set to defaults if there are not multiple shared items.
+						cacheField.SharedItems.ContainsNumbers = false;
+						cacheField.SharedItems.ContainsDate = false;
+						cacheField.SharedItems.ContainsString = true;
+						cacheField.SharedItems.ContainsInteger = false;
+					}
 				}
 				else
 				{

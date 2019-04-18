@@ -102,7 +102,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Math
 			var input2 = "12/11/2011 11:00 am";
 			var result1 = function.Execute(FunctionsHelper.CreateArgs(input1, input2), this.ParsingContext);
 
-			if ((double)result1.ResultValue < 40554.45833 || (double)result1.ResultValue > 40888.45833)
+			if ((double)result1.ResultValue < 40554.45833 || (double)result1.ResultValue > 40888.45835)
 				Assert.Fail("A value outside of the given range was returned.");
 		}
 
