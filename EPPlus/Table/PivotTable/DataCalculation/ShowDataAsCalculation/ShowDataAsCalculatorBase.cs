@@ -107,7 +107,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 					parentColumnHeaderIndices = currentHeader.CacheRecordIndices.Where(i => i.Item1 == -2).ToList();
 			}
 
-			var parentBackingData = PivotTableDataManager.GetBackingCellValues(
+			var parentBackingData = PivotTableDataManager.GetParentBackingCellValues(
 				this.PivotTable,
 				this.DataFieldCollectionIndex,
 				parentRowHeaderIndices,

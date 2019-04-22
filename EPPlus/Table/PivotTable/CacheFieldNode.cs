@@ -155,7 +155,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					// Compare the value with the existing shared item value with precision as duplicate values
 					// cause corrupt workbooks.
 					double doubleItemValue = double.Parse(item.Value);
-					var doubleTargetValue = Convert.ToDouble(value);
+					var doubleTargetValue = Convert.ToDouble(stringValue);
 					if (Math.Abs(doubleItemValue - doubleTargetValue) < CacheFieldNode.Epsilon)
 						return i;
 				}

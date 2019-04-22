@@ -279,6 +279,58 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 			return matchingValues;
 		}
+
+		/// <summary>
+		/// Get the data field values for each cell from the given cache records and filters.
+		/// </summary>
+		/// <param name="rowCacheRecordList">The list of cache record indices the row header uses.</param>
+		/// <param name="columnCacheRecordList">The list of cache record indices the column header uses.</param>
+		/// <param name="dataFieldIndex">The index of the data field.</param>
+		/// <param name="filterIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
+		/// <returns>A list of the values that make up the total cell value.</returns>
+		public List<object> GetDataFieldValues(List<int> rowCacheRecordList, List<int> columnCacheRecordList, int dataFieldIndex, Dictionary<int, List<int>> filterIndices)
+		{
+			IEnumerable<int> commonIndices = null;
+			if (rowCacheRecordList == null)
+				commonIndices = columnCacheRecordList;
+			else if (columnCacheRecordList == null)
+				commonIndices = rowCacheRecordList;
+			else
+				commonIndices = rowCacheRecordList.Intersect(columnCacheRecordList);
+
+			var returnValues = new List<object>();
+			foreach (var index in commonIndices)
+			{
+				var record = this.Records[index];
+				bool addValue = filterIndices != null ? this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record) : true;
+				if (addValue)
+				{
+					var recordItem = record.Items[dataFieldIndex];
+					var value = recordItem.Value;
+					if (recordItem.Type == PivotCacheRecordType.x)
+					{
+						int recordValue = int.Parse(recordItem.Value);
+						recordItem = this.CacheDefinition.CacheFields[dataFieldIndex].SharedItems[recordValue];
+						value = recordItem.Value;
+					}
+
+					if (string.IsNullOrWhiteSpace(value))
+						returnValues.Add(value);
+					else if (recordItem.Type == PivotCacheRecordType.m)
+						returnValues.Add(null);
+					else if (recordItem.Type == PivotCacheRecordType.n)
+						returnValues.Add(double.Parse(value));
+					else if (recordItem.Type == PivotCacheRecordType.d)
+						returnValues.Add(DateTime.Parse(value));
+					else
+					{
+						double.TryParse(value, out var v);
+						returnValues.Add(v);
+					}
+				}
+			}
+			return returnValues;
+		}
 		#endregion
 
 		#region Internal Methods

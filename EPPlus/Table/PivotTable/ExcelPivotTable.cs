@@ -795,6 +795,16 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Gets or sets the row item tree.
+		/// </summary>
+		internal PivotItemTreeNode RowItemsRoot { get; set; } = new PivotItemTreeNode(-1);
+
+		/// <summary>
+		/// Gets or sets the column item tree.
+		/// </summary>
+		internal PivotItemTreeNode ColumnItemsRoot { get; set; } = new PivotItemTreeNode(-1);
+
+		/// <summary>
 		/// Gets or sets the cache id of the pivot table.
 		/// </summary>
 		internal int CacheID
@@ -1184,10 +1194,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					// If the node is above a data field node and there are multiple data fields, then create a subtotal node for each data field. 
 					if (this.DataFields.Count > 0 && isAboveDataField && !isLastNonDataField && this.HasColumnDataFields)
-						this.CreateTotalNodes(function, false, indices, null, repeatedItemsCount, true, this.HasColumnDataFields);
+						this.CreateTotalNodes(node?.CacheRecordIndices, function, false, indices, null, repeatedItemsCount, true, this.HasColumnDataFields);
 					// Otherwise, if the node is not the last non-data field node and is below a data field node, then only create one subtotal node.
 					else if (!isLastNonDataField && (!isAboveDataField || !this.HasColumnDataFields))
-						this.CreateTotalNodes(function, false, indices, null, repeatedItemsCount, false, this.HasColumnDataFields, node.DataFieldIndex);
+						this.CreateTotalNodes(node?.CacheRecordIndices, function, false, indices, null, repeatedItemsCount, false, this.HasColumnDataFields, node.DataFieldIndex);
 				}
 			}
 		}
@@ -1219,24 +1229,24 @@ namespace OfficeOpenXml.Table.PivotTable
 						bool isLastNonDataField = this.RowFields.Skip(repeatedItemsCount).All(x => x.Index == -2);
 						// If the node is above a data field node and there are multiple data fields, then create a subtotal node for each data field. 
 						if (this.DataFields.Count > 0 && isAboveDataField && !isLastNonDataField && this.HasRowDataFields)
-							this.CreateTotalNodes(function, true, indices, pivotField, repeatedItemsCount, true, this.HasRowDataFields);
+							this.CreateTotalNodes(node?.CacheRecordIndices, function, true, indices, pivotField, repeatedItemsCount, true, this.HasRowDataFields);
 						// Otherwise, if the node is not the last non-data field node and is below a data field node, then only create one subtotal node.
 						else if (!isLastNonDataField && (!isAboveDataField || !this.HasRowDataFields))
-							this.CreateTotalNodes(function, true, indices, pivotField, repeatedItemsCount, false, this.HasRowDataFields, node.DataFieldIndex);
+							this.CreateTotalNodes(node?.CacheRecordIndices, function, true, indices, pivotField, repeatedItemsCount, false, this.HasRowDataFields, node.DataFieldIndex);
 					}
 					else
 					{
 						// If above a datafield, subtotals are always shown if defaultSubtotal is enabled.
 						if (this.HasRowDataFields && isAboveDataField && (node.Children.FirstOrDefault()?.HasChildren == true || this.RowFields.Last().Index != -2))
-							this.CreateTotalNodes(function, true, indices, pivotField, repeatedItemsCount, true, this.HasRowDataFields, node.DataFieldIndex);
+							this.CreateTotalNodes(node?.CacheRecordIndices, function, true, indices, pivotField, repeatedItemsCount, true, this.HasRowDataFields, node.DataFieldIndex);
 						else if (!node.SubtotalTop || functionNames.Count > 1)
 						{
 							// If this child is only followed by datafields, do not write out a subtotal node.
 							// In other words, treat this child as the leaf node.
 							if (!isAboveDataField)
-								this.CreateTotalNodes(function, true, indices, pivotField, repeatedItemsCount, false, this.HasRowDataFields, node.DataFieldIndex);
+								this.CreateTotalNodes(node?.CacheRecordIndices, function, true, indices, pivotField, repeatedItemsCount, false, this.HasRowDataFields, node.DataFieldIndex);
 							else if (node.Children.Any(c => !c.IsDataField || c.Children.Any()))
-								this.CreateTotalNodes(function, true, indices, pivotField, repeatedItemsCount, true, this.HasRowDataFields, node.DataFieldIndex);
+								this.CreateTotalNodes(node?.CacheRecordIndices, function, true, indices, pivotField, repeatedItemsCount, true, this.HasRowDataFields, node.DataFieldIndex);
 						}
 					}
 				}
@@ -1258,7 +1268,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					string subtotalType = root.PivotFieldIndex == -2 ? null : this.GetRowFieldSubtotalType(pivotField);
 					bool isDataField = root.PivotFieldIndex == -2;
 					indent = indent == -1 ? 0 : indent;
-					this.RowHeaders.Add(new PivotTableHeader(indices, pivotField, root.DataFieldIndex, false,
+					this.RowHeaders.Add(new PivotTableHeader(root.CacheRecordIndices, indices, pivotField, root.DataFieldIndex, false,
 						!root.HasChildren, isDataField, subtotalType, !indices.Any(x => x.Item1 == -2), indent: indent));
 					this.RowItems.AddColumnItem(indices.ToList(), repeatedItemsCount, root.DataFieldIndex);
 					lastChildIndices = indices.ToList();
@@ -1329,7 +1339,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (!node.HasChildren)
 			{
 				repeatedItemsCount = this.GetRepeatedItemsCount(indices, lastChildIndices);
-				var header = new PivotTableHeader(indices, null, node.DataFieldIndex, false, true, node.IsDataField);
+				var header = new PivotTableHeader(node.CacheRecordIndices, indices, null, node.DataFieldIndex, false, true, node.IsDataField);
 				this.ColumnHeaders.Add(header);
 				this.ColumnItems.AddColumnItem(indices.ToList(), repeatedItemsCount, node.DataFieldIndex);
 				return indices.ToList();
@@ -1566,25 +1576,32 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				collection.Clear();
 				var pageFieldIndices = this.GetPageFieldIndices();
-				var root = this.BuildRowColTree(rowColFieldCollection, pageFieldIndices, stringResources);
-				root.SortChildren(this);
-				if (isRowItems && root.Children.Count > 0)
+				if (isRowItems)
 				{
-					this.BuildRowItems(root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>(), -1);
-					this.CreateLeafFieldCustomFieldSettingsNode(true);
+					this.RowItemsRoot = this.BuildRowColTree(rowColFieldCollection, pageFieldIndices, stringResources);
+					this.RowItemsRoot.SortChildren(this);
+					if (this.RowItemsRoot.HasChildren)
+					{
+						this.BuildRowItems(this.RowItemsRoot, new List<Tuple<int, int>>(), new List<Tuple<int, int>>(), -1);
+						this.CreateLeafFieldCustomFieldSettingsNode(true);
+					}
 				}
-				else if (root.Children.Count > 0)
+				else
 				{
-					this.BuildColumnItems(root, new List<Tuple<int, int>>(), new List<Tuple<int, int>>());
-					this.CreateLeafFieldCustomFieldSettingsNode(false);
+					this.ColumnItemsRoot = this.BuildRowColTree(rowColFieldCollection, pageFieldIndices, stringResources);
+					this.ColumnItemsRoot.SortChildren(this);
+					if (this.ColumnItemsRoot.HasChildren)
+					{
+						this.BuildColumnItems(this.ColumnItemsRoot, new List<Tuple<int, int>>(), new List<Tuple<int, int>>());
+						this.CreateLeafFieldCustomFieldSettingsNode(false);
+					}
 				}
-
 				// Create grand total items if necessary.
 				bool grandTotals = isRowItems ? this.RowGrandTotals : this.ColumnGrandTotals;
 				if (grandTotals && isRowItems && !(this.RowFields.Count == 1 && this.RowFields.First().Index == -2))
-					this.CreateTotalNodes("grand", true, null, null, 0, false, this.HasRowDataFields);
+					this.CreateTotalNodes(null, "grand", true, null, null, 0, false, this.HasRowDataFields);
 				else if (grandTotals && !isRowItems && !(this.ColumnFields.Count == 1 && this.ColumnFields.First().Index == -2))
-					this.CreateTotalNodes("grand", false, null, null, 0, false, this.HasColumnDataFields);
+					this.CreateTotalNodes(null, "grand", false, null, null, 0, false, this.HasColumnDataFields);
 			}
 			else
 			{
@@ -1592,7 +1609,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				// If there are no row/column fields, then remove tag or else it will corrupt the workbook.
 				this.TopNode.RemoveChild(this.TopNode.SelectSingleNode(xmlTag, this.NameSpaceManager));
 				var headerCollection = isRowItems ? this.RowHeaders : this.ColumnHeaders;
-				var header = new PivotTableHeader(null, null, 0, false, false, false);
+				var header = new PivotTableHeader(null, null, null, 0, false, false, false);
 				header.IsPlaceHolder = true;
 				headerCollection.Add(header);
 			}
@@ -1613,7 +1630,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					foreach (var function in functionNames)
 					{
-						List<Tuple<int, int>> indices = new List<Tuple<int, int>>(); ;
+						List<Tuple<int, int>> indices = new List<Tuple<int, int>>();
+						int pivotFieldItemIndex = lastPivotField.Items[i].X;
 						if (i == 0 && function == functionNames.First())
 						{
 							for (int k = 0; k < collection.Count - 1; k++)
@@ -1621,18 +1639,33 @@ namespace OfficeOpenXml.Table.PivotTable
 								// Excel stores 1048832 for the member properties ('x' value) for the row/column item.
 								indices.Add(new Tuple<int, int>(lastPivotField.Index, 1048832));
 							}
-							indices.Add(new Tuple<int, int>(lastPivotField.Index, i));
+							indices.Add(new Tuple<int, int>(lastPivotField.Index, pivotFieldItemIndex));
 						}
 						else
-							indices.Add(new Tuple<int, int>(lastPivotField.Index, i));
+							indices.Add(new Tuple<int, int>(lastPivotField.Index, pivotFieldItemIndex));
 						var hasDataFields = collection.Any(r => r.Index == -2);
-						this.CreateTotalNodes(function, isRowField, indices, lastPivotField, collection.Count - 1, true, hasDataFields, 0, true);
+						var list = this.GetCacheRecordList(lastPivotField.Index, pivotFieldItemIndex);
+						int repeatedItemsCount = i == 0 && function == functionNames.First() ? 0 : collection.Count - 1;
+						this.CreateTotalNodes(list, function, isRowField, indices, lastPivotField, repeatedItemsCount, true, hasDataFields, 0, true);
 					}
 				}
 			}
 		}
 
-		private void CreateTotalNodes(string totalType, bool isRowItem, List<Tuple<int, int>> indices, ExcelPivotTableField pivotField,
+		private List<int> GetCacheRecordList(int pivotFieldIndex, int itemIndex)
+		{
+			var indicesList = new List<int>();
+			for (int i = 0; i < this.CacheDefinition.CacheRecords.Count; i++)
+			{
+				var record = this.CacheDefinition.CacheRecords[i];
+				int.TryParse(record.Items[pivotFieldIndex].Value, out var value);
+				if (value == itemIndex)
+					indicesList.Add(i);
+			}
+			return indicesList;
+		}
+
+		private void CreateTotalNodes(List<int> cacheRecordIndices, string totalType, bool isRowItem, List<Tuple<int, int>> indices, ExcelPivotTableField pivotField,
 			int repeatedItemsCount, bool multipleSubtotalDataFields, bool hasDataFields, int dataFieldIndex = 0, bool customField = false)
 		{
 			var itemsCollection = isRowItem ? this.RowItems : this.ColumnItems;
@@ -1657,7 +1690,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Create one xml node if the header is below a data field header with the correct data field index (not necessarily zero).
 			if (!aboveDataField && !grandTotal)
 			{
-				var header = new PivotTableHeader(indices, pivotField, dataFieldIndex, grandTotal, false, false, totalType, aboveDataField);
+				var header = new PivotTableHeader(cacheRecordIndices, indices, pivotField, dataFieldIndex, grandTotal, false, false, totalType, aboveDataField);
 				itemsCollection.AddSumNode(totalType, repeatedItemsCount, xMember, dataFieldIndex);
 				headerCollection.Add(header);
 			}
@@ -1666,7 +1699,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				// Create the xml node and row/column header.
 				for (int i = 0; i < index; i++)
 				{
-					var header = new PivotTableHeader(indices, pivotField, i, grandTotal, false, false, totalType, aboveDataField);
+					var header = new PivotTableHeader(cacheRecordIndices, indices, pivotField, i, grandTotal, false, false, totalType, aboveDataField);
 					var list = customField ? indices : null;
 					itemsCollection.AddSumNode(totalType, repeatedItemsCount, xMember, i, list);
 					headerCollection.Add(header);
@@ -1820,7 +1853,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			bool singleXMemberProperties = item.Count == 0;
 			if (item.RepeatedItemsCount == 0)
-				return singleXMemberProperties ? column : column + j;
+				return singleXMemberProperties || item.First() == 1048832 ? column : column + j;
 			else
 			{
 				int count = singleXMemberProperties && cacheRecordIndices != null ? cacheRecordIndices.Count - 1 : item.RepeatedItemsCount;
@@ -1871,7 +1904,10 @@ namespace OfficeOpenXml.Table.PivotTable
 					for (int j = 0; j < item.Count; j++)
 					{
 						if (item[j] == 1048832)
+						{
+							startHeaderRow++;
 							continue;
+						}
 						string itemType = this.GetTotalCaptionCellValue(this.ColumnFields, item, this.ColumnHeaders[i], stringResources, j);
 						if (!string.IsNullOrEmpty(itemType))
 						{
@@ -1929,7 +1965,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				else
 				{
-					var itemName = this.GetSharedItemValue(field, item, item.RepeatedItemsCount, j, stringResources);
+					int repeatedItemsCount = item.First() == 1048832 ? item.Count - 1 : item.RepeatedItemsCount;
+					var itemName = this.GetSharedItemValue(field, item, repeatedItemsCount, j, stringResources);
 					if (this.DataFields.Count > 1 && header.IsAboveDataField && 
 						((this.HasRowDataFields && field == this.RowFields) || (this.HasColumnDataFields && field == this.ColumnFields)))
 					{

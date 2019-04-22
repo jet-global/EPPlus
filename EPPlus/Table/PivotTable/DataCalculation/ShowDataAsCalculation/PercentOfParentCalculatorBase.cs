@@ -70,7 +70,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 					parentColumnHeaderIndices = null;
 			}
 
-			var parentBackingData = PivotTableDataManager.GetBackingCellValues(
+			var parentBackingData = PivotTableDataManager.GetParentBackingCellValues(
 				base.PivotTable,
 				base.DataFieldCollectionIndex,
 				parentRowHeaderIndices,

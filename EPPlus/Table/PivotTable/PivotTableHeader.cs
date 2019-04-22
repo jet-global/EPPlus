@@ -85,13 +85,19 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets the level of indentation of the items that correspond to this header.
 		/// </summary>
 		public int Indent { get; }
+
+		/// <summary>
+		/// Gets the list of cache record indices the header uses.
+		/// </summary>
+		public List<int> UsedCacheRecordIndices { get; }
 		#endregion
 
 		#region Constructors
 		/// <summary>
 		/// Creates a new <see cref="PivotTableHeader"/> object.
 		/// </summary>
-		/// <param name="recordIndices">The list of cacheRecord indices.</param>
+		/// <param name="cacheRecordsUsed">The list of cache record indices the header uses.</param>
+		/// <param name="recordIndices">The list tuple of cacheRecord indices and pivot field item index.</param>
 		/// <param name="field">The pivot table field.</param>
 		/// <param name="dataFieldCollectionIndex">The index of the data field in the collection.</param>
 		/// <param name="isGrandTotal">A value indicating if it is a grand total.</param>
@@ -100,9 +106,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="totalType">The itemType value of the <see cref="RowColumnItem"/>.</param>
 		/// <param name="isAboveDataField">A value indicating if it is above a data field node.</param>
 		/// <param name="indent">The level of indentation for the items that correspond to this header.</param>
-		public PivotTableHeader(List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldCollectionIndex, bool isGrandTotal,
+		public PivotTableHeader(List<int> cacheRecordsUsed, List<Tuple<int, int>> recordIndices, ExcelPivotTableField field, int dataFieldCollectionIndex, bool isGrandTotal,
 			bool isLeafNode, bool isDataField, string totalType = null, bool isAboveDataField = false, int indent = 0)
 		{
+			this.UsedCacheRecordIndices = cacheRecordsUsed;
 			this.CacheRecordIndices = recordIndices;
 			this.PivotTableField = field;
 			this.DataFieldCollectionIndex = dataFieldCollectionIndex;
