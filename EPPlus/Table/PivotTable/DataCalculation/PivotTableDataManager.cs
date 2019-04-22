@@ -113,7 +113,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <param name="columnHeaderTotalType">The column function type to calculate values with.</param>
 		/// <param name="functionCalculator">The <see cref="TotalsFunctionHelper"/> to perform calculations with.</param>
 		/// <returns>A <see cref="PivotCellBackingData"/> containing the backing values and a calculated result.</returns>
-		public static PivotCellBackingData GetBackingCellValues(
+		public static PivotCellBackingData GetParentBackingCellValues(
 			ExcelPivotTable pivotTable,
 			int dataFieldCollectionIndex,
 			List<Tuple<int, int>> rowHeaderIndices,
@@ -263,6 +263,48 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			}
 		}
 
+		private PivotCellBackingData GetBodyBackingCellValues(
+			ExcelPivotTable pivotTable,
+			int dataFieldCollectionIndex,
+			List<int> rowCacheRecordIndices,
+			List<int> columnCacheRecordIndices,
+			string rowHeaderTotalType,
+			string columnHeaderTotalType,
+			TotalsFunctionHelper functionCalculator)
+		{
+			var dataField = pivotTable.DataFields[dataFieldCollectionIndex];
+			var cacheField = pivotTable.CacheDefinition.CacheFields[dataField.Index];
+			PivotCellBackingData backingData = null;
+			if (string.IsNullOrEmpty(cacheField.Formula))
+			{
+				var matchingValues = pivotTable.CacheDefinition.CacheRecords.GetDataFieldValues(
+					rowCacheRecordIndices,
+					columnCacheRecordIndices,
+					dataField.Index,
+					pivotTable.GetPageFieldIndices());
+				backingData = new PivotCellBackingData(matchingValues);
+			}
+			else
+			{
+				// If a formula is present, it is a calculated field which needs to be evaluated.
+				var fieldNameToValues = new Dictionary<string, List<object>>();
+				foreach (var cacheFieldName in cacheField.ReferencedCacheFieldsToIndex.Keys)
+				{
+					var values = pivotTable.CacheDefinition.CacheRecords.GetDataFieldValues(
+						rowCacheRecordIndices,
+						columnCacheRecordIndices,
+						cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
+						pivotTable.GetPageFieldIndices());
+					fieldNameToValues.Add(cacheFieldName, values);
+				}
+				backingData = new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
+			}
+			var value = functionCalculator.CalculateCellTotal(dataField, backingData, rowHeaderTotalType, columnHeaderTotalType);
+			if (backingData != null)
+				backingData.Result = value;
+			return backingData;
+		}
+
 		private PivotCellBackingData[,] GetPivotTableBodyBackingData()
 		{
 			var backingData = new PivotCellBackingData[this.PivotTable.RowHeaders.Count(), this.PivotTable.ColumnHeaders.Count()];
@@ -279,11 +321,11 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 						continue;
 
 					var dataFieldCollectionIndex = this.PivotTable.HasRowDataFields ? rowHeader.DataFieldCollectionIndex : columnHeader.DataFieldCollectionIndex;
-					backingData[row, column] = PivotTableDataManager.GetBackingCellValues(
+					backingData[row, column] = this.GetBodyBackingCellValues(
 						this.PivotTable,
 						dataFieldCollectionIndex,
-						rowHeader.CacheRecordIndices, 
-						columnHeader.CacheRecordIndices, 
+						rowHeader.UsedCacheRecordIndices,
+						columnHeader.UsedCacheRecordIndices,
 						rowHeader.TotalType,
 						columnHeader.TotalType,
 						this.TotalsCalculator);
