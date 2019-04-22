@@ -1630,7 +1630,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					foreach (var function in functionNames)
 					{
-						List<Tuple<int, int>> indices = new List<Tuple<int, int>>(); ;
+						List<Tuple<int, int>> indices = new List<Tuple<int, int>>();
+						int pivotFieldItemIndex = lastPivotField.Items[i].X;
 						if (i == 0 && function == functionNames.First())
 						{
 							for (int k = 0; k < collection.Count - 1; k++)
@@ -1638,13 +1639,14 @@ namespace OfficeOpenXml.Table.PivotTable
 								// Excel stores 1048832 for the member properties ('x' value) for the row/column item.
 								indices.Add(new Tuple<int, int>(lastPivotField.Index, 1048832));
 							}
-							indices.Add(new Tuple<int, int>(lastPivotField.Index, i));
+							indices.Add(new Tuple<int, int>(lastPivotField.Index, pivotFieldItemIndex));
 						}
 						else
-							indices.Add(new Tuple<int, int>(lastPivotField.Index, i));
+							indices.Add(new Tuple<int, int>(lastPivotField.Index, pivotFieldItemIndex));
 						var hasDataFields = collection.Any(r => r.Index == -2);
-						var list = this.GetCacheRecordList(lastPivotField.Index, i);
-						this.CreateTotalNodes(list, function, isRowField, indices, lastPivotField, collection.Count - 1, true, hasDataFields, 0, true);
+						var list = this.GetCacheRecordList(lastPivotField.Index, pivotFieldItemIndex);
+						int repeatedItemsCount = i == 0 && function == functionNames.First() ? 0 : collection.Count - 1;
+						this.CreateTotalNodes(list, function, isRowField, indices, lastPivotField, repeatedItemsCount, true, hasDataFields, 0, true);
 					}
 				}
 			}
@@ -1851,7 +1853,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			bool singleXMemberProperties = item.Count == 0;
 			if (item.RepeatedItemsCount == 0)
-				return singleXMemberProperties ? column : column + j;
+				return singleXMemberProperties || item.First() == 1048832 ? column : column + j;
 			else
 			{
 				int count = singleXMemberProperties && cacheRecordIndices != null ? cacheRecordIndices.Count - 1 : item.RepeatedItemsCount;
@@ -1902,7 +1904,10 @@ namespace OfficeOpenXml.Table.PivotTable
 					for (int j = 0; j < item.Count; j++)
 					{
 						if (item[j] == 1048832)
+						{
+							startHeaderRow++;
 							continue;
+						}
 						string itemType = this.GetTotalCaptionCellValue(this.ColumnFields, item, this.ColumnHeaders[i], stringResources, j);
 						if (!string.IsNullOrEmpty(itemType))
 						{
@@ -1960,7 +1965,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				else
 				{
-					var itemName = this.GetSharedItemValue(field, item, item.RepeatedItemsCount, j, stringResources);
+					int repeatedItemsCount = item.First() == 1048832 ? item.Count - 1 : item.RepeatedItemsCount;
+					var itemName = this.GetSharedItemValue(field, item, repeatedItemsCount, j, stringResources);
 					if (this.DataFields.Count > 1 && header.IsAboveDataField && 
 						((this.HasRowDataFields && field == this.RowFields) || (this.HasColumnDataFields && field == this.ColumnFields)))
 					{
