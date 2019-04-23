@@ -1631,7 +1631,6 @@ namespace OfficeOpenXml.Table.PivotTable
 					foreach (var function in functionNames)
 					{
 						List<Tuple<int, int>> indices = new List<Tuple<int, int>>();
-						int pivotFieldItemIndex = lastPivotField.Items[i].X;
 						if (i == 0 && function == functionNames.First())
 						{
 							for (int k = 0; k < collection.Count - 1; k++)
@@ -1639,12 +1638,12 @@ namespace OfficeOpenXml.Table.PivotTable
 								// Excel stores 1048832 for the member properties ('x' value) for the row/column item.
 								indices.Add(new Tuple<int, int>(lastPivotField.Index, 1048832));
 							}
-							indices.Add(new Tuple<int, int>(lastPivotField.Index, pivotFieldItemIndex));
+							indices.Add(new Tuple<int, int>(lastPivotField.Index, i));
 						}
 						else
-							indices.Add(new Tuple<int, int>(lastPivotField.Index, pivotFieldItemIndex));
+							indices.Add(new Tuple<int, int>(lastPivotField.Index, i));
 						var hasDataFields = collection.Any(r => r.Index == -2);
-						var list = this.GetCacheRecordList(lastPivotField.Index, pivotFieldItemIndex);
+						var list = this.GetCacheRecordList(lastPivotField.Index, lastPivotField.Items[i].X);
 						int repeatedItemsCount = i == 0 && function == functionNames.First() ? 0 : collection.Count - 1;
 						this.CreateTotalNodes(list, function, isRowField, indices, lastPivotField, repeatedItemsCount, true, hasDataFields, 0, true);
 					}
