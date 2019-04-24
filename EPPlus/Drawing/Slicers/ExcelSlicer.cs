@@ -40,7 +40,6 @@ namespace OfficeOpenXml.Drawing.Slicers
 	public class ExcelSlicer : XmlHelper
 	{
 		#region Class Variables
-		private string _name;
 		private static XmlNamespaceManager _slicerDocumentNamespaceManager;
 		#endregion
 
@@ -55,17 +54,8 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// </summary>
 		public string Name
 		{
-			get
-			{
-				if (this._name == null)
-					this._name = this.TopNode.Attributes["name"].Value;
-				return this._name;
-			}
-			set
-			{
-				this._name = value;
-				this.TopNode.Attributes["name"].Value = value;
-			}
+			get { return base.GetXmlNodeString("@name"); }
+			set { this.SetXmlNodeString("@name", value); }
 		}
 
 		/// <summary>

@@ -36,6 +36,7 @@ using System.Linq;
 using System.Resources;
 using System.Text;
 using System.Xml;
+using OfficeOpenXml.Drawing.Slicers;
 using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Internationalization;
 using OfficeOpenXml.Utils;
@@ -737,6 +738,11 @@ namespace OfficeOpenXml.Table.PivotTable
 				mySourceRange = value;
 			}
 		}
+
+		private int PivotCacheId
+		{
+			get { return base.GetXmlNodeInt("d:extLst/d:ext/x14:pivotCacheDefinition/@pivotCacheId"); }
+		}
 		#endregion
 
 		#region Constructors
@@ -836,6 +842,10 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.CacheFields[fieldIndex].Name = sourceRange.Worksheet.Cells[sourceRange.Start.Row, col].Value.ToString();
 			}
 
+			// Get all of the related slicer selected values before refreshing.
+			var relatedSlicerCaches = this.GetRelatedSlicerCaches();
+			var selectedSlicerValues = this.GetSelectedSlicerCacheItems(relatedSlicerCaches);
+
 			// Update all cache record values.
 			var worksheet = sourceRange.Worksheet;
 			var range = new ExcelRange(worksheet, worksheet.Cells[sourceRange.Start.Row + 1, sourceRange.Start.Column, sourceRange.End.Row, sourceRange.End.Column]);
@@ -845,11 +855,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				if (cacheField.HasSharedItems)
 				{
-					// Clear out the shared items, but keep the @minDate attribute in order
-					// to correctly parse new values into the shared items.
-					var containsDate = cacheField.SharedItems.ContainsDate;
 					cacheField.SharedItems.Clear();
-					cacheField.SharedItems.ContainsDate = containsDate;
 					cacheField.ClearedSharedItems = true;
 				}
 			}
@@ -862,8 +868,12 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			this.UpdateCacheFieldFieldGroups();
 
+			this.RefreshRelatedSlicerCaches(relatedSlicerCaches, selectedSlicerValues);
+
+			var relatedPivotTables = this.GetRelatedPivotTables();
+	
 			// Refresh pivot tables.
-			foreach (var pivotTable in this.GetRelatedPivotTables())
+			foreach (var pivotTable in relatedPivotTables)
 			{
 				pivotTable.RefreshFromCache(this.StringResources);
 			}
@@ -952,6 +962,23 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (this.CacheSource != eSourceType.Worksheet)
 				unsupportedFeatures.Add($"Unsupported pivot cache source type {this.CacheSource}");
 			return unsupportedFeatures.Any();
+		}
+
+		/// <summary>
+		/// Gets the <see cref="SharedItemsCollection"/> of cache items that a slicer is referencing by the specified <paramref name="fieldName"/>.
+		/// </summary>
+		/// <param name="fieldName">The name of the cache field to retrieve cache items from.</param>
+		/// <returns>The <see cref="SharedItemsCollection"/> of cache items that a slicer is referencing.</returns>
+		public SharedItemsCollection GetCacheItemsForSlicer(string fieldName)
+		{
+			// If a cacheField is a group field, the fieldGroup/groupItems are used as the values for the slicer.
+			var cacheField = this.CacheFields.First(f => f.Name.IsEquivalentTo(fieldName));
+			SharedItemsCollection cacheItems;
+			if (cacheField.IsGroupField)
+				cacheItems = cacheField.FieldGroup.GroupItems;
+			else
+				cacheItems = cacheField.SharedItems;
+			return cacheItems;
 		}
 		#endregion
 
@@ -1148,6 +1175,45 @@ namespace OfficeOpenXml.Table.PivotTable
 					}
 				}
 			}
+		}
+
+		private void RefreshRelatedSlicerCaches(List<ExcelSlicerCache> relatedSlicerCaches, Dictionary<string, List<CacheItem>> previousSelectedSlicerCacheValues)
+		{
+			foreach (var slicer in relatedSlicerCaches)
+			{
+				var previouslySelectedItems = previousSelectedSlicerCacheValues[slicer.Name];
+				slicer.Refresh(this, previouslySelectedItems);
+			}
+		}
+
+		private List<ExcelSlicerCache> GetRelatedSlicerCaches()
+		{
+			var relatedSlicers = new List<ExcelSlicerCache>();
+			foreach (var slicer in this.Workbook.SlicerCaches)
+			{
+				if (int.Parse(slicer.TabularDataNode.PivotCacheId) == this.PivotCacheId)
+					relatedSlicers.Add(slicer);
+			}
+			return relatedSlicers;
+		}
+
+		private Dictionary<string, List<CacheItem>> GetSelectedSlicerCacheItems(List<ExcelSlicerCache> relatedSlicerCaches)
+		{
+			var slicerCacheToSelectedItems = new Dictionary<string, List<CacheItem>>();
+			foreach (var slicerCache in relatedSlicerCaches)
+			{
+				var cacheItems = this.GetCacheItemsForSlicer(slicerCache.SourceName);
+				foreach (var item in slicerCache.TabularDataNode.Items)
+				{
+					if (item.IsSelected)
+					{
+						if (!slicerCacheToSelectedItems.ContainsKey(slicerCache.Name))
+							slicerCacheToSelectedItems.Add(slicerCache.Name, new List<CacheItem>());
+						slicerCacheToSelectedItems[slicerCache.Name].Add(cacheItems[item.AtomIndex]);
+					}
+				}
+			}
+			return slicerCacheToSelectedItems;
 		}
 		#endregion
 	}

@@ -302,6 +302,7 @@
     <Compile Include="Table\PivotTable\PivotTableTestBase.cs" />
     <Compile Include="Table\PivotTable\RowColumnItemTest.cs" />
     <Compile Include="Table\PivotTable\SharedItemsCollectionTest.cs" />
+    <Compile Include="Drawing\Slicers\SlicerCacheTabularItemsTest.cs" />
     <Compile Include="TestHelpers\ExpectedCellValue.cs" />
     <Compile Include="TestHelpers\TempTestFile.cs" />
     <Compile Include="TestHelpers\TestHelperUtility.cs" />
