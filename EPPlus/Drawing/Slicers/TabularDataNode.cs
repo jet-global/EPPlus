@@ -4,9 +4,18 @@ using System.Xml;
 namespace OfficeOpenXml.Drawing.Slicers
 {
 	#region Enums
+	/// <summary>
+	/// Enum representing the sort order of tabular cached slicer data.
+	/// </summary>
 	public enum SortOrder
 	{
+		/// <summary>
+		/// Values are sorted ascending (A-Z).
+		/// </summary>
 		Ascending = 0,
+		/// <summary>
+		/// Values are sorted descending (Z-A).
+		/// </summary>
 		Descending = 1
 	};
 	#endregion
@@ -57,6 +66,10 @@ namespace OfficeOpenXml.Drawing.Slicers
 			set { base.SetXmlNodeBool("@customListSort", true); }
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating the type of filter to apply. 
+		/// Non-default value is "showItemsWithNoData".
+		/// </summary>
 		public string CrossFilter
 		{
 			get { return base.GetXmlNodeString("@crossFilter"); }
