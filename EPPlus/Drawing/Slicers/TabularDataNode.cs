@@ -1,38 +1,72 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Xml;
 
 namespace OfficeOpenXml.Drawing.Slicers
 {
+	#region Enums
+	public enum SortOrder
+	{
+		Ascending = 0,
+		Descending = 1
+	};
+	#endregion
+
 	/// <summary>
 	/// Wraps a <tabular /> node in <slicerCacheDefinition-data />.
 	/// </summary>
-	public class TabularDataNode
+	public class TabularDataNode : XmlHelper
 	{
-		#region Class Variables
-		private List<TabularItemNode> myItems = new List<TabularItemNode>();
-		#endregion
-
 		#region Properties
 		/// <summary>
 		/// Gets or sets the pivot cache ID.
 		/// </summary>
 		public string PivotCacheId
 		{
-			get { return this.Node.Attributes["pivotCacheId"].Value; }
-			set { this.Node.Attributes["pivotCacheId"].Value = value; }
+			get { return base.GetXmlNodeString("@pivotCacheId"); }
+			set { base.SetXmlNodeString("@pivotCacheId", value); }
 		}
 
 		/// <summary>
-		/// Gets a readonly list of <see cref="TabularItemNode"/>.
+		/// Gets or sets the sort order attribute.
 		/// </summary>
-		public IReadOnlyList<TabularItemNode> Items
+		public SortOrder SortOrder
 		{
-			get { return myItems; }
+			get
+			{
+				var value = base.GetXmlNodeString("@sortOrder", "ascending");
+				if (Enum.TryParse(value, true, out SortOrder sortOrder))
+					return sortOrder;
+				throw new InvalidOperationException($"Unexpected sortOrder value: '{value}'");
+			}
+			set
+			{
+				// The default value is "ascending" so we will leave that blank.
+				string stringValue = null;
+				if (value == SortOrder.Descending)
+					stringValue = value.ToString();
+				base.SetXmlNodeString("@sortOrder", stringValue, true);
+			}
 		}
 
-		private XmlNode Node { get; set; }
-		private XmlNamespaceManager NameSpaceManager { get; set; }
+		/// <summary>
+		/// Gets or sets the custom list sort attribute.
+		/// </summary>
+		public bool CustomListSort
+		{
+			get { return base.GetXmlNodeBool("@customListSort", true); }
+			set { base.SetXmlNodeBool("@customListSort", true); }
+		}
+
+		public string CrossFilter
+		{
+			get { return base.GetXmlNodeString("@crossFilter"); }
+			set { base.SetXmlNodeString("@crossFilter", value); }
+		}
+
+		/// <summary>
+		/// Gets the slicer cache data items.
+		/// </summary>
+		public SlicerCacheTabularItems Items { get; }
 		#endregion
 
 		#region Constructors
@@ -41,18 +75,14 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// </summary>
 		/// <param name="node">The <see cref="XmlNode"/> for this <see cref="TabularDataNode"/>.</param>
 		/// <param name="namespaceManager">The namespace manager to use for searching child nodes.</param>
-		public TabularDataNode(XmlNode node, XmlNamespaceManager namespaceManager)
+		public TabularDataNode(XmlNode node, XmlNamespaceManager namespaceManager) : base(namespaceManager, node)
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
 			if (namespaceManager == null)
 				throw new ArgumentNullException(nameof(namespaceManager));
-			this.Node = node;
-			this.NameSpaceManager = namespaceManager;
-			foreach (XmlNode item in this.Node.SelectNodes("default:items/default:i", this.NameSpaceManager))
-			{
-				myItems.Add(new TabularItemNode(item));
-			}
+			var itemsNode = base.TopNode.SelectSingleNode("default:items", base.NameSpaceManager);
+			this.Items = new SlicerCacheTabularItems(itemsNode, base.NameSpaceManager);
 		}
 		#endregion
 	}

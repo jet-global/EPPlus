@@ -31,7 +31,10 @@
  *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
+using OfficeOpenXml.Extensions;
+using OfficeOpenXml.Table.PivotTable;
 
 namespace OfficeOpenXml.Drawing.Slicers
 {
@@ -44,7 +47,6 @@ namespace OfficeOpenXml.Drawing.Slicers
 		#region Class Variables
 		private List<PivotTableNode> myPivotTables = new List<PivotTableNode>();
 		private List<OlapDataNode> myOlapDataSources = new List<OlapDataNode>();
-		private List<TabularDataNode> myTabularDataSources = new List<TabularDataNode>();
 		#endregion
 
 		#region Properties
@@ -53,12 +55,12 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// </summary>
 		public string Name
 		{
-			get { return this.TopNode.Attributes["name"].Value; }
+			get { return base.GetXmlNodeString("@name"); }
 			set
 			{
-				this.TopNode.Attributes["name"].Value = value;
+				base.SetXmlNodeString("@name", value);
 				if (this.Slicer != null)
-					this.Slicer.TopNode.Attributes["cache"].Value = value;
+					this.Slicer.SetXmlNodeString("@cache", value);
 			}
 		}
 
@@ -67,17 +69,8 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// </summary>
 		public string SourceName
 		{
-			get { return this.TopNode.Attributes["sourceName"]?.Value; }
-			set
-			{
-				var attribute = this.TopNode.Attributes["sourceName"];
-				if (attribute == null)
-				{
-					attribute = this.TopNode.OwnerDocument.CreateAttribute("sourceName");
-					this.TopNode.Attributes.Append(attribute);
-				}
-				attribute.Value = value;
-			}
+			get { return base.GetXmlNodeString("@sourceName"); }
+			set { base.SetXmlNodeString("@sourceName", value); }
 		}
 
 		/// <summary>
@@ -107,12 +100,9 @@ namespace OfficeOpenXml.Drawing.Slicers
 		}
 
 		/// <summary>
-		/// Gets a readonly list of table data sources for this slicer cache.
+		/// Gets the table data source for this slicer cache.
 		/// </summary>
-		public IReadOnlyList<TabularDataNode> TabularDataSources
-		{
-			get { return myTabularDataSources; }
-		}
+		public TabularDataNode TabularDataNode { get; }
 
 		private XmlDocument Part { get; set; }
 		#endregion
@@ -129,7 +119,6 @@ namespace OfficeOpenXml.Drawing.Slicers
 		{
 			this.SlicerCacheUri = slicerCacheUri;
 			this.Part = part;
-			this.Name = node.Attributes["name"].Value;
 			foreach (XmlNode pivotTableNode in this.TopNode.SelectNodes("default:pivotTables/default:pivotTable", this.NameSpaceManager))
 			{
 				myPivotTables.Add(new PivotTableNode(pivotTableNode));
@@ -138,18 +127,45 @@ namespace OfficeOpenXml.Drawing.Slicers
 			{
 				myOlapDataSources.Add(new OlapDataNode(olapDataNode, this.NameSpaceManager));
 			}
-			foreach (XmlNode tabularDataNode in this.TopNode.SelectNodes("default:data/default:tabular", this.NameSpaceManager))
-			{
-				myTabularDataSources.Add(new TabularDataNode(tabularDataNode, this.NameSpaceManager));
-			}
+
+			var tabularDataNode = this.TopNode.SelectSingleNode("default:data/default:tabular", this.NameSpaceManager);
+			this.TabularDataNode = new TabularDataNode(tabularDataNode, this.NameSpaceManager);
 		}
 		#endregion
 
 		#region Internal Methods
 		/// <summary>
+		/// Refreshes the slicer cache's values.
+		/// </summary>
+		internal void Refresh(ExcelPivotCacheDefinition cacheDefinition, List<CacheItem> previouslySelectedItems)
+		{
+			// If all are selected and a new value is added, it is selected.
+			// Otherwise new values are added as deselected.
+			bool isFiltered = this.TabularDataNode.Items.Any(i => !i.IsSelected);
+
+			var cacheItems = cacheDefinition.GetCacheItemsForSlicer(this.SourceName);
+
+			// TODO: Sort values, respect sort (and other) settings in slicer. See user story #13556.
+
+			this.TabularDataNode.Items.Clear();
+
+			if (isFiltered)
+			{
+				for (int i = 0; i < cacheItems.Count; i++)
+				{
+					var sharedItem = cacheItems[i];
+					bool isSelected = previouslySelectedItems.Any(si => si.Value == sharedItem.Value && si.Type == sharedItem.Type);
+					this.TabularDataNode.Items.Add(i, isSelected);
+				}
+			}
+			else
+				cacheItems.ForEach((c, i) => this.TabularDataNode.Items.Add(i, true));
+		}
+
+		/// <summary>
 		/// Save this <see cref="ExcelSlicerCache"/> back into the <paramref name="package"/> at
 		/// </summary>
-		/// <param name="package"></param>
+		/// <param name="package">The <see cref="ExcelPackage"/> to save to.</param>
 		internal void Save(ExcelPackage package)
 		{
 			package.SavePart(new Uri("/xl/" + this.SlicerCacheUri, UriKind.Relative), this.Part);
