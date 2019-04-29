@@ -83,7 +83,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <returns>True if the record should be included, or false if the record should be filtered out.</returns>
 		public bool ShouldInclude(CacheRecordNode cacheRecord)
 		{
-			return this.ShouldIncludeBasedOnPageFields(cacheRecord);
+			return this.ShouldIncludeBasedOnPageFields(cacheRecord)
+				&& this.ShouldIncludeBasedOnHiddenFields(cacheRecord);
 		}
 		#endregion
 
@@ -99,6 +100,53 @@ namespace OfficeOpenXml.Table.PivotTable
 				int cacheRecordValue = int.Parse(cacheRecord.Items[keyValue.Key].Value);
 				if (!keyValue.Value.Any(v => v == cacheRecordValue))
 					return false;
+			}
+			return true;
+		}
+
+		private bool ShouldIncludeBasedOnHiddenFields(CacheRecordNode cacheRecord)
+		{
+			foreach (var entry in this.HiddenFieldItems)
+			{
+				int fieldIndex = entry.Key;
+				// Ignore data field tuples, group pivot field tuples and custom field subtotal settings.
+				if (fieldIndex == -2 || fieldIndex == 1048832)
+					continue;
+
+				var cacheField = myCacheDefinition.CacheFields[fieldIndex];
+				//if (cacheField.IsGroupField)
+				//{
+				//	bool groupMatch = this.FindGroupingRecordValueAndTupleMatch(cacheField, record, tuple, pivotTable);
+				//	if (!groupMatch)
+				//		return false;
+				//}
+				//else
+				//{
+				var sharedItemsCollection = myCacheDefinition.CacheFields[fieldIndex].SharedItems;
+				//int cacheRecordValue = int.Parse(cacheRecord.Items[fieldIndex].Value);
+
+				//if (pivotTable.HasFilters)
+				//{
+				//	foreach (var filter in pivotTable.Filters)
+				//	{
+				//		int filterFieldIndex = filter.Field;
+				//		int recordReferenceIndex = int.Parse(record.Items[filterFieldIndex].Value);
+				//		string recordReferenceString = this.CacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordReferenceIndex].Value;
+				//		bool isNumeric = this.CacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordReferenceIndex].Type == PivotCacheRecordType.n;
+				//		bool isMatch = filter.MatchesFilterCriteriaResult(recordReferenceString, isNumeric);
+				//		if (!isMatch)
+				//			return false;
+				//	}
+				//}
+
+
+				int cacheRecordSharedItemIndex = int.Parse(cacheRecord.Items[fieldIndex].Value);
+				var cacheRecordValue = sharedItemsCollection[cacheRecordSharedItemIndex].Value;
+				var hiddenFieldItems = this.HiddenFieldItems[fieldIndex];
+				var hiddenSharedCacheItems = hiddenFieldItems.Select(i => sharedItemsCollection[i]);
+				if (hiddenSharedCacheItems.Any(i => i.Value == cacheRecordValue))
+					return false;
+				//}
 			}
 			return true;
 		}
