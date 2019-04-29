@@ -15,7 +15,7 @@ namespace EPPlusTest.Drawing.Slicers
 	{
 		#region Refresh Tests
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\Slicers")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\Slicers.xlsx")]
 		public void RefreshSlicersWithStaticData()
 		{
 			var file = new FileInfo("Slicers.xlsx");
@@ -103,7 +103,7 @@ namespace EPPlusTest.Drawing.Slicers
 		}
 
 		[TestMethod]
-		[DeploymentItem(@"..\..\Workbooks\PivotTables\Slicers")]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\Slicers.xlsx")]
 		public void RefreshSlicersWithStaticDataNoCustomListSorting()
 		{
 			var file = new FileInfo("Slicers.xlsx");
