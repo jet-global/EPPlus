@@ -661,6 +661,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Gets whether or not this field has any items.
+		/// </summary>
+		public bool HasItems => this.TopNode.SelectNodes("d:items/d:item", base.NameSpaceManager)?.Count > 0;
+
+		/// <summary>
 		/// Gets the pivot table field items that is used for grouping.
 		/// </summary>
 		public ExcelPivotTableFieldItemCollection Items
