@@ -122,24 +122,21 @@ namespace OfficeOpenXml.Table.PivotTable
 				//}
 				//else
 				//{
-				var sharedItemsCollection = myCacheDefinition.CacheFields[fieldIndex].SharedItems;
-				//int cacheRecordValue = int.Parse(cacheRecord.Items[fieldIndex].Value);
-
-				//if (pivotTable.HasFilters)
+				//if (myFilters != null)
 				//{
-				//	foreach (var filter in pivotTable.Filters)
+				//	foreach (var filter in myFilters)
 				//	{
 				//		int filterFieldIndex = filter.Field;
-				//		int recordReferenceIndex = int.Parse(record.Items[filterFieldIndex].Value);
-				//		string recordReferenceString = this.CacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordReferenceIndex].Value;
-				//		bool isNumeric = this.CacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordReferenceIndex].Type == PivotCacheRecordType.n;
+				//		int recordReferenceIndex = int.Parse(cacheRecord.Items[filterFieldIndex].Value);
+				//		string recordReferenceString = myCacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordReferenceIndex].Value;
+				//		bool isNumeric = myCacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordReferenceIndex].Type == PivotCacheRecordType.n;
 				//		bool isMatch = filter.MatchesFilterCriteriaResult(recordReferenceString, isNumeric);
 				//		if (!isMatch)
 				//			return false;
 				//	}
 				//}
 
-
+				var sharedItemsCollection = myCacheDefinition.CacheFields[fieldIndex].SharedItems;
 				int cacheRecordSharedItemIndex = int.Parse(cacheRecord.Items[fieldIndex].Value);
 				var cacheRecordValue = sharedItemsCollection[cacheRecordSharedItemIndex].Value;
 				var hiddenFieldItems = this.HiddenFieldItems[fieldIndex];
