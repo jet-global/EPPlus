@@ -12,7 +12,7 @@ namespace EPPlusTest.Table.PivotTable.Filters
 		#region Hidden Row/Column Items Tests
 		[TestMethod]
 		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableHiddenRowAndColumnItems.xlsx")]
-		public void PivotTableLabelFiltersCaptionEqualsRowFilterOnlyOneRowFieldOneColumnField()
+		public void PivotTableWithHiddenRowAndColumnItems()
 		{
 			var file = new FileInfo("PivotTableHiddenRowAndColumnItems.xlsx");
 			Assert.IsTrue(file.Exists);
@@ -1517,6 +1517,119 @@ namespace EPPlusTest.Table.PivotTable.Filters
 					new ExpectedCellValue(sheetName, 109, 13, 873.4),
 					new ExpectedCellValue(sheetName, 109, 14, 5593.9),
 					new ExpectedCellValue(sheetName, 109, 15, 21419.798),
+				});
+			}
+		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithReportFilter.xlsx")]
+		public void PivotTableWithReportFilter()
+		{
+			var file = new FileInfo("PivotTableWithReportFilter.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet4";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:H16"), pivotTable.Address);
+					Assert.AreEqual(8, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 1, 2, "Reorder Quantity"),
+					new ExpectedCellValue(sheetName, 1, 3, 100),
+					new ExpectedCellValue(sheetName, 3, 2, "Sum of Unit Cost"),
+					new ExpectedCellValue(sheetName, 3, 3, "Column Labels"),
+					new ExpectedCellValue(sheetName, 4, 3, "FINISHED"),
+					new ExpectedCellValue(sheetName, 4, 7, "FINISHED Total"),
+					new ExpectedCellValue(sheetName, 4, 8, "Grand Total"),
+					new ExpectedCellValue(sheetName, 5, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 5, 4, "01587796"),
+					new ExpectedCellValue(sheetName, 5, 5, "20000"),
+					new ExpectedCellValue(sheetName, 5, 6, "32456123"),
+					new ExpectedCellValue(sheetName, 6, 2, "Back Hub"),
+					new ExpectedCellValue(sheetName, 6, 3, 12.452),
+					new ExpectedCellValue(sheetName, 6, 4, null),
+					new ExpectedCellValue(sheetName, 6, 5, null),
+					new ExpectedCellValue(sheetName, 6, 6, null),
+					new ExpectedCellValue(sheetName, 6, 7, 12.452),
+					new ExpectedCellValue(sheetName, 6, 8, 12.452),
+					new ExpectedCellValue(sheetName, 7, 2, "Back Wheel"),
+					new ExpectedCellValue(sheetName, 7, 3, 129.682),
+					new ExpectedCellValue(sheetName, 7, 4, null),
+					new ExpectedCellValue(sheetName, 7, 5, null),
+					new ExpectedCellValue(sheetName, 7, 6, null),
+					new ExpectedCellValue(sheetName, 7, 7, 129.682),
+					new ExpectedCellValue(sheetName, 7, 8, 129.682),
+					new ExpectedCellValue(sheetName, 8, 2, "Bicycle"),
+					new ExpectedCellValue(sheetName, 8, 3, 350.595),
+					new ExpectedCellValue(sheetName, 8, 4, null),
+					new ExpectedCellValue(sheetName, 8, 5, null),
+					new ExpectedCellValue(sheetName, 8, 6, null),
+					new ExpectedCellValue(sheetName, 8, 7, 350.595),
+					new ExpectedCellValue(sheetName, 8, 8, 350.595),
+					new ExpectedCellValue(sheetName, 9, 2, "Brake"),
+					new ExpectedCellValue(sheetName, 9, 3, 9.765),
+					new ExpectedCellValue(sheetName, 9, 4, null),
+					new ExpectedCellValue(sheetName, 9, 5, null),
+					new ExpectedCellValue(sheetName, 9, 6, null),
+					new ExpectedCellValue(sheetName, 9, 7, 9.765),
+					new ExpectedCellValue(sheetName, 9, 8, 9.765),
+					new ExpectedCellValue(sheetName, 10, 2, "Chain"),
+					new ExpectedCellValue(sheetName, 10, 3, null),
+					new ExpectedCellValue(sheetName, 10, 4, null),
+					new ExpectedCellValue(sheetName, 10, 5, null),
+					new ExpectedCellValue(sheetName, 10, 6, 1.99),
+					new ExpectedCellValue(sheetName, 10, 7, 1.99),
+					new ExpectedCellValue(sheetName, 10, 8, 1.99),
+					new ExpectedCellValue(sheetName, 11, 2, "Chain Assy"),
+					new ExpectedCellValue(sheetName, 11, 3, 13.157),
+					new ExpectedCellValue(sheetName, 11, 4, null),
+					new ExpectedCellValue(sheetName, 11, 5, null),
+					new ExpectedCellValue(sheetName, 11, 6, null),
+					new ExpectedCellValue(sheetName, 11, 7, 13.157),
+					new ExpectedCellValue(sheetName, 11, 8, 13.157),
+					new ExpectedCellValue(sheetName, 12, 2, "Front Hub"),
+					new ExpectedCellValue(sheetName, 12, 3, 12.441),
+					new ExpectedCellValue(sheetName, 12, 4, null),
+					new ExpectedCellValue(sheetName, 12, 5, null),
+					new ExpectedCellValue(sheetName, 12, 6, null),
+					new ExpectedCellValue(sheetName, 12, 7, 12.441),
+					new ExpectedCellValue(sheetName, 12, 8, 12.441),
+					new ExpectedCellValue(sheetName, 13, 2, "Front Wheel"),
+					new ExpectedCellValue(sheetName, 13, 3, null),
+					new ExpectedCellValue(sheetName, 13, 4, null),
+					new ExpectedCellValue(sheetName, 13, 5, 129.671),
+					new ExpectedCellValue(sheetName, 13, 6, null),
+					new ExpectedCellValue(sheetName, 13, 7, 129.671),
+					new ExpectedCellValue(sheetName, 13, 8, 129.671),
+					new ExpectedCellValue(sheetName, 14, 2, "Hand rear wheel Brake"),
+					new ExpectedCellValue(sheetName, 14, 3, null),
+					new ExpectedCellValue(sheetName, 14, 4, null),
+					new ExpectedCellValue(sheetName, 14, 5, null),
+					new ExpectedCellValue(sheetName, 14, 6, 4.5),
+					new ExpectedCellValue(sheetName, 14, 7, 4.5),
+					new ExpectedCellValue(sheetName, 14, 8, 4.5),
+					new ExpectedCellValue(sheetName, 15, 2, "Rim"),
+					new ExpectedCellValue(sheetName, 15, 3, null),
+					new ExpectedCellValue(sheetName, 15, 4, 1.05),
+					new ExpectedCellValue(sheetName, 15, 5, null),
+					new ExpectedCellValue(sheetName, 15, 6, null),
+					new ExpectedCellValue(sheetName, 15, 7, 1.05),
+					new ExpectedCellValue(sheetName, 15, 8, 1.05),
+					new ExpectedCellValue(sheetName, 16, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 16, 3, 528.092),
+					new ExpectedCellValue(sheetName, 16, 4, 1.05),
+					new ExpectedCellValue(sheetName, 16, 5, 129.671),
+					new ExpectedCellValue(sheetName, 16, 6, 6.49),
+					new ExpectedCellValue(sheetName, 16, 7, 665.303),
+					new ExpectedCellValue(sheetName, 16, 8, 665.303),
 				});
 			}
 		}
