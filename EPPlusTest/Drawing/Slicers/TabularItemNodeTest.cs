@@ -87,9 +87,9 @@ namespace EPPlusTest.Drawing.Slicers
 			var node = xmlDoc.FirstChild;
 			var namespaceManager = TestUtility.CreateDefaultNSM();
 			var tabularItemNode = new TabularItemNode(node, namespaceManager);
-			Assert.AreEqual(true, tabularItemNode.NonDisplay);
-			tabularItemNode.NonDisplay = false;
-			Assert.AreEqual(false, tabularItemNode.NonDisplay);
+			Assert.AreEqual(true, tabularItemNode.NoData);
+			tabularItemNode.NoData = false;
+			Assert.AreEqual(false, tabularItemNode.NoData);
 			Assert.AreEqual("<i x=\"2\" s=\"1\" nd=\"0\" />", node.OuterXml);
 		}
 
@@ -101,9 +101,9 @@ namespace EPPlusTest.Drawing.Slicers
 			var node = xmlDoc.FirstChild;
 			var namespaceManager = TestUtility.CreateDefaultNSM();
 			var tabularItemNode = new TabularItemNode(node, namespaceManager);
-			Assert.AreEqual(false, tabularItemNode.NonDisplay);
-			tabularItemNode.NonDisplay = true;
-			Assert.AreEqual(true, tabularItemNode.NonDisplay);
+			Assert.AreEqual(false, tabularItemNode.NoData);
+			tabularItemNode.NoData = true;
+			Assert.AreEqual(true, tabularItemNode.NoData);
 			Assert.AreEqual("<i x=\"1\" s=\"1\" nd=\"1\" />", node.OuterXml);
 		}
 		#endregion

@@ -18,6 +18,28 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// </summary>
 		Descending = 1
 	};
+
+	/// <summary>
+	/// Enum representing the combination of the tabular slicer data settings
+	/// "Visually indicate items with no data" and "Show items with no data last".
+	/// </summary>
+	public enum CrossFilter
+	{
+		/// <summary>
+		/// Indicates that both settings are selected.
+		/// </summary>
+		Both = 0,
+		/// <summary>
+		/// Indicates that "Visually indicate items with no data" is checked and 
+		/// "Show items with no data last" is unchecked.
+		/// </summary>
+		ShowItemsWithNoData = 1,
+		/// <summary>
+		/// Indicates that "Visually indicates items with no data" is unchecked regardless
+		/// of the value of "Show items with no data last".
+		/// </summary>
+		None = 2
+	}
 	#endregion
 
 	/// <summary>
@@ -52,7 +74,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 				// The default value is "ascending" so we will leave that blank.
 				string stringValue = null;
 				if (value == SortOrder.Descending)
-					stringValue = value.ToString();
+					stringValue = value.ToString().ToLower();
 				base.SetXmlNodeString("@sortOrder", stringValue, true);
 			}
 		}
@@ -67,13 +89,43 @@ namespace OfficeOpenXml.Drawing.Slicers
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating the type of filter to apply. 
-		/// Non-default value is "showItemsWithNoData".
+		/// Gets or sets a value indicating the combination of the 
+		/// "Visually indicate items with no data" and "Show items with no data last"
+		/// setting selections.
 		/// </summary>
-		public string CrossFilter
+		public CrossFilter CrossFilter
 		{
-			get { return base.GetXmlNodeString("@crossFilter"); }
-			set { base.SetXmlNodeString("@crossFilter", value); }
+			get
+			{
+				var value = base.GetXmlNodeString("@crossFilter");
+				if (string.IsNullOrEmpty(value))
+					return CrossFilter.Both;
+				if (Enum.TryParse(value, true, out CrossFilter result))
+					return result;
+				throw new InvalidOperationException($"Unexpected sortOrder value: '{value}'");
+			}
+			set
+			{
+				if (value == CrossFilter.Both)
+					base.SetXmlNodeString("@crossFilter", null, true);
+				else
+				{
+					string stringValue = value.ToString();
+					// Lowercase the first letter of the enum string value.
+					stringValue = char.ToLower(stringValue[0]) + stringValue.Substring(1);
+					base.SetXmlNodeString("@crossFilter", stringValue);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether to show items 
+		/// deleted from the data source.
+		/// </summary>
+		public bool ShowMissing
+		{
+			get { return base.GetXmlNodeBool("@showMissing", true); }
+			set { base.SetXmlNodeBool("@showMissing", value, true); }
 		}
 
 		/// <summary>

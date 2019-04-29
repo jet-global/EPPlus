@@ -64,6 +64,15 @@ namespace OfficeOpenXml.Table.PivotTable
 					base.SetXmlNodeString("@v", value, false);
 			}
 		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether the item is unused. 
+		/// </summary>
+		public bool Unused
+		{
+			get { return base.GetXmlNodeBool("@u", false); }
+			set { base.SetXmlNodeBool(@"u", value, false); }
+		}
 		#endregion
 
 		#region Constructors

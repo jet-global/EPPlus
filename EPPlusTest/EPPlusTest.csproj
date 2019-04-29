@@ -99,6 +99,7 @@
     <Compile Include="ConditionalFormatting\ConditionalFormattingTest.cs" />
     <Compile Include="ConditionalFormatting\Rules\ExcelConditionalFormattingRuleTest.cs" />
     <Compile Include="ConditionalFormatting\Rules\X14ConditionalFormattingRuleTest.cs" />
+    <Compile Include="Drawing\Slicers\ExcelSlicerCacheTest.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerDrawingTest.cs" />
     <Compile Include="Drawing\Slicers\OlapDataNodeTest.cs" />
     <Compile Include="Drawing\Slicers\PivotTableNodeTest.cs" />

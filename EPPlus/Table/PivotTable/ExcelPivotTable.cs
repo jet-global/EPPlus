@@ -1020,6 +1020,13 @@ namespace OfficeOpenXml.Table.PivotTable
 			return pageFieldIndices;
 		}
 
+		public bool ContainsData(int fieldIndex, int sharedItemIndex)
+		{
+			// TODO: Implement a way of determining if the pivot table contains the 
+			// data reference by a slicer cache. Task #13685.
+			return true;
+		}
+
 		/// <summary>
 		/// Gets a list of the unsupported features that are enabled on this pivot table.
 		/// </summary>

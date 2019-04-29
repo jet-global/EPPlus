@@ -31,11 +31,23 @@ namespace OfficeOpenXml.Drawing.Slicers
 		/// <param name="isSelected">A value indicating whether the item is selected.</param>
 		public void Add(int i, bool isSelected)
 		{
-			var node = base.TopNode.OwnerDocument.CreateElement("default:i", base.TopNode.NamespaceURI);
+			var node = base.TopNode.OwnerDocument.CreateElement("i", base.TopNode.NamespaceURI);
 			var item = new TabularItemNode(node, base.NameSpaceManager);
 			item.AtomIndex = i;
 			item.IsSelected = isSelected;
 			base.AddItem(item);
+		}
+
+		/// <summary>
+		/// Adds a list of <see cref="TabularItemNode"/>s to the collection.
+		/// </summary>
+		/// <param name="items">The items to add.</param>
+		public void AddRange(List<TabularItemNode> items)
+		{
+			foreach (var item in items)
+			{
+				base.AddItem(item);
+			}
 		}
 
 		/// <summary>
