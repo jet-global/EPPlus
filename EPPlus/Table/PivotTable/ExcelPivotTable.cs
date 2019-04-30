@@ -1021,6 +1021,19 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
+		/// Determines whether this pivot table contains data at the specified indices.
+		/// </summary>
+		/// <param name="fieldIndex">The index of the field.</param>
+		/// <param name="sharedItemIndex">The index into the shared items.</param>
+		/// <returns>True if the pivot table contains the specified data, otherwise false.</returns>
+		public bool ContainsData(int fieldIndex, int sharedItemIndex)
+		{
+			// TODO: Implement a way of determining if the pivot table contains the 
+			// data reference by a slicer cache. Task #13685.
+			return true;
+		}
+
+		/// <summary>
 		/// Gets a list of the unsupported features that are enabled on this pivot table.
 		/// </summary>
 		/// <param name="unsupportedFeatures">The unsupported features enabled on this pivot table.</param>

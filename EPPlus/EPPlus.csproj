@@ -818,6 +818,10 @@
     <Compile Include="Table\PivotTable\AutoSortScopeReference.cs" />
     <Compile Include="Table\PivotTable\AutoSortScopeReferencesCollection.cs" />
     <Compile Include="Drawing\Slicers\SlicerCacheTabularItems.cs" />
+    <Compile Include="Table\PivotTable\Sorting\DateComparerBase.cs" />
+    <Compile Include="Table\PivotTable\Sorting\DayComparer.cs" />
+    <Compile Include="Table\PivotTable\Sorting\MonthComparer.cs" />
+    <Compile Include="Table\PivotTable\Sorting\NaturalComparer.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\InternationalizationUtility.cs" />
     <Compile Include="Utils\UriHelper.cs" />

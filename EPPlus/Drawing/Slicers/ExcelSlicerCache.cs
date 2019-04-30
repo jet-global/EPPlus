@@ -35,9 +35,10 @@ using System.Linq;
 using System.Xml;
 using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Table.PivotTable;
+using OfficeOpenXml.Table.PivotTable.Sorting;
 
 namespace OfficeOpenXml.Drawing.Slicers
-{
+{	
 	/// <summary>
 	/// Represents an Excel Slicer Cache.
 	/// When this part exists, it can be found at /xl/slicerCaches/slicerCacheN.xml.
@@ -71,6 +72,14 @@ namespace OfficeOpenXml.Drawing.Slicers
 		{
 			get { return base.GetXmlNodeString("@sourceName"); }
 			set { base.SetXmlNodeString("@sourceName", value); }
+		}
+
+		/// <summary>
+		/// Gets a value indicating that the "Hide items with no data" setting is checked.
+		/// </summary>
+		public bool HideItemsWithNoData
+		{
+			get { return base.TopNode.SelectSingleNode("default:extLst/x:ext/x15:slicerCacheHideItemsWithNoData", base.NameSpaceManager) != null; }
 		}
 
 		/// <summary>
@@ -142,10 +151,9 @@ namespace OfficeOpenXml.Drawing.Slicers
 			// If all are selected and a new value is added, it is selected.
 			// Otherwise new values are added as deselected.
 			bool isFiltered = this.TabularDataNode.Items.Any(i => !i.IsSelected);
-
-			var cacheItems = cacheDefinition.GetCacheItemsForSlicer(this.SourceName);
-
-			// TODO: Sort values, respect sort (and other) settings in slicer. See user story #13556.
+			var cacheFieldIndex = cacheDefinition.GetCacheFieldIndex(this.SourceName);
+			var cacheField = cacheDefinition.CacheFields[cacheFieldIndex];
+			var cacheItems = cacheDefinition.GetCacheItemsForSlicer(cacheField);
 
 			this.TabularDataNode.Items.Clear();
 
@@ -163,12 +171,114 @@ namespace OfficeOpenXml.Drawing.Slicers
 		}
 
 		/// <summary>
-		/// Save this <see cref="ExcelSlicerCache"/> back into the <paramref name="package"/> at
+		/// Applies the sort and hide settings to the slice values. This must be called after
+		/// pivot tables are refreshed in order to work properly.
+		/// </summary>
+		/// <param name="cacheDefinition">The backing cache definition.</param>
+		internal void ApplySettings(ExcelPivotCacheDefinition cacheDefinition)
+		{
+			var cacheFieldIndex = cacheDefinition.GetCacheFieldIndex(this.SourceName);
+			var cacheField = cacheDefinition.CacheFields[cacheFieldIndex];
+			var cacheItems = cacheDefinition.GetCacheItemsForSlicer(cacheField);
+			var sortedItems = this.Sort(cacheField, cacheItems);
+			sortedItems = this.ApplyNoDataSettings(sortedItems, cacheDefinition, cacheFieldIndex, cacheField, cacheItems);
+			this.TabularDataNode.Items.Clear();
+			this.TabularDataNode.Items.AddRange(sortedItems);
+		}
+
+		/// <summary>
+		/// Save this <see cref="ExcelSlicerCache"/> back into the <paramref name="package"/> at.
 		/// </summary>
 		/// <param name="package">The <see cref="ExcelPackage"/> to save to.</param>
 		internal void Save(ExcelPackage package)
 		{
 			package.SavePart(new Uri("/xl/" + this.SlicerCacheUri, UriKind.Relative), this.Part);
+		}
+		#endregion
+
+		#region Private Methods
+		private List<TabularItemNode> Sort(CacheFieldNode cacheField, SharedItemsCollection cacheItems)
+		{
+			// Sort the fields according to their types.
+			IComparer<string> comparer = null;
+			if (this.TabularDataNode.CustomListSort && cacheField.IsDateGrouping)
+			{
+				if (cacheField.FieldGroup.GroupBy == PivotFieldDateGrouping.Months)
+					comparer = new MonthComparer();
+				else if (cacheField.FieldGroup.GroupBy == PivotFieldDateGrouping.Days)
+					comparer = new DayComparer();
+			}
+			else
+				comparer = new NaturalComparer();
+
+			// Sort the slicer cache items.
+			if (this.TabularDataNode.SortOrder == SortOrder.Descending)
+				return this.TabularDataNode.Items.OrderByDescending(t => cacheItems[t.AtomIndex].Value, comparer).ToList();
+			return this.TabularDataNode.Items.OrderBy(t => cacheItems[t.AtomIndex].Value, comparer).ToList();
+		}
+		
+		private List<TabularItemNode> ApplyNoDataSettings(List<TabularItemNode> sortedItems, ExcelPivotCacheDefinition cacheDefinition, 
+			int cacheFieldIndex, CacheFieldNode cacheField, SharedItemsCollection cacheItems)
+		{
+			var pivotTables = this.GetRelatedPivotTables(cacheDefinition);
+			if (this.HideItemsWithNoData)
+			{
+				foreach (var item in sortedItems)
+				{
+					// TODO: Task #13685 - Implement hide items with no data settings.
+					if (!this.PivotTablesContainItem(item, pivotTables, cacheFieldIndex, cacheItems))
+						item.NoData = true;
+				}
+			}
+			else
+			{
+				if (this.TabularDataNode.CrossFilter == CrossFilter.Both)
+				{
+					var usedItems = new List<TabularItemNode>();
+					var unusedItems = new List<TabularItemNode>();
+					foreach (var item in sortedItems)
+					{
+						bool hasData = this.PivotTablesContainItem(item, pivotTables, cacheFieldIndex, cacheItems);
+						if (hasData)
+							usedItems.Add(item);
+						else
+							unusedItems.Add(item);
+					}
+					sortedItems = usedItems.Concat(unusedItems).ToList();
+				}
+
+				if (!this.TabularDataNode.ShowMissing)
+				{
+					foreach (var item in sortedItems)
+					{
+						if (cacheItems[item.AtomIndex].Unused)
+							item.NoData = true;
+					}
+				}
+			}
+			return sortedItems;
+		}
+
+		private bool PivotTablesContainItem(TabularItemNode item, List<ExcelPivotTable> pivotTables, 
+			int cacheFieldIndex, SharedItemsCollection cacheItems)
+		{
+			// Cache field items marked as unused are never referenced in a pivot table.
+			if (cacheItems[item.AtomIndex].Unused)
+				return false;
+
+			foreach (var pivotTable in pivotTables)
+			{
+				if (pivotTable.ContainsData(cacheFieldIndex, item.AtomIndex))
+					return true;
+			}
+			return false;
+		}
+
+		private List<ExcelPivotTable> GetRelatedPivotTables(ExcelPivotCacheDefinition cacheDefinition)
+		{
+			var relatedPivotTables = cacheDefinition.GetRelatedPivotTables();
+			var pivotTableNames = this.PivotTables.Select(p => p.PivotTableName);
+			return relatedPivotTables.Where(p => pivotTableNames.Any(n => n.IsEquivalentTo(p.Name))).ToList();
 		}
 		#endregion
 	}

@@ -29,9 +29,9 @@ namespace OfficeOpenXml.Drawing.Slicers
 		}
 
 		/// <summary>
-		/// Gets or sets whether this item is a display item.
+		/// Gets or sets whether this item has data in the pivot table.
 		/// </summary>
-		public bool NonDisplay
+		public bool NoData
 		{
 			get { return base.GetXmlNodeBool("@nd", false); }
 			set { base.SetXmlNodeBool("@nd", value); }

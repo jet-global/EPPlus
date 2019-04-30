@@ -878,6 +878,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				pivotTable.RefreshFromCache(this.StringResources);
 			}
 
+			// Apply the slicer sort and hide settings after pivot tables have been updated.
+			relatedSlicerCaches.ForEach(s => s.ApplySettings(this));
+
 			// Remove the 'u' xml attribute from each cache item to prevent corrupting the workbook, since Excel automatically adds them.
 			foreach (var cacheField in this.CacheFields)
 			{
@@ -965,14 +968,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		/// <summary>
-		/// Gets the <see cref="SharedItemsCollection"/> of cache items that a slicer is referencing by the specified <paramref name="fieldName"/>.
+		/// Gets the <see cref="SharedItemsCollection"/> of cache items that a slicer is referencing in the specified <paramref name="cacheField"/>.
 		/// </summary>
-		/// <param name="fieldName">The name of the cache field to retrieve cache items from.</param>
+		/// <param name="cacheField">The cache field to retrieve cache items from.</param>
 		/// <returns>The <see cref="SharedItemsCollection"/> of cache items that a slicer is referencing.</returns>
-		public SharedItemsCollection GetCacheItemsForSlicer(string fieldName)
+		public SharedItemsCollection GetCacheItemsForSlicer(CacheFieldNode cacheField)
 		{
 			// If a cacheField is a group field, the fieldGroup/groupItems are used as the values for the slicer.
-			var cacheField = this.CacheFields.First(f => f.Name.IsEquivalentTo(fieldName));
 			SharedItemsCollection cacheItems;
 			if (cacheField.IsGroupField)
 				cacheItems = cacheField.FieldGroup.GroupItems;
@@ -1214,6 +1216,13 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 			return slicerCacheToSelectedItems;
+		}
+
+		private SharedItemsCollection GetCacheItemsForSlicer(string fieldName)
+		{
+			var cacheFieldIndex = this.GetCacheFieldIndex(fieldName);
+			var cacheField = this.CacheFields[cacheFieldIndex];
+			return this.GetCacheItemsForSlicer(cacheField);
 		}
 		#endregion
 	}

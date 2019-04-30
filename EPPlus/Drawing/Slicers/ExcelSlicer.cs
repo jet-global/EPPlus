@@ -72,7 +72,9 @@ namespace OfficeOpenXml.Drawing.Slicers
 					namespaceManager.AddNamespace(string.Empty, ExcelPackage.schemaMain2009);
 					// Hack to work around a bug where SelectSingleNode ignores the default namespace.
 					namespaceManager.AddNamespace("default", ExcelPackage.schemaMain2009);
+					namespaceManager.AddNamespace("x", ExcelPackage.schemaMain);
 					namespaceManager.AddNamespace("mc", ExcelPackage.schemaMarkupCompatibility);
+					namespaceManager.AddNamespace("x15", ExcelPackage.schemaMain2010);
 					_slicerDocumentNamespaceManager = namespaceManager;
 				}
 				return ExcelSlicer._slicerDocumentNamespaceManager;
