@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using OfficeOpenXml.Extensions;
 using OfficeOpenXml.Table.PivotTable.Filters;
 
 namespace OfficeOpenXml.Table.PivotTable
@@ -61,7 +64,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 
-			foreach (var field in pivotFields.Where(f => f.HasItems))
+			foreach (var field in pivotFields.Where(f => f.HasItems && (f.IsRowField || f.IsColumnField)))
 			{
 				var values = new List<int>();
 				foreach (var fieldItem in field.Items)
@@ -109,6 +112,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			foreach (var entry in this.HiddenFieldItems)
 			{
 				int fieldIndex = entry.Key;
+				var hiddenFieldItemIndicies = entry.Value;
 				// Ignore data field tuples, group pivot field tuples and custom field subtotal settings.
 				if (fieldIndex == -2 || fieldIndex == 1048832)
 					continue;
@@ -116,7 +120,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				var cacheField = myCacheDefinition.CacheFields[fieldIndex];
 				if (cacheField.IsGroupField)
 				{
-					//bool groupMatch = this.FindGroupingRecordValueAndTupleMatch(cacheField, record, tuple, pivotTable);
+					//bool groupMatch = this.FindGroupingRecordValueAndTupleMatch(cacheField, cacheRecord, tuple);
 					//if (!groupMatch)
 					//	return false;
 				}
@@ -139,14 +143,86 @@ namespace OfficeOpenXml.Table.PivotTable
 					var sharedItemsCollection = myCacheDefinition.CacheFields[fieldIndex].SharedItems;
 					int cacheRecordSharedItemIndex = int.Parse(cacheRecord.Items[fieldIndex].Value);
 					var cacheRecordValue = sharedItemsCollection[cacheRecordSharedItemIndex].Value;
-					var hiddenFieldItems = this.HiddenFieldItems[fieldIndex];
-					var hiddenSharedCacheItems = hiddenFieldItems.Select(i => sharedItemsCollection[i]);
+					var hiddenSharedCacheItems = entry.Value.Select(i => sharedItemsCollection[i]);
 					if (hiddenSharedCacheItems.Any(i => i.Value == cacheRecordValue))
 						return false;
 				}
 			}
 			return true;
 		}
+
+		//private bool FindGroupingRecordValueAndTupleMatch(CacheFieldNode cacheField, CacheRecordNode record, Tuple<int, int> tuple)
+		//{
+		//	if (cacheField.IsDateGrouping)
+		//	{
+		//		// Find record indices for date groupings fields.
+		//		var recordIndices = this.DateGroupingRecordValueTupleMatch(cacheField, tuple.Item2);
+		//		// If the record value is in the list, then the record value and tuple are a match.
+		//		int index = tuple.Item1 < record.Items.Count ? tuple.Item1 : cacheField.FieldGroup.BaseField;
+		//		var itemValue = record.Items[index].Value;
+		//		if (recordIndices.All(i => i != int.Parse(itemValue)))
+		//			return false;
+		//	}
+		//	else
+		//	{
+		//		// Use discrete grouping property collection to determine match.
+		//		int baseIndex = cacheField.FieldGroup.BaseField;
+		//		// Get the pivot field item's x value and the record item's v value.
+		//		int pivotFieldValue = myFields[tuple.Item1].Items[tuple.Item2].X;
+		//		var recordValue = int.Parse(record.Items[baseIndex].Value);
+		//		var fieldGroup = cacheField.FieldGroup;
+		//		// Get the shared item string the pivot field item and record item is pointing to.
+		//		var pivotFieldPtrValue = fieldGroup.GroupItems[pivotFieldValue].Value;
+		//		var recordDiscretePtrValue = int.Parse(fieldGroup.DiscreteGroupingProperties[recordValue].Value);
+		//		var recordPtrValue = fieldGroup.GroupItems[recordDiscretePtrValue].Value;
+		//		// Check if the pivot field item and record item is pointing to the same shared string.
+		//		if (!pivotFieldPtrValue.IsEquivalentTo(recordPtrValue))
+		//			return false;
+		//	}
+		//	return true;
+		//}
+
+		//private List<int> DateGroupingRecordValueTupleMatch(CacheFieldNode cacheField, int tupleItem2)
+		//{
+		//	var recordIndices = new List<int>();
+		//	// Go through all the shared items and if the item is the targeted value (tuple.Item2 or groupItems[tuple.Item2]), 
+		//	// add the index of the shared item to the list.
+		//	var groupByType = cacheField.FieldGroup.GroupBy;
+		//	string groupFieldItemsValue = cacheField.FieldGroup.GroupItems[tupleItem2].Value;
+
+		//	int baseFieldIndex = cacheField.FieldGroup.BaseField;
+		//	var sharedItems = myCacheDefinition.CacheFields[baseFieldIndex].SharedItems;
+
+		//	for (int i = 0; i < sharedItems.Count; i++)
+		//	{
+		//		var dateTime = DateTime.Parse(sharedItems[i].Value);
+		//		var groupByValue = string.Empty;
+
+		//		// Get the sharedItem's groupBy value, unless the groupBy value is months.
+		//		if (groupByType == PivotFieldDateGrouping.Months && tupleItem2 == dateTime.Month)
+		//			recordIndices.Add(i);
+		//		else if (groupByType == PivotFieldDateGrouping.Years)
+		//			groupByValue = dateTime.Year.ToString();
+		//		else if (groupByType == PivotFieldDateGrouping.Quarters)
+		//			groupByValue = "Qtr" + ((dateTime.Month - 1) / 3 + 1);
+		//		else if (groupByType == PivotFieldDateGrouping.Days)
+		//			groupByValue = dateTime.Day + "-" + dateTime.ToString("MMM");
+		//		else if (groupByType == PivotFieldDateGrouping.Minutes)
+		//			groupByValue = ":" + dateTime.ToString("mm");
+		//		else if (groupByType == PivotFieldDateGrouping.Seconds)
+		//			groupByValue = ":" + dateTime.ToString("ss");
+		//		else if (groupByType == PivotFieldDateGrouping.Hours)
+		//		{
+		//			int hour = dateTime.Hour == 00 ? 12 : dateTime.Hour;
+		//			groupByValue = hour + " " + dateTime.ToString("tt", Thread.CurrentThread.CurrentCulture);
+		//		}
+
+		//		// Check if the sharedItem's groupBy value matches the groupFieldItem's value in the cacheField.
+		//		if (groupFieldItemsValue.IsEquivalentTo(groupByValue))
+		//			recordIndices.Add(i);
+		//	}
+		//	return recordIndices;
+		//}
 		#endregion
 	}
 }

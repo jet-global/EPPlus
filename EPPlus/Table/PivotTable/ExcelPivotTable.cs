@@ -1271,8 +1271,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		private List<Tuple<int, int>> BuildRowItems(PivotItemTreeNode root, List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices, int indent)
 		{
 			var pivotField = root.PivotFieldItemIndex != -2 ? this.Fields[root.PivotFieldIndex] : null;
-			if (this.IsHidden(root))
-				return indices;
 			int repeatedItemsCount = 0;
 			if (root.Value != -1)
 			{
@@ -1339,16 +1337,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			return null;
 		}
 		
-		private bool IsHidden(PivotItemTreeNode node)
-		{
-			var pivotField = node.PivotFieldItemIndex != -2 ? this.Fields[node.PivotFieldIndex] : null;
-			return pivotField != null && pivotField.Items[node.PivotFieldItemIndex].Hidden;
-		}
-
 		private List<Tuple<int, int>> BuildColumnItems(PivotItemTreeNode node, List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices)
 		{
-			if (this.IsHidden(node))
-				return indices;
 			int repeatedItemsCount = 0;
 			// Base case (leaf node).
 			if (!node.HasChildren)

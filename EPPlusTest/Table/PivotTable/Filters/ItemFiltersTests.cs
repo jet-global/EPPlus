@@ -1633,6 +1633,77 @@ namespace EPPlusTest.Table.PivotTable.Filters
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithDateGroupingFilter.xlsx")]
+		public void PivotTableWithDateGroupingFilter()
+		{
+			var file = new FileInfo("PivotTableWithDateGroupingFilter.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet4";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable1"];
+					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
+					cacheDefinition.UpdateData();
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:E14"), pivotTable.Address);
+					Assert.AreEqual(8, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 3, 2, "Sum of Unit Cost"),
+					new ExpectedCellValue(sheetName, 3, 3, "Column Labels"),
+					new ExpectedCellValue(sheetName, 4, 2, "Row Labels"),
+					new ExpectedCellValue(sheetName, 4, 3, "01587796"),
+					new ExpectedCellValue(sheetName, 4, 4, "32456123"),
+					new ExpectedCellValue(sheetName, 4, 5, "Grand Total"),
+					new ExpectedCellValue(sheetName, 5, 2, "2011"),
+					new ExpectedCellValue(sheetName, 5, 3, 1.23),
+					new ExpectedCellValue(sheetName, 5, 4, null),
+					new ExpectedCellValue(sheetName, 5, 5, 1.23),
+					new ExpectedCellValue(sheetName, 6, 2, "Qtr1"),
+					new ExpectedCellValue(sheetName, 6, 3, 1.23),
+					new ExpectedCellValue(sheetName, 6, 4, null),
+					new ExpectedCellValue(sheetName, 6, 5, 1.23),
+					new ExpectedCellValue(sheetName, 7, 2, "Jan"),
+					new ExpectedCellValue(sheetName, 7, 3, 1.23),
+					new ExpectedCellValue(sheetName, 7, 4, null),
+					new ExpectedCellValue(sheetName, 7, 5, 1.23),
+					new ExpectedCellValue(sheetName, 8, 2, "2015"),
+					new ExpectedCellValue(sheetName, 8, 3, null),
+					new ExpectedCellValue(sheetName, 8, 4, 0.45),
+					new ExpectedCellValue(sheetName, 8, 5, 0.45),
+					new ExpectedCellValue(sheetName, 9, 2, "Qtr3"),
+					new ExpectedCellValue(sheetName, 9, 3, null),
+					new ExpectedCellValue(sheetName, 9, 4, 0.45),
+					new ExpectedCellValue(sheetName, 9, 5, 0.45),
+					new ExpectedCellValue(sheetName, 10, 2, "Jul"),
+					new ExpectedCellValue(sheetName, 10, 3, null),
+					new ExpectedCellValue(sheetName, 10, 4, 0.45),
+					new ExpectedCellValue(sheetName, 10, 5, 0.45),
+					new ExpectedCellValue(sheetName, 11, 2, "2016"),
+					new ExpectedCellValue(sheetName, 11, 3, null),
+					new ExpectedCellValue(sheetName, 11, 4, 4.66),
+					new ExpectedCellValue(sheetName, 11, 5, 4.66),
+					new ExpectedCellValue(sheetName, 12, 2, "Qtr4"),
+					new ExpectedCellValue(sheetName, 12, 3, null),
+					new ExpectedCellValue(sheetName, 12, 4, 4.66),
+					new ExpectedCellValue(sheetName, 12, 5, 4.66),
+					new ExpectedCellValue(sheetName, 13, 2, "Dec"),
+					new ExpectedCellValue(sheetName, 13, 3, null),
+					new ExpectedCellValue(sheetName, 13, 4, 4.66),
+					new ExpectedCellValue(sheetName, 13, 5, 4.66),
+					new ExpectedCellValue(sheetName, 14, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 14, 3, 1.23),
+					new ExpectedCellValue(sheetName, 14, 4, 5.11),
+					new ExpectedCellValue(sheetName, 14, 5, 6.34),
+				});
+			}
+		}
 		#endregion
 	}
 }
