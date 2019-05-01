@@ -171,7 +171,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					var sharedItemsCollection = myCacheDefinition.CacheFields[fieldIndex].SharedItems;
 					int cacheRecordSharedItemIndex = int.Parse(cacheRecord.Items[fieldIndex].Value);
 					var cacheRecordValue = sharedItemsCollection[cacheRecordSharedItemIndex].Value;
-					var hiddenSharedCacheItems = entry.Value.Select(i => sharedItemsCollection[i]);
+					var hiddenSharedCacheItems = hiddenFieldItemIndicies.Select(i => sharedItemsCollection[i]);
 					if (hiddenSharedCacheItems.Any(i => i.Value == cacheRecordValue))
 						return false;
 				}
