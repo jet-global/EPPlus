@@ -178,7 +178,6 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private string GetGroupKey(DateTime dateTime, PivotFieldDateGrouping groupByType)
 		{
-			// Get the sharedItem's groupBy value, unless the groupBy value is months.
 			if (groupByType == PivotFieldDateGrouping.Months)
 				return ExcelPivotCacheDefinition.Months[dateTime.Month - 1];
 			else if (groupByType == PivotFieldDateGrouping.Years)
