@@ -1650,7 +1650,7 @@ namespace EPPlusTest.Table.PivotTable.Filters
 					var cacheDefinition = package.Workbook.PivotCacheDefinitions.Single();
 					cacheDefinition.UpdateData();
 					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B3:E14"), pivotTable.Address);
-					Assert.AreEqual(8, pivotTable.Fields.Count);
+					Assert.AreEqual(10, pivotTable.Fields.Count);
 					package.SaveAs(newFile.File);
 				}
 				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]

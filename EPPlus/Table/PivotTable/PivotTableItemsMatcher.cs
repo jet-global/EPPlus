@@ -125,15 +125,14 @@ namespace OfficeOpenXml.Table.PivotTable
 						int baseFieldIndex = cacheField.FieldGroup.BaseField;
 						var baseFieldSharedItemIndex = int.Parse(cacheRecord.Items[baseFieldIndex].Value);
 						var cacheItem = myCacheDefinition.CacheFields[baseFieldIndex].SharedItems[baseFieldSharedItemIndex];
-						if (!string.IsNullOrEmpty(cacheItem.Value))
-						{
-							var dateTime = DateTime.Parse(cacheItem.Value);
-							var groupByType = cacheField.FieldGroup.GroupBy;
-							var groupKey = this.GetGroupKey(dateTime, groupByType);
-							var groupItemIndex = cacheField.FieldGroup.GroupItems.ToList().FindIndex(i => i.Value.IsEquivalentTo(groupKey));
-							if (groupItemIndex >= 0 && hiddenFieldItemIndicies.Contains(groupItemIndex))
-								return false;
-						}
+						if (string.IsNullOrEmpty(cacheItem.Value))
+							return false;
+						var dateTime = DateTime.Parse(cacheItem.Value);
+						var groupByType = cacheField.FieldGroup.GroupBy;
+						var groupKey = this.GetGroupKey(dateTime, groupByType);
+						var groupItemIndex = cacheField.FieldGroup.GroupItems.ToList().FindIndex(i => i.Value.IsEquivalentTo(groupKey));
+						if (groupItemIndex >= 0 && hiddenFieldItemIndicies.Contains(groupItemIndex))
+							return false;
 					}
 					//else
 					//{
