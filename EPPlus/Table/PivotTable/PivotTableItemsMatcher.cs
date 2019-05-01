@@ -120,11 +120,11 @@ namespace OfficeOpenXml.Table.PivotTable
 				var cacheField = myCacheDefinition.CacheFields[fieldIndex];
 				if (cacheField.IsGroupField)
 				{
+					int baseFieldIndex = cacheField.FieldGroup.BaseField;
+					var cacheRecordSharedItemIndex = int.Parse(cacheRecord.Items[baseFieldIndex].Value);
 					if (cacheField.IsDateGrouping)
 					{
-						int baseFieldIndex = cacheField.FieldGroup.BaseField;
-						var baseFieldSharedItemIndex = int.Parse(cacheRecord.Items[baseFieldIndex].Value);
-						var sharedItem = myCacheDefinition.CacheFields[baseFieldIndex].SharedItems[baseFieldSharedItemIndex];
+						var sharedItem = myCacheDefinition.CacheFields[baseFieldIndex].SharedItems[cacheRecordSharedItemIndex];
 						if (string.IsNullOrEmpty(sharedItem.Value))
 							return false;
 						var dateTime = DateTime.Parse(sharedItem.Value);
@@ -143,8 +143,6 @@ namespace OfficeOpenXml.Table.PivotTable
 							if (hiddenFieldItemIndicies.Contains(int.Parse(discreteProperty.Value)))
 								hiddenDiscretePrIndicies.Add(i);
 						}
-						int baseFieldIndex = cacheField.FieldGroup.BaseField;
-						var cacheRecordSharedItemIndex = int.Parse(cacheRecord.Items[baseFieldIndex].Value);
 						if (hiddenDiscretePrIndicies.Contains(cacheRecordSharedItemIndex))
 							return false;
 					}
