@@ -543,7 +543,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			"31-Dec"
 		};
 
-		private static readonly IReadOnlyList<string> Months = new List<string>
+		/// <summary>
+		/// Gets the month values used for group items in date groupings.
+		/// </summary>
+		internal static readonly IReadOnlyList<string> Months = new List<string>
 		{
 			"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 		};
