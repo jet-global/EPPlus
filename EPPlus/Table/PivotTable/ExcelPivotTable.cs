@@ -1005,7 +1005,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <returns>A dictionary of pivot field index to a list of field item value indices.</returns>
 		internal Dictionary<int, List<int>> GetPageFieldIndices()
 		{
-			// TODO: Delete me
 			if (this.PageFields == null || this.PageFields.Count == 0)
 				return null;
 			var pageFieldIndices = new Dictionary<int, List<int>>();

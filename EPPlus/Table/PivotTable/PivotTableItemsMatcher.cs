@@ -149,20 +149,6 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				else
 				{
-					//if (myFilters != null)
-					//{
-					//	foreach (var filter in myFilters)
-					//	{
-					//		int filterFieldIndex = filter.Field;
-					//		int recordReferenceIndex = int.Parse(cacheRecord.Items[filterFieldIndex].Value);
-					//		string recordReferenceString = myCacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordReferenceIndex].Value;
-					//		bool isNumeric = myCacheDefinition.CacheFields[filterFieldIndex].SharedItems[recordReferenceIndex].Type == PivotCacheRecordType.n;
-					//		bool isMatch = filter.MatchesFilterCriteriaResult(recordReferenceString, isNumeric);
-					//		if (!isMatch)
-					//			return false;
-					//	}
-					//}
-
 					var sharedItemsCollection = myCacheDefinition.CacheFields[fieldIndex].SharedItems;
 					int cacheRecordSharedItemIndex = int.Parse(cacheRecord.Items[fieldIndex].Value);
 					var cacheRecordValue = sharedItemsCollection[cacheRecordSharedItemIndex].Value;

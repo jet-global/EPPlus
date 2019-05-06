@@ -375,7 +375,6 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private bool FindCacheRecordValueAndTupleValueMatch(List<Tuple<int, int>> list, CacheRecordNode record, ExcelPivotTable pivotTable)
 		{
-			// DELETE ME
 			foreach (var tuple in list)
 			{
 				// Ignore data field tuples, group pivot field tuples and custom field subtotal settings.
@@ -418,7 +417,6 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private bool FindGroupingRecordValueAndTupleMatch(CacheFieldNode cacheField, CacheRecordNode record, Tuple<int, int> tuple, ExcelPivotTable pivotTable)
 		{
-			// DELETE ME
 			if (cacheField.IsDateGrouping)
 			{
 				// Find record indices for date groupings fields.
