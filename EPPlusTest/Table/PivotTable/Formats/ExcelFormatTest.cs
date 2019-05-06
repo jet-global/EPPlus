@@ -48,8 +48,8 @@ namespace EPPlusTest.Table.PivotTable.Formats
 					</pivotArea>
 				</format>");
 			var format = new ExcelFormat(TestUtility.CreateDefaultNSM(), xmlDoc.FirstChild);
-			Assert.IsNotNull(format.References);
-			Assert.AreEqual(1, format.References.Count);
+			Assert.IsNotNull(format.PivotArea.ReferencesCollection);
+			Assert.AreEqual(1, format.PivotArea.ReferencesCollection.Count);
 			Assert.AreEqual(10, format.FormatId);
 		}
 

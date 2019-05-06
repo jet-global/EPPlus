@@ -809,6 +809,10 @@
     <Compile Include="Table\PivotTable\Formats\ExcelFormatReference.cs" />
     <Compile Include="Table\PivotTable\Formats\ExcelFormatReferencesCollection.cs" />
     <Compile Include="Table\PivotTable\Formats\ExcelFormatsCollection.cs" />
+    <Compile Include="Table\PivotTable\Formats\PivotArea.cs" />
+    <Compile Include="Table\PivotTable\Formats\PivotAreasCollection.cs" />
+    <Compile Include="Table\PivotTable\Formats\PivotTableConditionalFormat.cs" />
+    <Compile Include="Table\PivotTable\Formats\PivotTableConditionalFormatsCollection.cs" />
     <Compile Include="Table\PivotTable\ItemsCollection.cs" />
     <Compile Include="Table\PivotTable\PivotItemTreeNode.cs" />
     <Compile Include="Table\PivotTable\PivotTableHeader.cs" />
