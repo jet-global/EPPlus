@@ -543,7 +543,10 @@ namespace OfficeOpenXml.Table.PivotTable
 			"31-Dec"
 		};
 
-		private static readonly IReadOnlyList<string> Months = new List<string>
+		/// <summary>
+		/// Gets the month values used for group items in date groupings.
+		/// </summary>
+		internal static readonly IReadOnlyList<string> Months = new List<string>
 		{
 			"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 		};
@@ -1094,7 +1097,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					// Indicates this field contains more than one data type.
 					cacheField.SharedItems.ContainsMixedTypes = this.ContainsMixedDataTypes(hasDate, hasString, hasNumbers, hasBool, hasError);
 					cacheField.SharedItems.ContainsBlank = hasBlank;
-					cacheField.SharedItems.ContainsSemiMixedTypes = hasString || hasBool;  // Excel appears to think bools are strings.
+					cacheField.SharedItems.ContainsSemiMixedTypes = hasString || hasBool || hasDate;  // Excel appears to think bools and dates are strings.
 					cacheField.SharedItems.LongText = hasLongText;
 
 					// "...not validated unless there is more than one item in sharedItems or the one and only item is not a blank item.
