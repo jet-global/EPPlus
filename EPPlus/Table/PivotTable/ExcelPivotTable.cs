@@ -2034,9 +2034,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					int formatId = format.FormatId;
 					var formatting = this.Workbook.Styles.Dxfs[formatId];
-					if (format.References != null)
+					if (format.PivotArea.ReferencesCollection != null)
 					{
-						foreach (var reference in format.References)
+						foreach (var reference in format.PivotArea.ReferencesCollection)
 						{
 							if (reference.ItemIndexCount == 0)
 							{

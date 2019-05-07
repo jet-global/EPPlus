@@ -24,42 +24,44 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
-using System.Collections.Generic;
 using System.Xml;
 using OfficeOpenXml.Utils;
 
 namespace OfficeOpenXml.Table.PivotTable.Formats
 {
 	/// <summary>
-	/// A collection of <see cref="ExcelFormatReference"/>s.
+	/// A pivot table conditional format rule.
 	/// </summary>
-	public class ExcelFormatReferencesCollection : XmlCollectionBase<ExcelFormatReference>
+	public class PivotTableConditionalFormat : XmlCollectionItemBase
 	{
-		#region Constructors
+		#region Properties
 		/// <summary>
-		/// Creates an instance of an <see cref="ExcelFormatReferencesCollection"/>.
+		/// Gets the priority of the rule.
 		/// </summary>
-		/// <param name="namespaceManager">The namespace manager.</param>
-		/// <param name="node">The xml top node</param>
-		public ExcelFormatReferencesCollection(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node)
+		public int Priority
 		{
-
+			get { return base.GetXmlNodeInt("@priority"); }
 		}
+
+		/// <summary>
+		/// Gets the pivot area collection for this rule.
+		/// </summary>
+		public PivotAreasCollection PivotAreasCollection { get; }
 		#endregion
 
-		#region XmlCollectionBase Overrides
+		#region Constructors
 		/// <summary>
-		/// Loads the <see cref="ExcelFormatReference"/>s from the xml document.
+		/// Creates an instance of a <see cref="PivotTableConditionalFormat"/> rule.
 		/// </summary>
-		/// <returns>The collection of <see cref="ExcelFormatReference"/>s.</returns>
-		protected override List<ExcelFormatReference> LoadItems()
+		/// <param name="namespaceManager">The namespace manager.</param>
+		/// <param name="node">The xml top node.</param>
+		public PivotTableConditionalFormat(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node)
 		{
-			var references = new List<ExcelFormatReference>();
-			foreach (XmlNode reference in base.TopNode.SelectNodes("d:reference", this.NameSpaceManager))
-			{
-				references.Add(new ExcelFormatReference(this.NameSpaceManager, reference));
-			}
-			return references;
+			if (node == null)
+				throw new ArgumentNullException(nameof(node));
+			var pivotAreasCollectionNode = node.SelectSingleNode("d:pivotAreas", this.NameSpaceManager);
+			if (pivotAreasCollectionNode != null)
+				this.PivotAreasCollection = new PivotAreasCollection(this.NameSpaceManager, pivotAreasCollectionNode);
 		}
 		#endregion
 	}

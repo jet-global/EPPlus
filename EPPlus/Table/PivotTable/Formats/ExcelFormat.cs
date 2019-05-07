@@ -44,9 +44,9 @@ namespace OfficeOpenXml.Table.PivotTable.Formats
 		}
 
 		/// <summary>
-		/// Gets the collection of format references.
+		/// Gets the pivot area for the format.
 		/// </summary>
-		public ExcelFormatReferencesCollection References { get; }
+		public PivotArea PivotArea { get; }
 		#endregion
 
 		#region Constructors
@@ -59,9 +59,9 @@ namespace OfficeOpenXml.Table.PivotTable.Formats
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
-			var referencesNode = node.SelectSingleNode(".//d:references", this.NameSpaceManager);
-			if (referencesNode != null)
-				this.References = new ExcelFormatReferencesCollection(this.NameSpaceManager, referencesNode);
+			var pivotAreaNode = node.SelectSingleNode("d:pivotArea", this.NameSpaceManager);
+			if (pivotAreaNode != null)
+				this.PivotArea = new PivotArea(this.NameSpaceManager, pivotAreaNode);
 		}
 		#endregion
 	}

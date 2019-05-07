@@ -31,35 +31,36 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.Table.PivotTable.Formats
 {
 	/// <summary>
-	/// A collection of <see cref="ExcelFormatReference"/>s.
+	/// The collection of pivot areas.
 	/// </summary>
-	public class ExcelFormatReferencesCollection : XmlCollectionBase<ExcelFormatReference>
+	public class PivotAreasCollection : XmlCollectionBase<PivotArea>
 	{
 		#region Constructors
 		/// <summary>
-		/// Creates an instance of an <see cref="ExcelFormatReferencesCollection"/>.
+		/// Creates an instance of a <see cref="PivotAreasCollection"/>.
 		/// </summary>
 		/// <param name="namespaceManager">The namespace manager.</param>
-		/// <param name="node">The xml top node</param>
-		public ExcelFormatReferencesCollection(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node)
+		/// <param name="node">The xml top node.</param>
+		public PivotAreasCollection(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node)
 		{
-
+			if (node == null)
+				throw new ArgumentNullException(nameof(node));
 		}
 		#endregion
 
 		#region XmlCollectionBase Overrides
 		/// <summary>
-		/// Loads the <see cref="ExcelFormatReference"/>s from the xml document.
+		/// Loads the <see cref="PivotArea"/>s from the xml document.
 		/// </summary>
-		/// <returns>The collection of <see cref="ExcelFormatReference"/>s.</returns>
-		protected override List<ExcelFormatReference> LoadItems()
+		/// <returns>The collection of <see cref="PivotArea"/>s.</returns>
+		protected override List<PivotArea> LoadItems()
 		{
-			var references = new List<ExcelFormatReference>();
-			foreach (XmlNode reference in base.TopNode.SelectNodes("d:reference", this.NameSpaceManager))
+			var pivotAreaCollection = new List<PivotArea>();
+			foreach (XmlNode pivotArea in base.TopNode.SelectNodes("d:pivotArea", this.NameSpaceManager))
 			{
-				references.Add(new ExcelFormatReference(this.NameSpaceManager, reference));
+				pivotAreaCollection.Add(new PivotArea(this.NameSpaceManager, pivotArea));
 			}
-			return references;
+			return pivotAreaCollection;
 		}
 		#endregion
 	}

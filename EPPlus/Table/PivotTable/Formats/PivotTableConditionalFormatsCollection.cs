@@ -31,35 +31,36 @@ using OfficeOpenXml.Utils;
 namespace OfficeOpenXml.Table.PivotTable.Formats
 {
 	/// <summary>
-	/// A collection of <see cref="ExcelFormatReference"/>s.
+	/// A collection of pivot table conditional formats.
 	/// </summary>
-	public class ExcelFormatReferencesCollection : XmlCollectionBase<ExcelFormatReference>
+	public class PivotTableConditionalFormatsCollection : XmlCollectionBase<PivotTableConditionalFormat>
 	{
 		#region Constructors
 		/// <summary>
-		/// Creates an instance of an <see cref="ExcelFormatReferencesCollection"/>.
+		/// Creates an instance of a <see cref="PivotTableConditionalFormatsCollection"/>.
 		/// </summary>
 		/// <param name="namespaceManager">The namespace manager.</param>
-		/// <param name="node">The xml top node</param>
-		public ExcelFormatReferencesCollection(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node)
+		/// <param name="node">The xml top node.</param>
+		public PivotTableConditionalFormatsCollection(XmlNamespaceManager namespaceManager, XmlNode node) : base(namespaceManager, node)
 		{
-
+			if (node == null)
+				throw new ArgumentNullException(nameof(node));
 		}
 		#endregion
 
 		#region XmlCollectionBase Overrides
 		/// <summary>
-		/// Loads the <see cref="ExcelFormatReference"/>s from the xml document.
+		/// Loads the <see cref="PivotTableConditionalFormat"/>s from the xml document.
 		/// </summary>
-		/// <returns>The collection of <see cref="ExcelFormatReference"/>s.</returns>
-		protected override List<ExcelFormatReference> LoadItems()
+		/// <returns>The collection of <see cref="PivotTableConditionalFormat"/>s.</returns>
+		protected override List<PivotTableConditionalFormat> LoadItems()
 		{
-			var references = new List<ExcelFormatReference>();
-			foreach (XmlNode reference in base.TopNode.SelectNodes("d:reference", this.NameSpaceManager))
+			var conditionalFormatCollection = new List<PivotTableConditionalFormat>();
+			foreach (XmlNode conditionalFormat in base.TopNode.SelectNodes("d:conditionalFormat", this.NameSpaceManager))
 			{
-				references.Add(new ExcelFormatReference(this.NameSpaceManager, reference));
+				conditionalFormatCollection.Add(new PivotTableConditionalFormat(this.NameSpaceManager, conditionalFormat));
 			}
-			return references;
+			return conditionalFormatCollection;
 		}
 		#endregion
 	}

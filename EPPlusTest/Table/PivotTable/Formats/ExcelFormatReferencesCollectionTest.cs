@@ -50,9 +50,15 @@ namespace EPPlusTest.Table.PivotTable.Formats
 
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentNullException))]
-		public void ExcelFormatReferencesCollectionNullNodeTest()
+		public void ExcelFormatReferencesCollectionNullNamespaceManagerTest()
 		{
-			new ExcelFormatReferencesCollection(TestUtility.CreateDefaultNSM(), null);
+			var xmlDoc = new XmlDocument(TestUtility.CreateDefaultNSM().NameTable);
+			xmlDoc.LoadXml(@"<references count=""1"" xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"">
+								<reference field=""6"" count =""1"">
+									<x v=""0""/>
+								</reference>
+							</references>");
+			new ExcelFormatReferencesCollection(null, xmlDoc.FirstChild);
 		}
 		#endregion
 
