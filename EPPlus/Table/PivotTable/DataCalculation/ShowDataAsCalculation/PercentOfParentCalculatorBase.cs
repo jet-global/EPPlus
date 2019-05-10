@@ -77,7 +77,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				parentColumnHeaderIndices,
 				rowTotalType,
 				columnTotalType,
-				base.TotalsCalculator);
+				base.TotalsCalculator,
+				includeHiddenValues: true);
 
 			// Don't calculate the percentage if the cell contains an error value.
 			if (cellBackingData?.Result != null && Values.TryGetErrorType(cellBackingData?.Result.ToString(), out _)

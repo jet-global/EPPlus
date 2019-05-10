@@ -256,9 +256,10 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="filterIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
 		/// <param name="dataFieldIndex">The index of the data field.</param>
 		/// <param name="pivotTable">The pivot table (optional).</param>
+		/// <param name="includeHiddenValues">A value indicating whether or not to include hidden values in calculations.</param>
 		/// <returns>The subtotal value or null if no values are found.</returns>
 		public List<object> FindMatchingValues(List<Tuple<int, int>> rowTuples, List<Tuple<int, int>> columnTuples, 
-			Dictionary<int, List<int>> filterIndices, int dataFieldIndex, ExcelPivotTable pivotTable = null)
+			Dictionary<int, List<int>> filterIndices, int dataFieldIndex, ExcelPivotTable pivotTable = null, bool includeHiddenValues = false)
 		{
 			// Convert tuple values if the tuple is a group field.
 			rowTuples = this.ConvertGroupingTuples(rowTuples, pivotTable);
@@ -267,15 +268,23 @@ namespace OfficeOpenXml.Table.PivotTable
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
-				bool match = false;
-				if (rowTuples != null)
-					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
-				if ((match && columnTuples != null) || rowTuples == null)
-					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(columnTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(columnTuples, record, pivotTable);
-				if (match && filterIndices != null)
-					match = this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record);
-				if (match)
-					this.AddToList(record, dataFieldIndex, matchingValues);
+				if (includeHiddenValues || pivotTable == null)
+				{
+					bool match = false;
+					if (rowTuples != null)
+						match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
+					if ((match && columnTuples != null) || rowTuples == null)
+						match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(columnTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(columnTuples, record, pivotTable);
+					if (match && filterIndices != null)
+						match = this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record);
+					if (match)
+						this.AddToList(record, dataFieldIndex, matchingValues);
+				}
+				else
+				{
+					if (pivotTable.ItemsMatcher.ShouldInclude(record))
+						this.AddToList(record, dataFieldIndex, matchingValues);
+				}
 			}
 			return matchingValues;
 		}

@@ -60,7 +60,7 @@ namespace EPPlusTest.Drawing.Slicers
 			Assert.AreEqual(true, tabularItemNode.IsSelected);
 			tabularItemNode.IsSelected = false;
 			Assert.AreEqual(false, tabularItemNode.IsSelected);
-			Assert.AreEqual("<i x=\"2\" s=\"0\" />", node.OuterXml);
+			Assert.AreEqual("<i x=\"2\" />", node.OuterXml);
 		}
 
 		[TestMethod]

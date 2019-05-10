@@ -114,7 +114,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation.ShowDataAsCalculation
 				parentColumnHeaderIndices,
 				rowTotalType,
 				columnTotalType,
-				this.TotalsCalculator);
+				this.TotalsCalculator,
+				includeHiddenValues: true);
 			var baseValue = parentBackingData.Result;
 
 			if (cellBackingData?.Result == null)

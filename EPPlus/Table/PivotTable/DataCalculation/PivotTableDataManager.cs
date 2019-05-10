@@ -112,6 +112,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <param name="rowHeaderTotalType">The row function type to calculate values with.</param>
 		/// <param name="columnHeaderTotalType">The column function type to calculate values with.</param>
 		/// <param name="functionCalculator">The <see cref="TotalsFunctionHelper"/> to perform calculations with.</param>
+		/// <param name="includeHiddenValues">A value indicating whether or not to include hidden values in calculations.</param>
 		/// <returns>A <see cref="PivotCellBackingData"/> containing the backing values and a calculated result.</returns>
 		public static PivotCellBackingData GetParentBackingCellValues(
 			ExcelPivotTable pivotTable,
@@ -120,7 +121,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 			List<Tuple<int, int>> columnHeaderIndices,
 			string rowHeaderTotalType,
 			string columnHeaderTotalType,
-			TotalsFunctionHelper functionCalculator)
+			TotalsFunctionHelper functionCalculator,
+			bool includeHiddenValues = false)
 		{
 			var dataField = pivotTable.DataFields[dataFieldCollectionIndex];
 			var cacheField = pivotTable.CacheDefinition.CacheFields[dataField.Index];
@@ -132,7 +134,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					columnHeaderIndices,
 					pivotTable.GetPageFieldIndices(),
 					dataField.Index,
-					pivotTable);
+					pivotTable,
+					includeHiddenValues);
 				backingData = new PivotCellBackingData(matchingValues);
 			}
 			else
@@ -146,7 +149,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 						columnHeaderIndices,
 						pivotTable.GetPageFieldIndices(),
 						cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
-						pivotTable);
+						pivotTable,
+						includeHiddenValues);
 					fieldNameToValues.Add(cacheFieldName, values);
 				}
 				backingData = new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);

@@ -25,7 +25,7 @@ namespace OfficeOpenXml.Drawing.Slicers
 		public bool IsSelected
 		{
 			get { return base.GetXmlNodeBool("@s", false); }
-			set { base.SetXmlNodeBool("@s", value); }
+			set { base.SetXmlNodeBool("@s", value, false); }
 		}
 
 		/// <summary>

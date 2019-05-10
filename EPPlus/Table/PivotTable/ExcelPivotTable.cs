@@ -36,6 +36,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
+using OfficeOpenXml.Drawing.Slicers;
 using OfficeOpenXml.Extensions;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.Internationalization;
@@ -956,13 +957,15 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Refresh the <see cref="ExcelPivotTable"/> based on the <see cref="ExcelPivotCacheDefinition"/>.
 		/// </summary>
-		internal void RefreshFromCache(StringResources stringResources)
+		internal void RefreshFromCache(StringResources stringResources, List<ExcelSlicerCache> relatedSlicerCaches)
 		{
 			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.RefreshFromCache));
 
 			// Update pivot fields and sort pivot field items.
 			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.UpdatePivotFields));
 			this.UpdatePivotFields();
+
+			this.ApplySlicers(relatedSlicerCaches);
 
 			this.RowHeaders.Clear();
 			this.ColumnHeaders.Clear();
@@ -1151,6 +1154,38 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
+		private void ApplySlicers(List<ExcelSlicerCache> slicerCaches)
+		{
+			foreach (var slicerCache in slicerCaches)
+			{
+				int fieldIndex = this.GetCacheDefinitionFieldIndexByName(slicerCache.SourceName);
+				foreach (var slicerCacheReference in slicerCache.PivotTables)
+				{
+					if (this.Name.IsEquivalentTo(slicerCacheReference.PivotTableName))
+					{
+						for (int i = 0; i < slicerCache.TabularDataNode.Items.Count; i++)
+						{
+							bool isHidden = !slicerCache.TabularDataNode.Items[i].IsSelected;
+							this.Fields[fieldIndex].Items[i].Hidden = isHidden;
+						}
+					}
+				}
+			}
+		}
+
+		private int GetCacheDefinitionFieldIndexByName(string name)
+		{
+			for (int i = 0; i < this.CacheDefinition.CacheFields.Count; i++)
+			{
+				var field = this.CacheDefinition.CacheFields[i];
+				if (field.Name.IsEquivalentTo(name))
+				{
+					return i;
+				}
+			}
+			throw new Exception($"The name '{name}' was not found in the cacheDefinition.");
+		}
+
 		private void UpdatePivotFields()
 		{
 			// Update pivotField items to match corresponding cacheField sharedItems.
