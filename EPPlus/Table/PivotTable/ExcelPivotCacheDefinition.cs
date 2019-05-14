@@ -1038,7 +1038,7 @@ namespace OfficeOpenXml.Table.PivotTable
 					}
 
 					// Note that this differs from the documentation, which we believe to be wrong (the false case appears to be worded incorrectly).
-					cacheField.SharedItems.ContainsNonDate = (hasString || hasBlank || hasNumbers || hasInteger || hasBool || hasError);
+					cacheField.SharedItems.ContainsNonDate = (hasString || hasNumbers || hasInteger || hasBool || hasError);
 
 					if (hasDate)
 					{
@@ -1065,12 +1065,12 @@ namespace OfficeOpenXml.Table.PivotTable
 					// Indicates this field contains more than one data type.
 					cacheField.SharedItems.ContainsMixedTypes = this.ContainsMixedDataTypes(hasDate, hasString, hasNumbers, hasBool, hasError);
 					cacheField.SharedItems.ContainsBlank = hasBlank;
-					cacheField.SharedItems.ContainsSemiMixedTypes = hasString || hasBool;  // Excel appears to think bools are strings.
+					cacheField.SharedItems.ContainsSemiMixedTypes = hasString || hasBool || hasBlank;  // Excel appears to think bools are strings.
 					cacheField.SharedItems.LongText = hasLongText;
 
 					// "...not validated unless there is more than one item in sharedItems or the one and only item is not a blank item.
 					//  If the first item is a blank item the data type the field cannot be verified."
-					if (cacheField.SharedItems.Count > 0 && cacheField.SharedItems.First().Type != PivotCacheRecordType.m)
+					if (cacheField.SharedItems.Count > 0 || (cacheField.SharedItems.Count == 1 && cacheField.SharedItems.First().Type != PivotCacheRecordType.m))
 					{
 						cacheField.SharedItems.ContainsNumbers = hasNumbers;
 						cacheField.SharedItems.ContainsString = hasString || hasBool;  // Excel appears to think bools are strings.
