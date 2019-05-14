@@ -294,6 +294,7 @@
     <Compile Include="Table\PivotTable\Formats\PivotAreaTest.cs" />
     <Compile Include="Table\PivotTable\Formats\PivotTableConditionalFormatsCollectionTest.cs" />
     <Compile Include="Table\PivotTable\Formats\PivotTableConditionalFormatTest.cs" />
+    <Compile Include="Table\PivotTable\Formats\PivotTableConditionalFormattingTest.cs" />
     <Compile Include="Table\PivotTable\Formats\PivotTableFormattingTest.cs" />
     <Compile Include="Table\PivotTable\ItemsCollectionTest.cs" />
     <Compile Include="Table\PivotTable\PivotItemTreeNodeTest.cs" />
