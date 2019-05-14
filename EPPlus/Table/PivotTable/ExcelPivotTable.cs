@@ -854,6 +854,8 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal bool HasFilters => this.Filters != null;
 
 		internal ExcelWorkbook Workbook { get; private set; }
+
+		private int OriginalTableEndRow { get; set; }
 		#endregion
 
 		#region Constructors
@@ -983,6 +985,9 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// Refreshing a pivot table expands all values, so update the field items to make the icons match.
 			this.ExpandAllFieldItems();
+
+			// Update conditional formatting rule addresses.
+			this.UpdateConditionalFormattingRuleAddresses();
 		}
 
 		/// <summary>
@@ -1124,6 +1129,53 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
+		private void UpdateConditionalFormattingRuleAddresses()
+		{
+			foreach (var rule in this.Worksheet.ConditionalFormatting)
+			{
+				string newAddress = string.Empty;
+				var ruleAddress = rule.Address.AddressSpaceSeparated.Split(' ');
+				ExcelAddress cellRange = null;
+				foreach (var cells in ruleAddress)
+				{
+					cellRange = new ExcelAddress(cells);
+					if (cellRange.IsSingleCell)
+					{
+						if (this.Address.Start.Row <= cellRange.Start.Row && cellRange.End.Row <= this.Address.End.Row
+							&& this.Address.Start.Column <= cellRange.Start.Column && cellRange.End.Column <= this.Address.End.Column)
+							newAddress += cells + " ";
+					}
+					else if (cells.Contains(":"))
+					{
+						ExcelAddress updatedAddress = null;
+						if (cellRange.Start.Row < this.Address.End.Row && cellRange.End.Row > this.Address.End.Row
+							&& this.Address.Start.Column <= cellRange.Start.Column && cellRange.End.Column <= this.Address.End.Column)
+						{
+							// The pivot table's size is smaller than the original, so the conditional formatting range's end row is past the end of the pivot table.
+							updatedAddress = new ExcelAddress(cellRange.Start.Row, cellRange.Start.Column, this.Address.End.Row, cellRange.End.Column);
+						}
+						else if (this.Address.Start.Row > cellRange.Start.Row && cellRange.End.Row > this.Address.Start.Row
+							&& this.Address.Start.Column <= cellRange.Start.Column && cellRange.End.Column <= this.Address.End.Column)
+						{
+							// The pivot table's size is smaller than the original, so the conditional formatting range's start row is before the beginning of the pivot table.
+							updatedAddress = new ExcelAddress(this.Address.Start.Row, cellRange.Start.Column, cellRange.End.Row, cellRange.End.Column);
+						}
+						else if (this.Address.Start.Row <= cellRange.Start.Row && cellRange.End.Row == this.OriginalTableEndRow
+							&& this.Address.Start.Column <= cellRange.Start.Column && cellRange.End.Column <= this.Address.End.Column)
+						{
+							// The pivot table's size is bigger than the original, so expand the conditional formatting rule's end row.
+							updatedAddress = new ExcelAddress(cellRange.Start.Row, cellRange.Start.Column, this.Address.End.Row, cellRange.End.Column);
+						}
+						if (updatedAddress != null)
+							newAddress += updatedAddress.AddressSpaceSeparated + " ";
+					}
+				}
+				if (!string.IsNullOrEmpty(newAddress))
+					rule.Address = new ExcelAddress(newAddress);
+			}
+		}
+
+
 		private void UpdatePivotFields()
 		{
 			// Update pivotField items to match corresponding cacheField sharedItems.
@@ -1721,6 +1773,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private ExcelAddress GetNewAddress()
 		{
+			this.OriginalTableEndRow = this.Address.End.Row;
 			int endRow = this.Address.Start.Row + this.FirstDataRow + this.RowHeaders.Count - 1;
 			// If there are no data fields, then don't find the offset to obtain the first data column.
 			int endColumn = this.Address.Start.Column;
