@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using EPPlusTest.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -892,41 +891,78 @@ namespace EPPlusTest.Drawing.Slicers
 				}
 			}
 		}
-		#endregion
 
 		[TestMethod]
-		public void AutoGenerateExpectedResults()
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\Slicers.xlsx")]
+		public void RefreshSlicerMultiplePivotTablesSameSlicerField()
 		{
-			string sheetName = "Sheet3";
-			string range = "B3:H18";
-			//var sourceFilePath = @"C:\Source\EPPlus\EPPlusTest\Workbooks\PivotTables\Slicers.xlsx";
-			var sourceFilePath = @"C:\Users\ems\Downloads\Slicers.xlsx";
-			var outputFilePath = @"C:\Users\ems\Downloads\expected.cs";
-
-			using (var package = new OfficeOpenXml.ExcelPackage(new System.IO.FileInfo(sourceFilePath)))
+			var file = new FileInfo("Slicers.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
 			{
-				var cells = package.Workbook.Worksheets[sheetName].Cells[range];
-				string text = $"TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]{System.Environment.NewLine}{{{System.Environment.NewLine}";
-				foreach (var cell in cells)
+				var sheetName = "Sheet4";
+				using (var package = new ExcelPackage(file))
 				{
-					string value = null;
-					if (cell.Value is string)
-						value = $"\"{cell.Value}\"";
-					else if (cell.Value is OfficeOpenXml.ExcelErrorValue errorValue)
-						value = $"ExcelErrorValue.Create(eErrorType.{errorValue.Type})";
-					else if (cell.Value is DateTime dateValue)
-						value = dateValue.ToOADate().ToString();
-					else if (cell.Value == null)
-						value = "null";
-					else
-						value = cell.Value.ToString();
-
-					text += $"	new ExpectedCellValue(sheetName, {cell._fromRow}, {cell._fromCol}, {value}),{System.Environment.NewLine}";
+					var sheet = package.Workbook.Worksheets[sheetName];
+					package.Workbook.PivotCacheDefinitions.First().UpdateData();
+					package.SaveAs(newFile.File);
 				}
-				text += "});";
-				System.IO.File.WriteAllText(outputFilePath, text);
+				using (var package = new ExcelPackage(newFile.File))
+				{
+					TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+					{
+						new ExpectedCellValue(sheetName, 2, 2, "Sum of Amount"),
+						new ExpectedCellValue(sheetName, 2, 3, "Column Labels"),
+						new ExpectedCellValue(sheetName, 3, 3, "2013"),
+						new ExpectedCellValue(sheetName, 3, 4, "Grand Total"),
+						new ExpectedCellValue(sheetName, 4, 2, "Row Labels"),
+						new ExpectedCellValue(sheetName, 4, 3, "SALES"),
+						new ExpectedCellValue(sheetName, 5, 2, "Entries, January 2013"),
+						new ExpectedCellValue(sheetName, 5, 3, 8277.85),
+						new ExpectedCellValue(sheetName, 5, 4, 8277.85),
+						new ExpectedCellValue(sheetName, 6, 2, "43100"),
+						new ExpectedCellValue(sheetName, 6, 3, 8277.85),
+						new ExpectedCellValue(sheetName, 6, 4, 8277.85),
+						new ExpectedCellValue(sheetName, 7, 2, "Order 106015"),
+						new ExpectedCellValue(sheetName, 7, 3, 53800.14),
+						new ExpectedCellValue(sheetName, 7, 4, 53800.14),
+						new ExpectedCellValue(sheetName, 8, 2, "22400"),
+						new ExpectedCellValue(sheetName, 8, 3, 53800.14),
+						new ExpectedCellValue(sheetName, 8, 4, 53800.14),
+						new ExpectedCellValue(sheetName, 9, 2, "Order 106018"),
+						new ExpectedCellValue(sheetName, 9, 3, 23672.06),
+						new ExpectedCellValue(sheetName, 9, 4, 23672.06),
+						new ExpectedCellValue(sheetName, 10, 2, "17110"),
+						new ExpectedCellValue(sheetName, 10, 3, 11836.03),
+						new ExpectedCellValue(sheetName, 10, 4, 11836.03),
+						new ExpectedCellValue(sheetName, 11, 2, "22400"),
+						new ExpectedCellValue(sheetName, 11, 3, 11836.03),
+						new ExpectedCellValue(sheetName, 11, 4, 11836.03),
+						new ExpectedCellValue(sheetName, 12, 2, "Grand Total"),
+						new ExpectedCellValue(sheetName, 12, 3, 85750.05),
+						new ExpectedCellValue(sheetName, 12, 4, 85750.05),
+						new ExpectedCellValue(sheetName, 14, 2, "Row Labels"),
+						new ExpectedCellValue(sheetName, 14, 3, "Sum of Entry No."),
+						new ExpectedCellValue(sheetName, 14, 4, "Sum of Amount"),
+						new ExpectedCellValue(sheetName, 15, 2, "Order 106015"),
+						new ExpectedCellValue(sheetName, 15, 3, 105),
+						new ExpectedCellValue(sheetName, 15, 4, -53800.14),
+						new ExpectedCellValue(sheetName, 16, 2, "PURCHASES"),
+						new ExpectedCellValue(sheetName, 16, 3, 105),
+						new ExpectedCellValue(sheetName, 16, 4, -53800.14),
+						new ExpectedCellValue(sheetName, 17, 2, "Order 106018"),
+						new ExpectedCellValue(sheetName, 17, 3, 81),
+						new ExpectedCellValue(sheetName, 17, 4, 23672.06),
+						new ExpectedCellValue(sheetName, 18, 2, "PURCHASES"),
+						new ExpectedCellValue(sheetName, 18, 3, 81),
+						new ExpectedCellValue(sheetName, 18, 4, 23672.06),
+						new ExpectedCellValue(sheetName, 19, 2, "Grand Total"),
+						new ExpectedCellValue(sheetName, 19, 3, 186),
+						new ExpectedCellValue(sheetName, 19, 4, -30128.08),
+					});
+				}
 			}
-			Assert.Fail("Successfully generated results.");
 		}
+		#endregion
 	}
 }
