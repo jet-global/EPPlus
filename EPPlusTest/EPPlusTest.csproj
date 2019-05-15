@@ -103,6 +103,7 @@
     <Compile Include="Drawing\Slicers\ExcelSlicerDrawingTest.cs" />
     <Compile Include="Drawing\Slicers\OlapDataNodeTest.cs" />
     <Compile Include="Drawing\Slicers\PivotTableNodeTest.cs" />
+    <Compile Include="Drawing\Slicers\PivotTableSlicerRefreshTest.cs" />
     <Compile Include="Drawing\Slicers\SlicerCacheItemParentTest.cs" />
     <Compile Include="Drawing\Slicers\SlicerLevelNodeTest.cs" />
     <Compile Include="Drawing\Slicers\SlicerRangeItemTest.cs" />

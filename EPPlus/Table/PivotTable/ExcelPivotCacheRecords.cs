@@ -295,9 +295,9 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <param name="rowCacheRecordList">The list of cache record indices the row header uses.</param>
 		/// <param name="columnCacheRecordList">The list of cache record indices the column header uses.</param>
 		/// <param name="dataFieldIndex">The index of the data field.</param>
-		/// <param name="filterIndices">A dictionary of page field (filter) indices. Maps a cache field to a list of selected filter item indices.</param>
+		/// <param name="itemsMatcher">The <see cref="PivotTableItemsMatcher"/>.</param>
 		/// <returns>A list of the values that make up the total cell value.</returns>
-		public List<object> GetDataFieldValues(List<int> rowCacheRecordList, List<int> columnCacheRecordList, int dataFieldIndex, Dictionary<int, List<int>> filterIndices)
+		public List<object> GetDataFieldValues(List<int> rowCacheRecordList, List<int> columnCacheRecordList, int dataFieldIndex, PivotTableItemsMatcher itemsMatcher)
 		{
 			IEnumerable<int> commonIndices = null;
 			if (rowCacheRecordList == null)
@@ -311,8 +311,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			foreach (var index in commonIndices)
 			{
 				var record = this.Records[index];
-				bool addValue = filterIndices != null ? this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record) : true;
-				if (addValue)
+				if (itemsMatcher.ShouldInclude(record))
 				{
 					var recordItem = record.Items[dataFieldIndex];
 					var value = recordItem.Value;

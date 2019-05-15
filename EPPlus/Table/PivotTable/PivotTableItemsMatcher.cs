@@ -64,7 +64,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 
-			foreach (var field in pivotFields.Where(f => f.HasItems && (f.IsRowField || f.IsColumnField)))
+			foreach (var field in pivotFields.Where(f => f.HasItems && (f.IsRowField || f.IsColumnField || f.IsSlicerField)))
 			{
 				var values = new List<int>();
 				foreach (var fieldItem in field.Items)

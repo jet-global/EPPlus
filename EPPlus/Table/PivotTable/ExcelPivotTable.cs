@@ -1158,19 +1158,28 @@ namespace OfficeOpenXml.Table.PivotTable
 		{
 			foreach (var slicerCache in slicerCaches)
 			{
-				int fieldIndex = this.GetCacheDefinitionFieldIndexByName(slicerCache.SourceName);
-				foreach (var slicerCacheReference in slicerCache.PivotTables)
+				if (this.SlicerReferencesThisPivotTable(slicerCache))
 				{
-					if (this.Name.IsEquivalentTo(slicerCacheReference.PivotTableName))
+					int fieldIndex = this.GetCacheDefinitionFieldIndexByName(slicerCache.SourceName);
+					var field = this.Fields[fieldIndex];
+					field.IsSlicerField = true;
+					foreach (var item in slicerCache.TabularDataNode.Items)
 					{
-						for (int i = 0; i < slicerCache.TabularDataNode.Items.Count; i++)
-						{
-							bool isHidden = !slicerCache.TabularDataNode.Items[i].IsSelected;
-							this.Fields[fieldIndex].Items[i].Hidden = isHidden;
-						}
+						var fieldItem = field.Items.Single(i => i.X == item.AtomIndex);
+						fieldItem.Hidden = !item.IsSelected;
 					}
 				}
 			}
+		}
+
+		private bool SlicerReferencesThisPivotTable(ExcelSlicerCache slicerCache)
+		{
+			return slicerCache.PivotTables.Any(p =>
+			{
+				int sheetId = int.Parse(p.TabId);
+				var worksheet = this.Workbook.Worksheets.First(w => w.SheetID == sheetId);
+				return worksheet.Name.IsEquivalentTo(this.Worksheet.Name) && this.Name.IsEquivalentTo(p.PivotTableName);
+			});
 		}
 
 		private int GetCacheDefinitionFieldIndexByName(string name)
