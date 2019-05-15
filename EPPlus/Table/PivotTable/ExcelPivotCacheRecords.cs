@@ -268,23 +268,15 @@ namespace OfficeOpenXml.Table.PivotTable
 			var matchingValues = new List<object>();
 			foreach (var record in this.Records)
 			{
-				if (includeHiddenValues || pivotTable == null)
-				{
-					bool match = false;
-					if (rowTuples != null)
-						match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
-					if ((match && columnTuples != null) || rowTuples == null)
-						match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(columnTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(columnTuples, record, pivotTable);
-					if (match && filterIndices != null)
-						match = this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record);
-					if (match)
-						this.AddToList(record, dataFieldIndex, matchingValues);
-				}
-				else
-				{
-					if (pivotTable.ItemsMatcher.ShouldInclude(record))
-						this.AddToList(record, dataFieldIndex, matchingValues);
-				}
+				bool match = false;
+				if (rowTuples != null)
+					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(rowTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(rowTuples, record, pivotTable);
+				if ((match && columnTuples != null) || rowTuples == null)
+					match = pivotTable == null ? this.FindCacheRecordIndexAndTupleIndexMatch(columnTuples, record) : this.FindCacheRecordValueAndTupleValueMatch(columnTuples, record, pivotTable);
+				if (match && filterIndices != null)
+					match = this.FindCacheRecordValueAndPageFieldTupleValueMatch(filterIndices, record);
+				if (match)
+					this.AddToList(record, dataFieldIndex, matchingValues);
 			}
 			return matchingValues;
 		}
