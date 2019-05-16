@@ -963,6 +963,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					if (slicerCache.HideItemsWithNoData)
 						unsupportedFeatures.Add($"Slicer setting hide items with no data selected");
+					if (slicerCache.TabularDataNode.ShowMissing)
+						unsupportedFeatures.Add($"Slicer setting show missing selected");
 				}
 			}
 			if (base.TopNode.SelectSingleNode("d:calculatedItems", base.NameSpaceManager) != null)
