@@ -963,7 +963,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					if (slicerCache.HideItemsWithNoData)
 						unsupportedFeatures.Add($"Slicer setting hide items with no data selected");
-					if (slicerCache.TabularDataNode.ShowMissing)
+					if (slicerCache.TabularDataNode == null)
+						unsupportedFeatures.Add($"Slicer is not based off of local source.");
+					else if (slicerCache.TabularDataNode.ShowMissing)
 						unsupportedFeatures.Add($"Slicer setting show missing selected");
 				}
 			}
