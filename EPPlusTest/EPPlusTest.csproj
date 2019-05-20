@@ -99,10 +99,12 @@
     <Compile Include="ConditionalFormatting\ConditionalFormattingTest.cs" />
     <Compile Include="ConditionalFormatting\Rules\ExcelConditionalFormattingRuleTest.cs" />
     <Compile Include="ConditionalFormatting\Rules\X14ConditionalFormattingRuleTest.cs" />
+    <Compile Include="Drawing\Slicers\ExcelSlicerCacheTest.cs" />
     <Compile Include="Drawing\ExcelDrawingsTest.cs" />
     <Compile Include="Drawing\Slicers\ExcelSlicerDrawingTest.cs" />
     <Compile Include="Drawing\Slicers\OlapDataNodeTest.cs" />
     <Compile Include="Drawing\Slicers\PivotTableNodeTest.cs" />
+    <Compile Include="Drawing\Slicers\PivotTableSlicerRefreshTest.cs" />
     <Compile Include="Drawing\Slicers\SlicerCacheItemParentTest.cs" />
     <Compile Include="Drawing\Slicers\SlicerLevelNodeTest.cs" />
     <Compile Include="Drawing\Slicers\SlicerRangeItemTest.cs" />
@@ -287,6 +289,7 @@
     <Compile Include="Table\PivotTable\Filters\ExcelFilterCriteriaCollectionTest.cs" />
     <Compile Include="Table\PivotTable\Filters\ExcelFilterTest.cs" />
     <Compile Include="Table\PivotTable\Filters\ExcelPivotTableAdvancedFilterTest.cs" />
+    <Compile Include="Table\PivotTable\Filters\ItemFiltersTests.cs" />
     <Compile Include="Table\PivotTable\Formats\ExcelFormatReferencesCollectionTest.cs" />
     <Compile Include="Table\PivotTable\Formats\ExcelFormatReferenceTest.cs" />
     <Compile Include="Table\PivotTable\Formats\ExcelFormatsCollectionTest.cs" />
@@ -303,6 +306,7 @@
     <Compile Include="Table\PivotTable\PivotTableTestBase.cs" />
     <Compile Include="Table\PivotTable\RowColumnItemTest.cs" />
     <Compile Include="Table\PivotTable\SharedItemsCollectionTest.cs" />
+    <Compile Include="Drawing\Slicers\SlicerCacheTabularItemsTest.cs" />
     <Compile Include="TestHelpers\ExpectedCellValue.cs" />
     <Compile Include="TestHelpers\TempTestFile.cs" />
     <Compile Include="TestHelpers\TestHelperUtility.cs" />

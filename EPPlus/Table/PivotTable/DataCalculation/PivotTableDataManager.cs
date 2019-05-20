@@ -132,7 +132,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					columnHeaderIndices,
 					pivotTable.GetPageFieldIndices(),
 					dataField.Index,
-					pivotTable);
+					pivotTable,
+					true);
 				backingData = new PivotCellBackingData(matchingValues);
 			}
 			else
@@ -146,7 +147,8 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 						columnHeaderIndices,
 						pivotTable.GetPageFieldIndices(),
 						cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
-						pivotTable);
+						pivotTable,
+						true);
 					fieldNameToValues.Add(cacheFieldName, values);
 				}
 				backingData = new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
@@ -281,7 +283,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					rowCacheRecordIndices,
 					columnCacheRecordIndices,
 					dataField.Index,
-					pivotTable.GetPageFieldIndices());
+					pivotTable.ItemsMatcher);
 				backingData = new PivotCellBackingData(matchingValues);
 			}
 			else
@@ -294,7 +296,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 						rowCacheRecordIndices,
 						columnCacheRecordIndices,
 						cacheField.ReferencedCacheFieldsToIndex[cacheFieldName],
-						pivotTable.GetPageFieldIndices());
+						pivotTable.ItemsMatcher);
 					fieldNameToValues.Add(cacheFieldName, values);
 				}
 				backingData = new PivotCellBackingData(fieldNameToValues, cacheField.ResolvedFormula);
@@ -383,7 +385,9 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					if (field != null)
 					{
 						var resolvedReferences = PivotTableDataManager.ResolveFormulaReferences(field.Formula, totalsCalculator, calculatedFields);
+						resolvedFormulaTokens.Add(new Token("(", TokenType.OpeningParenthesis));
 						resolvedFormulaTokens.AddRange(resolvedReferences);
+						resolvedFormulaTokens.Add(new Token(")", TokenType.ClosingParenthesis));
 					}
 					else
 						resolvedFormulaTokens.Add(token);

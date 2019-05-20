@@ -810,6 +810,7 @@
     <Compile Include="Table\PivotTable\Formats\ExcelFormatReferencesCollection.cs" />
     <Compile Include="Table\PivotTable\Formats\ExcelFormatsCollection.cs" />
     <Compile Include="Table\PivotTable\ItemsCollection.cs" />
+    <Compile Include="Table\PivotTable\PivotTableItemsMatcher.cs" />
     <Compile Include="Table\PivotTable\PivotItemTreeNode.cs" />
     <Compile Include="Table\PivotTable\PivotTableHeader.cs" />
     <Compile Include="Table\PivotTable\RangePr.cs" />
@@ -817,6 +818,11 @@
     <Compile Include="Table\PivotTable\SharedItemsCollection.cs" />
     <Compile Include="Table\PivotTable\AutoSortScopeReference.cs" />
     <Compile Include="Table\PivotTable\AutoSortScopeReferencesCollection.cs" />
+    <Compile Include="Drawing\Slicers\SlicerCacheTabularItems.cs" />
+    <Compile Include="Table\PivotTable\Sorting\DateComparerBase.cs" />
+    <Compile Include="Table\PivotTable\Sorting\DayComparer.cs" />
+    <Compile Include="Table\PivotTable\Sorting\MonthComparer.cs" />
+    <Compile Include="Table\PivotTable\Sorting\NaturalComparer.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\InternationalizationUtility.cs" />
     <Compile Include="Utils\UriHelper.cs" />
