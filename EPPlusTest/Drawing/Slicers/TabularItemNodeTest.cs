@@ -13,7 +13,8 @@ namespace EPPlusTest.Drawing.Slicers
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void TabularItemNodeNullXmlNodeThrowsException()
 		{
-			new TabularItemNode(null);
+			var namespaceManager = TestUtility.CreateDefaultNSM();
+			new TabularItemNode(null, namespaceManager);
 		}
 		#endregion
 
@@ -24,7 +25,8 @@ namespace EPPlusTest.Drawing.Slicers
 			var xmlDoc = new XmlDocument(ExcelSlicer.SlicerDocumentNamespaceManager.NameTable);
 			xmlDoc.LoadXml("<i x=\"2\" s=\"1\"/>");
 			var node = xmlDoc.FirstChild;
-			var tabularItemNode = new TabularItemNode(node);
+			var namespaceManager = TestUtility.CreateDefaultNSM();
+			var tabularItemNode = new TabularItemNode(node, namespaceManager);
 			Assert.AreEqual(2, tabularItemNode.AtomIndex);
 			tabularItemNode.AtomIndex = 3;
 			Assert.AreEqual(3, tabularItemNode.AtomIndex);
@@ -37,7 +39,8 @@ namespace EPPlusTest.Drawing.Slicers
 			var xmlDoc = new XmlDocument(ExcelSlicer.SlicerDocumentNamespaceManager.NameTable);
 			xmlDoc.LoadXml("<i s=\"1\"/>");
 			var node = xmlDoc.FirstChild;
-			var tabularItemNode = new TabularItemNode(node);
+			var namespaceManager = TestUtility.CreateDefaultNSM();
+			var tabularItemNode = new TabularItemNode(node, namespaceManager);
 			Assert.AreEqual(-1, tabularItemNode.AtomIndex);
 			tabularItemNode.AtomIndex = 3;
 			Assert.AreEqual(3, tabularItemNode.AtomIndex);
@@ -52,11 +55,12 @@ namespace EPPlusTest.Drawing.Slicers
 			var xmlDoc = new XmlDocument(ExcelSlicer.SlicerDocumentNamespaceManager.NameTable);
 			xmlDoc.LoadXml("<i x=\"2\" s=\"1\"/>");
 			var node = xmlDoc.FirstChild;
-			var tabularItemNode = new TabularItemNode(node);
+			var namespaceManager = TestUtility.CreateDefaultNSM();
+			var tabularItemNode = new TabularItemNode(node, namespaceManager);
 			Assert.AreEqual(true, tabularItemNode.IsSelected);
 			tabularItemNode.IsSelected = false;
 			Assert.AreEqual(false, tabularItemNode.IsSelected);
-			Assert.AreEqual("<i x=\"2\" s=\"0\" />", node.OuterXml);
+			Assert.AreEqual("<i x=\"2\" />", node.OuterXml);
 		}
 
 		[TestMethod]
@@ -65,7 +69,8 @@ namespace EPPlusTest.Drawing.Slicers
 			var xmlDoc = new XmlDocument(ExcelSlicer.SlicerDocumentNamespaceManager.NameTable);
 			xmlDoc.LoadXml("<i x=\"1\"/>");
 			var node = xmlDoc.FirstChild;
-			var tabularItemNode = new TabularItemNode(node);
+			var namespaceManager = TestUtility.CreateDefaultNSM();
+			var tabularItemNode = new TabularItemNode(node, namespaceManager);
 			Assert.AreEqual(false, tabularItemNode.IsSelected);
 			tabularItemNode.IsSelected = true;
 			Assert.AreEqual(true, tabularItemNode.IsSelected);
@@ -80,10 +85,11 @@ namespace EPPlusTest.Drawing.Slicers
 			var xmlDoc = new XmlDocument(ExcelSlicer.SlicerDocumentNamespaceManager.NameTable);
 			xmlDoc.LoadXml("<i x=\"2\" s=\"1\" nd=\"1\"/>");
 			var node = xmlDoc.FirstChild;
-			var tabularItemNode = new TabularItemNode(node);
-			Assert.AreEqual(true, tabularItemNode.NonDisplay);
-			tabularItemNode.NonDisplay = false;
-			Assert.AreEqual(false, tabularItemNode.NonDisplay);
+			var namespaceManager = TestUtility.CreateDefaultNSM();
+			var tabularItemNode = new TabularItemNode(node, namespaceManager);
+			Assert.AreEqual(true, tabularItemNode.NoData);
+			tabularItemNode.NoData = false;
+			Assert.AreEqual(false, tabularItemNode.NoData);
 			Assert.AreEqual("<i x=\"2\" s=\"1\" nd=\"0\" />", node.OuterXml);
 		}
 
@@ -93,10 +99,11 @@ namespace EPPlusTest.Drawing.Slicers
 			var xmlDoc = new XmlDocument(ExcelSlicer.SlicerDocumentNamespaceManager.NameTable);
 			xmlDoc.LoadXml("<i x=\"1\" s=\"1\"/>");
 			var node = xmlDoc.FirstChild;
-			var tabularItemNode = new TabularItemNode(node);
-			Assert.AreEqual(false, tabularItemNode.NonDisplay);
-			tabularItemNode.NonDisplay = true;
-			Assert.AreEqual(true, tabularItemNode.NonDisplay);
+			var namespaceManager = TestUtility.CreateDefaultNSM();
+			var tabularItemNode = new TabularItemNode(node, namespaceManager);
+			Assert.AreEqual(false, tabularItemNode.NoData);
+			tabularItemNode.NoData = true;
+			Assert.AreEqual(true, tabularItemNode.NoData);
 			Assert.AreEqual("<i x=\"1\" s=\"1\" nd=\"1\" />", node.OuterXml);
 		}
 		#endregion

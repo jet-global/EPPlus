@@ -152,7 +152,8 @@ namespace OfficeOpenXml.Utils
 		protected void ClearItems()
 		{
 			this.Collection.Clear();
-			base.TopNode.RemoveAll();
+			while (base.TopNode.FirstChild != null)
+				base.TopNode.RemoveChild(base.TopNode.FirstChild);
 			this.Count = 0;
 		}
 		#endregion
