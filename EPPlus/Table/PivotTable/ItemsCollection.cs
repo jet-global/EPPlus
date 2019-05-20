@@ -90,10 +90,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Clears all existing rowItems.
 		/// </summary>
-		public void Clear()
-		{
-			base.ClearItems();
-		}
+		public void Clear() => base.ClearItems();
 		#endregion
 
 		#region XmlCollectionBase Overrides

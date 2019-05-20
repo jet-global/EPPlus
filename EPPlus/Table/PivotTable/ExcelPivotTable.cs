@@ -36,6 +36,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
+using OfficeOpenXml.Drawing.Slicers;
 using OfficeOpenXml.Extensions;
 using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.Internationalization;
@@ -74,6 +75,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		private ItemsCollection myColumnItems;
 		private TableStyles myTableStyle = Table.TableStyles.Medium6;
 		private ExcelAddress myAddress;
+		private PivotTableItemsMatcher myItemsMatcher;
 		#endregion
 
 		#region Properties
@@ -855,6 +857,19 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		internal ExcelWorkbook Workbook { get; private set; }
 
+		/// <summary>
+		/// Gets the <see cref="PivotTableItemsMatcher"/> for this pivot table.
+		/// </summary>
+		internal PivotTableItemsMatcher ItemsMatcher
+		{
+			get
+			{
+				if (myItemsMatcher == null)
+					myItemsMatcher = new PivotTableItemsMatcher(this.Fields, this.PageFields, this.CacheDefinition, this.Filters);
+				return myItemsMatcher;
+			}
+		}
+
 		private int OriginalTableEndRow { get; set; }
 		#endregion
 
@@ -944,13 +959,15 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// <summary>
 		/// Refresh the <see cref="ExcelPivotTable"/> based on the <see cref="ExcelPivotCacheDefinition"/>.
 		/// </summary>
-		internal void RefreshFromCache(StringResources stringResources)
+		internal void RefreshFromCache(StringResources stringResources, List<ExcelSlicerCache> relatedSlicerCaches)
 		{
 			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.RefreshFromCache));
 
 			// Update pivot fields and sort pivot field items.
 			this.Workbook.FormulaParser.Logger?.LogFunction(nameof(this.UpdatePivotFields));
 			this.UpdatePivotFields();
+
+			this.ApplySlicers(relatedSlicerCaches);
 
 			this.RowHeaders.Clear();
 			this.ColumnHeaders.Clear();
@@ -1023,6 +1040,19 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 			return pageFieldIndices;
+		}
+
+		/// <summary>
+		/// Determines whether this pivot table contains data at the specified indices.
+		/// </summary>
+		/// <param name="fieldIndex">The index of the field.</param>
+		/// <param name="sharedItemIndex">The index into the shared items.</param>
+		/// <returns>True if the pivot table contains the specified data, otherwise false.</returns>
+		public bool ContainsData(int fieldIndex, int sharedItemIndex)
+		{
+			// TODO: Implement a way of determining if the pivot table contains the 
+			// data reference by a slicer cache. Task #13685.
+			return true;
 		}
 
 		/// <summary>
@@ -1129,6 +1159,47 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
+		private void ApplySlicers(List<ExcelSlicerCache> slicerCaches)
+		{
+			foreach (var slicerCache in slicerCaches)
+			{
+				if (this.SlicerReferencesThisPivotTable(slicerCache))
+				{
+					int fieldIndex = this.GetCacheDefinitionFieldIndexByName(slicerCache.SourceName);
+					var field = this.Fields[fieldIndex];
+					field.IsSlicerField = true;
+					foreach (var item in slicerCache.TabularDataNode.Items)
+					{
+						var fieldItem = field.Items.Single(i => i.X == item.AtomIndex);
+						fieldItem.Hidden = !item.IsSelected;
+					}
+				}
+			}
+		}
+
+		private bool SlicerReferencesThisPivotTable(ExcelSlicerCache slicerCache)
+		{
+			return slicerCache.PivotTables.Any(p =>
+			{
+				int sheetId = int.Parse(p.TabId);
+				var worksheet = this.Workbook.Worksheets.First(w => w.SheetID == sheetId);
+				return worksheet.Name.IsEquivalentTo(this.Worksheet.Name) && this.Name.IsEquivalentTo(p.PivotTableName);
+			});
+		}
+
+		private int GetCacheDefinitionFieldIndexByName(string name)
+		{
+			for (int i = 0; i < this.CacheDefinition.CacheFields.Count; i++)
+			{
+				var field = this.CacheDefinition.CacheFields[i];
+				if (field.Name.IsEquivalentTo(name))
+				{
+					return i;
+				}
+			}
+			throw new Exception($"The name '{name}' was not found in the cacheDefinition.");
+		}
+
 		private void UpdateConditionalFormattingRuleAddresses()
 		{
 			foreach (var rule in this.Worksheet.ConditionalFormatting)
@@ -1308,8 +1379,6 @@ namespace OfficeOpenXml.Table.PivotTable
 		private List<Tuple<int, int>> BuildRowItems(PivotItemTreeNode root, List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices, int indent)
 		{
 			var pivotField = root.PivotFieldItemIndex != -2 ? this.Fields[root.PivotFieldIndex] : null;
-			if (this.IsHidden(root))
-				return indices;
 			int repeatedItemsCount = 0;
 			if (root.Value != -1)
 			{
@@ -1376,16 +1445,8 @@ namespace OfficeOpenXml.Table.PivotTable
 			return null;
 		}
 		
-		private bool IsHidden(PivotItemTreeNode node)
-		{
-			var pivotField = node.PivotFieldItemIndex != -2 ? this.Fields[node.PivotFieldIndex] : null;
-			return pivotField != null && pivotField.Items[node.PivotFieldItemIndex].Hidden;
-		}
-
 		private List<Tuple<int, int>> BuildColumnItems(PivotItemTreeNode node, List<Tuple<int, int>> indices, List<Tuple<int, int>> lastChildIndices)
 		{
-			if (this.IsHidden(node))
-				return indices;
 			int repeatedItemsCount = 0;
 			// Base case (leaf node).
 			if (!node.HasChildren)
@@ -1413,7 +1474,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			return lastChildIndices;
 		}
 
-		private PivotItemTreeNode BuildRowColTree(ExcelPivotTableRowColumnFieldCollection rowColFields, Dictionary<int, List<int>> cacheRecordPageFieldIndices, StringResources stringResources)
+		private PivotItemTreeNode BuildRowColTree(ExcelPivotTableRowColumnFieldCollection rowColFields, StringResources stringResources)
 		{
 			// Build a tree using the cache records. Each node in the tree is a cache record that is identified by the row or column field indices.
 			var rootNode = new PivotItemTreeNode(-1);
@@ -1452,10 +1513,10 @@ namespace OfficeOpenXml.Table.PivotTable
 						{
 							if (cacheFields[originalIndex].IsGroupField)
 								currentNode = this.CreateTreeNodeWithGrouping(sharedItemValue, originalIndex, currentNode, recordItemValue, groupBy, cacheFields, 
-									cacheRecordPageFieldIndices, cacheRecord, stringResources, rowColFieldIndex < cacheRecord.Items.Count);
+									cacheRecord, stringResources, rowColFieldIndex < cacheRecord.Items.Count);
 							else
 								currentNode = this.CreateTreeNode(false, currentNode, this.Fields[rowColFieldIndex], recordItemValue, rowColFieldIndex, 
-									cacheRecordPageFieldIndices, cacheRecord, sharedItemValue.Value, stringResources);
+									cacheRecord, sharedItemValue.Value, stringResources);
 						}
 
 						// This cache record does not contain the page field indices, so continue to the next record.
@@ -1487,7 +1548,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		private PivotItemTreeNode CreateTreeNodeWithGrouping(CacheItem sharedItemValue, int groupingIndex, PivotItemTreeNode currentNode, int recordItemValue, PivotFieldDateGrouping? groupBy,
-			IReadOnlyList<CacheFieldNode> cacheFields, Dictionary<int, List<int>> cacheRecordPageFieldIndices, CacheRecordNode cacheRecord, StringResources stringResources, bool baseGroup)
+			IReadOnlyList<CacheFieldNode> cacheFields, CacheRecordNode cacheRecord, StringResources stringResources, bool baseGroup)
 		{
 			var pivotField = this.Fields[groupingIndex];
 			// A sharedItem value of type DateTime indicates the current pivot field is part of a date grouping. Otherwise, create a new node if necessary.
@@ -1496,7 +1557,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				// Handles field date groupings.
 				var date = DateTime.Parse(sharedItemValue.Value);
 				var searchValue = this.GetItemValueByGroupingType(date, groupBy);
-				currentNode = this.CreateTreeNode(true, currentNode, pivotField, recordItemValue, groupingIndex, cacheRecordPageFieldIndices, cacheRecord, searchValue, stringResources, cacheFields[groupingIndex], baseGroup);
+				currentNode = this.CreateTreeNode(true, currentNode, pivotField, recordItemValue, groupingIndex, cacheRecord, searchValue, stringResources, cacheFields[groupingIndex], baseGroup);
 			}
 			else if (cacheFields[groupingIndex].FieldGroup.DiscreteGroupingProperties != null)
 			{
@@ -1504,7 +1565,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				var groupingFieldGroup = cacheFields[groupingIndex].FieldGroup;
 				int discretePrValue = int.Parse(groupingFieldGroup.DiscreteGroupingProperties[recordItemValue].Value);
 				var groupingSearchValue = groupingFieldGroup.GroupItems[discretePrValue].Value;
-				currentNode = this.CreateTreeNode(false, currentNode, pivotField, discretePrValue, groupingIndex, cacheRecordPageFieldIndices, cacheRecord, groupingSearchValue, stringResources);
+				currentNode = this.CreateTreeNode(false, currentNode, pivotField, discretePrValue, groupingIndex, cacheRecord, groupingSearchValue, stringResources);
 			}
 			return currentNode;
 		}
@@ -1536,7 +1597,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		}
 
 		private PivotItemTreeNode CreateTreeNode(bool isDateGrouping, PivotItemTreeNode currentNode, ExcelPivotTableField pivotField, int recordItemValue, int pivotFieldIndex,
-			Dictionary<int, List<int>> cacheRecordPageFieldIndices, CacheRecordNode cacheRecord, string searchValue, StringResources stringResources, CacheFieldNode cacheField = null, bool baseGroup = false)
+			CacheRecordNode cacheRecord, string searchValue, StringResources stringResources, CacheFieldNode cacheField = null, bool baseGroup = false)
 		{
 			// If an identical child already exists, continue. Otherwise, create a new child.
 			searchValue = searchValue ?? stringResources.BlankValueHeaderCaption;
@@ -1544,7 +1605,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				return currentNode.GetChildNode(searchValue);
 			else
 			{
-				if (cacheRecordPageFieldIndices?.Any() == true && !cacheRecord.ContainsPageFieldIndices(cacheRecordPageFieldIndices))
+				if (!this.ItemsMatcher.ShouldInclude(cacheRecord))
 					return null;
 				currentNode.SubtotalTop = pivotField.SubtotalTop;
 				int pivotFieldItemIndex = 0;
@@ -1627,10 +1688,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (rowColFieldCollection.Any())
 			{
 				collection.Clear();
-				var pageFieldIndices = this.GetPageFieldIndices();
 				if (isRowItems)
 				{
-					this.RowItemsRoot = this.BuildRowColTree(rowColFieldCollection, pageFieldIndices, stringResources);
+					this.RowItemsRoot = this.BuildRowColTree(rowColFieldCollection, stringResources);
 					this.RowItemsRoot.SortChildren(this);
 					if (this.RowItemsRoot.HasChildren)
 					{
@@ -1640,7 +1700,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 				else
 				{
-					this.ColumnItemsRoot = this.BuildRowColTree(rowColFieldCollection, pageFieldIndices, stringResources);
+					this.ColumnItemsRoot = this.BuildRowColTree(rowColFieldCollection, stringResources);
 					this.ColumnItemsRoot.SortChildren(this);
 					if (this.ColumnItemsRoot.HasChildren)
 					{

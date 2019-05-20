@@ -35,11 +35,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Resources;
 using System.Security.Cryptography;
 using System.Xml;
 using OfficeOpenXml.Encryption;
-using OfficeOpenXml.Internationalization;
 using OfficeOpenXml.Utils;
 namespace OfficeOpenXml
 {
@@ -85,6 +83,7 @@ namespace OfficeOpenXml
 		internal const string schemaMain = @"http://schemas.openxmlformats.org/spreadsheetml/2006/main";
 		internal const string schemaMain2009 = @"http://schemas.microsoft.com/office/spreadsheetml/2009/9/main";
 		internal const string schemaOfficeMain2006 = @"http://schemas.microsoft.com/office/excel/2006/main";
+		internal const string schemaMain2010 = @"http://schemas.microsoft.com/office/spreadsheetml/2010/11/main";
 		/// <summary>
 		/// Relationship schema name
 		/// </summary>

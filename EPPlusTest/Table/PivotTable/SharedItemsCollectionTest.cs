@@ -79,8 +79,9 @@ namespace EPPlusTest.Table.PivotTable
 		public void AddItemTest()
 		{
 			var node = base.GetTestCacheFieldNode();
+			Assert.AreEqual(2, node.SharedItems.Count);
 			node.SharedItems.Add("jet");
-			Assert.AreEqual(4, node.SharedItems.Count);
+			Assert.AreEqual(3, node.SharedItems.Count);
 			Assert.AreEqual("jet", node.SharedItems[2].Value);
 			Assert.AreEqual(PivotCacheRecordType.s, node.SharedItems[2].Type);
 		}
@@ -89,8 +90,9 @@ namespace EPPlusTest.Table.PivotTable
 		public void AddItemNullValueTest()
 		{
 			var node = base.GetTestCacheFieldNode();
+			Assert.AreEqual(2, node.SharedItems.Count);
 			node.SharedItems.Add(null);
-			Assert.AreEqual(4, node.SharedItems.Count);
+			Assert.AreEqual(3, node.SharedItems.Count);
 			Assert.IsNull(node.SharedItems[2].Value);
 			Assert.AreEqual(PivotCacheRecordType.m, node.SharedItems[2].Type);
 		}
