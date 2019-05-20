@@ -385,7 +385,9 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 					if (field != null)
 					{
 						var resolvedReferences = PivotTableDataManager.ResolveFormulaReferences(field.Formula, totalsCalculator, calculatedFields);
+						resolvedFormulaTokens.Add(new Token("(", TokenType.OpeningParenthesis));
 						resolvedFormulaTokens.AddRange(resolvedReferences);
+						resolvedFormulaTokens.Add(new Token(")", TokenType.ClosingParenthesis));
 					}
 					else
 						resolvedFormulaTokens.Add(token);

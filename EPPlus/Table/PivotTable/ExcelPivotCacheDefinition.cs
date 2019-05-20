@@ -958,7 +958,17 @@ namespace OfficeOpenXml.Table.PivotTable
 					unsupportedFeatures.AddRange(pivotTableUnsupportedFeatures);
 			}
 			if (this.Workbook.SlicerCaches.Any())
-				unsupportedFeatures.Add("Slicer present");
+			{
+				foreach (var slicerCache in this.Workbook.SlicerCaches)
+				{
+					if (slicerCache.HideItemsWithNoData)
+						unsupportedFeatures.Add($"Slicer setting hide items with no data selected");
+					if (slicerCache.TabularDataNode == null)
+						unsupportedFeatures.Add($"Slicer is not based off of local source.");
+					else if (slicerCache.TabularDataNode.ShowMissing)
+						unsupportedFeatures.Add($"Slicer setting show missing selected");
+				}
+			}
 			if (base.TopNode.SelectSingleNode("d:calculatedItems", base.NameSpaceManager) != null)
 				unsupportedFeatures.Add("Calculated items present");
 			if (!this.SaveData)

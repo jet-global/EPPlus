@@ -138,7 +138,8 @@ namespace OfficeOpenXml.Drawing.Slicers
 			}
 
 			var tabularDataNode = this.TopNode.SelectSingleNode("default:data/default:tabular", this.NameSpaceManager);
-			this.TabularDataNode = new TabularDataNode(tabularDataNode, this.NameSpaceManager);
+			if (tabularDataNode != null)
+				this.TabularDataNode = new TabularDataNode(tabularDataNode, this.NameSpaceManager);
 		}
 		#endregion
 
