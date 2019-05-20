@@ -347,7 +347,7 @@ namespace OfficeOpenXml.Table.PivotTable.Filters
 					returnVal = negatedCaption;
 			}
 			var character = startsWith ? filterValue.First() : filterValue.Last();
-			var checkCharacter = startsWith ? input.First().ToString() : input.Last().ToString();
+			var checkCharacter = startsWith ? input.FirstOrDefault().ToString() : input.Last().ToString();
 			var filterValueString = startsWith ? filterValue.First().ToString() : filterValue.Last().ToString();
 			if (character != '*' && character != '.')
 			{

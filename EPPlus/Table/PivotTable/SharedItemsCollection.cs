@@ -175,7 +175,6 @@ namespace OfficeOpenXml.Table.PivotTable
 			var item = new CacheItem(this.NameSpaceManager, base.TopNode, CacheItem.GetObjectType(value), stringValue);
 			if (item.Type == PivotCacheRecordType.m)
 				this.ContainsBlank = true;
-			item.AddSelf(base.TopNode);
 			base.AddItem(item);
 		}
 
