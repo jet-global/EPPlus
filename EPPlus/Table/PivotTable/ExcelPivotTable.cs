@@ -888,9 +888,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private int OriginalTableEndRow { get; set; }
 
-		private List<Tuple<int, int, List<Tuple<int, string>>>> SortedOriginalConditionalFormattingStringValues { get; set; } = new List<Tuple<int, int, List<Tuple<int, string>>>>();
-
-		private List<Tuple<int, int, List<Tuple<int, string>>>> AllOriginalConditionalFormattingStringValues { get; set; } = new List<Tuple<int, int, List<Tuple<int, string>>>>();
+		private List<Tuple<int, int, List<Tuple<int, string>>>> OriginalConditionalFormattingStringValues { get; set; } = new List<Tuple<int, int, List<Tuple<int, string>>>>();
 
 		private List<Tuple<int, List<string>>> UpdatedConditionalFormatSelectedCellAddresses { get; set; } = new List<Tuple<int, List<string>>>();
 		#endregion
@@ -1006,17 +1004,15 @@ namespace OfficeOpenXml.Table.PivotTable
 							this.AddConditionalFormattingStringValues(referenceQueue, new List<Tuple<int, string>>(), overallList);
 							foreach (var list in overallList)
 							{
-								this.AllOriginalConditionalFormattingStringValues.Add(new Tuple<int, int, List<Tuple<int, string>>>(conditionalFormat.Priority, dataFieldCollectionIndex, list));
-								if (list.Count == this.RowFields.Count)
-									this.SortedOriginalConditionalFormattingStringValues.Add(new Tuple<int, int, List<Tuple<int, string>>>(conditionalFormat.Priority, dataFieldCollectionIndex, list));
+								this.OriginalConditionalFormattingStringValues.Add(new Tuple<int, int, List<Tuple<int, string>>>(conditionalFormat.Priority, dataFieldCollectionIndex, list));
 							}
 						}
 					}
 				}
 			}
 
-			this.SortedOriginalConditionalFormattingStringValues = this.SortFieldsByRowFieldsOrder();
-			var grouped = this.SortedOriginalConditionalFormattingStringValues.GroupBy(i => i.Item1);
+			this.OriginalConditionalFormattingStringValues = this.SortFieldsByRowFieldsOrder();
+			var grouped = this.OriginalConditionalFormattingStringValues.GroupBy(i => i.Item1);
 			var priorityValues = new List<int>();
 			foreach (var tuple in grouped)
 			{
@@ -1048,8 +1044,8 @@ namespace OfficeOpenXml.Table.PivotTable
 				this.Workbook.FormulaParser.Logger?.LogFunction($"{nameof(this.UpdateRowColumnItems)}: Rows");
 				this.UpdateRowColumnItems(this.RowFields, this.RowItems, true, stringResources);
 				// Update conditional format references with new pivot field item indices.
-				if (this.AllOriginalConditionalFormattingStringValues.Count > 0)
-					this.PivotTableConditionalFormats.UpdateConditionalFormatReferences(this.RowItemsRoot, this.AllOriginalConditionalFormattingStringValues);
+				if (this.OriginalConditionalFormattingStringValues.Count > 0)
+					this.PivotTableConditionalFormats.UpdateConditionalFormatReferences(this.RowItemsRoot, this.OriginalConditionalFormattingStringValues);
 			}
 
 			// Update the colItems.
@@ -1400,7 +1396,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		private List<Tuple<int, int, List<Tuple<int, string>>>> SortFieldsByRowFieldsOrder()
 		 {
 			var sortedList = new List<Tuple<int, int, List<Tuple<int, string>>>>();
-			foreach (var values in this.SortedOriginalConditionalFormattingStringValues)
+			foreach (var values in this.OriginalConditionalFormattingStringValues)
 			{
 				var list = values.Item3;
 				var newList = new List<Tuple<int, string>>();
@@ -1906,7 +1902,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		private void SetPivotItemTreeNodesWithConditionalFormatting(PivotItemTreeNode root)
 		{
-			foreach (var value in this.SortedOriginalConditionalFormattingStringValues)
+			foreach (var value in this.OriginalConditionalFormattingStringValues)
 			{
 				Queue<string> conditionalFormattingStringValues = new Queue<string>();
 				foreach (var valueList in value.Item3)

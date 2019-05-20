@@ -68,6 +68,7 @@ namespace OfficeOpenXml.Table.PivotTable.Formats
 						foreach (var pivotArea in conditionalFormat.PivotAreasCollection)
 						{
 							int sharedStringIndex = 0;
+							int addValue = 0;
 							foreach (var reference in pivotArea.ReferencesCollection)
 							{
 								if (reference.FieldIndex < 0)
@@ -75,15 +76,19 @@ namespace OfficeOpenXml.Table.PivotTable.Formats
 								int temp = matchingPriorityListIndex;
 								foreach (var item in reference.SharedItems)
 								{
-									var cf = matchingPriorityList.ElementAt(temp++);
+									var cf = matchingPriorityList.ElementAt(temp);
 									var sharedString = cf.Item3[sharedStringIndex].Item2;
 									var node = root.GetNode(root, sharedString);
 									if (node != null)
 										item.Value = node.PivotFieldItemIndex.ToString();
+									if (reference.SharedItems.Count > 1)
+										temp++;
 								}
+								if (temp > matchingPriorityListIndex)
+									addValue = temp - matchingPriorityListIndex;
 								sharedStringIndex++;
 							}
-							matchingPriorityListIndex++;
+							matchingPriorityListIndex = addValue == 0 ? matchingPriorityListIndex + 1 : matchingPriorityListIndex + addValue;
 						}
 					}
 				}
