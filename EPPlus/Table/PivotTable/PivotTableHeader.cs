@@ -90,6 +90,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets the list of cache record indices the header uses.
 		/// </summary>
 		public List<int> UsedCacheRecordIndices { get; }
+
+		/// <summary>
+		/// Gets a list of all the conditional formatting rules applied to this header.
+		///		Item1 is the priority value of the conditional format.
+		///		Item2 is the data field collection index.
+		/// </summary>
+		public List<Tuple<int, int>> ConditionalFormattingTupleList { get; } = new List<Tuple<int, int>>();
 		#endregion
 
 		#region Constructors

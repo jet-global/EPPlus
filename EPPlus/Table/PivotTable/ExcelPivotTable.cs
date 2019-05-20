@@ -70,6 +70,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		private ExcelPageFieldCollection myPageFields;
 		private ExcelPivotFieldFiltersCollection myFilters;
 		private ExcelFormatsCollection myFormats;
+		private PivotTableConditionalFormatsCollection myConditionalFormats;
 		private ItemsCollection myRowItems;
 		private ItemsCollection myColumnItems;
 		private TableStyles myTableStyle = Table.TableStyles.Medium6;
@@ -750,6 +751,21 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
+		public PivotTableConditionalFormatsCollection PivotTableConditionalFormats
+		{
+			get
+			{
+				if (myConditionalFormats == null)
+				{
+					var conditionalFormatsNode = this.TopNode.SelectSingleNode("d:conditionalFormats", this.NameSpaceManager);
+					if (conditionalFormatsNode == null)
+						return null;
+					myConditionalFormats = new PivotTableConditionalFormatsCollection(this.NameSpaceManager, conditionalFormatsNode);
+				}
+				return myConditionalFormats;
+			}
+		}
+
 		/// <summary>
 		/// Gets or sets the pivot style name that is used for custom styles.
 		/// </summary>
@@ -856,6 +872,12 @@ namespace OfficeOpenXml.Table.PivotTable
 		internal ExcelWorkbook Workbook { get; private set; }
 
 		private int OriginalTableEndRow { get; set; }
+
+		private List<Tuple<int, int, List<Tuple<int, string>>>> SortedOriginalConditionalFormattingStringValues { get; set; } = new List<Tuple<int, int, List<Tuple<int, string>>>>();
+
+		private List<Tuple<int, int, List<Tuple<int, string>>>> AllOriginalConditionalFormattingStringValues { get; set; } = new List<Tuple<int, int, List<Tuple<int, string>>>>();
+
+		private List<Tuple<int, List<string>>> UpdatedConditionalFormatSelectedCellAddresses { get; set; } = new List<Tuple<int, List<string>>>();
 		#endregion
 
 		#region Constructors
@@ -942,6 +964,54 @@ namespace OfficeOpenXml.Table.PivotTable
 
 		#region Internal Methods
 		/// <summary>
+		/// Store all the conditional format references shared string values since the references need to be 
+		/// updated due to our refresh algorithm changing the pivot field item index values.
+		/// </summary>
+		internal void CacheOriginalConditionalFormattingItems()
+		{
+			if (this.PivotTableConditionalFormats != null)
+			{
+				foreach (var conditionalFormat in this.PivotTableConditionalFormats)
+				{
+					foreach (var pivotArea in conditionalFormat.PivotAreasCollection)
+					{
+						int dataFieldCollectionIndex = 0;
+						Queue<ExcelFormatReference> referenceQueue = new Queue<ExcelFormatReference>();
+						foreach (var reference in pivotArea.ReferencesCollection)
+						{
+							int fieldIndex = reference.FieldIndex;
+							if (fieldIndex < 0)
+								dataFieldCollectionIndex = int.Parse(reference.SharedItems[0].Value);
+							else
+								referenceQueue.Enqueue(reference);
+						}
+						if (referenceQueue.Count > 0)
+						{
+							var overallList = new List<List<Tuple<int, string>>>();
+							this.AddConditionalFormattingStringValues(referenceQueue, new List<Tuple<int, string>>(), overallList);
+							foreach (var list in overallList)
+							{
+								this.AllOriginalConditionalFormattingStringValues.Add(new Tuple<int, int, List<Tuple<int, string>>>(conditionalFormat.Priority, dataFieldCollectionIndex, list));
+								if (list.Count == this.RowFields.Count)
+									this.SortedOriginalConditionalFormattingStringValues.Add(new Tuple<int, int, List<Tuple<int, string>>>(conditionalFormat.Priority, dataFieldCollectionIndex, list));
+							}
+						}
+					}
+				}
+			}
+
+			this.SortedOriginalConditionalFormattingStringValues = this.SortFieldsByRowFieldsOrder();
+			var grouped = this.SortedOriginalConditionalFormattingStringValues.GroupBy(i => i.Item1);
+			var priorityValues = new List<int>();
+			foreach (var tuple in grouped)
+			{
+				priorityValues.Add(tuple.Key);
+				this.UpdatedConditionalFormatSelectedCellAddresses.Add(new Tuple<int, List<string>>(tuple.Key, new List<string>()));
+			}
+			this.RemoveOriginalConditionalFormattingRuleAddress(priorityValues);
+		}
+
+		/// <summary>
 		/// Refresh the <see cref="ExcelPivotTable"/> based on the <see cref="ExcelPivotCacheDefinition"/>.
 		/// </summary>
 		internal void RefreshFromCache(StringResources stringResources)
@@ -960,6 +1030,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				this.Workbook.FormulaParser.Logger?.LogFunction($"{nameof(this.UpdateRowColumnItems)}: Rows");
 				this.UpdateRowColumnItems(this.RowFields, this.RowItems, true, stringResources);
+				// Update conditional format references with new pivot field item indices.
+				if (this.AllOriginalConditionalFormattingStringValues.Count > 0)
+					this.PivotTableConditionalFormats.UpdateConditionalFormatReferences(this.RowItemsRoot, this.AllOriginalConditionalFormattingStringValues);
 			}
 
 			// Update the colItems.
@@ -988,6 +1061,7 @@ namespace OfficeOpenXml.Table.PivotTable
 
 			// Update conditional formatting rule addresses.
 			this.UpdateConditionalFormattingRuleAddresses();
+			this.UpdateConditionalFormattingRuleAddressesForSelectedCells(this.UpdatedConditionalFormatSelectedCellAddresses);
 		}
 
 		/// <summary>
@@ -1129,6 +1203,28 @@ namespace OfficeOpenXml.Table.PivotTable
 		#endregion
 
 		#region Private Methods
+		private void AddConditionalFormattingStringValues(Queue<ExcelFormatReference> referenceQueue, List<Tuple<int, string>> stringPriorityTupleList, List<List<Tuple<int, string>>> overallList)
+		{
+			if (stringPriorityTupleList.Count == this.RowFields.Count || referenceQueue.Count == 0)
+			{
+				overallList.Add(stringPriorityTupleList);
+				return;
+			}
+
+			var copyQueue = new Queue<ExcelFormatReference>(referenceQueue);
+			var currentReference = copyQueue.Dequeue();
+			foreach (var item in currentReference.SharedItems)
+			{
+				var copyList = stringPriorityTupleList.ToList();
+				var pivotField = this.Fields[currentReference.FieldIndex];
+				var cacheField = this.CacheDefinition.CacheFields[currentReference.FieldIndex];
+				int pivotFieldItemIndex = pivotField.Items[int.Parse(item.Value)].X;
+				string sharedItem = cacheField.SharedItems[pivotFieldItemIndex].Value;
+				copyList.Add(new Tuple<int, string>(currentReference.FieldIndex, sharedItem));
+				this.AddConditionalFormattingStringValues(copyQueue, copyList, overallList);
+			}
+		}
+
 		private void UpdateConditionalFormattingRuleAddresses()
 		{
 			foreach (var rule in this.Worksheet.ConditionalFormatting)
@@ -1138,6 +1234,9 @@ namespace OfficeOpenXml.Table.PivotTable
 				ExcelAddress cellRange = null;
 				foreach (var cells in ruleAddress)
 				{
+					if (string.IsNullOrEmpty(cells))
+						continue;
+
 					cellRange = new ExcelAddress(cells);
 					if (cellRange.IsSingleCell)
 					{
@@ -1175,6 +1274,78 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
+		private void UpdateConditionalFormattingRuleAddressesForSelectedCells(List<Tuple<int, List<string>>> conditionalFormattingAddresses)
+		{
+			foreach (var tuple in conditionalFormattingAddresses)
+			{
+				string fullAddress = string.Join(string.Empty, tuple.Item2);
+				if (string.IsNullOrEmpty(fullAddress))
+					continue;
+				foreach (var rule in this.Worksheet.ConditionalFormatting)
+				{
+					if (rule.Priority == tuple.Item1)
+					{
+						if (string.IsNullOrEmpty(rule.Address.AddressSpaceSeparated))
+							rule.Address = new ExcelAddress(fullAddress);
+						else
+						{
+							string currentAddress = rule.Address.AddressSpaceSeparated + " " + fullAddress;
+							rule.Address = new ExcelAddress(currentAddress);
+						}
+						break;
+					}
+				}
+			}
+		}
+
+		private void RemoveOriginalConditionalFormattingRuleAddress(List<int> priorityValuesList)
+		{
+			for (int i = 0; i < priorityValuesList.Count; i++)
+			{
+				int priority = priorityValuesList[i];
+				foreach (var conditionalFormat in this.Worksheet.ConditionalFormatting)
+				{
+					string updatedAddress = string.Empty;
+					if (conditionalFormat.Priority == priority && !string.IsNullOrEmpty(conditionalFormat.Address.AddressSpaceSeparated))
+					{
+						var ruleAddress = conditionalFormat.Address.AddressSpaceSeparated.Split(' ');
+						foreach (var address in ruleAddress)
+						{
+							var cellRange = new ExcelAddress(address);
+							if (this.RowGrandTotals && (cellRange.Start.Row == this.Address.End.Row || cellRange.End.Row == this.Address.End.Row))
+							{
+								// The grand total address has a conditional format rule applied to it, so save the cell address.
+								var newAddress = new ExcelAddress(this.Address.End.Row, cellRange.Start.Column, this.Address.End.Row, cellRange.End.Column);
+								updatedAddress += newAddress.AddressSpaceSeparated + " ";
+							}
+						}
+						conditionalFormat.Address = new ExcelAddress(updatedAddress);
+						break;
+					}
+				}
+			}
+		}
+
+		private List<Tuple<int, int, List<Tuple<int, string>>>> SortFieldsByRowFieldsOrder()
+		 {
+			var sortedList = new List<Tuple<int, int, List<Tuple<int, string>>>>();
+			foreach (var values in this.SortedOriginalConditionalFormattingStringValues)
+			{
+				var list = values.Item3;
+				var newList = new List<Tuple<int, string>>();
+				for (int i = 0; i < this.RowFields.Count; i++)
+				{
+					int rowFieldIndex = this.RowFields[i].Index;
+					var formattingValuesWithRowFieldIndex = list.Where(x => x.Item1 == rowFieldIndex);
+					foreach (var formattingRule in formattingValuesWithRowFieldIndex)
+					{
+						newList.Add(formattingRule);
+					}
+				}
+				sortedList.Add(new Tuple<int, int, List<Tuple<int, string>>>(values.Item1, values.Item2, newList));
+			}
+			return sortedList;
+		}
 
 		private void UpdatePivotFields()
 		{
@@ -1320,8 +1491,13 @@ namespace OfficeOpenXml.Table.PivotTable
 					string subtotalType = root.PivotFieldIndex == -2 ? null : this.GetRowFieldSubtotalType(pivotField);
 					bool isDataField = root.PivotFieldIndex == -2;
 					indent = indent == -1 ? 0 : indent;
-					this.RowHeaders.Add(new PivotTableHeader(root.CacheRecordIndices, indices, pivotField, root.DataFieldIndex, false,
-						!root.HasChildren, isDataField, subtotalType, !indices.Any(x => x.Item1 == -2), indent: indent));
+					var header = new PivotTableHeader(root.CacheRecordIndices, indices, pivotField, root.DataFieldIndex, false,
+						!root.HasChildren, isDataField, subtotalType, !indices.Any(x => x.Item1 == -2), indent: indent);
+					foreach (var tuple in root.ConditionalFormattingTuple)
+					{
+						header.ConditionalFormattingTupleList.Add(tuple);
+					}
+					this.RowHeaders.Add(header);
 					this.RowItems.AddColumnItem(indices.ToList(), repeatedItemsCount, root.DataFieldIndex);
 					lastChildIndices = indices.ToList();
 
@@ -1632,6 +1808,7 @@ namespace OfficeOpenXml.Table.PivotTable
 				{
 					this.RowItemsRoot = this.BuildRowColTree(rowColFieldCollection, pageFieldIndices, stringResources);
 					this.RowItemsRoot.SortChildren(this);
+					this.SetPivotItemTreeNodesWithConditionalFormatting(this.RowItemsRoot);
 					if (this.RowItemsRoot.HasChildren)
 					{
 						this.BuildRowItems(this.RowItemsRoot, new List<Tuple<int, int>>(), new List<Tuple<int, int>>(), -1);
@@ -1665,6 +1842,32 @@ namespace OfficeOpenXml.Table.PivotTable
 				header.IsPlaceHolder = true;
 				headerCollection.Add(header);
 			}
+		}
+
+		private void SetPivotItemTreeNodesWithConditionalFormatting(PivotItemTreeNode root)
+		{
+			foreach (var value in this.SortedOriginalConditionalFormattingStringValues)
+			{
+				Queue<string> conditionalFormattingStringValues = new Queue<string>();
+				foreach (var valueList in value.Item3)
+				{
+					conditionalFormattingStringValues.Enqueue(valueList.Item2);
+				}
+				var node = this.GetNodeToApplyConditionalFormatting(conditionalFormattingStringValues, root);
+				if (node != null)
+					node.ConditionalFormattingTuple.Add(new Tuple<int, int>(value.Item1, value.Item2));
+			}
+		}
+
+		private PivotItemTreeNode GetNodeToApplyConditionalFormatting(Queue<string> conditionalFormattingValues, PivotItemTreeNode node)
+		{
+			if (conditionalFormattingValues.Count == 0)
+				return node;
+			string value = conditionalFormattingValues.Dequeue();
+			var childNode = node.GetChildNode(value);
+			if (childNode != null)
+				return this.GetNodeToApplyConditionalFormatting(conditionalFormattingValues, childNode);
+			return null;
 		}
 
 		private void CreateLeafFieldCustomFieldSettingsNode(bool isRowField)
@@ -1767,7 +1970,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (this.DataFields.Any())
 			{
 				var dataManager = new PivotTableDataManager(this);
-				dataManager.UpdateWorksheet();
+				dataManager.UpdateWorksheet(this.UpdatedConditionalFormatSelectedCellAddresses);
 			}
 		}
 

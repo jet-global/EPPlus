@@ -829,6 +829,12 @@ namespace OfficeOpenXml.Table.PivotTable
 			if (sourceRange.IsName)
 				sourceRange = AddressUtility.GetFormulaAsCellRange(this.Workbook, sourceRange.Worksheet, sourceRange.Address);
 
+			// Cache all the conditional formatting references' shared string values.
+			foreach (var pivotTable in this.GetRelatedPivotTables())
+			{
+				pivotTable.CacheOriginalConditionalFormattingItems();
+			}
+
 			// Update all cacheField names assuming the shape of the pivot cache definition source range remains unchanged.
 			for (int col = sourceRange.Start.Column; col < sourceRange.Columns + sourceRange.Start.Column; col++)
 			{

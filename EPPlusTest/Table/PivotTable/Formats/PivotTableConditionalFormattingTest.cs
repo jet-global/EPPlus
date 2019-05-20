@@ -272,5 +272,104 @@ namespace EPPlusTest.Table.PivotTable.Formats
 				});
 			}
 		}
+
+		[TestMethod]
+		[DeploymentItem(@"..\..\Workbooks\PivotTables\PivotTableWithConditionalFormatting.xlsx")]
+		public void PivotTableRefreshConditionalFormattingSelectedCellsWithMultipleDataFields()
+		{
+			var file = new FileInfo("PivotTableWithConditionalFormatting.xlsx");
+			Assert.IsTrue(file.Exists);
+			using (var newFile = new TempTestFile())
+			{
+				string sheetName = "Sheet3";
+				using (var package = new ExcelPackage(file))
+				{
+					var worksheet = package.Workbook.Worksheets[sheetName];
+					var pivotTable = worksheet.PivotTables["PivotTable2"];
+					package.Workbook.PivotCacheDefinitions.ForEach(c => c.UpdateData());
+					ExcelPivotTableTest.CheckPivotTableAddress(new ExcelAddress("B2:F17"), pivotTable.Address);
+					Assert.AreEqual(10, pivotTable.Fields.Count);
+					package.SaveAs(newFile.File);
+				}
+				TestHelperUtility.ValidateWorksheet(newFile.File, sheetName, new[]
+				{
+					new ExpectedCellValue(sheetName, 2, 2, "City"),
+					new ExpectedCellValue(sheetName, 2, 3, "Contact"),
+					new ExpectedCellValue(sheetName, 2, 4, "Country/Region Code"),
+					new ExpectedCellValue(sheetName, 2, 5, "Sum of Net Change"),
+					new ExpectedCellValue(sheetName, 2, 6, "Sum of Outstanding Orders"),
+					new ExpectedCellValue(sheetName, 3, 2, "Antwerpen"),
+					new ExpectedCellValue(sheetName, 3, 3, "Michael Zeman"),
+					new ExpectedCellValue(sheetName, 3, 4, "BE"),
+					new ExpectedCellValue(sheetName, 3, 5, 3218.14),
+					new ExpectedCellValue(sheetName, 3, 6, 0),
+					new ExpectedCellValue(sheetName, 4, 2, "Atlanta"),
+					new ExpectedCellValue(sheetName, 4, 3, "Mr. Andy Teal"),
+					new ExpectedCellValue(sheetName, 4, 4, "US"),
+					new ExpectedCellValue(sheetName, 4, 5, 255797.35),
+					new ExpectedCellValue(sheetName, 4, 6, 1354.5),
+					new ExpectedCellValue(sheetName, 5, 3, "Mr. Jim Stewart"),
+					new ExpectedCellValue(sheetName, 5, 4, "US"),
+					new ExpectedCellValue(sheetName, 5, 5, 822),
+					new ExpectedCellValue(sheetName, 5, 6, 0),
+					new ExpectedCellValue(sheetName, 6, 3, "Mr. Kevin Wright"),
+					new ExpectedCellValue(sheetName, 6, 4, "US"),
+					new ExpectedCellValue(sheetName, 6, 5, 1736.39),
+					new ExpectedCellValue(sheetName, 6, 6, 4390.52),
+					new ExpectedCellValue(sheetName, 7, 2, "Bojkovice"),
+					new ExpectedCellValue(sheetName, 7, 3, "Milos Silhan"),
+					new ExpectedCellValue(sheetName, 7, 4, "CZ"),
+					new ExpectedCellValue(sheetName, 7, 5, 58518.63),
+					new ExpectedCellValue(sheetName, 7, 6, 0),
+					new ExpectedCellValue(sheetName, 8, 2, "Chicago"),
+					new ExpectedCellValue(sheetName, 8, 3, "Mr. Mark McArthur"),
+					new ExpectedCellValue(sheetName, 8, 4, "US"),
+					new ExpectedCellValue(sheetName, 8, 5, 147258.97),
+					new ExpectedCellValue(sheetName, 8, 6, 8548.97),
+					new ExpectedCellValue(sheetName, 9, 3, "Mr. Scott Mitchell"),
+					new ExpectedCellValue(sheetName, 9, 4, "US"),
+					new ExpectedCellValue(sheetName, 9, 5, 2461),
+					new ExpectedCellValue(sheetName, 9, 6, 0),
+					new ExpectedCellValue(sheetName, 10, 2, "Gmunden"),
+					new ExpectedCellValue(sheetName, 10, 3, "Fr. Birgitte Vestphael"),
+					new ExpectedCellValue(sheetName, 10, 4, "AT"),
+					new ExpectedCellValue(sheetName, 10, 5, 3112.13),
+					new ExpectedCellValue(sheetName, 10, 6, 116491.69),
+					new ExpectedCellValue(sheetName, 11, 2, "Hafnafjordur"),
+					new ExpectedCellValue(sheetName, 11, 3, "Ragnheidur K. Gudmundsdottir"),
+					new ExpectedCellValue(sheetName, 11, 4, "IS"),
+					new ExpectedCellValue(sheetName, 11, 5, 86949.84),
+					new ExpectedCellValue(sheetName, 11, 6, 0),
+					new ExpectedCellValue(sheetName, 12, 2, "Hamburg 36"),
+					new ExpectedCellValue(sheetName, 12, 3, ""),
+					new ExpectedCellValue(sheetName, 12, 4, "DE"),
+					new ExpectedCellValue(sheetName, 12, 5, 8794.86),
+					new ExpectedCellValue(sheetName, 12, 6, 81399.66),
+					new ExpectedCellValue(sheetName, 13, 2, "Haslum"),
+					new ExpectedCellValue(sheetName, 13, 3, "Thomas Andersen"),
+					new ExpectedCellValue(sheetName, 13, 4, "NO"),
+					new ExpectedCellValue(sheetName, 13, 5, 115966.31),
+					new ExpectedCellValue(sheetName, 13, 6, 0),
+					new ExpectedCellValue(sheetName, 14, 2, "Miami"),
+					new ExpectedCellValue(sheetName, 14, 3, "Miss Patricia Doyle"),
+					new ExpectedCellValue(sheetName, 14, 4, "US"),
+					new ExpectedCellValue(sheetName, 14, 5, 537967),
+					new ExpectedCellValue(sheetName, 14, 6, 10820.18),
+					new ExpectedCellValue(sheetName, 15, 2, "Norrköbing"),
+					new ExpectedCellValue(sheetName, 15, 3, ""),
+					new ExpectedCellValue(sheetName, 15, 4, "SE"),
+					new ExpectedCellValue(sheetName, 15, 5, 7841),
+					new ExpectedCellValue(sheetName, 15, 6, 6272.81),
+					new ExpectedCellValue(sheetName, 16, 2, "Reykjavik"),
+					new ExpectedCellValue(sheetName, 16, 3, "Gunnar Orn Thorsteinsson"),
+					new ExpectedCellValue(sheetName, 16, 4, "IS"),
+					new ExpectedCellValue(sheetName, 16, 5, 200615.42),
+					new ExpectedCellValue(sheetName, 16, 6, 0),
+					new ExpectedCellValue(sheetName, 17, 2, "Grand Total"),
+					new ExpectedCellValue(sheetName, 17, 5, 1431059.04),
+					new ExpectedCellValue(sheetName, 17, 6, 229278.33),
+				});
+			}
+		}
 	}
 }

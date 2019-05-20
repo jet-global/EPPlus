@@ -58,7 +58,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <summary>
 		/// Updates the pivot table's worksheet with the latest calculated data.
 		/// </summary>
-		public void UpdateWorksheet()
+		public void UpdateWorksheet(List<Tuple<int, List<string>>> conditionalFormattingAddress)
 		{
 			using (var totalsCalculator = new TotalsFunctionHelper())
 			{
@@ -96,7 +96,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 				// Write out body data applying "Show Data As" and other settings as necessary.
 				this.WritePivotTableBodyData(backingBodyData, columnGrandTotalBackingData, 
-					rowGrandTotalBackingData, columnGrandGrandTotalsLists, totalsCalculator);
+					rowGrandTotalBackingData, columnGrandGrandTotalsLists, totalsCalculator, conditionalFormattingAddress);
 			}
 		}
 		#endregion
@@ -198,7 +198,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		#region Private Methods
 		private void WritePivotTableBodyData(PivotCellBackingData[,] backingDatas,
 			List<PivotCellBackingData> columnGrandTotalsValuesLists, List<PivotCellBackingData> rowGrandTotalsValuesLists,
-			PivotCellBackingData[] grandGrandTotalValues, TotalsFunctionHelper totalsCalculator)
+			PivotCellBackingData[] grandGrandTotalValues, TotalsFunctionHelper totalsCalculator, List<Tuple<int, List<string>>> conditionalFormattingAddress)
 		{
 			int sheetColumn = this.PivotTable.Address.Start.Column + this.PivotTable.FirstDataCol;
 			for (int column = 0; column < this.PivotTable.ColumnHeaders.Count; column++)
@@ -224,6 +224,16 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 
 					var cell = this.PivotTable.Worksheet.Cells[sheetRow, sheetColumn];
 					this.WriteCellValue(value, cell, dataField, this.PivotTable.Workbook.Styles);
+
+					if (rowHeader.ConditionalFormattingTupleList.Count > 0)
+					{
+						var currentTuples = rowHeader.ConditionalFormattingTupleList.Where(i => i.Item2 == dataFieldCollectionIndex);
+						foreach (var tuple in currentTuples)
+						{
+							int index = conditionalFormattingAddress.FindIndex(i => i.Item1 == tuple.Item1);
+							conditionalFormattingAddress[index].Item2.Add(cell.AddressSpaceSeparated + " ");
+						}
+					}
 				}
 				sheetColumn++;
 			}

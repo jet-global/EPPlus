@@ -88,6 +88,13 @@ namespace OfficeOpenXml.Table.PivotTable
 		public bool IsTabularForm { get; private set; }
 
 		/// <summary>
+		/// Gets a list of all the conditional formatting rules applied to this node.
+		///		Item1 is the priority value of the conditional format.
+		///		Item2 is the data field collection index.
+		/// </summary>
+		public List<Tuple<int, int>> ConditionalFormattingTuple { get; } = new List<Tuple<int, int>>();
+
+		/// <summary>
 		/// Gets or sets the list of children that this node parents.
 		/// </summary>
 		public List<PivotItemTreeNode> Children { get; set; } = new List<PivotItemTreeNode>();
@@ -165,6 +172,29 @@ namespace OfficeOpenXml.Table.PivotTable
 		public PivotItemTreeNode GetChildNode(string value)
 		{
 			return this.Children.Find(i => i.SharedItemValue.IsEquivalentTo(value));
+		}
+
+		/// <summary>
+		/// Gets the node that has the specified string value.
+		/// </summary>
+		/// <param name="node">The root node of the tree.</param>
+		/// <param name="value">The value to look for.</param>
+		/// <returns></returns>
+		public PivotItemTreeNode GetNode(PivotItemTreeNode node, string value)
+		{
+			if (node == null)
+				return null;
+			if (node.SharedItemValue == value)
+				return node;
+
+			foreach (var child in node.Children)
+			{
+				var foundNode = this.GetNode(child, value);
+				if (foundNode != null)
+					return foundNode;
+			}
+
+			return null;
 		}
 
 		/// <summary>

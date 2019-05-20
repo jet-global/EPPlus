@@ -25,6 +25,7 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using OfficeOpenXml.Utils;
 
@@ -45,6 +46,48 @@ namespace OfficeOpenXml.Table.PivotTable.Formats
 		{
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Update the values of the shared items in the references collection.
+		/// </summary>
+		/// <param name="root">The row items tree node that has the shared string values in the given list.</param>
+		/// <param name="conditionalFormattingStringValues">The list of cached references shared string values.</param>
+		public void UpdateConditionalFormatReferences(PivotItemTreeNode root, List<Tuple<int, int, List<Tuple<int, string>>>> conditionalFormattingStringValues)
+		{
+			if (conditionalFormattingStringValues.Count > 0)
+			{
+				foreach (var conditionalFormat in this)
+				{
+					var matchingPriorityList = conditionalFormattingStringValues.Where(i => i.Item1 == conditionalFormat.Priority);
+					int matchingPriorityListIndex = 0;
+					if (matchingPriorityList.Count() > 0)
+					{
+						foreach (var pivotArea in conditionalFormat.PivotAreasCollection)
+						{
+							int sharedStringIndex = 0;
+							foreach (var reference in pivotArea.ReferencesCollection)
+							{
+								if (reference.FieldIndex < 0)
+									continue;
+								int temp = matchingPriorityListIndex;
+								foreach (var item in reference.SharedItems)
+								{
+									var cf = matchingPriorityList.ElementAt(temp++);
+									var sharedString = cf.Item3[sharedStringIndex].Item2;
+									var node = root.GetNode(root, sharedString);
+									if (node != null)
+										item.Value = node.PivotFieldItemIndex.ToString();
+								}
+								sharedStringIndex++;
+							}
+							matchingPriorityListIndex++;
+						}
+					}
+				}
+			}
 		}
 		#endregion
 
