@@ -734,6 +734,11 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// Gets or sets the date groupings.
 		/// </summary>
 		internal eDateGroupBy DateGrouping { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value that indicates that this field is referenced by a slicer.
+		/// </summary>
+		internal bool IsSlicerField { get; set; }
 		#endregion
 
 		#region Constructors

@@ -878,7 +878,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			// Refresh pivot tables.
 			foreach (var pivotTable in relatedPivotTables)
 			{
-				pivotTable.RefreshFromCache(this.StringResources);
+				pivotTable.RefreshFromCache(this.StringResources, relatedSlicerCaches);
 			}
 
 			// Apply the slicer sort and hide settings after pivot tables have been updated.
