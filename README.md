@@ -28,4 +28,4 @@
 * We used to be responsible for approximately 75% of all EPPlus pull requests, so it made sense for us to maintain our own fork so we could handle our own pull requests in a timely manner. 
 
 ### About [Jet Global](https://www.jetglobal.com/):
-Jet Global is one of the world leaders in business reporting and analytics, providing unparalleled access to data through fast and flexible solutions that are cost effective, provide rapid time-to-value, and are built specifically for the needs of Microsoft Dynamics ERP users. Founded in 2002, Jet Global is headquartered in the very cool city of Portland, OR. If you're looking for a sweet new gig, [we're hiring](https://www.jetglobal.com/careers/) and would love to hear from you!
+Jet Global is one of the world leaders in business reporting and analytics, providing unparalleled access to data through fast and flexible solutions that are cost effective, provide rapid time-to-value, and are built specifically for the needs of Microsoft Dynamics ERP users. Founded in 2002, Jet Global is headquartered in the very cool city of Portland, OR.
