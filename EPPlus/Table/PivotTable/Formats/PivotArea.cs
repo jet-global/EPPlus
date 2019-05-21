@@ -24,6 +24,8 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using OfficeOpenXml.Utils;
 
@@ -117,6 +119,30 @@ namespace OfficeOpenXml.Table.PivotTable.Formats
 			var references = node.SelectSingleNode("d:references", this.NameSpaceManager);
 			if (references != null)
 				this.ReferencesCollection = new ExcelFormatReferencesCollection(this.NameSpaceManager, references);
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Update the conditional format references.
+		/// </summary>
+		/// <param name="root">The root of the row items tree.</param>
+		/// <param name="matchingPriorityList">A list of all the conditional formatting rules associated with the current conditional format.</param>
+		/// <param name="currentIndex">The index into the <paramref name="matchingPriorityList"/>"/>.</param>
+		public void UpdateReferences(PivotItemTreeNode root, IEnumerable<Tuple<int, int, List<Tuple<int, string>>>> matchingPriorityList, ref int currentIndex)
+		{
+			for (int referenceIndex = 0; referenceIndex < this.ReferencesCollection.Count; referenceIndex++)
+			{
+				var reference = this.ReferencesCollection[referenceIndex];
+				Func<int, PivotItemTreeNode> getNode = index =>
+				{
+					var shareStringValues = matchingPriorityList.ElementAt(index).Item3;
+					var sharedStringValue = shareStringValues.Find(i => i.Item1 == reference.FieldIndex).Item2;
+					return root.GetNode(root, sharedStringValue);
+				};
+				reference.UpdateSharedItemValues(getNode, ref currentIndex);
+			}
+			currentIndex++;
 		}
 		#endregion
 	}

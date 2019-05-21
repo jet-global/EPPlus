@@ -179,7 +179,7 @@ namespace OfficeOpenXml.Table.PivotTable
 		/// </summary>
 		/// <param name="node">The root node of the tree.</param>
 		/// <param name="value">The value to look for.</param>
-		/// <returns></returns>
+		/// <returns>The node with the given value if it exists. Otherwise, null.</returns>
 		public PivotItemTreeNode GetNode(PivotItemTreeNode node, string value)
 		{
 			if (node == null)

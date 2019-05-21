@@ -58,6 +58,7 @@ namespace OfficeOpenXml.Table.PivotTable.DataCalculation
 		/// <summary>
 		/// Updates the pivot table's worksheet with the latest calculated data.
 		/// </summary>
+		/// <param name="conditionalFormattingAddress">The list to add the current cell address to based on it's priority value.</param>
 		public void UpdateWorksheet(List<Tuple<int, List<string>>> conditionalFormattingAddress)
 		{
 			using (var totalsCalculator = new TotalsFunctionHelper())

@@ -753,6 +753,9 @@ namespace OfficeOpenXml.Table.PivotTable
 			}
 		}
 
+		/// <summary>
+		/// Gets the collection of pivot table conditional formats.
+		/// </summary>
 		public PivotTableConditionalFormatsCollection PivotTableConditionalFormats
 		{
 			get
@@ -1043,9 +1046,7 @@ namespace OfficeOpenXml.Table.PivotTable
 			{
 				this.Workbook.FormulaParser.Logger?.LogFunction($"{nameof(this.UpdateRowColumnItems)}: Rows");
 				this.UpdateRowColumnItems(this.RowFields, this.RowItems, true, stringResources);
-				// Update conditional format references with new pivot field item indices.
-				if (this.OriginalConditionalFormattingStringValues.Count > 0)
-					this.PivotTableConditionalFormats.UpdateConditionalFormatReferences(this.RowItemsRoot, this.OriginalConditionalFormattingStringValues);
+				this.RestoreCachedConditionalFormats();
 			}
 
 			// Update the colItems.
@@ -1268,6 +1269,26 @@ namespace OfficeOpenXml.Table.PivotTable
 				}
 			}
 			throw new Exception($"The name '{name}' was not found in the cacheDefinition.");
+		}
+
+		private void RestoreCachedConditionalFormats()
+		{
+			// Update conditional format references with new pivot field item indices.
+			if (this.OriginalConditionalFormattingStringValues.Count > 0)
+			{
+				foreach (var conditionalFormat in this.PivotTableConditionalFormats)
+				{
+					var matchingPriorityList = this.OriginalConditionalFormattingStringValues.Where(i => i.Item1 == conditionalFormat.Priority);
+					int currentIndex = 0;
+					if (matchingPriorityList.Count() > 0)
+					{
+						foreach (var pivotArea in conditionalFormat.PivotAreasCollection)
+						{
+							pivotArea.UpdateReferences(this.RowItemsRoot, matchingPriorityList, ref currentIndex);
+						}
+					}
+				}
+			}
 		}
 
 		private void AddConditionalFormattingStringValues(Queue<ExcelFormatReference> referenceQueue, List<Tuple<int, string>> stringPriorityTupleList, List<List<Tuple<int, string>>> overallList)

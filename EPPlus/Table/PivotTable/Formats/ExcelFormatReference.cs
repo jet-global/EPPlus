@@ -24,6 +24,7 @@
 * For code change notes, see the source control history.
 *******************************************************************************/
 using System;
+using System.Linq;
 using System.Xml;
 using OfficeOpenXml.Utils;
 
@@ -76,6 +77,27 @@ namespace OfficeOpenXml.Table.PivotTable.Formats
 			if (node == null)
 				throw new ArgumentNullException(nameof(node));
 			this.SharedItems = new SharedItemsCollection(this.NameSpaceManager, node);
+		}
+		#endregion
+
+		#region Public Methods
+		/// <summary>
+		/// Updates the values of each shared item in the reference's shared items collection.
+		/// </summary>
+		/// <param name="lookupNode">Function to get the node with the shared string value from the tree.</param>
+		/// <param name="currentIndex">The index passed into getting the tree node.</param>
+		public void UpdateSharedItemValues(Func<int, PivotItemTreeNode> lookupNode, ref int currentIndex)
+		{
+			if (this.FieldIndex < 0)
+				return;
+			foreach (var item in this.SharedItems)
+			{
+				var node = lookupNode(currentIndex);
+				if (node != null)
+					item.Value = node.PivotFieldItemIndex.ToString();
+				if (this.SharedItems.Count > 1 && item != this.SharedItems.Last())
+					currentIndex++;
+			}
 		}
 		#endregion
 	}
