@@ -165,6 +165,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["if"] = new If();
 			this.Functions["iferror"] = new IfError();
 			this.Functions["ifna"] = new IfNa();
+			this.Functions["ifs"] = new Ifs();
 			this.Functions["not"] = new Not();
 			this.Functions["and"] = new And();
 			this.Functions["or"] = new Or();

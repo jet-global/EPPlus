@@ -417,6 +417,7 @@
     <Compile Include="FormulaParsing\Excel\Functions\FunctionArgument.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\FunctionRepository.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\FunctionsModule.cs" />
+    <Compile Include="FormulaParsing\Excel\Functions\Logical\Ifs.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\RefAndLookup\GetPivotData.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\HiddenValuesHandlingFunction.cs" />
     <Compile Include="FormulaParsing\Excel\Functions\IFunctionModule.cs" />
