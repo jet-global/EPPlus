@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using OfficeOpenXml.FormulaParsing.ExcelUtilities;
 using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 
 namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Logical
@@ -21,17 +22,14 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Logical
 			if (this.ArgumentsAreValid(arguments, 3, out eErrorType argumentError) == false)
 				return new CompileResult(eErrorType.Value);
 			var value = arguments.First().ValueFirst;
-			var format = ArgToString(arguments, 0);
 			for (int i = 1; i + 1 < arguments.Count(); i += 2)
 			{
-				var valueToMatch = base.ArgToString(arguments, i);
-				if (valueToMatch == format)
+				var valueToMatch = arguments.ElementAt(i).Value;
+				if (valueToMatch.Equals(value))
 					return new CompileResultFactory().Create(arguments.ElementAt(i + 1).Value);
 			}
 			if (arguments.Count() % 2 == 0)
-			{
 				return new CompileResultFactory().Create(arguments.ElementAt(arguments.Count() - 1).Value);
-			}
 			return new CompileResult(eErrorType.NA);
 		}
 		#endregion
