@@ -48,7 +48,7 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Logical
 		}
 
 		[TestMethod]
-		public void SwitchFunctionWithMatchStringArguments()
+		public void SwitchFunctionMatchWithStringArguments()
 		{
 			var function = new Switch();
 			var arguments = FunctionsHelper.CreateArgs("one", "one", "Return one", "Default");
@@ -102,12 +102,30 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Logical
 		}
 
 		[TestMethod]
-		public void SwitchFunctionWithDoubleArguments()
+		public void SwitchFunctionMatchWithDoubleArguments()
 		{
 			var function = new Switch();
 			var arguments = FunctionsHelper.CreateArgs(5.2, 2.1, "two", 3.1, "third", 5.2, "Five and two tenths", "Default");
 			var result = function.Execute(arguments, _parsingContext);
 			Assert.AreEqual("Five and two tenths", result.Result);
+		}
+
+		[TestMethod]
+		public void SwitchFunctionMatchWithBoolArguments()
+		{
+			var function = new Switch();
+			var arguments = FunctionsHelper.CreateArgs(true, false, 1, true, 2, "Default");
+			var result = function.Execute(arguments, _parsingContext);
+			Assert.AreEqual(2, result.Result);
+		}
+
+		[TestMethod]
+		public void SwitchFunctionNoMatchWithIntTypeDefault()
+		{
+			var function = new Switch();
+			var arguments = FunctionsHelper.CreateArgs("one", "two", 2, "three", 3, 1);
+			var result = function.Execute(arguments, _parsingContext);
+			Assert.AreEqual(1, result.Result);
 		}
 		#endregion
 
