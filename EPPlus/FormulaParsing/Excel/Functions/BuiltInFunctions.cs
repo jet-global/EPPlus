@@ -171,6 +171,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions
 			this.Functions["or"] = new Or();
 			this.Functions["true"] = new True();
 			this.Functions["false"] = new False();
+			this.Functions["switch"] = new Switch();
 			// Reference and lookup
 			this.Functions["address"] = new Address();
 			this.Functions["hlookup"] = new HLookup();
