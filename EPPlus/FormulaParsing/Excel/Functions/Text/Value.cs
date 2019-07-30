@@ -63,7 +63,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 					result = double.Parse(value);
 				return CreateResult(result, DataType.Decimal);
 			}
-			if (double.TryParse(value, NumberStyles.Float, CultureInfo.CurrentCulture, out result))
+			if (double.TryParse(value, NumberStyles.Float | NumberStyles.Currency, CultureInfo.CurrentCulture, out result))
 				return CreateResult(result, DataType.Decimal);
 			var timeSeparator = Regex.Escape(CultureInfo.CurrentCulture.DateTimeFormat.TimeSeparator);
 			if (Regex.IsMatch(value, @"^[\d]{1,2}" + timeSeparator + @"[\d]{2}(" + timeSeparator + @"[\d]{2})?$"))
