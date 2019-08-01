@@ -46,12 +46,12 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 		{
 			if (this.ArgumentsAreValid(arguments, 1, out eErrorType argumentError) == false)
 				return new CompileResult(argumentError);
-			var value = ArgToString(arguments, 0).TrimEnd(' ');
+			var value = base.ArgToString(arguments, 0).TrimEnd(' ');
 			if (string.IsNullOrEmpty(value))
-				return CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
-			double result = 0d;
+				return base.CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 			var groupSeparator = Regex.Escape(CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator);
 			var decimalSeparator = Regex.Escape(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+			double result;
 			if (Regex.IsMatch(value, $"^[\\d]*({groupSeparator}?[\\d]*)?({decimalSeparator}[\\d]*)?[ ?% ?]?$"))
 			{
 				if (value.EndsWith("%"))
@@ -61,10 +61,10 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 				}
 				else
 					result = double.Parse(value);
-				return CreateResult(result, DataType.Decimal);
+				return base.CreateResult(result, DataType.Decimal);
 			}
-			if (double.TryParse(value, NumberStyles.Float, CultureInfo.CurrentCulture, out result))
-				return CreateResult(result, DataType.Decimal);
+			if (double.TryParse(value, NumberStyles.Float | NumberStyles.Currency, CultureInfo.CurrentCulture, out result))
+				return base.CreateResult(result, DataType.Decimal);
 			var timeSeparator = Regex.Escape(CultureInfo.CurrentCulture.DateTimeFormat.TimeSeparator);
 			if (Regex.IsMatch(value, @"^[\d]{1,2}" + timeSeparator + @"[\d]{2}(" + timeSeparator + @"[\d]{2})?$"))
 			{
@@ -75,7 +75,7 @@ namespace OfficeOpenXml.FormulaParsing.Excel.Functions.Text
 			var dateResult = new DateValue().Execute(value);
 			if (dateResult.DataType == DataType.Date)
 				return dateResult;
-			return CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
+			return base.CreateResult(ExcelErrorValue.Create(eErrorType.Value), DataType.ExcelError);
 		}
 		#endregion
 	}

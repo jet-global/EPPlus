@@ -189,5 +189,44 @@ namespace EPPlusTest.FormulaParsing.Excel.Functions.Text
 			Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result.Result).Type);
 		}
 		#endregion
+
+		#region Integration Test Methods
+		[TestMethod]
+		public void ValueFunctionCurrencyFormattedValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = "=VALUE(\"$1000\")";
+				sheet.Cells[2, 2].Calculate();
+				Assert.AreEqual(1000d, sheet.Cells[2, 2].Value);
+			}
+		}
+
+		[TestMethod]
+		public void ValueFunctionDoubleCurrencyFormattedValue()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = "=VALUE(\"$100.50\")";
+				sheet.Cells[2, 2].Calculate();
+				Assert.AreEqual(100.5d, sheet.Cells[2, 2].Value);
+			}
+		}
+
+		[TestMethod]
+		public void ValueFunctionStringValueWithCurrencySymbolReturnsError()
+		{
+			using (var package = new ExcelPackage())
+			{
+				var sheet = package.Workbook.Worksheets.Add("Sheet1");
+				sheet.Cells[2, 2].Formula = "=VALUE(\"$sdfsdf\")";
+				sheet.Cells[2, 2].Calculate();
+				var result = sheet.Cells[2, 2].Value;
+				Assert.AreEqual(eErrorType.Value, ((ExcelErrorValue)result).Type);
+			}
+		}
+		#endregion
 	}
 }
