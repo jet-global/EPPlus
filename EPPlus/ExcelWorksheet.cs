@@ -3730,7 +3730,7 @@ namespace OfficeOpenXml
 			{
 				string v = xr.ReadElementContentAsString();
 				var nf = Workbook.Styles.CellXfs[styleID].NumberFormatId;
-				if ((nf >= 14 && nf <= 22) || (nf >= 45 && nf <= 47))
+				if ((nf >= 14 && nf <= 22) || (nf >= 45 && nf <= 47) || (nf >= 164 && nf <= 181))
 				{
 					double res;
 					if (double.TryParse(v, NumberStyles.Any, CultureInfo.InvariantCulture, out res))
