@@ -368,14 +368,8 @@ namespace OfficeOpenXml
 		/// </summary>
 		public bool ShowGridLines
 		{
-			get
-			{
-				return GetXmlNodeBool("@showGridLines");
-			}
-			set
-			{
-				SetXmlNodeString("@showGridLines", value ? "1" : "0");
-			}
+			get { return GetXmlNodeBool("@showGridLines", true); }
+			set { SetXmlNodeString("@showGridLines", value ? "1" : "0"); }
 		}
 		/// <summary>
 		/// Show the Column/Row headers (containg column letters and row numbers)
