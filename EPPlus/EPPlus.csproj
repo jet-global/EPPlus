@@ -825,6 +825,7 @@
     <Compile Include="Table\PivotTable\Sorting\DayComparer.cs" />
     <Compile Include="Table\PivotTable\Sorting\MonthComparer.cs" />
     <Compile Include="Table\PivotTable\Sorting\NaturalComparer.cs" />
+    <Compile Include="ExcelTheme.cs" />
     <Compile Include="Utils\ConvertUtil.cs" />
     <Compile Include="Utils\InternationalizationUtility.cs" />
     <Compile Include="Utils\UriHelper.cs" />
@@ -965,6 +966,7 @@
   <ItemGroup>
     <Compile Include="ConditionalFormatting\CF Implementation.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using OfficeOpenXml.Drawing.Slicers;
@@ -108,6 +109,7 @@ namespace OfficeOpenXml
 		private XmlDocument _workbookXml;
 		private bool? date1904Cache = null;
 		private XmlDocument _stylesXml;
+		private ExcelTheme myTheme;
 		#endregion
 
 		#region Public Properties
@@ -156,6 +158,29 @@ namespace OfficeOpenXml
 					}
 				}
 				return mySlicerCaches;
+			}
+		}
+
+		/// <summary>
+		/// Gets the collection of ExcelThemes.
+		/// </summary>
+		public ExcelTheme ExcelTheme
+		{
+			get
+			{
+				if (myTheme == null)
+				{
+					var themes = this.Part.GetRelationshipsByType("http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme");
+					var theme = themes.FirstOrDefault();
+					if (theme != null)
+					{
+						var themeTargetUri = theme.TargetUri.ToString();
+						var uri = new Uri($"xl/{themeTargetUri}", UriKind.Relative);
+						var part = this.Package.GetXmlFromUri(uri);
+						myTheme = new ExcelTheme(part, this.NameSpaceManager);
+					}
+				}
+				return myTheme;
 			}
 		}
 
